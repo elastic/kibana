@@ -26,6 +26,8 @@ import { css } from '@emotion/react';
 import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import { FiltersNotificationActionApi } from './filters_notification_action';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 
@@ -35,11 +37,14 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
 
   const editPanelAction = getEditPanelAction();
 
-  const filters = useMemo(() => api.filters$?.value, [api]);
+  const [filters, query] = useBatchedPublishingSubjects(
+    api.filters$ ?? new BehaviorSubject<undefined>(undefined),
+    api.query$ ?? new BehaviorSubject<undefined>(undefined)
+  );
+
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
 
   const { queryString, queryLanguage } = useMemo(() => {
-    const query = api.query$?.value;
     if (!query) return {};
     if (isOfQueryType(query)) {
       if (typeof query.query === 'string') {
@@ -55,7 +60,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
         queryLanguage: language,
       };
     }
-  }, [api, setDisableEditButton]);
+  }, [query]);
 
   const dataViews = useMemo(() => api.parentApi?.getAllDataViews(), [api]);
 
