@@ -11,7 +11,6 @@
  * --------------- THIS FILE IS COPIED FROM ES SPECIFICATION REPO -------------------
  *
  */
-/* eslint-disable max-classes-per-file */
 
 /**
  * The name of a type, composed of a simple name and a namespace. Hierarchical namespace elements are separated by
@@ -27,7 +26,7 @@
  *    - null: the null value. Since JS distinguishes undefined and null, some APIs make use of this value.
  *    - object: used to represent "any". We may forbid it at some point. UserDefinedValue should be used for user data.
  */
-export class TypeName {
+export interface TypeName {
   namespace: string;
   name: string;
 }
@@ -56,7 +55,7 @@ export type ValueOf =
 /**
  * A single value
  */
-export class InstanceOf {
+export interface InstanceOf {
   kind: 'instance_of';
   type: TypeName;
   /** generic parameters: either concrete types or open parameters from the enclosing type */
@@ -66,15 +65,15 @@ export class InstanceOf {
 /**
  * An array
  */
-export class ArrayOf {
+export interface ArrayOf {
   kind: 'array_of';
   value: ValueOf;
 }
 
 /**
- * One of several possible types which don't necessarily have a common superclass
+ * One of several possible types which don't necessarily have a common superinterface
  */
-export class UnionOf {
+export interface UnionOf {
   kind: 'union_of';
   items: ValueOf[];
 }
@@ -85,7 +84,7 @@ export class UnionOf {
  * If `singleKey` is true, then this dictionary can only have a single key. This is a common pattern in ES APIs,
  * used to associate a value to a field name or some other identifier.
  */
-export class DictionaryOf {
+export interface DictionaryOf {
   kind: 'dictionary_of';
   key: ValueOf;
   value: ValueOf;
@@ -102,7 +101,7 @@ export class DictionaryOf {
  * Think twice before using this as it defeats the purpose of a strongly typed API, and deserialization
  * will also require to buffer raw JSON data which may have performance implications.
  */
-export class UserDefinedValue {
+export interface UserDefinedValue {
   kind: 'user_defined_value';
 }
 
@@ -113,7 +112,7 @@ export class UserDefinedValue {
  * It may later be used to set a property to a constant value, which is why it accepts not only strings but also
  * other primitive types.
  */
-export class LiteralValue {
+export interface LiteralValue {
   kind: 'literal_value';
   value: string | number | boolean;
 }
@@ -121,7 +120,7 @@ export class LiteralValue {
 /**
  * An interface or request interface property.
  */
-export class Property {
+export interface Property {
   name: string;
   type: ValueOf;
   required: boolean;
@@ -156,7 +155,7 @@ export type TypeDefinition = Interface | Request | Response | Enum | TypeAlias;
 /**
  * Common attributes for all type definitions
  */
-export abstract class BaseType {
+export interface BaseType {
   name: TypeName;
   description?: string;
   /** Link to public documentation */
@@ -184,7 +183,7 @@ export abstract class BaseType {
 
 export type Variants = ExternalTag | InternalTag | Container | Untagged;
 
-export class VariantBase {
+export interface VariantBase {
   /**
    * Is this variant type open to extensions? Default to false. Used for variants that can
    * be extended with plugins. If true, target clients should allow for additional variants
@@ -193,11 +192,11 @@ export class VariantBase {
   nonExhaustive?: boolean;
 }
 
-export class ExternalTag extends VariantBase {
+export interface ExternalTag extends VariantBase {
   kind: 'external_tag';
 }
 
-export class InternalTag extends VariantBase {
+export interface InternalTag extends VariantBase {
   kind: 'internal_tag';
   /* Name of the property that holds the variant tag */
   tag: string;
@@ -205,11 +204,11 @@ export class InternalTag extends VariantBase {
   defaultTag?: string;
 }
 
-export class Container extends VariantBase {
+export interface Container extends VariantBase {
   kind: 'container';
 }
 
-export class Untagged extends VariantBase {
+export interface Untagged extends VariantBase {
   kind: 'untagged';
   untypedVariant: TypeName;
 }
@@ -217,12 +216,12 @@ export class Untagged extends VariantBase {
 /**
  * Inherits clause (aka extends or implements) for an interface or request
  */
-export class Inherits {
+export interface Inherits {
   type: TypeName;
   generics?: ValueOf[];
 }
 
-export class Behavior {
+export interface Behavior {
   type: TypeName;
   generics?: ValueOf[];
   meta?: Record<string, string>;
@@ -231,7 +230,7 @@ export class Behavior {
 /**
  * An interface type
  */
-export class Interface extends BaseType {
+export interface Interface extends BaseType {
   kind: 'interface';
   /**
    * Open generic parameters. The name is that of the parameter, the namespace is an arbitrary value that allows
@@ -264,7 +263,7 @@ export class Interface extends BaseType {
 /**
  * A request type
  */
-export class Request extends BaseType {
+export interface Request extends BaseType {
   // Note: does not extend Interface as properties are split across path, query and body
   kind: 'request';
   generics?: TypeName[];
@@ -295,7 +294,7 @@ export class Request extends BaseType {
 /**
  * A response type
  */
-export class Response extends BaseType {
+export interface Response extends BaseType {
   kind: 'response';
   generics?: TypeName[];
   body: Body;
@@ -304,7 +303,7 @@ export class Response extends BaseType {
   exceptions?: ResponseException[];
 }
 
-export class ResponseException {
+export interface ResponseException {
   description?: string;
   body: Body;
   statusCodes: number[];
@@ -312,18 +311,18 @@ export class ResponseException {
 
 export type Body = ValueBody | PropertiesBody | NoBody;
 
-export class ValueBody {
+export interface ValueBody {
   kind: 'value';
   value: ValueOf;
   codegenName?: string;
 }
 
-export class PropertiesBody {
+export interface PropertiesBody {
   kind: 'properties';
   properties: Property[];
 }
 
-export class NoBody {
+export interface NoBody {
   kind: 'no_body';
 }
 
@@ -334,7 +333,7 @@ export class NoBody {
  * identifier name, and `stringValue` will be the string value to use on the wire.
  * See DateMathTimeUnit for an example of this, which have members for "m" (minute) and "M" (month).
  */
-export class EnumMember {
+export interface EnumMember {
   /** The identifier to use for this enum */
   name: string;
   /** An optional set of aliases for `name` */
@@ -353,7 +352,7 @@ export class EnumMember {
 /**
  * An enumeration
  */
-export class Enum extends BaseType {
+export interface Enum extends BaseType {
   kind: 'enum';
   /**
    * If the enum is open, it means that other than the specified values it can accept an arbitrary value.
@@ -366,7 +365,7 @@ export class Enum extends BaseType {
 /**
  * An alias for an existing type.
  */
-export class TypeAlias extends BaseType {
+export interface TypeAlias extends BaseType {
   kind: 'type_alias';
   type: ValueOf;
   /** generic parameters: either concrete types or open parameters from the enclosing type */
@@ -391,24 +390,24 @@ export enum Visibility {
   private = 'private',
 }
 
-export class Deprecation {
+export interface Deprecation {
   version: string;
   description: string;
 }
 
-export class Availabilities {
+export interface Availabilities {
   stack?: Availability;
   serverless?: Availability;
 }
 
-export class Availability {
+export interface Availability {
   since?: string;
   featureFlag?: string;
   stability?: Stability;
   visibility?: Visibility;
 }
 
-export class Endpoint {
+export interface Endpoint {
   name: string;
   description: string;
   docUrl: string;
@@ -447,13 +446,13 @@ export class Endpoint {
   };
 }
 
-export class UrlTemplate {
+export interface UrlTemplate {
   path: string;
   methods: string[];
   deprecation?: Deprecation;
 }
 
-export class Model {
+export interface Model {
   _info?: {
     title: string;
     license: {
