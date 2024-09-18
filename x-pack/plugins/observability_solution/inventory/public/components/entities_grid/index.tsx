@@ -129,7 +129,7 @@ export function EntitiesGrid({
     [onChangeSort]
   );
 
-  const CellValue = useCallback(
+  const renderCellValue = useCallback(
     ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
       const entity = entities[rowIndex];
       if (entity === undefined) {
@@ -195,7 +195,7 @@ export function EntitiesGrid({
       columns={columns}
       columnVisibility={{ visibleColumns, setVisibleColumns }}
       rowCount={entities.length}
-      renderCellValue={CellValue}
+      renderCellValue={renderCellValue}
       toolbarVisibility={{
         showColumnSelector: false,
         showSortSelector: false,
