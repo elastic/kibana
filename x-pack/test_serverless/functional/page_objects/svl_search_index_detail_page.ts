@@ -66,6 +66,16 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.missingOrFail('setupAISearchButton', { timeout: 2000 });
     },
 
+    async expectAddDocumentCodeExamples() {
+      await testSubjects.existOrFail('SearchIndicesAddDocumentsCode', { timeout: 2000 });
+    },
+
+    async expectHasIndexDocuments() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail('search-index-documents-result', { timeout: 2000 });
+      });
+    },
+
     async expectMoreOptionsActionButtonExists() {
       await testSubjects.existOrFail('moreOptionsActionButton');
     },
