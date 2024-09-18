@@ -54,27 +54,29 @@ export class InventoryPlugin
       true
     );
 
-    pluginsSetup.observabilityShared.navigation.registerSections(
-      from(coreSetup.getStartServices()).pipe(
-        map(([coreStart, pluginsStart]) => {
-          return [
-            {
-              label: '',
-              sortKey: 101,
-              entries: [
-                {
-                  label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
-                    defaultMessage: 'Inventory',
-                  }),
-                  app: INVENTORY_APP_ID,
-                  path: '/',
-                },
-              ],
-            },
-          ];
-        })
-      )
-    );
+    if (isEntityCentricExperienceSettingEnabled) {
+      pluginsSetup.observabilityShared.navigation.registerSections(
+        from(coreSetup.getStartServices()).pipe(
+          map(([coreStart, pluginsStart]) => {
+            return [
+              {
+                label: '',
+                sortKey: 101,
+                entries: [
+                  {
+                    label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
+                      defaultMessage: 'Inventory',
+                    }),
+                    app: INVENTORY_APP_ID,
+                    path: '/',
+                  },
+                ],
+              },
+            ];
+          })
+        )
+      );
+    }
 
     coreSetup.application.register({
       id: INVENTORY_APP_ID,
