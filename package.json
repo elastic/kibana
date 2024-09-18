@@ -1802,7 +1802,7 @@
     "tape": "^5.0.1",
     "terser": "^5.32.0",
     "terser-webpack-plugin": "^4.2.3",
-    "tough-cookie": "^4.1.4",
+    "tough-cookie": "^5.0.0",
     "tree-kill": "^1.2.2",
     "ts-morph": "^15.1.0",
     "tsd": "^0.31.1",
