@@ -12,7 +12,7 @@ export interface Query {
   language: string;
 }
 
-export const getGroupQueries = (tags?: string[], groups?: Group[]): Query[] | undefined => {
+export const getRelatedAlertKuery = (tags?: string[], groups?: Group[]): string | undefined => {
   const tagKueries: string[] =
     tags?.map((tag) => {
       return `tags: ${tag}`;
@@ -28,12 +28,5 @@ export const getGroupQueries = (tags?: string[], groups?: Group[]): Query[] | un
   const groupKueriesStr = groupKueries.length > 0 ? [`${groupKueries.join(' or ')}`] : [];
   const kueries = [...tagKueriesStr, ...groupKueriesStr];
 
-  return kueries.length
-    ? [
-        {
-          query: kueries.join(' or '),
-          language: 'kuery',
-        },
-      ]
-    : undefined;
+  return kueries.length ? kueries.join(' or ') : undefined;
 };

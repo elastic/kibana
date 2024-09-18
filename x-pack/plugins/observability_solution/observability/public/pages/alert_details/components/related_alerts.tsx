@@ -36,7 +36,7 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../utils/kibana_react';
 import { buildEsQuery } from '../../../utils/build_es_query';
 import { mergeBoolQueries } from '../../alerts/helpers/merge_bool_queries';
-import { getGroupQueries } from '../helpers/get_related_alerts_query';
+import { getRelatedAlertKuery } from '../helpers/get_related_alerts_query';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -68,6 +68,7 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
   const alertStart = alert?.fields[ALERT_START];
   const alertEnd = alert?.fields[ALERT_END];
   const alertId = alert?.fields[ALERT_UUID];
+
   const defaultQuery = useRef<Query[]>([
     { query: `not kibana.alert.uuid: ${alertId}`, language: 'kuery' },
   ]);
@@ -92,7 +93,7 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
           defaultSearchQueries={defaultQuery.current}
           defaultState={{
             ...defaultState,
-            kuery: getGroupQueries(tags, groups)?.[0].query ?? '',
+            kuery: getRelatedAlertKuery(tags, groups) ?? '',
           }}
         />
       </EuiFlexItem>

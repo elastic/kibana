@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getGroupQueries } from './get_related_alerts_query';
+import { getRelatedAlertKuery } from './get_related_alerts_query';
 
-describe('getGroupQueries', () => {
+describe('getRelatedAlertKuery', () => {
   const tags = ['tag1', 'tag2'];
   const groups = [
     { field: 'group1Field', value: 'group1Value' },
@@ -18,33 +18,18 @@ describe('getGroupQueries', () => {
     '(group1Field: group1Value or kibana.alert.group.value: group1Value) or (group2Field: group2Value or kibana.alert.group.value: group2Value)';
 
   it('should generate correct query with no tags or groups', () => {
-    expect(getGroupQueries()).toBeUndefined();
+    expect(getRelatedAlertKuery()).toBeUndefined();
   });
 
   it('should generate correct query for tags', () => {
-    expect(getGroupQueries(tags)).toEqual([
-      {
-        query: tagsKuery,
-        language: 'kuery',
-      },
-    ]);
+    expect(getRelatedAlertKuery(tags)).toEqual(tagsKuery);
   });
 
   it('should generate correct query for groups', () => {
-    expect(getGroupQueries(undefined, groups)).toEqual([
-      {
-        query: groupsKuery,
-        language: 'kuery',
-      },
-    ]);
+    expect(getRelatedAlertKuery(undefined, groups)).toEqual(groupsKuery);
   });
 
   it('should generate correct query for tags and groups', () => {
-    expect(getGroupQueries(tags, groups)).toEqual([
-      {
-        query: `${tagsKuery} or ${groupsKuery}`,
-        language: 'kuery',
-      },
-    ]);
+    expect(getRelatedAlertKuery(tags, groups)).toEqual(`${tagsKuery} or ${groupsKuery}`);
   });
 });
