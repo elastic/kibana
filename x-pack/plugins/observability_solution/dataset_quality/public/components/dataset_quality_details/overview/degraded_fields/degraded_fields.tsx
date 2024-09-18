@@ -46,6 +46,7 @@ export function DegradedFields() {
       onChange={onChange}
       aria-describedby={toggleTextSwitchId}
       compressed
+      data-test-subj="datasetQualityDetailsOverviewDegradedFieldToggleSwitch"
     />
   );
 

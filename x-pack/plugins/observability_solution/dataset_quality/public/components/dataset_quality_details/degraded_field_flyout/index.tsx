@@ -110,7 +110,10 @@ export default function DegradedFieldFlyout() {
         {!isUserViewingTheIssueOnLatestBackingIndex && (
           <>
             <EuiSpacer size="s" />
-            <EuiTextColor color="danger">
+            <EuiTextColor
+              color="danger"
+              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist"
+            >
               {degradedFieldMessageIssueDoesNotExistInLatestIndex}
             </EuiTextColor>
           </>
