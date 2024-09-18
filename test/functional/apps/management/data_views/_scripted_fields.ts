@@ -81,7 +81,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
-        await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         const script = `1`;
         await PageObjects.settings.addScriptedField(
