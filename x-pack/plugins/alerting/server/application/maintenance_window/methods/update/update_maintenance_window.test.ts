@@ -376,7 +376,7 @@ describe('MaintenanceWindowClient - update', () => {
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Error validating update maintenance window data - invalid scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
-      invalid:
+      invalid: 
       ---------^"
     `);
   });
