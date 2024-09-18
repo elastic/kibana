@@ -17,7 +17,7 @@ import { groupingFunctionDefinitions } from '../../definitions/grouping';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
-import { TIME_SYSTEM_PARAMS } from '../factories';
+import { TIME_SYSTEM_PARAMS, getSafeInsertText } from '../factories';
 import { getFunctionSignatures } from '../../definitions/helpers';
 import { ESQLRealField } from '../../validation/types';
 import {
@@ -280,10 +280,7 @@ export function createCompletionContext(triggerCharacter?: string) {
 export function getPolicyFields(policyName: string) {
   return policies
     .filter(({ name }) => name === policyName)
-    .flatMap(({ enrichFields }) =>
-      // ok, this is a bit of cheating as it's using the same logic as in the helper
-      enrichFields.map((field) => (/[^a-zA-Z\d_\.@]/.test(field) ? `\`${field}\`` : field))
-    );
+    .flatMap(({ enrichFields }) => enrichFields.map((field) => getSafeInsertText(field)));
 }
 
 export interface SuggestOptions {

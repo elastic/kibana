@@ -78,7 +78,7 @@ export const esqlAsyncSearchStrategyProvider = (
             {
               method: 'GET',
               path: `/_query/async/${id}`,
-              querystring: { ...params },
+              querystring: { ...params, drop_null_columns: dropNullColumns },
             },
             { ...options.transport, signal: options.abortSignal, meta: true, asStream: true }
           )

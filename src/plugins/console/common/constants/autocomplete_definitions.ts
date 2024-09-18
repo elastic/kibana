@@ -17,3 +17,5 @@ export const AUTOCOMPLETE_DEFINITIONS_FOLDER = resolve(
 export const GENERATED_SUBFOLDER = 'generated';
 export const OVERRIDES_SUBFOLDER = 'overrides';
 export const MANUAL_SUBFOLDER = 'manual';
+
+export const API_DOCS_LINK = 'https://www.elastic.co/docs/api';

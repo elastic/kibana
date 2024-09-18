@@ -7,7 +7,7 @@
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { UpdateInvestigationParams, UpdateInvestigationResponse } from '@kbn/investigation-shared';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { InvestigationRepository } from './investigation_repository';
 import { Investigation } from '../models/investigation';
 
@@ -18,9 +18,13 @@ export async function updateInvestigation(
 ): Promise<UpdateInvestigationResponse> {
   const originalInvestigation = await repository.findById(investigationId);
 
-  const updatedInvestigation: Investigation = Object.assign({}, originalInvestigation, params);
+  const updatedInvestigation: Investigation = Object.assign({}, originalInvestigation, params, {
+    updatedAt: Date.now(),
+  });
 
-  if (isEqual(originalInvestigation, updatedInvestigation)) {
+  if (
+    isEqual(omit(originalInvestigation, ['updatedAt']), omit(updatedInvestigation, ['updatedAt']))
+  ) {
     return originalInvestigation;
   }
 
