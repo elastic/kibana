@@ -77,12 +77,14 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
             startColumn = Number(encodedColumn);
             startLineNumber = Number(encodedLine.replace('Line ', ''));
           }
-          // extract the length of the "expression" within the message
-          // and try to guess the correct size for the editor marker to highlight
-          if (/\[.*\]/.test(warningMessage)) {
-            const [_, wordWithError] = warningMessage.split('[');
-            if (wordWithError) {
-              errorLength = wordWithError.length;
+          const openingSquareBracketIndex = warningMessage.indexOf('[');
+          if (openingSquareBracketIndex !== -1) {
+            const closingSquareBracketIndex = warningMessage.indexOf(
+              ']',
+              openingSquareBracketIndex
+            );
+            if (closingSquareBracketIndex !== -1) {
+              errorLength = warningMessage.length - openingSquareBracketIndex - 1;
             }
           }
         }

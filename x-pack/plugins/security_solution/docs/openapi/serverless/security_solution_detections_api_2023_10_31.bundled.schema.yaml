@@ -1316,6 +1316,10 @@ components:
           $ref: '#/components/schemas/RuleFilterArray'
         index:
           $ref: '#/components/schemas/IndexPatternArray'
+        response_actions:
+          items:
+            $ref: '#/components/schemas/ResponseAction'
+          type: array
         tiebreaker_field:
           $ref: '#/components/schemas/TiebreakerField'
         timestamp_field:
@@ -2003,6 +2007,10 @@ components:
       properties:
         alert_suppression:
           $ref: '#/components/schemas/AlertSuppression'
+        response_actions:
+          items:
+            $ref: '#/components/schemas/ResponseAction'
+          type: array
     EsqlRulePatchProps:
       allOf:
         - type: object
@@ -3026,6 +3034,10 @@ components:
           $ref: '#/components/schemas/RuleFilterArray'
         index:
           $ref: '#/components/schemas/IndexPatternArray'
+        response_actions:
+          items:
+            $ref: '#/components/schemas/ResponseAction'
+          type: array
     NewTermsRulePatchFields:
       allOf:
         - type: object
