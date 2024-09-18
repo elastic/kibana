@@ -21,13 +21,13 @@ export async function updateInvestigationNote(
     throw new Error('Note not found');
   }
 
-  if (note.createdBy !== user.username) {
+  if (note.createdBy !== user.profile_uid) {
     throw new Error('User does not have permission to update note');
   }
 
   investigation.notes = investigation.notes.filter((currNote) => {
     if (currNote.id === noteId) {
-      currNote.content = params.content;
+      currNote = Object.assign(currNote, { content: params.content, updatedAt: Date.now() });
     }
 
     return currNote;

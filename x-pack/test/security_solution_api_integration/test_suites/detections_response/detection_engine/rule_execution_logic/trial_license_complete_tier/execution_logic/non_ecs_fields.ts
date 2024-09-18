@@ -213,8 +213,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(errors).toEqual([]);
 
-      // event properties getting flattened
-      expect(alertSource).toHaveProperty(['event.created'], validDates);
+      expect(alertSource).toHaveProperty(['event', 'created'], validDates);
     });
 
     // source threat.enrichments is keyword, ECS mapping for threat.enrichments is nested
