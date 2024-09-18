@@ -48,6 +48,10 @@
     }
   }
 
+  .euiDataGrid--bordersHorizontal .euiDataGridHeader {
+    border-top: none;
+  }
+
   .euiDataGrid--headerUnderline .euiDataGridHeader {
     border-bottom: $euiBorderThin;
   }

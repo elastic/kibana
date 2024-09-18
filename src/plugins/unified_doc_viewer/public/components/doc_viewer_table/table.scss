@@ -68,11 +68,11 @@
 }
 
 .kbnDocViewer__fieldsGrid {
-  &.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeaderCell {
+  &.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader {
     border-top: none;
   }
 
-  &.euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+  &.euiDataGrid--headerUnderline .euiDataGridHeader {
     border-bottom: $euiBorderThin;
   }
 
