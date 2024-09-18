@@ -147,7 +147,7 @@ API Authentication in Kibana: Public vs. Internal APIs
 
 Kibana provides both public and internal APIs, each requiring authentication with the correct privileges. However, the method of testing these APIs varies, depending on how they are untilized by end users.
 
-- Public APIs: When testing HTTP requests to public APIs, API key-based authentication should be used. It reflect how end user call these APIs. Due to existing restrictions, we utilize `Admin` user credentials to generate API keys for various roles. While the API key permissions are correctly scoped according to the assigned role, the user will internally be recognized as `Admin` during authentication.
+- Public APIs: When testing HTTP requests to public APIs, API key-based authentication should be used. It reflects how an end user calls these APIs. Due to existing restrictions, we utilize `Admin` user credentials to generate API keys for various roles. While the API key permissions are correctly scoped according to the assigned role, the user will internally be recognized as `Admin` during authentication.
 
 - Internal APIs: Direct HTTP requests to internal APIs are generally not expected. However, for testing purposes, authentication should be performed using the Cookie header. This approach simulates client-side behavior during browser interactions, mirroring how internal APIs are indirectly invoked.
 
