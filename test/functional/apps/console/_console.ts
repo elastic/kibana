@@ -159,7 +159,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // Status badge is not yet implented in phase 2
     describe('with query params', () => {
       it('should issue a successful request', async () => {
         await PageObjects.console.clearEditorText();
