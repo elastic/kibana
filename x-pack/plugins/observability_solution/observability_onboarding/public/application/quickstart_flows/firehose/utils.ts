@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const HAS_DATA_FETCH_INTERVAL = 5000;
+
 export function buildCreateStackCommand({
   templateUrl,
   stackName,

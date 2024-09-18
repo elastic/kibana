@@ -16,6 +16,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { HAS_DATA_FETCH_INTERVAL } from './utils';
 
 export function AutoRefreshCallout() {
   const { euiTheme } = useEuiTheme();
@@ -40,7 +41,8 @@ export function AutoRefreshCallout() {
               {i18n.translate(
                 'xpack.observability_onboarding.firehosePanel.autorefreshCalloutLabel',
                 {
-                  defaultMessage: 'Auto-refreshing every 5 s',
+                  defaultMessage: 'Auto-refreshing every {intervalSeconds} s',
+                  values: { intervalSeconds: Math.round(HAS_DATA_FETCH_INTERVAL / 1000) },
                 }
               )}
             </p>

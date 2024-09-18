@@ -24,8 +24,8 @@ import { GetStartedPanel } from '../shared/get_started_panel';
 import { useAWSServiceGetStartedList } from './use_aws_service_get_started_list';
 import { AutoRefreshCallout } from './auto_refresh_callout';
 import { ProgressCallout } from './progress_callout';
+import { HAS_DATA_FETCH_INTERVAL } from './utils';
 
-const FETCH_INTERVAL = 5000;
 const REQUEST_PENDING_STATUS_LIST = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
 
 export function VisualizeData() {
@@ -70,7 +70,7 @@ export function VisualizeData() {
             'xpack.observability_onboarding.firehosePanel.dataReceivedToastText',
             {
               defaultMessage:
-                'We’ve begun processing your data. Expect updates every 30 seconds as we automatically refresh to capture more incoming data.',
+                'We’ve begun processing your data. In the background, we automatically refresh every few seconds to capture more incoming data.',
             }
           ),
         },
@@ -99,7 +99,7 @@ export function VisualizeData() {
     }
 
     refetch();
-  }, FETCH_INTERVAL);
+  }, HAS_DATA_FETCH_INTERVAL);
 
   if (populatedAWSLogsIndexList === undefined) {
     return null;
@@ -141,13 +141,7 @@ export function VisualizeData() {
               key={id}
               id={`${accordionId}_${id}`}
               icon={<EuiIcon type={logoURL} size="l" />}
-              title={i18n.translate(
-                'xpack.observability_onboarding.firehosePanel.awsServiceDataFoundTitle',
-                {
-                  defaultMessage: '{title}',
-                  values: { title },
-                }
-              )}
+              title={title}
               initialIsOpen={true}
               borders={
                 index === 0 || index === orderedPopulatedAWSLogsIndexList.length - 1

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiAccordion,
   EuiCodeBlock,
@@ -14,14 +13,16 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import {
   FIREHOSE_CLOUDFORMATION_STACK_NAME,
   FIREHOSE_LOGS_STREAM_NAME,
   FIREHOSE_METRICS_STREAM_NAME,
 } from '../../../../common/aws_firehose';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
+import { DownloadTemplateCallout } from './download_template_callout';
 import { buildCreateStackCommand, buildStackStatusCommand } from './utils';
 
 interface Props {
@@ -73,6 +74,10 @@ export function CreateStackCommandSnippet({
               ),
             }}
           />
+        </p>
+
+        <p>
+          <DownloadTemplateCallout />
         </p>
       </EuiText>
 

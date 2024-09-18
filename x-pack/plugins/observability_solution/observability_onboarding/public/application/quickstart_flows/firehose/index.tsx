@@ -8,9 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
   EuiButtonGroup,
-  EuiHorizontalRule,
   EuiLink,
   EuiPanel,
   EuiSkeletonRectangle,
@@ -22,7 +20,6 @@ import {
 } from '@elastic/eui';
 import useEvent from 'react-use/lib/useEvent';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FIREHOSE_CLOUDFORMATION_TEMPLATE_URL } from '../../../../common/aws_firehose';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { CreateStackCommandSnippet } from './create_stack_command_snippet';
@@ -135,8 +132,7 @@ export function FirehosePanel() {
                 legend={i18n.translate(
                   'xpack.observability_onboarding.firehosePanel.createStackOptionsLegend',
                   {
-                    defaultMessage:
-                      'Select one an a preferred option to create a CloudFormation stack',
+                    defaultMessage: 'Select a preferred option to create a CloudFormation stack',
                   }
                 )}
                 type="single"
@@ -165,32 +161,6 @@ export function FirehosePanel() {
                   isCopyPrimaryAction={!isVisualizeStepActive}
                 />
               )}
-
-              <EuiHorizontalRule />
-
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="xpack.observability_onboarding.firehosePanel.DownloadCloudFormationTemplateCaption"
-                    defaultMessage="Download and edit the CloudFormation Template if necessary:"
-                  />
-                </p>
-              </EuiText>
-
-              <EuiSpacer size="s" />
-
-              <EuiButtonEmpty
-                data-test-subj="observabilityOnboardingFirehosePanelDownloadCloudFormationTemplateButton"
-                href={FIREHOSE_CLOUDFORMATION_TEMPLATE_URL}
-                download={true}
-                iconType="download"
-                flush="left"
-              >
-                {i18n.translate(
-                  'xpack.observability_onboarding.firehosePanel.downloadCloudFormationTemplateButtonLabel',
-                  { defaultMessage: 'Download CloudFormation Template' }
-                )}
-              </EuiButtonEmpty>
             </>
           )}
         </>
