@@ -8,5 +8,5 @@
 export type OnBoardingDefaultSolution = 'es' | 'oblt' | 'security';
 
 export interface ElasticsearchConfigType {
-  elasticsearch_url: string;
+  elasticsearch_url?: string;
 }
