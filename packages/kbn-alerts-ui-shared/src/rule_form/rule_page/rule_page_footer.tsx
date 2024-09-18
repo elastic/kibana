@@ -70,7 +70,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
       return onSave();
     }
     if (actions.length === 0) {
-      setShowCreateConfirmation(true);
+      return setShowCreateConfirmation(true);
     }
     onSave();
   }, [actions, isEdit, onSave]);

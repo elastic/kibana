@@ -183,7 +183,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
   return (
     <EuiFlexGroup direction="column" data-test-subj="ruleActionsSettings">
       <EuiFlexItem>
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="flexEnd">
           <EuiFlexItem>
             <RuleActionsNotifyWhen
               frequency={action.frequency}

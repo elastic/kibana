@@ -208,8 +208,8 @@ describe('ruleActionsItem', () => {
     );
 
     expect(screen.getByTestId('ruleActionsItem')).toBeInTheDocument();
-    expect(screen.getByText('ruleActionsSettings')).toBeInTheDocument();
-    expect(screen.queryByText('ruleActionsMessage')).not.toBeInTheDocument();
+    expect(screen.queryByText('ruleActionsSettings')).not.toBeInTheDocument();
+    expect(screen.getByText('ruleActionsMessage')).toBeInTheDocument();
   });
 
   test('should allow for toggling between setting and message', async () => {
@@ -221,15 +221,15 @@ describe('ruleActionsItem', () => {
       />
     );
 
-    await userEvent.click(screen.getByText('Settings'));
-
-    expect(screen.getByText('ruleActionsSettings')).toBeInTheDocument();
-    expect(screen.queryByText('ruleActionsMessage')).not.toBeInTheDocument();
-
     await userEvent.click(screen.getByText('Message'));
 
     expect(screen.getByText('ruleActionsMessage')).toBeInTheDocument();
     expect(screen.queryByText('ruleActionsSettings')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByText('Settings'));
+
+    expect(screen.getByText('ruleActionsSettings')).toBeInTheDocument();
+    expect(screen.queryByText('ruleActionsMessage')).not.toBeInTheDocument();
   });
 
   test('should allow notify when to be changed', async () => {
@@ -243,6 +243,8 @@ describe('ruleActionsItem', () => {
         producerId="stackAlerts"
       />
     );
+
+    await userEvent.click(screen.getByText('Settings'));
 
     await userEvent.click(screen.getByText('onNotifyWhenChange'));
 
@@ -289,6 +291,8 @@ describe('ruleActionsItem', () => {
       />
     );
 
+    await userEvent.click(screen.getByText('Settings'));
+
     await userEvent.click(screen.getByText('onAlertsFilterChange'));
 
     expect(mockOnChange).toHaveBeenCalledTimes(2);
@@ -315,6 +319,8 @@ describe('ruleActionsItem', () => {
         producerId="stackAlerts"
       />
     );
+
+    await userEvent.click(screen.getByText('Settings'));
 
     await userEvent.click(screen.getByText('onTimeframeChange'));
 
@@ -366,6 +372,8 @@ describe('ruleActionsItem', () => {
         producerId="stackAlerts"
       />
     );
+
+    await userEvent.click(screen.getByText('Settings'));
 
     await userEvent.click(screen.getByTestId('ruleActionsItemDeleteButton'));
 

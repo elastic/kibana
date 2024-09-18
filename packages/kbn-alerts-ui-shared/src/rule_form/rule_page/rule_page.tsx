@@ -102,7 +102,7 @@ export const RulePage = (props: RulePageProps) => {
         ),
       },
     ];
-  }, [actionComponent, canReadConnectors]);
+  }, [actionComponent]);
 
   return (
     <EuiPageTemplate grow bottomBorder offset={0} css={styles}>

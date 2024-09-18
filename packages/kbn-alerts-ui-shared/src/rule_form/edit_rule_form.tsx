@@ -103,11 +103,8 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     const hasAllPrivilege = !!ruleType.authorizedConsumers[consumer]?.all;
     const canExecuteActions = !!application.capabilities.actions?.execute;
 
-    return (
-      hasAllPrivilege && 
-      (canExecuteActions || (!canExecuteActions && !actions.length))
-    );
-  }, [ruleType, fetchedFormData]);
+    return hasAllPrivilege && (canExecuteActions || (!canExecuteActions && !actions.length));
+  }, [ruleType, fetchedFormData, application]);
 
   if (isInitialLoading) {
     return (

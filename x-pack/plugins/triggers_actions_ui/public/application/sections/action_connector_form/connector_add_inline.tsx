@@ -153,7 +153,7 @@ export const AddConnectorInline = ({
         id={index.toString()}
         className="actAccordionActionForm"
         buttonContentClassName="actAccordionActionForm__button"
-        data-test-subj={`alertActionAccordion-${index}`}
+        data-test-subj={`alertActionAccordionwtf-${index}`}
         buttonContent={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>

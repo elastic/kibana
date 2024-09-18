@@ -107,7 +107,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     aadTemplateFields,
   } = useRuleFormState();
 
-  const [tab, setTab] = useState<string>('settings');
+  const [tab, setTab] = useState<string>('messages');
   const subdued = useEuiBackgroundColor('subdued');
   const plain = useEuiBackgroundColor('plain');
   const { euiTheme } = useEuiTheme();
@@ -416,7 +416,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
       buttonContentClassName="eui-fullWidth"
       buttonContent={
         <EuiPanel color="subdued" paddingSize="m">
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               {showActionGroupErrorIcon() ? (
                 <EuiToolTip content={ACTION_ERROR_TOOLTIP}>
@@ -466,30 +466,20 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         style={{
           padding: euiTheme.size.l,
           backgroundColor: plain,
+          borderRadius: euiTheme.border.radius.medium,
         }}
       >
         <EuiFlexItem>
           <EuiTabs>
-            <EuiTab isSelected={tab === 'settings'} onClick={() => setTab('settings')}>
-              Settings
-            </EuiTab>
             <EuiTab isSelected={tab === 'messages'} onClick={() => setTab('messages')}>
               Message
+            </EuiTab>
+            <EuiTab isSelected={tab === 'settings'} onClick={() => setTab('settings')}>
+              Settings
             </EuiTab>
           </EuiTabs>
         </EuiFlexItem>
         <EuiFlexItem>
-          {tab === 'settings' && (
-            <RuleActionsSettings
-              action={action}
-              producerId={producerId}
-              onUseDefaultMessageChange={() => setUseDefaultMessage(true)}
-              onNotifyWhenChange={onNotifyWhenChange}
-              onActionGroupChange={onActionGroupChange}
-              onAlertsFilterChange={onAlertsFilterChange}
-              onTimeframeChange={onTimeframeChange}
-            />
-          )}
           {tab === 'messages' && (
             <RuleActionsMessage
               action={action}
@@ -500,6 +490,17 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
               warning={warning}
               templateFields={templateFields}
               onParamsChange={onParamsChange}
+            />
+          )}
+          {tab === 'settings' && (
+            <RuleActionsSettings
+              action={action}
+              producerId={producerId}
+              onUseDefaultMessageChange={() => setUseDefaultMessage(true)}
+              onNotifyWhenChange={onNotifyWhenChange}
+              onActionGroupChange={onActionGroupChange}
+              onAlertsFilterChange={onAlertsFilterChange}
+              onTimeframeChange={onTimeframeChange}
             />
           )}
         </EuiFlexItem>
