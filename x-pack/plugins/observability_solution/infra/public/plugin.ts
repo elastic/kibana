@@ -163,17 +163,38 @@ export class Plugin implements InfraClientPluginClass {
               ...(capabilities.infrastructure.show
                 ? [
                     {
-                      label: 'Infrastructure',
+                      label: i18n.translate('xpack.infra.metrics.pluginTitle', {
+                        defaultMessage: 'Infrastructure',
+                      }),
                       sortKey: 300,
                       entries: [
-                        { label: 'Infrastructure Inventory', app: 'metrics', path: '/inventory' },
+                        {
+                          label: i18n.translate(
+                            'xpack.infra.metrics.infrastructureInventoryTitle',
+                            {
+                              defaultMessage: 'Infrastructure Inventory',
+                            }
+                          ),
+                          app: 'metrics',
+                          path: '/inventory',
+                        },
                         ...(this.config.featureFlags.metricsExplorerEnabled
-                          ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
+                          ? [
+                              {
+                                label: i18n.translate('xpack.infra.metrics.metricsExplorerTitle', {
+                                  defaultMessage: 'Metrics Explorer',
+                                }),
+                                app: 'metrics',
+                                path: '/explorer',
+                              },
+                            ]
                           : []),
                         ...(isInfrastructureHostsViewEnabled
                           ? [
                               {
-                                label: 'Hosts',
+                                label: i18n.translate('xpack.infra.metrics.hostsTitle', {
+                                  defaultMessage: 'Hosts',
+                                }),
                                 app: 'metrics',
                                 path: '/hosts',
                               },
