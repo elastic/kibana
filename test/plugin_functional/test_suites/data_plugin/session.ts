@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/192510
+  // Failing: See https://github.com/elastic/kibana/issues/192510
   describe.skip('Session management', function describeSessionManagementTests() {
     describe('Discover', () => {
       before(async () => {
