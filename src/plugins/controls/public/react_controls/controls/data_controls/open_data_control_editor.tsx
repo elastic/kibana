@@ -17,9 +17,9 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiHasParentApi } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { ControlGroupApi } from '../../control_group/types';
+import type { DefaultDataControlState } from '../../../../common';
+import type { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditor } from './data_control_editor';
-import { DefaultDataControlState } from './types';
 
 export const openDataControlEditor = <
   State extends DefaultDataControlState = DefaultDataControlState

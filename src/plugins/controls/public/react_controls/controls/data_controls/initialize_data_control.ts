@@ -12,9 +12,9 @@ import { BehaviorSubject, combineLatest, debounceTime, first, skip, switchMap, t
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
   DataView,
   DataViewField,
-  DATA_VIEW_SAVED_OBJECT_TYPE,
 } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
@@ -22,12 +22,13 @@ import { SerializedPanelState } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
 
 import { i18n } from '@kbn/i18n';
-import { ControlGroupApi } from '../../control_group/types';
+import type { DefaultControlState, DefaultDataControlState } from '../../../../common';
+import type { ControlGroupApi } from '../../control_group/types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
-import { ControlApiInitialization, ControlStateManager, DefaultControlState } from '../types';
+import type { ControlApiInitialization, ControlStateManager } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
-import { DataControlApi, DataControlFieldFormatter, DefaultDataControlState } from './types';
 import { getReferenceName } from './reference_name_utils';
+import type { DataControlApi, DataControlFieldFormatter } from './types';
 
 export const initializeDataControl = <EditorState extends object = {}>(
   controlId: string,

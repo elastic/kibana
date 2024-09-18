@@ -15,6 +15,7 @@ import { RequestResult } from '../hooks/use_send_current_request/send_request';
 
 export type Actions =
   | { type: 'sendRequest'; payload: undefined }
+  | { type: 'cleanRequest'; payload: undefined }
   | { type: 'requestSuccess'; payload: { data: RequestResult[] } }
   | { type: 'requestFail'; payload: RequestResult<string> | undefined };
 
@@ -56,6 +57,12 @@ export const reducer: Reducer<Store, Actions> = (state, action) =>
     if (action.type === 'requestFail') {
       draft.requestInFlight = false;
       draft.lastResult = { ...initialResultValue, error: action.payload };
+      return;
+    }
+
+    if (action.type === 'cleanRequest') {
+      draft.requestInFlight = false;
+      draft.lastResult = initialResultValue;
       return;
     }
   });
