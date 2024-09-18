@@ -154,23 +154,21 @@ export const createAppMockRenderer = ({
   });
 
   const getFilesClient = mockGetFilesClient();
+  const casesProviderValue = {
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
+    features,
+    owner,
+    permissions,
+    releasePhase,
+    getFilesClient,
+  };
 
   const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
     <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
-          <CasesProvider
-            value={{
-              externalReferenceAttachmentTypeRegistry,
-              persistableStateAttachmentTypeRegistry,
-              features,
-              owner,
-              permissions,
-              releasePhase,
-              getFilesClient,
-            }}
-            queryClient={queryClient}
-          >
+          <CasesProvider value={casesProviderValue} queryClient={queryClient}>
             {children}
           </CasesProvider>
         </MemoryRouter>
@@ -190,7 +188,10 @@ export const createAppMockRenderer = ({
   const clearQueryCache = async () => {
     queryClient.getQueryCache().clear();
 
-    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+    await waitFor(() => {
+      console.log('stop fetching...');
+      return expect(queryClient.isFetching()).toBe(0);
+    });
   };
 
   return {

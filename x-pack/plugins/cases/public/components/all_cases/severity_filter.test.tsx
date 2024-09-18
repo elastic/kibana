@@ -28,29 +28,19 @@ describe.skip('Severity form field', () => {
   });
 
   it('renders', async () => {
-    const t0 = performance.now();
     appMockRender.render(<SeverityFilter {...props} />);
-    const t1 = performance.now();
-    console.log(`3.1 Call to render took ${t1 - t0} milliseconds.`);
     const popoverButton = await screen.findByTestId('options-filter-popover-button-severity');
-    const t2 = performance.now();
-    console.log(`3.2 Call to find by test id took ${t2 - t1} milliseconds.`);
+
     expect(popoverButton).toBeInTheDocument();
     expect(popoverButton).not.toBeDisabled();
 
-    const t3 = performance.now();
-    console.log(`3.3 Call to expect took ${t3 - t2} milliseconds.`);
     await userEvent.click(popoverButton);
-
     await waitForEuiPopoverOpen();
-    const t4 = performance.now();
 
-    console.log(`3.4 Call to click took ${t4 - t3} milliseconds.`);
     const allOptions = await within(await screen.findByTestId('euiSelectableList')).findAllByRole(
       'option'
     );
-    const t5 = performance.now();
-    console.log(`3.5 Call to find all by role took ${t5 - t4} milliseconds.`);
+
     expect(allOptions.length).toBe(4);
     expect(allOptions[0]).toHaveAttribute('title', CaseSeverity.LOW);
     expect(allOptions[1]).toHaveAttribute('title', CaseSeverity.MEDIUM);
