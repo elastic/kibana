@@ -16,6 +16,8 @@ import { AgentName } from '@kbn/elastic-agent-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { getAvailableResourceFields } from '../../../../utils/get_available_resource_fields';
 import * as constants from '../../../../../common/data_types/logs/constants';
+import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
+import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 
 /**
  * getUnformattedResourceFields definitions
@@ -49,15 +51,18 @@ export const getUnformattedResourceFields = (doc: LogDocument): ResourceFields =
  */
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
 
+const resourceCustomComponentsMap: Partial<
+  Record<keyof ResourceFields, React.ComponentType<FieldBadgeWithActionsProps>>
+> = {
+  [constants.SERVICE_NAME_FIELD]: ServiceNameBadgeWithActions,
+};
+
 export interface ResourceFieldDescriptor {
+  ResourceBadge: React.ComponentType<FieldBadgeWithActionsProps>;
   Icon?: () => JSX.Element;
   name: keyof ResourceFields;
   value: string;
 }
-
-const iconCss = css`
-  margin-right: ${euiThemeVars.euiSizeXS};
-`;
 
 export const createResourceFields = (row: DataTableRecord): ResourceFieldDescriptor[] => {
   const resourceDoc = getUnformattedResourceFields(row as LogDocument);
@@ -67,12 +72,15 @@ export const createResourceFields = (row: DataTableRecord): ResourceFieldDescrip
   const resourceFields = availableResourceFields.map((name) => ({
     name,
     value: resourceDoc[name] as string,
+    ResourceBadge: resourceCustomComponentsMap[name] ?? FieldBadgeWithActions,
     ...(name === constants.SERVICE_NAME_FIELD && {
       Icon: () => (
         <AgentIcon
           agentName={resourceDoc[constants.AGENT_NAME_FIELD] as AgentName}
           size="m"
-          css={iconCss}
+          css={css`
+            margin-right: ${euiThemeVars.euiSizeXS};
+          `}
         />
       ),
     }),

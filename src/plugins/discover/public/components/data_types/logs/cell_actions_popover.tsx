@@ -35,7 +35,9 @@ interface CellActionsPopoverProps {
   /* ECS mapping for the key */
   property: string;
   /* Value for the mapping, which will be displayed */
-  text: string;
+  value: string;
+  /* Optional callback to render the value */
+  renderValue?: (value: string) => React.ReactNode;
   /* Props to forward to the trigger Badge */
   renderPopoverTrigger: (props: {
     popoverTriggerProps: {
@@ -48,7 +50,8 @@ interface CellActionsPopoverProps {
 
 export function CellActionsPopover({
   property,
-  text,
+  value,
+  renderValue,
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
@@ -74,7 +77,8 @@ export function CellActionsPopover({
       >
         <EuiFlexItem style={{ maxWidth: '200px' }}>
           <EuiText size="s" css={codeFontCSS}>
-            <strong>{property}</strong> {text}
+            <strong>{property}</strong>{' '}
+            {typeof renderValue === 'function' ? renderValue(value) : value}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -90,33 +94,36 @@ export function CellActionsPopover({
       </EuiFlexGroup>
       <EuiPopoverFooter>
         <EuiFlexGroup responsive={false} gutterSize="s" wrap={true}>
-          <FilterInButton value={text} property={property} />
-          <FilterOutButton value={text} property={property} />
+          <FilterInButton value={value} property={property} />
+          <FilterOutButton value={value} property={property} />
         </EuiFlexGroup>
       </EuiPopoverFooter>
       <EuiPopoverFooter>
-        <CopyButton value={text} property={property} />
+        <CopyButton value={value} property={property} />
       </EuiPopoverFooter>
     </EuiPopover>
   );
 }
 
-interface FieldBadgeWithActionsProps {
-  /* ECS mapping for the key */
-  property: string;
-  /* Value for the mapping, which will be displayed */
-  text: string;
+export interface FieldBadgeWithActionsProps
+  extends Pick<CellActionsPopoverProps, 'property' | 'value' | 'renderValue'> {
   icon?: EuiBadgeProps['iconType'];
 }
 
-export function FieldBadgeWithActions({ property, text, icon }: FieldBadgeWithActionsProps) {
+export function FieldBadgeWithActions({
+  icon,
+  property,
+  renderValue,
+  value,
+}: FieldBadgeWithActionsProps) {
   return (
     <CellActionsPopover
       property={property}
-      text={text}
+      value={value}
+      renderValue={renderValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
         <EuiBadge {...popoverTriggerProps} color="hollow" iconType={icon} iconSide="left">
-          <EuiTextTruncate text={text} truncation="middle" width={120} />
+          <EuiTextTruncate text={value} truncation="middle" width={120} />
         </EuiBadge>
       )}
     />

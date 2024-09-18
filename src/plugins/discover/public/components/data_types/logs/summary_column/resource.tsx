@@ -11,7 +11,6 @@ import React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { EuiBadge, EuiBadgeGroup, EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
 import { ResourceFieldDescriptor, createResourceFields } from './utils';
-import { FieldBadgeWithActions } from '../cell_actions_popover';
 
 const MAX_LIMITED_FIELDS_VISIBLE = 3;
 
@@ -31,8 +30,8 @@ export const Resource = ({ row, limited = false, alignItems = 'stretch' }: Resou
 
   return (
     <EuiFlexGroup gutterSize="s" css={{ height: '100%' }} alignItems={alignItems}>
-      {displayedFields.map(({ name, value, Icon }) => (
-        <FieldBadgeWithActions key={name} property={name} text={value} icon={Icon} />
+      {displayedFields.map(({ name, value, ResourceBadge, Icon }) => (
+        <ResourceBadge key={name} property={name} value={value} icon={Icon} />
       ))}
       {extraFieldsCount > 0 && (
         <div>

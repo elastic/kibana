@@ -652,7 +652,8 @@
               "\nSet of properties that drive a settings menu"
             ],
             "signature": [
-              "{ hideSettings?: boolean | undefined; pushVsOverlay?: { disabled: boolean; tooltip: string; } | undefined; } | undefined"
+              "FlyoutCustomProps",
+              " | undefined"
             ],
             "path": "packages/kbn-expandable-flyout/src/index.tsx",
             "deprecated": false,

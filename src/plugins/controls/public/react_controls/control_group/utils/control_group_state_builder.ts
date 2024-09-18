@@ -13,13 +13,13 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
+  type DefaultDataControlState,
 } from '../../../../common';
-import { ControlGroupRuntimeState, ControlPanelsState } from '../types';
+import { type ControlGroupRuntimeState, type ControlPanelsState } from '../../../../common';
+import type { OptionsListControlState } from '../../../../common/options_list';
 import { pluginServices } from '../../../services';
-import { OptionsListControlState } from '../../controls/data_controls/options_list_control/types';
-import { RangesliderControlState } from '../../controls/data_controls/range_slider/types';
-import { DefaultDataControlState } from '../../controls/data_controls/types';
 import { getDataControlFieldRegistry } from '../../controls/data_controls/data_control_editor_utils';
+import type { RangesliderControlState } from '../../controls/data_controls/range_slider/types';
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;
 
