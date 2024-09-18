@@ -493,6 +493,15 @@
       "labels": ["Team: Sec Eng Productivity", "release_note:skip", "backport:all-open"],
       "minimumReleaseAge": "7 days",
       "enabled": true
+    },
+    {
+      "groupName": "@mswjs/http-middleware",
+      "matchPackageNames": ["@mswjs/http-middleware"],
+      "reviewers": ["team:kibana-cloud-security-posture"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
     }
   ],
   "customManagers": [
