@@ -27,6 +27,7 @@ export type {
   Pipeline,
   Docs,
   SamplesFormat,
+  LangSmithOptions,
 } from './api/model/common_attributes.gen';
 export { SamplesFormatName } from './api/model/common_attributes.gen';
 export type { ESProcessorItem } from './api/model/processor_attributes.gen';
