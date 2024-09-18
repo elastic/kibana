@@ -48,7 +48,7 @@ export function DashboardEmptyScreen() {
 
   const dashboardApi = useDashboardApi();
   const isDarkTheme = useObservable(theme$)?.darkMode;
-  const [viewMode] = useStateFromPublishingSubject(dashboardApi.viewMode);
+  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode);
   const isEditMode = useMemo(() => {
     return viewMode === 'edit';
   }, [viewMode]);

@@ -15,7 +15,9 @@ import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_
 import { DashboardGrid } from './dashboard_grid';
 import { buildMockDashboard } from '../../../mocks';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
-import { DashboardContainerContext } from '../../embeddable/dashboard_container';
+import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
+import { DashboardApi } from '../../../dashboard_api/types';
+import { DashboardPanelMap } from '../../../../common';
 
 jest.mock('./dashboard_grid_item', () => {
   return {
@@ -45,52 +47,49 @@ jest.mock('./dashboard_grid_item', () => {
   };
 });
 
-const createAndMountDashboardGrid = async () => {
+const PANELS = {
+  '1': {
+    gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+    type: CONTACT_CARD_EMBEDDABLE,
+    explicitInput: { id: '1' },
+  },
+  '2': {
+    gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
+    type: CONTACT_CARD_EMBEDDABLE,
+    explicitInput: { id: '2' },
+  },
+};
+
+const createAndMountDashboardGrid = async (panels: DashboardPanelMap = PANELS) => {
   const dashboardContainer = buildMockDashboard({
     overrides: {
-      panels: {
-        '1': {
-          gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-          type: CONTACT_CARD_EMBEDDABLE,
-          explicitInput: { id: '1' },
-        },
-        '2': {
-          gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
-          type: CONTACT_CARD_EMBEDDABLE,
-          explicitInput: { id: '2' },
-        },
-      },
+      panels,
     },
   });
   await dashboardContainer.untilContainerInitialized();
   const component = mountWithIntl(
-    <DashboardContainerContext.Provider value={dashboardContainer}>
+    <DashboardContext.Provider value={dashboardContainer as DashboardApi}>
       <DashboardGrid viewportWidth={1000} />
-    </DashboardContainerContext.Provider>
+    </DashboardContext.Provider>
   );
   return { dashboardContainer, component };
 };
 
 test('renders DashboardGrid', async () => {
-  const { component } = await createAndMountDashboardGrid();
+  const { component } = await createAndMountDashboardGrid(PANELS);
   const panelElements = component.find('GridItem');
   expect(panelElements.length).toBe(2);
 });
 
 test('renders DashboardGrid with no visualizations', async () => {
-  const { dashboardContainer, component } = await createAndMountDashboardGrid();
-  dashboardContainer.updateInput({ panels: {} });
-  component.update();
+  const { component } = await createAndMountDashboardGrid({});
   expect(component.find('GridItem').length).toBe(0);
 });
 
 test('DashboardGrid removes panel when removed from container', async () => {
-  const { dashboardContainer, component } = await createAndMountDashboardGrid();
-  const originalPanels = dashboardContainer.getInput().panels;
-  const filteredPanels = { ...originalPanels };
-  delete filteredPanels['1'];
-  dashboardContainer.updateInput({ panels: filteredPanels });
-  component.update();
+  const { component } = await createAndMountDashboardGrid({
+    '2': PANELS['2'],
+  });
   const panelElements = component.find('GridItem');
   expect(panelElements.length).toBe(1);
 });
@@ -98,6 +97,7 @@ test('DashboardGrid removes panel when removed from container', async () => {
 test('DashboardGrid renders expanded panel', async () => {
   const { dashboardContainer, component } = await createAndMountDashboardGrid();
   dashboardContainer.setExpandedPanelId('1');
+  await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
   expect(component.find('GridItem').length).toBe(2);
@@ -106,6 +106,7 @@ test('DashboardGrid renders expanded panel', async () => {
   expect(component.find('#mockDashboardGridItem_2').hasClass('hiddenPanel')).toBe(true);
 
   dashboardContainer.setExpandedPanelId();
+  await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   expect(component.find('GridItem').length).toBe(2);
 
@@ -116,6 +117,7 @@ test('DashboardGrid renders expanded panel', async () => {
 test('DashboardGrid renders focused panel', async () => {
   const { dashboardContainer, component } = await createAndMountDashboardGrid();
   dashboardContainer.setFocusedPanelId('2');
+  await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
   expect(component.find('GridItem').length).toBe(2);
@@ -124,6 +126,7 @@ test('DashboardGrid renders focused panel', async () => {
   expect(component.find('#mockDashboardGridItem_2').hasClass('focusedPanel')).toBe(true);
 
   dashboardContainer.setFocusedPanelId(undefined);
+  await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   expect(component.find('GridItem').length).toBe(2);
 
