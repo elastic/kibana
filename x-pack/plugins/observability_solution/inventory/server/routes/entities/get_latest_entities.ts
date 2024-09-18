@@ -21,7 +21,7 @@ const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   dataset: ENTITY_LATEST,
 });
 
-interface LatestEntity {
+export interface LatestEntity {
   [ENTITY_LAST_SEEN]: string;
   [ENTITY_TYPE]: string;
   [ENTITY_DISPLAY_NAME]: string;
