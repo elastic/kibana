@@ -104,7 +104,7 @@ export class DataPublicPlugin
       getTableViewDescription(() => ({
         uiActions: startServices().plugins.uiActions,
         uiSettings: startServices().core.uiSettings,
-        fieldFormats: startServices().self.fieldFormats,
+        fieldFormats: startServices().plugins.fieldFormats,
         isFilterable: startServices().self.datatableUtilities.isFilterable,
       }))
     );
