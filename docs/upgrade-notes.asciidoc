@@ -1,0 +1,718 @@
+[[breaking-changes-summary]]
+== Upgrade Notes
+
+This page summarizes all breaking changes and deprecation notices introduced to {kib} version 8 since 8.0. Review these changes before upgrading Kibana to mitigate the impact to your application.
+
+NOTE: For the Elastic Security solution release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+=== Breaking changes
+
+[discrete]
+.Added rate limiting to install by upload endpoint. (8.15)
+[%collapsible]
+====
+*Details* +
+Rate limiting was added to the upload `api/fleet/epm/packages` endpoint. For more information, refer to {kibana-pull}184036[#184036].
+
+*Impact* +
+If you do two or more requests in less than 10 seconds, the subsequent requests fail with `429 Too Many Requests`.
+Wait 10 seconds before uploading again.
+This change could potentially break automations for users that rely on frequent package uploads.
+====
+
+[discrete]
+.Renamed an advanced setting to enable {esql}. (8.14)
+[%collapsible]
+====
+*Details* +
+The advanced setting which hides {esql} from the UI has been renamed from `discover:enableESQL` to `enableESQL`. It is enabled by default and must be switched off to disable {esql} features from your {kib} applications. For more information, refer to ({kibana-pull}182074[#182074]).
+====
+
+[discrete]
+.Removed conditional topics for Kafka outputs. (8.13)
+[%collapsible]
+====
+*Details* +
+The Kafka output no longer supports conditional topics. For more information, refer to ({kibana-pull}176879[#176879]).
+====
+
+[discrete]
+.Most Fleet installed integrations are now read-only and labelled with a *Managed* tag in the Kibana UI. (8.13)
+[%collapsible]
+====
+*Details* +
+
+Integration content installed by {fleet} is no longer editable. This content is tagged with *Managed* in the {kib} UI, and is Elastic managed. This content cannot be edited or deleted. However, managed visualizations, dashboards, and saved searches can be cloned. The clones can be customized.
+
+When cloning a dashboard the cloned panels become entirely independent copies that are unlinked from the original configurations and dependencies.
+
+Managed content relating to specific visualization editors such as Lens, TSVB, and Maps, the clones retain the original reference configurations. The same applies to editing any saved searches in a managed visualization.
+
+For more information, refer to ({kibana-pull}172393[#172393]).
+====
+
+[discrete]
+.Removed `is_nan`, `is_finite`, and `is_infinite` functions from {esql}. (8.13)
+[%collapsible]
+====
+*Details* +
+These functions have been removed from {esql} queries as they are not supported. Errors would be thrown when trying to use them. For more information, refer to ({kibana-pull}174674[#174674]).
+====
+
+[discrete]
+.New SLO architecture. (8.12)
+[%collapsible]
+====
+*Details* +
+We introduce a breaking change in the SLO features that will break any SLOs created before 8.12. These SLOs have to be manually reset through an API until we provide a UI for it. The data aggregated over time (rollup) is still available in the sli v2 index, but won't be used for summary calculation when reset.
+
+The previous summary transforms summarizing every SLOs won't be used anymore and can be stopped and deleted:
+
+* slo-summary-occurrences-7d-rolling
+* slo-summary-occurrences-30d-rolling
+* slo-summary-occurrences-90d-rolling
+* slo-summary-occurrences-monthly-aligned
+* slo-summary-occurrences-weekly-aligned
+* slo-summary-timeslices-7d-rolling
+* slo-summary-timeslices-30d-rolling
+* slo-summary-timeslices-90d-rolling
+* slo-summary-timeslices-monthly-aligned
+* slo-summary-timeslices-weekly-aligned
+
+Be aware that when installing a new SLO (or after resetting an SLO), we install two transforms (one for the rollup data and one that summarize the rollup data). Do not delete the new `slo-summary-{slo_id}-{slo_revision}` transforms. For more information, refer to ({kibana-pull}172224[#172224]).
+====
+
+[discrete]
+.A new sub-feature privilege to control user access to the cases settings. (8.12)
+[%collapsible]
+====
+*Details* +
+Roles with at least a sub-feature privilege configured will not have access to the cases setting like they had previously. All roles without a sub-feature privilege configured will not be affected. For more information, refer to ({kibana-pull}170635[#170635]).
+====
+
+[discrete]
+.Improved config output validation for default output. (8.11)
+[%collapsible]
+====
+*Details* +
+Improve config output validation to not allow to defining multiple default outputs in {kib} configuration. For more information, refer to ({kibana-pull}167085[#167085]).
+====
+
+[discrete]
+.Converted filterQuery to KQL.(8.11)
+[%collapsible]
+====
+*Details* +
+Converts `filterQuery` to a KQL query string. For more information, refer to ({kibana-pull}161806[#161806]).
+====
+
+[discrete]
+.Moved doc_root.vulnerability.package to doc_root.package (ECS). (8.11)
+[%collapsible]
+====
+*Details* +
+This updates all instances of vulnerability.package to the ECS standard package fieldset. For more information, refer to ({kibana-pull}164651[#164651]).
+====
+
+[discrete]
+.Introduced new summary search capabilities that will cause existing SLOs to stop working. (8.10)
+[%collapsible]
+====
+*Details* +
+New summary search capabilities introduce breaking changes in various places, and we have decided not to handle backward compatibility:
+
+* SLO find API body parameters have changed.
+* The index mapping used by the rollup data has changed, and we have added a summary index that becomes the new source of truth for search.
+* The rollup transforms have been updated, but existing SLO with their transforms won't be updated.
+
+If some SLOs have been installed in a prior version at 8.10, they won't work after migrating to 8.10. There are two approaches to handle this breaking change. The recommended route is to delete all SLOs before migrating to 8.10. The alternative is to migrate to 8.10 and manually remove the SLOs.
+
+*Removing SLOs before migrating to 8.10*
+
+Use the SLO UI or the SLO delete API to delete all existing SLOs. This takes care of the Saved Object, Transform and rollup data. When all SLOs have been deleted, then delete the residual rollup indices: `.slo-observability.sli-v1*`. Note that this is v1.
+
+*Removing SLOs after migrating to 8.10*
+
+After migrating to 8.10, the previously created SLOs won’t appear in the UI because the API is using a new index. The previously created SLOs still exist, and associated transforms are still rolling up data into the previous index `.slo-observability.sli-v1*`. The SLO delete API can't be used now, so remove the resources resources manually:
+
+. Find all existing transforms
+All SLO related transforms start with the `slo-` prefix, this request returns them all:
++
+[source, bash]
+----
+GET _transform/slo-*
+----
++
+Make a note of all the transforms IDs for later.
+
+. Stop all transforms
++
+[source, bash]
+----
+POST _transform/slo-*/_stop?force=true
+----
+
+. Remove all transforms
++
+From the list of transforms returned during the first step, now delete them one by one:
++
+[source, bash]
+----
+DELETE _transform/{transform_id}?force=true
+----
+
+. Find the SLO saved objects
++
+This request lists all the SLO saved objects. The SLO IDs and the saved object IDs are not the same.
++
+[source, bash]
+----
+GET kbn:/api/saved_objects/_find?type=slo
+----
++
+Make a note of all the saved object IDs from the response.
+
+. Remove the SLO saved objects
++
+For each saved object ID, run the following:
++
+[source, bash]
+----
+DELETE kbn:/api/saved_objects/slo/{Saved_Object_Id}
+----
+
+. Delete the rollup indices v1
++
+Note that this is v1.
++
+[source, bash]
+----
+DELETE .slo-observability.sli-v1*
+----
+====
+
+[discrete]
+.Get case metrics APIs became internal. (8.10)
+[%collapsible]
+====
+*Details* +
+The get case metrics APIs are now internal. For more information, refer to ({kibana-pull}162506[#162506]).
+====
+
+[discrete]
+.New case limits. (8.10)
+[%collapsible]
+====
+*Details* +
+Limits are now imposed on the number of objects cases can process or the amount of data those objects can store.
+////
+For example:
+* Updating a case comment is now included in the 10000 user actions restriction. ({kibana-pull}163150[#163150])
+* Updating a case now fails if the operation makes it reach more than 10000 user actions. ({kibana-pull}161848[#161848])
+* The total number of characters per comment is limited to 30000. ({kibana-pull}161357[#161357])
+* The getConnectors API now limits the number of supported connectors returned to 1000. ({kibana-pull}161282[#161282])
+* There are new limits and restrictions when retrieving cases. ({kibana-pull}162411[#162411]), ({kibana-pull}162245[#162245]), ({kibana-pull}161111[#161111]), ({kibana-pull}160705[#160705])
+* A case can now only have 100 external references and persistable state(excluding files) attachments combined. ({kibana-pull}162071[#162071]).
+* New limits on titles, descriptions, tags and category. ({kibana-pull}160844[#160844]).
+* The maximum number of cases that can be updated simultaneously is now 100. The minimum is 1. ({kibana-pull}161076[#161076]).
+* The Delete cases API now limits the number of cases to be deleted to 100.({kibana-pull}160846[#160846]).
+////
+For the full list, refer to {kib-issue}146945[#146945].
+====
+
+[discrete]
+.The `addProcessorDefinition` function was removed. (8.10)
+[%collapsible]
+====
+*Details* +
+The function `addProcessorDefinition` is removed from the Console plugin start contract (server side). For more information, refer to ({kibana-pull}159041[#159041]).
+====
+
+[discrete]
+.The Download CSV endpoint has changed. (8.10)
+[%collapsible]
+====
+*Details* +
+The API endpoint for downloading a CSV file from a saved search in the Dashboard application has changed to reflect the fact that this is an internal API. The previous API path of
+`/api/reporting/v1/generate/immediate/csv_searchsource` has been changed to `/internal/reporting/generate/immediate/csv_searchsource`. For more information, refer to {kibana-pull}162288[#162288].
+====
+
+[discrete]
+.Uptime app now hidden when no data is available. (8.9)
+[%collapsible]
+====
+*Details* +
+The Uptime app now gets hidden from the interface when it doesn't have any data for more than a week. If you have a standalone Heartbeat pushing data to Elasticsearch, the Uptime app is considered active. You can disable this automatic behavior from the advanced settings in Kibana using the **Always show legacy Uptime app** option.
+For synthetic monitoring, we now recommend to use the new Synthetics app. For more information, refer to {kibana-pull}159118[#159118]
+====
+
+[discrete]
+.Removed synthetics pattern from Uptime settings. (8.9)
+[%collapsible]
+====
+*Details* +
+Data from browser monitors and monitors of all types created within the Synthetics App or via the Elastic Synthetics Fleet Integration will no longer appear in Uptime. For more information, refer to {kibana-pull}159012[#159012]
+====
+
+[discrete]
+.Removed legacy project monitor API. (8.8)
+[%collapsible]
+====
+*Details* +
+The project monitor API for Synthetics in Elastic Observability has been removed. For more information, refer to {kibana-pull}155470[#155470].
+
+*Impact* +
+In 8.8.0 and later, an error appears when you use the project monitor API.
+====
+
+[discrete]
+
+.Changed privileges for alerts and cases. (8.8)
+[%collapsible]
+====
+*Details* +
+The privileges for attaching alerts to cases has changed. For more information, refer to {kibana-pull}147985[#147985].
+
+*Impact* +
+To attach alerts to cases, you must have `Read` access to an {observability} or Security feature that has alerts and `All` access to the **Cases** feature. For detailed information, check link:https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html[{kib} privileges] and link:https://www.elastic.co/guide/en/kibana/current/setup-cases.html[Configure access to cases].
+====
+
+[discrete]
+.Removed the fields list sampling setting. (8.7)
+[%collapsible]
+====
+*Details* +
+`lens:useFieldExistenceSampling` has been removed from *Advanced Settings*. The setting allowed you to enable document sampling to determine the fields that are displayed in *Lens*. For more information, refer to {kibana-pull}149482[#149482].
+
+*Impact* +
+In 8.1.0 and later, {kib} uses the field caps API, by default, to determine the fields that are displayed in *Lens*.
+====
+
+[discrete]
+.Removed legacy pie chart visualization setting. (8.7)
+[%collapsible]
+====
+*Details* +
+`visualization:visualize:legacyPieChartsLibrary` has been removed from *Advanced Settings*. The setting allowed you to create aggregation-based pie chart visualizations using the legacy charts library. For more information, refer to {kibana-pull}146990[#146990].
+
+*Impact* +
+In 7.14.0 and later, the new aggregation-based pie chart visualization is available by default. For more information, check link:https://www.elastic.co/guide/en/kibana/current/add-aggregation-based-visualization-panels.html[Aggregation-based].
+====
+
+[discrete]
+.Removed the `current_upgrades` endpoint. (8.7)
+[%collapsible]
+====
+*Details* +
+The `api/fleet/current_upgrades` endpoint has been removed. For more information, refer to {kibana-pull}147616[#147616].
+
+*Impact* +
+When you upgrade to 8.7.0, use the `/action_status` endpoint.
+====
+
+[discrete]
+.Removed the `preconfiguration` API route. (8.7)
+[%collapsible]
+====
+*Details* +
+The `/api/fleet/setup/preconfiguration` API, which was released as generally available by error, has been removed. For more information, refer to {kibana-pull}147199[#147199].
+
+*Impact* +
+Do not use `/api/fleet/setup/preconfiguration`. To manage preconfigured agent policies, use kibana.yml. For more information, check link:https://www.elastic.co/guide/en/kibana/current/fleet-settings-kb.html#_preconfiguration_settings_for_advanced_use_cases[Preconfigured settings].
+====
+
+[discrete]
+.Changed the `histogram:maxBars` default setting. (8.6)
+[%collapsible]
+====
+*Details* +
+To configure higher resolution data histogram aggregations without changing the *Advanced Settings*, the default histogram:maxBars setting is now 1000 instead of 100. For more information, refer to {kibana-pull}143081[#143081].
+
+*Impact* +
+For each {kibana-ref}/xpack-spaces.html[space], complete the following to change *histogram:maxBars* to the previous default setting:
+
+. Open the main menu, then click *Stack Management > Advanced Settings*.
+. Scroll or search for *histogram:maxBars*.
+. Enter `100`, then click *Save changes*.
+====
+
+[discrete]
+.CSV reports now use PIT instead of Scroll. (8.6)
+[%collapsible]
+====
+*Details* +
+CSV reports now use PIT instead of Scroll. Previously generated CSV reports that used an index alias with alias-only privileges, but without privileges on the alias referenced-indices will no longer generate. For more information, refer to {kibana-pull}158338[#158338].
+
+*Impact* +
+To generate CSV reports, grant `read` privileges to the underlying indices.
+====
+
+[discrete]
+.Updated bulk action API to return actionId instead of agent success. (8.5)
+[%collapsible]
+====
+*Details* +
+To make bulk action responses consistent, returns `actionId` instead of agent ids with `success: True` or `success: False` results. For more information, refer to {kibana-pull}141757[#141757].
+
+*Impact* +
+When you use `FleetBulkResponse`, you now receive only `actionId` responses.
+====
+
+[discrete]
+.Removed filter validation for ad-hoc data views (8.5)
+[%collapsible]
+====
+*Details* +
+Filters associated with unknown data views, such as deleted data views, are no longer automatically disabled. For more information, refer to {kibana-pull}139431[#139431].
+
+*Impact* +
+Filters associated with unknown data views now display a warning message instead of being automatically disabled.
+====
+
+[discrete]
+.Removed the `package_policies` field from the agent policy saved object. (8.5)
+[%collapsible]
+====
+*Details* +
+The bidirectional foreign key between agent policy and package policy has been removed. For more information, refer to {kibana-pull}138677[#138677].
+
+*Impact* +
+The agent policy saved object no longer includes the `package_policies` field.
+====
+
+[discrete]
+.xpack.agents.* are now uneditable in UI when defined in kibana.yml. (8.4)
+[%collapsible]
+====
+*Details* +
+When you configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` in kibana.yml, you are unable to update the fields on the Fleet UI.
+
+For more information, refer to {kibana-pull}135669[#135669].
+
+*Impact* +
+To configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` on the Fleet UI, avoid configuring the settings in kibana.yml.
+====
+
+[discrete]
+.Removed the legacy Timelion charts library. (8.4)
+[%collapsible]
+====
+*Details* +
+The legacy implementation of the *Timelion* visualization charts library has been removed. All *Timelion* visualizations now use the elastic-charts library, which was introduced in 7.15.0.
+
+For more information, refer to {kibana-pull}134336[#134336].
+
+*Impact* +
+In 8.4.0 and later, you are unable to configure the *Timelion* legacy charts library advanced setting. For information about visualization Advanced Settings, check link:https://www.elastic.co/guide/en/kibana/8.4/advanced-options.html#kibana-visualization-settings[Visualization].
+====
+
+[discrete]
+.Removed Quandl and Graphite integrations. (8.3)
+[%collapsible]
+====
+*Details* +
+The experimental `.quandl` and `.graphite` functions and advanced settings are removed from *Timelion*. For more information, check {kibana-pull}129581[#129581].
+
+*Impact* +
+When you use the `vis_type_timelion.graphiteUrls` kibana.yml setting, {kib} successfully starts, but logs a `[WARN ][config.deprecation] You no longer need to configure "vis_type_timelion.graphiteUrls".` warning.
+
+To leave your feedback about the removal of `.quandl` and `.graphite`, go to the link:https://discuss.elastic.co/c/elastic-stack/kibana/7[discuss forum].
+====
+
+[discrete]
+."All" base privilege option now also applies to Osquery. (8.3)
+[%collapsible]
+====
+*Details* +
+The Osquery {kib} privilege has been updated, so that when the *Privileges for all features level* is set to *All*, this now applies *All* to Osquery privileges as well. Previously, users had to choose the *Customize* option to grant any access to Osquery. For more information, refer to {kibana-pull}130523[#130523].
+
+*Impact* +
+This impacts user roles that have *Privileges for all features* set to *All*. After this update, users with this role will have access to the Osquery page in {kib}. However, to use the Osquery feature fully, these requirements remain the same: users also need Read access to the logs-osquery_manager.result* index and the Osquery Manager integration must be deployed to Elastic Agents.
+====
+
+[discrete]
+.Removed legacy CSV export type. (8.1)
+[%collapsible]
+====
+*Details* +
+The `/api/reporting/generate/csv` endpoint has been removed. For more information, refer to {kibana-pull}121435[#121435].
+
+*Impact* +
+If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-generation.html[regenerate the POST URLs] that you use to automatically generate CSV reports.
+====
+
+[discrete]
+.Removed legacy PDF shim. (8.1)
+[%collapsible]
+====
+*Details* +
+The POST URLs that you generated in {kib} 6.2.0 no longer work. For more information, refer to {kibana-pull}121369[#121369].
+
+*Impact* +
+{kibana-ref-all}/8.1/automating-report-generation.html[Regenerate the POST URLs] that you use to automatatically generate PDF reports.
+====
+
+[discrete]
+.Removed the `console.ssl` setting. (8.0)
+[%collapsible]
+====
+*Details* +
+The `console.ssl` setting has been removed. For more information, refer to {kibana-pull}123754[#123754].
+
+*Impact* +
+Before you upgrade to 8.0.0, remove `console.ssl` from kibana.yml.
+====
+
+[discrete]
+.Removed support for `monitoring.cluster_alerts.allowedSpaces`. (8.0)
+[%collapsible]
+====
+*Details* +
+The `monitoring.cluster_alerts.allowedSpaces` setting, which {kib} uses to create Stack Monitoring alerts, has been removed. For more information, refer to {kibana-pull}123229[#123229].
+
+*Impact* +
+Before you upgrade to 8.0.0, remove `monitoring.cluster_alerts.allowedSpaces` from kibana.yml.
+====
+
+[float]
+=== Deprecation notices
+
+The following functionality is deprecated and will be removed at a future date. Deprecated functionality 
+does not have an immediate impact on your application, but we strongly recommend you make the necessary 
+updates to avoid use of deprecated features.
+
+Use the **Kibana Upgrade Assistant** to prepare for your upgrade to the next version of the Elastic Stack. 
+The assistant identifies deprecated settings in your configuration and guides you through the process of 
+resolving issues if any deprecated features are enabled. 
+To access the assistant, go to **Stack Management** > **Upgrade Assistant**.
+
+[discrete]
+.Uptime is deprecated in 8.15.0 and will be removed in a future version. (8.15)
+[%collapsible]
+====
+*Details* +
+The Uptime app is already hidden from Kibana when there is no recent Heartbeat data, and will be completely removed in early 2026. You should migrate to Synthetics as an alternative. For more details, refer to the {observability-guide}/uptime-intro.html[Uptime documentation].
+====
+
+[discrete]
+.Downloading a CSV file from a saved search panel in a dashboard has become deprecated in favor of generating a CSV report. (8.14)
+[%collapsible]
+====
+*Details* +
+The mechanism of exporting CSV data from a saved search panel in a dashboard has been changed to generate a CSV report, rather than allowing the CSV data to be downloaded
+without creating a report. To preserve the original behavior, it is necessary to update `kibana.yml` with the setting of `xpack.reporting.csv.enablePanelActionDownload:
+true`. The scope of this breaking change is limited to downloading CSV files from saved search panels only; downloading CSV files from other types of dashboard panels is
+unchanged. For more information, refer to {kibana-pull}178159[#178159].
+====
+
+[discrete]
+.Action variables in the UI and in tests that were no longer used have been replaced. (8.10)
+[%collapsible]
+====
+*Details* +
+The following rule action variables have been deprecated. Use the recommended variables (in parentheses) instead:
+
+* alertActionGroup (alert.actionGroup)
+* alertActionGroupName (alert.actionGroupName)
+* alertActionSubgroup (alert.actionSubgroup)
+* alertId (rule.id)
+* alertInstanceId (alert.id)
+* alertName (rule.name)
+* params (rule.params)
+* spaceId (rule.spaceId)
+* tags (rule.tags)
+
+For more information, refer to ({kibana-pull}161136[#161136]).
+====
+
+[discrete]
+.The ability to create legacy input controls was hidden. (8.9)
+[%collapsible]
+====
+*Details* +
+The option to create legacy input controls when creating a new visualization is hidden. For more information, refer to {kibana-pull}156455[#156455]
+====
+
+[discrete]
+.Removed legacy field stats. (8.9)
+[%collapsible]
+====
+*Details* +
+Legacy felid stats that were previously shown within a popover have been removed. For more information, refer to {kibana-pull}155503[#155503]
+====
+
+[discrete]
+.Deprecated ephemeral Task Manager settings (8.8)
+[%collapsible]
+====
+*Details* +
+The following Task Manager settings are deprecated:
+
+* `xpack.task_manager.ephemeral_tasks.enabled`
+* `xpack.task_manager.ephemeral_tasks.request_capacity`
+* `xpack.alerting.maxEphemeralActionsPerAlert`
+
+For more information, refer to {kibana-pull}154275[#154275].
+
+*Impact* +
+To improve task execution resiliency, remove the deprecated settings from the `kibana.yml` file. For detailed information, check link:https://www.elastic.co/guide/en/kibana/current/task-manager-settings-kb.html[Task Manager settings in {kib}].
+====
+
+[discrete]
+.Deprecated Synthetics and Uptime monitor schedules (8.8)
+[%collapsible]
+====
+*Details* +
+Synthetics and Uptime monitor schedules and zip URL fields are deprecated. For more information, refer to {kibana-pull}154010[#154010] and {kibana-pull}154952[#154952].
+
+*Impact* +
+When you create monitors in Uptime Monitor Management and the Synthetics app, unsupported schedules are automatically transferred to the nearest supported schedule. To use zip URLs, use project monitors.
+====
+
+[discrete]
+.Deprecated Agent reassign API PUT endpoint. (8.8)
+[%collapsible]
+====
+*Details* +
+The PUT endpoint for the agent reassign API is deprecated. For more information, refer to {kibana-pull}152236[#152236].
+
+*Impact* +
+Use the POST endpoint for the agent reassign API.
+====
+
+[discrete]
+.Deprecated `total` in `/agent_status` Fleet API. (8.8)
+[%collapsible]
+====
+*Details* +
+The `total` field in `/agent_status` Fleet API responses is deprecated. For more information, refer to {kibana-pull}151564[#151564].
+
+*Impact* +
+The `/agent_status` Fleet API now returns the following statuses:
+
+* `all` &mdash; All active and inactive
+* `active` &mdash; All active
+====
+
+[discrete]
+.Deprecated Elastic Synthetics integration. (8.8)
+[%collapsible]
+====
+*Details* +
+The Elastic Synthetics integration is deprecated. For more information, refer to {kibana-pull}149506[#149506].
+
+*Impact* +
+To monitor endpoints, pages, and user journeys, go to **{observability}** -> **Synthetics (beta)**.
+====
+
+[discrete]
+.Deprecated ApiKey authentication for interactive users. (8.4)
+[%collapsible]
+====
+*Details* +
+The ability to authenticate interactive users with ApiKey via a web browser has been deprecated, and will be removed in a future version.
+
+For more information, refer to {kibana-pull}136422[#136422].
+
+*Impact* +
+To authenticate interactive users via a web browser, use <<kibana-authentication,another authentication method>>. Use API keys only for programmatic access to {kib} and {es}.
+====
+
+[discrete]
+.Removed `apm_user`. (8.3)
+[%collapsible]
+====
+*Details* +
+Removes the `apm_user` role. For more information, check {kibana-pull}132790[#132790].
+
+*Impact* +
+The `apm_user`role is replaced with the `viewer` and `editor` built-in roles.
+====
+
+[discrete]
+.Deprecated input control panels in dashboards. (8.3)
+[%collapsible]
+====
+*Details* +
+The input control panels, which allow you to add interactive filters to dashboards, are deprecated. For more information, check {kibana-pull}132562[#132562].
+
+*Impact* +
+To add interactive filters to your dashboards, use the link:https://www.elastic.co/guide/en/kibana/8.3/add-controls.html[new controls].
+====
+
+[discrete]
+.Deprecated anonymous authentication credentials. (8.3)
+[%collapsible]
+====
+*Details* +
+The apiKey, including key and ID/key pair, and `elasticsearch_anonymous_user` credential types for anonymous authentication providers are deprecated. For more information, check {kibana-pull}131636[#131636].
+
+*Impact* +
+If you have anonymous authentication provider configured with apiKey or `elasticsearch_anonymous_user` credential types, a deprecation warning appears, even when the provider is not enabled.
+====
+
+[discrete]
+.Deprecated v1 and v2 security_linux and security_windows jobs. (8.3)
+[%collapsible]
+====
+*Details* +
+The v1 and v2 job configurations for security_linux and security_windows are deprecated. For more information, check {kibana-pull}131166[#131166].
+
+*Impact* +
+The following security_linux and security_windows job configurations are updated to v3:
+
+* security_linux:
+
+** v3_linux_anomalous_network_activity
+** v3_linux_anomalous_network_port_activity_ecs
+** v3_linux_anomalous_process_all_hosts_ecs
+** v3_linux_anomalous_user_name_ecs
+** v3_linux_network_configuration_discovery
+** v3_linux_network_connection_discovery
+** v3_linux_rare_metadata_process
+** v3_linux_rare_metadata_user
+** v3_linux_rare_sudo_user
+** v3_linux_rare_user_compiler
+** v3_linux_system_information_discovery
+** v3_linux_system_process_discovery
+** v3_linux_system_user_discovery
+** v3_rare_process_by_host_linux_ecs
+
+* security_windows:
+
+** v3_rare_process_by_host_windows_ecs
+** v3_windows_anomalous_network_activity_ecs
+** v3_windows_anomalous_path_activity_ecs
+** v3_windows_anomalous_process_all_hosts_ecs
+** v3_windows_anomalous_process_creation
+** v3_windows_anomalous_script
+** v3_windows_anomalous_service
+** v3_windows_anomalous_user_name_ecs
+** v3_windows_rare_metadata_process
+** v3_windows_rare_metadata_user
+** v3_windows_rare_user_runas_event
+** v3_windows_rare_user_type10_remote_login
+====
+
+[discrete]
+.Deprecated the `Auto` default legend size in Lens. (8.3)
+[%collapsible]
+====
+*Details* +
+In the *Lens* visualization editor, the *Auto* default for *Legend width* has been deprecated. For more information, check {kibana-pull}130336[#130336].
+
+*Impact* +
+When you create *Lens* visualization, the default for the *Legend width* is now *Medium*.
+====
+
+[discrete]
+.Deprecated `xpack.data_enhanced.*` setting. (8.3)
+[%collapsible]
+====
+*Details* +
+In kibana.yml, the `xpack.data_enhanced.*` setting is deprecated. For more information, check {kibana-pull}122075[#122075].
+
+*Impact* +
+Use the `data.*` configuration parameters instead.
+====

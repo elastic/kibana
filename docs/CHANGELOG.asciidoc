@@ -72,6 +72,8 @@ Review important information about the {kib} 8.x releases.
 
 --
 
+include::upgrade-notes.asciidoc[]
+
 [[release-notes-8.15.1]]
 == {kib} 8.15.1
 
