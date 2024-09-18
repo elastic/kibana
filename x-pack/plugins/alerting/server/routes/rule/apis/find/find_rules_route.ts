@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
@@ -29,6 +29,7 @@ interface BuildFindRulesRouteParams {
   router: IRouter<AlertingRequestHandlerContext>;
   excludeFromPublicApi?: boolean;
   usageCounter?: UsageCounter;
+  options?: RouteConfigOptions<RouteMethod>;
 }
 
 const buildFindRulesRoute = ({
@@ -37,15 +38,12 @@ const buildFindRulesRoute = ({
   router,
   excludeFromPublicApi = false,
   usageCounter,
+  options: routerOptions,
 }: BuildFindRulesRouteParams) => {
   router.get(
     {
       path,
-      options: {
-        access: 'public',
-        summary: 'Get information about rules',
-        tags: ['oas-tag:alerting'],
-      },
+      options: routerOptions,
       validate: {
         request: {
           query: findRulesRequestQuerySchemaV1,
@@ -162,6 +160,11 @@ export const findRulesRoute = (
     path: `${BASE_ALERTING_API_PATH}/rules/_find`,
     router,
     usageCounter,
+    options: {
+      access: 'public',
+      summary: 'Get information about rules',
+      tags: ['oas-tag:alerting'],
+    },
   });
 };
 
