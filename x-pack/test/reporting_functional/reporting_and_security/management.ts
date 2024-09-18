@@ -58,22 +58,27 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('Download report', () => {
       // use archived reports to allow reporting_user to view report jobs they've created
-      before(async () => {
+      before('log in as reporting user', async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
-
-        await reportingFunctional.loginReportingUser();
-        await PageObjects.common.navigateToApp('reporting');
-        await testSubjects.existOrFail('reportJobListing');
       });
+
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
       });
 
       it('user can access download link', async () => {
+        await reportingFunctional.loginReportingUser();
+        await PageObjects.common.navigateToApp('reporting');
+        await testSubjects.existOrFail('reportJobListing');
+
         await testSubjects.existOrFail('reportDownloadLink-kraz9db6154g0763b5141viu');
       });
 
       it('user can access download link for export type that is no longer supported', async () => {
+        await reportingFunctional.loginReportingUser();
+        await PageObjects.common.navigateToApp('reporting');
+        await testSubjects.existOrFail('reportJobListing');
+
         // The "csv" export type, aka CSV V1, was removed and can no longer be created.
         // Downloading a report of this export type does still work
         await testSubjects.existOrFail('reportDownloadLink-krb7arhe164k0763b50bjm31');
