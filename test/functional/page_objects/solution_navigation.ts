@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 
 import type { NavigationID as MlNavId } from '@kbn/default-nav-ml';
@@ -186,14 +186,33 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           return false;
         }
       },
-      async openPanel(sectionId: NavigationId) {
+      async openPanel(
+        sectionId: NavigationId,
+        { button }: { button: 'icon' | 'link' } = { button: 'icon' }
+      ) {
         log.debug('SolutionNavigation.sidenav.openPanel', sectionId);
 
         const isOpen = await this.isPanelOpen(sectionId);
         if (isOpen) return;
 
         const panelOpenerBtn = await testSubjects.find(
-          `~panelOpener-id-${sectionId}`,
+          button === 'icon' ? `~panelOpener-id-${sectionId}` : `~nav-item-id-${sectionId}`,
+          TIMEOUT_CHECK
+        );
+
+        await panelOpenerBtn.click();
+      },
+      async closePanel(
+        sectionId: NavigationId,
+        { button }: { button: 'icon' | 'link' } = { button: 'icon' }
+      ) {
+        log.debug('SolutionNavigation.sidenav.closePanel', sectionId);
+
+        const isOpen = await this.isPanelOpen(sectionId);
+        if (!isOpen) return;
+
+        const panelOpenerBtn = await testSubjects.find(
+          button === 'icon' ? `~panelOpener-id-${sectionId}` : `~nav-item-id-${sectionId}`,
           TIMEOUT_CHECK
         );
 
