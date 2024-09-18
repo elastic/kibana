@@ -18,7 +18,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
 } from '@elastic/eui';
 import {
   RuleDefinition,
@@ -34,8 +33,6 @@ import {
   RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
   RULE_FORM_PAGE_RULE_DETAILS_TITLE,
   RULE_FORM_RETURN_TITLE,
-  RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_TITLE,
-  RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_CREATE_DESCRIPTION,
 } from '../translations';
 
 export interface RulePageProps {
@@ -71,24 +68,20 @@ export const RulePage = (props: RulePageProps) => {
 
   const actionComponent = useMemo(() => {
     if (canReadConnectors) {
-      return (
-        <>
-          <RuleActions />
-          <EuiSpacer />
-          <EuiHorizontalRule margin="none" />
-        </>
-      );
+      return [
+        {
+          title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
+          children: (
+            <>
+              <RuleActions />
+              <EuiSpacer />
+              <EuiHorizontalRule margin="none" />
+            </>
+          ),
+        },
+      ];
     }
-
-    return (
-      <EuiCallOut
-        title={RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_TITLE}
-        color="warning"
-        iconType="warning"
-      >
-        <p>{RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_CREATE_DESCRIPTION}</p>
-      </EuiCallOut>
-    );
+    return [];
   }, [canReadConnectors]);
 
   const steps: EuiStepsProps['steps'] = useMemo(() => {
@@ -97,11 +90,7 @@ export const RulePage = (props: RulePageProps) => {
         title: RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
         children: <RuleDefinition />,
       },
-      {
-        title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
-        children: actionComponent,
-        status: canReadConnectors ? undefined : 'disabled',
-      },
+      ...actionComponent,
       {
         title: RULE_FORM_PAGE_RULE_DETAILS_TITLE,
         children: (

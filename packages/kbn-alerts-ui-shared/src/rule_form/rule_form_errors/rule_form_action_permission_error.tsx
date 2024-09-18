@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import {
   RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_TITLE,
-  RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_EDIT_DESCRIPTION,
+  RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_DESCRIPTION,
 } from '../translations';
 
 export const RuleFormActionPermissionError = () => {
@@ -26,7 +26,7 @@ export const RuleFormActionPermissionError = () => {
       }
       body={
         <EuiText>
-          <p>{RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_EDIT_DESCRIPTION}</p>
+          <p>{RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_DESCRIPTION}</p>
         </EuiText>
       }
     />

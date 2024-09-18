@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { RuleFormData, RuleFormPlugins } from './types';
@@ -94,20 +94,25 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     [id, mutate]
   );
 
-  const canReadConnectors = !!application.capabilities.actions?.show;
+  const canEditRule = useMemo(() => {
+    if (!ruleType || !fetchedFormData) {
+      return false;
+    }
+
+    const { consumer, actions } = fetchedFormData;
+    const hasAllPrivilege = !!ruleType.authorizedConsumers[consumer]?.all;
+    const canExecuteActions = !!application.capabilities.actions?.execute;
+
+    return (
+      hasAllPrivilege && 
+      (canExecuteActions || (!canExecuteActions && !actions.length))
+    );
+  }, [ruleType, fetchedFormData]);
 
   if (isInitialLoading) {
     return (
       <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
         <EuiLoadingElastic size="xl" />
-      </RuleFormErrorPromptWrapper>
-    );
-  }
-
-  if (!canReadConnectors) {
-    return (
-      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
-        <RuleFormActionPermissionError />
       </RuleFormErrorPromptWrapper>
     );
   }
@@ -132,6 +137,14 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     return (
       <RuleFormErrorPromptWrapper>
         <RuleFormHealthCheckError error={healthCheckError} docLinks={docLinks} />
+      </RuleFormErrorPromptWrapper>
+    );
+  }
+
+  if (!canEditRule) {
+    return (
+      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
+        <RuleFormActionPermissionError />
       </RuleFormErrorPromptWrapper>
     );
   }

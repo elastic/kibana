@@ -239,6 +239,8 @@ describe('useLoadDependencies', () => {
           capabilities: {
             actions: {
               show: true,
+              save: true,
+              execute: true,
             },
           } as unknown as ApplicationStart['capabilities'],
         });
@@ -275,6 +277,8 @@ describe('useLoadDependencies', () => {
           capabilities: {
             actions: {
               show: true,
+              save: true,
+              execute: true,
             },
           } as unknown as ApplicationStart['capabilities'],
         });
@@ -305,6 +309,8 @@ describe('useLoadDependencies', () => {
           capabilities: {
             actions: {
               show: true,
+              save: true,
+              execute: true,
             },
           } as unknown as ApplicationStart['capabilities'],
         });
@@ -335,6 +341,8 @@ describe('useLoadDependencies', () => {
           capabilities: {
             actions: {
               show: true,
+              save: true,
+              execute: true,
             },
           } as unknown as ApplicationStart['capabilities'],
         });
@@ -370,6 +378,8 @@ describe('useLoadDependencies', () => {
           capabilities: {
             actions: {
               show: true,
+              save: true,
+              execute: true,
             },
           } as unknown as ApplicationStart['capabilities'],
         });
@@ -402,6 +412,8 @@ describe('useLoadDependencies', () => {
           capabilities: {
             actions: {
               show: true,
+              save: true,
+              execute: true,
             },
           } as unknown as ApplicationStart['capabilities'],
         });

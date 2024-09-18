@@ -68,6 +68,8 @@ useRuleFormState.mockReturnValue({
       capabilities: {
         actions: {
           show: true,
+          save: true,
+          execute: true,
         },
       },
     },
