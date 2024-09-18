@@ -55,7 +55,7 @@ export interface AlertSearchBarContainerState {
   rangeTo: string;
   kuery: string;
   status: AlertStatus;
-  filters: Filter[];
+  filters?: Filter[];
   savedQueryId?: string;
 }
 
