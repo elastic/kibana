@@ -166,6 +166,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('View policy flyout', async () => {
+      const link = await findPolicyLinkInListView(POLICY_NAME);
+      await link.click();
+
+      await retry.waitFor('View policy flyout to be present', async () => {
+        return testSubjects.isDisplayed('policyFlyoutTitle');
+      });
+
+      await a11y.testAppSnapshot();
+    });
+
     it('Add policy to index template modal', async () => {
       await filterByPolicyName(POLICY_NAME);
       const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);

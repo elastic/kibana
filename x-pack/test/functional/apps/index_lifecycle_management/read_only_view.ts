@@ -8,16 +8,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const policyName = 'testPolicy1';
-
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexLifecycleManagement']);
   const log = getService('log');
   const retry = getService('retry');
-  const esClient = getService('es');
   const security = getService('security');
-  const deployment = getService('deployment');
-  const testSubjects = getService('testSubjects');
 
   describe('Read only view', function () {
     before(async () => {
