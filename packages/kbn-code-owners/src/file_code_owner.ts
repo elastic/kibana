@@ -68,6 +68,13 @@ export function getCodeOwnersForFile(
   return match?.teams;
 }
 
+/**
+ * Run the getCodeOwnersForFile() method above.
+ * Report back to the cli with either success and the owner(s), or a failure.
+ *
+ * This function depends on a --file param being passed on the cli, like this:
+ * $ node scripts/get_owners_for_file.js --file SOME-FILE
+ */
 export async function runGetOwnersForFileCli() {
   run(
     async ({ flags, log }) => {
