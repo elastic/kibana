@@ -161,9 +161,6 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                     <EuiIcon
                       data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID}
                       type="iInCircle"
-                      css={css`
-                        margin-left: 4px;
-                      `}
                     />
                   </EuiToolTip>
                 )}
@@ -200,9 +197,6 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                     <EuiIcon
                       data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID}
                       type="iInCircle"
-                      css={css`
-                        margin-left: 4px;
-                      `}
                     />
                   </EuiToolTip>
                 )}

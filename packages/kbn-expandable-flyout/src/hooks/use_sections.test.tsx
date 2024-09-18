@@ -37,7 +37,7 @@ describe('useSections', () => {
       leftSection: undefined,
       rightSection: undefined,
       previewSection: undefined,
-      previewBanner: undefined,
+      mostRecentPreviewBanner: undefined,
       mostRecentPreview: undefined,
     });
   });
@@ -78,7 +78,7 @@ describe('useSections', () => {
     expect(hookResult.result.current.previewSection?.key).toEqual('preview');
     expect(hookResult.result.current.previewSection?.component).toBeDefined();
 
-    expect(hookResult.result.current.previewBanner).toEqual(undefined);
+    expect(hookResult.result.current.mostRecentPreviewBanner).toEqual(undefined);
     expect(hookResult.result.current.mostRecentPreview).toEqual({ id: 'preview' });
   });
 
@@ -110,7 +110,7 @@ describe('useSections', () => {
       initialProps,
     });
 
-    expect(hookResult.result.current.previewBanner).toEqual({
+    expect(hookResult.result.current.mostRecentPreviewBanner).toEqual({
       title: 'title',
       backgroundColor: 'primary',
       textColor: 'red',

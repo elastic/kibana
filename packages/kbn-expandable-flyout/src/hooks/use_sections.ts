@@ -39,7 +39,7 @@ export interface UseSectionsResult {
   /**
    * The preview banner to be displayed in preview section.
    */
-  previewBanner: PreviewBanner | undefined;
+  mostRecentPreviewBanner: PreviewBanner | undefined;
 }
 
 /**
@@ -65,7 +65,7 @@ export const useSections = ({ registeredPanels }: UseSectionsParams): UseSection
     () => registeredPanels.find((panel) => panel.key === mostRecentPreview?.id),
     [mostRecentPreview, registeredPanels]
   );
-  const previewBanner = useMemo(
+  const mostRecentPreviewBanner = useMemo(
     () =>
       isPreviewBanner(mostRecentPreview?.params?.banner)
         ? mostRecentPreview?.params?.banner
@@ -78,9 +78,9 @@ export const useSections = ({ registeredPanels }: UseSectionsParams): UseSection
       leftSection,
       rightSection,
       previewSection,
-      previewBanner,
+      mostRecentPreviewBanner,
       mostRecentPreview,
     }),
-    [leftSection, rightSection, previewSection, previewBanner, mostRecentPreview]
+    [leftSection, rightSection, previewSection, mostRecentPreviewBanner, mostRecentPreview]
   );
 };

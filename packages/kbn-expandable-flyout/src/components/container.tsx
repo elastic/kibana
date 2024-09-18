@@ -107,10 +107,15 @@ export const Container: React.FC<ContainerProps> = memo(
     const defaultWidths = useSelector(selectDefaultWidths);
 
     // retrieves the sections to be displayed
-    const { leftSection, rightSection, previewSection, mostRecentPreview, previewBanner } =
-      useSections({
-        registeredPanels,
-      });
+    const {
+      leftSection,
+      rightSection,
+      previewSection,
+      mostRecentPreview,
+      mostRecentPreviewBanner,
+    } = useSections({
+      registeredPanels,
+    });
 
     // calculates what needs to be rendered
     const showLeft = useMemo(() => leftSection != null && left != null, [leftSection, left]);
@@ -222,7 +227,7 @@ export const Container: React.FC<ContainerProps> = memo(
         {showPreview && (
           <PreviewSection
             component={previewComponent as React.ReactElement}
-            banner={previewBanner}
+            banner={mostRecentPreviewBanner}
             showExpanded={showExpanded}
           />
         )}

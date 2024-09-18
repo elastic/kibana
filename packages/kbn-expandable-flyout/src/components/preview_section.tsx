@@ -72,7 +72,7 @@ interface PreviewSectionProps {
    */
   banner?: PreviewBanner;
   /**
-   *
+   * Flag to indicate whether the preview section is expanded, use to calculate the width of the section
    */
   showExpanded: boolean;
 }
