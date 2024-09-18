@@ -26,7 +26,9 @@ import {
 describe(
   'When defining a kibana role for Endpoint security access with space awareness enabled',
   {
-    tags: ['@ess', '@serverless', '@serverlessMKI', '@skipInServerlessMKI'],
+    // TODO:PT determine if Roles are supported in @serverless tag
+    // TODO:PR Remove `'@skipInServerlessMKI` once PR merges to `main`
+    tags: ['@ess', '@serverless', '@skipInServerless', '@serverlessMKI', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
