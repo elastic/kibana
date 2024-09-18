@@ -94,7 +94,6 @@ export const ContextualInsightProcessRow = ({ command }: { command: string }) =>
               <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
                 title={explainProcessMessageTitle}
                 messages={explainProcessMessages}
-                scope="observability"
               />
             </EuiFlexItem>
           </EuiFlexItem>

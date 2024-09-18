@@ -68,7 +68,6 @@ export function ErrorSampleContextualInsight({
           title={i18n.translate('xpack.apm.errorGroupContextualInsight.explainErrorTitle', {
             defaultMessage: "What's this error?",
           })}
-          scope="observability"
         />
       </EuiFlexItem>
       <EuiSpacer size="s" />

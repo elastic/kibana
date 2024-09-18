@@ -324,7 +324,6 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
               <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
                 title={logRateAnalysisTitle}
                 messages={messages}
-                scope="observability"
               />
             </EuiFlexItem>
           ) : null}

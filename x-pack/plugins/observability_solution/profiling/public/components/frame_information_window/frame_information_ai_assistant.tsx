@@ -85,7 +85,6 @@ export function FrameInformationAIAssistant({ frame }: Props) {
             title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
               defaultMessage: 'Optimize function',
             })}
-            scope="observability"
           />
         </EuiFlexItem>
       ) : null}

@@ -20,7 +20,7 @@ import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ILicense } from '@kbn/licensing-plugin/public';
-import { MessageRole, type Message, AssistantScope } from '../../../common/types';
+import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { ChatState, useChat } from '../../hooks/use_chat';
@@ -49,15 +49,14 @@ function ChatContent({
   title: defaultTitle,
   initialMessages,
   connectorId,
-  scope,
 }: {
   title: string;
   initialMessages: Message[];
   connectorId: string;
-  scope: AssistantScope;
 }) {
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
+  const { scope } = service;
 
   const initialMessagesRef = useRef(initialMessages);
 
@@ -202,7 +201,6 @@ export interface InsightProps {
   messages: Message[] | (() => Promise<Message[] | undefined>);
   title: string;
   dataTestSubj?: string;
-  scope: AssistantScope;
 }
 
 enum FETCH_STATUS {
@@ -216,7 +214,6 @@ export function Insight({
   messages: initialMessagesOrCallback,
   title,
   dataTestSubj,
-  scope,
 }: InsightProps) {
   const [messages, setMessages] = useState<{ messages: Message[]; status: FETCH_STATUS }>({
     messages: [],
@@ -271,6 +268,7 @@ export function Insight({
 
   const connectors = useGenAIConnectors();
   const service = useObservabilityAIAssistant();
+  const { scope } = service;
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
@@ -359,7 +357,6 @@ export function Insight({
           title={title}
           initialMessages={messages.messages}
           connectorId={connectors.selectedConnector}
-          scope={scope}
         />
       </>
     );
