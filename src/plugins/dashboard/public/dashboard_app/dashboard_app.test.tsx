@@ -27,11 +27,9 @@ describe('Dashboard App', () => {
   const expandedPanelIdSpy = jest.spyOn(mockDashboard.expandedPanelId, 'next');
   let mockHistory: MemoryHistory;
   let historySpy: jest.SpyInstance;
-
-  beforeEach(() => {
+  beforeAll(() => {
     mockHistory = createMemoryHistory();
     historySpy = jest.spyOn(mockHistory, 'replace');
-
     /**
      * Mock the LazyDashboardRenderer component to avoid rendering the actual dashboard
      * and hitting errors that aren't relevant
@@ -46,7 +44,9 @@ describe('Dashboard App', () => {
 
         return <div>Test renderer</div>;
       });
+  });
 
+  beforeEach(() => {
     // reset the mock history calls per test
     historySpy.mockClear();
     // reset the expanded panel id between tests
