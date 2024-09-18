@@ -102,12 +102,12 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const navToFindings = useNavigateFindings();
 
-    const navToFindingsByHostName = (hostName: string) => {
-      navToFindings({ 'host.name': hostName }, ['rule.name']);
-    };
-
     const navToFindingsByRuleAndResourceId = (ruleId: string, resourceId: string) => {
       navToFindings({ 'rule.id': ruleId, 'resource.id': resourceId });
+    };
+
+    const navToFindingsByName = (name: string, queryField: 'host.name' | 'user.name') => {
+      navToFindings({ [queryField]: name }, ['rule.name']);
     };
 
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
@@ -154,13 +154,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
         <EuiPanel hasShadow={false}>
           <EuiLink
             onClick={() => {
-              navToFindingsByHostName(queryName);
+              navToFindingsByName(queryName, fieldName);
             }}
           >
             {i18n.translate(
               'xpack.securitySolution.flyout.left.insights.misconfigurations.tableTitle',
               {
-                defaultMessage: 'Misconfigurations',
+                defaultMessage: 'Misconfigurations ',
               }
             )}
             <EuiIcon type={'popout'} />
