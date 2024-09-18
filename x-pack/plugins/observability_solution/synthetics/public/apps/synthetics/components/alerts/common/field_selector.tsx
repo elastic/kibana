@@ -76,11 +76,21 @@ export function FieldSelector({
         }}
         onSearchChange={(val: string) => debouncedSearch(val)}
         options={options}
-        selectedOptions={value?.map((val) => ({
-          value: val,
-          label: val,
-          'data-test-subj': `${dataTestSubj}SelectedValue`,
-        }))}
+        selectedOptions={value?.map((val) => {
+          const option = options.find((opt) => opt.value === val);
+          if (option) {
+            return {
+              value: val,
+              label: option.label,
+              'data-test-subj': `${dataTestSubj}SelectedValue`,
+            };
+          }
+          return {
+            value: val,
+            label: val,
+            'data-test-subj': `${dataTestSubj}SelectedValue`,
+          };
+        })}
       />
     </EuiFormRow>
   );

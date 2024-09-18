@@ -209,7 +209,9 @@ export class StatusRuleExecutor {
       from = moment().subtract(size, unit).toISOString();
     }
 
-    this.debug(`Using range from ${from} to now`);
+    this.debug(
+      `Using range from ${from} to now, diff of ${moment().diff(from, 'minutes')} minutes`
+    );
 
     return { from, to: 'now' };
   };
