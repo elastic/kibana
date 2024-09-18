@@ -6,10 +6,10 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { PackageInfo } from '@kbn/screenshotting-server';
 import assert from 'assert';
 import axios from 'axios';
 import path from 'path';
-import { PackageInfo } from '..';
 import { paths as chromiumArchivePaths } from '../../../utils';
 import { download } from '../../download';
 import { install } from '../../install';
