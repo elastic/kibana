@@ -1410,7 +1410,6 @@
     "@kbn/whereis-pkg-cli": "link:packages/kbn-whereis-pkg-cli",
     "@kbn/yarn-lock-validator": "link:packages/kbn-yarn-lock-validator",
     "@mapbox/vector-tile": "1.3.1",
-    "@mswjs/http-middleware": "^0.10.1",
     "@octokit/rest": "^17.11.2",
     "@parcel/watcher": "^2.1.0",
     "@redocly/cli": "^1.16.0",

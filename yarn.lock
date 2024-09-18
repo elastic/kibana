@@ -7427,14 +7427,6 @@
   resolved "https://registry.yarnpkg.com/@mswjs/cookies/-/cookies-1.1.0.tgz#1528eb43630caf83a1d75d5332b30e75e9bb1b5b"
   integrity sha512-0ZcCVQxifZmhwNBoQIrystCb+2sWBY2Zw8lpfJBPCHGCA/HWqehITeCRVIv4VMy8MPlaHo2w2pTHFV2pFfqKPw==
 
-"@mswjs/http-middleware@^0.10.1":
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/@mswjs/http-middleware/-/http-middleware-0.10.1.tgz#7ff38c5398ba01efe98e16a0da24d612ffd69ccc"
-  integrity sha512-I58RDHXzwKjMjaSO7aV7X0zUzbAvUEEDYsL9+I6Ro0zF5LgjnNdpZoMufG/WoYEenhDCgv7K+HMpLxGuhlfjKA==
-  dependencies:
-    express "^4.18.2"
-    strict-event-emitter "^0.5.1"
-
 "@mswjs/interceptors@^0.29.0":
   version "0.29.1"
   resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.29.1.tgz#e77fc58b5188569041d0440b25c9e9ebb1ccd60a"
@@ -17567,7 +17559,7 @@ expr-eval@^2.0.2:
   resolved "https://registry.yarnpkg.com/expr-eval/-/expr-eval-2.0.2.tgz#fa6f044a7b0c93fde830954eb9c5b0f7fbc7e201"
   integrity sha512-4EMSHGOPSwAfBiibw3ndnP0AvjDWLsMvGOvWEZ2F96IGk0bIVdjQisOHxReSkE13mHcfbuCiXw+G4y0zv6N8Eg==
 
-express@^4.17.1, express@^4.17.3, express@^4.18.2:
+express@^4.17.1, express@^4.17.3:
   version "4.21.0"
   resolved "https://registry.yarnpkg.com/express/-/express-4.21.0.tgz#d57cb706d49623d4ac27833f1cbc466b668eb915"
   integrity sha512-VqcNGcj/Id5ZT1LZ/cfihi3ttTn+NJmkli2eZADigjq29qTlWi/hAQ43t/VLPq8+UX06FCEx3ByOYet6ZFblng==
