@@ -11,6 +11,7 @@
  * --------------- THIS FILE IS COPIED FROM ES SPECIFICATION REPO -------------------
  *
  */
+/* eslint-disable max-classes-per-file */
 
 /**
  * The name of a type, composed of a simple name and a namespace. Hierarchical namespace elements are separated by
