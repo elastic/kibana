@@ -16,13 +16,13 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
-jest.mock('../factories/utils/build_bulk_body', () => ({ buildBulkBody: jest.fn() }));
+jest.mock('../factories/utils/transform_hit_to_alert', () => ({ transformHitToAlert: jest.fn() }));
 
-const buildBulkBodyMock = buildBulkBody as jest.Mock;
+const transformHitToAlertMock = transformHitToAlert as jest.Mock;
 
 const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
@@ -118,7 +118,7 @@ const wrappedParams = {
 };
 
 describe('wrapSuppressedAlerts', () => {
-  buildBulkBodyMock.mockReturnValue({ 'mock-props': true });
+  transformHitToAlertMock.mockReturnValue({ 'mock-props': true });
 
   it('should wrap event with alert fields and correctly set suppression fields', () => {
     const expectedTimestamp = '2020-10-28T06:30:00.000Z';
@@ -137,10 +137,10 @@ describe('wrapSuppressedAlerts', () => {
       ...wrappedParams,
     });
 
-    expect(buildBulkBodyMock).toHaveBeenCalledWith(
-      'default',
-      wrappedParams.completeRule,
-      {
+    expect(transformHitToAlertMock).toHaveBeenCalledWith({
+      spaceId: 'default',
+      completeRule: wrappedParams.completeRule,
+      doc: {
         fields: {
           '@timestamp': [expectedTimestamp],
           'agent.name': ['agent-0'],
@@ -149,16 +149,17 @@ describe('wrapSuppressedAlerts', () => {
         _id: '1',
         _index: 'test*',
       },
-      'missingFields',
-      [],
-      true,
-      wrappedParams.buildReasonMessage,
-      ['test*'],
-      undefined,
+      mergeStrategy: 'missingFields',
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
+      buildReasonMessage: wrappedParams.buildReasonMessage,
+      indicesToQuery: ['test*'],
+      alertTimestampOverride: undefined,
       ruleExecutionLogger,
-      expect.any(String),
-      'public-url-mock'
-    );
+      alertUuid: expect.any(String),
+      publicBaseUrl: 'public-url-mock',
+    });
     expect(wrappedAlerts[0]._source).toEqual(
       expect.objectContaining({
         [ALERT_SUPPRESSION_TERMS]: [
