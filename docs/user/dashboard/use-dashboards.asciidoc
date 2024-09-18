@@ -7,7 +7,7 @@
 {kib} supports several ways to explore the data displayed in a dashboard more in depth:
 
 * The **query bar**, using KQL expressions by default.
-* The **Time range**, that allows you to display data only for the period that you want to focus on. You can set a global time range for the entire dashboard, or specify a custom time range for each panel.
+* The **time range**, that allows you to display data only for the period that you want to focus on. You can set a global time range for the entire dashboard, or specify a custom time range for each panel.
 * **Controls**, that dashboard creators can add to help viewers filter on specific values.
 * **Filter pills**, that you can add and combine by clicking on specific parts of the dashboard visualizations, or by defining conditions manually from the filter editor. The filter editor is a good alternative if you're not comfortable with using KQL expressions in the main query bar.
 * View the data of a panel and the requests used to build it.
@@ -50,7 +50,7 @@ image::images/dashboard-global-time-range.png[Time range menu with multiple time
 
 When a custom time range is active for a single panel, it is indicated in the panel's header.
 
-To edit it, click the filter. You can then adjust and apply the updated **Time range**.
+To edit it, click the filter. You can then adjust and apply the updated **time range**.
 
 [float]
 === Use available controls
@@ -78,6 +78,9 @@ The *Exists* query returns all documents that contain an indexed value for the f
 
 . To display only the options you selected in the dropdown, click image:images/dashboard_showOnlySelectedOptions_8.3.0.png[The icon to display only the options you have selected in the Options list].
 
+[role="screenshot"]
+image::images/dashboard_controlsOptionsList_8.7.0.png[Options list control]
+
 [float]
 [[filter-the-data-with-range-slider-controls]]
 ==== Filter the data with Range slider controls
@@ -90,6 +93,9 @@ Filter the data within a specified range of values.
 The dashboard displays only the data for the range of values you specified.
 
 . To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
+
+[role="screenshot"]
+image::images/dashboard_controlsRangeSlider_8.3.0.png[Range slider control]
 
 [float]
 [[filter-the-data-with-time-slider-controls]]
@@ -106,8 +112,16 @@ Filter the data within a specified range of time.
 
 . To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
 
+[role="screenshot"]
+image::images/dashboard_timeSliderControl_8.7.0.gif[Time slider control]
+
 [float]
 === Use filter pills
+
+Use filter pills to focus in on the specific data you want.
+
+[role="screenshot"]
+image::images/dashboard_filter_pills_8.15.0.png[Filter pills, width=60%]
 
 [float]
 ==== Add pills by interacting with visualizations
