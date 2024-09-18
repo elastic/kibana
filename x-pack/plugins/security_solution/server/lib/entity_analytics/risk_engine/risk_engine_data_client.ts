@@ -252,21 +252,16 @@ export class RiskEngineDataClient {
   public async tearDown({ taskManager, riskScoreDataClient }: TearDownParams) {
     const errors: Error[] = [];
     const addError = (e: Error) => errors.push(e);
-    const riskEngineStatus = await this.getCurrentStatus();
+  
+    await removeRiskScoringTask({
+      namespace: this.options.namespace,
+      taskManager,
+      logger: this.options.logger,
+    }).catch(addError);
 
-    if (riskEngineStatus === RiskEngineStatusEnum.ENABLED) {
-      await removeRiskScoringTask({
-        namespace: this.options.namespace,
-        taskManager,
-        logger: this.options.logger,
-      }).catch(addError);
-
-      await deleteSavedObjects({ savedObjectsClient: this.options.soClient }).catch(addError);
-      const riskScoreErrors = await riskScoreDataClient.tearDown();
-      errors.concat(riskScoreErrors);
-    } else {
-      errors.push(Error('Risk engine is disabled or deleted already.'));
-    }
+    await deleteSavedObjects({ savedObjectsClient: this.options.soClient }).catch(addError);
+    const riskScoreErrors = await riskScoreDataClient.tearDown();
+    errors.concat(riskScoreErrors);
 
     return errors;
   }
