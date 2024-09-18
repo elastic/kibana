@@ -1759,7 +1759,7 @@
     "mochawesome-merge": "^4.3.0",
     "mock-fs": "^5.1.2",
     "ms-chromium-edge-driver": "^0.5.1",
-    "msw": "^2.4.4",
+    "msw": "^2.4.5",
     "multistream": "^4.1.0",
     "mutation-observer": "^1.0.3",
     "native-hdr-histogram": "^1.0.0",
