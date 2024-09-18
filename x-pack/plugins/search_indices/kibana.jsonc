@@ -12,12 +12,12 @@
     ],
     "requiredPlugins": [
       "share",
+      "indexManagement",
     ],
     "optionalPlugins": [
       "cloud",
       "console",
       "usageCollection",
-      "indexManagement",
     ],
     "requiredBundles": [
       "kibanaReact",

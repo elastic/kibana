@@ -5,36 +5,27 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Index, IndexMappingProps } from '@kbn/index-management-shared-types';
+import { EuiSpacer } from '@elastic/eui';
+import { Index } from '@kbn/index-management-shared-types';
 import React from 'react';
 import { useMemo } from 'react';
+import { useKibana } from '../../hooks/use_kibana';
 export interface SearchIndexDetailsMappingsProps {
-  IndexMappingComponent?: React.FC<IndexMappingProps>;
   index?: Index;
 }
-export const SearchIndexDetailsMappings = ({
-  IndexMappingComponent,
-  index,
-}: SearchIndexDetailsMappingsProps) => {
-  const MappingsComponent = useMemo(() => {
+export const SearchIndexDetailsMappings = ({ index }: SearchIndexDetailsMappingsProps) => {
+  const { indexManagement, history } = useKibana().services;
+
+  const IndexMappingComponent = useMemo(
+    () => indexManagement.getIndexMappingComponent({ history }),
+    [indexManagement, history]
+  );
+  return useMemo(() => {
     return (
       <>
         <EuiSpacer />
-        {IndexMappingComponent ? (
-          <IndexMappingComponent index={index} showAboutMappings={false} />
-        ) : (
-          <EuiCallOut
-            color="danger"
-            iconType="warn"
-            title={i18n.translate('xpack.searchIndices.mappings.noMappingsComponent', {
-              defaultMessage: 'Mappings component not found',
-            })}
-          />
-        )}
+        <IndexMappingComponent index={index} showAboutMappings={false} />
       </>
     );
   }, [IndexMappingComponent, index]);
-  return <>{MappingsComponent && MappingsComponent}</>;
 };

@@ -41,13 +41,7 @@ export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
-  const {
-    console: consolePlugin,
-    docLinks,
-    application,
-    indexManagement,
-    history,
-  } = useKibana().services;
+  const { console: consolePlugin, docLinks, application, history } = useKibana().services;
   const { data: index, refetch, isError: isIndexError, isInitialLoading } = useIndex(indexName);
   const {
     data: mappings,
@@ -70,16 +64,11 @@ export const SearchIndexDetailsPage = () => {
         name: i18n.translate('xpack.searchIndices.mappingsTabLabel', {
           defaultMessage: 'Mappings',
         }),
-        content: (
-          <SearchIndexDetailsMappings
-            IndexMappingComponent={indexManagement.getIndexMappingComponent({ history })}
-            index={index}
-          />
-        ),
+        content: <SearchIndexDetailsMappings index={index} />,
         'data-test-subj': `${SearchIndicesDetailsMappingsTabs.MAPPINGS}Tab`,
       },
     ];
-  }, [index, indexName, indexManagement, history]);
+  }, [index, indexName]);
 
   const [selectedTab, setSelectedTab] = useState(SearchIndexDetailsTabs[0]);
 
