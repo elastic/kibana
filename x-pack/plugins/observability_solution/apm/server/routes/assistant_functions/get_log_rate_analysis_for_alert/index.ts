@@ -6,9 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { CoreRequestHandlerContext } from '@kbn/core/server';
-import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
 import { fetchLogRateAnalysisForAlert } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { PROCESSOR_EVENT } from '../../../../common/es_fields/apm';
 import { getShouldMatchOrNotExistFilter } from '../utils/get_should_match_or_not_exist_filter';
 
@@ -17,11 +16,11 @@ import { getShouldMatchOrNotExistFilter } from '../utils/get_should_match_or_not
  */
 export async function getLogRateAnalysisForAlert({
   esClient,
-  coreContext,
+  logSourcesService,
   arguments: args,
 }: {
   esClient: ElasticsearchClient;
-  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
+  logSourcesService: LogSourcesService;
   arguments: {
     alertStartedAt: string;
     alertRuleParameterTimeSize?: number;
@@ -34,7 +33,7 @@ export async function getLogRateAnalysisForAlert({
     };
   };
 }): ReturnType<typeof fetchLogRateAnalysisForAlert> {
-  const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
+  const index = await logSourcesService.getFlattenedLogSources();
 
   const keyValueFilters = getShouldMatchOrNotExistFilter(
     Object.entries(args.entities).map(([key, value]) => ({ field: key, value }))

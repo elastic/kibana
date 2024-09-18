@@ -8,9 +8,10 @@
  */
 
 import { FlyoutPanelProps } from '../types';
-import { panelsReducer } from './reducers';
-import { initialPanelsState, PanelsState } from './state';
+import { panelsReducer, uiReducer } from './reducers';
+import { initialPanelsState, PanelsState, initialUiState, UiState } from './state';
 import {
+  changePushVsOverlayAction,
   closeLeftPanelAction,
   closePanelsAction,
   closePreviewPanelAction,
@@ -777,6 +778,38 @@ describe('panelsReducer', () => {
           },
         },
         needsSync: true,
+      });
+    });
+  });
+});
+
+describe('uiReducer', () => {
+  describe('should handle changePushVsOverlayAction action', () => {
+    it('should set value if id does not exist', () => {
+      const state: UiState = initialUiState;
+      const action = changePushVsOverlayAction({
+        type: 'push',
+        savedToLocalStorage: false,
+      });
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        pushVsOverlay: 'push',
+      });
+    });
+
+    it('should override value if id already exists', () => {
+      const state: UiState = {
+        pushVsOverlay: 'push',
+      };
+      const action = changePushVsOverlayAction({
+        type: 'overlay',
+        savedToLocalStorage: false,
+      });
+      const newState: UiState = uiReducer(state, action);
+
+      expect(newState).toEqual({
+        pushVsOverlay: 'overlay',
       });
     });
   });
