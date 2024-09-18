@@ -61,6 +61,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const isNotMobile = useIsWithinMinBreakpoint('s');
   const isIconVisible = isNotMobile && !isSideNavCollapsed && !!children && children.length > 0;
   const isActive = isActiveFromUrl(item.path, activeNodes);
+  const hasLandingPage = Boolean(href);
 
   const itemClassNames = classNames(
     'sideNavItem',
@@ -129,7 +130,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
             size="s"
             color="text"
             onClick={onIconClick}
-            iconType="arrowRight"
+            iconType={hasLandingPage ? 'spaces' : 'arrowRight'}
             iconSize="m"
             aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
               defaultMessage: 'Toggle "{title}" panel navigation',
