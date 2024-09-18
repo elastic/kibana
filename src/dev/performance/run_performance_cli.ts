@@ -42,12 +42,7 @@ interface JourneyTargetGroups {
 const journeyTargetGroups: JourneyTargetGroups = {
   kibanaStartAndLoad: ['login'],
   crud: ['tags_listing_page', 'dashboard_listing_page'],
-  dashboard: [
-    'ecommerce_dashboard',
-    'data_stress_test_lens',
-    'flight_dashboard',
-    'web_logs_dashboard',
-  ],
+  dashboard: ['ecommerce_dashboard', 'data_stress_test_lens', 'flight_dashboard'],
   discover: ['many_fields_discover', 'many_fields_discover_esql'],
   maps: ['ecommerce_dashboard_map_only'],
   ml: ['aiops_log_rate_analysis', 'many_fields_transform', 'tsdb_logs_data_visualizer'],
