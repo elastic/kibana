@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createMemoryHistory } from 'history';
 import {
   coreMock,
   notificationServiceMock,
@@ -39,6 +40,7 @@ export const serviceContextMock = {
         storage,
         esHostService,
         settings: new SettingsMock(storage),
+        routeHistory: createMemoryHistory(),
         history: new HistoryMock(storage),
         notifications: notificationServiceMock.createSetupContract(),
         objectStorageClient: {} as unknown as ObjectStorageClient,
@@ -48,7 +50,6 @@ export const serviceContextMock = {
       docLinkVersion: 'NA',
       docLinks: docLinksServiceMock.createStartContract().links,
       config: {
-        isMonacoEnabled: false,
         isDevMode: false,
       },
     };
