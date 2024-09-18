@@ -31,5 +31,9 @@
     "@kbn/ml-random-sampler-utils",
     "@kbn/zod",
     "@kbn/calculate-auto",
+    "@kbn/discover-plugin",
+    "@kbn/es-query",
+    "@kbn/router-utils",
+    "@kbn/share-plugin",
   ]
 }
