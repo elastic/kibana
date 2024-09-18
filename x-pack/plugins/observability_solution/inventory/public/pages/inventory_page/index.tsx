@@ -6,11 +6,12 @@
  */
 import React from 'react';
 import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
-import { EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EntitiesGrid } from '../../components/entities_grid';
 import { useKibana } from '../../hooks/use_kibana';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
+import { SearchBar } from '../../components/search_bar';
 
 export function InventoryPage() {
   const {
@@ -54,14 +55,21 @@ export function InventoryPage() {
   }
 
   return (
-    <EntitiesGrid
-      entities={value.entities}
-      loading={loading}
-      sortDirection={sortDirection}
-      sortField={sortField}
-      onChangePage={handlePageChange}
-      onChangeSort={handleSortChange}
-      pageIndex={pageIndex}
-    />
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <SearchBar />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EntitiesGrid
+          entities={value.entities}
+          loading={loading}
+          sortDirection={sortDirection}
+          sortField={sortField}
+          onChangePage={handlePageChange}
+          onChangeSort={handleSortChange}
+          pageIndex={pageIndex}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
