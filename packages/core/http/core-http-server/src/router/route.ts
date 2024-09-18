@@ -112,10 +112,67 @@ export interface RouteConfigOptionsBody {
 export type RouteAccess = 'public' | 'internal';
 
 /**
+ * @remark When providing a deprecation description like: "This API will be
+ *         removed in version X.X.X., use Y instead" ensure that the string
+ *         contains no dynamically computed parts.
+ */
+export type RouteDeprecationDescription<O = unknown> = O extends object
+  ? {
+      [k in keyof O]:
+        | string
+        | { message: string; check: (v: O[k]) => boolean }
+        | RouteDeprecationDescription<O[k]>;
+    }
+  : never;
+
+export interface RouteInputDeprecation<P = unknown, Q = unknown, B = unknown> {
+  query?: RouteDeprecationDescription<P>;
+  params?: RouteDeprecationDescription<Q>;
+  body?: RouteDeprecationDescription<B>;
+}
+
+/**
+ * Description of deprecations for this HTTP API.
+ *
+ * @remark This will assist Kibana HTTP API users when upgrading to new versions
+ * of the Elastic stack (via Upgrade Assistant) and will be surfaced in documentation
+ * created from HTTP API introspection (like OAS).
+ *
+ * string - Provide a string to mark this route as deprecated along with a description like:
+ *          "This route is deprecated and staged for removal by X.X.X. Use /another/cool/route instead"
+ * boolean - Set this to `true` to specify that this entire route is deprecated.
+ *
+ * It's also possible to provide deprecation messages about sub-parts of the route. Consider this
+ * example of a route deprecating an enum value from its request body:
+ *
+ * ```ts
+ * {
+ *   body: {
+ *     foo: {
+ *       type: { check: (v) => v === "bar", message : "'bar' is deprecated. Use 'qux' or 'baz' instead." }
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * @default false
+ * @public
+ */
+export type RouteDeprecation<P = unknown, Q = unknown, B = unknown> =
+  | boolean
+  | string
+  | RouteInputDeprecation<P, Q, B>;
+
+/**
  * Additional route options.
  * @public
  */
-export interface RouteConfigOptions<Method extends RouteMethod> {
+export interface RouteConfigOptions<
+  Method extends RouteMethod,
+  P = unknown,
+  Q = unknown,
+  B = unknown
+> {
   /**
    * Defines authentication mode for a route:
    * - true. A user has to have valid credentials to access a resource
@@ -201,12 +258,11 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   description?: string;
 
   /**
-   * Setting this to `true` declares this route to be deprecated. Consumers SHOULD
-   * refrain from usage of this route.
+   * A description of this routes deprecations.
    *
-   * @remarks This will be surfaced in OAS documentation.
+   * @remarks This may be surfaced in OAS documentation.
    */
-  deprecated?: boolean;
+  deprecated?: RouteDeprecation<P, Q, B>;
 
   /**
    * Release version or date that this route will be removed

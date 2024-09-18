@@ -107,6 +107,9 @@ export type {
   RouteValidatorFullConfigResponse,
   LazyValidator,
   RouteAccess,
+  RouteDeprecation,
+  RouteDeprecationDescription,
+  RouteInputDeprecation,
 } from './src/router';
 export {
   validBodyOutput,

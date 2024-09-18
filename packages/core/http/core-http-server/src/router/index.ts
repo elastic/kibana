@@ -53,6 +53,9 @@ export type {
   RouteContentType,
   SafeRouteMethod,
   RouteAccess,
+  RouteDeprecation,
+  RouteDeprecationDescription,
+  RouteInputDeprecation,
 } from './route';
 export { validBodyOutput } from './route';
 export type {
