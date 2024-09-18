@@ -5,35 +5,47 @@
  * 2.0.
  */
 
+import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
-import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
+import { MAX_NUMBER_OF_ENTITIES, type EntityType } from '../../../common/entities';
+import {
+  ENTITY_DISPLAY_NAME,
+  ENTITY_ID,
+  ENTITY_LAST_SEEN,
+  ENTITY_TYPE,
+} from '../../../common/es_fields/entities';
 
 const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   type: '*',
   dataset: ENTITY_LATEST,
 });
 
-const MAX_NUMBER_OF_ENTITIES = 500;
 interface LatestEntity {
-  'entity.lastSeenTimestamp': string;
-  'entity.type': string;
-  'entity.displayName': string;
-  'entity.id': string;
+  [ENTITY_LAST_SEEN]: string;
+  [ENTITY_TYPE]: string;
+  [ENTITY_DISPLAY_NAME]: string;
+  [ENTITY_ID]: string;
 }
 
 export async function getLatestEntities({
   inventoryEsClient,
+  sortDirection,
+  sortField,
+  entityTypes,
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
+  sortDirection: 'asc' | 'desc';
+  sortField: string;
+  entityTypes: EntityType[];
 }) {
   const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
     query: `FROM ${ENTITIES_LATEST_ALIAS}
-     | WHERE entity.type IN ("service", "host", "container") 
+     | WHERE entity.type IN (${entityTypes.map((entityType) => `"${entityType}"`).join()}) 
      | WHERE entity.definitionId IN ("builtin_services_from_ecs_data", "builtin_hosts_from_ecs_data", "builtin_containers_from_ecs_data")
-     | SORT entity.lastSeenTimestamp DESC
+     | SORT ${sortField} ${sortDirection}
      | LIMIT ${MAX_NUMBER_OF_ENTITIES}
-     | KEEP entity.id, entity.displayName, entity.lastSeenTimestamp, entity.type
+     | KEEP ${ENTITY_LAST_SEEN}, ${ENTITY_TYPE}, ${ENTITY_DISPLAY_NAME}, ${ENTITY_ID}
     `,
   });
 
