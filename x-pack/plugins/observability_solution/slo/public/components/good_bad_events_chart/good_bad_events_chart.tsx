@@ -22,10 +22,10 @@ import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema'
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { useAnnotations } from '@kbn/observability-plugin/public';
-import { TimeBounds } from '../../../slo_details/types';
-import { getBrushTimeBounds } from '../../../../utils/slo/duration';
-import { useKibana } from '../../../../utils/kibana_react';
-import { openInDiscover } from '../../../../utils/slo/get_discover_link';
+import { TimeBounds } from '../../pages/slo_details/types';
+import { getBrushTimeBounds } from '../../utils/slo/duration';
+import { useKibana } from '../../utils/kibana_react';
+import { openInDiscover } from '../../utils/slo/get_discover_link';
 
 export interface Props {
   data: GetPreviewDataResponse;
@@ -89,7 +89,7 @@ export function GoodBadEventsChart({
         to: moment(datum.x).add(intervalInMilliseconds, 'ms').toISOString(),
         mode: 'absolute' as const,
       };
-      openInDiscover(slo, isBad, !isBad, timeRange, discover);
+      openInDiscover({ slo, showBad: isBad, showGood: !isBad, timeRange, discover });
     }
   };
 
