@@ -17,6 +17,11 @@ export const syntheticsRuleFieldMap: FieldMap = {
     type: 'keyword',
     required: false,
   },
+  'observer.name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   'observer.geo.name': {
     type: 'keyword',
     array: true,
