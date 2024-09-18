@@ -56,7 +56,6 @@
       "charts"
     ],
     "optionalPlugins": [
-      "cloudExperiments",
       "encryptedSavedObjects",
       "fleet",
       "ml",
