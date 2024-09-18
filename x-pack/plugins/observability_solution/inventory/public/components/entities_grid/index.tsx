@@ -6,6 +6,7 @@
  */
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
@@ -13,6 +14,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
@@ -29,26 +31,55 @@ type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/ent
 
 type EntityColumnIds = typeof ENTITY_DISPLAY_NAME | typeof ENTITY_LAST_SEEN | typeof ENTITY_TYPE;
 
+const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipContent: string }) => (
+  <>
+    <span>{title}</span>
+    <EuiToolTip content={tooltipContent}>
+      <EuiButtonIcon
+        data-test-subj="inventoryCustomHeaderCellButton"
+        iconType="questionInCircle"
+        aria-label={tooltipContent}
+        color="primary"
+      />
+    </EuiToolTip>
+  </>
+);
+
 const columns: EuiDataGridColumn[] = [
   {
     id: ENTITY_DISPLAY_NAME,
-    displayAsText: i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.entityNameLabel', {
-      defaultMessage: 'Entity name',
-    }),
+    display: (
+      <CustomHeaderCell
+        title={i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.entityNameLabel', {
+          defaultMessage: 'Entity name',
+        })}
+        tooltipContent="Name of the entity (entity.displayName)"
+      />
+    ),
     isSortable: true,
   },
   {
     id: ENTITY_TYPE,
-    displayAsText: i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.typeLabel', {
-      defaultMessage: 'Type',
-    }),
+    display: (
+      <CustomHeaderCell
+        title={i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.typeLabel', {
+          defaultMessage: 'Type',
+        })}
+        tooltipContent="Type of entity (entity.type)"
+      />
+    ),
     isSortable: true,
   },
   {
     id: ENTITY_LAST_SEEN,
-    displayAsText: i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.lastSeenLabel', {
-      defaultMessage: 'Last seen',
-    }),
+    display: (
+      <CustomHeaderCell
+        title={i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.lastSeenLabel', {
+          defaultMessage: 'Last seen',
+        })}
+        tooltipContent="Timestamp of last received data for entity (entity.lastSeenTimestamp)"
+      />
+    ),
     defaultSortDirection: 'desc',
     isSortable: true,
     schema: 'datetime',
