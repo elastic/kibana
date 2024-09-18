@@ -26,7 +26,7 @@
  *    - null: the null value. Since JS distinguishes undefined and null, some APIs make use of this value.
  *    - object: used to represent "any". We may forbid it at some point. UserDefinedValue should be used for user data.
  */
-export interface TypeName {
+export class TypeName {
   namespace: string;
   name: string;
 }
@@ -55,7 +55,7 @@ export type ValueOf =
 /**
  * A single value
  */
-export interface InstanceOf {
+export class InstanceOf {
   kind: 'instance_of';
   type: TypeName;
   /** generic parameters: either concrete types or open parameters from the enclosing type */
@@ -65,15 +65,15 @@ export interface InstanceOf {
 /**
  * An array
  */
-export interface ArrayOf {
+export class ArrayOf {
   kind: 'array_of';
   value: ValueOf;
 }
 
 /**
- * One of several possible types which don't necessarily have a common superinterface
+ * One of several possible types which don't necessarily have a common superclass
  */
-export interface UnionOf {
+export class UnionOf {
   kind: 'union_of';
   items: ValueOf[];
 }
@@ -84,7 +84,7 @@ export interface UnionOf {
  * If `singleKey` is true, then this dictionary can only have a single key. This is a common pattern in ES APIs,
  * used to associate a value to a field name or some other identifier.
  */
-export interface DictionaryOf {
+export class DictionaryOf {
   kind: 'dictionary_of';
   key: ValueOf;
   value: ValueOf;
@@ -92,7 +92,7 @@ export interface DictionaryOf {
 }
 
 /**
- * A user defined value. To be used when bubbling a generic parameter up to the top-level interface is
+ * A user defined value. To be used when bubbling a generic parameter up to the top-level class is
  * inconvenient or impossible (e.g. for lists of user-defined values of possibly different types).
  *
  * Clients will allow providing a serializer/deserializer when reading/writing properties of this type,
@@ -101,7 +101,7 @@ export interface DictionaryOf {
  * Think twice before using this as it defeats the purpose of a strongly typed API, and deserialization
  * will also require to buffer raw JSON data which may have performance implications.
  */
-export interface UserDefinedValue {
+export class UserDefinedValue {
   kind: 'user_defined_value';
 }
 
@@ -112,7 +112,7 @@ export interface UserDefinedValue {
  * It may later be used to set a property to a constant value, which is why it accepts not only strings but also
  * other primitive types.
  */
-export interface LiteralValue {
+export class LiteralValue {
   kind: 'literal_value';
   value: string | number | boolean;
 }
@@ -120,7 +120,7 @@ export interface LiteralValue {
 /**
  * An interface or request interface property.
  */
-export interface Property {
+export class Property {
   name: string;
   type: ValueOf;
   required: boolean;
@@ -139,7 +139,7 @@ export interface Property {
   codegenName?: string;
   /** An optional set of aliases for `name` */
   aliases?: string[];
-  /** If the enclosing interface is a variants container, is this a property of the container and not a variant? */
+  /** If the enclosing class is a variants container, is this a property of the container and not a variant? */
   containerProperty?: boolean;
   /** If this property has a quirk that needs special attention, give a short explanation about it */
   esQuirk?: string;
@@ -155,7 +155,7 @@ export type TypeDefinition = Interface | Request | Response | Enum | TypeAlias;
 /**
  * Common attributes for all type definitions
  */
-export interface BaseType {
+export abstract class BaseType {
   name: TypeName;
   description?: string;
   /** Link to public documentation */
@@ -181,9 +181,9 @@ export interface BaseType {
   specLocation: string;
 }
 
-export type Variants = ExternalTag | InternalTag | Container;
+export type Variants = ExternalTag | InternalTag | Container | Untagged;
 
-export interface VariantBase {
+export class VariantBase {
   /**
    * Is this variant type open to extensions? Default to false. Used for variants that can
    * be extended with plugins. If true, target clients should allow for additional variants
@@ -192,11 +192,11 @@ export interface VariantBase {
   nonExhaustive?: boolean;
 }
 
-export interface ExternalTag extends VariantBase {
+export class ExternalTag extends VariantBase {
   kind: 'external_tag';
 }
 
-export interface InternalTag extends VariantBase {
+export class InternalTag extends VariantBase {
   kind: 'internal_tag';
   /* Name of the property that holds the variant tag */
   tag: string;
@@ -204,22 +204,33 @@ export interface InternalTag extends VariantBase {
   defaultTag?: string;
 }
 
-export interface Container extends VariantBase {
+export class Container extends VariantBase {
   kind: 'container';
+}
+
+export class Untagged extends VariantBase {
+  kind: 'untagged';
+  untypedVariant: TypeName;
 }
 
 /**
  * Inherits clause (aka extends or implements) for an interface or request
  */
-export interface Inherits {
+export class Inherits {
   type: TypeName;
   generics?: ValueOf[];
+}
+
+export class Behavior {
+  type: TypeName;
+  generics?: ValueOf[];
+  meta?: Record<string, string>;
 }
 
 /**
  * An interface type
  */
-export interface Interface extends BaseType {
+export class Interface extends BaseType {
   kind: 'interface';
   /**
    * Open generic parameters. The name is that of the parameter, the namespace is an arbitrary value that allows
@@ -232,7 +243,7 @@ export interface Interface extends BaseType {
   /**
    * Behaviors directly implemented by this interface
    */
-  behaviors?: Inherits[];
+  behaviors?: Behavior[];
 
   /**
    * Behaviors attached to this interface, coming from the interface itself (see `behaviors`)
@@ -252,7 +263,7 @@ export interface Interface extends BaseType {
 /**
  * A request type
  */
-export interface Request extends BaseType {
+export class Request extends BaseType {
   // Note: does not extend Interface as properties are split across path, query and body
   kind: 'request';
   generics?: TypeName[];
@@ -271,28 +282,28 @@ export interface Request extends BaseType {
   // We can also pull path parameter descriptions on body properties they replace
 
   /**
-   * Body type. Most often a list of properties (that can extend those of the inherited interface, see above), except for a
+   * Body type. Most often a list of properties (that can extend those of the inherited class, see above), except for a
    * few specific cases that use other types such as bulk (array) or create (generic parameter). Or NoBody for requests
    * that don't have a body.
    */
   body: Body;
-  behaviors?: Inherits[];
+  behaviors?: Behavior[];
   attachedBehaviors?: string[];
 }
 
 /**
  * A response type
  */
-export interface Response extends BaseType {
+export class Response extends BaseType {
   kind: 'response';
   generics?: TypeName[];
   body: Body;
-  behaviors?: Inherits[];
+  behaviors?: Behavior[];
   attachedBehaviors?: string[];
   exceptions?: ResponseException[];
 }
 
-export interface ResponseException {
+export class ResponseException {
   description?: string;
   body: Body;
   statusCodes: number[];
@@ -300,18 +311,18 @@ export interface ResponseException {
 
 export type Body = ValueBody | PropertiesBody | NoBody;
 
-export interface ValueBody {
+export class ValueBody {
   kind: 'value';
   value: ValueOf;
   codegenName?: string;
 }
 
-export interface PropertiesBody {
+export class PropertiesBody {
   kind: 'properties';
   properties: Property[];
 }
 
-export interface NoBody {
+export class NoBody {
   kind: 'no_body';
 }
 
@@ -322,7 +333,7 @@ export interface NoBody {
  * identifier name, and `stringValue` will be the string value to use on the wire.
  * See DateMathTimeUnit for an example of this, which have members for "m" (minute) and "M" (month).
  */
-export interface EnumMember {
+export class EnumMember {
   /** The identifier to use for this enum */
   name: string;
   /** An optional set of aliases for `name` */
@@ -335,12 +346,13 @@ export interface EnumMember {
   description?: string;
   deprecation?: Deprecation;
   since?: string;
+  availability?: Availabilities;
 }
 
 /**
  * An enumeration
  */
-export interface Enum extends BaseType {
+export class Enum extends BaseType {
   kind: 'enum';
   /**
    * If the enum is open, it means that other than the specified values it can accept an arbitrary value.
@@ -353,13 +365,16 @@ export interface Enum extends BaseType {
 /**
  * An alias for an existing type.
  */
-export interface TypeAlias extends BaseType {
+export class TypeAlias extends BaseType {
   kind: 'type_alias';
   type: ValueOf;
   /** generic parameters: either concrete types or open parameters from the enclosing type */
   generics?: TypeName[];
-  /** Only applicable to `union_of` aliases: identify typed_key unions (external) and variant inventories (internal) */
-  variants?: InternalTag | ExternalTag;
+  /**
+   * Only applicable to `union_of` aliases: identify typed_key unions (external), variant inventories (internal)
+   * and untagged variants
+   */
+  variants?: InternalTag | ExternalTag | Untagged;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -375,24 +390,24 @@ export enum Visibility {
   private = 'private',
 }
 
-export interface Deprecation {
+export class Deprecation {
   version: string;
   description: string;
 }
 
-export interface Availabilities {
+export class Availabilities {
   stack?: Availability;
   serverless?: Availability;
 }
 
-export interface Availability {
+export class Availability {
   since?: string;
   featureFlag?: string;
   stability?: Stability;
   visibility?: Visibility;
 }
 
-export interface Endpoint {
+export class Endpoint {
   name: string;
   description: string;
   docUrl: string;
@@ -431,13 +446,21 @@ export interface Endpoint {
   };
 }
 
-export interface UrlTemplate {
+export class UrlTemplate {
   path: string;
   methods: string[];
   deprecation?: Deprecation;
 }
 
-export interface Model {
+export class Model {
+  _info?: {
+    title: string;
+    license: {
+      name: string;
+      url: string;
+    };
+  };
+
   types: TypeDefinition[];
   endpoints: Endpoint[];
 }
