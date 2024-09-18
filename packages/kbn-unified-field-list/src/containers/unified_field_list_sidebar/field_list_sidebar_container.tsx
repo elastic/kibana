@@ -117,6 +117,7 @@ const UnifiedFieldListSidebarContainer = memo(
         prependInFlyout,
         variant = 'responsive',
         onFieldEdited,
+        additionalFilters,
       } = props;
       const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
         createStateService({ options: getCreationOptions() })
@@ -151,11 +152,16 @@ const UnifiedFieldListSidebarContainer = memo(
       const searchMode: SearchMode | undefined = querySubscriberResult.searchMode;
       const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
 
+      const filters = useMemo(
+        () => [...(querySubscriberResult.filters ?? []), ...(additionalFilters ?? [])],
+        [querySubscriberResult.filters, additionalFilters]
+      );
+
       const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
         disableAutoFetching: stateService.creationOptions.disableFieldsExistenceAutoFetching,
         dataViews: searchMode === 'documents' && dataView ? [dataView] : [],
         query: querySubscriberResult.query,
-        filters: querySubscriberResult.filters,
+        filters,
         fromDate: querySubscriberResult.fromDate,
         toDate: querySubscriberResult.toDate,
         services,
