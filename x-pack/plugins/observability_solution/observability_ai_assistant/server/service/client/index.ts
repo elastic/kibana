@@ -81,6 +81,7 @@ import {
   LangtraceServiceProvider,
   withLangtraceChatCompleteSpan,
 } from './operators/with_langtrace_chat_complete_span';
+import { runSemanticTextKnowledgeBaseMigration } from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -716,11 +717,25 @@ export class ObservabilityAIAssistantClient {
   };
 
   getKnowledgeBaseStatus = () => {
-    return this.dependencies.knowledgeBaseService.status();
+    return this.dependencies.knowledgeBaseService.getElserModelStatus();
   };
 
   setupKnowledgeBase = () => {
-    return this.dependencies.knowledgeBaseService.setup();
+    const { esClient } = this.dependencies;
+    return this.dependencies.knowledgeBaseService.setup(esClient);
+  };
+
+  resetKnowledgeBase = () => {
+    const { esClient } = this.dependencies;
+    return this.dependencies.knowledgeBaseService.reset(esClient);
+  };
+
+  migrateKnowledgeBaseToSemanticText = () => {
+    return runSemanticTextKnowledgeBaseMigration({
+      esClient: this.dependencies.esClient.asInternalUser,
+      logger: this.dependencies.logger,
+      kbService: this.dependencies.knowledgeBaseService,
+    });
   };
 
   addKnowledgeBaseEntry = async ({

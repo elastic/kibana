@@ -115,7 +115,7 @@ export class ObservabilityAIAssistantPlugin
     }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
 
     // Using once to make sure the same model ID is used during service init and Knowledge base setup
-    const getModelId = once(async () => {
+    const getSearchConnectorModelId = once(async () => {
       const configModelId = this.config.modelId;
       if (configModelId) {
         return configModelId;
@@ -158,7 +158,7 @@ export class ObservabilityAIAssistantPlugin
       logger: this.logger.get('service'),
       core,
       taskManager: plugins.taskManager,
-      getModelId,
+      getSearchConnectorModelId,
     }));
 
     service.register(registerFunctions);
