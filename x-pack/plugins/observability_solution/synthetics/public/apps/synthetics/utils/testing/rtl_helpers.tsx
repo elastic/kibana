@@ -356,32 +356,6 @@ export const makeSyntheticsPermissionsCore = (
   };
 };
 
-// This function filters out the queried elements which appear only
-// either on mobile or desktop.
-//
-// It does so by filtering those with the class passed as the `classWrapper`.
-// For mobile, we filter classes which tell elements to be hidden on desktop.
-// For desktop, we do the opposite.
-//
-// We have this function because EUI will manipulate the visibility of some
-// elements through pure CSS, which we can't assert on tests. Therefore,
-// we look for the corresponding class wrapper.
-const finderWithClassWrapper =
-  (classWrapper: string) =>
-  (
-    getterFn: (f: MatcherFunction) => HTMLElement | null,
-    customAttribute?: keyof Element | keyof HTMLElement
-  ) =>
-  (text: string): HTMLElement | null =>
-    getterFn((_content: string, node: Element | null) => {
-      if (!node) return false;
-      // There are actually properties that are not in Element but which
-      // appear on the `node`, so we must cast the customAttribute as a keyof Element
-      const content = node[(customAttribute as keyof Element) ?? 'innerHTML'];
-      if (content === text && wrappedInClass(node, classWrapper)) return true;
-      return false;
-    });
-
 const wrappedInClass = (element: HTMLElement | Element, classWrapper: string): boolean => {
   if (element.className.includes(classWrapper)) return true;
   if (element.parentElement) return wrappedInClass(element.parentElement, classWrapper);
