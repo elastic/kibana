@@ -285,9 +285,9 @@ describe('RenderEndpoint component tests', () => {
     });
   });
 
-  describe('with alibabacloudaisearch service', () => {
+  describe('with alibabacloud-ai-search service', () => {
     const mockEndpoint = {
-      model_id: 'alibabacloud-ai-search-1',
+      inference_id: 'alibabacloud-ai-search-1',
       service: 'alibabacloud-ai-search',
       service_settings: {
         service_id: 'service-123',

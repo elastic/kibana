@@ -84,7 +84,7 @@ function endpointModelAtrributes(endpoint: InferenceAPIConfigResponse) {
       return mistralAttributes(endpoint);
     case ServiceProviderKeys.googleaistudio:
       return googleAIStudioAttributes(endpoint);
-    case ServiceProviderKeys.alibabacloudaisearch:
+    case ServiceProviderKeys['alibabacloud-ai-search']:
       return alibabaCloudAISearchAttributes(endpoint);      
     case ServiceProviderKeys.amazonbedrock:
       return amazonBedrockAttributes(endpoint);

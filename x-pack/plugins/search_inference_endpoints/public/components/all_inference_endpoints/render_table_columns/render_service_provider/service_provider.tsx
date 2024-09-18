@@ -29,7 +29,7 @@ interface ServiceProviderRecord {
 }
 
 export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecord> = {
-  [ServiceProviderKeys.alibabacloudaisearch]: {
+  [ServiceProviderKeys['alibabacloud-ai-search']]: {
     icon: alibabaCloudAISearchIcon,
     name: 'AlibabaCloud AI Search',
   },  
