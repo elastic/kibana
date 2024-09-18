@@ -30,7 +30,7 @@ export async function launch({
     pipe: !browserConfig.inspect,
     userDataDir,
     executablePath: binaryPath,
-    ignoreHTTPSErrors: true,
+    acceptInsecureCerts: true,
     handleSIGHUP: false,
     args: chromiumArgs,
     defaultViewport: viewport,
