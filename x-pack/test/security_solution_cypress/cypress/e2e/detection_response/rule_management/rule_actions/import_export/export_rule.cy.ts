@@ -71,7 +71,7 @@ describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
   it('exports a custom rule', function () {
     exportRule('Rule to export');
     cy.wait('@bulk_action').then(({ response }) => {
-      cy.wrap(response?.body).should('deep.equal', expectedExportedRule(this.ruleResponse));
+      cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
       cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
     });
   });
