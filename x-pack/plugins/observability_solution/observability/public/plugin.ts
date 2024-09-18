@@ -124,7 +124,6 @@ export interface ObservabilityPublicPluginsSetup {
   licensing: LicensingPluginSetup;
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
-  inventory?: InventoryPublicSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -163,7 +162,6 @@ export interface ObservabilityPublicPluginsStart {
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
   investigate?: InvestigatePublicStart;
-  inventory?: InventoryPublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

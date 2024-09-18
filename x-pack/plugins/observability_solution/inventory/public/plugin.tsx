@@ -7,8 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { from } from 'rxjs';
-import { map } from 'rxjs';
+import { from, map } from 'rxjs';
 import {
   AppMountParameters,
   APP_WRAPPER_CLASS,
@@ -64,7 +63,7 @@ export class InventoryPlugin
                     defaultMessage: 'Inventory',
                   }),
                   app: INVENTORY_APP_ID,
-                  path: '',
+                  path: '/',
                 },
               ],
             },
