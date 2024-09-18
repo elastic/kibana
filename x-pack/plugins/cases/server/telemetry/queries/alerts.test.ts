@@ -7,12 +7,15 @@
 
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getAlertsTelemetryData } from './alerts';
+import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
 describe('alerts', () => {
   const logger = loggingSystemMock.createLogger();
 
   describe('getAlertsTelemetryData', () => {
     const savedObjectsClient = savedObjectsRepositoryMock.create();
+    const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
+
     savedObjectsClient.find.mockResolvedValue({
       total: 5,
       saved_objects: [],
@@ -35,7 +38,10 @@ describe('alerts', () => {
     });
 
     it('it returns the correct res', async () => {
-      const res = await getAlertsTelemetryData({ savedObjectsClient, logger });
+      const res = await getAlertsTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
       expect(res).toEqual({
         all: {
           total: 5,
@@ -48,7 +54,7 @@ describe('alerts', () => {
     });
 
     it('should call find with correct arguments', async () => {
-      await getAlertsTelemetryData({ savedObjectsClient, logger });
+      await getAlertsTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
       expect(savedObjectsClient.find).toBeCalledWith({
         aggs: {
           counts: {

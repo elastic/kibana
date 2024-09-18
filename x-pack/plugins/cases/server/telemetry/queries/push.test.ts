@@ -6,12 +6,15 @@
  */
 
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { getPushedTelemetryData } from './pushes';
+import { getPushedTelemetryData } from './push';
+import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
-describe('pushes', () => {
+describe('push', () => {
   describe('getPushedTelemetryData', () => {
     const logger = loggingSystemMock.createLogger();
     const savedObjectsClient = savedObjectsRepositoryMock.create();
+    const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
+
     savedObjectsClient.find.mockResolvedValue({
       total: 5,
       saved_objects: [],
@@ -27,7 +30,10 @@ describe('pushes', () => {
     });
 
     it('it returns the correct res', async () => {
-      const res = await getPushedTelemetryData({ savedObjectsClient, logger });
+      const res = await getPushedTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
       expect(res).toEqual({
         all: {
           maxOnACase: 1,
@@ -37,7 +43,7 @@ describe('pushes', () => {
     });
 
     it('should call find with correct arguments', async () => {
-      await getPushedTelemetryData({ savedObjectsClient, logger });
+      await getPushedTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
       expect(savedObjectsClient.find).toBeCalledWith({
         aggs: {
           references: {

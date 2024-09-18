@@ -15,6 +15,7 @@ import type {
   FileAttachmentAggregationResults,
 } from '../types';
 import { getCasesTelemetryData } from './cases';
+import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
 const MOCK_FIND_TOTAL = 5;
 const SOLUTION_TOTAL = 1;
@@ -23,6 +24,7 @@ describe('getCasesTelemetryData', () => {
   describe('getCasesTelemetryData', () => {
     const logger = loggingSystemMock.createLogger();
     const savedObjectsClient = savedObjectsRepositoryMock.create();
+    const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
 
     const mockFind = (aggs: object, so: SavedObjectsFindResponse['saved_objects'] = []) => {
       savedObjectsClient.find.mockResolvedValueOnce({
@@ -322,7 +324,10 @@ describe('getCasesTelemetryData', () => {
         };
       };
 
-      const res = await getCasesTelemetryData({ savedObjectsClient, logger });
+      const res = await getCasesTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
 
       const allAttachmentsTotal = 5;
       const allAttachmentsAverage = allAttachmentsTotal / MOCK_FIND_TOTAL;
@@ -406,7 +411,7 @@ describe('getCasesTelemetryData', () => {
     it('should call find with correct arguments', async () => {
       mockResponse();
 
-      await getCasesTelemetryData({ savedObjectsClient, logger });
+      await getCasesTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
 
       expect(savedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
