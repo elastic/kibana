@@ -15,7 +15,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  describe('Console variables', function testConsoleVariables() {
+  // Failing: See https://github.com/elastic/kibana/issues/157776
+  describe.skip('Console variables', function testConsoleVariables() {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -65,10 +66,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
+    // Flaky: https://github.com/elastic/kibana/issues/157776
+    // Beware that this test will pass locally and in flaky test runner, but it
+    // will fail after merged.
     describe.skip('with variables in request body', () => {
-      // bug in monaco https://github.com/elastic/kibana/issues/185999
-      it.skip('should send a successful request', async () => {
+      it('should send a successful request', async () => {
+        await PageObjects.console.openConfig();
         await PageObjects.console.addNewVariable({ name: 'query1', value: '{"match_all": {}}' });
+        await PageObjects.console.openConsole();
+        await PageObjects.console.clickClearInput();
         await PageObjects.console.enterText('\n GET _search\n');
         await PageObjects.console.enterText(`{\n\t"query": "\${query1}"`);
         await PageObjects.console.clickPlay();

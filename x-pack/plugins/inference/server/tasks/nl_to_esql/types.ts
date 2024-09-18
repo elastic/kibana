@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
+  FunctionCallingMode,
   Message,
 } from '../../../common/chat_complete';
 import type { ToolOptions } from '../../../common/chat_complete/tools';
@@ -27,5 +28,6 @@ export type NlToEsqlTaskParams<TToolOptions extends ToolOptions> = {
   client: Pick<InferenceClient, 'output' | 'chatComplete'>;
   connectorId: string;
   logger: Pick<Logger, 'debug'>;
+  functionCalling?: FunctionCallingMode;
 } & TToolOptions &
   ({ input: string } | { messages: Message[] });
