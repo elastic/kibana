@@ -389,145 +389,151 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             </EuiFormRow>
           )}
         </React.Fragment>
-        <EuiFormRow>
-          {selectedRolesCombinedPrivileges.length > 1 ? (
-            <EuiCallOut
-              size="s"
-              color="warning"
-              iconType="iInCircle"
-              data-test-subj="privilege-conflict-callout"
-              title={i18n.translate(
-                'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
-                {
-                  defaultMessage: 'Selected roles have different privileges granted',
-                }
-              )}
-            >
-              {i18n.translate(
-                'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.description',
-                {
-                  defaultMessage:
-                    'Updating the settings here in a bulk will override current individual settings.',
-                }
-              )}
-            </EuiCallOut>
-          ) : (
-            <EuiCallOut
-              size="s"
-              color="primary"
-              iconType="iInCircle"
-              data-test-subj="privilege-info-callout"
-              title={i18n.translate(
-                'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
-                {
-                  defaultMessage: 'Privileges will apply to all current and future spaces.',
-                }
-              )}
-            />
-          )}
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.spaces.management.spaceDetails.roles.assign.privilegesLabelText',
-            {
-              defaultMessage: 'Define role privileges',
-            }
-          )}
-        >
-          <EuiButtonGroup
-            data-test-subj="space-assign-role-privilege-selection-switch"
-            legend={i18n.translate(
-              'xpack.spaces.management.spaceDetails.roles.assign.privilegeSelectionLegendText',
-              {
-                defaultMessage: 'select the privilege for the features enabled in this space',
-              }
-            )}
-            isDisabled={!Boolean(selectedRoles.length)}
-            options={[
-              {
-                id: FEATURE_PRIVILEGES_ALL,
-                label: i18n.translate(
-                  'xpack.spaces.management.spaceDetails.roles.assign.privileges.all',
-                  {
-                    defaultMessage: 'All',
-                  }
-                ),
-              },
-              {
-                id: FEATURE_PRIVILEGES_READ,
-                label: i18n.translate(
-                  'xpack.spaces.management.spaceDetails.roles.assign.privileges.read',
-                  { defaultMessage: 'Read' }
-                ),
-              },
-              {
-                id: FEATURE_PRIVILEGES_CUSTOM,
-                label: i18n.translate(
-                  'xpack.spaces.management.spaceDetails.roles.assign.privileges.custom',
-                  { defaultMessage: 'Customize' }
-                ),
-              },
-            ].map((privilege) => ({
-              ...privilege,
-              'data-test-subj': `${privilege.id}-privilege-button`,
-            }))}
-            color="primary"
-            idSelected={roleSpacePrivilege}
-            onChange={(id) => onRoleSpacePrivilegeChange(id as KibanaRolePrivilege)}
-            isFullWidth
-          />
-        </EuiFormRow>
-        {Boolean(selectedRoles.length) && (
-          <EuiFormRow data-test-subj="space-assign-role-privilege-customization-form">
+        <React.Fragment>
+          {Boolean(selectedRoles.length) && (
             <React.Fragment>
-              {!kibanaPrivileges ? (
-                <EuiLoadingSpinner size="l" />
-              ) : (
-                <KibanaPrivilegeTable
-                  showTitle={false}
-                  disabled={roleSpacePrivilege !== FEATURE_PRIVILEGES_CUSTOM}
-                  role={roleCustomizationAnchor.value!}
-                  privilegeIndex={roleCustomizationAnchor.privilegeIndex}
-                  onChange={(featureId, selectedPrivileges) => {
-                    // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
-                    // to all of the selected roles till we decide to commit the changes chosen
-                    setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
-                      let privilege;
-
-                      if ((privilege = value!.kibana?.[privilegeIndex!])) {
-                        privilege.feature[featureId] = selectedPrivileges;
+              <EuiFormRow>
+                {selectedRolesCombinedPrivileges.length > 1 ? (
+                  <EuiCallOut
+                    size="s"
+                    color="warning"
+                    iconType="iInCircle"
+                    data-test-subj="privilege-conflict-callout"
+                    title={i18n.translate(
+                      'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
+                      {
+                        defaultMessage: 'Selected roles have different privileges granted',
                       }
-
-                      return { value, privilegeIndex };
-                    });
-                  }}
-                  onChangeAll={(_privilege) => {
-                    // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
-                    // to all of the selected roles till we decide to commit the changes chosen
-                    setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
-                      let privilege;
-
-                      if ((privilege = value!.kibana?.[privilegeIndex!])) {
-                        privilege.base = _privilege;
+                    )}
+                  >
+                    {i18n.translate(
+                      'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.description',
+                      {
+                        defaultMessage:
+                          'Updating the settings here in a bulk will override current individual settings.',
                       }
-
-                      return { value, privilegeIndex };
-                    });
-                  }}
-                  kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
-                  privilegeCalculator={
-                    new PrivilegeFormCalculator(
-                      new KibanaPrivileges(kibanaPrivileges, features),
-                      roleCustomizationAnchor.value!
-                    )
+                    )}
+                  </EuiCallOut>
+                ) : (
+                  <EuiCallOut
+                    size="s"
+                    color="primary"
+                    iconType="iInCircle"
+                    data-test-subj="privilege-info-callout"
+                    title={i18n.translate(
+                      'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
+                      {
+                        defaultMessage: 'Privileges will apply only to this space.',
+                      }
+                    )}
+                  />
+                )}
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.spaces.management.spaceDetails.roles.assign.privilegesLabelText',
+                  {
+                    defaultMessage: 'Define role privileges',
                   }
-                  allSpacesSelected={false}
-                  canCustomizeSubFeaturePrivileges={false}
+                )}
+              >
+                <EuiButtonGroup
+                  data-test-subj="space-assign-role-privilege-selection-switch"
+                  legend={i18n.translate(
+                    'xpack.spaces.management.spaceDetails.roles.assign.privilegeSelectionLegendText',
+                    {
+                      defaultMessage: 'select the privilege for the features enabled in this space',
+                    }
+                  )}
+                  isDisabled={!Boolean(selectedRoles.length)}
+                  options={[
+                    {
+                      id: FEATURE_PRIVILEGES_ALL,
+                      label: i18n.translate(
+                        'xpack.spaces.management.spaceDetails.roles.assign.privileges.all',
+                        {
+                          defaultMessage: 'All',
+                        }
+                      ),
+                    },
+                    {
+                      id: FEATURE_PRIVILEGES_READ,
+                      label: i18n.translate(
+                        'xpack.spaces.management.spaceDetails.roles.assign.privileges.read',
+                        { defaultMessage: 'Read' }
+                      ),
+                    },
+                    {
+                      id: FEATURE_PRIVILEGES_CUSTOM,
+                      label: i18n.translate(
+                        'xpack.spaces.management.spaceDetails.roles.assign.privileges.custom',
+                        { defaultMessage: 'Customize' }
+                      ),
+                    },
+                  ].map((privilege) => ({
+                    ...privilege,
+                    'data-test-subj': `${privilege.id}-privilege-button`,
+                  }))}
+                  color="primary"
+                  idSelected={roleSpacePrivilege}
+                  onChange={(id) => onRoleSpacePrivilegeChange(id as KibanaRolePrivilege)}
+                  isFullWidth
                 />
+              </EuiFormRow>
+              {Boolean(selectedRoles.length) && (
+                <EuiFormRow data-test-subj="space-assign-role-privilege-customization-form">
+                  <React.Fragment>
+                    {!kibanaPrivileges ? (
+                      <EuiLoadingSpinner size="l" />
+                    ) : (
+                      <KibanaPrivilegeTable
+                        showTitle={false}
+                        disabled={roleSpacePrivilege !== FEATURE_PRIVILEGES_CUSTOM}
+                        role={roleCustomizationAnchor.value!}
+                        privilegeIndex={roleCustomizationAnchor.privilegeIndex}
+                        onChange={(featureId, selectedPrivileges) => {
+                          // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
+                          // to all of the selected roles till we decide to commit the changes chosen
+                          setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
+                            let privilege;
+
+                            if ((privilege = value!.kibana?.[privilegeIndex!])) {
+                              privilege.feature[featureId] = selectedPrivileges;
+                            }
+
+                            return { value, privilegeIndex };
+                          });
+                        }}
+                        onChangeAll={(_privilege) => {
+                          // apply selected changes only to the designated customization anchor, this way we delay reconciling the intending privileges
+                          // to all of the selected roles till we decide to commit the changes chosen
+                          setRoleCustomizationAnchor(({ value, privilegeIndex }) => {
+                            let privilege;
+
+                            if ((privilege = value!.kibana?.[privilegeIndex!])) {
+                              privilege.base = _privilege;
+                            }
+
+                            return { value, privilegeIndex };
+                          });
+                        }}
+                        kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
+                        privilegeCalculator={
+                          new PrivilegeFormCalculator(
+                            new KibanaPrivileges(kibanaPrivileges, features),
+                            roleCustomizationAnchor.value!
+                          )
+                        }
+                        allSpacesSelected={false}
+                        canCustomizeSubFeaturePrivileges={false}
+                      />
+                    )}
+                  </React.Fragment>
+                </EuiFormRow>
               )}
             </React.Fragment>
-          </EuiFormRow>
-        )}
+          )}
+        </React.Fragment>
       </EuiForm>
     );
   };

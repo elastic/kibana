@@ -132,7 +132,7 @@ describe('PrivilegesRolesForm', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the privilege permission selector disabled when no role is selected', async () => {
+  it('does not display the privilege selection buttons or customization form when no role is selected', async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
@@ -141,17 +141,8 @@ describe('PrivilegesRolesForm', () => {
     await waitFor(() => null);
 
     ['all', 'read', 'custom'].forEach((privilege) => {
-      expect(screen.getByTestId(`${privilege}-privilege-button`)).toBeDisabled();
+      expect(screen.queryByTestId(`${privilege}-privilege-button`)).not.toBeInTheDocument();
     });
-  });
-
-  it('does not display the the privilege customization form disabled when no role is selected', async () => {
-    getRolesSpy.mockResolvedValue([]);
-    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
-
-    renderPrivilegeRolesForm();
-
-    await waitFor(() => null);
 
     expect(
       screen.queryByTestId('space-assign-role-privilege-customization-form')
