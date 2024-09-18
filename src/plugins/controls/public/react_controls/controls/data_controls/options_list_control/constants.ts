@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OptionsListSearchTechnique } from '../../../../../common/options_list/suggestions_searching';
-import { OptionsListSortingType } from '../../../../../common/options_list/suggestions_sorting';
+import type {
+  OptionsListSortingType,
+  OptionsListSearchTechnique,
+} from '../../../../../common/options_list';
 
 export const DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';
 export const OPTIONS_LIST_DEFAULT_SORT: OptionsListSortingType = {
