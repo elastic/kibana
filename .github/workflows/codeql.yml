@@ -54,7 +54,12 @@ jobs:
         category: "/language:${{matrix.language}}"
         ref: ${{ env.CHECKOUT_REF }}
         sha: ${{ env.CHECKOUT_SHA }}
-
+  alert:
+    name: Alert
+    runs-on: ubuntu-latest
+    needs: analyze
+    if: github.repository == 'elastic/kibana' # Hack: Do not run on forks
+    steps:
     - name: Checkout kibana-operations
       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       with:
