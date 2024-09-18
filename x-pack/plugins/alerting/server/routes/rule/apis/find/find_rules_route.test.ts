@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { findInternalRulesRoute as findRulesRoute } from './find_rules_route';
+import { findRulesRoute } from './find_rules_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
