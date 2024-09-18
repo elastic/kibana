@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect } from 'react';
+import React, { Suspense, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CenteredLoadingSpinner } from '../../../common/components/centered_loading_spinner';
 import type { OnboardingCardId } from '../../constants';
@@ -19,18 +19,8 @@ export const OnboardingBody = React.memo(() => {
   const bodyConfig = useBodyConfig();
 
   const { expandedCardId, setExpandedCardId } = useExpandedCard();
-  const {
-    isCardComplete,
-    setCardComplete,
-    getCardCheckCompleteResult,
-    checkAllCardsComplete,
-    checkCardComplete,
-  } = useCompletedCards(bodyConfig);
-
-  useEffect(() => {
-    // initial auto-check for all cards
-    checkAllCardsComplete();
-  }, [checkAllCardsComplete]);
+  const { isCardComplete, setCardComplete, getCardCheckCompleteResult, checkCardComplete } =
+    useCompletedCards(bodyConfig);
 
   const createOnToggleExpanded = useCallback(
     (cardId: OnboardingCardId) => () => {

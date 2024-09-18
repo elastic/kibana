@@ -19,7 +19,7 @@ const LocalStorageKey = {
  * Wrapper hook for useLocalStorage, but always returns the default value when not defined instead of `undefined`.
  */
 const useDefinedLocalStorage = <T>(key: string, defaultValue: T) => {
-  const [value, setValue] = useLocalStorage<T>(key);
+  const [value, setValue] = useLocalStorage<T>(key, defaultValue);
   return [value ?? defaultValue, setValue] as const;
 };
 

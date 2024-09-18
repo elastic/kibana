@@ -18,7 +18,7 @@ interface OnboardingContextValue {
 }
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
-export const OnboardingContextProvider: React.FC<PropsWithChildren<OnboardingContextValue>> =
+export const OnboardingContextProvider: React.FC<PropsWithChildren<{ spaceId: string }>> =
   React.memo(({ children, spaceId }) => {
     const { telemetry } = useKibana().services;
 
