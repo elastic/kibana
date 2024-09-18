@@ -14,7 +14,6 @@ import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
@@ -36,15 +35,37 @@ import type { IntegrationCardItem } from '../screens/home';
 import { InlineReleaseBadge, WithGuidedOnboardingTour } from '../../../components';
 import { useStartServices, useIsGuidedOnboardingActive } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
+import type { EpmPackageInstallStatus } from '../../../../../../common/types';
+import { installationStatuses } from '../../../../../../common/constants';
 
 export type PackageCardProps = IntegrationCardItem;
 
 // Min-height is roughly 3 lines of content.
 // This keeps the cards from looking overly unbalanced because of content differences.
-const Card = styled(EuiCard)<{ isquickstart?: boolean; isQuickstart?: boolean }>`
+const Card = styled(EuiCard)<{ isquickstart?: boolean; fixedCardHeight?: number }>`
   min-height: 127px;
   border-color: ${({ isquickstart }) => (isquickstart ? '#ba3d76' : null)};
+  ${({ fixedCardHeight }) =>
+    fixedCardHeight ? `max-height: ${fixedCardHeight}px; overflow: hidden;` : ''};
 `;
+
+const installStatusMapToColor: Record<
+  EpmPackageInstallStatus,
+  { color: string; iconType: string; text: string }
+> = {
+  installed: {
+    color: 'success',
+    iconType: 'check',
+    text: i18n.translate('xpack.fleet.packageCard.installedLabel', { defaultMessage: 'Installed' }),
+  },
+  install_failed: {
+    color: 'warning',
+    iconType: 'warning',
+    text: i18n.translate('xpack.fleet.packageCard.installFailedLabel', {
+      defaultMessage: 'Install Failed',
+    }),
+  },
+};
 
 export function PackageCard({
   description,
@@ -64,9 +85,11 @@ export function PackageCard({
   showInstallationStatus,
   extraLabelsBadges,
   isQuickstart = false,
-  isInstalled,
+  installStatus,
   onCardClick: onClickProp = undefined,
   isCollectionCard = false,
+  lineClamp,
+  fixedCardHeight,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -154,26 +177,43 @@ export function PackageCard({
     );
   }
 
-  const installStatus = useMemo(
+  const installStatusCallout = useMemo(
     () =>
-      showInstallationStatus && isInstalled ? (
-        <EuiCallOut
+      showInstallationStatus &&
+      (installStatus === installationStatuses.Installed ||
+        installStatus === installationStatuses.InstallFailed) ? (
+        <div
           css={`
             position: absolute;
-            bottom: 0;
-            width: 100%;
+            border-radius: 0 0 6px 6px;
+            bottom: 1px;
+            left: 1px;
+            width: calc(100% - 2px);
           `}
-          iconType="tick"
-          title={
-            <FormattedMessage
-              id="xpack.fleet.packageCard.installedLabel"
-              defaultMessage="Installed"
-            />
-          }
-          color="success"
-        />
+        >
+          <EuiSpacer
+            size="m"
+            css={`
+              background: white;
+            `}
+          />
+          <EuiCallOut
+            css={`
+              padding: 8px 16px;
+              text-align: center;
+            `}
+            iconType={installStatusMapToColor[installStatus].iconType}
+            title={
+              <FormattedMessage
+                id="xpack.fleet.packageCard.installedLabel"
+                defaultMessage="Installed"
+              />
+            }
+            color={installStatusMapToColor[installStatus].color}
+          />
+        </div>
       ) : undefined,
-    [showInstallationStatus, isInstalled]
+    [showInstallationStatus, installStatus]
   );
 
   const { application } = useStartServices();
@@ -212,6 +252,17 @@ export function PackageCard({
 
             [class*='euiCard__description'] {
               flex-grow: 1;
+              ${lineClamp
+                ? `-webkit-line-clamp: ${
+                    installStatusCallout ? 1 : lineClamp
+                  };display: -webkit-box;-webkit-box-orient: vertical;overflow: hidden;`
+                : ''}
+            }
+
+            [class*='euiCard__titleButton'] {
+              ${lineClamp
+                ? `-webkit-line-clamp: ${1};display: -webkit-box;-webkit-box-orient: vertical;overflow: hidden;`
+                : ''}
             }
           `}
           data-test-subj={testid}
@@ -232,6 +283,7 @@ export function PackageCard({
             />
           }
           onClick={onClickProp ?? onCardClick}
+          fixedCardHeight={fixedCardHeight}
         >
           <EuiFlexGroup gutterSize="xs" wrap={true}>
             {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
@@ -240,8 +292,8 @@ export function PackageCard({
             {releaseBadge}
             {hasDeferredInstallationsBadge}
             {collectionButton}
-            {installStatus}
           </EuiFlexGroup>
+          {installStatusCallout}
         </Card>
       </TrackApplicationView>
     </WithGuidedOnboardingTour>

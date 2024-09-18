@@ -35,8 +35,6 @@ import type { CategoryFacet } from '../category_facets';
 
 import { mergeCategoriesAndCount } from '../util';
 
-import { installationStatuses } from '../../../../../../../../common/constants';
-
 import { useBuildIntegrationsUrl } from './use_build_integrations_url';
 
 export interface IntegrationsURLParameters {
