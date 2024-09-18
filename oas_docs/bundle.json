@@ -1093,6 +1093,12 @@
           "204": {
             "description": "Indicates a successful call."
           },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
           "404": {
             "description": "Indicates a rule with the given ID does not exist."
           }
@@ -2001,6 +2007,12 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
           },
           "404": {
             "description": "Indicates a rule with the given ID does not exist."
@@ -3193,40 +3205,13 @@
             "description": "Indicates a successful call."
           },
           "400": {
-            "description": "Indicates that the requested rule type is not registered."
+            "description": "Indicates an invalid schema or parameters."
           },
           "403": {
-            "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "error": {
-                      "enum": [
-                        "Forbidden"
-                      ],
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "enum": [
-                        403
-                      ],
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "statusCode",
-                    "error",
-                    "message"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
             "description": "Indicates that this call is forbidden."
+          },
+          "409": {
+            "description": "Indicates that the rule id is already in use."
           }
         },
         "summary": "Create a rule",
@@ -4398,41 +4383,17 @@
             },
             "description": "Indicates a successful call."
           },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
           "403": {
-            "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "error": {
-                      "enum": [
-                        "Forbidden"
-                      ],
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "enum": [
-                        403
-                      ],
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "statusCode",
-                    "error",
-                    "message"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
             "description": "Indicates that this call is forbidden."
           },
           "404": {
             "description": "Indicates a rule with the given ID does not exist."
+          },
+          "409": {
+            "description": "Indicates that the rule has already been updated by another user."
           }
         },
         "summary": "Update a rule",
@@ -4499,37 +4460,10 @@
           "204": {
             "description": "Indicates a successful call."
           },
+          "400": {
+            "description": "Indicates an invalid schema."
+          },
           "403": {
-            "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "error": {
-                      "enum": [
-                        "Forbidden"
-                      ],
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "enum": [
-                        403
-                      ],
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "statusCode",
-                    "error",
-                    "message"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
             "description": "Indicates that this call is forbidden."
           },
           "404": {
@@ -4582,37 +4516,10 @@
           "204": {
             "description": "Indicates a successful call."
           },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
           "403": {
-            "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "error": {
-                      "enum": [
-                        "Forbidden"
-                      ],
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "enum": [
-                        403
-                      ],
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "statusCode",
-                    "error",
-                    "message"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
             "description": "Indicates that this call is forbidden."
           },
           "404": {
@@ -4759,41 +4666,17 @@
           "204": {
             "description": "Indicates a successful call."
           },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
           "403": {
-            "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "error": {
-                      "enum": [
-                        "Forbidden"
-                      ],
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "enum": [
-                        403
-                      ],
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "statusCode",
-                    "error",
-                    "message"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
             "description": "Indicates that this call is forbidden."
           },
           "404": {
             "description": "Indicates a rule with the given ID does not exist."
+          },
+          "409": {
+            "description": "Indicates that the rule has already been updated by another user."
           }
         },
         "summary": "Update the API key for a rule",
@@ -4851,37 +4734,10 @@
           "204": {
             "description": "Indicates a successful call."
           },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
           "403": {
-            "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "error": {
-                      "enum": [
-                        "Forbidden"
-                      ],
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "enum": [
-                        403
-                      ],
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "statusCode",
-                    "error",
-                    "message"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
             "description": "Indicates that this call is forbidden."
           },
           "404": {
@@ -4943,37 +4799,10 @@
           "204": {
             "description": "Indicates a successful call."
           },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
           "403": {
-            "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "error": {
-                      "enum": [
-                        "Forbidden"
-                      ],
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "enum": [
-                        403
-                      ],
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "statusCode",
-                    "error",
-                    "message"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
             "description": "Indicates that this call is forbidden."
           },
           "404": {
