@@ -135,7 +135,7 @@ export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFt
     ) {
       // if 'useCookieHeader' set to 'true', HTTP requests will be called with cookie Header (like in browser)
       if (options.useCookieHeader) {
-        const cookieHeader = await samlAuth.getM2MApiCredentialsWithRoleScope(role);
+        const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope(role);
         return new SupertestWithRoleScope(cookieHeader, supertestWithoutAuth, samlAuth, options);
       }
 

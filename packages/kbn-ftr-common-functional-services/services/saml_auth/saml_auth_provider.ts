@@ -66,7 +66,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     async getInteractiveUserSessionCookieWithRoleScope(role: string) {
       return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
-    async getM2MApiCredentialsWithRoleScope(role: string): Promise<CookieCredentials> {
+    async getM2MApiCookieCredentialsWithRoleScope(role: string): Promise<CookieCredentials> {
       return sessionManager.getApiCredentialsForRole(role);
     },
     async getEmail(role: string) {
@@ -82,7 +82,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     },
     async createM2mApiKeyWithRoleScope(role: string): Promise<RoleCredentials> {
       // Get admin credentials in order to create the API key
-      const adminCookieHeader = await this.getM2MApiCredentialsWithRoleScope('admin');
+      const adminCookieHeader = await this.getM2MApiCookieCredentialsWithRoleScope('admin');
 
       // Get the role descrtiptor for the role
       let roleDescriptors = {};
@@ -120,7 +120,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     },
     async invalidateM2mApiKeyWithRoleScope(roleCredentials: RoleCredentials) {
       // Get admin credentials in order to invalidate the API key
-      const adminCookieHeader = await this.getM2MApiCredentialsWithRoleScope('admin');
+      const adminCookieHeader = await this.getM2MApiCookieCredentialsWithRoleScope('admin');
 
       const requestBody = {
         apiKeys: [

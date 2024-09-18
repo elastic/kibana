@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('security/api_keys', function () {
     before(async () => {
-      cookieHeader = await samlAuth.getM2MApiCredentialsWithRoleScope('admin');
+      cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
     });
 
     describe('route access', () => {
