@@ -17,12 +17,16 @@ Status: `in progress`.
   - [Rule field doesn't have an update and has no custom value - `AAA`](#rule-field-doesnt-have-an-update-and-has-no-custom-value---aaa)
     - [**Scenario: `AAA` - Rule field is any type**](#scenario-aaa---rule-field-is-any-type)
   - [Rule field doesn't have an update but has a custom value - `ABA`](#rule-field-doesnt-have-an-update-but-has-a-custom-value---aba)
-    - [**Scenario: `ABA` - Rule field is any type**](#scenario-aba---rule-field-is-any-type)
+    - [**Scenario: `ABA` - Rule field is any type except rule `type`**](#scenario-aba---rule-field-is-any-type-except-rule-type)
+    - [**Scenario: `ABA` - Rule field is rule `type`**](#scenario-aba---rule-field-is-rule-type)
   - [Rule field has an update and doesn't have a custom value - `AAB`](#rule-field-has-an-update-and-doesnt-have-a-custom-value---aab)
-    - [**Scenario: `AAB` - Rule field is any type**](#scenario-aab---rule-field-is-any-type)
+    - [**Scenario: `AAB` - Rule field is any type except rule `type`**](#scenario-aab---rule-field-is-any-type-except-rule-type)
+    - [**Scenario: `AAB` - Rule field is rule `type`**](#scenario-aab---rule-field-is-rule-type)
   - [Rule field has an update and a custom value that are the same - `ABB`](#rule-field-has-an-update-and-a-custom-value-that-are-the-same---abb)
-    - [**Scenario: `ABB` - Rule field is any type**](#scenario-abb---rule-field-is-any-type)
+    - [**Scenario: `ABB` - Rule field is any type except rule `type`**](#scenario-abb---rule-field-is-any-type-except-rule-type)
+    - [**Scenario: `ABB` - Rule field is rule `type`**](#scenario-abb---rule-field-is-rule-type)
   - [Rule field has an update and a custom value that are NOT the same - `ABC`](#rule-field-has-an-update-and-a-custom-value-that-are-not-the-same---abc)
+    - [**Scenario: `ABC` - Rule field is rule `type`**](#scenario-abc---rule-field-is-rule-type)
     - [**Scenario: `ABC` - Rule field is a number or single line string**](#scenario-abc---rule-field-is-a-number-or-single-line-string)
     - [**Scenario: `ABC` - Rule field is a mergeable multi line string**](#scenario-abc---rule-field-is-a-mergeable-multi-line-string)
     - [**Scenario: `ABC` - Rule field is a non-mergeable multi line string**](#scenario-abc---rule-field-is-a-non-mergeable-multi-line-string)
@@ -37,6 +41,7 @@ Status: `in progress`.
     - [**Scenario: `-AB` - Rule field is an array of scalar values**](#scenario--ab---rule-field-is-an-array-of-scalar-values)
     - [**Scenario: `-AB` - Rule field is a solvable `data_source` object**](#scenario--ab---rule-field-is-a-solvable-data_source-object)
     - [**Scenario: `-AB` - Rule field is a non-solvable `data_source` object**](#scenario--ab---rule-field-is-a-non-solvable-data_source-object)
+    - [**Scenario: `-AB` - Rule field is rule `type`**](#scenario--ab---rule-field-is-rule-type)
 
 ## Useful information
 
@@ -74,7 +79,7 @@ Status: `in progress`.
 
 #### **Scenario: `AAA` - Rule field is any type**
 
-**Automation**: 10 integration tests with mock rules + a set of unit tests for each algorithm
+**Automation**: 11 integration tests with mock rules + a set of unit tests for each algorithm
 
 ```Gherkin
 Given <field_name> field is not customized by the user (current version == base version)
@@ -85,6 +90,7 @@ And <field_name> field should not be shown in the upgrade preview UI
 
 Examples:
 | algorithm          | field_name  | base_version                                                                         | current_version                                                                      | target_version                                                                       | merged_version                                                                       |
+| rule type          | type        | "query"                                                                              | "query"                                                                              | "query"                                                                              | "query"                                                                              |
 | single line string | name        | "A"                                                                                  | "A"                                                                                  | "A"                                                                                  | "A"                                                                                  |
 | multi line string  | description | "My description.\nThis is a second line."                                            | "My description.\nThis is a second line."                                            | "My description.\nThis is a second line."                                            | "My description.\nThis is a second line."                                            |
 | number             | risk_score  | 1                                                                                    | 1                                                                                    | 1                                                                                    | 1                                                                                    |
@@ -99,7 +105,7 @@ Examples:
 
 ### Rule field doesn't have an update but has a custom value - `ABA`
 
-#### **Scenario: `ABA` - Rule field is any type**
+#### **Scenario: `ABA` - Rule field is any type except rule `type`**
 
 **Automation**: 10 integration tests with mock rules + a set of unit tests for each algorithm
 
@@ -124,9 +130,25 @@ Examples:
 | esql_query         | esql_query  | {query: "FROM query WHERE true", language: "esql"}                                   | {query: "FROM query WHERE false", language: "esql"}                                   | {query: "FROM query WHERE true", language: "esql"}                                   | {query: "FROM query WHERE false", language: "esql"}                                   |
 ```
 
+#### **Scenario: `ABA` - Rule field is rule `type`**
+
+**Automation**: 1 integration test with mock rules + a set of unit tests for each algorithm
+
+```Gherkin
+Given <field_name> field is customized by the user (current version != base version)
+And <field_name> field is not updated by Elastic in this upgrade (target version == base version)
+Then for <field_name> field the diff algorithm should output the target version as the merged one with a non-solvable conflict
+And <field_name> field should be returned from the `upgrade/_review` API endpoint
+And <field_name> field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm | field_name | base_version | current_version | target_version | merged_version |
+| rule type | type       | "query"      | "eql"           | "query"        | "query"        |
+```
+
 ### Rule field has an update and doesn't have a custom value - `AAB`
 
-#### **Scenario: `AAB` - Rule field is any type**
+#### **Scenario: `AAB` - Rule field is any type except rule `type`**
 
 **Automation**: 10 integration tests with mock rules + a set of unit tests for each algorithm
 
@@ -151,9 +173,25 @@ Examples:
 | esql_query         | esql_query  | {query: "FROM query WHERE true", language: "esql"}                                   | {query: "FROM query WHERE true", language: "esql"}                                   | {query: "FROM query WHERE false", language: "esql"}                                  | {query: "FROM query WHERE false", language: "esql"}                                  |
 ```
 
+#### **Scenario: `AAB` - Rule field is rule `type`**
+
+**Automation**: 1 integration test with mock rules + a set of unit tests for each algorithm
+
+```Gherkin
+Given <field_name> field is not customized by the user (current version == base version)
+And <field_name> field is updated by Elastic in this upgrade (target version != base version)
+Then for <field_name> field the diff algorithm should output the target version as the merged one with a  non-solvable conflict
+And <field_name> field should be returned from the `upgrade/_review` API endpoint
+And <field_name> field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm | field_name | base_version | current_version | target_version | merged_version |
+| rule type | type       | "query"      | "query"         | "eql"          | "eql"          |
+```
+
 ### Rule field has an update and a custom value that are the same - `ABB`
 
-#### **Scenario: `ABB` - Rule field is any type**
+#### **Scenario: `ABB` - Rule field is any type except rule `type`**
 
 **Automation**: 10 integration tests with mock rules + a set of unit tests for each algorithm
 
@@ -179,7 +217,41 @@ Examples:
 | esql_query         | esql_query  | {query: "FROM query WHERE true", language: "esql"}                                   | {query: "FROM query WHERE false", language: "esql"}                                   | {query: "FROM query WHERE false", language: "esql"}                                   | {query: "FROM query WHERE false", language: "esql"}                                   |
 ```
 
+#### **Scenario: `ABB` - Rule field is rule `type`**
+
+**Automation**: 1 integration test with mock rules + a set of unit tests for each algorithm
+
+```Gherkin
+Given <field_name> field is customized by the user (current version != base version)
+And <field_name> field is updated by Elastic in this upgrade (target version != base version)
+And customized <field_name> field is the same as the Elastic update in this upgrade (current version == target version)
+Then for <field_name> field the diff algorithm should output the target version as the merged one with a non-solvable conflict
+And <field_name> field should be returned from the `upgrade/_review` API endpoint
+And <field_name> field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm | field_name | base_version | current_version | target_version | merged_version |
+| rule type | type       | "query"      | "eql"           | "eql"          | "eql"          |
+```
+
 ### Rule field has an update and a custom value that are NOT the same - `ABC`
+
+#### **Scenario: `ABC` - Rule field is rule `type`**
+
+**Automation**: 1 integration test with mock rules + a set of unit tests for the algorithms
+
+```Gherkin
+Given <field_name> field is customized by the user (current version != base version)
+And <field_name> field is updated by Elastic in this upgrade (target version != base version)
+And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
+Then for <field_name> field the diff algorithm should output the target version as the merged one with a non-solvable conflict
+And <field_name> field should be returned from the `upgrade/_review` API endpoint
+And <field_name> field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm | field_name | base_version | current_version | target_version | merged_version |
+| rule type | type       | "query"      | "eql"           | "threshold"    | "threshold"    |
+```
 
 #### **Scenario: `ABC` - Rule field is a number or single line string**
 
@@ -328,7 +400,7 @@ Examples:
 
 #### **Scenario: `-AA` - Rule field is any type**
 
-**Automation**: 9 integration tests with mock rules + a set of unit tests for each algorithm
+**Automation**: 11 integration tests with mock rules + a set of unit tests for each algorithm
 
 ```Gherkin
 Given at least 1 installed prebuilt rule has a new version available
@@ -340,6 +412,7 @@ And <field_name> field should not be shown in the upgrade preview UI
 
 Examples:
 | algorithm          | field_name  | base_version | current_version                                                                      | target_version                                                                       | merged_version                                                                       |
+| rule type          | type        | N/A          | "query"                                                                              | "query"                                                                              | "query"                                                                              |
 | single line string | name        | N/A          | "A"                                                                                  | "A"                                                                                  | "A"                                                                                  |
 | multi line string  | description | N/A          | "My description.\nThis is a second line."                                            | "My description.\nThis is a second line."                                            | "My description.\nThis is a second line."                                            |
 | number             | risk_score  | N/A          | 1                                                                                    | 1                                                                                    | 1                                                                                    |
@@ -437,4 +510,22 @@ And data_source field should be shown in the upgrade preview UI
 Examples:
 | algorithm    | base_version | current_version                                                     | target_version                           | merged_version                           |
 | data_source  | N/A          | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "data_view", "data_view_id": "A"} | {type: "data_view", "data_view_id": "A"} |
+```
+
+#### **Scenario: `-AB` - Rule field is rule `type`**
+
+**Automation**: 1 integration test with mock rules + a set of unit tests for the algorithm
+
+```Gherkin
+Given at least 1 installed prebuilt rule has a new version available
+And the base version of the rule cannot be determined
+And customized data_source field is different than the Elastic update in this upgrade (current version != target version)
+And current version and target version are not both array fields in data_source
+Then for data_source field the diff algorithm should output the target version as the merged version with a non-solvable conflict
+And data_source field should be returned from the `upgrade/_review` API endpoint
+And data_source field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm    | base_version | current_version | target_version | merged_version |
+| rule type    | N/A          | "query"         | "eql"          | "eql"          |
 ```
