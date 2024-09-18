@@ -266,6 +266,7 @@ export function AlertDetails() {
       'data-test-subj': 'relatedAlertsTab',
       content: (
         <RelatedAlerts
+          alert={alertDetail?.formatted}
           tags={alertDetail?.formatted.fields.tags}
           groups={alertDetail?.formatted.fields[ALERT_GROUP] as Group[]}
         />

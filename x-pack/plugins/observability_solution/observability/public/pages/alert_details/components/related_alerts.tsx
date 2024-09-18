@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
+
+import { observabilityAlertFeatureIds } from '../../../../common/constants';
+import { TopAlert } from '../../..';
 import {
   AlertSearchBarContainerState,
   defaultState as DEFAULT_STATE,
 } from '../../../components/alert_search_bar/containers/state_container';
-import { getGroupQueries } from '../helpers/get_related_alerts_query';
-
 import type { Group } from '../../../../common/typings';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { renderGroupPanel } from '../../../components/alerts_table/grouping/render_group_panel';
@@ -23,31 +26,32 @@ import { getAggregationsByGroupingField } from '../../../components/alerts_table
 import { DEFAULT_GROUPING_OPTIONS } from '../../../components/alerts_table/grouping/constants';
 import { ALERT_STATUS_FILTER } from '../../../components/alert_search_bar/constants';
 import { AlertsByGroupingAgg } from '../../../components/alerts_table/types';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { useKibana } from '../../../utils/kibana_react';
 import {
   alertSearchBarStateContainer,
   Provider,
   useAlertSearchBarStateContainer,
 } from '../../../components/alert_search_bar/containers';
-import { observabilityAlertFeatureIds } from '../../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID, SEARCH_BAR_URL_STORAGE_KEY } from '../../../constants';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useKibana } from '../../../utils/kibana_react';
 import { buildEsQuery } from '../../../utils/build_es_query';
 import { mergeBoolQueries } from '../../alerts/helpers/merge_bool_queries';
+import { getGroupQueries } from '../helpers/get_related_alerts_query';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
 const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
 
 interface Props {
-  tags?: string[];
+  alert?: TopAlert;
   groups?: Group[];
+  tags?: string[];
 }
 
 const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE, status: 'active' };
 const DEFAULT_FILTERS: Filter[] = [];
 
-export function InternalRelatedAlerts({ groups, tags }: Props) {
+export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
   const kibanaServices = useKibana().services;
   const {
     http,
@@ -62,6 +66,17 @@ export function InternalRelatedAlerts({ groups, tags }: Props) {
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
   const relatedAlertQuery = useRef(getGroupQueries(tags, groups));
+  const alertStart = alert?.fields[ALERT_START];
+  const alertEnd = alert?.fields[ALERT_END];
+
+  useEffect(() => {
+    if (alertStart) {
+      const defaultTimeRange = getPaddedAlertTimeRange(alertStart, alertEnd);
+      alertSearchBarStateProps.onRangeFromChange(defaultTimeRange.from);
+      alertSearchBarStateProps.onRangeToChange(defaultTimeRange.to);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alertStart, alertEnd]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
