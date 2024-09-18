@@ -18,7 +18,6 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
   EuiScreenReaderOnly,
-  useIsWithinBreakpoints,
   useEuiOverflowScroll,
   useEuiTheme,
 } from '@elastic/eui';
@@ -83,8 +82,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
     docLinks,
     services: { notifications, routeHistory },
   } = useServicesContext();
-
-  const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
   const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
@@ -314,13 +311,12 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           {currentTab === SHELL_TAB_ID && (
             <Editor
               loading={!done}
-              isVerticalLayout={isVerticalLayout}
               inputEditorValue={inputEditorValue}
               setInputEditorValue={setInputEditorValue}
             />
           )}
-          {currentTab === HISTORY_TAB_ID && <History isVerticalLayout={isVerticalLayout} />}
-          {currentTab === CONFIG_TAB_ID && <Config isVerticalLayout={isVerticalLayout} />}
+          {currentTab === HISTORY_TAB_ID && <History />}
+          {currentTab === CONFIG_TAB_ID && <Config />}
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" className="consoleVariablesBottomBar" />
         <EuiSplitPanel.Inner
