@@ -7,6 +7,7 @@
 import { jsonRt } from '@kbn/io-ts-utils';
 import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import * as t from 'io-ts';
+import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { entityTypeRt } from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { getLatestEntities } from './get_latest_entities';
@@ -32,7 +33,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
     const inventoryEsClient = createObservabilityEsClient({
       client: coreContext.elasticsearch.client.asCurrentUser,
       logger,
-      plugin: '@kbn/inventory-plugin',
+      plugin: `@kbn/${INVENTORY_APP_ID}-plugin`,
     });
 
     const { sortDirection, sortField, entityTypes } = params.query;

@@ -196,6 +196,7 @@ export function EntitiesGrid({
       columnVisibility={{ visibleColumns, setVisibleColumns }}
       rowCount={entities.length}
       renderCellValue={renderCellValue}
+      gridStyle={{ border: 'horizontal', header: 'shade' }}
       toolbarVisibility={{
         showColumnSelector: false,
         showSortSelector: false,
