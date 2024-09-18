@@ -40,6 +40,7 @@ import { CHART_TYPE } from '../explorer_constants';
 import { CHART_HEIGHT, TRANSPARENT_BACKGROUND } from './constants';
 import { filter } from 'rxjs';
 import { drawCursor } from './utils/draw_anomaly_explorer_charts_cursor';
+import { SCHEDULE_EVENT_MARKER_ENTITY } from '../../../../common/constants/charts';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
 const SCHEDULED_EVENT_MARKER_HEIGHT = 5;
@@ -158,12 +159,29 @@ export class ExplorerChartDistribution extends React.Component {
         .key((d) => d.entity)
         .entries(chartData)
         .sort((a, b) => {
+          // To display calendar event markers we populate the chart with fake data points.
+          // If a category has fake data points, it should be sorted to the end.
+          const aHasFakeData = a.values.some((d) => d.entity === SCHEDULE_EVENT_MARKER_ENTITY);
+          const bHasFakeData = b.values.some((d) => d.entity === SCHEDULE_EVENT_MARKER_ENTITY);
+
+          if (aHasFakeData && !bHasFakeData) {
+            return 1;
+          }
+
+          if (bHasFakeData && !aHasFakeData) {
+            return -1;
+          }
+
           return b.values.length - a.values.length;
         })
         .filter((d, i) => {
           // only filter for rare charts
           if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
-            return i < categoryLimit || d.key === highlight;
+            return (
+              i < categoryLimit ||
+              d.key === highlight ||
+              d.values.some((d) => d.entity === SCHEDULE_EVENT_MARKER_ENTITY)
+            );
           }
           return true;
         })
@@ -373,7 +391,8 @@ export class ExplorerChartDistribution extends React.Component {
         .orient('left')
         .innerTickSize(0)
         .outerTickSize(0)
-        .tickPadding(10);
+        .tickPadding(10)
+        .tickFormat((d) => (d === SCHEDULE_EVENT_MARKER_ENTITY ? null : d));
 
       if (fieldFormat !== undefined) {
         yAxis.tickFormat((d) => fieldFormat.convert(d, 'text'));
@@ -518,7 +537,8 @@ export class ExplorerChartDistribution extends React.Component {
       const tooltipData = [{ label: formattedDate }];
       const seriesKey = config.detectorLabel;
 
-      if (marker.entity !== undefined) {
+      // Hide entity for scheduled events with mocked value.
+      if (marker.entity !== undefined && marker.entity !== SCHEDULE_EVENT_MARKER_ENTITY) {
         tooltipData.push({
           label: i18n.translate('xpack.ml.explorer.distributionChart.entityLabel', {
             defaultMessage: 'entity',
@@ -590,7 +610,11 @@ export class ExplorerChartDistribution extends React.Component {
             });
           }
         }
-      } else if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
+      } else if (
+        chartType !== CHART_TYPE.EVENT_DISTRIBUTION &&
+        // Hide value for scheduled events with mocked value.
+        marker.entity !== SCHEDULE_EVENT_MARKER_ENTITY
+      ) {
         tooltipData.push({
           label: i18n.translate(
             'xpack.ml.explorer.distributionChart.valueWithoutAnomalyScoreLabel',

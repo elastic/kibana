@@ -49,6 +49,9 @@ WORKDIR ${KBN_DIR}
 
 # Node and NVM setup
 COPY .node-version /tmp/
+
+USER vscode
+
 RUN mkdir -p $NVM_DIR && \
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash && \
   . "$NVM_DIR/nvm.sh" && \
@@ -60,6 +63,8 @@ RUN mkdir -p $NVM_DIR && \
   echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.bashrc && \
   echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.zshrc  && \
   chown -R 1000:1000 "${HOME}/.npm"
+
+USER root
 
 # Reload the env everytime a new shell is opened incase the .env file changed.
 RUN echo "source $KBN_DIR/.devcontainer/scripts/env.sh" >> ${HOME}/.bashrc && \

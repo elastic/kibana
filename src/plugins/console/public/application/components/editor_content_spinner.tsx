@@ -8,12 +8,12 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiSkeletonText, EuiPageSection } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageSection } from '@elastic/eui';
 
 export const EditorContentSpinner: FunctionComponent = () => {
   return (
-    <EuiPageSection className="conApp__editor__spinner">
-      <EuiSkeletonText lines={10} />
+    <EuiPageSection alignment="center" grow={true} className="conApp__editor__spinner">
+      <EuiLoadingSpinner size="xxl" />
     </EuiPageSection>
   );
 };
