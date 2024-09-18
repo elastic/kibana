@@ -87,18 +87,6 @@ export const DashboardViewportComponent = () => {
     };
   }, [controlGroupApi]);
 
-  useEffect(() => {
-    if (!controlGroupApi) {
-      return;
-    }
-    const subscription = controlGroupApi.children$.subscribe((children) => {
-      setHasControls(Object.keys(children).length > 0);
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [controlGroupApi]);
-
   // Bug in main where panels are loaded before control filters are ready
   // Want to migrate to react embeddable controls with same behavior
   // TODO - do not load panels until control filters are ready
