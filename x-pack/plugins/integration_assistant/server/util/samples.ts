@@ -211,3 +211,45 @@ export function mergeSamples(objects: any[]): string {
 
   return JSON.stringify(result, null, 2);
 }
+
+export function flattenObjectsList(
+  obj: any[]
+): Array<{ name: string; type: string; description?: string }> {
+  const result = flattenObject(obj);
+
+  return sortListOfObjects(result);
+}
+
+function flattenObject(
+  obj: any[],
+  parentKey: string = '',
+  separator: string = '.'
+): Array<{ name: string; type: string; description?: string }> {
+  let result: Array<{ name: string; type: string; description?: string }> = [];
+
+  obj.forEach((element) => {
+    if (element.name) {
+      const newKey = parentKey ? `${parentKey}${separator}${element.name}` : element.name;
+
+      if (element.fields && Array.isArray(element.fields)) {
+        result = result.concat(flattenObject(element.fields, newKey, separator));
+      } else {
+        result.push({
+          name: newKey,
+          type: element.type,
+          description: element.description,
+        });
+      }
+    }
+  });
+
+  return result;
+}
+
+function sortListOfObjects(
+  objectsList: Array<{ name: string; type: string; description?: string }>
+): Array<{ name: string; type: string; description?: string }> {
+  return objectsList.sort((a, b) => {
+    return (a.name || '').localeCompare(b.name || '');
+  });
+}

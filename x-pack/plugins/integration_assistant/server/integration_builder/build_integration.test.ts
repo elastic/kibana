@@ -12,6 +12,7 @@ import * as DataStreamModule from './data_stream';
 import * as FieldsModule from './fields';
 import * as AgentModule from './agent';
 import * as PipelineModule from './pipeline';
+import * as ReadmeModule from './readme';
 import { DataStream, Docs, InputType, Pipeline, Integration } from '../../common';
 import { renderPackageManifestYAML } from './build_integration';
 import yaml from 'js-yaml';
@@ -24,6 +25,7 @@ jest.mock('./data_stream');
 jest.mock('./fields');
 jest.mock('./agent');
 jest.mock('./pipeline');
+jest.mock('./readme');
 
 (Utils.generateUniqueId as jest.Mock).mockReturnValue(mockedId);
 
@@ -108,18 +110,7 @@ describe('buildPackage', () => {
     // _dev files
     expect(Utils.ensureDirSync).toHaveBeenCalledWith(`${integrationPath}/_dev/build`);
     expect(Utils.createSync).toHaveBeenCalledWith(
-      `${integrationPath}/_dev/build/docs/README.md`,
-      expect.any(String)
-    );
-    expect(Utils.createSync).toHaveBeenCalledWith(
       `${integrationPath}/_dev/build/build.yml`,
-      expect.any(String)
-    );
-
-    // Docs files
-    expect(Utils.ensureDirSync).toHaveBeenCalledWith(`${integrationPath}/docs/`);
-    expect(Utils.createSync).toHaveBeenCalledWith(
-      `${integrationPath}/docs/README.md`,
       expect.any(String)
     );
 
@@ -209,6 +200,29 @@ describe('buildPackage', () => {
       secondDatastreamPath,
       secondDataStreamDocs
     );
+  });
+
+  it('Should call createReadme once', async () => {
+    jest.clearAllMocks();
+
+    const firstDataStreamFields = [
+      { name: 'name 1', description: 'description 1', type: 'type 1' },
+    ];
+
+    const secondDataStreamFields = [
+      { name: 'name 2', description: 'description 2', type: 'type 2' },
+      { name: 'name 3', description: 'description 3', type: 'type 3' },
+    ];
+
+    (FieldsModule.createFieldMapping as jest.Mock).mockReturnValueOnce(firstDataStreamFields);
+    (FieldsModule.createFieldMapping as jest.Mock).mockReturnValueOnce(secondDataStreamFields);
+
+    await buildIntegrationModule.buildPackage(testIntegration);
+
+    expect(ReadmeModule.createReadme).toHaveBeenCalledWith(integrationPath, testIntegration.name, [
+      { datastream: firstDatastreamName, fields: firstDataStreamFields },
+      { datastream: secondDatastreamName, fields: secondDataStreamFields },
+    ]);
   });
 });
 

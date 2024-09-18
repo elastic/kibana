@@ -71,4 +71,49 @@ describe('createFieldMapping', () => {
       expectedFields
     );
   });
+  it('Should return all fields flattened', async () => {
+    const docs: Docs = [
+      {
+        key: 'foo',
+        anotherKey: 'bar',
+      },
+    ];
+
+    const basedFields = `- name: data_stream.type
+  type: constant_keyword
+  description: Data stream type.
+- name: data_stream.dataset
+  type: constant_keyword
+- name: "@timestamp"
+  type: date
+  description: Event timestamp.
+`;
+    (nunjucks.render as jest.Mock).mockReturnValue(basedFields);
+
+    const fieldsResult = createFieldMapping(packageName, dataStreamName, dataStreamPath, docs);
+
+    expect(fieldsResult).toEqual([
+      { name: '@timestamp', type: 'date', description: 'Event timestamp.' },
+      {
+        description: undefined,
+        name: 'anotherKey',
+        type: 'keyword',
+      },
+      {
+        description: undefined,
+        name: 'data_stream.dataset',
+        type: 'constant_keyword',
+      },
+      {
+        description: 'Data stream type.',
+        name: 'data_stream.type',
+        type: 'constant_keyword',
+      },
+      {
+        description: undefined,
+        name: 'key',
+        type: 'keyword',
+      },
+    ]);
+  });
 });
