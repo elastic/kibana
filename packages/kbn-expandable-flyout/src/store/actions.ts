@@ -21,6 +21,8 @@ export enum ActionType {
   previousPreviewPanel = 'previous_preview_panel',
   closeFlyout = 'close_flyout',
   urlChanged = 'urlChanged',
+
+  changePushVsOverlay = 'change_push_overlay',
 }
 
 export const openPanelsAction = createAction<{
@@ -120,3 +122,15 @@ export const urlChangedAction = createAction<{
    */
   id: string;
 }>(ActionType.urlChanged);
+
+export const changePushVsOverlayAction = createAction<{
+  /**
+   * Type of flyout to render, value and only be 'push' or 'overlay'
+   */
+  type: 'push' | 'overlay';
+  /**
+   * Used in the redux middleware to decide if the value needs to be saved to local storage.
+   * This is used to avoid saving the value to local storage when the value is changed by code instead of by a user action.
+   */
+  savedToLocalStorage: boolean;
+}>(ActionType.changePushVsOverlay);

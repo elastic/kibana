@@ -114,6 +114,9 @@ export const Right: Story<void> = () => {
         },
       },
     },
+    ui: {
+      pushVsOverlay: 'overlay',
+    },
   };
 
   return (
@@ -140,6 +143,9 @@ export const Left: Story<void> = () => {
           preview: undefined,
         },
       },
+    },
+    ui: {
+      pushVsOverlay: 'overlay',
     },
   };
 
@@ -171,6 +177,9 @@ export const Preview: Story<void> = () => {
           ],
         },
       },
+    },
+    ui: {
+      pushVsOverlay: 'overlay',
     },
   };
 
@@ -206,6 +215,9 @@ export const MultiplePreviews: Story<void> = () => {
         },
       },
     },
+    ui: {
+      pushVsOverlay: 'overlay',
+    },
   };
 
   return (
@@ -231,6 +243,9 @@ export const CollapsedPushVsOverlay: Story<void> = () => {
         },
       },
     },
+    ui: {
+      pushVsOverlay: 'push',
+    },
   };
 
   return (
@@ -255,6 +270,9 @@ export const ExpandedPushVsOverlay: Story<void> = () => {
         },
       },
     },
+    ui: {
+      pushVsOverlay: 'push',
+    },
   };
 
   return (
@@ -278,6 +296,9 @@ export const DisableTypeSelection: Story<void> = () => {
           preview: undefined,
         },
       },
+    },
+    ui: {
+      pushVsOverlay: 'overlay',
     },
   };
 
