@@ -15,8 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  // flaky
-  describe.skip('console app', function testComments() {
+  describe('console app', function testComments() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');

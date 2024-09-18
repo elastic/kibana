@@ -850,6 +850,7 @@ describe('Observability AI Assistant client', () => {
               },
             },
           ],
+          useSimulatedFunctionCalling: false,
         });
       });
 
