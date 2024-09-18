@@ -88,7 +88,6 @@ export default function ({ getService }: FtrProviderContext) {
         const rule = await ruleHelper.createCustomStatusRule({
           params,
           name: 'When down 5 times from 1 location',
-          monitorIds: [monitor.id],
         });
         ruleId = rule.id;
         expect(rule.params).to.eql(params);
