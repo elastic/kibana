@@ -17,13 +17,13 @@
 import { z } from '@kbn/zod';
 
 import {
+  PackageName,
+  DataStreamName,
   LogSamples,
   Connector,
   LangSmithOptions,
-  DataStreamName,
-  PackageName,
-} from '../model/common_attributes';
-import { AnalyzeLogsAPIResponse } from '../model/response_schemas';
+} from '../model/common_attributes.gen';
+import { AnalyzeLogsAPIResponse } from '../model/response_schemas.gen';
 
 export type AnalyzeLogsRequestBody = z.infer<typeof AnalyzeLogsRequestBody>;
 export const AnalyzeLogsRequestBody = z.object({

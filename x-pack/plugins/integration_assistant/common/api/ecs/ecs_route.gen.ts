@@ -20,13 +20,13 @@ import {
   PackageName,
   DataStreamName,
   RawSamples,
+  SamplesFormat,
   Mapping,
   Connector,
   LangSmithOptions,
-  SamplesFormat,
-} from '../model/common_attributes';
-import { ESProcessorItem } from '../model/processor_attributes';
-import { EcsMappingAPIResponse } from '../model/response_schemas';
+} from '../model/common_attributes.gen';
+import { ESProcessorItem } from '../model/processor_attributes.gen';
+import { EcsMappingAPIResponse } from '../model/response_schemas.gen';
 
 export type EcsMappingRequestBody = z.infer<typeof EcsMappingRequestBody>;
 export const EcsMappingRequestBody = z.object({

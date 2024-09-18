@@ -16,8 +16,8 @@
 
 import { z } from '@kbn/zod';
 
-import { Docs, Mapping, Pipeline, SamplesFormat } from './common_attributes';
-import { ESProcessorItem } from './processor_attributes';
+import { Mapping, Pipeline, Docs, SamplesFormat } from './common_attributes.gen';
+import { ESProcessorItem } from './processor_attributes.gen';
 
 export type EcsMappingAPIResponse = z.infer<typeof EcsMappingAPIResponse>;
 export const EcsMappingAPIResponse = z.object({
@@ -52,9 +52,9 @@ export const CheckPipelineAPIResponse = z.object({
 
 export type AnalyzeLogsAPIResponse = z.infer<typeof AnalyzeLogsAPIResponse>;
 export const AnalyzeLogsAPIResponse = z.object({
+  additionalProcessors: z.array(ESProcessorItem).optional(),
   results: z.object({
     samplesFormat: SamplesFormat,
     parsedSamples: z.array(z.string()),
   }),
-  additionalProcessors: z.array(ESProcessorItem).optional(),
 });
