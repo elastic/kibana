@@ -1,5 +1,5 @@
 {
-  "query_ruleset.put": {
+  "query_rules.put_ruleset": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
