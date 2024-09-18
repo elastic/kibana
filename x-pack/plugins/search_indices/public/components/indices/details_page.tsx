@@ -7,10 +7,10 @@
 
 import {
   EuiPageSection,
-  EuiSpacer,
   EuiButton,
   EuiPageTemplate,
   EuiFlexItem,
+  EuiTabbedContent,
   EuiFlexGroup,
   EuiPopover,
   EuiButtonIcon,
@@ -27,13 +27,23 @@ import { i18n } from '@kbn/i18n';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
+import { ConnectionDetails } from '../connection_details/connection_details';
+import { QuickStats } from '../quick_stats/quick_stats';
+import { useIndexMapping } from '../../hooks/api/use_index_mappings';
+import { IndexDocuments } from '../index_documents/index_documents';
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const { console: consolePlugin, docLinks, application } = useKibana().services;
-  const { data: index, refetch, isSuccess, isInitialLoading } = useIndex(indexName);
+
+  const { data: index, refetch, isError: isIndexError, isInitialLoading } = useIndex(indexName);
+  const {
+    data: mappings,
+    isError: isMappingsError,
+    isInitialLoading: isMappingsInitialLoading,
+  } = useIndexMapping(indexName);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -87,7 +97,7 @@ export const SearchIndexDetailsPage = () => {
       />
     </EuiPopover>
   );
-  if (isInitialLoading) {
+  if (isInitialLoading || isMappingsInitialLoading) {
     return (
       <SectionLoading>
         {i18n.translate('xpack.searchIndices.loadingDescription', {
@@ -103,9 +113,10 @@ export const SearchIndexDetailsPage = () => {
       restrictWidth={false}
       data-test-subj="searchIndicesDetailsPage"
       grow={false}
-      bottomBorder={false}
+      panelled
+      bottomBorder
     >
-      {!isSuccess || !index ? (
+      {isIndexError || isMappingsError || !index || !mappings ? (
         <IndexloadingError
           indexName={indexName}
           navigateToIndexListPage={navigateToIndexListPage}
@@ -147,18 +158,46 @@ export const SearchIndexDetailsPage = () => {
               </EuiFlexGroup>,
             ]}
           />
-          <EuiSpacer size="l" />
-
-          {isShowingDeleteModal && (
-            <DeleteIndexModal
-              onCancel={() => setShowDeleteIndexModal(!isShowingDeleteModal)}
-              indexName={indexName}
-              navigateToIndexListPage={navigateToIndexListPage}
-            />
-          )}
-
-          <div data-test-subj="searchIndexDetailsContent" />
+          <EuiPageTemplate.Section grow={false}>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <ConnectionDetails />
+                  </EuiFlexItem>
+                  <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup>
+                  <QuickStats index={index} mappings={mappings} />
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTabbedContent
+                    tabs={[
+                      {
+                        id: 'data',
+                        name: i18n.translate('xpack.searchIndices.documentsTabLabel', {
+                          defaultMessage: 'Data',
+                        }),
+                        content: <IndexDocuments indexName={indexName} />,
+                      },
+                    ]}
+                  />
+                </EuiFlexItem>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageTemplate.Section>
         </>
+      )}
+      {isShowingDeleteModal && (
+        <DeleteIndexModal
+          onCancel={() => setShowDeleteIndexModal(!isShowingDeleteModal)}
+          indexName={indexName}
+          navigateToIndexListPage={navigateToIndexListPage}
+        />
       )}
       {embeddableConsole}
     </EuiPageTemplate>

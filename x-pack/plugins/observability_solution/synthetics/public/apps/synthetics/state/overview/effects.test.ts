@@ -7,7 +7,7 @@
 
 import sagaHelper from 'redux-saga-testing';
 import { call, put, select } from 'redux-saga/effects';
-import { TrendKey, TrendRequest, TrendTable } from '../../../../../common/types';
+import { GetTrendPayload, TrendKey, TrendRequest, TrendTable } from '../../../../../common/types';
 import { TRENDS_CHUNK_SIZE, fetchTrendEffect, refreshTrends } from './effects';
 import { trendStatsBatch } from './actions';
 import { fetchOverviewTrendStats as trendsApi } from './api';
@@ -48,7 +48,9 @@ describe('overview effects', () => {
     });
 
     it('sends trends stats success action', (putResult) => {
-      expect(putResult).toEqual(put(trendStatsBatch.success(firstChunkResponse)));
+      expect(putResult).toEqual(
+        put(trendStatsBatch.success({ trendStats: firstChunkResponse, batch: firstChunk }))
+      );
     });
 
     it('calls the api for the second chunk', (callResult) => {
@@ -57,7 +59,9 @@ describe('overview effects', () => {
     });
 
     it('sends trends stats success action', (putResult) => {
-      expect(putResult).toEqual(put(trendStatsBatch.success(secondChunkResponse)));
+      expect(putResult).toEqual(
+        put(trendStatsBatch.success({ trendStats: secondChunkResponse, batch: secondChunk }))
+      );
     });
 
     it('terminates', (result) => {
@@ -111,6 +115,10 @@ describe('overview effects', () => {
       },
     };
 
+    const batch = [
+      { configId: 'monitor1', locationId: 'location', schedule: '3' },
+      { configId: 'monitor3', locationId: 'location', schedule: '3' },
+    ];
     const apiResponse: TrendTable = {
       monitor1: {
         configId: 'monitor1',
@@ -142,6 +150,11 @@ describe('overview effects', () => {
       },
     };
 
+    const successPayload: GetTrendPayload = {
+      trendStats: apiResponse,
+      batch,
+    };
+
     it('selects the trends in the table', (selectResult) => {
       expect(selectResult).toEqual(select(selectOverviewTrends));
 
@@ -161,18 +174,13 @@ describe('overview effects', () => {
     });
 
     it('calls the api for the first chunk', (callResult) => {
-      expect(callResult).toEqual(
-        call(trendsApi, [
-          { configId: 'monitor1', locationId: 'location', schedule: '3' },
-          { configId: 'monitor3', locationId: 'location', schedule: '3' },
-        ])
-      );
+      expect(callResult).toEqual(call(trendsApi, batch));
 
       return apiResponse;
     });
 
     it('sends trends stats success action', (putResult) => {
-      expect(putResult).toEqual(put(trendStatsBatch.success(apiResponse)));
+      expect(putResult).toEqual(put(trendStatsBatch.success(successPayload)));
     });
   });
 });
