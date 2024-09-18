@@ -86,4 +86,9 @@ export const alertProducersData: Record<AlertsTableSupportedConsumers, AlertProd
     displayName: 'Example',
     icon: 'beaker',
   },
+  [AlertConsumers.DISCOVER]: {
+    displayName: STACK_DISPLAY_NAME,
+    icon: 'managementApp',
+    subFeatureIds: stackFeatureIds,
+  },
 };

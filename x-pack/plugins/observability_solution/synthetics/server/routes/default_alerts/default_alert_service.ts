@@ -158,7 +158,7 @@ export class DefaultAlertService {
         minimumRuleInterval
       );
     } else {
-      const rulesClient = (await this.context.alerting)?.getRulesClient();
+      const rulesClient = await (await this.context.alerting)?.getRulesClient();
       await rulesClient.bulkDeleteRules({
         filter: `alert.attributes.alertTypeId:"${SYNTHETICS_STATUS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
       });
@@ -174,7 +174,7 @@ export class DefaultAlertService {
         minimumRuleInterval
       );
     } else {
-      const rulesClient = (await this.context.alerting)?.getRulesClient();
+      const rulesClient = await (await this.context.alerting)?.getRulesClient();
       await rulesClient.bulkDeleteRules({
         filter: `alert.attributes.alertTypeId:"${SYNTHETICS_TLS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
       });

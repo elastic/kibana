@@ -52,7 +52,7 @@ export const getQuery = ({
       },
     },
   },
-  feature_ids: ruleTypeIds,
+  rule_type_ids: ruleTypeIds,
   query: {
     bool: {
       filter: [

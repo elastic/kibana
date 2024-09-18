@@ -16,6 +16,7 @@ import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { renderGroupPanel } from './grouping/render_group_panel';
 import { rulesLocatorID } from '../../../common';
 import { ALERT_STATUS_FILTER } from '../../components/alert_search_bar/constants';
@@ -45,7 +46,6 @@ import { getGroupStats } from './grouping/get_group_stats';
 import { getAggregationsByGroupingField } from './grouping/get_aggregations_by_grouping_field';
 import { DEFAULT_GROUPING_OPTIONS } from './grouping/constants';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
-import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -279,7 +279,7 @@ function InternalAlertsPage() {
                   return (
                     <AlertsStateTable
                       id={ALERTS_TABLE_ID}
-                      featureIds={observabilityAlertFeatureIds}
+                      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
                       configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                       query={mergeBoolQueries(esQuery, groupQuery)}
                       showAlertStatusWithFlapping

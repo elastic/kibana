@@ -8,12 +8,11 @@
  */
 
 import React from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsGroupingProps } from '../types';
 
 export const mockGroupingId = 'test';
 
-export const mockRuleTypeIds = [AlertConsumers.STACK_ALERTS];
+export const mockRuleTypeIds = ['.es-query'];
 
 export const mockDate = {
   from: '2020-07-07T08:20:18.966Z',

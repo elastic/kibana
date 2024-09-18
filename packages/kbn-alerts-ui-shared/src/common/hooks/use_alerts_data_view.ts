@@ -97,7 +97,7 @@ export const useAlertsDataView = ({
 }: UseAlertsDataViewParams): UseAlertsDataViewResult => {
   const includesSecurity = ruleTypeIds.some(isSiemRuleType);
   const isOnlySecurity = ruleTypeIds.every(isSiemRuleType);
-  const hasMixedFeatureIds = !isOnlySecurity;
+  const hasMixedFeatureIds = !isOnlySecurity && includesSecurity;
 
   const {
     data: indexNames,
@@ -180,6 +180,7 @@ export const useAlertsDataView = ({
           isLoadingFields;
       }
     }
+
     return {
       dataView,
       isLoading,

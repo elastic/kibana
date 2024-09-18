@@ -41,6 +41,7 @@ const mockServices = {
   toasts: notificationServiceMock.createStartContract().toasts,
   dataViewsService: dataViewPluginMocks.createStartContract(),
 };
+
 mockServices.dataViewsService.create.mockResolvedValue(mockDataView);
 
 const queryClient = new QueryClient(testQueryClientConfig);

@@ -157,7 +157,7 @@ describe('useColumns', () => {
       () =>
         useColumns({
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -215,7 +215,7 @@ describe('useColumns', () => {
         useColumns({
           alertsFields,
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,

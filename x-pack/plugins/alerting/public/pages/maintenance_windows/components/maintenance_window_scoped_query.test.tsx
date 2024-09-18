@@ -46,7 +46,7 @@ describe('MaintenanceWindowScopedQuery', () => {
   it('renders correctly', () => {
     appMockRenderer.render(
       <MaintenanceWindowScopedQuery
-        ruleTypeIds={['observability', 'management', 'securitySolution']}
+        ruleTypeIds={['apm', '.es-query', 'siem.esqlRule']}
         query={''}
         filters={[]}
         onQueryChange={jest.fn()}
@@ -59,7 +59,7 @@ describe('MaintenanceWindowScopedQuery', () => {
   it('should hide the search bar if isEnabled is false', () => {
     appMockRenderer.render(
       <MaintenanceWindowScopedQuery
-        ruleTypeIds={['observability', 'management', 'securitySolution']}
+        ruleTypeIds={['apm', '.es-query', 'siem.esqlRule']}
         isEnabled={false}
         query={''}
         filters={[]}
@@ -73,7 +73,7 @@ describe('MaintenanceWindowScopedQuery', () => {
   it('should render loading if isLoading is true', () => {
     appMockRenderer.render(
       <MaintenanceWindowScopedQuery
-        ruleTypeIds={['observability', 'management', 'securitySolution']}
+        ruleTypeIds={['apm', '.es-query', 'siem.esqlRule']}
         isLoading={true}
         query={''}
         filters={[]}

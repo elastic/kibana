@@ -29,6 +29,7 @@ export const AlertConsumers = {
   EXAMPLE: 'AlertingExample',
   MONITORING: 'monitoring',
   ALERTS: 'alerts',
+  DISCOVER: 'discover',
 } as const;
 export type AlertConsumers = (typeof AlertConsumers)[keyof typeof AlertConsumers];
 export type STATUS_VALUES = 'open' | 'acknowledged' | 'closed' | 'in-progress'; // TODO: remove 'in-progress' after migration to 'acknowledged'

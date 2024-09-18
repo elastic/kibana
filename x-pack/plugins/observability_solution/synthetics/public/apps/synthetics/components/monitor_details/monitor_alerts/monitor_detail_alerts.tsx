@@ -6,7 +6,11 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  SYNTHETICS_RULE_TYPE_IDS,
+  UPTIME_RULE_TYPE_IDS,
+} from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useRefreshedRangeFromUrl } from '../../../hooks';
@@ -15,6 +19,7 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 export const MONITOR_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
+const ruleTypeIds = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
 
 export function MonitorDetailsAlerts() {
   const {
@@ -44,7 +49,7 @@ export function MonitorDetailsAlerts() {
             configurationId={AlertConsumers.OBSERVABILITY}
             id={MONITOR_ALERTS_TABLE_ID}
             data-test-subj="monitorAlertsTable"
-            featureIds={[AlertConsumers.UPTIME]}
+            ruleTypeIds={ruleTypeIds}
             query={{
               bool: {
                 filter: [
