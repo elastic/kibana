@@ -93,7 +93,22 @@ export const AutoDetectPanel: FunctionComponent = () => {
                 </EuiText>
                 <EuiSpacer size="s" />
                 <EuiFlexGroup gutterSize="s">
-                  {['Apache', 'Docker', 'Nginx', 'System', 'Custom .log files'].map((item) => (
+                  {[
+                    'Apache',
+                    'Docker',
+                    'Nginx',
+                    'System',
+                    'MySQL',
+                    'PostgreSQL',
+                    'Redis',
+                    'HAProxy',
+                    'Kafka',
+                    'RabbitMQ',
+                    'Prometheus',
+                    'Tomcat',
+                    'MongoDB',
+                    'Custom .log files',
+                  ].map((item) => (
                     <EuiFlexItem key={item} grow={false}>
                       <EuiBadge color="hollow">{item}</EuiBadge>
                     </EuiFlexItem>
