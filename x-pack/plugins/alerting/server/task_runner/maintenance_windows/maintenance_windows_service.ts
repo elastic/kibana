@@ -59,8 +59,16 @@ export class MaintenanceWindowsService {
       spaceId: opts.spaceId,
     });
 
+    // Filter maintenance windows on current time
+    const now = Date.now();
+    const currentlyActiveMaintenanceWindows = activeMaintenanceWindows.filter((mw) => {
+      return mw.events.some((event) => {
+        return new Date(event.gte).getTime() <= now && new Date(event.lte).getTime;
+      });
+    });
+
     // Only look at maintenance windows for this rule category
-    const maintenanceWindows = activeMaintenanceWindows.filter(({ categoryIds }) => {
+    const maintenanceWindows = currentlyActiveMaintenanceWindows.filter(({ categoryIds }) => {
       // If category IDs array doesn't exist: allow all
       if (!Array.isArray(categoryIds)) {
         return true;
@@ -126,7 +134,9 @@ export class MaintenanceWindowsService {
   ): Promise<MaintenanceWindow[]> {
     return await withAlertingSpan('alerting:load-maintenance-windows', async () => {
       const maintenanceWindowClient = this.options.getMaintenanceWindowClientWithRequest(request);
-      const activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows();
+      const activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows(
+        this.cacheIntervalMs
+      );
       this.windows.set(spaceId, {
         lastUpdated: now,
         activeMaintenanceWindows,

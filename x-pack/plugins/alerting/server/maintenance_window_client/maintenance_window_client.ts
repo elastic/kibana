@@ -85,6 +85,6 @@ export class MaintenanceWindowClient {
   public bulkGet = (
     params: BulkGetMaintenanceWindowsParams
   ): Promise<BulkGetMaintenanceWindowsResult> => bulkGetMaintenanceWindows(this.context, params);
-  public getActiveMaintenanceWindows = (): Promise<MaintenanceWindow[]> =>
-    getActiveMaintenanceWindows(this.context);
+  public getActiveMaintenanceWindows = (cacheIntervalMs?: number): Promise<MaintenanceWindow[]> =>
+    getActiveMaintenanceWindows(this.context, cacheIntervalMs);
 }

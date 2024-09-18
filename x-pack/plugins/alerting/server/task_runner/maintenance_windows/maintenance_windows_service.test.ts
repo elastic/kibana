@@ -370,4 +370,56 @@ describe('MaintenanceWindowsService', () => {
 
     expect(alertingEventLogger.setMaintenanceWindowIds).not.toHaveBeenCalled();
   });
+
+  test('should filter active maintenance windows on current time', async () => {
+    const mw = [
+      {
+        ...getMockMaintenanceWindow(),
+        events: [
+          {
+            gte: '2023-02-27T00:00:00.000Z',
+            lte: '2023-02-28T00:00:00.000Z',
+          },
+          {
+            gte: '2023-03-01T00:00:00.000Z',
+            lte: '2023-03-02T00:00:00.000Z',
+          },
+        ],
+        eventStartTime: new Date().toISOString(),
+        eventEndTime: new Date().toISOString(),
+        status: MaintenanceWindowStatus.Running,
+        id: 'test-id1',
+      },
+      {
+        ...getMockMaintenanceWindow(),
+        events: [
+          {
+            // maintenance window starts one minute in the future
+            gte: '2023-02-27T08:16:00.000Z',
+            lte: '2023-02-28T00:00:00.000Z',
+          },
+        ],
+        eventStartTime: new Date().toISOString(),
+        eventEndTime: new Date().toISOString(),
+        status: MaintenanceWindowStatus.Running,
+        id: 'test-id2',
+      },
+    ];
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(mw);
+    const maintenanceWindowsService = new MaintenanceWindowsService({
+      getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+      logger,
+    });
+
+    const windows = await maintenanceWindowsService.loadMaintenanceWindows({
+      request: fakeRequest,
+      spaceId: 'default',
+      eventLogger: alertingEventLogger,
+      ruleTypeCategory: 'securitySolution',
+    });
+    expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalledTimes(1);
+
+    expect(windows.maintenanceWindows).toEqual([mw[0]]);
+    expect(windows.maintenanceWindowsWithoutScopedQueryIds).toEqual(['test-id1']);
+  });
 });
