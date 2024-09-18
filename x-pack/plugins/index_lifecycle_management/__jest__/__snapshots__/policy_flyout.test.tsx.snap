@@ -212,184 +212,189 @@ exports[`View policy flyout shows all phases 1`] = `
         <div
           class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        <dl
+          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          data-type="row"
         >
-          Rollover
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Rollover
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Maximum primary shard size: 
-            <strong>
-              50gb
-            </strong>
-          </div>
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Maximum docs in the primary shard: 
-            <strong>
-              25
-            </strong>
-          </div>
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Maximum age: 
-            <strong>
-              30d
-            </strong>
-          </div>
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Maximum documents: 
-            <strong>
-              235
-            </strong>
-          </div>
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Maximum index size: 
-            <strong>
-              2gb
-            </strong>
-             
-            <span
-              class="euiBadge emotion-euiBadge-warning"
-              title="Deprecated"
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
             >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum primary shard size: 
+              <strong>
+                50gb
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum docs in the primary shard: 
+              <strong>
+                25
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum age: 
+              <strong>
+                30d
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum documents: 
+              <strong>
+                235
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum index size: 
+              <strong>
+                2gb
+              </strong>
+               
               <span
-                class="euiBadge__content emotion-euiBadge__content"
+                class="euiBadge emotion-euiBadge-warning"
+                title="Deprecated"
               >
                 <span
-                  class="euiBadge__text emotion-euiBadge__text"
+                  class="euiBadge__content emotion-euiBadge__content"
                 >
-                  Deprecated
+                  <span
+                    class="euiBadge__text emotion-euiBadge__text"
+                  >
+                    Deprecated
+                  </span>
                 </span>
               </span>
-            </span>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Force merge
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
+            </div>
+          </dd>
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Force merge
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Number of segments: 
-            <strong>
-              3
-            </strong>
-          </div>
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Number of segments: 
+              <strong>
+                3
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Compress stored fields: 
+              <strong>
+                Yes
+              </strong>
+            </div>
+          </dd>
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Shrink
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Compress stored fields: 
-            <strong>
-              Yes
-            </strong>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Shrink
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Number of primary shards: 
+              <strong>
+                1
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Allow writes after shrink: 
+              <strong>
+                No
+              </strong>
+            </div>
+          </dd>
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Read only
+          </dt>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Index priority
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Number of primary shards: 
-            <strong>
-              1
-            </strong>
-          </div>
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              100
+            </div>
+          </dd>
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Allow writes after shrink: 
-            <strong>
-              No
-            </strong>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Read only
-        </dt>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Index priority
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            100
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+        </dl>
         <div
           class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
@@ -416,194 +421,199 @@ exports[`View policy flyout shows all phases 1`] = `
         <div
           class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        <dl
+          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          data-type="row"
         >
-          Move data into phase when
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Move data into phase when
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            3d old
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Replicas
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Number of replicas: 
-            <strong>
-              3
-            </strong>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Shrink
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Maximum primary shard size: 
-            <strong>
-              4gb
-            </strong>
-          </div>
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Allow writes after shrink: 
-            <strong>
-              No
-            </strong>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Force merge
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Number of segments: 
-            <strong>
-              44
-            </strong>
-          </div>
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Compress stored fields: 
-            <strong>
-              Yes
-            </strong>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Downsample
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Downsampling interval: 
-            <strong>
-              1d
-            </strong>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Data allocation
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Using warm nodes 
-            <span
-              class="euiBadge emotion-euiBadge-success"
-              title="Recommended"
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
             >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              3d old
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Replicas
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Number of replicas: 
+              <strong>
+                3
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Shrink
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum primary shard size: 
+              <strong>
+                4gb
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Allow writes after shrink: 
+              <strong>
+                No
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Force merge
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Number of segments: 
+              <strong>
+                44
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Compress stored fields: 
+              <strong>
+                Yes
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Downsample
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Downsampling interval: 
+              <strong>
+                1d
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Data allocation
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Using warm nodes 
               <span
-                class="euiBadge__content emotion-euiBadge__content"
+                class="euiBadge emotion-euiBadge-success"
+                title="Recommended"
               >
                 <span
-                  class="euiBadge__text emotion-euiBadge__text"
+                  class="euiBadge__content emotion-euiBadge__content"
                 >
-                  Recommended
+                  <span
+                    class="euiBadge__text emotion-euiBadge__text"
+                  >
+                    Recommended
+                  </span>
                 </span>
               </span>
-            </span>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Index priority
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
+            </div>
+          </dd>
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Index priority
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            50
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              50
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+        </dl>
         <div
           class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
@@ -630,149 +640,154 @@ exports[`View policy flyout shows all phases 1`] = `
         <div
           class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        <dl
+          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          data-type="row"
         >
-          Move data into phase when
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Move data into phase when
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            55d old
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Searchable snapshot
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Snapshot repository: 
-            <code>
-              found-snapshots
-            </code>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Replicas
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Number of replicas: 
-            <strong>
-              3
-            </strong>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Downsample
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Downsampling interval: 
-            <strong>
-              4d
-            </strong>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Data allocation
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Using cold nodes 
-            <span
-              class="euiBadge emotion-euiBadge-success"
-              title="Recommended"
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
             >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              55d old
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Searchable snapshot
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Snapshot repository: 
+              <code>
+                found-snapshots
+              </code>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Replicas
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Number of replicas: 
+              <strong>
+                3
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Downsample
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Downsampling interval: 
+              <strong>
+                4d
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Data allocation
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Using cold nodes 
               <span
-                class="euiBadge__content emotion-euiBadge__content"
+                class="euiBadge emotion-euiBadge-success"
+                title="Recommended"
               >
                 <span
-                  class="euiBadge__text emotion-euiBadge__text"
+                  class="euiBadge__content emotion-euiBadge__content"
                 >
-                  Recommended
+                  <span
+                    class="euiBadge__text emotion-euiBadge__text"
+                  >
+                    Recommended
+                  </span>
                 </span>
               </span>
-            </span>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Index priority
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
+            </div>
+          </dd>
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Index priority
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            0
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              0
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+        </dl>
         <div
           class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
@@ -799,49 +814,54 @@ exports[`View policy flyout shows all phases 1`] = `
         <div
           class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        <dl
+          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          data-type="row"
         >
-          Move data into phase when
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Move data into phase when
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            555d old
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Searchable snapshot
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              555d old
+            </div>
+          </dd>
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Searchable snapshot
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            Snapshot repository: 
-            <code>
-              found-snapshots
-            </code>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Snapshot repository: 
+              <code>
+                found-snapshots
+              </code>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+        </dl>
         <div
           class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
@@ -868,48 +888,53 @@ exports[`View policy flyout shows all phases 1`] = `
         <div
           class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        <dl
+          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          data-type="row"
         >
-          Move data into phase when
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Move data into phase when
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            7365d old
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          Wait for snapshot policy
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              7365d old
+            </div>
+          </dd>
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Wait for snapshot policy
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            <code>
-              cloud-snapshot-policy
-            </code>
-          </div>
-        </dd>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <code>
+                cloud-snapshot-policy
+              </code>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+        </dl>
         <div
           class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
