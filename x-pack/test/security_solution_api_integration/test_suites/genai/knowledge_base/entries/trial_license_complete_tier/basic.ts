@@ -6,43 +6,22 @@
  */
 
 import expect from 'expect';
-import {
-  DocumentEntryCreateFields,
-  DocumentEntryType,
-  IndexEntryCreateFields,
-  IndexEntryType,
-} from '@kbn/elastic-assistant-common';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createEntry } from '../utils/create_entry';
-import { deleteTinyElser, installTinyElser, setupKnowledgeBase } from '../utils/helpers';
+import {
+  clearKnowledgeBase,
+  deleteTinyElser,
+  installTinyElser,
+  setupKnowledgeBase,
+} from '../utils/helpers';
 import { removeServerGeneratedProperties } from '../utils/remove_server_generated_properties';
 import { MachineLearningProvider } from '../../../../../../functional/services/ml';
-
-const documentEntry: DocumentEntryCreateFields = {
-  name: 'Sample Document Entry',
-  type: DocumentEntryType.value,
-  required: false,
-  source: 'api',
-  kbResource: 'user',
-  namespace: 'default',
-  text: 'This is a sample document entry',
-  users: [],
-};
-
-const indexEntry: IndexEntryCreateFields = {
-  name: 'Sample Index Entry',
-  type: IndexEntryType.value,
-  namespace: 'default',
-  index: 'sample-index',
-  field: 'sample-field',
-  description: 'This is a sample index entry',
-  users: [],
-  queryDescription: 'Use sample-field to search in sample-index',
-};
+import { documentEntry, indexEntry, globalDocumentEntry } from './mocks/entries';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
   const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
 
   describe('@ess @serverless Basic Security AI Assistant Knowledge Base Entries', () => {
@@ -55,23 +34,120 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteTinyElser(ml);
     });
 
-    describe('Create Entries', () => {
-      it('should create a new document entry', async () => {
-        const entry = await createEntry(supertest, log, documentEntry);
+    afterEach(async () => {
+      await clearKnowledgeBase(es);
+    });
 
-        expect(removeServerGeneratedProperties(entry)).toEqual(documentEntry);
+    describe('Create Entries', () => {
+      // TODO: KB-RBAC: Added stubbed admin tests for when RBAC is enabled. Hopefully this helps :]
+      describe('Admin', () => {
+        it('should create a new document entry for the current user', async () => {
+          const entry = await createEntry(supertest, log, documentEntry);
+
+          const expectedDocumentEntry = {
+            ...documentEntry,
+            users: [{ name: 'elastic' }],
+          };
+
+          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
+        });
+
+        it('should create a new index entry for the current user', async () => {
+          const entry = await createEntry(supertest, log, indexEntry);
+
+          const expectedIndexEntry = {
+            ...indexEntry,
+            inputSchema: [],
+            outputFields: [],
+            users: [{ name: 'elastic' }],
+          };
+
+          expect(removeServerGeneratedProperties(entry)).toEqual(expectedIndexEntry);
+        });
+
+        // TODO: KB-RBAC: Action not currently allowed without RBAC
+        it.skip('should create a new entry for another user', async () => {
+          const entry = await createEntry(supertest, log, {
+            ...documentEntry,
+            users: [{ name: 'george' }],
+          });
+
+          const expectedDocumentEntry = {
+            ...documentEntry,
+            users: [{ name: 'george' }],
+          };
+
+          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
+        });
+
+        it('should create a new global entry for all users', async () => {
+          const entry = await createEntry(supertest, log, globalDocumentEntry);
+
+          expect(removeServerGeneratedProperties(entry)).toEqual(globalDocumentEntry);
+        });
+
+        it('should create a new global entry for all users in another space', async () => {
+          const entry = await createEntry(supertest, log, globalDocumentEntry, 'space-x');
+
+          const expectedDocumentEntry = {
+            ...globalDocumentEntry,
+            namespace: 'space-x',
+          };
+
+          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
+        });
       });
 
-      it('should create a new index entry', async () => {
-        const entry = await createEntry(supertest, log, indexEntry);
+      describe('User', () => {
+        it('should create a new document entry', async () => {
+          const entry = await createEntry(supertest, log, documentEntry);
 
-        const expectedIndexEntry = {
-          ...indexEntry,
-          inputSchema: [],
-          outputFields: [],
-        };
+          const expectedDocumentEntry = {
+            ...documentEntry,
+            users: [{ name: 'elastic' }],
+          };
 
-        expect(removeServerGeneratedProperties(entry)).toEqual(expectedIndexEntry);
+          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
+        });
+
+        it('should create a new index entry', async () => {
+          const entry = await createEntry(supertest, log, indexEntry);
+
+          const expectedIndexEntry = {
+            ...indexEntry,
+            inputSchema: [],
+            outputFields: [],
+            users: [{ name: 'elastic' }],
+          };
+
+          expect(removeServerGeneratedProperties(entry)).toEqual(expectedIndexEntry);
+        });
+
+        it('should not be able to create an entry for another user', async () => {
+          const entry = await createEntry(supertest, log, {
+            ...documentEntry,
+            users: [{ name: 'george' }],
+          });
+
+          const expectedDocumentEntry = {
+            ...documentEntry,
+            users: [{ name: 'elastic' }],
+          };
+
+          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
+        });
+
+        // TODO: KB-RBAC: Action not currently limited without RBAC
+        it.skip('should not be able to create a global entry', async () => {
+          const entry = await createEntry(supertest, log, globalDocumentEntry);
+
+          const expectedDocumentEntry = {
+            ...globalDocumentEntry,
+            users: [{ name: 'elastic' }],
+          };
+
+          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
+        });
       });
     });
   });
