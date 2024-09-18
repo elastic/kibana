@@ -217,7 +217,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
                 closeRulePreview();
               }}
               fill
-              data-test-subj="installPrebuiltRuleFromFlyoutButton"
+              data-test-subj="installAndEnablePrebuiltRuleFromFlyoutButton"
             >
               {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
             </EuiButton>
