@@ -111,26 +111,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await synthtrace.clean();
         });
 
-        it('Active and Estimated data are not available due to underprivileged user', async () => {
-          await testSubjects.existOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-${PageObjects.datasetQuality.texts.activeDatasets}`
-          );
+        it('Estimated data are not available due to underprivileged user', async () => {
           await testSubjects.existOrFail(
             `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-${PageObjects.datasetQuality.texts.estimatedData}`
           );
         });
 
-        it('"Show inactive datasets" is hidden when lastActivity is not available', async () => {
-          await find.waitForDeletedByCssSelector(
-            PageObjects.datasetQuality.selectors.showInactiveDatasetsNamesSwitch
-          );
-        });
-
-        it('does not show size and last activity columns for underprivileged data stream', async () => {
+        it('does not show size column for underprivileged data stream', async () => {
           const cols = await PageObjects.datasetQuality.getDatasetTableHeaderTexts();
 
           expect(cols).to.not.contain('Size');
-          expect(cols).to.not.contain('Last Activity');
         });
       });
 
@@ -149,26 +139,20 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await synthtrace.clean();
         });
 
-        it('shows underprivileged warning when size and last activity cannot be accessed for some data streams', async () => {
+        it('shows underprivileged warning when size cannot be accessed for some data streams', async () => {
           await PageObjects.datasetQuality.refreshTable();
 
           const datasetWithMonitorPrivilege = apacheAccessDatasetHumanName;
           const datasetWithoutMonitorPrivilege = 'synth.1';
 
-          // "Size" and "Last Activity" should be available for `apacheAccessDatasetName`
+          // "Size" should be available for `apacheAccessDatasetName`
           await testSubjects.missingOrFail(
             `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithMonitorPrivilege}`
           );
-          await testSubjects.missingOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-lastActivity-${datasetWithMonitorPrivilege}`
-          );
 
-          // "Size" and "Last Activity" should not be available for `datasetWithoutMonitorPrivilege`
+          // "Size" should not be available for `datasetWithoutMonitorPrivilege`
           await testSubjects.existOrFail(
             `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithoutMonitorPrivilege}`
-          );
-          await testSubjects.existOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-lastActivity-${datasetWithoutMonitorPrivilege}`
           );
         });
 

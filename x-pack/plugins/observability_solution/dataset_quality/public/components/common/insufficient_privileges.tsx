@@ -54,7 +54,10 @@ export const PrivilegesWarningIconWrapper = ({
 }) => {
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
-  const handleButtonClick = useCallback(() => togglePopover(true), [togglePopover]);
+  const handleButtonClick = useCallback(
+    () => togglePopover(!isPopoverOpen),
+    [isPopoverOpen, togglePopover]
+  );
 
   if (hasPrivileges) {
     return <>{children}</>;
