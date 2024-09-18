@@ -11,7 +11,6 @@ import { Observable } from 'rxjs';
 import { Logger } from '@kbn/core/server';
 import { Stream, PassThrough } from 'stream';
 import { IncomingMessage } from 'http';
-import { SerializableRecord } from '@kbn/utility-types';
 
 const delimiter = '\n';
 
@@ -26,8 +25,8 @@ export const createNDJSONStream = <Response>(
   results.subscribe({
     next: (message: Response) => {
       try {
-        const rawResponse = (message as SerializableRecord).result?.rawResponse as IncomingMessage;
-        if (rawResponse && rawResponse.pipe) {
+        if ((message as any).result?.rawResponse?.pipe) {
+          const rawResponse = (message as any).result?.rawResponse as IncomingMessage;
           activeStreams++;
           let body = '';
           // Collect data from the stream

@@ -14,7 +14,6 @@ import { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import { Stream, PassThrough } from 'stream';
 import { constants, deflate } from 'zlib';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { SerializableRecord } from '@kbn/utility-types';
 import { IncomingMessage } from 'http';
 
 const delimiter = '\n';
@@ -86,11 +85,11 @@ export const createCompressedStream = <Response>(
   results
     .pipe(
       concatMap((message: Response) => {
-        const rawResponse = (message as SerializableRecord).result?.rawResponse as IncomingMessage;
-        if (rawResponse && rawResponse.pipe) {
+        if ((message as any).result?.rawResponse?.pipe) {
+          const rawResponse = (message as any).result?.rawResponse as IncomingMessage;
           let body = '';
           // Collect data from the stream
-          const streamPromise = new Promise<void>((resolve, reject) => {
+          const streamPromise = new Promise<unknown>((resolve, reject) => {
             rawResponse.on('data', (chunk) => {
               body += chunk.toString(); // Append incoming data chunks
             });
