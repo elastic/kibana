@@ -15,9 +15,6 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
 import { ISavedObjectsRepository } from '@kbn/core/server';
 
-const constants = jest.requireMock('../constants');
-jest.mock('../constants');
-
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -572,7 +569,6 @@ describe('kibana index telemetry', () => {
   });
 
   test('should stop on MW max limit count', async () => {
-    constants.TELEMETRY_MW_COUNT_LIMIT = 1
     savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
       close: jest.fn(),
       find: jest.fn().mockImplementation(async function* () {
@@ -582,6 +578,7 @@ describe('kibana index telemetry', () => {
     const telemetry = await getMWTelemetry({
       savedObjectsClient,
       logger,
+      maxDocuments: 1,
     });
 
     expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({

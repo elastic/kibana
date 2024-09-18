@@ -25,7 +25,6 @@ import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import { groupRulesBySearchType } from './group_rules_by_search_type';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
 import { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
-import { TELEMETRY_MW_COUNT_LIMIT } from '../constants';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -36,6 +35,7 @@ interface Opts {
 interface MWOpts {
   savedObjectsClient: ISavedObjectsRepository;
   logger: Logger;
+  maxDocuments?: number;
 }
 
 type GetTotalCountsResults = Pick<
@@ -71,6 +71,8 @@ interface GetTotalCountInUseResults {
   errorMessage?: string;
   hasErrors: boolean;
 }
+
+const TELEMETRY_MW_COUNT_LIMIT = 10000;
 
 export async function getTotalCountAggregations({
   esClient,
@@ -510,12 +512,14 @@ export async function getTotalCountInUse({
 export async function getMWTelemetry({
   savedObjectsClient,
   logger,
+  maxDocuments = TELEMETRY_MW_COUNT_LIMIT,
 }: MWOpts): Promise<GetMWTelemetryResults> {
   try {
     const mwFinder = savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       namespaces: ['*'],
       perPage: 100,
+      fields: ['rRule', 'scopedQuery'],
     });
 
     let countMWTotal = 0;
@@ -523,7 +527,7 @@ export async function getMWTelemetry({
     let countMWWithFilterAlertToggleON = 0;
     mwLoop: for await (const response of mwFinder.find()) {
       for (const mwSavedObject of response.saved_objects) {
-        if (countMWTotal > TELEMETRY_MW_COUNT_LIMIT) break mwLoop
+        if (countMWTotal > maxDocuments) break mwLoop;
         countMWTotal = countMWTotal + 1;
         // scopedQuery property will be null if "Filter alerts" toggle will be off
         if (mwSavedObject.attributes.scopedQuery) {
