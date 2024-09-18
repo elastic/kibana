@@ -18,6 +18,7 @@ import {
 import {
   HasAppContext,
   HasType,
+  HasUniqueId,
   PublishesDataViews,
   PublishesPanelDescription,
   PublishesPanelTitle,
@@ -39,6 +40,7 @@ export type DashboardApi = CanExpandPanels &
   HasRuntimeChildState &
   HasSerializedChildState &
   HasType<'dashboard'> &
+  HasUniqueId &
   PresentationContainer &
   PublishesDataViews &
   PublishesPanelDescription &
