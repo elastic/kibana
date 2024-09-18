@@ -53,6 +53,9 @@ export type UiPartitionFieldsConfig = Exclude<PartitionFieldsConfig, undefined>;
 
 export type UiPartitionFieldConfig = Exclude<PartitionFieldConfig, undefined>;
 
+/**
+ * Returns a filterBy object for the by_field config.
+ */
 const getFilterBy = (
   currentEntity: Entity,
   entities: Entity[]
@@ -256,7 +259,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
       }, {} as Record<string, any>),
       [entity.fieldName]: fieldValue,
     };
-    // Maybe reload entity values
+
     appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
   };
 

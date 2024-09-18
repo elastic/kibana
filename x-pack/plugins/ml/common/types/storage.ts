@@ -37,7 +37,7 @@ export type PartitionFieldConfig =
       };
       filterBy?: {
         field: `${MlEntityFieldType}_value`;
-        query?: any;
+        query: string;
       };
     }
   | undefined;

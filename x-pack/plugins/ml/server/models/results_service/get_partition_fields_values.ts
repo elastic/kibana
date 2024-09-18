@@ -23,7 +23,6 @@ export interface PartitionFieldData {
   values: Array<{ value: string; maxRecordScore?: number }>;
 }
 
-import util from 'util';
 /**
  * Gets an object for aggregation query to retrieve field name and values.
  * @param fieldType - Field type
@@ -250,7 +249,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
         }, {}),
       },
     };
-    console.log(util.inspect(requestBody, { showHidden: false, depth: null, colors: true }));
+
     const body = await mlClient.anomalySearch(
       {
         body: {
