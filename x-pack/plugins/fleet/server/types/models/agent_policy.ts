@@ -65,10 +65,10 @@ export const AgentPolicyBaseSchema = {
     )
   ),
   keep_monitoring_alive: schema.maybe(schema.boolean({ defaultValue: false })),
-  data_output_id: schema.maybe(schema.nullable(schema.string())),
-  monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
-  download_source_id: schema.maybe(schema.nullable(schema.string())),
-  fleet_server_host_id: schema.maybe(schema.nullable(schema.string())),
+  data_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  monitoring_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  download_source_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  fleet_server_host_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   agent_features: schema.maybe(
     schema.arrayOf(
       schema.object({
