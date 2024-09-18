@@ -98,10 +98,9 @@ export const shouldShowResponseActions = (
   ruleType: Type | undefined,
   automatedResponseActionsForMoreRulesEnabled: boolean
 ) => {
-  return automatedResponseActionsForMoreRulesEnabled
-    ? isQueryRule(ruleType) ||
-        isEsqlRule(ruleType) ||
-        isEqlRule(ruleType) ||
-        isNewTermsRule(ruleType)
-    : isQueryRule(ruleType);
+  return (
+    isQueryRule(ruleType) ||
+    (automatedResponseActionsForMoreRulesEnabled &&
+      (isEsqlRule(ruleType) || isEqlRule(ruleType) || isNewTermsRule(ruleType)))
+  );
 };

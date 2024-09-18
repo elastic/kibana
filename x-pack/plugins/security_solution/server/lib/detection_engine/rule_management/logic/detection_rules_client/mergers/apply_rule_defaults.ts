@@ -56,7 +56,6 @@ export function applyRuleDefaults(rule: RuleCreateProps & { immutable?: boolean 
     immutable,
     rule_source: convertImmutableToRuleSource(immutable),
     required_fields: addEcsToRequiredFields(rule.required_fields),
-    response_actions: rule.response_actions,
   };
 }
 
@@ -87,6 +86,7 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         event_category_override: props.event_category_override,
         tiebreaker_field: props.tiebreaker_field,
         alert_suppression: props.alert_suppression,
+        response_actions: props.response_actions,
       };
     }
     case 'esql': {
@@ -95,6 +95,7 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         language: props.language,
         query: props.query,
         alert_suppression: props.alert_suppression,
+        response_actions: props.response_actions,
       };
     }
     case 'threat_match': {
@@ -126,6 +127,7 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         query: props.query ?? '',
         filters: props.filters,
         saved_id: props.saved_id,
+        response_actions: props.response_actions,
         alert_suppression: props.alert_suppression,
       };
     }
@@ -138,6 +140,7 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         filters: props.filters,
         saved_id: props.saved_id,
         data_view_id: props.data_view_id,
+        response_actions: props.response_actions,
         alert_suppression: props.alert_suppression,
       };
     }
@@ -175,6 +178,7 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         language: props.language ?? 'kuery',
         data_view_id: props.data_view_id,
         alert_suppression: props.alert_suppression,
+        response_actions: props.response_actions,
       };
     }
     default: {

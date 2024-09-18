@@ -6,6 +6,7 @@
  */
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
+import { transformAlertToRuleResponseAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { TypeSpecificResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { convertObjectKeysToSnakeCase } from '../../../../../../utils/object_case_converters';
@@ -27,6 +28,7 @@ export const typeSpecificCamelToSnake = (
         event_category_override: params.eventCategoryOverride,
         tiebreaker_field: params.tiebreakerField,
         alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'esql': {
@@ -35,6 +37,7 @@ export const typeSpecificCamelToSnake = (
         language: params.language,
         query: params.query,
         alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'threat_match': {
@@ -66,6 +69,7 @@ export const typeSpecificCamelToSnake = (
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
         alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
       };
     }
@@ -78,6 +82,7 @@ export const typeSpecificCamelToSnake = (
         filters: params.filters,
         saved_id: params.savedId,
         data_view_id: params.dataViewId,
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
         alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
       };
     }
@@ -115,6 +120,7 @@ export const typeSpecificCamelToSnake = (
         language: params.language,
         data_view_id: params.dataViewId,
         alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     default: {
