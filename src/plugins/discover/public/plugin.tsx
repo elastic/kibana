@@ -183,7 +183,7 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
-          profilesManager: await this.createProfilesManager(),
+          profilesManager: await this.createProfilesManager({ plugins: discoverStartPlugins }),
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -302,14 +302,15 @@ export class DiscoverPlugin
     }
   }
 
-  private createProfileServices = once(async () => {
+  private createProfileServices = once(async ({ plugins }: { plugins: DiscoverStartPlugins }) => {
     const { registerProfileProviders } = await import('./context_awareness/profile_providers');
     const rootProfileService = new RootProfileService();
     const dataSourceProfileService = new DataSourceProfileService();
     const documentProfileService = new DocumentProfileService();
     const enabledExperimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
 
-    registerProfileProviders({
+    await registerProfileProviders({
+      plugins,
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
@@ -319,9 +320,9 @@ export class DiscoverPlugin
     return { rootProfileService, dataSourceProfileService, documentProfileService };
   });
 
-  private async createProfilesManager() {
+  private async createProfilesManager({ plugins }: { plugins: DiscoverStartPlugins }) {
     const { rootProfileService, dataSourceProfileService, documentProfileService } =
-      await this.createProfileServices();
+      await this.createProfileServices({ plugins });
 
     return new ProfilesManager(
       rootProfileService,
@@ -367,7 +368,7 @@ export class DiscoverPlugin
 
     const getDiscoverServicesInternal = async () => {
       const [coreStart, deps] = await core.getStartServices();
-      const profilesManager = await this.createProfilesManager();
+      const profilesManager = await this.createProfilesManager({ plugins: deps });
       return this.getDiscoverServices(coreStart, deps, profilesManager);
     };
 
