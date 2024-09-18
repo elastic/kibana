@@ -71,7 +71,7 @@ export const esqlExecutor = async ({
   version: string;
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
-  scheduleNotificationResponseActionsService?: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }) => {
   const ruleParams = completeRule.ruleParams;
   /**
@@ -226,16 +226,11 @@ export const esqlExecutor = async ({
           break;
         }
       }
-      if (
-        completeRule.ruleParams.responseActions?.length &&
-        result.createdSignalsCount &&
-        scheduleNotificationResponseActionsService
-      ) {
-        scheduleNotificationResponseActionsService({
-          signals: result.createdSignals,
-          responseActions: completeRule.ruleParams.responseActions,
-        });
-      }
+      scheduleNotificationResponseActionsService({
+        signals: result.createdSignals,
+        signalsCount: result.createdSignalsCount,
+        responseActions: completeRule.ruleParams.responseActions,
+      });
 
       // no more results will be found
       if (response.values.length < size) {

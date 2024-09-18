@@ -42,7 +42,7 @@ export const queryExecutor = async ({
   version: string;
   spaceId: string;
   bucketHistory?: BucketHistory[];
-  scheduleNotificationResponseActionsService?: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
   licensing: LicensingPluginSetup;
 }) => {
   const completeRule = runOpts.completeRule;
@@ -99,16 +99,11 @@ export const queryExecutor = async ({
             state: {},
           };
 
-    if (
-      completeRule.ruleParams.responseActions?.length &&
-      result.createdSignalsCount &&
-      scheduleNotificationResponseActionsService
-    ) {
-      scheduleNotificationResponseActionsService({
-        signals: result.createdSignals,
-        responseActions: completeRule.ruleParams.responseActions,
-      });
-    }
+    scheduleNotificationResponseActionsService({
+      signals: result.createdSignals,
+      signalsCount: result.createdSignalsCount,
+      responseActions: completeRule.ruleParams.responseActions,
+    });
 
     return result;
   });

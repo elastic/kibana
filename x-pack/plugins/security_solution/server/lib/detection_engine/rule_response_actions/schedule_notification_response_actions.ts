@@ -24,7 +24,10 @@ export const getScheduleNotificationResponseActionsService =
     osqueryCreateActionService,
     endpointAppContextService,
   }: ScheduleNotificationResponseActionsService) =>
-  async ({ signals, responseActions }: ScheduleNotificationActions) => {
+  async ({ signals, signalsCount, responseActions }: ScheduleNotificationActions) => {
+    if (!signalsCount || !responseActions?.length) {
+      return;
+    }
     // expandDottedObject is needed eg in ESQL rule because it's alerts come without nested agent, host etc data but everything is dotted
     const nestedAlerts = signals.map((signal) => expandDottedObject(signal as object)) as Alert[];
     const alerts = nestedAlerts.filter((alert) => alert.agent?.id) as AlertWithAgent[];

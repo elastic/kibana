@@ -161,11 +161,12 @@ export interface CreateRuleOptions {
 
 export interface ScheduleNotificationActions {
   signals: unknown[];
+  signalsCount: number;
   responseActions: RuleResponseAction[];
 }
 
 export interface CreateRuleAdditionalOptions {
-  scheduleNotificationResponseActionsService?: (params: ScheduleNotificationActions) => void;
+  scheduleNotificationResponseActionsService: (params: ScheduleNotificationActions) => void;
 }
 
 export interface CreateQueryRuleOptions extends CreateRuleOptions, CreateRuleAdditionalOptions {

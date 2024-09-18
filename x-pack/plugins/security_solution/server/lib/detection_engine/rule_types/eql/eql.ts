@@ -67,7 +67,7 @@ interface EqlExecutorParams {
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
-  scheduleNotificationResponseActionsService?: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }
 
 export const eqlExecutor = async ({
@@ -191,16 +191,11 @@ export const eqlExecutor = async ({
         result.warningMessages.push(maxSignalsWarning);
       }
 
-      if (
-        completeRule.ruleParams.responseActions?.length &&
-        result.createdSignalsCount &&
-        scheduleNotificationResponseActionsService
-      ) {
-        scheduleNotificationResponseActionsService({
-          signals: result.createdSignals,
-          responseActions: completeRule.ruleParams.responseActions,
-        });
-      }
+      scheduleNotificationResponseActionsService({
+        signals: result.createdSignals,
+        signalsCount: result.createdSignalsCount,
+        responseActions: completeRule.ruleParams.responseActions,
+      });
 
       return result;
     } catch (error) {
