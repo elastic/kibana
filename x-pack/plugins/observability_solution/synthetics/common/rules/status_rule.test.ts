@@ -14,17 +14,17 @@ describe('Status Rule', () => {
   });
 
   it('should return the correct condition type check based', () => {
-    const { useLatestChecks, isTimeWindow } = getConditionType({
+    const { useLatestChecks, useTimeWindow } = getConditionType({
       window: {
         numberOfChecks: 5,
       },
     });
     expect(useLatestChecks).toBe(true);
-    expect(isTimeWindow).toBe(false);
+    expect(useTimeWindow).toBe(false);
   });
 
   it('should return the correct condition type time based', () => {
-    const { isTimeWindow, useLatestChecks } = getConditionType({
+    const { useTimeWindow, useLatestChecks } = getConditionType({
       window: {
         time: {
           unit: 'm',
@@ -32,7 +32,7 @@ describe('Status Rule', () => {
         },
       },
     });
-    expect(isTimeWindow).toBe(true);
+    expect(useTimeWindow).toBe(true);
     expect(useLatestChecks).toBe(false);
   });
 });

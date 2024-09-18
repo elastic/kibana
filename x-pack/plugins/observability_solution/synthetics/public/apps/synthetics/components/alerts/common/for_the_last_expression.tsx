@@ -66,16 +66,16 @@ export const DEFAULT_CONDITION: StatusRuleCondition = {
   locationsThreshold: 1,
 };
 const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
-  const { isTimeWindow, isLocationBased } = getConditionType(condition);
+  const { useTimeWindow, isLocationBased } = getConditionType(condition);
 
   if (isLocationBased && option.key === 'locations') {
     return 'on';
   }
 
-  if (option.key === 'timeWindow' && isTimeWindow && !isLocationBased) {
+  if (option.key === 'timeWindow' && useTimeWindow && !isLocationBased) {
     return 'on';
   }
-  if (option.key === 'checksWindow' && !isTimeWindow && !isLocationBased) {
+  if (option.key === 'checksWindow' && !useTimeWindow && !isLocationBased) {
     return 'on';
   }
 
@@ -85,7 +85,7 @@ const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
 export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
   const { condition } = ruleParams;
 
-  const { isTimeWindow } = getConditionType(condition);
+  const { useTimeWindow } = getConditionType(condition);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -105,10 +105,10 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
         checked: getCheckedOption(option, condition),
       }))
     );
-  }, [condition, isTimeWindow]);
+  }, [condition, useTimeWindow]);
 
   const getDescriptiveText = () => {
-    if (isTimeWindow) {
+    if (useTimeWindow) {
       return WITHIN_TIMERANGE_EXPRESSION;
     }
     return WITHIN_TOTAL_CHECKS_EXPRESSION;
