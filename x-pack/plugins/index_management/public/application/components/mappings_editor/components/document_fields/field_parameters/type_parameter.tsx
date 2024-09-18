@@ -79,7 +79,9 @@ export const TypeParameter = ({
                     )}
                   </EuiLink>
                 </EuiText>
-              ) : <EuiSpacer size="m" />
+              ) : (
+                <EuiSpacer size="m" />
+              )
             }
           >
             <EuiComboBox
