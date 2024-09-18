@@ -394,7 +394,13 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
             <EuiFlexItem>
               <EuiCallOut title="No agents in the policy" color="warning" iconType="help">
                 <p>
-                  {`Fleet has detected that you have not assigned yet any agent to the `}
+                  {i18n.translate(
+                    'xpack.osquery.fleetIntegration.osqueryConfig.noAgentsWarningMessage',
+                    {
+                      defaultMessage:
+                        'Fleet has detected that you have not assigned yet any agent to the ',
+                    }
+                  )}
                   {agentPolicies?.map((agentPolicy, index) => (
                     <React.Fragment key={agentPolicy.id}>
                       <EuiLink href={agentsLinkHref(agentPolicy.id)}>

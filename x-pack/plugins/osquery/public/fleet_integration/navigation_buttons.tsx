@@ -25,16 +25,18 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
 
-  const agentPolicies = useMemo(
+  const agentPolicyIdsQueryParam = useMemo(
     () => agentPolicyIds?.map((id) => `agentPolicyId=${id}`).join('&'),
     [agentPolicyIds]
   );
   const liveQueryHref = useMemo(
     () =>
       getUrlForApp(PLUGIN_ID, {
-        path: agentPolicyIds?.length ? `/live_queries/new?${agentPolicies}` : '/live_queries/new',
+        path: agentPolicyIds?.length
+          ? `/live_queries/new?${agentPolicyIdsQueryParam}`
+          : '/live_queries/new',
       }),
-    [agentPolicies, agentPolicyIds?.length, getUrlForApp]
+    [agentPolicyIdsQueryParam, agentPolicyIds?.length, getUrlForApp]
   );
 
   const liveQueryClick = useCallback(
@@ -42,11 +44,13 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
         navigateToApp(PLUGIN_ID, {
-          path: agentPolicyIds?.length ? `/live_queries/new?${agentPolicies}` : '/live_queries/new',
+          path: agentPolicyIds?.length
+            ? `/live_queries/new?${agentPolicyIdsQueryParam}`
+            : '/live_queries/new',
         });
       }
     },
-    [agentPolicies, agentPolicyIds?.length, navigateToApp]
+    [agentPolicyIdsQueryParam, agentPolicyIds?.length, navigateToApp]
   );
 
   const packsHref = getUrlForApp(PLUGIN_ID, {
