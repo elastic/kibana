@@ -92,15 +92,14 @@ Bare metal machine is used to produce results as stable and reproducible as poss
 #### Running subset of journeys for the PR
 
 Some code changes might affect the Kibana performance and it might be benefitial to run relevant journeys against the PR
-before it got merged.
+and compare performance metrics vs. the ones on main branch.
 
 In oder to trigger the build for Kibana PR, you can follow these steps:
 
 - Create a new kibana-single-user-performance [build](https://buildkite.com/elastic/kibana-single-user-performance#new)
 - Provide the following arguments:
-
-Branch: `refs/pull/<PR_number>/head`
-Under Options, set the environment variable: `JOURNEYS_GROUP=<group_name>`
+  - Branch: `refs/pull/<PR_number>/head`
+  - Under Options, set the environment variable: `JOURNEYS_GROUP=<group_name>`
 
 Currently supported journey groups:
 
