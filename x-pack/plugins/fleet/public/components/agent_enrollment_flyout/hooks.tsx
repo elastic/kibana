@@ -210,12 +210,15 @@ export function useGetCreateApiKey() {
   const core = useStartServices();
 
   const [apiKey, setApiKey] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
   const onCreateApiKey = useCallback(async () => {
     try {
+      setIsLoading(true);
       const res = await sendCreateStandaloneAgentAPIKey({
         name: crypto.randomBytes(16).toString('hex'),
       });
-      const newApiKey = `${res.data?.item.id}:${res.data?.item.api_key}`;
+
+      const newApiKey = `${res.item.id}:${res.item.api_key}`;
       setApiKey(newApiKey);
     } catch (err) {
       core.notifications.toasts.addError(err, {
@@ -224,9 +227,11 @@ export function useGetCreateApiKey() {
         }),
       });
     }
+    setIsLoading(false);
   }, [core.notifications.toasts]);
   return {
     apiKey,
+    isLoading,
     onCreateApiKey,
   };
 }
@@ -235,7 +240,7 @@ export function useFetchFullPolicy(agentPolicy: AgentPolicy | undefined, isK8s?:
   const core = useStartServices();
   const [yaml, setYaml] = useState<any | undefined>('');
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
-  const { apiKey, onCreateApiKey } = useGetCreateApiKey();
+  const { apiKey, isLoading: isCreatingApiKey, onCreateApiKey } = useGetCreateApiKey();
 
   useEffect(() => {
     async function fetchFullPolicy() {
@@ -302,6 +307,7 @@ export function useFetchFullPolicy(agentPolicy: AgentPolicy | undefined, isK8s?:
     yaml,
     onCreateApiKey,
     fullAgentPolicy,
+    isCreatingApiKey,
     apiKey,
     downloadYaml,
   };
