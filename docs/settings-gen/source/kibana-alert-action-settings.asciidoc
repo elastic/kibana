@@ -13,96 +13,132 @@ Something
 
 Something else.
 
-`xpack.encryptedSavedObjects.encryptionKey`::
-A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in Elasticsearch. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.
-+
-Kibana offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key.
-+
-If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn't the same on all instances of Kibana.
-+
-Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,Kibana Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
-+
+.`xpack.encryptedSavedObjects.encryptionKey`
+[%collapsible]
 ====
-Options: +
-{nbsp} `mercury` - too close to the sun +
-{nbsp} `venus` - still a little close +
-{nbsp} `earth` - just perfect +
+A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in Elasticsearch. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.
+
+Kibana offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key.
+
+If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn't the same on all instances of Kibana.
+
+Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,Kibana Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
+
+
+Options:
+
+* `mercury` - too close to the sun
+* `venus` - still a little close
+* `earth` - just perfect
+
 Default: `true` +
 Type: `static` +
 ====
 
-`xpack.actions.allowedHosts` {ess-icon}::
-A list of hostnames that Kibana is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
-+
-Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
-+
+.`xpack.actions.allowedHosts` {ess-icon}
+[%collapsible]
 ====
+A list of hostnames that Kibana is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
+
+Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
+
 Default: `["*"]` +
 ====
 
-`xpack.actions.customHostSettings` {ess-icon}::
+.`xpack.actions.customHostSettings` {ess-icon}
+[%collapsible]
+====
 A list of custom host settings to override existing global settings. Default: an empty list.
-+
-Each entry in the list must have a `url` property, to associate a connection type (mail or https), hostname and port with the remaining options in the entry.
-+
-The settings in `xpack.actions.customHostSettings` can be used to override the global option `xpack.actions.ssl.verificationMode` and provide customized TLS settings on a per-server basis. Set `xpack.actions.ssl.verificationMode` to the value to be used by default for all servers, then add an entry in `xpack.actions.customHostSettings` for every server that requires customized settings.
-+
-**Example**
-+
-include::../examples/example-xpack.actions.customHostSettings.asciidoc[]
 
-`xpack.actions.customHostSettings[n].url` {ess-icon}::
+Each entry in the list must have a `url` property, to associate a connection type (mail or https), hostname and port with the remaining options in the entry.
+
+The settings in `xpack.actions.customHostSettings` can be used to override the global option `xpack.actions.ssl.verificationMode` and provide customized TLS settings on a per-server basis. Set `xpack.actions.ssl.verificationMode` to the value to be used by default for all servers, then add an entry in `xpack.actions.customHostSettings` for every server that requires customized settings.
+
+
+**Example**
+
+include::../examples/example-xpack.actions.customHostSettings.asciidoc[]
+====
+
+.`xpack.actions.customHostSettings[n].url` {ess-icon}
+[%collapsible]
+====
 A URL associated with this custom host setting.  Should be in the form of `protocol://hostname:port`, where `protocol` is `https` or `smtp`.  If the port is not provided, 443 is used for `https` and 25 is used for `smtp`.  The `smtp` URLs are used for the Email actions that use this server, and the `https` URLs are used for actions which use `https` to connect to services.
-+
+
 Entries with `https` URLs can use the `ssl` options, and entries with `smtp` URLs can use both the `ssl` and `smtp` options.
-+
+
 No other URL values should be part of this URL, including paths, query strings, and authentication information.  When an http or smtp request is made as part of running an action, only the protocol, hostname, and port of the URL for that request are used to look up these configuration values.
 
-`xpack.actions.customHostSettings[n].smtp.ignoreTLS` {ess-icon}::
+====
+
+.`xpack.actions.customHostSettings[n].smtp.ignoreTLS` {ess-icon}
+[%collapsible]
+====
 A boolean value indicating that TLS must not be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
-+
-====
+
 Default: `false` +
 ====
 
-`xpack.actions.customHostSettings[n].smtp.requireTLS` {ess-icon}::
+.`xpack.actions.customHostSettings[n].smtp.requireTLS` {ess-icon}
+[%collapsible]
+====
 A boolean value indicating that TLS must be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
-+
-====
+
 Default: `false` +
 ====
 
-`xpack.actions.customHostSettings[n].ssl.rejectUnauthorized`::
-+
+.`xpack.actions.customHostSettings[n].ssl.rejectUnauthorized`
+[%collapsible]
+====
 **Deprecated:** Starting in version 8.0.0 this setting is deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead.
-+
+
 A boolean value indicating whether to bypass server certificate validation.
-+
+
 Overrides the general `xpack.actions.rejectUnauthorized` configuration for requests made for this hostname/port.
 
-
-[[action-config-custom-host-verification-mode]] `action-config-custom-host-verification-mode` {ess-icon}::
-Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
-+
 ====
-Options: +
-{nbsp} `hello` - a description +
-{nbsp} `goodbye` - a different description +
-{nbsp} `have_a_nice_day` - yet another description +
+
+
+[[action-config-custom-host-verification-mode]]
+.`action-config-custom-host-verification-mode` {ess-icon}
+[%collapsible]
+====
+Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
+
+
+Options:
+
+* `hello` - a description
+* `goodbye` - a different description
+* `have_a_nice_day` - yet another description
+
 Default: `full` +
 ====
 
-`xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesFiles`::
+.`xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesFiles`
+[%collapsible]
+====
 A file name or list of file names of PEM-encoded certificate files to use to validate the server.
 
-`xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData` {ess-icon}::
+====
+
+.`xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData` {ess-icon}
+[%collapsible]
+====
 The contents of one or more PEM-encoded certificate files in multiline format. This configuration can be used for environments where the files cannot be made available.
 
+====
 
-[[action-config-email-domain-allowlist]] `xpack.actions.email.domain_allowlist` {ess-icon}::
+
+[[action-config-email-domain-allowlist]]
+.`xpack.actions.email.domain_allowlist` {ess-icon}
+[%collapsible]
+====
 A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
-+
+
+
 WARNING: This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
+====
 
 
 [float]
@@ -115,14 +151,18 @@ Something else.
 
 Even more.
 
-`test.setting`::
-Some description.
-+
+.`test.setting`
+[%collapsible]
 ====
-Options: +
-{nbsp} `hello` +
-{nbsp} `goodbye` +
-{nbsp} `have_a_nice_day` +
+Some description.
+
+
+Options:
+
+* `hello`
+* `goodbye`
+* `have_a_nice_day`
+
 Default: `true` +
 Type: `static` +
 ====
@@ -138,14 +178,18 @@ Something else.
 
 Even more.
 
-`test.setting`::
-Some description.
-+
+.`test.setting`
+[%collapsible]
 ====
-Options: +
-{nbsp} `mercury` - too close to the sun +
-{nbsp} `venus` - still a little close +
-{nbsp} `earth` - just perfect +
+Some description.
+
+
+Options:
+
+* `mercury` - too close to the sun
+* `venus` - still a little close
+* `earth` - just perfect
+
 Default: `true` +
 Type: `static` +
 ====
@@ -161,14 +205,18 @@ Something else.
 
 Even more.
 
-`test.setting` {ess-icon}::
-Some description.
-+
+.`test.setting` {ess-icon}
+[%collapsible]
 ====
-Options: +
-{nbsp} `mercury` - too close to the sun +
-{nbsp} `venus` - still a little close +
-{nbsp} `earth` - just perfect +
+Some description.
+
+
+Options:
+
+* `mercury` - too close to the sun
+* `venus` - still a little close
+* `earth` - just perfect
+
 Default: `true` +
 Type: `static` +
 ====

@@ -7,7 +7,7 @@ connection.  The second provides a custom host setting for https server
 that will allow Kibana to connect to the server if it's using a self-signed
 certificate.  The individual properties that can be used in the settings are
 documented below.
-+
+
 [source,yaml]
 --
 xpack.actions.customHostSettings:

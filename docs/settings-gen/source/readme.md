@@ -33,8 +33,10 @@ groups:
           - "If not set, {kib} will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}."
           - "Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>."
         
-        # [Optional] Markdown format wrapped in single or double quotation marks. This would typically be 'Deprecated' or 'Technical Preview'. The state will appear directly below the setting name.
-        # For a beta release, 'state' can be set to "Technical Preview" and 'state_guidance' to "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+        # [Optional] Markdown format wrapped in single or double quotation marks.
+        # For a beta release, set 'state' to "technical-preview" and the standard disclaimer will be added.
+        # For non-public settings, set state to 'hidden' and the setting won't be displayed in the docs.
+        # For a deprecated setting, use 'Deprecated' and add a 'state_guidance' field with the details, as shown below.
         state: Deprecated
         state_guidance: "Starting in version 8.0.0 this setting is deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead."
 

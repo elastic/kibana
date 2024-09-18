@@ -21,8 +21,6 @@ groups:
           - "In English, it is named after the ancient Roman god Mercurius (Mercury), god of commerce and communication, and the messenger of the gods."
           - "Mercury is adjacent to the planet <<kibana-example-setting-venus,Venus>>"
         example: example-setting-example.asciidoc
-        state: Technical Preview
-        state_guidance: "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
         warning: "This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2."
         default: avoid
         type: static
@@ -42,8 +40,7 @@ groups:
         description:
           - "Venus is the second planet from <<kibana-example-setting-sun,The Sun>>."
           - "It is a terrestrial planet and is the closest in mass and size to its orbital neighbour, <<kibana-example-setting-earth,Earth>>."
-        state: Technical Preview
-        state_guidance: "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+        state: technical-preview
         important: "All visitors to Venus must have an inter-planetary passport that will be validtip for a minimum of six months beyond your date of return."
         default: visit
         type: static.
@@ -79,10 +76,10 @@ groups:
         platforms:
           - self-managed
 
-  - group: Solar settings
+  - group: Celestial settings
     group_id: kibana-settings-schema-solar
     description:
-     - "Solar settings can be used to configure the Sun. Use these settings carefully as the Sun provides sustenance to <<kibana-example-setting-earth,Earth>> and all of the life that inhabits it."
+     - "Celestial settings can be used to configure the Sun and other non-planetary objects. Use these settings carefully as the Sun provides sustenance to <<kibana-example-setting-earth,Earth>> and all of the life that inhabits it."
      - "Your group description can include warnings, examples, etc., just like the settings descriptions."
 
     settings:
@@ -96,3 +93,25 @@ groups:
         type: dynamic
         platforms:
           - self-managed
+          - cloud
+
+      - setting: kibana.example.setting.arcturus
+        id: kibana-example-setting-arcturus
+        description:
+          - "Arcturus is the brightest star in the northern constellation of Bootes."
+          - "With an apparent visual magnitude of -0.05,[2] it is the fourth-brightest star in the night sky, and the brightest in the northern celestial hemisphere."
+        type: dynamic
+        platforms:
+          - self-managed
+          - cloud
+
+      - setting: kibana.example.setting.alpha.centauri
+        id: kibana-example-setting-alpha-centauri
+        description:
+          - "Alpha Centauri is a triple star system in the southern constellation of Centaurus."
+          - " It consists of three stars: Rigil Kentaurus, Toliman, and Proxima Centauri."
+        state: hidden
+        type: dynamic
+        platforms:
+          - self-managed
+          - cloud
