@@ -268,7 +268,6 @@ export function Insight({
 
   const connectors = useGenAIConnectors();
   const service = useObservabilityAIAssistant();
-  const { scope } = service;
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
