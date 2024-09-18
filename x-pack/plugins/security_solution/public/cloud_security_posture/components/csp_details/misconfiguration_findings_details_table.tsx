@@ -160,7 +160,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             {i18n.translate(
               'xpack.securitySolution.flyout.left.insights.misconfigurations.tableTitle',
               {
-                defaultMessage: 'Misconfigurations',
+                defaultMessage: 'Misconfigurations ',
               }
             )}
             <EuiIcon type={'popout'} />

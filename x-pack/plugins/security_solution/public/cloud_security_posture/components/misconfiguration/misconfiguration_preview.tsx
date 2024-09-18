@@ -137,7 +137,7 @@ export const MisconfigurationsPreview = ({
     enabled: true,
     pageSize: 1,
   });
-
+  const isUsingHostName = fieldName === 'host.name';
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;
 
@@ -145,42 +145,40 @@ export const MisconfigurationsPreview = ({
   const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
   const buildFilterQuery = useMemo(
-    () => (fieldName === 'host.name' ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
-    [fieldName, name]
+    () => (isUsingHostName ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
+    [isUsingHostName, name]
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: fieldName === 'host.name' ? RiskScoreEntity.host : RiskScoreEntity.user,
+    riskEntity: isUsingHostName ? RiskScoreEntity.host : RiskScoreEntity.user,
     filterQuery: buildFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
   });
   const { data: hostRisk } = riskScoreState;
-  const riskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
-  const isRiskScoreExist =
-    fieldName === 'host.name'
-      ? !!(riskData as HostRiskScore)?.host.risk
-      : !!(riskData as UserRiskScore)?.user.risk;
+  const riskData = hostRisk?.[0];
+  const isRiskScoreExist = isUsingHostName
+    ? !!(riskData as HostRiskScore)?.host.risk
+    : !!(riskData as UserRiskScore)?.user.risk;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const goToEntityInsightTab = useCallback(() => {
     openLeftPanel({
-      id: fieldName === 'host.name' ? HostDetailsPanelKey : UserDetailsPanelKey,
-      params:
-        fieldName === 'host.name'
-          ? {
-              name,
-              isRiskScoreExist,
-              hasMisconfigurationFindings,
-              path: { tab: 'csp_insights' },
-            }
-          : {
-              user: { name },
-              isRiskScoreExist,
-              hasMisconfigurationFindings,
-              path: { tab: 'csp_insights' },
-            },
+      id: isUsingHostName ? HostDetailsPanelKey : UserDetailsPanelKey,
+      params: isUsingHostName
+        ? {
+            name,
+            isRiskScoreExist,
+            hasMisconfigurationFindings,
+            path: { tab: 'csp_insights' },
+          }
+        : {
+            user: { name },
+            isRiskScoreExist,
+            hasMisconfigurationFindings,
+            path: { tab: 'csp_insights' },
+          },
     });
-  }, [fieldName, hasMisconfigurationFindings, isRiskScoreExist, name, openLeftPanel]);
+  }, [hasMisconfigurationFindings, isRiskScoreExist, isUsingHostName, name, openLeftPanel]);
   const link = useMemo(
     () =>
       !isPreviewMode
