@@ -49,7 +49,7 @@ import { requiredOptional } from '@kbn/zod-helpers';
 import { createHash } from 'crypto';
 
 import { getAlertDetailsUrl } from '../../../../../../common/utils/alert_detail_path';
-import type { BaseSignalHit, SimpleHit } from '../../types';
+import type { SimpleHit } from '../../types';
 import type { ThresholdResult } from '../../threshold/types';
 import {
   getField,
@@ -63,8 +63,6 @@ import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
-  ALERT_THRESHOLD_RESULT,
-  ALERT_ORIGINAL_EVENT,
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_RULE_ACTIONS,
   ALERT_RULE_INDICES,
@@ -96,6 +94,22 @@ import type {
   AncestorLatest,
   BaseFieldsLatest,
 } from '../../../../../../common/api/detection_engine/model/alerts';
+
+export interface BuildAlertFieldsProps {
+  docs: SimpleHit[];
+  completeRule: CompleteRule<RuleParams>;
+  spaceId: string | null | undefined;
+  reason: string;
+  indicesToQuery: string[];
+  alertUuid: string;
+  publicBaseUrl: string | undefined;
+  alertTimestampOverride: Date | undefined;
+  overrides?: {
+    nameOverride: string;
+    severityOverride: string;
+    riskScoreOverride: number;
+  };
+}
 
 export const generateAlertId = (alert: BaseFieldsLatest) => {
   return createHash('sha256')
@@ -145,21 +159,17 @@ export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
  * @param reason Human readable string summarizing alert.
  * @param indicesToQuery Array of index patterns searched by the rule.
  */
-export const buildAlert = (
-  docs: SimpleHit[],
-  completeRule: CompleteRule<RuleParams>,
-  spaceId: string | null | undefined,
-  reason: string,
-  indicesToQuery: string[],
-  alertUuid: string,
-  publicBaseUrl: string | undefined,
-  alertTimestampOverride: Date | undefined,
-  overrides?: {
-    nameOverride: string;
-    severityOverride: string;
-    riskScoreOverride: number;
-  }
-): BaseFieldsLatest => {
+export const buildAlertFields = ({
+  docs,
+  completeRule,
+  spaceId,
+  reason,
+  indicesToQuery,
+  alertUuid,
+  publicBaseUrl,
+  alertTimestampOverride,
+  overrides,
+}: BuildAlertFieldsProps): BaseFieldsLatest => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce(
@@ -276,28 +286,8 @@ export const buildAlert = (
   };
 };
 
-const isThresholdResult = (thresholdResult: SearchTypes): thresholdResult is ThresholdResult => {
+export const isThresholdResult = (
+  thresholdResult: SearchTypes
+): thresholdResult is ThresholdResult => {
   return typeof thresholdResult === 'object';
-};
-
-/**
- * Creates signal fields that are only available in the special case where a signal has only 1 parent signal/event.
- * We copy the original time from the document as "original_time" since we override the timestamp with the current date time.
- * @param doc The parent signal/event of the new signal to be built.
- */
-export const additionalAlertFields = (doc: BaseSignalHit) => {
-  const thresholdResult = doc._source?.threshold_result;
-  if (thresholdResult != null && !isThresholdResult(thresholdResult)) {
-    throw new Error(`threshold_result failed to validate: ${thresholdResult}`);
-  }
-  const additionalFields: Record<string, SearchTypes> = {
-    ...(thresholdResult != null ? { [ALERT_THRESHOLD_RESULT]: thresholdResult } : {}),
-  };
-
-  for (const [key, val] of Object.entries(doc._source ?? {})) {
-    if (key.startsWith('event.')) {
-      additionalFields[`${ALERT_ORIGINAL_EVENT}.${key.replace('event.', '')}`] = val;
-    }
-  }
-  return additionalFields;
 };

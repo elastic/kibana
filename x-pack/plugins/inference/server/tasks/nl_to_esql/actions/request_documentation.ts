@@ -10,24 +10,28 @@ import { InferenceClient, withoutOutputUpdateEvents } from '../../..';
 import { Message } from '../../../../common';
 import { ToolChoiceType, ToolOptions } from '../../../../common/chat_complete/tools';
 import { requestDocumentationSchema } from './shared';
+import type { FunctionCallingMode } from '../../../../common/chat_complete';
 
 export const requestDocumentation = ({
   outputApi,
   system,
   messages,
   connectorId,
+  functionCalling,
   toolOptions: { tools, toolChoice },
 }: {
   outputApi: InferenceClient['output'];
   system: string;
   messages: Message[];
   connectorId: string;
+  functionCalling?: FunctionCallingMode;
   toolOptions: ToolOptions;
 }) => {
   const hasTools = !isEmpty(tools) && toolChoice !== ToolChoiceType.none;
 
   return outputApi('request_documentation', {
     connectorId,
+    functionCalling,
     system,
     previousMessages: messages,
     input: `Based on the previous conversation, request documentation
