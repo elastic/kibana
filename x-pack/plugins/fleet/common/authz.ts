@@ -117,7 +117,8 @@ export const calculateAuthz = ({
         allSettings: fleet.settings?.all ?? false,
         allAgentPolicies: fleet.agentPolicies?.all ?? false,
         addAgents: fleet.agents?.all ?? false,
-        addFleetServers: (fleet.agents?.all && fleet.settings?.all) ?? false,
+        addFleetServers:
+          (fleet.agents?.all && fleet.agentPolicies?.all && fleet.settings?.all) ?? false,
         // Setup is needed to access the Fleet UI
         setup:
           hasFleetAll ||

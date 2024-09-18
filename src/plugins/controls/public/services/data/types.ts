@@ -8,15 +8,7 @@
  */
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { ControlInput } from '../../types';
-
 export interface ControlsDataService {
-  fetchFieldRange: (
-    dataView: DataView,
-    fieldName: string,
-    input: ControlInput
-  ) => Promise<{ min: number; max: number }>;
   query: DataPublicPluginStart['query'];
   searchSource: DataPublicPluginStart['search']['searchSource'];
   timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];

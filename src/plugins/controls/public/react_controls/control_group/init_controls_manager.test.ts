@@ -8,10 +8,13 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { DefaultDataControlState } from '../controls/data_controls/types';
-import { DefaultControlApi } from '../controls/types';
+import type { DefaultControlApi } from '../controls/types';
 import { initControlsManager, getLastUsedDataViewId } from './init_controls_manager';
-import { ControlPanelState, ControlPanelsState } from './types';
+import type {
+  ControlPanelState,
+  DefaultDataControlState,
+  ControlPanelsState,
+} from '../../../common';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('delta'),
