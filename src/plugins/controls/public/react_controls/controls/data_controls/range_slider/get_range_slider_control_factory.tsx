@@ -61,6 +61,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       const controlFetch$ = controlGroupApi.controlFetch$(uuid);
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
       const step$ = new BehaviorSubject<number | undefined>(initialState.step ?? 1);
 
       const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
@@ -82,6 +83,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       const api = buildApi(
         {
           ...dataControl.api,
+          dataLoading: dataLoading$,
           getTypeDisplayName: RangeSliderStrings.control.getDisplayName,
           serializeState: () => {
             const { rawState: dataControlState, references } = dataControl.serialize();
@@ -109,17 +111,17 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         }
       );
 
-      const dataLoadingSubscription = combineLatest([loadingMinMax$, loadingHasNoResults$])
+      const dataLoadingSubscription = combineLatest([
+        loadingMinMax$,
+        loadingHasNoResults$,
+        dataControl.api.dataLoading,
+      ])
         .pipe(
           debounceTime(100),
-          map((values) => {
-            return values.some((value) => {
-              return value;
-            });
-          })
+          map((values) => values.some((value) => value))
         )
         .subscribe((isLoading) => {
-          dataControl.api.setDataLoading(isLoading);
+          dataLoading$.next(isLoading);
         });
 
       // Clear state when the field changes
@@ -215,7 +217,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         Component: ({ className: controlPanelClassName }) => {
           const [dataLoading, fieldFormatter, max, min, selectionHasNotResults, step, value] =
             useBatchedPublishingSubjects(
-              dataControl.api.dataLoading,
+              dataLoading$,
               dataControl.api.fieldFormatter,
               max$,
               min$,
