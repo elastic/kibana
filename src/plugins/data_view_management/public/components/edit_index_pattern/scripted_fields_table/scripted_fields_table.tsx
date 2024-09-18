@@ -136,7 +136,7 @@ export class ScriptedFieldsTable extends Component<
 
     return (
       <>
-        <Header indexPatternId={indexPattern.id || ''} />
+        <Header />
 
         <CallOuts deprecatedLangsInUse={deprecatedLangsInUse} painlessDocLink={painlessDocLink} />
 
