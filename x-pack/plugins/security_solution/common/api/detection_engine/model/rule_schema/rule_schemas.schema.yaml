@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Security Rule Schema
   version: 'not applicable'
-paths: { }
+paths: {}
 components:
   x-codegen-enabled: true
   schemas:
@@ -262,7 +262,7 @@ components:
       properties:
         type:
           type: string
-          enum: [ eql ]
+          enum: [eql]
           description: Rule type
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
@@ -342,7 +342,7 @@ components:
       properties:
         type:
           type: string
-          enum: [ query ]
+          enum: [query]
           description: Rule type
       required:
         - type
@@ -422,7 +422,7 @@ components:
       properties:
         type:
           type: string
-          enum: [ saved_query ]
+          enum: [saved_query]
           description: Rule type
         saved_id:
           $ref: './common_attributes.schema.yaml#/components/schemas/SavedQueryId'
@@ -503,7 +503,7 @@ components:
       properties:
         type:
           type: string
-          enum: [ threshold ]
+          enum: [threshold]
           description: Rule type
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
@@ -583,7 +583,7 @@ components:
       properties:
         type:
           type: string
-          enum: [ threat_match ]
+          enum: [threat_match]
           description: Rule type
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
@@ -679,7 +679,7 @@ components:
       properties:
         type:
           type: string
-          enum: [ machine_learning ]
+          enum: [machine_learning]
           description: Rule type
         anomaly_threshold:
           $ref: './specific_attributes/ml_attributes.schema.yaml#/components/schemas/AnomalyThreshold'
@@ -741,7 +741,7 @@ components:
       properties:
         type:
           type: string
-          enum: [ new_terms ]
+          enum: [new_terms]
           description: Rule type
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
@@ -831,7 +831,7 @@ components:
       properties:
         type:
           type: string
-          enum: [ esql ]
+          enum: [esql]
           description: Rule type
         language:
           $ref: '#/components/schemas/EsqlQueryLanguage'
