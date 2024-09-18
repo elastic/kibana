@@ -11,18 +11,18 @@ import * as recast from 'recast';
 const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
-import { functions } from '../sections/generated/scalar_functions';
+import { functions } from '../src/sections/generated/scalar_functions';
 
 (function () {
   const pathToElasticsearch = process.argv[2];
   const { scalarFunctions, aggregationFunctions } = loadFunctionDocs(pathToElasticsearch);
   writeFunctionDocs(
     scalarFunctions,
-    path.join(__dirname, '.../sections/generated/scalar_functions.tsx')
+    path.join(__dirname, '../src/sections/generated/scalar_functions.tsx')
   );
   writeFunctionDocs(
     aggregationFunctions,
-    path.join(__dirname, '.../sections/generated/aggregation_functions.tsx')
+    path.join(__dirname, '../src/sections/generated/aggregation_functions.tsx')
   );
 })();
 
