@@ -147,7 +147,6 @@ export const AlertsSearchBar = ({
     submitOnBlur,
     onQueryChange: onSearchQueryChange,
     suggestionsAbstraction: isSecurity ? undefined : SA_ALERTS,
-    filters: initialFilters,
   });
 };
 
