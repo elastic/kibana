@@ -223,17 +223,18 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private async fetchElasticsearchConfig(
     http: CoreStart['http']
   ): Promise<PublicElasticsearchConfigType> {
-    if (this.elasticsearchUrl) {
+    if (this.elasticsearchUrl !== undefined) {
       return { elasticsearchUrl: this.elasticsearchUrl };
     }
     try {
       const result = await http.get<ElasticsearchConfigType>('/api/internal/elasticsearch_config');
-      this.elasticsearchUrl = result.elasticsearch_url;
+      // Short-circuiting to empty string ensures this is only set once
+      this.elasticsearchUrl = result.elasticsearch_url || '';
       return { elasticsearchUrl: result.elasticsearch_url };
     } catch {
       this.logger.error('Failed to fetch Elasticsearch config');
       return {
-        elasticsearchUrl: undefined,
+        elasticsearchUrl: '',
       };
     }
   }
