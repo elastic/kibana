@@ -39,7 +39,8 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   let roleAdmin: RoleCredentials;
 
-  describe('Summary actions', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/193061
+  describe.skip('Summary actions', function () {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
