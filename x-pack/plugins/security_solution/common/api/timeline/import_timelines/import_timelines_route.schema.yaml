@@ -19,7 +19,7 @@ paths:
       x-codegen-enabled: true
       operationId: ImportTimelines
       summary: Import Timelines
-      descriptions: Import Timelines.
+      description: Import Timelines.
       tags:
         - access:securitySolution
       requestBody:
