@@ -353,7 +353,7 @@ describe('CoreKibanaRequest', () => {
     });
 
     describe('route.options.security property', () => {
-      it('takes precedence over auth property', () => {
+      it('throws if auth is both configured with security and legacy authRequired option', () => {
         const request = hapiMocks.createRequest({
           route: {
             settings: {
@@ -365,9 +365,9 @@ describe('CoreKibanaRequest', () => {
             },
           },
         });
-        const kibanaRequest = CoreKibanaRequest.from(request);
-
-        expect(kibanaRequest.route.options.authRequired).toBe(true);
+        expect(() => CoreKibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
+          `"unexpected authentication options for route: /. Auth cannot be configured with security config and authRequired option"`
+        );
       });
 
       it('handles required authc: undefined', () => {

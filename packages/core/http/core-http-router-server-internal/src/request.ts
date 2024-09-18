@@ -348,7 +348,13 @@ export class CoreKibanaRequest<
 
     const security = this.getSecurity(request);
 
-    if (security) {
+    if (security?.authc !== undefined && request.route.settings.auth !== undefined) {
+      throw new Error(
+        `unexpected authentication options for route: ${this.url.pathname}${this.url.search}. Auth cannot be configured with security config and authRequired option`
+      );
+    }
+
+    if (security?.authc !== undefined) {
       return security.authc?.enabled ?? true;
     }
 
