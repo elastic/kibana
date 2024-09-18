@@ -230,7 +230,7 @@ export interface PublicElasticsearchConfigType {
   /**
    * The URL to the Elasticsearch cluster, derived from xpack.elasticsearch.publicBaseUrl if populated
    * Otherwise this is based on the cloudId
-   * If neither is populated, this will be an empty string
+   * If neither is populated, this will be undefined
    */
-  elasticsearchUrl: string;
+  elasticsearchUrl?: string;
 }

@@ -67,14 +67,14 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly isServerlessEnabled: boolean;
   private readonly contextProviders: Array<FC<PropsWithChildren<unknown>>> = [];
   private readonly logger: Logger;
-  private elasticsearchUrl?: string;
+  private elasticsearchConfig?: PublicElasticsearchConfigType;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
     this.isServerlessEnabled = !!this.config.serverless?.project_id;
     this.logger = initializerContext.logger.get();
-    this.elasticsearchUrl = undefined;
+    this.elasticsearchConfig = undefined;
   }
 
   public setup(core: CoreSetup): CloudSetup {
@@ -223,18 +223,19 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private async fetchElasticsearchConfig(
     http: CoreStart['http']
   ): Promise<PublicElasticsearchConfigType> {
-    if (this.elasticsearchUrl !== undefined) {
-      return { elasticsearchUrl: this.elasticsearchUrl };
+    if (this.elasticsearchConfig !== undefined) {
+      // This config should be fully populated on first fetch, so we should avoid refetching from server
+      return this.elasticsearchConfig;
     }
     try {
       const result = await http.get<ElasticsearchConfigType>('/api/internal/elasticsearch_config');
-      // Short-circuiting to empty string ensures this is only set once
-      this.elasticsearchUrl = result.elasticsearch_url || '';
-      return { elasticsearchUrl: this.elasticsearch_url };
+
+      this.elasticsearchConfig = { elasticsearchUrl: result.elasticsearch_url || undefined };
+      return this.elasticsearchConfig;
     } catch {
       this.logger.error('Failed to fetch Elasticsearch config');
       return {
-        elasticsearchUrl: '',
+        elasticsearchUrl: undefined,
       };
     }
   }
