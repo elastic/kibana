@@ -115,6 +115,17 @@ export interface ESQLFunction<
   args: ESQLAstItem[];
 }
 
+const isESQLAstBaseItem = (node: unknown): node is ESQLAstBaseItem =>
+  typeof node === 'object' &&
+  node !== null &&
+  Object.hasOwn(node, 'name') &&
+  Object.hasOwn(node, 'text');
+
+export const isESQLFunction = (node: unknown): node is ESQLFunction =>
+  isESQLAstBaseItem(node) &&
+  Object.hasOwn(node, 'type') &&
+  (node as ESQLFunction).type === 'function';
+
 export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'> {
   subtype: 'variadic-call';
   args: ESQLAstItem[];
@@ -309,6 +320,10 @@ export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
   value: string;
 }
 
+export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedParamLiteral =>
+  isESQLAstBaseItem(node) &&
+  (node as ESQLNamedParamLiteral).literalType === 'param' &&
+  (node as ESQLNamedParamLiteral).paramType === 'named';
 /**
  * *Positional* parameter is a question mark followed by a number "?1".
  *

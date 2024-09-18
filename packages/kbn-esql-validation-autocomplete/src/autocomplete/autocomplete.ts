@@ -30,11 +30,9 @@ import {
   isAssignment,
   isAssignmentComplete,
   isColumnItem,
-  isComma,
   isFunctionItem,
   isIncompleteItem,
   isLiteralItem,
-  isMathFunction,
   isOptionItem,
   isRestartingExpression,
   isSourceCommand,
@@ -47,7 +45,10 @@ import {
   getColumnExists,
   findPreviousWord,
   noCaseCompare,
+  correctQuerySyntax,
   getColumnByName,
+  sourceExists,
+  findFinalWord,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -90,7 +91,7 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { ESQLCallbacks } from '../shared/types';
+import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getOverlapRange,
@@ -98,11 +99,8 @@ import {
   getSourcesFromCommands,
   getSupportedTypesForBinaryOperators,
   isAggFunctionUsedAlready,
-  getCompatibleTypesToSuggestNext,
   removeQuoteForSuggestedSources,
-  getValidFunctionSignaturesForPreviousArgs,
-  strictlyGetParamAtPosition,
-  isLiteralDateItem,
+  getValidSignaturesAndTypesToSuggestNext,
 } from './helper';
 import { getSortPos } from './commands/sort/helper';
 import {
@@ -112,12 +110,9 @@ import {
   isParameterType,
   isReturnType,
 } from '../definitions/types';
+import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
 
-type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
-type GetDataStreamsForIntegrationFn = (
-  sourceName: string
-) => Promise<Array<{ name: string; title?: string }> | undefined>;
 type GetFieldsByTypeFn = (
   type: string | string[],
   ignored?: string[],
@@ -159,76 +154,6 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
   return finalSuggestions;
 }
 
-/**
- * This function count the number of unclosed brackets in order to
- * locally fix the queryString to generate a valid AST
- * A known limitation of this is that is not aware of commas "," or pipes "|"
- * so it is not yet helpful on a multiple commands errors (a workaround it to pass each command here...)
- * @param bracketType
- * @param text
- * @returns
- */
-function countBracketsUnclosed(bracketType: '(' | '[' | '"' | '"""', text: string) {
-  const stack = [];
-  const closingBrackets = { '(': ')', '[': ']', '"': '"', '"""': '"""' };
-  for (let i = 0; i < text.length; i++) {
-    const substr = text.substring(i, i + bracketType.length);
-    if (substr === closingBrackets[bracketType] && stack.length) {
-      stack.pop();
-    } else if (substr === bracketType) {
-      stack.push(bracketType);
-    }
-  }
-  return stack.length;
-}
-
-/**
- * This function attempts to correct the syntax of a partial query to make it valid.
- *
- * This is important because a syntactically-invalid query will not generate a good AST.
- *
- * @param _query
- * @param context
- * @returns
- */
-function correctQuerySyntax(_query: string, context: EditorContext) {
-  let query = _query;
-  // check if all brackets are closed, otherwise close them
-  const unclosedRoundBrackets = countBracketsUnclosed('(', query);
-  const unclosedSquaredBrackets = countBracketsUnclosed('[', query);
-  const unclosedQuotes = countBracketsUnclosed('"', query);
-  const unclosedTripleQuotes = countBracketsUnclosed('"""', query);
-  // if it's a comma by the user or a forced trigger by a function argument suggestion
-  // add a marker to make the expression still valid
-  const charThatNeedMarkers = [',', ':'];
-  if (
-    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
-    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
-    (context.triggerCharacter === ' ' && isMathFunction(query, query.length)) ||
-    isComma(query.trimEnd()[query.trimEnd().length - 1])
-  ) {
-    query += EDITOR_MARKER;
-  }
-
-  // if there are unclosed brackets, close them
-  if (unclosedRoundBrackets || unclosedSquaredBrackets || unclosedQuotes) {
-    for (const [char, count] of [
-      ['"""', unclosedTripleQuotes],
-      ['"', unclosedQuotes],
-      [')', unclosedRoundBrackets],
-      [']', unclosedSquaredBrackets],
-    ]) {
-      if (count) {
-        // inject the closing brackets
-        query += Array(count).fill(char).join('');
-      }
-    }
-  }
-
-  return query;
-}
-
 export async function suggest(
   fullText: string,
   offset: number,
@@ -253,8 +178,7 @@ export async function suggest(
     queryForFields,
     resourceRetriever
   );
-  const getSources = getSourcesRetriever(resourceRetriever);
-  const getDatastreamsForIntegration = getDatastreamsForIntegrationRetriever(resourceRetriever);
+  const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
   if (astContext.type === 'newCommand') {
@@ -280,7 +204,6 @@ export async function suggest(
       ast,
       astContext,
       getSources,
-      getDatastreamsForIntegration,
       getFieldsByType,
       getFieldsMap,
       getPolicies,
@@ -337,7 +260,7 @@ export async function suggest(
   return [];
 }
 
-function getFieldsByTypeRetriever(
+export function getFieldsByTypeRetriever(
   queryString: string,
   resourceRetriever?: ESQLCallbacks
 ): { getFieldsByType: GetFieldsByTypeFn; getFieldsMap: GetFieldsMapFn } {
@@ -366,29 +289,15 @@ function getPolicyRetriever(resourceRetriever?: ESQLCallbacks) {
   };
 }
 
-function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
-  const helper = getSourcesHelper(resourceRetriever);
-  return async () => {
-    const list = (await helper()) || [];
-    // hide indexes that start with .
-    return buildSourcesDefinitions(
-      list
-        .filter(({ hidden }) => !hidden)
-        .map(({ name, dataStreams, title, type }) => {
-          return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
-        })
-    );
-  };
-}
-
-function getDatastreamsForIntegrationRetriever(
-  resourceRetriever?: ESQLCallbacks
-): GetDataStreamsForIntegrationFn {
-  const helper = getSourcesHelper(resourceRetriever);
-  return async (sourceName: string) => {
-    const list = (await helper()) || [];
-    return list.find(({ name }) => name === sourceName)?.dataStreams;
-  };
+function getSourceSuggestions(sources: ESQLSourceResult[]) {
+  // hide indexes that start with .
+  return buildSourcesDefinitions(
+    sources
+      .filter(({ hidden }) => !hidden)
+      .map(({ name, dataStreams, title, type }) => {
+        return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
+      })
+  );
 }
 
 function findNewVariable(variables: Map<string, ESQLVariable[]>) {
@@ -566,8 +475,7 @@ async function getExpressionSuggestionsByType(
     option: ESQLCommandOption | undefined;
     node: ESQLSingleAstItem | undefined;
   },
-  getSources: GetSourceFn,
-  getDatastreamsForIntegration: GetDataStreamsForIntegrationFn,
+  getSources: () => Promise<ESQLSourceResult[]>,
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
@@ -705,13 +613,12 @@ async function getExpressionSuggestionsByType(
         );
 
         /**
-         * @TODO — this string manipulation is crude and can't support all cases
+         * @TODO — this string scanning is crude and can't support all cases
          * Checking for a partial word and computing the replacement range should
          * really be done using the AST node, but we'll have to refactor further upstream
          * to make that available. This is a quick fix to support the most common case.
          */
-        const words = innerText.split(/\s+/);
-        const lastWord = words[words.length - 1];
+        const lastWord = findFinalWord(innerText);
         if (lastWord !== '') {
           // ... | <COMMAND> <word><suggest>
 
@@ -728,16 +635,13 @@ async function getExpressionSuggestionsByType(
             }
             // now we know that the user has already entered a column,
             // so suggest comma and pipe
-            // const NON_ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
-            // const textToUse = lastWord.replace(NON_ALPHANUMERIC_REGEXP, '');
-            const textToUse = lastWord;
             return [
               { ...pipeCompleteItem, text: ' | ' },
               { ...commaCompleteItem, text: ', ' },
             ].map<SuggestionRawDefinition>((s) => ({
               ...s,
-              filterText: textToUse,
-              text: textToUse + s.text,
+              filterText: lastWord,
+              text: lastWord + s.text,
               command: TRIGGER_SUGGESTION_COMMAND,
               rangeToReplace,
             }));
@@ -991,9 +895,22 @@ async function getExpressionSuggestionsByType(
       if (argDef.innerTypes?.includes('policy')) {
         // ... | ENRICH <suggest>
         const policies = await getPolicies();
+        const lastWord = findFinalWord(innerText);
+        if (lastWord !== '') {
+          policies.forEach((suggestion) => {
+            suggestions.push({
+              ...suggestion,
+              rangeToReplace: {
+                start: innerText.length - lastWord.length + 1,
+                end: innerText.length + 1,
+              },
+            });
+          });
+        }
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
-        const index = getSourcesFromCommands(commands, 'index');
+        const indexes = getSourcesFromCommands(commands, 'index');
+        const lastIndex = indexes[indexes.length - 1];
         const canRemoveQuote = isNewExpression && innerText.includes('"');
         // Function to add suggestions based on canRemoveQuote
         const addSuggestionsBasedOnQuote = async (definitions: SuggestionRawDefinition[]) => {
@@ -1002,24 +919,58 @@ async function getExpressionSuggestionsByType(
           );
         };
 
-        if (index && index.text && index.text !== EDITOR_MARKER) {
-          const source = index.text.replace(EDITOR_MARKER, '');
-          const dataStreams = await getDatastreamsForIntegration(source);
+        if (lastIndex && lastIndex.text && lastIndex.text !== EDITOR_MARKER) {
+          const sources = await getSources();
+          const sourceIdentifier = lastIndex.text.replace(EDITOR_MARKER, '');
+          if (sourceExists(sourceIdentifier, new Set(sources.map(({ name }) => name)))) {
+            const exactMatch = sources.find(({ name: _name }) => _name === sourceIdentifier);
+            if (exactMatch?.dataStreams) {
+              // this is an integration name, suggest the datastreams
+              addSuggestionsBasedOnQuote(
+                buildSourcesDefinitions(
+                  exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+                )
+              );
+            } else {
+              // this is a complete source name
+              const rangeToReplace = {
+                start: innerText.length - sourceIdentifier.length + 1,
+                end: innerText.length + 1,
+              };
 
-          if (dataStreams) {
-            // Integration name, suggest the datastreams
-            await addSuggestionsBasedOnQuote(
-              buildSourcesDefinitions(
-                dataStreams.map(({ name }) => ({ name, isIntegration: false }))
-              )
-            );
+              const suggestionsToAdd: SuggestionRawDefinition[] = [
+                {
+                  ...pipeCompleteItem,
+                  filterText: sourceIdentifier,
+                  text: sourceIdentifier + ' | ',
+                  command: TRIGGER_SUGGESTION_COMMAND,
+                  rangeToReplace,
+                },
+                {
+                  ...commaCompleteItem,
+                  filterText: sourceIdentifier,
+                  text: sourceIdentifier + ', ',
+                  command: TRIGGER_SUGGESTION_COMMAND,
+                  rangeToReplace,
+                },
+                {
+                  ...buildOptionDefinition(metadataOption),
+                  filterText: sourceIdentifier,
+                  text: sourceIdentifier + ' METADATA ',
+                  asSnippet: false, // turn this off because $ could be contained within the source name
+                  rangeToReplace,
+                },
+              ];
+
+              addSuggestionsBasedOnQuote(suggestionsToAdd);
+            }
           } else {
-            // Not an integration, just a partial source name
-            await addSuggestionsBasedOnQuote(await getSources());
+            // Just a partial source name
+            await addSuggestionsBasedOnQuote(getSourceSuggestions(sources));
           }
         } else {
           // FROM <suggest> or no index/text
-          await addSuggestionsBasedOnQuote(await getSources());
+          await addSuggestionsBasedOnQuote(getSourceSuggestions(await getSources()));
         }
       }
     }
@@ -1295,18 +1246,6 @@ async function getFunctionArgsSuggestions(
     fields: fieldsMap,
     variables: anyVariables,
   };
-
-  const enrichedArgs = node.args.map((nodeArg) => {
-    let dataType = extractTypeFromASTArg(nodeArg, references);
-
-    // For named system time parameters ?start and ?end, make sure it's compatiable
-    if (isLiteralDateItem(nodeArg)) {
-      dataType = 'date';
-    }
-
-    return { ...nodeArg, dataType } as ESQLAstItem & { dataType: string };
-  });
-
   const variablesExcludingCurrentCommandOnes = excludeVariablesFromCurrentCommand(
     commands,
     command,
@@ -1314,33 +1253,15 @@ async function getFunctionArgsSuggestions(
     innerText
   );
 
-  // pick the type of the next arg
-  const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
-  let argIndex = Math.max(node.args.length, 0);
-  if (!shouldGetNextArgument && argIndex) {
-    argIndex -= 1;
-  }
-
+  const { typesToSuggestNext, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
+    getValidSignaturesAndTypesToSuggestNext(node, references, fnDefinition, fullText, offset);
   const arg: ESQLAstItem = enrichedArgs[argIndex];
-
-  const validSignatures = getValidFunctionSignaturesForPreviousArgs(
-    fnDefinition,
-    enrichedArgs,
-    argIndex
-  );
-  // Retrieve unique of types that are compatiable for the current arg
-  const typesToSuggestNext = getCompatibleTypesToSuggestNext(fnDefinition, enrichedArgs, argIndex);
-  const hasMoreMandatoryArgs = !validSignatures
-    // Types available to suggest next after this argument is completed
-    .map((signature) => strictlyGetParamAtPosition(signature, argIndex + 1))
-    // when a param is null, it means param is optional
-    // If there's at least one param that is optional, then
-    // no need to suggest comma
-    .some((p) => p === null || p?.optional === true);
 
   // Whether to prepend comma to suggestion string
   // E.g. if true, "fieldName" -> "fieldName, "
-  const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
+  const isCursorFollowedByComma = fullText
+    ? fullText.slice(offset, fullText.length).trimStart().startsWith(',')
+    : false;
   const canBeBooleanCondition =
     // For `CASE()`, there can be multiple conditions, so keep suggesting fields and functions if possible
     fnDefinition.name === 'case' ||
@@ -1350,9 +1271,10 @@ async function getFunctionArgsSuggestions(
   const shouldAddComma =
     hasMoreMandatoryArgs &&
     fnDefinition.type !== 'builtin' &&
-    !alreadyHasComma &&
+    !isCursorFollowedByComma &&
     !canBeBooleanCondition;
-  const shouldAdvanceCursor = hasMoreMandatoryArgs && fnDefinition.type !== 'builtin';
+  const shouldAdvanceCursor =
+    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !isCursorFollowedByComma;
 
   const suggestedConstants = uniq(
     typesToSuggestNext
@@ -1649,7 +1571,7 @@ async function getOptionArgsSuggestions(
       // if it's a new expression, suggest fields to match on
       if (
         isNewExpression ||
-        findPreviousWord(innerText) === 'ON' ||
+        noCaseCompare(findPreviousWord(innerText), 'ON') ||
         (option && isAssignment(option.args[0]) && !option.args[1])
       ) {
         const policyName = isSourceItem(command.args[0]) ? command.args[0].name : undefined;
@@ -1669,7 +1591,7 @@ async function getOptionArgsSuggestions(
         suggestions.push(
           buildOptionDefinition(getCommandOption('with')!),
           ...getFinalSuggestions({
-            comma: true,
+            comma: false,
           })
         );
       }
@@ -1696,7 +1618,23 @@ async function getOptionArgsSuggestions(
         if (policyMetadata) {
           if (isNewExpression || (assignFn && !isAssignmentComplete(assignFn))) {
             // ... | ENRICH ... WITH a =
-            suggestions.push(...buildFieldsDefinitions(policyMetadata.enrichFields));
+            // ... | ENRICH ... WITH b
+            const fieldSuggestions = buildFieldsDefinitions(policyMetadata.enrichFields);
+            // in this case, we don't want to open the suggestions menu when the field is accepted
+            // because we're keeping the suggestions simple here for now. Could always revisit.
+            fieldSuggestions.forEach((s) => (s.command = undefined));
+
+            // attach the replacement range if needed
+            const lastWord = findFinalWord(innerText);
+            if (lastWord) {
+              // ENRICH ... WITH a <suggest>
+              const rangeToReplace = {
+                start: innerText.length - lastWord.length + 1,
+                end: innerText.length + 1,
+              };
+              fieldSuggestions.forEach((s) => (s.rangeToReplace = rangeToReplace));
+            }
+            suggestions.push(...fieldSuggestions);
           }
         }
 
@@ -1748,13 +1686,41 @@ async function getOptionArgsSuggestions(
   if (option.name === 'metadata') {
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
-    if (isNewExpression) {
-      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
-    } else if (existingFields.size > 0) {
-      if (filteredMetaFields.length > 0) {
-        suggestions.push(commaCompleteItem);
+    const lastWord = findFinalWord(innerText);
+    if (lastWord) {
+      // METADATA something<suggest>
+      const isField = METADATA_FIELDS.includes(lastWord);
+      if (isField) {
+        // METADATA field<suggest>
+        suggestions.push({
+          ...pipeCompleteItem,
+          text: lastWord + ' | ',
+          filterText: lastWord,
+          command: TRIGGER_SUGGESTION_COMMAND,
+        });
+        if (filteredMetaFields.length > 1) {
+          suggestions.push({
+            ...commaCompleteItem,
+            text: lastWord + ', ',
+            filterText: lastWord,
+            command: TRIGGER_SUGGESTION_COMMAND,
+          });
+        }
+      } else {
+        suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
       }
-      suggestions.push(pipeCompleteItem);
+    } else if (isNewExpression) {
+      // METADATA <suggest>
+      // METADATA field, <suggest>
+      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    } else {
+      if (existingFields.size > 0) {
+        // METADATA field <suggest>
+        if (filteredMetaFields.length > 0) {
+          suggestions.push(commaCompleteItem);
+        }
+        suggestions.push(pipeCompleteItem);
+      }
     }
   }
 

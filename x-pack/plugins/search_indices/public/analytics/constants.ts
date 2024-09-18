@@ -7,5 +7,10 @@
 
 export enum AnalyticsEvents {
   startPageOpened = 'start_page_opened',
+  startPageShowCodeClick = 'start_page_show_code',
+  startPageShowCreateIndexUIClick = 'start_page_show_create_index_ui',
   startCreateIndexClick = 'start_create_index',
+  startCreateIndexLanguageSelect = 'start_code_lang_select',
+  startCreateIndexCodeCopyInstall = 'start_code_copy_install',
+  startCreateIndexCodeCopy = 'start_code_copy',
 }
