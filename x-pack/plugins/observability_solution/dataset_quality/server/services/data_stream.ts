@@ -19,6 +19,7 @@ class DataStreamService {
     try {
       const { data_streams: dataStreamsInfo } = await esClient.indices.getDataStream({
         name: datasetName,
+        // @ts-expect-error
         verbose: true,
       });
 

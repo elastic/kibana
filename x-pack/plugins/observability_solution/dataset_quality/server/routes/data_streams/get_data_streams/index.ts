@@ -61,6 +61,7 @@ export async function getDataStreams(options: {
   const mappedDataStreams = filteredDataStreams.map((dataStream) => ({
     name: dataStream.name,
     integration: dataStream._meta?.package?.name,
+    // @ts-expect-error
     lastActivity: dataStream.maximum_timestamp,
     userPrivileges: {
       canMonitor: dataStreamsPrivileges[dataStream.name],
