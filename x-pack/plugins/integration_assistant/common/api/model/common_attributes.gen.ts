@@ -46,7 +46,7 @@ export const RawSamples = z.array(z.string());
  * mapping object to ECS Mapping Request.
  */
 export type Mapping = z.infer<typeof Mapping>;
-export const Mapping = z.object({});
+export const Mapping = z.object({}).passthrough();
 
 /**
  * LLM Connector to be used in each API request.
@@ -58,7 +58,7 @@ export const Connector = z.string();
  * An array of processed documents.
  */
 export type Docs = z.infer<typeof Docs>;
-export const Docs = z.array(z.object({}));
+export const Docs = z.array(z.object({}).passthrough());
 
 /**
  * The name of the log samples format.

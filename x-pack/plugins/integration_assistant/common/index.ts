@@ -28,6 +28,7 @@ export type {
   Docs,
   SamplesFormat,
 } from './api/model/common_attributes.gen';
+export { SamplesFormatName } from './api/model/common_attributes.gen';
 export type { ESProcessorItem } from './api/model/processor_attributes.gen';
 
 export {
