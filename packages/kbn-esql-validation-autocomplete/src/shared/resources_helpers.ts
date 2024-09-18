@@ -10,6 +10,7 @@
 import type { ESQLAst } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
+import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
 
 export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string) {
   const prevCommand = ast[Math.max(ast.length - 2, 0)];
@@ -18,14 +19,31 @@ export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string
 
 export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const cacheFields = new Map<string, ESQLRealField>();
+
+  const getEcsMetadata = async () => {
+    if (!resourceRetriever?.getFieldsMetadata) {
+      return undefined;
+    }
+    const client = await resourceRetriever?.getFieldsMetadata;
+    if (client.find) {
+      // Fetch full list of ECS field
+      // This list should be cached already by fieldsMetadataClient
+      const results = await client.find({ attributes: ['type'] });
+      return results?.fields;
+    }
+  };
+
   const getFields = async () => {
+    const metadata = await getEcsMetadata();
     if (!cacheFields.size && queryText) {
       const fieldsOfType = await resourceRetriever?.getFieldsFor?.({ query: queryText });
-      for (const field of fieldsOfType || []) {
+      const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
+      for (const field of fieldsWithMetadata || []) {
         cacheFields.set(field.name, field);
       }
     }
   };
+
   return {
     getFieldsByType: async (
       expectedType: string | string[] = 'any',
