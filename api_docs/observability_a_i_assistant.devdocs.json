@@ -4241,7 +4241,7 @@
         "label": "aiAssistantLogsIndexPattern",
         "description": [],
         "signature": [
-          "\"observability:aiAssistantLogsIndexPattern\""
+          "\"observability:logSources\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
@@ -6855,7 +6855,7 @@
         "label": "aiAssistantLogsIndexPattern",
         "description": [],
         "signature": [
-          "\"observability:aiAssistantLogsIndexPattern\""
+          "\"observability:logSources\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
@@ -8871,7 +8871,7 @@
         "label": "aiAssistantLogsIndexPattern",
         "description": [],
         "signature": [
-          "\"observability:aiAssistantLogsIndexPattern\""
+          "\"observability:logSources\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,

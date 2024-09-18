@@ -30,7 +30,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
-import { resultMetaData } from './result/result_metadata';
+import { resultMetaData, resultToField } from './result/result_metadata';
 
 import { Result } from '..';
 interface DocumentListProps {
@@ -55,20 +55,6 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   setDocsPerPage,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const resultToField = (result: SearchHit) => {
-    if (mappings && result._source && !Array.isArray(result._source)) {
-      if (typeof result._source === 'object') {
-        return Object.entries(result._source).map(([key, value]) => {
-          return {
-            fieldName: key,
-            fieldType: mappings[key]?.type ?? 'object',
-            fieldValue: JSON.stringify(value, null, 2),
-          };
-        });
-      }
-    }
-    return [];
-  };
 
   const getIconType = (size: number) => {
     return size === docsPerPage ? 'check' : 'empty';
@@ -113,7 +99,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       {docs.map((doc) => {
         return (
           <React.Fragment key={doc._id}>
-            <Result fields={resultToField(doc)} metaData={resultMetaData(doc)} />
+            <Result fields={resultToField(doc, mappings)} metaData={resultMetaData(doc)} />
             <EuiSpacer size="s" />
           </React.Fragment>
         );
