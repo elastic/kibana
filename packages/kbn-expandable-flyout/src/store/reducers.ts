@@ -20,8 +20,9 @@ import {
   previousPreviewPanelAction,
   openPreviewPanelAction,
   urlChangedAction,
+  changePushVsOverlayAction,
 } from './actions';
-import { initialPanelsState } from './state';
+import { initialPanelsState, initialUiState } from './state';
 
 export const panelsReducer = createReducer(initialPanelsState, (builder) => {
   builder.addCase(openPanelsAction, (state, { payload: { preview, left, right, id } }) => {
@@ -147,5 +148,11 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
     }
 
     state.needsSync = false;
+  });
+});
+
+export const uiReducer = createReducer(initialUiState, (builder) => {
+  builder.addCase(changePushVsOverlayAction, (state, { payload: { type } }) => {
+    state.pushVsOverlay = type;
   });
 });

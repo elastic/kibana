@@ -33,6 +33,9 @@ describe('PreviewSection', () => {
         },
       },
     },
+    ui: {
+      pushVsOverlay: 'overlay',
+    },
   };
 
   const component = <div>{'component'}</div>;
