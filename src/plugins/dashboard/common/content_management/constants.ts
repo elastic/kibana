@@ -8,7 +8,6 @@
  */
 
 export const LATEST_VERSION = 3;
-export const LATEST_CLIENT_VERSION = 2;
 
 export const CONTENT_ID = 'dashboard';
 

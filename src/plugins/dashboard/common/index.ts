@@ -16,8 +16,6 @@ export type {
   DashboardContainerByReferenceInput,
 } from './dashboard_container/types';
 
-export type { DashboardAttributes, SavedDashboardPanel } from './content_management';
-
 export {
   type InjectExtractDeps,
   injectReferences,
@@ -32,10 +30,8 @@ export {
 export { prefixReferencesFromPanel } from './dashboard_container/persistable_state/dashboard_container_references';
 
 export {
-  convertPanelStateToSavedDashboardPanel,
-  convertSavedDashboardPanelToPanelState,
-  convertSavedPanelsToPanelMap,
-  convertPanelMapToSavedPanels,
+  convertPanelsArrayToPanelMap,
+  convertPanelMapToPanelsArray,
 } from './lib/dashboard_panel_converters';
 
 export const UI_SETTINGS = {

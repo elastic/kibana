@@ -28,7 +28,7 @@ import { DashboardContainerInput } from '../../../common';
 import { DashboardSavedObjectUserContent } from '../types';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { pluginServices } from '../../services/plugin_services';
-import { DashboardItem } from '../../../common/content_management';
+import type { DashboardItem } from '../../../server/content_management';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 
 type GetDetailViewLink =

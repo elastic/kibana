@@ -13,8 +13,14 @@ import moment, { Moment } from 'moment';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 
-import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
-import { DashboardAttributes, DashboardCrudTypes } from '../../../../common/content_management';
+import { convertPanelMapToPanelsArray, extractReferences } from '../../../../common';
+import type {
+  DashboardAttributes,
+  DashboardCreateIn,
+  DashboardCreateOut,
+  DashboardUpdateIn,
+  DashboardUpdateOut,
+} from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
@@ -100,9 +106,6 @@ export const saveDashboardState = async ({
     //
   }
 
-  /**
-   * Stringify filters and query into search source JSON
-   */
   const { searchSource, searchSourceReferences } = await (async () => {
     const searchSourceFields = await dataSearchService.searchSource.create();
     searchSourceFields.setField(
@@ -116,9 +119,6 @@ export const saveDashboardState = async ({
     return { searchSourceReferences: references, searchSource: fields };
   })();
 
-  /**
-   * Stringify options and panels
-   */
   const options = {
     useMargins,
     syncColors,
@@ -126,7 +126,7 @@ export const saveDashboardState = async ({
     syncTooltips,
     hidePanelTitles,
   };
-  const savedPanels = convertPanelMapToSavedPanels(panels, true);
+  const savedPanels = convertPanelMapToPanelsArray(panels, true);
 
   /**
    * Parse global time filter settings
@@ -185,10 +185,7 @@ export const saveDashboardState = async ({
 
   try {
     const result = idToSaveTo
-      ? await contentManagement.client.update<
-          DashboardCrudTypes['UpdateIn'],
-          DashboardCrudTypes['UpdateOut']
-        >({
+      ? await contentManagement.client.update<DashboardUpdateIn, DashboardUpdateOut>({
           id: idToSaveTo,
           contentTypeId: DASHBOARD_CONTENT_ID,
           data: attributes,
@@ -198,10 +195,7 @@ export const saveDashboardState = async ({
             mergeAttributes: false,
           },
         })
-      : await contentManagement.client.create<
-          DashboardCrudTypes['CreateIn'],
-          DashboardCrudTypes['CreateOut']
-        >({
+      : await contentManagement.client.create<DashboardCreateIn, DashboardCreateOut>({
           contentTypeId: DASHBOARD_CONTENT_ID,
           data: attributes,
           options: {

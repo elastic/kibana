@@ -16,10 +16,10 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
 
-import { injectReferences, convertSavedPanelsToPanelMap } from '../../../../common';
+import { injectReferences, convertPanelsArrayToPanelMap } from '../../../../common';
 import { migrateDashboardInput } from './migrate_dashboard_input';
 import { convertNumberToDashboardVersion } from './dashboard_versioning';
-import { DashboardCrudTypes } from '../../../../common/content_management';
+import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
@@ -65,8 +65,8 @@ export const loadDashboardState = async ({
   /**
    * Load the saved object from Content Management
    */
-  let rawDashboardContent: DashboardCrudTypes['GetOut']['item'];
-  let resolveMeta: DashboardCrudTypes['GetOut']['meta'];
+  let rawDashboardContent: DashboardGetOut['item'];
+  let resolveMeta: DashboardGetOut['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
   if (cachedDashboard) {
@@ -75,7 +75,7 @@ export const loadDashboardState = async ({
   } else {
     /** Otherwise, fetch and load the dashboard from the content management client, and add it to the cache */
     const result = await contentManagement.client
-      .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
+      .get<DashboardGetIn, DashboardGetOut>({
         contentTypeId: DASHBOARD_CONTENT_ID,
         id,
       })
@@ -159,7 +159,7 @@ export const loadDashboardState = async ({
         }
       : undefined;
 
-  const panelMap = convertSavedPanelsToPanelMap(panels ?? []);
+  const panelMap = convertPanelsArrayToPanelMap(panels ?? []);
 
   const { dashboardInput, anyMigrationRun } = migrateDashboardInput(
     {

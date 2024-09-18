@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, Type, TypeOf } from '@kbn/config-schema';
-import {
-  createOptionsSchemas,
-  createResultSchema,
-  objectTypeToGetResultSchema,
-  savedObjectSchema,
-  updateOptionsSchema,
-} from '@kbn/content-management-utils';
+import { schema, Type } from '@kbn/config-schema';
+import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   type ControlGroupChainingSystem,
@@ -30,14 +24,19 @@ import {
 } from '@kbn/controls-plugin/common';
 import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
-import type { DashboardCrudTypes } from '../../../../common/content_management/v3';
-import type { DashboardCrudTypes as DashboardCrudTypesV2 } from '../../../../common/content_management/v2';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
-} from '../../../../common/content_management';
-import { itemAttrsToSavedObjectAttrs } from './storage_transforms';
+} from '../../../common/content_management';
+import { getResultV3ToV2 } from './transform_utils';
+
+const apiError = schema.object({
+  error: schema.string(),
+  message: schema.string(),
+  statusCode: schema.number(),
+  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+});
 
 export const controlGroupInputSchema = schema.object({
   panels: schema.arrayOf(
@@ -240,7 +239,7 @@ const searchSourceSchema = schema.object(
   { defaultValue: {} }
 );
 
-const gridDataSchema = schema.object({
+export const gridDataSchema = schema.object({
   x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
   y: schema.number({ meta: { description: 'The y coordinate of the panel in grid units' } }),
   w: schema.number({
@@ -261,64 +260,61 @@ const gridDataSchema = schema.object({
   ),
 });
 
-const panelsSchema = schema.arrayOf(
-  schema.object({
-    embeddableConfig: schema.object(
-      {
-        version: schema.maybe(
-          schema.string({
-            meta: { description: 'The version of the embeddable in the panel.' },
-          })
-        ),
-        title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
-        description: schema.maybe(
-          schema.string({ meta: { description: 'The description of the panel' } })
-        ),
-        // id: schema.string({
-        //   defaultValue: uuidv4(),
-        //   meta: { description: 'The id of the panel' },
-        // }),
-        savedObjectId: schema.maybe(
-          schema.string({
-            meta: { description: 'The unique id of the library item to construct the embeddable.' },
-          })
-        ),
-        hidePanelTitles: schema.maybe(
-          schema.boolean({
-            defaultValue: false,
-            meta: { description: 'Set to true to hide the panel title in its container.' },
-          })
-        ),
-        enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+export const panelSchema = schema.object({
+  embeddableConfig: schema.object(
+    {
+      version: schema.maybe(
+        schema.string({
+          meta: { description: 'The version of the embeddable in the panel.' },
+        })
+      ),
+      title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
+      description: schema.maybe(
+        schema.string({ meta: { description: 'The description of the panel' } })
+      ),
+      // id: schema.string({
+      //   defaultValue: uuidv4(),
+      //   meta: { description: 'The id of the panel' },
+      // }),
+      savedObjectId: schema.maybe(
+        schema.string({
+          meta: { description: 'The unique id of the library item to construct the embeddable.' },
+        })
+      ),
+      hidePanelTitles: schema.maybe(
+        schema.boolean({
+          defaultValue: false,
+          meta: { description: 'Set to true to hide the panel title in its container.' },
+        })
+      ),
+      enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    },
+    {
+      unknowns: 'allow',
+    }
+  ),
+  id: schema.maybe(
+    schema.string({ meta: { description: 'The saved object id for by reference panels' } })
+  ),
+  type: schema.string({ meta: { description: 'The embeddable type' } }),
+  panelRefName: schema.maybe(schema.string()),
+  gridData: gridDataSchema,
+  panelIndex: schema.maybe(
+    schema.string({
+      meta: { description: 'The unique ID of the panel.' },
+    })
+  ),
+  title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
+  version: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (embeddableConfig in this type).",
+        deprecated: true,
       },
-      {
-        unknowns: 'allow',
-      }
-    ),
-    id: schema.maybe(
-      schema.string({ meta: { description: 'The saved object id for by reference panels' } })
-    ),
-    type: schema.string({ meta: { description: 'The embeddable type' } }),
-    panelRefName: schema.maybe(schema.string()),
-    gridData: gridDataSchema,
-    panelIndex: schema.maybe(
-      schema.string({
-        meta: { description: 'The unique ID of the panel.' },
-      })
-    ),
-    title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
-    version: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (embeddableConfig in this type).",
-          deprecated: true,
-        },
-      })
-    ),
-  }),
-  { defaultValue: [] }
-);
+    })
+  ),
+});
 
 const optionsSchema = schema.object({
   hidePanelTitles: schema.boolean({
@@ -343,12 +339,17 @@ const optionsSchema = schema.object({
   }),
 });
 
-export const generalAttributesSchema = schema.object({
+// These are the attributes that are returned in search results
+export const searchResultsAttributesSchema = schema.object({
   title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
   description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
+  timeRestore: schema.boolean({
+    defaultValue: false,
+    meta: { description: 'Whether to restore time upon viewing this dashboard' },
+  }),
 });
 
-export const dashboardAttributesSchema = generalAttributesSchema.extends({
+export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
   // Search
   kibanaSavedObjectMeta: schema.object(
     {
@@ -360,12 +361,7 @@ export const dashboardAttributesSchema = generalAttributesSchema.extends({
       },
     }
   ),
-
   // Time
-  timeRestore: schema.boolean({
-    defaultValue: false,
-    meta: { description: 'Whether to restore time upon viewing this dashboard' },
-  }),
   timeFrom: schema.maybe(
     schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
   ),
@@ -414,20 +410,44 @@ export const dashboardAttributesSchema = generalAttributesSchema.extends({
 
   // Dashboard Content
   controlGroupInput: schema.maybe(controlGroupInputSchema),
-  panels: panelsSchema,
+  panels: schema.arrayOf(panelSchema, { defaultValue: [] }),
   options: optionsSchema,
   version: schema.number({ meta: { deprecated: true } }),
 });
 
-export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
-export type ControlGroupAttributes = TypeOf<typeof controlGroupInputSchema>;
-export type GridData = TypeOf<typeof gridDataSchema>;
+export const referenceSchema = schema.object(
+  {
+    name: schema.string(),
+    type: schema.string(),
+    id: schema.string(),
+  },
+  { unknowns: 'forbid' }
+);
 
-// TODO the savedObjectSchema function is a misnomer as the actual output schema is
-// the dashboard attributes (not saved object attributes) wrapped by saved object metadata.
-export const dashboardItemSchema = savedObjectSchema(dashboardAttributesSchema);
+export const dashboardItemSchema = schema.object(
+  {
+    id: schema.string(),
+    type: schema.string(),
+    version: schema.maybe(schema.string()),
+    createdAt: schema.maybe(schema.string()),
+    updatedAt: schema.maybe(schema.string()),
+    createdBy: schema.maybe(schema.string()),
+    updatedBy: schema.maybe(schema.string()),
+    managed: schema.maybe(schema.boolean()),
+    error: schema.maybe(apiError),
+    attributes: dashboardAttributesSchema,
+    references: schema.arrayOf(referenceSchema),
+    namespaces: schema.maybe(schema.arrayOf(schema.string())),
+    originId: schema.maybe(schema.string()),
+  },
+  { unknowns: 'allow' }
+);
 
-const searchOptionsSchema = schema.maybe(
+export const dashboardSearchResultsSchema = dashboardItemSchema.extends({
+  attributes: searchResultsAttributesSchema,
+});
+
+export const dashboardSearchOptionsSchema = schema.maybe(
   schema.object(
     {
       onlyTitle: schema.maybe(schema.boolean()),
@@ -440,41 +460,62 @@ const searchOptionsSchema = schema.maybe(
   )
 );
 
-const createOptionsSchema = schema.object({
+export const dashboardCreateOptionsSchema = schema.object({
   id: schema.maybe(createOptionsSchemas.id),
   overwrite: schema.maybe(createOptionsSchemas.overwrite),
-  references: schema.maybe(createOptionsSchemas.references),
+  references: schema.maybe(schema.arrayOf(referenceSchema)),
   initialNamespaces: schema.maybe(createOptionsSchemas.initialNamespaces),
 });
 
-const dashboardUpdateOptionsSchema = schema.object({
-  references: schema.maybe(updateOptionsSchema.references),
+export const dashboardUpdateOptionsSchema = schema.object({
+  references: schema.maybe(schema.arrayOf(referenceSchema)),
   mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
 });
+
+export const dashboardGetResultSchema = schema.object(
+  {
+    item: dashboardItemSchema,
+    meta: schema.object(
+      {
+        outcome: schema.oneOf([
+          schema.literal('exactMatch'),
+          schema.literal('aliasMatch'),
+          schema.literal('conflict'),
+        ]),
+        aliasTargetId: schema.maybe(schema.string()),
+        aliasPurpose: schema.maybe(
+          schema.oneOf([
+            schema.literal('savedObjectConversion'),
+            schema.literal('savedObjectImport'),
+          ])
+        ),
+      },
+      { unknowns: 'forbid' }
+    ),
+  },
+  { unknowns: 'forbid' }
+);
+
+export const dashboardCreateResultSchema = schema.object(
+  {
+    item: dashboardItemSchema,
+  },
+  { unknowns: 'forbid' }
+);
 
 export const serviceDefinition: ServicesDefinition = {
   get: {
     out: {
       result: {
-        schema: objectTypeToGetResultSchema(dashboardItemSchema),
-        down: (result: DashboardCrudTypes['GetOut']): DashboardCrudTypesV2['GetOut'] => {
-          const { attributes, ...rest } = result.item;
-          const soAttributes = itemAttrsToSavedObjectAttrs(attributes);
-          return {
-            ...result,
-            item: {
-              ...rest,
-              attributes: soAttributes,
-            },
-          };
-        },
+        schema: dashboardGetResultSchema,
+        down: getResultV3ToV2,
       },
     },
   },
   create: {
     in: {
       options: {
-        schema: createOptionsSchema,
+        schema: dashboardCreateOptionsSchema,
       },
       data: {
         schema: dashboardAttributesSchema,
@@ -482,7 +523,7 @@ export const serviceDefinition: ServicesDefinition = {
     },
     out: {
       result: {
-        schema: createResultSchema(dashboardItemSchema),
+        schema: dashboardCreateResultSchema,
       },
     },
   },
@@ -499,7 +540,7 @@ export const serviceDefinition: ServicesDefinition = {
   search: {
     in: {
       options: {
-        schema: searchOptionsSchema,
+        schema: dashboardSearchOptionsSchema,
       },
     },
   },

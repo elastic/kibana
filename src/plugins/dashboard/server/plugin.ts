@@ -23,7 +23,7 @@ import {
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
-import { DashboardStorage } from './content_management';
+import { DashboardStorage } from './dashboard_storage';
 import { capabilitiesProvider } from './capabilities_provider';
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
@@ -67,7 +67,6 @@ export class DashboardPlugin
     plugins.contentManagement.register({
       id: CONTENT_ID,
       storage: new DashboardStorage({
-        deps: { embeddablePersistableStateService: plugins.embeddable },
         throwOnResultValidationError: this.initializerContext.env.mode.dev,
         logger: this.logger.get('storage'),
       }),

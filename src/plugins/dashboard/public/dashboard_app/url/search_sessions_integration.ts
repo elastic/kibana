@@ -22,7 +22,7 @@ import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SEARCH_SESSION_ID } from '../../dashboard_constants';
 import { DashboardContainer, DashboardLocatorParams } from '../../dashboard_container';
-import { convertPanelMapToSavedPanels } from '../../../common';
+import { convertPanelMapToPanelsArray } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
@@ -102,6 +102,6 @@ function getLocatorParams({
       : undefined,
     panels: lastSavedId
       ? undefined
-      : (convertPanelMapToSavedPanels(panels) as DashboardLocatorParams['panels']),
+      : (convertPanelMapToPanelsArray(panels) as DashboardLocatorParams['panels']),
   };
 }

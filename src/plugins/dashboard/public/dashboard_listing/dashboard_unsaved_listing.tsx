@@ -22,7 +22,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { pluginServices } from '../services/plugin_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { DashboardAttributes } from '../../common/content_management';
+import type { DashboardAttributes } from '../../server/content_management';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
 

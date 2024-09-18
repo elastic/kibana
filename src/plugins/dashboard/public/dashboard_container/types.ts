@@ -13,7 +13,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import type { DashboardContainerInput, DashboardOptions } from '../../common';
-import { SavedDashboardPanel } from '../../common/content_management';
+import type { DashboardPanel } from '../../server/content_management';
 
 export interface UnsavedPanelState {
   [key: string]: object | undefined;
@@ -123,7 +123,7 @@ export type DashboardLocatorParams = Partial<
   /**
    * List of dashboard panels
    */
-  panels?: Array<SavedDashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
+  panels?: Array<DashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
 
   /**
    * Control group changes

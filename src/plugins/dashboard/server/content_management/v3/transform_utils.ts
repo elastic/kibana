@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import pick from 'lodash/pick';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ControlGroupChainingSystem,
@@ -16,13 +16,17 @@ import {
   DEFAULT_CONTROL_STYLE,
   RawControlGroupAttributes,
 } from '@kbn/controls-plugin/common';
-import { PartialSavedObject } from '@kbn/content-management-utils';
 import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
 
 import { SavedObject } from '@kbn/core-saved-objects-api-server';
-import { ControlGroupAttributes, DashboardAttributes } from './cm_services';
-import { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
-import { DashboardItem } from '../../../../common/content_management';
+import {
+  ControlGroupAttributes,
+  DashboardAttributes,
+  DashboardGetOut,
+  DashboardItem,
+} from './types';
+import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import { DashboardCrudTypes as DashboardCrudTypesV2 } from '../../../common/content_management/v2';
 
 function controlGroupInputOut(
   controlGroupInput?: DashboardSavedObjectAttributes['controlGroupInput']
@@ -54,17 +58,16 @@ function controlGroupInputOut(
 function kibanaSavedObjectMetaOut(
   kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta']
 ): DashboardAttributes['kibanaSavedObjectMeta'] {
-  const { searchSourceJSON, ...rest } = kibanaSavedObjectMeta;
+  const { searchSourceJSON } = kibanaSavedObjectMeta;
   const searchSource = searchSourceJSON ? parseSearchSourceJSON(searchSourceJSON) : undefined;
   return {
-    ...rest,
     searchSource,
   };
 }
 
 export function dashboardAttributesOut(
-  attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>
-): DashboardAttributes | Partial<DashboardAttributes> {
+  attributes: DashboardSavedObjectAttributes
+): DashboardAttributes {
   const { controlGroupInput, panelsJSON, optionsJSON, kibanaSavedObjectMeta, ...rest } = attributes;
   return {
     ...rest,
@@ -100,16 +103,6 @@ function controlGroupInputIn(
   };
 }
 
-function kibanaSavedObjectMetaIn(
-  kibanaSavedObjectMeta: DashboardAttributes['kibanaSavedObjectMeta']
-): DashboardSavedObjectAttributes['kibanaSavedObjectMeta'] {
-  const { searchSource, ...rest } = kibanaSavedObjectMeta;
-  return {
-    ...rest,
-    searchSourceJSON: JSON.stringify(searchSource ?? {}),
-  };
-}
-
 function panelsIn(
   panels: DashboardAttributes['panels']
 ): DashboardSavedObjectAttributes['panelsJSON'] {
@@ -132,10 +125,42 @@ function panelsIn(
   return JSON.stringify(updatedPanels);
 }
 
+export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
+  const { meta, item } = result;
+  const { attributes, ...rest } = item;
+  const {
+    controlGroupInput,
+    kibanaSavedObjectMeta: { searchSource },
+    options,
+    panels,
+    ...restAttributes
+  } = attributes;
+  const v2Attributes = {
+    ...restAttributes,
+    ...(controlGroupInput && { controlGroupInput: controlGroupInputIn(controlGroupInput) }),
+    ...(options && { optionsJSON: JSON.stringify(options) }),
+    panelsJSON: panels ? panelsIn(panels) : '[]',
+    kibanaSavedObjectMeta: { searchSourceJSON: searchSource ? JSON.stringify(searchSource) : '{}' },
+  };
+  return {
+    meta,
+    item: {
+      ...rest,
+      attributes: v2Attributes,
+    },
+  };
+};
+
 export const itemAttrsToSavedObjectAttrs = (
   attributes: DashboardAttributes
 ): DashboardSavedObjectAttributes => {
-  const { controlGroupInput, kibanaSavedObjectMeta, options, panels, ...rest } = attributes;
+  const {
+    controlGroupInput,
+    kibanaSavedObjectMeta: { searchSource },
+    options,
+    panels,
+    ...rest
+  } = attributes;
   const soAttributes = {
     ...rest,
     ...(controlGroupInput && {
@@ -147,20 +172,14 @@ export const itemAttrsToSavedObjectAttrs = (
     ...(panels && {
       panelsJSON: panelsIn(panels),
     }),
-    ...(kibanaSavedObjectMeta && {
-      kibanaSavedObjectMeta: kibanaSavedObjectMetaIn(kibanaSavedObjectMeta),
-    }),
+    kibanaSavedObjectMeta: searchSource ? { searchSourceJSON: JSON.stringify(searchSource) } : {},
   };
   return soAttributes;
 };
 
 export const savedObjectToItem = (
-  savedObject:
-    | SavedObject<DashboardSavedObjectAttributes>
-    | PartialSavedObject<DashboardSavedObjectAttributes>,
-  allowedSavedObjectAttributes: string[],
-  partial: boolean
-): DashboardItem | Partial<DashboardItem> => {
+  savedObject: SavedObject<DashboardSavedObjectAttributes>
+): DashboardItem => {
   const {
     id,
     type,
@@ -183,7 +202,7 @@ export const savedObjectToItem = (
     updatedBy,
     createdAt,
     createdBy,
-    attributes: pick(dashboardAttributesOut(attributes), allowedSavedObjectAttributes),
+    attributes: dashboardAttributesOut(attributes),
     error,
     namespaces,
     references,

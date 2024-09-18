@@ -12,7 +12,7 @@ import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { DashboardContainerInput } from '../../../common';
-import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content_management';
+import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
 import { DashboardStartDependencies } from '../../plugin';
 import { DashboardBackupServiceType } from '../dashboard_backup/types';
 import { DashboardDataService } from '../data/types';
@@ -62,7 +62,7 @@ export interface LoadDashboardFromSavedObjectProps {
   savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
 }
 
-type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];
+type DashboardResolveMeta = DashboardGetOut['meta'];
 
 export type SavedDashboardInput = DashboardContainerInput & {
   /**

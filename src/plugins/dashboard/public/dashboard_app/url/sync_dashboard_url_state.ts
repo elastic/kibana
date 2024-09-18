@@ -15,23 +15,24 @@ import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 import {
-  DashboardPanelMap,
-  SharedDashboardState,
-  convertSavedPanelsToPanelMap,
-  DashboardContainerInput,
+  convertPanelsArrayToPanelMap,
+  type DashboardPanelMap,
+  type SharedDashboardState,
+  type DashboardContainerInput,
 } from '../../../common';
-import { DashboardAPI } from '../../dashboard_container';
+import type { DashboardAPI } from '../../dashboard_container';
+import type { DashboardPanel } from '../../../server/content_management';
+
 import { pluginServices } from '../../services/plugin_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
-import { SavedDashboardPanel } from '../../../common/content_management';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management/lib/load_dashboard_state';
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.
  * @returns whether or not there is a panel in the URL state saved with a version before 7.3
  */
-export const isPanelVersionTooOld = (panels: SavedDashboardPanel[]) => {
+export const isPanelVersionTooOld = (panels: DashboardPanel[]) => {
   for (const panel of panels) {
     if (
       !panel.gridData ||
@@ -57,7 +58,7 @@ function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | 
     return undefined;
   }
 
-  return convertSavedPanelsToPanelMap(appStateInUrl.panels);
+  return convertPanelsArrayToPanelMap(appStateInUrl.panels);
 }
 
 /**

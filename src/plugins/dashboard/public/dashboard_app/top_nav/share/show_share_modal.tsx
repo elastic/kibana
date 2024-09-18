@@ -18,7 +18,7 @@ import { omit } from 'lodash';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
 import {
-  convertPanelMapToSavedPanels,
+  convertPanelMapToPanelsArray,
   DashboardContainerInput,
   DashboardPanelMap,
 } from '../../../../common';
@@ -163,7 +163,7 @@ export function ShowShareModal({
       ...latestPanels,
       ...modifiedPanels,
     };
-    return convertPanelMapToSavedPanels(allUnsavedPanelsMap);
+    return convertPanelMapToPanelsArray(allUnsavedPanelsMap);
   })();
 
   if (unsavedDashboardState) {

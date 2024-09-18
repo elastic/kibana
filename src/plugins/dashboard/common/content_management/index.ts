@@ -8,7 +8,6 @@
  */
 
 export {
-  LATEST_CLIENT_VERSION,
   LATEST_VERSION,
   CONTENT_ID,
   DASHBOARD_GRID_COLUMN_COUNT,
@@ -17,13 +16,3 @@ export {
 } from './constants';
 
 export type { DashboardContentType } from './types';
-
-export type {
-  ControlGroupAttributes,
-  DashboardItem,
-  DashboardCrudTypes,
-  DashboardAttributes,
-  DashboardSavedObjectAttributes,
-  GridData,
-  SavedDashboardPanel,
-} from './latest';

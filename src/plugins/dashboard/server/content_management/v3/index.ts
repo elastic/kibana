@@ -24,4 +24,10 @@ export type {
   DashboardUpdateIn,
   DashboardUpdateOut,
   DashboardUpdateOptions,
-} from './latest';
+} from './types';
+export { serviceDefinition, dashboardAttributesSchema } from './cm_services';
+export {
+  dashboardAttributesOut,
+  itemAttrsToSavedObjectAttrs,
+  savedObjectToItem,
+} from './transform_utils';

@@ -16,7 +16,7 @@ import {
   updateOptionsSchema,
   createResultSchema,
 } from '@kbn/content-management-utils';
-import { dashboardAttributesSchema } from '../../../dashboard_saved_object/schema/v1';
+import { dashboardAttributesSchema } from '../../dashboard_saved_object/schema/v1';
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
 

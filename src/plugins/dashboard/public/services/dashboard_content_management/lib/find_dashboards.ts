@@ -10,18 +10,22 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
-import {
+import type {
   DashboardAttributes,
-  DashboardCrudTypes,
+  DashboardGetIn,
+  DashboardGetOut,
+  DashboardSearchIn,
+  DashboardSearchOut,
+  DashboardSearchOptions,
   DashboardItem,
-} from '../../../../common/content_management';
+} from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardStartDependencies } from '../../../plugin';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 
 export interface SearchDashboardsArgs {
   contentManagement: DashboardStartDependencies['contentManagement'];
-  options?: DashboardCrudTypes['SearchIn']['options'];
+  options?: DashboardSearchOptions;
   hasNoReference?: SavedObjectsFindOptionsReference[];
   hasReference?: SavedObjectsFindOptionsReference[];
   search: string;
@@ -44,10 +48,7 @@ export async function searchDashboards({
   const {
     hits,
     pagination: { total },
-  } = await contentManagement.client.search<
-    DashboardCrudTypes['SearchIn'],
-    DashboardCrudTypes['SearchOut']
-  >({
+  } = await contentManagement.client.search<DashboardSearchIn, DashboardSearchOut>({
     contentTypeId: DASHBOARD_CONTENT_ID,
     query: {
       text: search ? `${search}*` : undefined,
@@ -87,10 +88,7 @@ export async function findDashboardById(
 
   /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
   try {
-    const response = await contentManagement.client.get<
-      DashboardCrudTypes['GetIn'],
-      DashboardCrudTypes['GetOut']
-    >({
+    const response = await contentManagement.client.get<DashboardGetIn, DashboardGetOut>({
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
     });
@@ -127,10 +125,7 @@ export async function findDashboardIdByTitle(
   contentManagement: DashboardStartDependencies['contentManagement'],
   title: string
 ): Promise<{ id: string } | undefined> {
-  const { hits } = await contentManagement.client.search<
-    DashboardCrudTypes['SearchIn'],
-    DashboardCrudTypes['SearchOut']
-  >({
+  const { hits } = await contentManagement.client.search<DashboardSearchIn, DashboardSearchOut>({
     contentTypeId: DASHBOARD_CONTENT_ID,
     query: {
       text: title ? `${title}*` : undefined,

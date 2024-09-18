@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardStartDependencies } from '../../../plugin';
+import type { DashboardStartDependencies } from '../../../plugin';
+import type { DashboardSearchIn, DashboardSearchOut } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
-import { DashboardCrudTypes } from '../../../../common/content_management';
 import { extractTitleAndCount } from '../../../dashboard_container/embeddable/api/lib/extract_title_and_count';
 
 export interface DashboardDuplicateTitleCheckProps {
@@ -56,10 +56,7 @@ export async function checkForDuplicateDashboardTitle(
 
   const [baseDashboardName] = extractTitleAndCount(title);
 
-  const { hits } = await contentManagement.client.search<
-    DashboardCrudTypes['SearchIn'],
-    DashboardCrudTypes['SearchOut']
-  >({
+  const { hits } = await contentManagement.client.search<DashboardSearchIn, DashboardSearchOut>({
     contentTypeId: DASHBOARD_CONTENT_ID,
     query: {
       text: `${baseDashboardName}*`,

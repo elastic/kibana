@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LATEST_CLIENT_VERSION } from '../../common/content_management';
+import { LATEST_VERSION } from '../../common/content_management';
 import { convertNumberToDashboardVersion } from '../services/dashboard_content_management/lib/dashboard_versioning';
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
-export const LATEST_DASHBOARD_CONTAINER_VERSION =
-  convertNumberToDashboardVersion(LATEST_CLIENT_VERSION);
+export const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
 
 export type { DashboardContainer } from './embeddable/dashboard_container';
 export {

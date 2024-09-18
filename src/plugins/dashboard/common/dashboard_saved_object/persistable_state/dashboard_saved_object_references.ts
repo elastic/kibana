@@ -11,27 +11,22 @@ import type { Reference } from '@kbn/content-management-utils';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
 
 import {
-  convertPanelMapToSavedPanels,
-  convertSavedPanelsToPanelMap,
+  convertPanelMapToPanelsArray,
+  convertPanelsArrayToPanelMap,
 } from '../../lib/dashboard_panel_converters';
 import { DashboardAttributesAndReferences, ParsedDashboardAttributesWithType } from '../../types';
-import { DashboardAttributes, SavedDashboardPanel } from '../../content_management';
+import type { DashboardAttributes } from '../../../server/content_management';
 
 export interface InjectExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
 }
 
-function parseDashboardAttributesWithType(
-  attributes: DashboardAttributes
-): ParsedDashboardAttributesWithType {
-  let panels = [] as SavedDashboardPanel[];
-  if (Array.isArray(attributes.panels)) {
-    panels = attributes.panels as SavedDashboardPanel[];
-  }
-
+function parseDashboardAttributesWithType({
+  panels,
+}: DashboardAttributes): ParsedDashboardAttributesWithType {
   return {
     type: 'dashboard',
-    panels: convertSavedPanelsToPanelMap(panels),
+    panels: convertPanelsArrayToPanelMap(panels),
   } as ParsedDashboardAttributesWithType;
 }
 
@@ -46,7 +41,7 @@ export function injectReferences(
     parsedAttributes,
     references
   ) as ParsedDashboardAttributesWithType;
-  const injectedPanels = convertPanelMapToSavedPanels(injectedState.panels);
+  const injectedPanels = convertPanelMapToPanelsArray(injectedState.panels);
 
   const newAttributes = {
     ...attributes,
@@ -76,7 +71,7 @@ export function extractReferences(
       references: Reference[];
       state: ParsedDashboardAttributesWithType;
     };
-  const extractedPanels = convertPanelMapToSavedPanels(extractedState.panels);
+  const extractedPanels = convertPanelMapToPanelsArray(extractedState.panels);
 
   const newAttributes = {
     ...attributes,

@@ -8,9 +8,9 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { DashboardAttributes, SavedDashboardPanel } from './content_management';
-import { DashboardContainerInput, DashboardPanelMap } from './dashboard_container/types';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { DashboardContainerInput, DashboardPanelMap } from './dashboard_container/types';
+import type { DashboardAttributes, DashboardPanel } from '../server/content_management';
 
 export interface DashboardOptions {
   hidePanelTitles: boolean;
@@ -32,7 +32,7 @@ export interface DashboardCapabilities {
  * For BWC reasons, dashboard state is stored with panels as an array instead of a map
  */
 export type SharedDashboardState = Partial<
-  Omit<DashboardContainerInput, 'panels'> & { panels: SavedDashboardPanel[] }
+  Omit<DashboardContainerInput, 'panels'> & { panels: DashboardPanel[] }
 >;
 
 /**
