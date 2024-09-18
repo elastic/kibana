@@ -116,14 +116,16 @@ export type RouteAccess = 'public' | 'internal';
  *         removed in version X.X.X., use Y instead" ensure that the string
  *         contains no dynamically computed parts.
  */
-export type RouteDeprecationDescription<O = unknown> = O extends object
+export type RouteDeprecationDescription<O = unknown> = O extends unknown[]
+  ? RouteDeprecationDescription<O[number]>
+  : O extends object
   ? {
       [k in keyof O]:
         | string
         | { message: string; check: (v: O[k]) => boolean }
         | RouteDeprecationDescription<O[k]>;
     }
-  : never;
+  : string | { message: string; check: (v: O) => boolean };
 
 export interface RouteInputDeprecation<P = unknown, Q = unknown, B = unknown> {
   query?: RouteDeprecationDescription<P>;
