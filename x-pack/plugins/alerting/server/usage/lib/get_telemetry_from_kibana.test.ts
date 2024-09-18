@@ -524,6 +524,7 @@ describe('kibana index telemetry', () => {
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
         namespaces: ['*'],
         perPage: 100,
+        fields: ['rRule', 'scopedQuery'],
       });
       expect(telemetry).toStrictEqual({
         count_mw_total: 3,
@@ -551,6 +552,7 @@ describe('kibana index telemetry', () => {
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       namespaces: ['*'],
       perPage: 100,
+      fields: ['rRule', 'scopedQuery'],
     });
 
     expect(telemetry).toStrictEqual({
@@ -585,6 +587,7 @@ describe('kibana index telemetry', () => {
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       namespaces: ['*'],
       perPage: 100,
+      fields: ['rRule', 'scopedQuery'],
     });
     expect(telemetry).toStrictEqual({
       count_mw_total: 2,
