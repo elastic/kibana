@@ -5,28 +5,22 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import type {
-  EngineDescriptor,
-  EntityType,
-} from '../../../../../common/api/entity_analytics/entity_store/common.gen';
+import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { HOST_ENTITY_DEFINITION, USER_ENTITY_DEFINITION } from '../definition';
 import { entityEngineDescriptorTypeName } from '../saved_object';
 
-export const getEntityDefinition = (entityType: EntityType) => {
-  if (entityType === 'host') return HOST_ENTITY_DEFINITION;
-  if (entityType === 'user') return USER_ENTITY_DEFINITION;
+export const getEntityDefinition = (entityType: EntityType, space: string) => {
+  if (entityType === 'host')
+    return HOST_ENTITY_DEFINITION(buildEntityDefinitionId(entityType, space));
+  if (entityType === 'user')
+    return USER_ENTITY_DEFINITION(buildEntityDefinitionId(entityType, space));
 
   throw new Error(`Unsupported entity type: ${entityType}`);
 };
 
-export const ensureEngineExists =
-  (entityType: EntityType) => (results: SavedObjectsFindResponse<EngineDescriptor>) => {
-    if (results.total === 0) {
-      throw new Error(`Entity engine for ${entityType} does not exist`);
-    }
-    return results.saved_objects[0].attributes;
-  };
+export const buildEntityDefinitionId = (entityType: EntityType, space: string) => {
+  return `ea_${space}_${entityType}_entity_store`;
+};
 
 export const getByEntityTypeQuery = (entityType: EntityType) => {
   return `${entityEngineDescriptorTypeName}.attributes.type: ${entityType}`;

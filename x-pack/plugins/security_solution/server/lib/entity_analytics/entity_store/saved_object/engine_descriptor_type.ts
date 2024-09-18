@@ -31,6 +31,6 @@ export const entityEngineDescriptorType: SavedObjectsType = {
   name: entityEngineDescriptorTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
-  namespaceType: 'multiple-isolated',
+  namespaceType: 'multiple',
   mappings: entityEngineDescriptorTypeMappings,
 };
