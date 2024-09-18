@@ -25,7 +25,7 @@ import {
 describe(
   'When defining a kibana role for Endpoint security access with space awareness enabled',
   {
-    tags: ['@ess', '@serverless', '@serverlessMKI'],
+    tags: ['@ess', '@serverless', '@serverlessMKI', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
@@ -108,6 +108,27 @@ describe(
           'Execute OperationsNone',
           'Scan OperationsNone',
         ]);
+    });
+
+    [
+      'endpoint_list',
+      'trusted_applications',
+      'host_isolation_exceptions',
+      'blocklist',
+      'event_filters',
+      'elastic_defend_policy_management',
+      'response_actions_history',
+      'host_isolation',
+      'process_operations',
+      'file_operations',
+      'execute_operations',
+      'scan_operations',
+    ].forEach((subFeaturePrivilegeId) => {
+      it(`should NOT display the privilege tooltip for ${subFeaturePrivilegeId}`, () => {
+        cy.getByTestSubj(`securitySolution_siem_${subFeaturePrivilegeId}_nameTooltip`).should(
+          'not.exist'
+        );
+      });
     });
   }
 );
