@@ -44,13 +44,29 @@ export const initialPanelsState: PanelsState = {
   needsSync: false,
 };
 
+export interface UiState {
+  /**
+   * Push vs overlay information
+   */
+  pushVsOverlay: 'push' | 'overlay';
+}
+
+export const initialUiState: UiState = {
+  pushVsOverlay: 'overlay',
+};
+
 export interface State {
   /**
    * All panels related information
    */
   panels: PanelsState;
+  /**
+   * All ui related information
+   */
+  ui: UiState;
 }
 
 export const initialState: State = {
   panels: initialPanelsState,
+  ui: initialUiState,
 };
