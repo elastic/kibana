@@ -20,12 +20,11 @@ export const SearchIndexDetailsMappings = ({ index }: SearchIndexDetailsMappings
     () => indexManagement.getIndexMappingComponent({ history }),
     [indexManagement, history]
   );
-  return useMemo(() => {
-    return (
-      <>
-        <EuiSpacer />
-        <IndexMappingComponent index={index} showAboutMappings={false} />
-      </>
-    );
-  }, [IndexMappingComponent, index]);
+
+  return (
+    <>
+      <EuiSpacer />
+      <IndexMappingComponent index={index} showAboutMappings={false} />
+    </>
+  );
 };
