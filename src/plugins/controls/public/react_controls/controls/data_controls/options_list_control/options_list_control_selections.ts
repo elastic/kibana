@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
 import deepEqual from 'react-fast-compare';
+import { BehaviorSubject } from 'rxjs';
+
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { OptionsListControlState } from './types';
+
+import { OptionsListControlState } from '../../../../../common/options_list';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 
 export function initializeOptionsListSelections(

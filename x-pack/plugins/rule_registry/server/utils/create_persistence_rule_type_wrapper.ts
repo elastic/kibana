@@ -65,16 +65,18 @@ const augmentAlerts = <T>({
   intendedTimestamp: Date | undefined;
 }) => {
   const commonRuleFields = getCommonAlertFields(options);
+  const currentDate = new Date();
+  const timestampOverrideOrCurrent = currentTimeOverride ?? currentDate;
   return alerts.map((alert) => {
     return {
       ...alert,
       _source: {
-        [ALERT_RULE_EXECUTION_TIMESTAMP]: new Date(),
-        [ALERT_START]: currentTimeOverride ?? new Date(),
-        [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
+        [ALERT_RULE_EXECUTION_TIMESTAMP]: currentDate,
+        [ALERT_START]: timestampOverrideOrCurrent,
+        [ALERT_LAST_DETECTED]: timestampOverrideOrCurrent,
         [ALERT_INTENDED_TIMESTAMP]: intendedTimestamp
           ? intendedTimestamp
-          : currentTimeOverride ?? new Date(),
+          : timestampOverrideOrCurrent,
         [VERSION]: kibanaVersion,
         ...(options?.maintenanceWindowIds?.length
           ? { [ALERT_MAINTENANCE_WINDOW_IDS]: options.maintenanceWindowIds }

@@ -21,6 +21,14 @@ export function MachineLearningJobExpandedDetailsProvider(
   const headerPage = getPageObject('header');
 
   return {
+    async openAnnotationsTab(jobId: string) {
+      await retry.tryForTime(10000, async () => {
+        await jobTable.ensureDetailsOpen(jobId);
+        await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-annotations'));
+        await testSubjects.existOrFail('mlAnnotationsTable');
+      });
+    },
+
     async clickEditAnnotationAction(jobId: string, annotationId: string) {
       await jobAnnotationsTable.ensureAnnotationsActionsMenuOpen(annotationId);
       await testSubjects.click('mlAnnotationsActionEdit');
@@ -77,7 +85,7 @@ export function MachineLearningJobExpandedDetailsProvider(
       const { _id: annotationId }: { _id: string } = annotationsFromApi[0];
 
       await jobTable.ensureDetailsOpen(jobId);
-      await jobTable.openAnnotationsTab(jobId);
+      await this.openAnnotationsTab(jobId);
       await this.clearSearchButton();
       await jobAnnotationsTable.ensureAnnotationsActionsMenuOpen(annotationId);
       await testSubjects.click('mlAnnotationsActionOpenInSingleMetricViewer');
@@ -92,7 +100,7 @@ export function MachineLearningJobExpandedDetailsProvider(
       await this.assertAnnotationsFromApi(annotationsFromApi);
 
       await jobTable.ensureDetailsOpen(jobId);
-      await jobTable.openAnnotationsTab(jobId);
+      await this.openAnnotationsTab(jobId);
       await this.clearSearchButton();
 
       const { _id: annotationId }: { _id: string } = annotationsFromApi[0];
@@ -107,7 +115,7 @@ export function MachineLearningJobExpandedDetailsProvider(
       await jobTable.ensureDetailsClosed(jobId);
 
       await jobTable.withDetailsOpen(jobId, async () => {
-        await jobTable.openAnnotationsTab(jobId);
+        await this.openAnnotationsTab(jobId);
         await this.clearSearchButton();
         const visibleText = await testSubjects.getVisibleText(
           jobTable.detailsSelector(jobId, 'mlAnnotationsColumnAnnotation')
@@ -118,7 +126,7 @@ export function MachineLearningJobExpandedDetailsProvider(
 
     async assertDataFeedFlyout(jobId: string): Promise<void> {
       await jobTable.withDetailsOpen(jobId, async () => {
-        await jobTable.openAnnotationsTab(jobId);
+        await this.openAnnotationsTab(jobId);
         await this.clearSearchButton();
         await testSubjects.click(jobTable.detailsSelector(jobId, 'euiCollapsedItemActionsButton'));
         await testSubjects.click('mlAnnotationsActionViewDatafeed');
@@ -162,9 +170,46 @@ export function MachineLearningJobExpandedDetailsProvider(
       });
     },
 
-    async assertJobListMultiSelectionText(expectedMsg: string): Promise<void> {
-      const visibleText = await testSubjects.getVisibleText('~mlADJobListMultiSelectActionsArea');
-      expect(visibleText).to.be(expectedMsg);
+    async clickJobRowCalendarWithAssertion(jobId: string, calendarId: string): Promise<void> {
+      await jobTable.ensureDetailsOpen(jobId);
+      const calendarSelector = `mlJobDetailsCalendar-${calendarId}`;
+      await testSubjects.existOrFail(calendarSelector, {
+        timeout: 3_000,
+      });
+      await testSubjects.click(calendarSelector, 3_000);
+      await testSubjects.existOrFail('mlPageCalendarEdit > mlCalendarFormEdit', {
+        timeout: 3_000,
+      });
+      const calendarTitleVisibleText = await testSubjects.getVisibleText('mlCalendarTitle');
+      expect(calendarTitleVisibleText).to.contain(
+        calendarId,
+        `Calendar page title should contain [${calendarId}], got [${calendarTitleVisibleText}]`
+      );
+    },
+
+    async assertJobRowDetailsCounts(
+      jobId: string,
+      expectedCounts: object,
+      expectedModelSizeStats: object
+    ) {
+      const { counts, modelSizeStats } = await jobTable.parseJobCounts(jobId);
+
+      // Only check for expected keys / values, ignore additional properties
+      // This way the tests stay stable when new properties are added on the ES side
+      for (const [key, value] of Object.entries(expectedCounts)) {
+        expect(counts)
+          .to.have.property(key)
+          .eql(value, `Expected counts property '${key}' to exist with value '${value}'`);
+      }
+
+      for (const [key, value] of Object.entries(expectedModelSizeStats)) {
+        expect(modelSizeStats)
+          .to.have.property(key)
+          .eql(
+            value,
+            `Expected model size stats property '${key}' to exist with value '${value}')`
+          );
+      }
     },
   };
 }
