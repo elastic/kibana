@@ -476,7 +476,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'pod-0 - Inventory - Infrastructure - Observability - Elastic'
+                'pod-0 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
               );
             });
 
