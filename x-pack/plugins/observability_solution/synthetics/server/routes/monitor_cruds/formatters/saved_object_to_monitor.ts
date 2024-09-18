@@ -23,6 +23,12 @@ const keysToOmit = [
   ConfigKey.FORM_MONITOR_TYPE,
   ConfigKey.MAX_ATTEMPTS,
   ConfigKey.MONITOR_SOURCE_TYPE,
+  ConfigKey.METADATA,
+  ConfigKey.SOURCE_PROJECT_CONTENT,
+  ConfigKey.PROJECT_ID,
+  ConfigKey.JOURNEY_FILTERS_MATCH,
+  ConfigKey.JOURNEY_FILTERS_TAGS,
+  ConfigKey.MONITOR_SOURCE_TYPE,
 ];
 
 type Result = MonitorFieldsResult & {
