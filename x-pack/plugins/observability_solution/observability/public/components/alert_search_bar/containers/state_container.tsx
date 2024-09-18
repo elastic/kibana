@@ -12,15 +12,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { AlertStatus } from '../../../../common/typings';
 import { ALL_ALERTS } from '../constants';
-
-interface AlertSearchBarContainerState {
-  rangeFrom: string;
-  rangeTo: string;
-  kuery: string;
-  status: AlertStatus;
-  filters: Filter[];
-  savedQueryId?: string;
-}
+import { AlertSearchBarContainerState } from '../types';
 
 interface AlertSearchBarStateTransitions {
   setRangeFrom: (

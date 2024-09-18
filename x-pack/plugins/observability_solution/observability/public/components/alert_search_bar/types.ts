@@ -19,6 +19,7 @@ export interface AlertStatusFilterProps {
 
 export interface AlertSearchBarWithUrlSyncProps extends CommonAlertSearchBarProps {
   urlStorageKey: string;
+  defaultState?: AlertSearchBarContainerState;
 }
 
 export interface Dependencies {
@@ -49,12 +50,12 @@ export interface ObservabilityAlertSearchBarProps
   services: Services;
 }
 
-interface AlertSearchBarContainerState {
+export interface AlertSearchBarContainerState {
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
   status: AlertStatus;
-  filters?: Filter[];
+  filters: Filter[];
   savedQueryId?: string;
 }
 
