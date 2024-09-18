@@ -11,9 +11,8 @@ import type { PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { byDataColorPaletteMap, SimplifiedArrayNode } from './get_color';
 import type { SeriesLayer } from '@kbn/coloring';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getColor } from './get_color';
 import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../../mocks';
 import { generateFormatters } from '../formatters';
@@ -108,7 +107,6 @@ describe('getColor', () => {
   const buckets = createMockBucketColumns();
   const visParams = createMockPieParams();
   const colors = ['color1', 'color2', 'color3', 'color4'];
-  const dataMock = dataPluginMock.createStartContract();
   interface RangeProps {
     gte: number;
     lt: number;
@@ -118,13 +116,13 @@ describe('getColor', () => {
   const distinctSeries = getDistinctSeries(visData.rows, buckets);
   const dataLength = { columnsLength: buckets.length, rowsLength: visData.rows.length };
 
-  dataMock.fieldFormats = {
+  const fieldFormats = {
     deserialize: jest.fn(() => ({
       convert: jest.fn((s: RangeProps) => {
         return `≥ ${s.gte} and < ${s.lt}`;
       }),
     })),
-  } as unknown as DataPublicPluginStart['fieldFormats'];
+  } as unknown as FieldFormatsStart;
 
   const getPaletteRegistry = () => {
     const mockPalette1: jest.Mocked<PaletteDefinition> = {
@@ -180,7 +178,7 @@ describe('getColor', () => {
       { getColor: () => undefined },
       false,
       false,
-      dataMock.fieldFormats,
+      fieldFormats,
       visData.columns[0],
       formatters
     );
@@ -215,7 +213,7 @@ describe('getColor', () => {
       { getColor: () => undefined },
       false,
       false,
-      dataMock.fieldFormats,
+      fieldFormats,
       visData.columns[0],
       formatters
     );
@@ -249,7 +247,7 @@ describe('getColor', () => {
       { getColor: () => undefined },
       false,
       false,
-      dataMock.fieldFormats,
+      fieldFormats,
       visData.columns[0],
       formatters
     );
@@ -313,7 +311,7 @@ describe('getColor', () => {
       { getColor: () => undefined },
       false,
       false,
-      dataMock.fieldFormats,
+      fieldFormats,
       column,
       formatters
     );
@@ -354,7 +352,7 @@ describe('getColor', () => {
       undefined,
       true,
       false,
-      dataMock.fieldFormats,
+      fieldFormats,
       visData.columns[0],
       formatters
     );
@@ -399,7 +397,7 @@ describe('getColor', () => {
       undefined,
       true,
       false,
-      dataMock.fieldFormats,
+      fieldFormats,
       visData.columns[0],
       formatters
     );

@@ -59,7 +59,7 @@ const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract
 const fieldFormatsPluginMockValue = fieldFormatsServiceMock.createStartContract();
 const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
-dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
+fieldFormatsPluginMockValue.deserialize = jest.fn().mockImplementation(({ id, params }) => {
   return {
     convert: ({ gte, lt }: { gte: string; lt: string }) => {
       if (params?.id === 'custom') {
