@@ -7,15 +7,14 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
+import { NameReadOnly } from './name';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { RiskScoreMappingReadOnly } from './risk_score_mapping';
 import { mockCustomQueryRule } from '../../storybook/mocks';
 
 export default {
-  component: RiskScoreMappingReadOnly,
-  title:
-    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/risk_score_mapping',
+  component: NameReadOnly,
+  title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/name',
 };
 
 interface TemplateProps {
@@ -23,15 +22,13 @@ interface TemplateProps {
 }
 
 const Template: Story<TemplateProps> = (args) => {
-  return (
-    <FieldReadOnly fieldName="risk_score_mapping" finalDiffableRule={args.finalDiffableRule} />
-  );
+  return <FieldReadOnly fieldName="name" finalDiffableRule={args.finalDiffableRule} />;
 };
 
 export const Default = Template.bind({});
 
 Default.args = {
   finalDiffableRule: mockCustomQueryRule({
-    risk_score_mapping: [{ field: 'event.risk_score', operator: 'equals', value: '' }],
+    name: 'Forwarded Google Workspace Security Alert',
   }),
 };

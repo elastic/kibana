@@ -7,15 +7,14 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
+import { DescriptionReadOnly } from './description';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { RiskScoreMappingReadOnly } from './risk_score_mapping';
 import { mockCustomQueryRule } from '../../storybook/mocks';
 
 export default {
-  component: RiskScoreMappingReadOnly,
-  title:
-    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/risk_score_mapping',
+  component: DescriptionReadOnly,
+  title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/description',
 };
 
 interface TemplateProps {
@@ -23,15 +22,14 @@ interface TemplateProps {
 }
 
 const Template: Story<TemplateProps> = (args) => {
-  return (
-    <FieldReadOnly fieldName="risk_score_mapping" finalDiffableRule={args.finalDiffableRule} />
-  );
+  return <FieldReadOnly fieldName="description" finalDiffableRule={args.finalDiffableRule} />;
 };
 
 export const Default = Template.bind({});
 
 Default.args = {
   finalDiffableRule: mockCustomQueryRule({
-    risk_score_mapping: [{ field: 'event.risk_score', operator: 'equals', value: '' }],
+    description:
+      "Identifies the occurrence of a security alert from the Google Workspace alerts center. Google Workspace's security alert center provides an overview of actionable alerts that may be affecting an organization's domain. An alert is a warning of a potential security issue that Google has detected.",
   }),
 };
