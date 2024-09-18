@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.clickScriptedFieldsTab();
       const scriptedFieldLangsBefore = await PageObjects.settings.getScriptedFieldLangs();
       await log.debug('add scripted field');
 
