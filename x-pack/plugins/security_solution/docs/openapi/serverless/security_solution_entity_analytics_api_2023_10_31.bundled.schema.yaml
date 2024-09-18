@@ -499,9 +499,7 @@ paths:
                     type: integer
                   records:
                     items:
-                      oneOf:
-                        - $ref: '#/components/schemas/UserEntity'
-                        - $ref: '#/components/schemas/HostEntity'
+                      $ref: '#/components/schemas/Entity'
                     type: array
                   total:
                     minimum: 0
@@ -627,6 +625,10 @@ components:
         - started
         - stopped
       type: string
+    Entity:
+      oneOf:
+        - $ref: '#/components/schemas/UserEntity'
+        - $ref: '#/components/schemas/HostEntity'
     EntityType:
       enum:
         - user
