@@ -19,11 +19,19 @@ import type {
   RequestHandlerContextBase,
   RouteValidationFunction,
   LazyValidator,
+  RouteInputDeprecation,
 } from '../..';
 
 type RqCtx = RequestHandlerContextBase;
 
 export type { ApiVersion };
+
+/**
+ * It is better practice to provide a string that can be surfaced to end users
+ * guiding them to alternative routes.
+ * @public
+ */
+export type VersionedRouteDeprecation = boolean | string;
 
 /**
  * Configuration for a versioned route
@@ -93,7 +101,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    *
    * @default false
    */
-  deprecated?: boolean;
+  deprecated?: VersionedRouteDeprecation;
 
   /**
    * Release version or date that this route will be removed
@@ -337,6 +345,11 @@ export interface AddVersionOpts<P, Q, B> {
    * @public
    */
   validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
+
+  /**
+   * A description of which parts of this route are deprecated.
+   */
+  deprecated?: RouteInputDeprecation<P, Q, B>;
 }
 
 /**
