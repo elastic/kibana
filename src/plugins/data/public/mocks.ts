@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { createDatatableUtilitiesMock } from '../common/mocks';
 import { DataPlugin } from '.';
 import { searchServiceMock } from './search/mocks';
@@ -38,7 +37,6 @@ const createStartContract = (): Start => {
     },
     datatableUtilities: createDatatableUtilitiesMock(),
     search: searchServiceMock.createStartContract(),
-    fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
     dataViews,
     /**

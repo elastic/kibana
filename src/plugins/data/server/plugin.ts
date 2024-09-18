@@ -26,20 +26,11 @@ import { QuerySetup } from './query';
 export interface DataPluginSetup {
   search: ISearchSetup;
   query: QuerySetup;
-  /**
-   * @deprecated - use "fieldFormats" plugin directly instead
-   */
-  fieldFormats: FieldFormatsSetup;
 }
 
 export interface DataPluginStart {
   search: ISearchStart;
-  /**
-   * @deprecated - use "fieldFormats" plugin directly instead
-   */
-  fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
-
   /**
    * Datatable type utility functions.
    */
@@ -85,7 +76,7 @@ export class DataServerPlugin
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
+    { bfetch, expressions, usageCollection }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
     const querySetup = this.queryService.setup(core);
@@ -102,7 +93,6 @@ export class DataServerPlugin
     return {
       search: searchSetup,
       query: querySetup,
-      fieldFormats,
     };
   }
 
@@ -121,7 +111,6 @@ export class DataServerPlugin
     return {
       datatableUtilities,
       search,
-      fieldFormats,
       indexPatterns: dataViews,
     };
   }
