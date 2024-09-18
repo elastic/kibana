@@ -8,7 +8,7 @@
 import React from 'react';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { waitFor, fireEvent, screen, act } from '@testing-library/react';
+import { waitFor, fireEvent, screen, act, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from '../../common/translations';
@@ -71,12 +71,14 @@ describe('EditableMarkdown', () => {
 
   afterEach(() => {
     sessionStorage.removeItem(draftStorageKey);
+    cleanup();
   });
 
   afterEach(async () => {
     await appMockRender.clearQueryCache();
   });
 
+  // double act error
   it('Save button click calls onSaveContent and onChangeEditable when text area value changed', async () => {
     appMockRender.render(<EditableMarkdown {...defaultProps} />);
 

@@ -130,8 +130,13 @@ export const CasesProvider: FC<
     ]
   );
 
+  let count = 0;
   const applyFilesContext = useCallback(
     (contextChildren: ReactNode) => {
+      if (count === 1) {
+        console.log('************************************* changing owner', { owner });
+      }
+      count++;
       if (owner.length === 0) {
         return contextChildren;
       }
@@ -148,7 +153,7 @@ export const CasesProvider: FC<
         );
       }
     },
-    [getFilesClient, owner]
+    [getFilesClient, owner, count]
   );
 
   return (

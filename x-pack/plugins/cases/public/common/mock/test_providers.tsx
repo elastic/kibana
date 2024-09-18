@@ -7,6 +7,7 @@
 
 /* eslint-disable no-console */
 
+import type { PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render as reactRender, waitFor } from '@testing-library/react';
@@ -127,23 +128,6 @@ export interface AppMockRenderer {
   clearQueryCache: () => Promise<void>;
 }
 
-export const testQueryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-  /**
-   * React query prints the errors in the console even though
-   * all tests are passings. We turn them off for testing.
-   */
-  logger: {
-    log: console.log,
-    warn: console.warn,
-    error: () => {},
-  },
-});
-
 export const createAppMockRenderer = ({
   features,
   owner = mockedTestProvidersOwner,
@@ -170,29 +154,27 @@ export const createAppMockRenderer = ({
   });
 
   const getFilesClient = mockGetFilesClient();
+  const casesProviderValue = {
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
+    features,
+    owner,
+    permissions,
+    releasePhase,
+    getFilesClient,
+  };
 
-  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
     <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
-          <CasesProvider
-            value={{
-              externalReferenceAttachmentTypeRegistry,
-              persistableStateAttachmentTypeRegistry,
-              features,
-              owner,
-              permissions,
-              releasePhase,
-              getFilesClient,
-            }}
-            queryClient={queryClient}
-          >
+          <CasesProvider value={casesProviderValue} queryClient={queryClient}>
             {children}
           </CasesProvider>
         </MemoryRouter>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
-  );
+  ));
 
   AppWrapper.displayName = 'AppWrapper';
 
@@ -206,7 +188,10 @@ export const createAppMockRenderer = ({
   const clearQueryCache = async () => {
     queryClient.getQueryCache().clear();
 
-    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+    await waitFor(() => {
+      console.log('stop fetching...');
+      return expect(queryClient.isFetching()).toBe(0);
+    });
   };
 
   return {

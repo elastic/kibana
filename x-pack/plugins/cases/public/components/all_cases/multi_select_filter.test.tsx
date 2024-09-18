@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 describe('multi select filter', () => {
+  // https://github.com/elastic/kibana/issues/183663
   it('should render the amount of options available', async () => {
     const onChange = jest.fn();
     const props = {
@@ -25,7 +26,6 @@ describe('multi select filter', () => {
       onChange,
       isLoading: false,
     };
-
     render(<MultiSelectFilter {...props} />);
 
     await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));

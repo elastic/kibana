@@ -8,7 +8,7 @@
 import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { screen } from '@testing-library/react';
+import { screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { SuggestUsersPopoverProps } from './suggest_users_popover';
@@ -39,6 +39,11 @@ describe('SuggestUsersPopover', () => {
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    cleanup();
+    await appMockRender.clearQueryCache();
   });
 
   it('calls onUsersChange when 1 user is selected', async () => {

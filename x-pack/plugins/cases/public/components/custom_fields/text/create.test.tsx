@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { FormTestComponent } from '../../../common/test_utils';
@@ -19,6 +19,10 @@ describe('Create ', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   // required text custom field with a default value
@@ -53,6 +57,7 @@ describe('Create ', () => {
     );
   });
 
+  // double act error
   it('does not render default value when setDefaultValue is false', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>

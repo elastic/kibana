@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment-timezone';
-import { render, waitFor, screen, within } from '@testing-library/react';
+import { render, waitFor, screen, within, cleanup } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -176,8 +176,10 @@ describe('AllCasesListGeneric', () => {
     window.localStorage.clear();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     moment.tz.setDefault('Browser');
+    cleanup();
+    await appMockRenderer.clearQueryCache();
   });
 
   it('should render AllCasesList', async () => {
@@ -706,6 +708,7 @@ describe('AllCasesListGeneric', () => {
         }
       );
 
+      // https://github.com/elastic/kibana/issues/148485
       it.each([
         [CaseSeverity.LOW],
         [CaseSeverity.MEDIUM],
@@ -717,9 +720,7 @@ describe('AllCasesListGeneric', () => {
         expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
 
         await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
-
         await userEvent.click(await screen.findByText('Bulk actions'));
-
         await userEvent.click(await screen.findByTestId('case-bulk-action-severity'), {
           pointerEventsCheck: 0,
         });
@@ -729,7 +730,6 @@ describe('AllCasesListGeneric', () => {
         ).toBeInTheDocument();
 
         await userEvent.click(await screen.findByTestId(`cases-bulk-action-severity-${severity}`));
-
         await waitFor(() => {
           expect(updateCasesSpy).toBeCalledWith({
             cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
@@ -741,15 +741,14 @@ describe('AllCasesListGeneric', () => {
         });
       });
 
+      // https://github.com/elastic/kibana/issues/148486
       it('Bulk delete', async () => {
         appMockRenderer.render(<AllCasesList />);
 
         expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
 
         await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
-
         await userEvent.click(await screen.findByText('Bulk actions'));
-
         await userEvent.click(await screen.findByTestId('cases-bulk-action-delete'), {
           pointerEventsCheck: 0,
         });
@@ -757,7 +756,6 @@ describe('AllCasesListGeneric', () => {
         expect(await screen.findByTestId('confirm-delete-case-modal')).toBeInTheDocument();
 
         await userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
-
         await waitFor(() => {
           expect(deleteCasesSpy).toHaveBeenCalledWith({
             caseIds: [
@@ -916,6 +914,7 @@ describe('AllCasesListGeneric', () => {
         expect(screen.queryAllByTestId('case-table-column-assignee').length).toBe(0);
       });
 
+      // double act error
       it('should show the assignees column on platinum license', async () => {
         useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
 

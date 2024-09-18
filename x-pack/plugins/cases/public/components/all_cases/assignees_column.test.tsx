@@ -103,6 +103,7 @@ describe('AssigneesColumn', () => {
     expect(screen.queryByTestId('case-table-column-expand-button')).not.toBeInTheDocument();
   });
 
+  // double act error
   it('displays the show less avatars button when the show more is clicked', async () => {
     const props = {
       ...defaultProps,

@@ -29,13 +29,12 @@ describe.skip('Severity form field', () => {
 
   it('renders', async () => {
     appMockRender.render(<SeverityFilter {...props} />);
-
     const popoverButton = await screen.findByTestId('options-filter-popover-button-severity');
+
     expect(popoverButton).toBeInTheDocument();
     expect(popoverButton).not.toBeDisabled();
 
     await userEvent.click(popoverButton);
-
     await waitForEuiPopoverOpen();
 
     const allOptions = await within(await screen.findByTestId('euiSelectableList')).findAllByRole(
