@@ -26,6 +26,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  // CRUD operations to become public APIs: https://github.com/elastic/kibana/issues/192153
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 

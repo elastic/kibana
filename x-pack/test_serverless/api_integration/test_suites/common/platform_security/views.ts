@@ -24,18 +24,13 @@ export default function ({ getService }: FtrProviderContext) {
           withInternalHeaders: true,
         }
       );
-      supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-        withInternalHeaders: true,
-      });
     });
-    after(async () => {
-      await supertestAdminWithApiKey.destroy();
-    });
+
     describe('route access', () => {
       describe('disabled', () => {
         // ToDo: unskip these when we disable login routes
         xit('login', async () => {
-          const { body, status } = await supertestAdminWithApiKey.get('/login');
+          const { body, status } = await supertestAdminWithCookieCredentials.get('/login');
           svlCommonApi.assertApiNotFound(body, status);
         });
 
@@ -48,7 +43,9 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('access agreement', async () => {
-          const { body, status } = await supertestAdminWithApiKey.get('/security/access_agreement');
+          const { body, status } = await supertestAdminWithCookieCredentials.get(
+            '/security/access_agreement'
+          );
           svlCommonApi.assertApiNotFound(body, status);
         });
 
@@ -62,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('public', () => {
         it('login', async () => {
-          const { status } = await supertestAdminWithApiKey.get('/login');
+          const { status } = await supertestAdminWithCookieCredentials.get('/login');
           expect(status).toBe(302);
         });
 
@@ -81,32 +78,36 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('space selector', async () => {
-          const { status } = await supertestAdminWithApiKey.get('/spaces/space_selector');
+          const { status } = await supertestAdminWithCookieCredentials.get(
+            '/spaces/space_selector'
+          );
           expect(status).toBe(200);
         });
 
         it('enter space', async () => {
-          const { status } = await supertestAdminWithApiKey.get('/spaces/enter');
+          const { status } = await supertestAdminWithCookieCredentials.get('/spaces/enter');
           expect(status).toBe(302);
         });
 
         it('account', async () => {
-          const { status } = await supertestAdminWithApiKey.get('/security/account');
+          const { status } = await supertestAdminWithCookieCredentials.get('/security/account');
           expect(status).toBe(200);
         });
 
         it('logged out', async () => {
-          const { status } = await supertestAdminWithApiKey.get('/security/logged_out');
-          expect(status).toBe(200);
+          const { status } = await supertestAdminWithCookieCredentials.get('/security/logged_out');
+          expect(status).toBe(302);
         });
 
         it('logout', async () => {
-          const { status } = await supertestAdminWithApiKey.get('/logout');
+          const { status } = await supertestAdminWithCookieCredentials.get('/logout');
           expect(status).toBe(200);
         });
 
         it('overwritten session', async () => {
-          const { status } = await supertestAdminWithApiKey.get('/security/overwritten_session');
+          const { status } = await supertestAdminWithCookieCredentials.get(
+            '/security/overwritten_session'
+          );
           expect(status).toBe(200);
         });
       });
