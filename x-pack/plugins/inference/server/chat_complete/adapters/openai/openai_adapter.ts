@@ -34,8 +34,7 @@ import {
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools, functionCalling, logger }) => {
     const stream = true;
-    // TODO: remove before merge
-    const simulatedFunctionCalling = true; // functionCalling === 'simulated';
+    const simulatedFunctionCalling = functionCalling === 'simulated';
 
     let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
     if (simulatedFunctionCalling) {
