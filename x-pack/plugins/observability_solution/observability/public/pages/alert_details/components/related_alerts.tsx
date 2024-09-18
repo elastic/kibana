@@ -8,8 +8,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
-import { BoolQuery, Filter } from '@kbn/es-query';
+import { ALERT_END, ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
+import { BoolQuery, Filter, type Query } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
 import { observabilityAlertFeatureIds } from '../../../../common/constants';
@@ -65,9 +65,12 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
   });
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const relatedAlertQuery = useRef(getGroupQueries(tags, groups));
   const alertStart = alert?.fields[ALERT_START];
   const alertEnd = alert?.fields[ALERT_END];
+  const alertId = alert?.fields[ALERT_UUID];
+  const defaultQuery = useRef<Query[]>([
+    { query: `not kibana.alert.uuid: ${alertId}`, language: 'kuery' },
+  ]);
 
   useEffect(() => {
     if (alertStart) {
@@ -86,7 +89,7 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
           appName={ALERTS_SEARCH_BAR_ID}
           onEsQueryChange={setEsQuery}
           urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
-          defaultSearchQueries={relatedAlertQuery.current}
+          defaultSearchQueries={defaultQuery.current}
           defaultState={{
             ...defaultState,
             kuery: getGroupQueries(tags, groups)?.[0].query ?? '',
