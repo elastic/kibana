@@ -27,7 +27,10 @@ import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/f
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { knowledgeBaseFieldMapV2 } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
-import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import {
+  AIAssistantKnowledgeBaseDataClient,
+  GetAIAssistantKnowledgeBaseDataClientParams,
+} from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../ai_assistant_data_clients/attack_discovery';
 import { createGetElserId, createPipeline, pipelineExists } from './helpers';
 
@@ -329,12 +332,24 @@ export class AIAssistantService {
   }
 
   public async createAIAssistantKnowledgeBaseDataClient(
-    opts: CreateAIAssistantClientParams & { v2KnowledgeBaseEnabled: boolean }
+    opts: CreateAIAssistantClientParams & GetAIAssistantKnowledgeBaseDataClientParams
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
+    // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
+    if (opts.modelIdOverride != null) {
+      const modelIdOverride = opts.modelIdOverride;
+      this.getElserId = async () => modelIdOverride;
+    }
+
     // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
     // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
     if (opts.v2KnowledgeBaseEnabled) {
       this.v2KnowledgeBaseEnabled = true;
+    }
+
+    // If either v2 KB or a modelIdOverride is provided, we need to reinitialize all persistence resources to make sure
+    // they're using the correct model/mappings. Technically all existing KB data is stale since it was created
+    // with a different model/mappings, but modelIdOverride is only intended for testing purposes at this time
+    if (opts.v2KnowledgeBaseEnabled || opts.modelIdOverride != null) {
       await this.initializeResources();
     }
 
@@ -356,7 +371,7 @@ export class AIAssistantService {
       ml: this.options.ml,
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
-      v2KnowledgeBaseEnabled: opts.v2KnowledgeBaseEnabled,
+      v2KnowledgeBaseEnabled: opts.v2KnowledgeBaseEnabled ?? false,
     });
   }
 

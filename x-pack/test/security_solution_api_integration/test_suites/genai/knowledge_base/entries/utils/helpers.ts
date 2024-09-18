@@ -35,8 +35,8 @@ export const installTinyElser = async (ml: ReturnType<typeof MachineLearningProv
       field_names: ['text_field'],
     },
   };
-  await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
   await ml.api.assureMlStatsIndexExists();
+  await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
 };
 
 /**
@@ -60,11 +60,11 @@ export const deleteTinyElser = async (ml: ReturnType<typeof MachineLearningProvi
 export const setupKnowledgeBase = async (
   supertest: SuperTest.Agent,
   log: ToolingLog,
-  resource = 'esql',
+  resource?: string,
   namespace?: string
 ): Promise<CreateKnowledgeBaseResponse> => {
   const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
-  const route = routeWithNamespace(path, namespace);
+  const route = routeWithNamespace(`${path}?modelId=pt_tiny_elser`, namespace);
   const response = await supertest
     .post(route)
     .set('kbn-xsrf', 'true')

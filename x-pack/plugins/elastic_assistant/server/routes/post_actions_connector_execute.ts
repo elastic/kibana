@@ -155,9 +155,9 @@ export const postActionsConnectorExecuteRoute = (
           const v2KnowledgeBaseEnabled =
             assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient(
-              v2KnowledgeBaseEnabled
-            )) ?? undefined;
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
+              v2KnowledgeBaseEnabled,
+            })) ?? undefined;
           const isEnabledKnowledgeBase = await getIsKnowledgeBaseEnabled(kbDataClient);
 
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {

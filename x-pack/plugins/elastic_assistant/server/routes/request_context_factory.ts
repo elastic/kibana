@@ -82,16 +82,21 @@ export class RequestContextFactory implements IRequestContextFactory {
       telemetry: core.analytics,
 
       // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
-      // Remove `initializeKnowledgeBase` once 'assistantKnowledgeBaseByDefault' feature flag is removed
-      getAIAssistantKnowledgeBaseDataClient: memoize((v2KnowledgeBaseEnabled = false) => {
-        const currentUser = getCurrentUser();
-        return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
-          spaceId: getSpaceId(),
-          logger: this.logger,
-          currentUser,
-          v2KnowledgeBaseEnabled,
-        });
-      }),
+      // Remove `v2KnowledgeBaseEnabled` once 'assistantKnowledgeBaseByDefault' feature flag is removed
+      // Additionally, modelIdOverride is used here to enable setting up the KB using a different ELSER model, which
+      // is necessary for testing purposes (`pt_tiny_elser`).
+      getAIAssistantKnowledgeBaseDataClient: memoize(
+        ({ modelIdOverride, v2KnowledgeBaseEnabled = false }) => {
+          const currentUser = getCurrentUser();
+          return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
+            spaceId: getSpaceId(),
+            logger: this.logger,
+            currentUser,
+            modelIdOverride,
+            v2KnowledgeBaseEnabled,
+          });
+        }
+      ),
 
       getAttackDiscoveryDataClient: memoize(() => {
         const currentUser = getCurrentUser();

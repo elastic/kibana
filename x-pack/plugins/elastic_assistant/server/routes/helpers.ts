@@ -386,8 +386,9 @@ export const langChainExecute = async ({
 
   // Create an ElasticsearchStore for KB interactions
   const kbDataClient =
-    (await assistantContext.getAIAssistantKnowledgeBaseDataClient(v2KnowledgeBaseEnabled)) ??
-    undefined;
+    (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
+      v2KnowledgeBaseEnabled,
+    })) ?? undefined;
   const bedrockChatEnabled =
     assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
   const esStore = new ElasticsearchStore(

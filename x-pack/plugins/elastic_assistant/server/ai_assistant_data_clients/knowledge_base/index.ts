@@ -43,6 +43,15 @@ import {
 } from './helpers';
 import { getKBUserFilter } from '../../routes/knowledge_base/entries/utils';
 
+/**
+ * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
+ * configuration after initial plugin start
+ */
+export interface GetAIAssistantKnowledgeBaseDataClientParams {
+  modelIdOverride?: string;
+  v2KnowledgeBaseEnabled?: boolean;
+}
+
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ml: MlPluginSetup;
   getElserId: GetElser;
@@ -187,13 +196,16 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    *
    * @param options
    * @param options.soClient SavedObjectsClientContract for installing ELSER so that ML SO's are in sync
+   * @param options.installEsqlDocs Whether to install ESQL documents as part of setup (e.g. not needed in test env)
    *
    * @returns Promise<void>
    */
   public setupKnowledgeBase = async ({
     soClient,
+    installEsqlDocs = true,
   }: {
     soClient: SavedObjectsClientContract;
+    installEsqlDocs?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -236,12 +248,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       }
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
-      const kbDocsLoaded = await this.isESQLDocsLoaded();
-      if (!kbDocsLoaded) {
-        this.options.logger.debug(`Loading KB docs...`);
-        await loadESQL(this, this.options.logger);
-      } else {
-        this.options.logger.debug(`Knowledge Base docs already loaded!`);
+      if (installEsqlDocs) {
+        const kbDocsLoaded = await this.isESQLDocsLoaded();
+        if (!kbDocsLoaded) {
+          this.options.logger.debug(`Loading KB docs...`);
+          await loadESQL(this, this.options.logger);
+        } else {
+          this.options.logger.debug(`Knowledge Base docs already loaded!`);
+        }
       }
     } catch (e) {
       this.options.setIsKBSetupInProgress(false);

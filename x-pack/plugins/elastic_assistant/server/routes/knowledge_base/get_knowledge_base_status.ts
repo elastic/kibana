@@ -57,9 +57,9 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
           // FF Check for V2 KB
           const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
-          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient(
-            v2KnowledgeBaseEnabled
-          );
+          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient({
+            v2KnowledgeBaseEnabled,
+          });
           if (!kbDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
