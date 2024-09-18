@@ -169,6 +169,10 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-metrics-server-internal",
     "@kbn/zod",
+    "@kbn/core-feature-flags-browser",
+    "@kbn/core-feature-flags-browser-mocks",
+    "@kbn/core-feature-flags-server",
+    "@kbn/core-feature-flags-server-mocks",
   ],
   "exclude": [
     "target/**/*",
