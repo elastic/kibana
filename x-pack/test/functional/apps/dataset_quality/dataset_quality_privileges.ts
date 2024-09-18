@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const security = getService('security');
   const synthtrace = getService('logSynthtraceEsClient');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const to = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
 
   const apacheAccessDatasetName = 'apache.access';
