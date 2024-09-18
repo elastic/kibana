@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.clickBackToIndicesButton();
         await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonRedirectsToListPage();
       });
-      describe("With data" ,async () => {
+      describe('With data', () => {
         before(async () => {
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
           await es.index({
@@ -84,7 +84,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
         it('should have index documents', async () => {
-
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
           await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
         });
@@ -93,12 +92,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectShouldDefaultToDataTab();
         });
         it('should be able to change tabs', async () => {
-          await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('mappingsTab')
-          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings')
+          await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('mappingsTab');
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings');
         });
-
-
-      })
+      });
 
       describe('page loading error', () => {
         before(async () => {

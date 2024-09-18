@@ -109,20 +109,17 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       });
     },
     async expectWithDataTabsExists() {
-      await testSubjects.existOrFail('mappingsTab', {timeout: 2000})
-      await testSubjects.existOrFail('dataTab', {timeout: 2000})
+      await testSubjects.existOrFail('mappingsTab', { timeout: 2000 });
+      await testSubjects.existOrFail('dataTab', { timeout: 2000 });
     },
     async expectShouldDefaultToDataTab() {
       expect(await browser.getCurrentUrl()).contain('/data');
     },
-    async withDataChangeTabs(tab:
-      | 'dataTab'
-      | 'mappingsTab'
-){
+    async withDataChangeTabs(tab: 'dataTab' | 'mappingsTab') {
       await testSubjects.click(tab);
     },
-    async expectUrlShouldChangeTo(tab: |'data'|'mappings'){
+    async expectUrlShouldChangeTo(tab: 'data' | 'mappings') {
       expect(await browser.getCurrentUrl()).contain(`/${tab}`);
-    }
+    },
   };
 }
