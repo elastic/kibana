@@ -57,11 +57,5 @@ export interface JobParamsProviderOptions {
   sharingData: ReportingSharingData;
   shareableUrl?: string;
   objectType: string;
-}
-
-export interface JobParamsProviderLayoutOptions {
-  layout: {
-    id: 'print' | 'preserve_layout' | 'canvas';
-    dimensions?: { width: number; height: number };
-  };
+  optimizedForPrinting?: boolean;
 }
