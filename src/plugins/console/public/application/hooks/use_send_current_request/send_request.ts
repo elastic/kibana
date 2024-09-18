@@ -130,7 +130,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
 
           if (isMultiRequest) {
             const lineNumber = req.lineNumber ? `${req.lineNumber}: ` : '';
-            value = `# ${lineNumber}${req.method} ${req.url} ${statusCode} ${statusText}\n${value}`;
+            value = `# ${lineNumber}${req.method} ${req.url} [${statusCode} ${statusText}]\n${value}`;
           }
 
           results.push({
@@ -164,7 +164,8 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
 
         if (isMultiRequest) {
-          value = `# ${req.method} ${req.url} ${statusCode} ${statusText}\n${value}`;
+          const lineNumber = req.lineNumber ? `${req.lineNumber}: ` : '';
+          value = `# ${lineNumber}${req.method} ${req.url} [${statusCode} ${statusText}]\n${value}`;
         }
 
         const result = {
