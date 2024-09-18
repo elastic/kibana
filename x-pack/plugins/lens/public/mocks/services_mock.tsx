@@ -30,6 +30,7 @@ import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { TopNavMenuItems, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import type { LensAttributeService } from '../lens_attribute_service';
 import type {
   LensByValueInput,
@@ -108,8 +109,18 @@ export function makeDefaultServices(
 
   jest
     .spyOn(navigationStartMock.ui.AggregateQueryTopNavMenu.prototype, 'constructor')
-    .mockImplementation(() => {
-      return <div className="topNavMenu" />;
+    .mockImplementation((nav) => {
+      const navProps = nav as TopNavMenuProps;
+      const navPropsConfig = navProps.config;
+      if (!navPropsConfig || navPropsConfig.length === 0) {
+        return null;
+      }
+      return (
+        <div className="topNavMenu">
+          <div data-test-subj="saveQueryMenuVisibility">{navProps.saveQueryMenuVisibility}</div>
+          <TopNavMenuItems config={navPropsConfig} />
+        </div>
+      );
     });
 
   function makeAttributeService(): LensAttributeService {
