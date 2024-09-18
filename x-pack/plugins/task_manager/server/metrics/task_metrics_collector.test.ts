@@ -151,7 +151,7 @@ describe('TaskManagerMetricsCollector', () => {
                   return;
                 }
 
-                if(taskStatus == 'idle') {
+                if(taskStatus.value == 'idle') {
                   emit((new Date().getTime() - runAt.value.getMillis()) / 1000);
                 } else {
                   def retryAt = doc['task.retryAt'];

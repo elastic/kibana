@@ -9,41 +9,27 @@
 
 import { ControlsPlugin } from './plugin';
 
-export type {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlStateTransform,
-  ControlPanelState,
-} from './react_controls/control_group/types';
 export {
   controlGroupStateBuilder,
   type ControlGroupStateBuilder,
 } from './react_controls/control_group/utils/control_group_state_builder';
 
+export type { ControlGroupApi, ControlStateTransform } from './react_controls/control_group/types';
+
+export { ACTION_CLEAR_CONTROL, ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from './actions';
+
 export type {
   DataControlApi,
-  DefaultDataControlState,
   DataControlFactory,
   DataControlServices,
 } from './react_controls/controls/data_controls/types';
-export type { OptionsListControlState } from './react_controls/controls/data_controls/options_list_control/types';
-
-export { ACTION_EDIT_CONTROL } from './react_controls/actions/edit_control_action/edit_control_action';
 
 export {
-  ACTION_DELETE_CONTROL,
   ControlGroupRenderer,
-  type ControlGroupRendererProps,
-  type ControlGroupRendererApi,
   type ControlGroupCreationOptions,
-} from './control_group';
-
-export type { ControlWidth, ControlStyle } from '../common/types';
-
-/**
- * TODO: remove all exports below this when control group embeddable is removed
- */
+  type ControlGroupRendererApi,
+  type ControlGroupRendererProps,
+} from './react_controls/external_api';
 
 export {
   CONTROL_GROUP_TYPE,
@@ -51,14 +37,14 @@ export {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '../common';
-
-export {
-  type ControlGroupContainer,
-  ControlGroupContainerFactory,
-  type ControlGroupInput,
-  type ControlGroupOutput,
-  controlGroupInputBuilder,
-} from './control_group';
+export type {
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlPanelState,
+  ControlPanelsState,
+  DefaultDataControlState,
+} from '../common';
+export type { OptionsListControlState } from '../common/options_list';
 
 export function plugin() {
   return new ControlsPlugin();
