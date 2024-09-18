@@ -49,6 +49,10 @@ export class InventoryPlugin
     pluginsSetup: InventorySetupDependencies
   ): InventoryPublicSetup {
     const inventoryAPIClient = createCallInventoryAPI(coreSetup);
+    const isEntityCentricExperienceSettingEnabled = coreSetup.uiSettings.get<boolean>(
+      'observability:entityCentricExperience',
+      true
+    );
 
     pluginsSetup.observabilityShared.navigation.registerSections(
       from(coreSetup.getStartServices()).pipe(
@@ -80,8 +84,8 @@ export class InventoryPlugin
       euiIconType: 'logoObservability',
       appRoute: '/app/observability/inventory',
       category: DEFAULT_APP_CATEGORIES.observability,
-      visibleIn: ['sideNav'],
-      order: 8001,
+      visibleIn: isEntityCentricExperienceSettingEnabled ? ['sideNav', 'globalSearch'] : [],
+      order: 8004,
       deepLinks: [
         {
           id: 'inventory',
