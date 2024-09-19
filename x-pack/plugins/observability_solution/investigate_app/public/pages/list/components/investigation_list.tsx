@@ -6,10 +6,12 @@
  */
 import {
   Criteria,
+  EuiAvatar,
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
@@ -21,8 +23,10 @@ import React, { useState } from 'react';
 import { paths } from '../../../../common/paths';
 import { InvestigationStatusBadge } from '../../../components/investigation_status_badge/investigation_status_badge';
 import { useFetchInvestigationList } from '../../../hooks/use_fetch_investigation_list';
+import { useFetchUserProfiles } from '../../../hooks/use_fetch_user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationListActions } from './investigation_list_actions';
+import { InvestigationStats } from './investigation_stats';
 import { InvestigationsError } from './investigations_error';
 import { SearchBar } from './search_bar/search_bar';
 
@@ -47,6 +51,10 @@ export function InvestigationList() {
     perPage: pageSize,
     search,
     filter: toFilter(status, tags),
+  });
+
+  const { data: userProfiles, isLoading: isUserProfilesLoading } = useFetchUserProfiles({
+    profileIds: new Set(data?.results.map((i) => i.createdBy)),
   });
 
   const investigations = data?.results ?? [];
@@ -75,6 +83,27 @@ export function InvestigationList() {
         defaultMessage: 'Created by',
       }),
       truncateText: true,
+      render: (value: InvestigationResponse['createdBy']) => {
+        return isUserProfilesLoading ? (
+          <EuiLoadingSpinner size="m" />
+        ) : (
+          <EuiFlexGroup gutterSize="s" direction="row">
+            <EuiAvatar
+              name={
+                userProfiles?.[value]?.user.full_name ??
+                userProfiles?.[value]?.user.username ??
+                value
+              }
+              size="s"
+            />
+            <EuiText size="s">
+              {userProfiles?.[value]?.user.full_name ??
+                userProfiles?.[value]?.user.username ??
+                value}
+            </EuiText>
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'tags',
@@ -82,11 +111,15 @@ export function InvestigationList() {
         defaultMessage: 'Tags',
       }),
       render: (value: InvestigationResponse['tags']) => {
-        return value.map((tag) => (
-          <EuiBadge color={'hollow'} key="tag">
-            {tag}
-          </EuiBadge>
-        ));
+        return (
+          <EuiFlexGroup wrap gutterSize="xs">
+            {value.map((tag) => (
+              <EuiFlexItem key={tag} grow={false}>
+                <EuiBadge color="hollow">{tag}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        );
       },
     },
     {
@@ -153,6 +186,7 @@ export function InvestigationList() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
+      <InvestigationStats />
       <SearchBar
         isLoading={isLoading}
         onSearch={(value) => setSearch(value)}
