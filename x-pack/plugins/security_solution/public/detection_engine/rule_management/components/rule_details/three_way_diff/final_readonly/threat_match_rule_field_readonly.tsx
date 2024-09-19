@@ -13,6 +13,7 @@ import { ThreatIndexReadOnly } from './fields/threat_index/threat_index';
 import { ThreatIndicatorPathReadOnly } from './fields/threat_indicator_path/threat_indicator_path';
 import { ThreatMappingReadOnly } from './fields/threat_mapping/threat_mapping';
 import { ThreatQueryReadOnly } from './fields/threat_query/threat_query';
+import { TypeReadOnly } from './fields/type/type';
 
 interface ThreatMatchRuleFieldReadOnlyProps {
   fieldName: keyof DiffableThreatMatchFields;
@@ -52,7 +53,7 @@ export function ThreatMatchRuleFieldReadOnly({
         />
       );
     case 'type':
-      return null;
+      return <TypeReadOnly type={finalDiffableRule.type} />;
     default:
       return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
   }

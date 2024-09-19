@@ -9,6 +9,7 @@ import React from 'react';
 import type { DiffableNewTermsFields } from '../../../../../../../common/api/detection_engine';
 import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { KqlQueryReadOnly } from './fields/kql_query';
+import { TypeReadOnly } from './fields/type/type';
 
 interface NewTermsRuleFieldReadOnlyProps {
   fieldName: keyof DiffableNewTermsFields;
@@ -31,7 +32,7 @@ export function NewTermsRuleFieldReadOnly({
         />
       );
     case 'type':
-      return null;
+      return <TypeReadOnly type={finalDiffableRule.type} />;
     default:
       return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
   }

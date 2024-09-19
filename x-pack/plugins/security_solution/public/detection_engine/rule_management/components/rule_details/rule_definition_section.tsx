@@ -258,7 +258,7 @@ interface RuleTypeProps {
   type: Type;
 }
 
-const RuleType = ({ type }: RuleTypeProps) => (
+export const RuleType = ({ type }: RuleTypeProps) => (
   <EuiText size="s">{getRuleTypeDescription(type)}</EuiText>
 );
 
