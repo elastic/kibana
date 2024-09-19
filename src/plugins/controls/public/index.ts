@@ -21,7 +21,6 @@ export { ACTION_CLEAR_CONTROL, ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from
 export type {
   DataControlApi,
   DataControlFactory,
-  DataControlServices,
 } from './react_controls/controls/data_controls/types';
 
 export {
