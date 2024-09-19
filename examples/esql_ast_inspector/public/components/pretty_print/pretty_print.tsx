@@ -6,24 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { parse, WrappingPrettyPrinter } from '@kbn/esql-ast';
+import { parse, WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '@kbn/esql-ast';
 import * as React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 
 export interface PrettyPrintProps {
   src: string;
+  opts?: WrappingPrettyPrinterOptions;
 }
 
-export const PrettyPrint: React.FC<PrettyPrintProps> = ({ src }) => {
+export const PrettyPrint: React.FC<PrettyPrintProps> = ({ src, opts }) => {
   const formatted = React.useMemo(() => {
     try {
       const { root } = parse(src, { withFormatting: true });
 
-      return WrappingPrettyPrinter.print(root);
+      return WrappingPrettyPrinter.print(root, opts);
     } catch {
       return '';
     }
-  }, [src]);
+  }, [src, opts]);
 
   return (
     <EuiCodeBlock language="esql" fontSize="m" paddingSize="m">

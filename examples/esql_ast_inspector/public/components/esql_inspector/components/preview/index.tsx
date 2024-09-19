@@ -11,6 +11,7 @@ import { EuiTabbedContent, EuiTabbedContentProps } from '@elastic/eui';
 import { PreviewAst } from './components/preview_ast';
 import { PreviewTokens } from './components/preview_tokens';
 import { PreviewUi } from './components/preview_ui';
+import { PreviewPrint } from './components/preview_print';
 
 export const Preview: React.FC = () => {
   const tabs: EuiTabbedContentProps['tabs'] = [
@@ -18,6 +19,11 @@ export const Preview: React.FC = () => {
       id: 'ui',
       name: 'UI',
       content: <PreviewUi />,
+    },
+    {
+      id: 'formatter',
+      name: 'Formatter',
+      content: <PreviewPrint />,
     },
     {
       id: 'ast',

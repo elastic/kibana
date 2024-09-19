@@ -23,7 +23,7 @@ export const PreviewAst: React.FC = (props) => {
   return (
     <>
       <EuiSpacer size="l" />
-      <EuiPanel paddingSize="xs" style={{ height: 600 }}>
+      <EuiPanel paddingSize="xs" hasShadow={false} hasBorder style={{ height: 600 }}>
         <CodeEditor
           allowFullScreen={true}
           languageId={'json'}

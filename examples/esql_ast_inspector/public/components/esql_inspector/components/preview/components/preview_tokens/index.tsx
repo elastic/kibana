@@ -64,7 +64,7 @@ export const PreviewTokens: React.FC = (props) => {
   return (
     <>
       <EuiSpacer size="l" />
-      <EuiPanel paddingSize="xs" style={{ height: 600 }}>
+      <EuiPanel paddingSize="xs" hasShadow={false} hasBorder style={{ height: 600 }}>
         <EuiDataGrid
           aria-label="Container constrained data grid demo"
           columns={columns}

@@ -12,12 +12,14 @@ import { ESQLProperNode } from '@kbn/esql-ast/src/types';
 import { Annotation } from '../annotations';
 import { highlight } from './helpers';
 
-const defaultSrc = `from kibana_sample_data_logs
-| keep bytes, clientip, url.keyword, response.keyword
-| EVAL type = CASE(to_integer(response.keyword) >= 400 and to_integer(response.keyword) < 500, "4xx", to_integer(response.keyword) >= 500, "5xx", "Other")
-| stats Visits = count(), Unique = count_distinct(clientip), p95 = percentile(bytes, 95), median = median(bytes) by type, url.keyword
-| eval total_records = TO_DOUBLE(count_4xx + count_5xx + count_rest)
-| drop count_4xx, count_rest, total_records`;
+const defaultSrc = `FROM kibana_sample_data_logs, another_index
+  | KEEP bytes, clientip, url.keyword, response.keyword
+  | STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip),
+      p95 = PERCENTILE(bytes, 95), median = MEDIAN(bytes)
+        BY type, url.keyword
+  | EVAL total_records = TO_DOUBLE(count_4xx + count_5xx + count_rest)
+  | DROP count_4xx, count_rest, total_records
+  | LIMIT 123`;
 
 export class EsqlInspectorState {
   public readonly src$ = new BehaviorSubject<string>(defaultSrc);
