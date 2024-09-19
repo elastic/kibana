@@ -35,6 +35,7 @@ describe('Header', () => {
     navControlsCenter$: Rx.of([]),
     navControlsRight$: Rx.of([]),
     customBranding$: Rx.of({}),
+    isSideNavCollapsed$: Rx.of(false),
     prependBasePath: (str) => `hello/world/${str}`,
     toggleSideNav: jest.fn(),
   };
