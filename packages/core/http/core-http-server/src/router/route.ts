@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { RemoveIndexSignatures } from '@kbn/utility-types';
 import type { RouteValidator } from './route_validator';
 
 /**
@@ -112,21 +113,26 @@ export interface RouteConfigOptionsBody {
 export type RouteAccess = 'public' | 'internal';
 
 /**
- * @remark When providing a deprecation description like: "This API will be
- *         removed in version X.X.X., use Y instead" ensure that the string
- *         contains no dynamically computed parts.
+ * @remark When providing a deprecation description like: "Use Y instead" ensure
+ *         that the string contains no dynamically computed parts.
+ *
+ * @remark this is limited to interfaces with well-defined interfaces, Re
  */
 export type RouteDeprecationDescription<O = unknown> = O extends unknown[]
-  ? RouteDeprecationDescription<O[number]>
+  ? // Unwrap arrays
+    RouteDeprecationDescription<O[number]>
+  : O extends Map<unknown, unknown>
+  ? // Map is not supported
+    never
   : O extends object
   ? {
-      [k in keyof O]:
-        | string
-        | { message: string; check: (v: O[k]) => boolean }
-        | RouteDeprecationDescription<O[k]>;
+      [K in keyof RemoveIndexSignatures<O>]?: string | RouteDeprecationDescription<O[K]>;
     }
-  : string | { message: string; check: (v: O) => boolean };
+  : string;
 
+/**
+ * Declare route input deprecations.
+ */
 export interface RouteInputDeprecation<P = unknown, Q = unknown, B = unknown> {
   query?: RouteDeprecationDescription<P>;
   params?: RouteDeprecationDescription<Q>;
@@ -357,5 +363,5 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
   /**
    * Additional route options {@link RouteConfigOptions}.
    */
-  options?: RouteConfigOptions<Method>;
+  options?: RouteConfigOptions<Method, P, Q, B>;
 }
