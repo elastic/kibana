@@ -190,11 +190,21 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions(
           'from a | sort stringField NULLS F/',
-          ['ASC', 'DESC', 'NULLS LAST', 'NULLS FIRST'].map(attachTriggerCommand)
+          [
+            'ASC',
+            'DESC',
+            { text: 'NULLS LAST', rangeToReplace: { start: 27, end: 34 } },
+            { text: 'NULLS FIRST', rangeToReplace: { start: 27, end: 34 } },
+          ].map(attachTriggerCommand)
         );
         await assertSuggestions(
           'from a | sort stringField NULLS FI/',
-          ['ASC', 'DESC', 'NULLS LAST', 'NULLS FIRST'].map(attachTriggerCommand)
+          [
+            'ASC',
+            'DESC',
+            { text: 'NULLS LAST', rangeToReplace: { start: 27, end: 35 } },
+            { text: 'NULLS FIRST', rangeToReplace: { start: 27, end: 35 } },
+          ].map(attachTriggerCommand)
         );
       });
 
