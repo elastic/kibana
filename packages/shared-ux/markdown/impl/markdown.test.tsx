@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { Markdown } from './markdown';
-import { render, screen } from '@testing-library/react';
+import { text as specText } from 'commonmark-spec';
+import { render, screen, waitFor } from '@testing-library/react';
 
 describe('shared ux markdown component', () => {
   it('renders markdown editor by default', () => {
@@ -38,6 +39,28 @@ describe('shared ux markdown component', () => {
   it('renders EuiMarkdownEditor without style passed', () => {
     render(<Markdown style={{ color: 'red' }} data-test-subj="editor" />);
     expect(screen.getByTestId('editor')).not.toHaveStyle({ color: 'red' });
+  });
+
+  it('EuiMarkdownFormat renders consistently matches to spec', async () => {
+    const renderSignal = jest.fn();
+
+    // remove language annotation of arbitrary 'example' language for code snippets in spec to prevent rendering error,
+    // because EUI implementation requires that the language annotation type be registered
+    // for proper syntax highlighting.
+    const cleanedText = specText.replace(/\s?example\b/gm, '`text').replace(/\\/, '');
+
+    render(
+      <Markdown
+        onRender={renderSignal}
+        data-test-subj="spec-validation"
+        markdownContent={cleanedText}
+        readOnly
+      />
+    );
+
+    await waitFor(() => expect(renderSignal).toHaveBeenCalled());
+
+    expect(screen.getByTestId('spec-validation')).toMatchSnapshot();
   });
 
   it('renders EuiMarkdownFormat with style passed', () => {

@@ -9,11 +9,11 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-
+import { text as specText } from 'commonmark-spec';
 import { Markdown } from './markdown';
 
-test('render', () => {
-  const component = shallow(<Markdown />);
+test('renders consistently matches to spec', () => {
+  const component = shallow(<Markdown markdown={specText} />);
   expect(component).toMatchSnapshot();
 });
 
