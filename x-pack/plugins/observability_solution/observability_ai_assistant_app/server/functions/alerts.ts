@@ -123,7 +123,8 @@ export function registerAlertsFunction({
           fields: fields.length === 0 ? defaultFields : fields,
         },
       };
-    }
+    },
+    ['observability']
   );
 
   functions.registerFunction(
@@ -212,6 +213,7 @@ export function registerAlertsFunction({
           alerts,
         },
       };
-    }
+    },
+    ['observability']
   );
 }

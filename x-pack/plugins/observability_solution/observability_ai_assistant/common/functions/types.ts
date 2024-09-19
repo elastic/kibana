@@ -8,6 +8,7 @@ import type { JSONSchema7TypeName } from 'json-schema';
 import type { Observable } from 'rxjs';
 import { ChatCompletionChunkEvent, MessageAddEvent } from '../conversation_complete';
 import { FunctionVisibility } from './function_visibility';
+import { AssistantScope } from '../types';
 export { FunctionVisibility };
 
 type JSONSchemaOrPrimitive = CompatibleJSONSchema | string | number | boolean;
@@ -41,6 +42,7 @@ export interface FunctionDefinition<TParameters extends CompatibleJSONSchema = a
   visibility?: FunctionVisibility;
   descriptionForUser?: string;
   parameters?: TParameters;
+  scopes?: AssistantScope[];
 }
 
 export type FunctionRegistry = Map<string, FunctionDefinition>;
