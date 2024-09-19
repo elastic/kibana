@@ -889,7 +889,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
       ? ast?.result
           ?.map((selectItem: { type: string; name: string; alias?: string }) => {
             if (selectItem.type === 'identifier') {
-               /*
+              /*
                 select * from routes, uptime;
               */
               if (ast?.result.length === 1 && selectItem.name === '*') {
