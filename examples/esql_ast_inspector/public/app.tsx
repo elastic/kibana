@@ -7,17 +7,7 @@
  */
 
 import React, { useRef, useState } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageSection,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiForm,
-  EuiTextArea,
-  EuiFormRow,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { EuiProvider } from '@elastic/eui';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -26,6 +16,7 @@ import { EditorError, ESQLAstQueryExpression, parse } from '@kbn/esql-ast';
 import { CodeEditor } from '@kbn/code-editor';
 import type { StartDependencies } from './plugin';
 import { PrettyPrint } from './pretty_print';
+import { EsqlInspector } from './components/esql_inspector';
 
 export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
   const [currentErrors, setErrors] = useState<EditorError[]>([]);
@@ -39,48 +30,15 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
     parse(currentQuery, { withFormatting: true }).root
   );
 
-  const parseQuery = (query: string) => {
-    const { root: _root, errors } = parse(query, { withFormatting: true });
-    setErrors(errors);
-    setAST(_root);
-  };
-
   return (
     <EuiProvider>
       <EuiPage>
-        <EuiPageBody style={{ maxWidth: 800, margin: '0 auto' }}>
+        <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
           <EuiPageHeader paddingSize="s" bottomBorder={true} pageTitle="ES|QL AST Inspector" />
           <EuiPageSection paddingSize="s">
             <p>This app gives you the AST for a particular ES|QL query.</p>
-
             <EuiSpacer />
-
-            <EuiForm>
-              <EuiFormRow
-                fullWidth
-                label="Query"
-                isInvalid={Boolean(currentErrors.length)}
-                error={currentErrors.map((error) => error.message)}
-              >
-                <EuiTextArea
-                  inputRef={(node) => {
-                    inputRef.current = node;
-                  }}
-                  isInvalid={Boolean(currentErrors.length)}
-                  fullWidth
-                  value={currentQuery}
-                  onChange={(e) => setQuery(e.target.value)}
-                  css={{
-                    height: '5em',
-                  }}
-                />
-              </EuiFormRow>
-              <EuiFormRow fullWidth>
-                <EuiButton fullWidth onClick={() => parseQuery(inputRef.current?.value ?? '')}>
-                  Parse
-                </EuiButton>
-              </EuiFormRow>
-            </EuiForm>
+            <EsqlInspector />
             <EuiSpacer />
             <PrettyPrint src={currentQuery} />
             <EuiSpacer />
