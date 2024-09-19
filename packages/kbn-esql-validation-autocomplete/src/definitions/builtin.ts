@@ -291,6 +291,7 @@ export const mathFunctions: FunctionDefinition[] = [
   ),
 ];
 
+// XXXXXXXX here!!! XXXXXXXX
 export const comparisonFunctions: FunctionDefinition[] = [
   {
     name: '==',

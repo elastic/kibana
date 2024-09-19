@@ -14,6 +14,7 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import { PluginInitializerContext } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DiscoverAppLocatorDefinition } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -53,6 +54,73 @@ export class DiscoverServerPlugin
         new DiscoverAppLocatorDefinition({ useHash: false, setStateToKbnUrl })
       );
     }
+
+    const router = core.http.createRouter();
+    router.post(
+      {
+        path: '/api/value_field_suggest',
+        validate: {
+          body: schema.object({
+            indexPattern: schema.string(),
+            valuePrefix: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const r = await esClient.transport.request({
+          method: 'GET',
+          path: `${request.body.indexPattern}/_search`,
+          body: {
+            size: 100,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    query_string: {
+                      query: `${request.body.valuePrefix}*`,
+                    },
+                  },
+                ],
+              },
+            },
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        });
+        console.log(r);
+        const docs = r.hits.hits;
+
+        // in the _source, find all fields that start with valuePrefix
+        // if they match, store the field name and the value
+
+        const matchingFieldValuePairs = new Map<string, Set<string>>();
+
+        for (const doc of docs) {
+          for (const [key, value] of Object.entries(doc._source)) {
+            const stringValue = String(value);
+            if (stringValue.startsWith(request.body.valuePrefix)) {
+              const values = matchingFieldValuePairs.get(key) ?? new Set<string>();
+              values.add(stringValue);
+              matchingFieldValuePairs.set(key, values);
+            }
+          }
+        }
+
+        // compile list of suggestions (<field>: "<value>")
+        const suggestions = [];
+        for (const [field, values] of matchingFieldValuePairs) {
+          for (const value of values) {
+            suggestions.push(`${field} == "${value}"`);
+          }
+        }
+
+        return response.ok({
+          body: {
+            suggestions,
+          },
+        });
+      }
+    );
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
 
