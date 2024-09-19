@@ -11,6 +11,7 @@ import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { KqlQueryReadOnly } from './fields/kql_query';
 import { TypeReadOnly } from './fields/type/type';
 import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface ThresholdRuleFieldReadOnlyProps {
   fieldName: keyof DiffableThresholdFields;
@@ -42,6 +43,6 @@ export function ThresholdRuleFieldReadOnly({
     case 'type':
       return <TypeReadOnly type={finalDiffableRule.type} />;
     default:
-      return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
+      return assertUnreachable(fieldName);
   }
 }
