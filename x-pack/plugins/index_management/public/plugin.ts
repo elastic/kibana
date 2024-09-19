@@ -26,9 +26,9 @@ import { ClientConfigType, SetupDependencies, StartDependencies } from './types'
 
 // avoid import from index files in plugin.ts, use specific import paths
 import { PLUGIN } from '../common/constants/plugin';
-import { IndexMapping } from './application/sections/home/index_list/details_page/withContextComponents/index_mappings_embeddable';
+import { IndexMapping } from './application/sections/home/index_list/details_page/with_context_components/index_mappings_embeddable';
 import { PublicApiService } from './services/public_api_service';
-import { IndexSettings } from './application/sections/home/index_list/details_page/withContextComponents/index_settings_embeddable';
+import { IndexSettings } from './application/sections/home/index_list/details_page/with_context_components/index_settings_embeddable';
 import { UiMetricService } from './application/services';
 import { UIM_APP_NAME } from '../common/constants';
 import { setUiMetricService } from './application/services/api';
