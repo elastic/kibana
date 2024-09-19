@@ -7,10 +7,10 @@
 
 import {
   EuiPageSection,
-  EuiSpacer,
   EuiButton,
   EuiPageTemplate,
   EuiFlexItem,
+  EuiTabbedContent,
   EuiFlexGroup,
   EuiPopover,
   EuiButtonIcon,
@@ -30,6 +30,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { ConnectionDetails } from '../connection_details/connection_details';
 import { QuickStats } from '../quick_stats/quick_stats';
 import { useIndexMapping } from '../../hooks/api/use_index_mappings';
+import { IndexDocuments } from '../index_documents/index_documents';
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
 
@@ -157,30 +158,46 @@ export const SearchIndexDetailsPage = () => {
               </EuiFlexGroup>,
             ]}
           />
-          <EuiSpacer size="l" />
-
-          {isShowingDeleteModal && (
-            <DeleteIndexModal
-              onCancel={() => setShowDeleteIndexModal(!isShowingDeleteModal)}
-              indexName={indexName}
-              navigateToIndexListPage={navigateToIndexListPage}
-            />
-          )}
           <EuiPageTemplate.Section grow={false}>
-            <EuiFlexGroup>
+            <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                <ConnectionDetails />
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <ConnectionDetails />
+                  </EuiFlexItem>
+                  <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="l" />
-
-            <EuiFlexGroup>
-              <QuickStats index={index} mappings={mappings} />
+              <EuiFlexItem>
+                <EuiFlexGroup>
+                  <QuickStats index={index} mappings={mappings} />
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTabbedContent
+                    tabs={[
+                      {
+                        id: 'data',
+                        name: i18n.translate('xpack.searchIndices.documentsTabLabel', {
+                          defaultMessage: 'Data',
+                        }),
+                        content: <IndexDocuments indexName={indexName} />,
+                      },
+                    ]}
+                  />
+                </EuiFlexItem>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageTemplate.Section>
         </>
+      )}
+      {isShowingDeleteModal && (
+        <DeleteIndexModal
+          onCancel={() => setShowDeleteIndexModal(!isShowingDeleteModal)}
+          indexName={indexName}
+          navigateToIndexListPage={navigateToIndexListPage}
+        />
       )}
       {embeddableConsole}
     </EuiPageTemplate>

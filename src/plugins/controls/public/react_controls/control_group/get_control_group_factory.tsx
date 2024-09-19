@@ -11,9 +11,7 @@ import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -27,13 +25,15 @@ import {
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 
-import { ControlStyle } from '../..';
-import {
-  CONTROL_GROUP_TYPE,
+import type {
   ControlGroupChainingSystem,
-  DEFAULT_CONTROL_STYLE,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlLabelPosition,
+  ControlPanelsState,
   ParentIgnoreSettings,
 } from '../../../common';
+import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_LABEL_POSITION } from '../../../common';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { ControlGroup } from './components/control_group';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
@@ -41,20 +41,13 @@ import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_ch
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { initSelectionsManager } from './selections_manager';
-import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlPanelsState,
-} from './types';
+import type { ControlGroupApi } from './types';
 import { deserializeControlGroup } from './utils/serialization_utils';
+import { coreServices, dataViewsService } from '../../services/kibana_services';
 
 const DEFAULT_CHAINING_SYSTEM = 'HIERARCHICAL';
 
-export const getControlGroupEmbeddableFactory = (services: {
-  core: CoreStart;
-  dataViews: DataViewsPublicPluginStart;
-}) => {
+export const getControlGroupEmbeddableFactory = () => {
   const controlGroupEmbeddableFactory: ReactEmbeddableFactory<
     ControlGroupSerializedState,
     ControlGroupRuntimeState,
@@ -78,7 +71,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       } = initialRuntimeState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
-      const defaultDataViewId = await services.dataViews.getDefaultId();
+      const defaultDataViewId = await dataViewsService.getDefaultId();
       const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(
         lastSavedRuntimeState.initialChildControlState
       );
@@ -97,14 +90,11 @@ export const getControlGroupEmbeddableFactory = (services: {
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         ignoreParentSettings
       );
-      const labelPosition$ = new BehaviorSubject<ControlStyle>( // TODO: Rename `ControlStyle`
-        initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
+      const labelPosition$ = new BehaviorSubject<ControlLabelPosition>(
+        initialLabelPosition ?? DEFAULT_CONTROL_LABEL_POSITION
       );
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
       const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
-
-      /** TODO: Handle loading; loading should be true if any child is loading */
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
 
       const unsavedChanges = initializeControlGroupUnsavedChanges(
         selectionsManager.applySelections,
@@ -125,7 +115,10 @@ export const getControlGroupEmbeddableFactory = (services: {
             (next: ParentIgnoreSettings | undefined) => ignoreParentSettings$.next(next),
             fastIsEqual,
           ],
-          labelPosition: [labelPosition$, (next: ControlStyle) => labelPosition$.next(next)],
+          labelPosition: [
+            labelPosition$,
+            (next: ControlLabelPosition) => labelPosition$.next(next),
+          ],
         },
         controlsManager.snapshotControlsRuntimeState,
         controlsManager.resetControlsUnsavedChanges,
@@ -160,18 +153,13 @@ export const getControlGroupEmbeddableFactory = (services: {
             initialChildControlState: controlsManager.snapshotControlsRuntimeState(),
           };
         },
-        dataLoading: dataLoading$,
         onEdit: async () => {
-          openEditControlGroupFlyout(
-            api,
-            {
-              chainingSystem: chainingSystem$,
-              labelPosition: labelPosition$,
-              autoApplySelections: autoApplySelections$,
-              ignoreParentSettings: ignoreParentSettings$,
-            },
-            { core: services.core }
-          );
+          openEditControlGroupFlyout(api, {
+            chainingSystem: chainingSystem$,
+            labelPosition: labelPosition$,
+            autoApplySelections: autoApplySelections$,
+            ignoreParentSettings: ignoreParentSettings$,
+          });
         },
         isEditingEnabled: () => true,
         openAddDataControlFlyout: (settings) => {
@@ -196,7 +184,6 @@ export const getControlGroupEmbeddableFactory = (services: {
               settings?.onSave?.();
             },
             controlGroupApi: api,
-            services,
           });
         },
         serializeState: () => {
@@ -204,7 +191,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           return {
             rawState: {
               chainingSystem: chainingSystem$.getValue(),
-              controlStyle: labelPosition$.getValue(), // Rename "labelPosition" to "controlStyle"
+              controlStyle: labelPosition$.getValue(),
               showApplySelections: !autoApplySelections$.getValue(),
               ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings$.getValue()),
               panelsJSON,
@@ -268,10 +255,9 @@ export const getControlGroupEmbeddableFactory = (services: {
             /** Fetch the allowExpensiveQuries setting for the children to use if necessary */
             const fetchAllowExpensiveQueries = async () => {
               try {
-                const { allowExpensiveQueries } = await services.core.http.get<{
+                const { allowExpensiveQueries } = await coreServices.http.get<{
                   allowExpensiveQueries: boolean;
-                  // TODO: Rename this route as part of https://github.com/elastic/kibana/issues/174961
-                }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
+                }>('/internal/controls/getExpensiveQueriesSetting', {
                   version: '1',
                 });
                 if (!allowExpensiveQueries) {

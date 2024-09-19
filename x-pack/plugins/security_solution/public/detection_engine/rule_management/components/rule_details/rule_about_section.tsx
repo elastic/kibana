@@ -256,7 +256,7 @@ interface TagsProps {
   tags: string[];
 }
 
-const Tags = ({ tags }: TagsProps) => (
+export const Tags = ({ tags }: TagsProps) => (
   <BadgeList badges={tags} data-test-subj="tagsPropertyValue" />
 );
 
