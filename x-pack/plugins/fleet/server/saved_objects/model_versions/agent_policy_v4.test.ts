@@ -50,9 +50,6 @@ describe('migrateAgentPolicyToV8160', () => {
       enabled: true,
       host: 'localhost',
       port: 1111,
-      buffer: {
-        enabled: true,
-      },
     });
     expect(
       migratedAgentPolicyDoc.attributes.advanced_settings?.agent_monitoring_http
@@ -126,9 +123,6 @@ describe('migrateAgentPolicyToV8160', () => {
 
     expect(migratedAgentPolicyDoc.attributes.monitoring_http).toEqual({
       enabled: true,
-      buffer: {
-        enabled: true,
-      },
     });
     expect(
       migratedAgentPolicyDoc.attributes.advanced_settings?.agent_monitoring_http

@@ -566,9 +566,6 @@ export function getFullMonitoringSettings(
       enabled: agentPolicy.monitoring_http.enabled,
       ...(agentPolicy.monitoring_http.host && { host: agentPolicy.monitoring_http.host }),
       ...(agentPolicy.monitoring_http.port && { port: agentPolicy.monitoring_http.port }),
-      ...(agentPolicy.monitoring_http.buffer && {
-        buffer: { enabled: agentPolicy.monitoring_http.buffer.enabled },
-      }),
     };
   }
 

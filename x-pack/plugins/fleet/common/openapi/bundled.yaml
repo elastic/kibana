@@ -4872,13 +4872,6 @@ components:
               type: string
             port:
               type: number
-            buffer:
-              type: object
-              properties:
-                enabled:
-                  type: boolean
-              required:
-                - enabled
           required:
             - enabled
         monitoring_diagnostics:
@@ -4889,22 +4882,17 @@ components:
               properties:
                 interval:
                   type: string
-                  nullable: true
                 burst:
                   type: number
-                  nullable: true
             uploader:
               type: object
               properties:
                 max_retries:
                   type: number
-                  nullable: true
                 init_dur:
                   type: string
-                  nullable: true
                 max_dur:
                   type: string
-                  nullable: true
       required:
         - id
         - status
@@ -5129,11 +5117,6 @@ components:
                   type: string
                 port:
                   type: number
-                buffer:
-                  type: object
-                  properties:
-                    enabled:
-                      type: boolean
               required:
                 - enabled
             diagnostics:

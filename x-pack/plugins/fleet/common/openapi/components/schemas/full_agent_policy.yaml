@@ -47,11 +47,6 @@ properties:
             type: string
           port:
             type: number
-          buffer:
-            type: object
-            properties:
-              enabled:
-                type: boolean
         required:
           - enabled
       diagnostics:

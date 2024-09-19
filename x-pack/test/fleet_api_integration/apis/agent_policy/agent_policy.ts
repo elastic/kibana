@@ -547,9 +547,6 @@ export default function (providerContext: FtrProviderContext) {
               host: 'localhost',
               port: 6791,
               enabled: true,
-              buffer: {
-                enabled: true,
-              },
             },
             monitoring_diagnostics: {
               limit: {
@@ -573,9 +570,6 @@ export default function (providerContext: FtrProviderContext) {
           host: 'localhost',
           port: 6791,
           enabled: true,
-          buffer: {
-            enabled: true,
-          },
         });
         expect(policyResponse.body.item.monitoring_diagnostics).to.eql({
           limit: {
@@ -604,9 +598,6 @@ export default function (providerContext: FtrProviderContext) {
             enabled: true,
             host: 'localhost',
             port: 6791,
-            buffer: {
-              enabled: true,
-            },
           },
           diagnostics: {
             limit: {
@@ -1082,9 +1073,6 @@ export default function (providerContext: FtrProviderContext) {
               host: 'localhost',
               port: 6791,
               enabled: true,
-              buffer: {
-                enabled: true,
-              },
             },
             monitoring_diagnostics: {
               limit: {
@@ -1116,9 +1104,6 @@ export default function (providerContext: FtrProviderContext) {
           host: 'localhost',
           port: 6791,
           enabled: true,
-          buffer: {
-            enabled: true,
-          },
         });
         expect(newPolicy.monitoring_diagnostics).to.eql({
           limit: {

@@ -8,7 +8,6 @@ import React from 'react';
 import {
   EuiDescribedFormGroup,
   EuiSpacer,
-  EuiIconTip,
   EuiCheckbox,
   EuiLink,
   EuiAccordion,
@@ -216,47 +215,6 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
-
-        <EuiSpacer size="s" />
-
-        {/* Metrics buffer endpoint */}
-        <EuiCheckbox
-          id="httpMonitoringMetricsBufferEnabled"
-          label={
-            <>
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyForm.enableHttpMonitoringBufferLabel"
-                defaultMessage="Enable metrics buffer at {bufferEndpoint}"
-                values={{
-                  bufferEndpoint: <EuiCode>/buffer</EuiCode>,
-                }}
-              />{' '}
-              <EuiIconTip
-                type="iInCircle"
-                color="subdued"
-                content={
-                  <FormattedMessage
-                    id="xpack.fleet.agentPolicyForm.enableHttpMonitoringBufferWarning"
-                    defaultMessage="Not recommended if the monitoring endpoint is accessible over a network"
-                  />
-                }
-              />
-            </>
-          }
-          disabled={disabled || !agentPolicy.monitoring_http?.enabled}
-          checked={agentPolicy.monitoring_http?.buffer?.enabled}
-          onChange={(e) => {
-            updateTouchedFields({ 'monitoring_http.buffer.enabled': true });
-            updateAgentPolicy({
-              monitoring_http: {
-                ...agentPolicy.monitoring_http!,
-                buffer: {
-                  enabled: e.target.checked,
-                },
-              },
-            });
-          }}
-        />
 
         <EuiSpacer size="s" />
 

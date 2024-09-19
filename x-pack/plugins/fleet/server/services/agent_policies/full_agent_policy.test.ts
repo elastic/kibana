@@ -913,7 +913,6 @@ describe('getFullMonitoringSettings', () => {
           enabled: true,
           host: 'localhost',
           port: 1111,
-          buffer: { enabled: true },
         },
         monitoring_diagnostics: {
           limit: {
@@ -946,7 +945,6 @@ describe('getFullMonitoringSettings', () => {
         enabled: true,
         host: 'localhost',
         port: 1111,
-        buffer: { enabled: true },
       },
       diagnostics: {
         limit: {
@@ -971,7 +969,6 @@ describe('getFullMonitoringSettings', () => {
         monitoring_http: {
           enabled: true,
           host: 'localhost',
-          buffer: { enabled: false },
         },
         monitoring_diagnostics: {
           limit: {
@@ -1000,7 +997,6 @@ describe('getFullMonitoringSettings', () => {
       http: {
         enabled: true,
         host: 'localhost',
-        buffer: { enabled: false },
       },
       diagnostics: {
         limit: {

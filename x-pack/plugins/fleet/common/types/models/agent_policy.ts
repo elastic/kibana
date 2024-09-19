@@ -49,7 +49,6 @@ export interface NewAgentPolicy {
     enabled: boolean;
     host?: string;
     port?: number;
-    buffer?: { enabled: boolean };
   };
   monitoring_diagnostics?: {
     limit?: {
@@ -144,7 +143,6 @@ export interface FullAgentPolicyMonitoring {
     enabled: boolean;
     host?: string;
     port?: number;
-    buffer?: { enabled: boolean };
   };
   diagnostics?: {
     limit?: {

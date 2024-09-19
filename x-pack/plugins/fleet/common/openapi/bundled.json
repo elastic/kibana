@@ -7607,17 +7607,6 @@
               },
               "port": {
                 "type": "number"
-              },
-              "buffer": {
-                "type": "object",
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "enabled"
-                ]
               }
             },
             "required": [
@@ -7631,12 +7620,10 @@
                 "type": "object",
                 "properties": {
                   "interval": {
-                    "type": "string",
-                    "nullable": true
+                    "type": "string"
                   },
                   "burst": {
-                    "type": "number",
-                    "nullable": true
+                    "type": "number"
                   }
                 }
               },
@@ -7644,16 +7631,13 @@
                 "type": "object",
                 "properties": {
                   "max_retries": {
-                    "type": "number",
-                    "nullable": true
+                    "type": "number"
                   },
                   "init_dur": {
-                    "type": "string",
-                    "nullable": true
+                    "type": "string"
                   },
                   "max_dur": {
-                    "type": "string",
-                    "nullable": true
+                    "type": "string"
                   }
                 }
               }
@@ -7983,14 +7967,6 @@
                   },
                   "port": {
                     "type": "number"
-                  },
-                  "buffer": {
-                    "type": "object",
-                    "properties": {
-                      "enabled": {
-                        "type": "boolean"
-                      }
-                    }
                   }
                 },
                 "required": [

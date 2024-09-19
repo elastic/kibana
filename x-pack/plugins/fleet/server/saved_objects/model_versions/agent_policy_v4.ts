@@ -18,12 +18,6 @@ export const backfillAgentPolicyToV4: SavedObjectModelDataBackfillFn<AgentPolicy
       enabled: advancedSettings.agent_monitoring_http.enabled,
       host: advancedSettings.agent_monitoring_http.host,
       port: advancedSettings.agent_monitoring_http.port,
-      buffer:
-        advancedSettings.agent_monitoring_http['buffer.enabled'] !== undefined
-          ? {
-              enabled: advancedSettings.agent_monitoring_http['buffer.enabled'],
-            }
-          : undefined,
     };
     delete advancedSettings.agent_monitoring_http;
   }
