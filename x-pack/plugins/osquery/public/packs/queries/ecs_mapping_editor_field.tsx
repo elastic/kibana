@@ -47,8 +47,8 @@ import {
   convertECSMappingToArray,
   convertECSMappingToObject,
 } from '../../../common/utils/converters';
-import ECSSchema from '../../common/schemas/ecs/v8.11.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.10.2.json';
+import ECSSchema from '../../common/schemas/ecs/v8.12.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.13.1.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -890,8 +890,8 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
           ?.map((selectItem: { type: string; name: string; alias?: string }) => {
             if (selectItem.type === 'identifier') {
               /*
-                select * from routes, uptime;
-              */
+              select * from routes, uptime;
+            */
               if (ast?.result.length === 1 && selectItem.name === '*') {
                 return reduce(
                   astOsqueryTables,
@@ -916,8 +916,8 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
               }
 
               /*
-                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
-              */
+              select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+            */
 
               const [table, column] = selectItem.name.includes('.')
                 ? selectItem.name.split('.')
@@ -961,18 +961,18 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
             }
 
             /*
-              SELECT pid, uid, name, ROUND((
-                (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
-              ) * 100, 2) AS percentage
-              FROM processes, (
-              SELECT (
-                SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
-                SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
-                FROM cpu_time
-              ) AS cpu_time
-              ORDER BY user_time+system_time DESC
-              LIMIT 5;
-            */
+            SELECT pid, uid, name, ROUND((
+              (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
+            ) * 100, 2) AS percentage
+            FROM processes, (
+            SELECT (
+              SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
+              SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
+              FROM cpu_time
+            ) AS cpu_time
+            ORDER BY user_time+system_time DESC
+            LIMIT 5;
+          */
 
             if (selectItem.type === 'function' && selectItem.alias) {
               return [

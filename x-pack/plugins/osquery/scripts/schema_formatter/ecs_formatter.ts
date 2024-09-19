@@ -44,6 +44,7 @@ run(
     const schemaFile = path.join(schemaPath, flags.schema_version as string);
     const schemaData = await require(schemaFile);
 
+    console.log({ schemaPath, schemaFile, schemaData });
     const transformToLowerCase = (obj: Record<string, unknown>) =>
       Object.fromEntries(Object.entries(obj).map(([key, val]) => [key.toLowerCase(), val]));
 
