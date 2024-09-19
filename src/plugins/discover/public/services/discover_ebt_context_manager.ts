@@ -11,26 +11,26 @@ import { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 
-export interface DiscoverEBTContextForProfilesProps {
-  dscProfiles: string[];
+export interface DiscoverEBTContextProps {
+  dscProfiles: string[]; // Discover Context Awareness Profiles
 }
-export type DiscoverEBTContextForProfiles = BehaviorSubject<DiscoverEBTContextForProfilesProps>;
+export type DiscoverEBTContext = BehaviorSubject<DiscoverEBTContextProps>;
 
 export class DiscoverEBTContextManager {
   private isEnabled: boolean = false;
-  private profilesContext$: DiscoverEBTContextForProfiles | undefined; // Discover Context Awareness Profiles
+  private ebtContext$: DiscoverEBTContext | undefined;
 
   constructor() {}
 
   // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
   public register({ core }: { core: CoreSetup }) {
-    const profilesContext$ = new BehaviorSubject<DiscoverEBTContextForProfilesProps>({
+    const context$ = new BehaviorSubject<DiscoverEBTContextProps>({
       dscProfiles: [],
     });
 
     core.analytics.registerContextProvider({
-      name: 'dsc_profiles',
-      context$: profilesContext$,
+      name: 'discover_context',
+      context$,
       schema: {
         dscProfiles: {
           type: 'array',
@@ -42,32 +42,31 @@ export class DiscoverEBTContextManager {
             },
           },
         },
+        // If we decide to extend EBT context with more properties, we can do it here
       },
     });
 
-    this.profilesContext$ = profilesContext$;
-
-    // If we decide to extend EBT context with more properties, we can do it here
+    this.ebtContext$ = context$;
   }
 
   public enable() {
     this.isEnabled = true;
   }
 
-  public updateProfilesContextWith(dscProfiles: DiscoverEBTContextForProfilesProps['dscProfiles']) {
+  public updateProfilesContextWith(dscProfiles: DiscoverEBTContextProps['dscProfiles']) {
     if (
       this.isEnabled &&
-      this.profilesContext$ &&
-      !isEqual(this.profilesContext$.getValue().dscProfiles, dscProfiles)
+      this.ebtContext$ &&
+      !isEqual(this.ebtContext$.getValue().dscProfiles, dscProfiles)
     ) {
-      this.profilesContext$.next({
+      this.ebtContext$.next({
         dscProfiles,
       });
     }
   }
 
   public getProfilesContext() {
-    return this.profilesContext$?.getValue()?.dscProfiles;
+    return this.ebtContext$?.getValue()?.dscProfiles;
   }
 
   public reset() {

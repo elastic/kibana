@@ -25,7 +25,7 @@ describe('DiscoverEBTContextManager', () => {
       discoverEBTContextManager.register({ core: coreSetupMock });
 
       expect(coreSetupMock.analytics.registerContextProvider).toHaveBeenCalledWith({
-        name: 'dsc_profiles',
+        name: 'discover_context',
         context$: expect.any(BehaviorSubject),
         schema: {
           dscProfiles: {
