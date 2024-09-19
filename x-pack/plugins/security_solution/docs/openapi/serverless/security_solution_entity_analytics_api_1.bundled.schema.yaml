@@ -1,0 +1,88 @@
+openapi: 3.0.3
+info:
+  description: ''
+  title: Security Solution Entity Analytics API (Elastic Cloud Serverless)
+  version: '1'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/risk_score/engine/dangerously_delete_data:
+    delete:
+      description: >-
+        Cleaning up the the Risk Engine by removing the indices, mapping and
+        transforms
+      operationId: CleanUpRiskEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cleanup_successful:
+                    type: boolean
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleanUpRiskEngineErrorResponse'
+          description: Unexpected error
+      summary: Cleanup the Risk Engine
+      tags:
+        - Security Solution Entity Analytics API
+components:
+  schemas:
+    CleanUpRiskEngineErrorResponse:
+      type: object
+      properties:
+        cleanup_successful:
+          example: false
+          type: boolean
+        errors:
+          items:
+            type: object
+            properties:
+              error:
+                type: string
+              seq:
+                type: integer
+            required:
+              - seq
+              - error
+          type: array
+      required:
+        - cleanup_successful
+        - errors
+    TaskManagerUnavailableResponse:
+      description: Task manager is unavailable
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          minimum: 400
+          type: integer
+      required:
+        - status_code
+        - message
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags:
+  - description: ''
+    name: Security Solution Entity Analytics API
