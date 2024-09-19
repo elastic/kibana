@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
@@ -34,7 +34,7 @@ export class EntityClient {
     installOnly?: boolean;
   }) {
     const installedDefinition = await installEntityDefinition({
-      definition,
+      definition: entityDefinitionSchema.parse(definition),
       soClient: this.options.soClient,
       esClient: this.options.esClient,
       logger: this.options.logger,

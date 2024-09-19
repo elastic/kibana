@@ -34,6 +34,9 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
     const logger = appContextService.getLogger();
     const spaceId = fleetContext.spaceId;
     const { pkgName, pkgVersion } = request.params;
+    const entityClient = await appContextService
+      .getEntityManagerStart()
+      ?.getScopedClient({ request });
 
     const installedPkgWithAssets = await getInstalledPackageWithAssets({
       savedObjectsClient,
@@ -58,6 +61,7 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
 
     await installKibanaAssetsAndReferences({
       savedObjectsClient,
+      entityClient,
       logger,
       pkgName,
       pkgTitle: packageInfo.title,

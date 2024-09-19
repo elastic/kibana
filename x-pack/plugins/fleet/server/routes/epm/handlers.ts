@@ -328,6 +328,9 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const entityClient = await appContextService
+    .getEntityManagerStart()
+    ?.getScopedClient({ request });
 
   const { pkgName, pkgVersion } = request.params;
 
@@ -339,6 +342,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     savedObjectsClient,
     pkgkey: pkgVersion ? `${pkgName}-${pkgVersion}` : pkgName,
     esClient,
+    entityClient,
     spaceId,
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
@@ -370,6 +374,9 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const entityClient = await appContextService
+    .getEntityManagerStart()
+    ?.getScopedClient({ request });
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const kibanaVersion = appContextService.getKibanaVersion();
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
@@ -383,6 +390,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
       pkgName: integrationName,
       datasets,
       esClient,
+      entityClient,
       spaceId,
       force,
       authorizationHeader,
@@ -447,9 +455,13 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+  const entityClient = await appContextService
+    .getEntityManagerStart()
+    ?.getScopedClient({ request });
 
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
+    entityClient,
     esClient,
     packagesToInstall: request.body.packages,
     spaceId,

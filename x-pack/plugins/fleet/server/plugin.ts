@@ -57,6 +57,8 @@ import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
+import type { EntityManagerServerPluginStart } from '@kbn/entityManager-plugin/server';
+
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import {
@@ -158,6 +160,7 @@ export interface FleetStartDeps {
   savedObjectsTagging: SavedObjectTaggingStart;
   taskManager: TaskManagerStartContract;
   spaces: SpacesPluginStart;
+  entityManager?: EntityManagerServerPluginStart;
 }
 
 export interface FleetAppContext {
@@ -187,6 +190,7 @@ export interface FleetAppContext {
   uninstallTokenService: UninstallTokenServiceInterface;
   unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
   taskManagerStart?: TaskManagerStartContract;
+  entityManagerStart?: EntityManagerServerPluginStart;
 }
 
 export type FleetSetupContract = void;
@@ -669,6 +673,7 @@ export class FleetPlugin
       uninstallTokenService,
       unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
       taskManagerStart: plugins.taskManager,
+      entityManagerStart: plugins.entityManager,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});

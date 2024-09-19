@@ -14,13 +14,15 @@ import { deleteKibanaAssets } from '../../remove';
 import { INSTALL_STATES } from '../../../../../../common/types';
 
 export async function stepInstallKibanaAssets(context: InstallContext) {
-  const { savedObjectsClient, logger, installedPkg, packageInstallContext, spaceId } = context;
+  const { savedObjectsClient, logger, installedPkg, packageInstallContext, spaceId, entityClient } =
+    context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
 
   const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
     installKibanaAssetsAndReferencesMultispace({
       savedObjectsClient,
+      entityClient,
       pkgName,
       pkgTitle,
       packageInstallContext,

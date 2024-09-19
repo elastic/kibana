@@ -39,6 +39,7 @@
       "spaces",
       "guidedOnboarding",
       "integrationAssistant",
+      "entityManager"
     ],
     "requiredBundles": [
       "kibanaReact",

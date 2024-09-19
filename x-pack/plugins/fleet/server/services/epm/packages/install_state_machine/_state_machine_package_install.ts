@@ -11,6 +11,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 
 import { PackageSavedObjectConflictError } from '../../../../errors';
 
@@ -60,6 +61,7 @@ import { handleState } from './state_machine';
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  entityClient?: EntityClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
   packageInstallContext: PackageInstallContext;

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 
 import pLimit from 'p-limit';
 import { uniqBy } from 'lodash';
@@ -27,6 +28,7 @@ interface BulkInstallPackagesParams {
     | { name: string; version?: string; prerelease?: boolean; skipDataStreamRollover?: boolean }
   >;
   esClient: ElasticsearchClient;
+  entityClient?: EntityClient;
   force?: boolean;
   spaceId: string;
   preferredSource?: 'registry' | 'bundled';
@@ -39,6 +41,7 @@ export async function bulkInstallPackages({
   savedObjectsClient,
   packagesToInstall,
   esClient,
+  entityClient,
   spaceId,
   force,
   prerelease,
@@ -139,6 +142,7 @@ export async function bulkInstallPackages({
       const installResult = await installPackage({
         savedObjectsClient,
         esClient,
+        entityClient,
         pkgkey,
         installSource: 'registry',
         spaceId,

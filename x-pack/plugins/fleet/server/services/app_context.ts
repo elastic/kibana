@@ -31,6 +31,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EntityManagerServerPluginStart } from '@kbn/entityManager-plugin/server';
 
 import type { FleetConfigType } from '../../common/types';
 import {
@@ -83,6 +84,7 @@ class AppContextService {
   private messageSigningService: MessageSigningServiceInterface | undefined;
   private uninstallTokenService: UninstallTokenServiceInterface | undefined;
   private taskManagerStart: TaskManagerStartContract | undefined;
+  private entityManagerStart?: EntityManagerServerPluginStart;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -108,6 +110,7 @@ class AppContextService {
     this.messageSigningService = appContext.messageSigningService;
     this.uninstallTokenService = appContext.uninstallTokenService;
     this.taskManagerStart = appContext.taskManagerStart;
+    this.entityManagerStart = appContext.entityManagerStart;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -345,6 +348,10 @@ class AppContextService {
 
   public getUninstallTokenService() {
     return this.uninstallTokenService;
+  }
+
+  public getEntityManagerStart() {
+    return this.entityManagerStart;
   }
 }
 

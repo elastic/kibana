@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 
 import type { Installation } from '../../../types';
 import { pkgToPkgKey } from '../registry';
@@ -20,10 +21,12 @@ import { installPackage } from './install';
 export async function reinstallPackageForInstallation({
   soClient,
   esClient,
+  entityClient,
   installation,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  entityClient: EntityClient;
   installation: Installation;
 }) {
   if (installation.install_source === 'upload' || installation.install_source === 'bundled') {
@@ -49,6 +52,7 @@ export async function reinstallPackageForInstallation({
       version: installation.version,
     }),
     esClient,
+    entityClient,
     spaceId: installation.installed_kibana_space_id || DEFAULT_SPACE_ID,
     // Force install the package will update the index template and the datastream write indices
     force: true,

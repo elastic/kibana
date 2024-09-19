@@ -21,6 +21,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 
 import type {
   KibanaAssetReference,
@@ -250,6 +251,7 @@ export async function handleInstallPackageFailure({
   pkgVersion,
   installedPkg,
   esClient,
+  entityClient,
   spaceId,
   authorizationHeader,
 }: {
@@ -259,6 +261,7 @@ export async function handleInstallPackageFailure({
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
   esClient: ElasticsearchClient;
+  entityClient?: EntityClient;
   spaceId: string;
   authorizationHeader?: HTTPAuthorizationHeader | null;
 }) {
@@ -312,6 +315,7 @@ export async function handleInstallPackageFailure({
         savedObjectsClient,
         pkgkey,
         esClient,
+        entityClient,
         spaceId,
         authorizationHeader,
         retryFromLastState: true,
@@ -333,6 +337,7 @@ export async function handleInstallPackageFailure({
         savedObjectsClient,
         pkgkey: prevVersion,
         esClient,
+        entityClient,
         spaceId,
         force: true,
         authorizationHeader,
@@ -369,6 +374,7 @@ interface InstallRegistryPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   esClient: ElasticsearchClient;
+  entityClient?: EntityClient;
   spaceId: string;
   force?: boolean;
   neverIgnoreVerificationError?: boolean;
@@ -389,6 +395,7 @@ interface InstallCustomPackageParams {
   pkgName: string;
   datasets: CustomPackageDatasetConfiguration[];
   esClient: ElasticsearchClient;
+  entityClient?: EntityClient;
   spaceId: string;
   force?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
@@ -397,6 +404,7 @@ interface InstallCustomPackageParams {
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  entityClient?: EntityClient;
   archiveBuffer: Buffer;
   contentType: string;
   spaceId: string;
@@ -432,6 +440,7 @@ async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
   esClient,
+  entityClient,
   spaceId,
   authorizationHeader,
   force = false,
@@ -515,6 +524,7 @@ async function installPackageFromRegistry({
       installType,
       savedObjectsClient,
       esClient,
+      entityClient,
       spaceId,
       force,
       packageInstallContext,
@@ -552,6 +562,7 @@ async function installPackageWithStateMachine(options: {
   installType: InstallType;
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  entityClient?: EntityClient;
   spaceId: string;
   force?: boolean;
   packageInstallContext: PackageInstallContext;
@@ -574,6 +585,7 @@ async function installPackageWithStateMachine(options: {
     savedObjectsClient,
     force,
     esClient,
+    entityClient,
     spaceId,
     verificationResult,
     authorizationHeader,
@@ -666,6 +678,7 @@ async function installPackageWithStateMachine(options: {
       savedObjectTagAssignmentService,
       savedObjectTagClient,
       esClient,
+      entityClient,
       logger,
       installedPkg,
       packageInstallContext,
@@ -730,6 +743,7 @@ async function installPackageWithStateMachine(options: {
 async function installPackageByUpload({
   savedObjectsClient,
   esClient,
+  entityClient,
   archiveBuffer,
   contentType,
   spaceId,
@@ -813,6 +827,7 @@ async function installPackageByUpload({
       installType,
       savedObjectsClient,
       esClient,
+      entityClient,
       spaceId,
       force: true, // upload has implicit force
       paths,
@@ -849,7 +864,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   }
 
   const logger = appContextService.getLogger();
-  const { savedObjectsClient, esClient } = args;
+  const { savedObjectsClient, esClient, entityClient } = args;
 
   const authorizationHeader = args.authorizationHeader;
 
@@ -897,6 +912,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       savedObjectsClient,
       pkgkey,
       esClient,
+      entityClient,
       spaceId,
       force,
       neverIgnoreVerificationError,
@@ -920,6 +936,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
     const response = await installPackageByUpload({
       savedObjectsClient,
       esClient,
+      entityClient,
       archiveBuffer,
       contentType,
       spaceId,
@@ -936,6 +953,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       pkgName,
       datasets,
       esClient,
+      entityClient,
       spaceId,
       force,
       authorizationHeader,
@@ -952,6 +970,7 @@ export async function installCustomPackage(
   const {
     savedObjectsClient,
     esClient,
+    entityClient,
     spaceId,
     pkgName,
     force,
@@ -1001,6 +1020,7 @@ export async function installCustomPackage(
     installType: 'install',
     savedObjectsClient,
     esClient,
+    entityClient,
     spaceId,
     force,
     paths,
