@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -16,7 +16,10 @@ import {
   installPrebuiltRulesPackage,
 } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 
-export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) => {
+export const bootstrapPrebuiltRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -42,6 +45,8 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
             installPrebuiltRulesPackage(config, securityContext),
             installEndpointPackage(config, securityContext),
           ]);
+
+          logger.error('installPrebuiltRulesPackage:after');
 
           const responseBody: BootstrapPrebuiltRulesResponse = {
             packages: results.map((result) => ({
