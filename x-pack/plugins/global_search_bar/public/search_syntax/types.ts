@@ -27,9 +27,5 @@ export interface ParsedSearchParams {
      * Aggregation of `type` and `types` field clauses
      */
     types?: FilterValues<string>;
-    /**
-     * All unknown field clauses
-     */
-    unknowns: Record<string, FilterValues>;
   };
 }
