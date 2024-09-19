@@ -8,24 +8,22 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { InventoryKibanaContext } from '../public/hooks/use_kibana';
+import { ITelemetryClient } from '../public/services/telemetry/types';
 
 export function getMockInventoryContext(): InventoryKibanaContext {
-  const core = coreMock.createStart();
+  const coreStart = coreMock.createStart();
 
   return {
-    core,
-    dependencies: {
-      start: {
-        observabilityShared: {} as unknown as ObservabilitySharedPluginStart,
-        inference: {} as unknown as InferencePublicStart,
-      },
-    },
-    services: {
-      inventoryAPIClient: {
-        fetch: jest.fn(),
-        stream: jest.fn(),
-      },
+    ...coreStart,
+    observabilityShared: {} as unknown as ObservabilitySharedPluginStart,
+    inference: {} as unknown as InferencePublicStart,
+    share: {} as unknown as SharePluginStart,
+    telemetry: {} as unknown as ITelemetryClient,
+    inventoryAPIClient: {
+      fetch: jest.fn(),
+      stream: jest.fn(),
     },
   };
 }

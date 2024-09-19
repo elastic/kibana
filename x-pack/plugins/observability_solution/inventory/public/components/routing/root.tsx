@@ -7,36 +7,54 @@
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React from 'react';
+import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InventoryContextProvider } from '../inventory_context_provider';
-import { InventoryKibanaContext, useKibana } from '../../hooks/use_kibana';
 import { inventoryRouter } from '../../routes/config';
 import { HeaderActionMenuItems } from './header_action_menu';
+import { InventoryStartDependencies } from '../../types';
+import { InventoryServices } from '../../services/types';
 
-export function AppRoot({ inventoryContext }: { inventoryContext: InventoryKibanaContext }) {
-  const { core, appMountParameters } = inventoryContext;
+export function AppRoot({
+  coreStart,
+  pluginsStart,
+  services,
+  appMountParameters,
+}: {
+  coreStart: CoreStart;
+  pluginsStart: InventoryStartDependencies;
+  services: InventoryServices;
+} & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
+  const context = {
+    ...coreStart,
+    ...pluginsStart,
+    ...services,
+  };
+
   return (
-    <InventoryContextProvider context={inventoryContext}>
-      <RedirectAppLinks coreStart={core}>
-        <core.i18n.Context>
+    <InventoryContextProvider context={context}>
+      <RedirectAppLinks coreStart={coreStart}>
+        <coreStart.i18n.Context>
           <RouterProvider history={history} router={inventoryRouter}>
             <RouteRenderer />
-            <InventoryHeaderActionMenu />
+            <InventoryHeaderActionMenu appMountParameters={appMountParameters} />
           </RouterProvider>
-        </core.i18n.Context>
+        </coreStart.i18n.Context>
       </RedirectAppLinks>
     </InventoryContextProvider>
   );
 }
 
-export function InventoryHeaderActionMenu() {
-  const {
-    appMountParameters: { setHeaderActionMenu, theme$ },
-  } = useKibana();
+export function InventoryHeaderActionMenu({
+  appMountParameters,
+}: {
+  appMountParameters: AppMountParameters;
+}) {
+  const { setHeaderActionMenu, theme$ } = appMountParameters;
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>

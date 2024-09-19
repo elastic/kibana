@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import type { InventoryStartDependencies } from '../types';
-import type { InventoryServices } from '../services/types';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import { InventoryStartDependencies } from '../types';
+import { InventoryServices } from '../services/types';
 
-export interface InventoryKibanaContext {
-  appMountParameters: AppMountParameters;
-  core: CoreStart;
-  dependencies: { start: InventoryStartDependencies };
-  services: InventoryServices;
-}
+export type InventoryKibanaContext = CoreStart & InventoryStartDependencies & InventoryServices;
 
-const useTypedKibana = () => {
-  return useKibana<InventoryKibanaContext>().services;
-};
+const useTypedKibana = useKibana as () => KibanaReactContextValue<InventoryKibanaContext>;
 
 export { useTypedKibana as useKibana };

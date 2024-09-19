@@ -11,7 +11,6 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { css } from '@emotion/css';
 import type { InventoryStartDependencies } from './types';
-
 import { InventoryServices } from './services/types';
 import { AppRoot } from './components/routing/root';
 
@@ -26,15 +25,6 @@ export const renderApp = ({
   services: InventoryServices;
 } & { appMountParameters: AppMountParameters }) => {
   const { element, theme$ } = appMountParameters;
-
-  const context = {
-    appMountParameters,
-    core: coreStart,
-    dependencies: {
-      start: pluginsStart,
-    },
-    services,
-  };
 
   const appWrapperClassName = css`
     overflow: auto;
@@ -53,7 +43,12 @@ export const renderApp = ({
           },
         }}
       >
-        <AppRoot inventoryContext={context} />
+        <AppRoot
+          appMountParameters={appMountParameters}
+          coreStart={coreStart}
+          pluginsStart={pluginsStart}
+          services={services}
+        />
       </KibanaThemeProvider>
     </KibanaRenderContextProvider>,
     element

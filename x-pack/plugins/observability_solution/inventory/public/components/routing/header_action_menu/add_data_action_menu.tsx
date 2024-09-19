@@ -38,9 +38,10 @@ const ASSOCIATE_LOGS_LINK = 'https://ela.st/new-experience-associate-service-log
 
 export function AddDataContextMenu() {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const { dependencies, services } = useKibana();
+  const {
+    services: { share, telemetry },
+  } = useKibana();
 
-  const { share } = dependencies.start;
   const onboardingLocator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
@@ -62,7 +63,7 @@ export function AddDataContextMenu() {
   );
 
   function reportButtonClick(journey: InventoryAddDataParams['journey']) {
-    services.telemetry.reportInventoryAddData({
+    telemetry.reportInventoryAddData({
       view: 'add_data_button',
       journey,
     });
