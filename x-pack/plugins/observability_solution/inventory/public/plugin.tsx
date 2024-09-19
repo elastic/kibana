@@ -7,7 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { from, map } from 'rxjs';
+import { BehaviorSubject, from, map } from 'rxjs';
 import {
   AppMountParameters,
   APP_WRAPPER_CLASS,
@@ -16,6 +16,8 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
+  AppStatus,
+  AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
@@ -40,6 +42,7 @@ export class InventoryPlugin
     >
 {
   logger: Logger;
+  inventoryAppUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -79,31 +82,6 @@ export class InventoryPlugin
       );
     }
 
-    pluginsSetup.observabilityShared.navigation.registerSections(
-      from(coreSetup.getStartServices()).pipe(
-        map(([coreStart, pluginsStart]) => {
-          return [
-            {
-              label: '',
-              sortKey: 101,
-              entries: [
-                {
-                  label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
-                    defaultMessage: 'Inventory',
-                  }),
-                  app: INVENTORY_APP_ID,
-                  path: '/',
-                  matchPath(currentPath: string) {
-                    return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
-                  },
-                },
-              ],
-            },
-          ];
-        })
-      )
-    );
-
     coreSetup.application.register({
       id: INVENTORY_APP_ID,
       title: i18n.translate('xpack.inventory.appTitle', {
@@ -112,19 +90,17 @@ export class InventoryPlugin
       euiIconType: 'logoObservability',
       appRoute: '/app/observability/inventory',
       category: DEFAULT_APP_CATEGORIES.observability,
-      visibleIn: isEntityCentricExperienceSettingEnabled ? ['sideNav', 'globalSearch'] : [],
+      visibleIn: ['sideNav', 'globalSearch'],
       order: 8004,
-      deepLinks: isEntityCentricExperienceSettingEnabled
-        ? [
-            {
-              id: 'inventory',
-              title: i18n.translate('xpack.inventory.inventoryDeepLinkTitle', {
-                defaultMessage: 'Inventory',
-              }),
-              path: '/',
-            },
-          ]
-        : [],
+      deepLinks: [
+        {
+          id: 'inventory',
+          title: i18n.translate('xpack.inventory.inventoryDeepLinkTitle', {
+            defaultMessage: 'Inventory',
+          }),
+          path: '/',
+        },
+      ],
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
@@ -160,12 +136,24 @@ export class InventoryPlugin
           appWrapperElement.classList.remove(appWrapperClassName);
         };
       },
+      updater$: this.inventoryAppUpdater,
     });
 
     return {};
   }
 
   start(coreStart: CoreStart, pluginsStart: InventoryStartDependencies): InventoryPublicStart {
+    const isEntityCentricExperienceSettingEnabled = coreStart.uiSettings.get<boolean>(
+      'observability:entityCentricExperience',
+      true
+    );
+
+    this.inventoryAppUpdater.next(() => ({
+      status: isEntityCentricExperienceSettingEnabled
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
+    }));
+
     return {};
   }
 }
