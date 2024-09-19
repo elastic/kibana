@@ -306,6 +306,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
       {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (
         <Cell
+          /* below style overrides all the styles provided by EUI so should be used carefully */
           style={{
             width: '100%',
           }}
