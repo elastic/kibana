@@ -1,22 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { of } from 'rxjs';
 
 import { estypes } from '@elastic/elasticsearch';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
+import { dataService, dataViewsService } from '../../../../services/kibana_services';
 import { getMockedBuildApi, getMockedControlGroupApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import { RangesliderControlState } from './types';
@@ -30,11 +29,10 @@ describe('RangesliderControlApi', () => {
 
   const controlGroupApi = getMockedControlGroupApi();
 
-  const dataStartServiceMock = dataPluginMock.createStartContract();
   let totalResults = DEFAULT_TOTAL_RESULTS;
   let min: estypes.AggregationsSingleMetricAggregateBase['value'] = DEFAULT_MIN;
   let max: estypes.AggregationsSingleMetricAggregateBase['value'] = DEFAULT_MAX;
-  dataStartServiceMock.search.searchSource.create = jest.fn().mockImplementation(() => {
+  dataService.search.searchSource.create = jest.fn().mockImplementation(() => {
     let isAggsRequest = false;
     return {
       setField: (key: string) => {
@@ -53,9 +51,8 @@ describe('RangesliderControlApi', () => {
       },
     };
   });
-  const mockDataViews = dataViewPluginMocks.createStartContract();
 
-  mockDataViews.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
+  dataViewsService.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
       throw new Error(`no data view found for id ${id}`);
     }
@@ -81,11 +78,7 @@ describe('RangesliderControlApi', () => {
     } as unknown as DataView;
   });
 
-  const factory = getRangesliderControlFactory({
-    core: coreMock.createStart(),
-    data: dataStartServiceMock,
-    dataViews: mockDataViews,
-  });
+  const factory = getRangesliderControlFactory();
 
   beforeEach(() => {
     totalResults = DEFAULT_TOTAL_RESULTS;

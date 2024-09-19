@@ -92,15 +92,13 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       await esTestIndexTool.setup();
     });
     afterEach(async () => {
-      await objectRemover.removeAll();
-      await esTestIndexTool.destroy();
-    });
-    after(async () => {
       await es.deleteByQuery({
         index: alertsAsDataIndex,
         query: { match_all: {} },
         conflicts: 'proceed',
       });
+      await objectRemover.removeAll();
+      await esTestIndexTool.destroy();
     });
 
     // This test
@@ -142,7 +140,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
               from: '1m',
               kibana_siem_app_url: 'https://localhost:5601/app/security',
             },
-            maxSignals: 100,
+            maxSignals: 20,
             riskScore: 21,
             riskScoreMapping: [],
             severity: 'low',

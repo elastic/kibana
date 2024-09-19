@@ -17,10 +17,6 @@ exports[`renders RangeControlEditor 1`] = `
     onChange={[Function]}
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     id="stepSize-0"
     label={
       <Memo(MemoizedFormattedMessage)
@@ -28,7 +24,6 @@ exports[`renders RangeControlEditor 1`] = `
         id="inputControl.editor.rangeControl.stepSizeLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldNumber
       data-test-subj="rangeControlSizeInput0"
@@ -37,10 +32,6 @@ exports[`renders RangeControlEditor 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     id="decimalPlaces-0"
     label={
       <Memo(MemoizedFormattedMessage)
@@ -48,7 +39,6 @@ exports[`renders RangeControlEditor 1`] = `
         id="inputControl.editor.rangeControl.decimalPlacesLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldNumber
       data-test-subj="rangeControlDecimalPlacesInput0"

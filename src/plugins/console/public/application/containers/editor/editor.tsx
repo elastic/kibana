@@ -1,100 +1,289 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, memo, useEffect, useState } from 'react';
+import React, { useRef, useCallback, memo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiProgress } from '@elastic/eui';
+import {
+  EuiProgress,
+  EuiSplitPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiResizableContainer,
+} from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
-import { EditorContentSpinner } from '../../components';
-import { Panel, PanelsContainer } from '..';
-import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
+import { i18n } from '@kbn/i18n';
+import { TextObject } from '../../../../common/text_object';
+
+import {
+  EditorContentSpinner,
+  OutputPanelEmptyState,
+  NetworkRequestStatusBar,
+} from '../../components';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
-import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
-import type { SenseEditor } from '../../models';
-import { MonacoEditor, MonacoEditorOutput } from './monaco';
+import {
+  useEditorReadContext,
+  useServicesContext,
+  useRequestReadContext,
+  useRequestActionContext,
+  useEditorActionContext,
+} from '../../contexts';
+import { MonacoEditor } from './monaco_editor';
+import { MonacoEditorOutput } from './monaco_editor_output';
+import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
-const INITIAL_PANEL_WIDTH = 50;
-const PANEL_MIN_WIDTH = '100px';
+const INITIAL_PANEL_SIZE = 50;
+const PANEL_MIN_SIZE = '20%';
+const DEBOUNCE_DELAY = 500;
 
 interface Props {
   loading: boolean;
-  setEditorInstance: (instance: SenseEditor) => void;
+  isVerticalLayout: boolean;
+  inputEditorValue: string;
+  setInputEditorValue: (value: string) => void;
 }
 
-export const Editor = memo(({ loading, setEditorInstance }: Props) => {
-  const {
-    services: { storage },
-    config: { isMonacoEnabled } = {},
-  } = useServicesContext();
+export const Editor = memo(
+  ({ loading, isVerticalLayout, inputEditorValue, setInputEditorValue }: Props) => {
+    const {
+      services: { storage, objectStorageClient },
+    } = useServicesContext();
 
-  const { currentTextObject } = useEditorReadContext();
-  const { requestInFlight } = useRequestReadContext();
+    const editorValueRef = useRef<TextObject | null>(null);
+    const { currentTextObject } = useEditorReadContext();
+    const {
+      requestInFlight,
+      lastResult: { data: requestData, error: requestError },
+    } = useRequestReadContext();
 
-  const [fetchingMappings, setFetchingMappings] = useState(false);
+    const dispatch = useRequestActionContext();
+    const editorDispatch = useEditorActionContext();
 
-  useEffect(() => {
-    const subscription = getAutocompleteInfo().mapping.isLoading$.subscribe(setFetchingMappings);
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+    const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
 
-  const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
-    INITIAL_PANEL_WIDTH,
-    INITIAL_PANEL_WIDTH,
-  ]);
+    useEffect(() => {
+      const debouncedSetFechingAutocompleteEntities = debounce(
+        setFetchingAutocompleteEntities,
+        DEBOUNCE_DELAY
+      );
+      const subscription = getAutocompleteInfo().isLoading$.subscribe(
+        debouncedSetFechingAutocompleteEntities
+      );
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const onPanelWidthChange = useCallback(
-    debounce((widths: number[]) => {
-      storage.set(StorageKeys.WIDTH, widths);
-    }, 300),
-    []
-  );
+      return () => {
+        subscription.unsubscribe();
+        debouncedSetFechingAutocompleteEntities.cancel();
+      };
+    }, []);
 
-  if (!currentTextObject) return null;
+    const [firstPanelSize, secondPanelSize] = storage.get(StorageKeys.SIZE, [
+      INITIAL_PANEL_SIZE,
+      INITIAL_PANEL_SIZE,
+    ]);
 
-  return (
-    <>
-      {requestInFlight || fetchingMappings ? (
-        <div className="conApp__requestProgressBarContainer">
-          <EuiProgress size="xs" color="accent" position="absolute" />
-        </div>
-      ) : null}
-      <PanelsContainer onPanelWidthChange={onPanelWidthChange} resizerClassName="conApp__resizer">
-        <Panel
-          style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-          initialWidth={firstPanelWidth}
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    const onPanelSizeChange = useCallback(
+      debounce((sizes) => {
+        storage.set(StorageKeys.SIZE, Object.values(sizes));
+      }, 300),
+      []
+    );
+
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    const debouncedUpdateLocalStorageValue = useCallback(
+      debounce((textObject: TextObject) => {
+        editorValueRef.current = textObject;
+        objectStorageClient.text.update(textObject);
+      }, DEBOUNCE_DELAY),
+      []
+    );
+
+    useEffect(() => {
+      return () => {
+        editorDispatch({
+          type: 'setCurrentTextObject',
+          payload: editorValueRef.current!,
+        });
+      };
+    }, [editorDispatch]);
+
+    // Always keep the localstorage in sync with the value in the editor
+    // to avoid losing the text object when the user navigates away from the shell
+    useEffect(() => {
+      // Only update when its not empty, this is to avoid setting the localstorage value
+      // to an empty string that will then be replaced by the example request.
+      if (inputEditorValue !== '') {
+        const textObject = {
+          ...currentTextObject,
+          text: inputEditorValue,
+          updatedAt: Date.now(),
+        } as TextObject;
+
+        debouncedUpdateLocalStorageValue(textObject);
+      }
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    }, [inputEditorValue, debouncedUpdateLocalStorageValue]);
+
+    const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
+    const isLoading = loading || requestInFlight;
+
+    if (!currentTextObject) return null;
+
+    return (
+      <>
+        {fetchingAutocompleteEntities ? (
+          <div className="conApp__requestProgressBarContainer">
+            <EuiProgress size="xs" color="accent" position="absolute" />
+          </div>
+        ) : null}
+        <EuiResizableContainer
+          style={{ height: '100%' }}
+          direction={isVerticalLayout ? 'vertical' : 'horizontal'}
+          onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
+          data-test-subj="consoleEditorContainer"
         >
-          {loading ? (
-            <EditorContentSpinner />
-          ) : isMonacoEnabled ? (
-            <MonacoEditor initialTextValue={currentTextObject.text} />
-          ) : (
-            <EditorUI
-              initialTextValue={currentTextObject.text}
-              setEditorInstance={setEditorInstance}
-            />
+          {(EuiResizablePanel, EuiResizableButton) => (
+            <>
+              <EuiResizablePanel
+                initialSize={firstPanelSize}
+                minSize={PANEL_MIN_SIZE}
+                tabIndex={0}
+                paddingSize="none"
+              >
+                <EuiSplitPanel.Outer
+                  grow={true}
+                  borderRadius="none"
+                  hasShadow={false}
+                  style={{ height: '100%' }}
+                >
+                  <EuiSplitPanel.Inner
+                    paddingSize="none"
+                    grow={true}
+                    className="consoleEditorPanel"
+                    style={{ top: 0, height: 'calc(100% - 40px)' }}
+                  >
+                    {loading ? (
+                      <EditorContentSpinner />
+                    ) : (
+                      <MonacoEditor
+                        localStorageValue={currentTextObject.text}
+                        value={inputEditorValue}
+                        setValue={setInputEditorValue}
+                      />
+                    )}
+                  </EuiSplitPanel.Inner>
+
+                  {!loading && (
+                    <EuiSplitPanel.Inner
+                      grow={false}
+                      paddingSize="s"
+                      css={{
+                        backgroundColor: euiThemeVars.euiFormBackgroundColor,
+                      }}
+                      className="consoleEditorPanel"
+                    >
+                      <EuiButtonEmpty
+                        size="xs"
+                        color="primary"
+                        data-test-subj="clearConsoleInput"
+                        onClick={() => setInputEditorValue('')}
+                      >
+                        {i18n.translate('console.editor.clearConsoleInputButton', {
+                          defaultMessage: 'Clear this input',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiSplitPanel.Inner>
+                  )}
+                </EuiSplitPanel.Outer>
+              </EuiResizablePanel>
+
+              <EuiResizableButton
+                className="conApp__resizerButton"
+                aria-label={i18n.translate('console.editor.adjustPanelSizeAriaLabel', {
+                  defaultMessage: "Press left/right to adjust panels' sizes",
+                })}
+              />
+
+              <EuiResizablePanel
+                initialSize={secondPanelSize}
+                minSize={PANEL_MIN_SIZE}
+                tabIndex={0}
+                paddingSize="none"
+              >
+                <EuiSplitPanel.Outer
+                  borderRadius="none"
+                  hasShadow={false}
+                  style={{ height: '100%' }}
+                >
+                  <EuiSplitPanel.Inner
+                    paddingSize="none"
+                    css={{ alignContent: 'center', top: 0 }}
+                    className="consoleEditorPanel"
+                  >
+                    {data ? (
+                      <MonacoEditorOutput />
+                    ) : isLoading ? (
+                      <EditorContentSpinner />
+                    ) : (
+                      <OutputPanelEmptyState />
+                    )}
+                  </EuiSplitPanel.Inner>
+
+                  {(data || isLoading) && (
+                    <EuiSplitPanel.Inner
+                      grow={false}
+                      paddingSize="s"
+                      css={{
+                        backgroundColor: euiThemeVars.euiFormBackgroundColor,
+                      }}
+                      className="consoleEditorPanel"
+                    >
+                      <EuiFlexGroup gutterSize="none" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            color="primary"
+                            data-test-subj="clearConsoleOutput"
+                            onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
+                          >
+                            {i18n.translate('console.editor.clearConsoleOutputButton', {
+                              defaultMessage: 'Clear this output',
+                            })}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+
+                        <EuiFlexItem>
+                          <NetworkRequestStatusBar
+                            requestInProgress={requestInFlight}
+                            requestResult={
+                              data
+                                ? {
+                                    method: data.request.method.toUpperCase(),
+                                    endpoint: data.request.path,
+                                    statusCode: data.response.statusCode,
+                                    statusText: data.response.statusText,
+                                    timeElapsedMs: data.response.timeMs,
+                                  }
+                                : undefined
+                            }
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiSplitPanel.Inner>
+                  )}
+                </EuiSplitPanel.Outer>
+              </EuiResizablePanel>
+            </>
           )}
-        </Panel>
-        <Panel
-          style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-          initialWidth={secondPanelWidth}
-        >
-          {loading ? (
-            <EditorContentSpinner />
-          ) : isMonacoEnabled ? (
-            <MonacoEditorOutput />
-          ) : (
-            <EditorOutput />
-          )}
-        </Panel>
-      </PanelsContainer>
-    </>
-  );
-});
+        </EuiResizableContainer>
+      </>
+    );
+  }
+);

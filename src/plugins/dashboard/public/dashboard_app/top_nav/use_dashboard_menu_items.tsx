@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { batch } from 'react-redux';
@@ -11,28 +12,31 @@ import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import useMountedState from 'react-use/lib/useMountedState';
 
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { UI_SETTINGS } from '../../../common';
-import { useDashboardAPI } from '../dashboard_app';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 import { pluginServices } from '../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
-import { DashboardRedirect } from '../../dashboard_container/types';
-import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
+import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
+import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 
 export const useDashboardMenuItems = ({
-  redirectTo,
   isLabsShown,
   setIsLabsShown,
+  maybeRedirect,
   showResetChange,
 }: {
-  redirectTo: DashboardRedirect;
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
+  maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
 }) => {
+  const isMounted = useMountedState();
+
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   /**
@@ -49,17 +53,25 @@ export const useDashboardMenuItems = ({
   /**
    * Unpack dashboard state from redux
    */
-  const dashboard = useDashboardAPI();
+  const dashboardApi = useDashboardApi();
 
-  const hasRunMigrations = dashboard.select(
-    (state) => state.componentState.hasRunClientsideMigrations
+  const [
+    dashboardTitle,
+    hasOverlays,
+    hasRunMigrations,
+    hasUnsavedChanges,
+    lastSavedId,
+    managed,
+    viewMode,
+  ] = useBatchedPublishingSubjects(
+    dashboardApi.panelTitle,
+    dashboardApi.hasOverlays$,
+    dashboardApi.hasRunMigrations$,
+    dashboardApi.hasUnsavedChanges$,
+    dashboardApi.savedObjectId,
+    dashboardApi.managed$,
+    dashboardApi.viewMode
   );
-  const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
-  const hasOverlays = dashboard.select((state) => state.componentState.hasOverlays);
-  const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
-  const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
-  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
-  const managed = dashboard.select((state) => state.componentState.managed);
   const disableTopNav = isSaveInProgress || hasOverlays;
 
   /**
@@ -72,26 +84,10 @@ export const useDashboardMenuItems = ({
         anchorElement,
         savedObjectId: lastSavedId,
         isDirty: Boolean(hasUnsavedChanges),
-        getDashboardState: () => dashboard.getState().explicitInput,
+        getPanelsState: dashboardApi.getPanelsState,
       });
     },
-    [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboard]
-  );
-
-  const maybeRedirect = useCallback(
-    (result?: SaveDashboardReturn) => {
-      if (!result) return;
-      const { redirectRequired, id } = result;
-      if (redirectRequired) {
-        redirectTo({
-          id,
-          editMode: true,
-          useReplace: true,
-          destination: 'dashboard',
-        });
-      }
-    },
-    [redirectTo]
+    [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboardApi]
   );
 
   /**
@@ -99,29 +95,30 @@ export const useDashboardMenuItems = ({
    */
   const quickSaveDashboard = useCallback(() => {
     setIsSaveInProgress(true);
-    dashboard
+    dashboardApi
       .runQuickSave()
       .then(() => setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE));
-  }, [dashboard]);
+  }, [dashboardApi]);
 
   /**
    * initiate interactive dashboard copy action
    */
   const dashboardInteractiveSave = useCallback(() => {
-    dashboard.runInteractiveSave(viewMode).then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboard, viewMode]);
+    dashboardApi.runInteractiveSave(viewMode).then((result) => maybeRedirect(result));
+  }, [maybeRedirect, dashboardApi, viewMode]);
 
   /**
    * Show the dashboard's "Confirm reset changes" modal. If confirmed:
    * (1) reset the dashboard to the last saved state, and
    * (2) if `switchToViewMode` is `true`, set the dashboard to view mode.
    */
+  const [isResetting, setIsResetting] = useState(false);
   const resetChanges = useCallback(
     (switchToViewMode: boolean = false) => {
-      dashboard.clearOverlays();
+      dashboardApi.clearOverlays();
       const switchModes = switchToViewMode
         ? () => {
-            dashboard.dispatch.setViewMode(ViewMode.VIEW);
+            dashboardApi.setViewMode(ViewMode.VIEW);
             dashboardBackup.storeViewMode(ViewMode.VIEW);
           }
         : undefined;
@@ -130,13 +127,17 @@ export const useDashboardMenuItems = ({
         return;
       }
       confirmDiscardUnsavedChanges(() => {
-        batch(() => {
-          dashboard.resetToLastSavedState();
-          switchModes?.();
+        batch(async () => {
+          setIsResetting(true);
+          await dashboardApi.asyncResetToLastSavedState();
+          if (isMounted()) {
+            setIsResetting(false);
+            switchModes?.();
+          }
         });
-      }, viewMode);
+      }, viewMode as ViewMode);
     },
-    [dashboard, dashboardBackup, hasUnsavedChanges, viewMode]
+    [dashboardApi, dashboardBackup, hasUnsavedChanges, viewMode, isMounted]
   );
 
   /**
@@ -149,7 +150,7 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.fullScreen,
         id: 'full-screen',
         testId: 'dashboardFullScreenMode',
-        run: () => dashboard.dispatch.setFullScreenMode(true),
+        run: () => dashboardApi.setFullScreenMode(true),
         disableButton: disableTopNav,
       } as TopNavMenuData,
 
@@ -169,8 +170,8 @@ export const useDashboardMenuItems = ({
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
         run: () => {
           dashboardBackup.storeViewMode(ViewMode.EDIT);
-          dashboard.dispatch.setViewMode(ViewMode.EDIT);
-          dashboard.clearOverlays();
+          dashboardApi.setViewMode(ViewMode.EDIT);
+          dashboardApi.clearOverlays();
         },
         disableButton: disableTopNav,
       } as TopNavMenuData,
@@ -207,7 +208,8 @@ export const useDashboardMenuItems = ({
       switchToViewMode: {
         ...topNavStrings.switchToViewMode,
         id: 'cancel',
-        disableButton: disableTopNav || !lastSavedId,
+        disableButton: disableTopNav || !lastSavedId || isResetting,
+        isLoading: isResetting,
         testId: 'dashboardViewOnlyMode',
         run: () => resetChanges(true),
       } as TopNavMenuData,
@@ -225,7 +227,7 @@ export const useDashboardMenuItems = ({
         id: 'settings',
         testId: 'dashboardSettingsButton',
         disableButton: disableTopNav,
-        run: () => dashboard.showSettings(),
+        run: () => dashboardApi.openSettingsFlyout(),
       },
     };
   }, [
@@ -237,12 +239,13 @@ export const useDashboardMenuItems = ({
     dashboardInteractiveSave,
     viewMode,
     showShare,
-    dashboard,
+    dashboardApi,
     setIsLabsShown,
     isLabsShown,
     dashboardBackup,
     quickSaveDashboard,
     resetChanges,
+    isResetting,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -251,12 +254,22 @@ export const useDashboardMenuItems = ({
       id: 'reset',
       testId: 'dashboardDiscardChangesMenuItem',
       disableButton:
+        isResetting ||
         !hasUnsavedChanges ||
         hasOverlays ||
         (viewMode === ViewMode.EDIT && (isSaveInProgress || !lastSavedId)),
+      isLoading: isResetting,
       run: () => resetChanges(),
     };
-  }, [hasOverlays, lastSavedId, resetChanges, viewMode, isSaveInProgress, hasUnsavedChanges]);
+  }, [
+    hasOverlays,
+    lastSavedId,
+    resetChanges,
+    viewMode,
+    isSaveInProgress,
+    hasUnsavedChanges,
+    isResetting,
+  ]);
 
   /**
    * Build ordered menus for view and edit mode.

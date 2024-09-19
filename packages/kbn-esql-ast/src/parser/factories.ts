@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -12,6 +13,7 @@
 
 import type { Token, ParserRuleContext, TerminalNode, RecognitionException } from 'antlr4';
 import {
+  IndexPatternContext,
   QualifiedNameContext,
   type ArithmeticUnaryContext,
   type DecimalValueContext,
@@ -38,6 +40,7 @@ import type {
   ESQLNumericLiteralType,
   FunctionSubtype,
   ESQLNumericLiteral,
+  ESQLOrderExpression,
 } from '../types';
 import { parseIdentifier, getPosition } from './helpers';
 import { Builder, type AstNodeParserFields } from '../builder';
@@ -197,6 +200,26 @@ export function createFunction<Subtype extends FunctionSubtype>(
   return node;
 }
 
+export const createOrderExpression = (
+  ctx: ParserRuleContext,
+  arg: ESQLAstItem,
+  order: ESQLOrderExpression['order'],
+  nulls: ESQLOrderExpression['nulls']
+) => {
+  const node: ESQLOrderExpression = {
+    type: 'order',
+    name: '',
+    order,
+    nulls,
+    args: [arg],
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  };
+
+  return node;
+};
+
 function walkFunctionStructure(
   args: ESQLAstItem[],
   initialLocation: ESQLLocation,
@@ -245,13 +268,13 @@ export function computeLocationExtends(fn: ESQLFunction) {
 
 /* SCRIPT_MARKER_START */
 function getQuotedText(ctx: ParserRuleContext) {
-  return [27 /* esql_parser.QUOTED_STRING */, 68 /* esql_parser.QUOTED_IDENTIFIER */]
+  return [27 /* esql_parser.QUOTED_STRING */, 69 /* esql_parser.QUOTED_IDENTIFIER */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
-  return [67 /* esql_parser.UNQUOTED_IDENTIFIER */, 73 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */]
+  return [68 /* esql_parser.UNQUOTED_IDENTIFIER */, 77 /* esql_parser.UNQUOTED_SOURCE */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
@@ -282,6 +305,34 @@ function sanitizeSourceString(ctx: ParserRuleContext) {
   }
   return contextText;
 }
+
+const unquoteIndexString = (indexString: string): string => {
+  const isStringQuoted = indexString[0] === '"';
+
+  if (!isStringQuoted) {
+    return indexString;
+  }
+
+  // If wrapped by triple double quotes, simply remove them.
+  if (indexString.startsWith(`"""`) && indexString.endsWith(`"""`)) {
+    return indexString.slice(3, -3);
+  }
+
+  // If wrapped by double quote, remove them and unescape the string.
+  if (indexString[indexString.length - 1] === '"') {
+    indexString = indexString.slice(1, -1);
+    indexString = indexString
+      .replace(/\\"/g, '"')
+      .replace(/\\r/g, '\r')
+      .replace(/\\n/g, '\n')
+      .replace(/\\t/g, '\t')
+      .replace(/\\\\/g, '\\');
+    return indexString;
+  }
+
+  // This should never happen, but if it does, return the original string.
+  return indexString;
+};
 
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   const result =
@@ -329,13 +380,32 @@ export function createSource(
   type: 'index' | 'policy' = 'index'
 ): ESQLSource {
   const text = sanitizeSourceString(ctx);
+
+  let cluster: string = '';
+  let index: string = '';
+
+  if (ctx instanceof IndexPatternContext) {
+    const clusterString = ctx.clusterString();
+    const indexString = ctx.indexString();
+
+    if (clusterString) {
+      cluster = clusterString.getText();
+    }
+    if (indexString) {
+      index = indexString.getText();
+      index = unquoteIndexString(index);
+    }
+  }
+
   return {
     type: 'source',
+    cluster,
+    index,
     name: text,
     sourceType: type,
-    text,
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception || text === ''),
+    text: ctx?.getText(),
   };
 }
 

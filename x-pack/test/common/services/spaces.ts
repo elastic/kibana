@@ -10,12 +10,29 @@ import Axios from 'axios';
 import Https from 'https';
 import { format as formatUrl } from 'url';
 import util from 'util';
+import Chance from 'chance';
+import Url from 'url';
 import { FtrProviderContext } from '../ftr_provider_context';
+
+const chance = new Chance();
+
+interface SpaceCreate {
+  name?: string;
+  id?: string;
+  description?: string;
+  color?: string;
+  initials?: string;
+  solution?: 'es' | 'oblt' | 'security' | 'classic';
+  disabledFeatures?: string[];
+}
 
 export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
+  const kibanaServer = getService('kibanaServer');
   const url = formatUrl(config.get('servers.kibana'));
+  // used often in fleet_api_integration tests
+  const TEST_SPACE_1 = 'test1';
 
   const certificateAuthorities = config.get('servers.kibana.certificateAuthorities');
   const httpsAgent: Https.Agent | undefined = certificateAuthorities
@@ -35,7 +52,9 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   });
 
   return new (class SpacesService {
-    public async create(space: any) {
+    public async create(_space?: SpaceCreate) {
+      const space = { id: chance.guid(), name: 'foo', ..._space };
+
       log.debug(`creating space ${space.id}`);
       const { data, status, statusText } = await axios.post('/api/spaces/space', space);
 
@@ -45,6 +64,15 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
         );
       }
       log.debug(`created space ${space.id}`);
+
+      const cleanUp = async () => {
+        return this.delete(space.id);
+      };
+
+      return {
+        cleanUp,
+        space,
+      };
     }
 
     public async delete(spaceId: string) {
@@ -71,6 +99,34 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
       log.debug(`retrieved ${data.length} spaces`);
 
       return data;
+    }
+
+    /** Return the full URL that points to the root of the space */
+    public getRootUrl(spaceId: string) {
+      const { protocol, hostname, port } = config.get('servers.kibana');
+
+      return Url.format({
+        protocol,
+        hostname,
+        port,
+        pathname: `/s/${spaceId}`,
+      });
+    }
+
+    public getDefaultTestSpace() {
+      return TEST_SPACE_1;
+    }
+
+    public async createTestSpace(id: string, name: string = id) {
+      try {
+        await kibanaServer.spaces.create({
+          id,
+          name,
+        });
+      } catch (err) {
+        log.error(`failed to create space with 'id=${id}': ${err}`);
+      }
+      return id;
     }
   })();
 }

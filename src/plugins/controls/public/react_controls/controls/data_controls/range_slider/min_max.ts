@@ -1,32 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
-import { combineLatest, lastValueFrom, Observable, of, startWith, switchMap, tap } from 'rxjs';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import { Observable, combineLatest, lastValueFrom, of, startWith, switchMap, tap } from 'rxjs';
+import { dataService } from '../../../../services/kibana_services';
 import { ControlFetchContext } from '../../../control_group/control_fetch';
 import { ControlGroupApi } from '../../../control_group/types';
 
 export function minMax$({
   controlFetch$,
   controlGroupApi,
-  data,
   dataViews$,
   fieldName$,
   setIsLoading,
 }: {
   controlFetch$: Observable<ControlFetchContext>;
   controlGroupApi: ControlGroupApi;
-  data: DataPublicPluginStart;
   dataViews$: PublishesDataViews['dataViews'];
   fieldName$: PublishingSubject<string>;
   setIsLoading: (isLoading: boolean) => void;
@@ -59,7 +58,6 @@ export function minMax$({
         prevRequestAbortController = abortController;
         return await getMinMax({
           abortSignal: abortController.signal,
-          data,
           dataView,
           field: dataViewField,
           ...controlFetchContext,
@@ -76,7 +74,6 @@ export function minMax$({
 
 export async function getMinMax({
   abortSignal,
-  data,
   dataView,
   field,
   filters,
@@ -84,20 +81,19 @@ export async function getMinMax({
   timeRange,
 }: {
   abortSignal: AbortSignal;
-  data: DataPublicPluginStart;
   dataView: DataView;
   field: DataViewField;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
 }): Promise<{ min: number | undefined; max: number | undefined }> {
-  const searchSource = await data.search.searchSource.create();
+  const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);
   searchSource.setField('index', dataView);
 
   const allFilters = filters ? [...filters] : [];
   if (timeRange) {
-    const timeFilter = data.query.timefilter.timefilter.createFilter(dataView, timeRange);
+    const timeFilter = dataService.query.timefilter.timefilter.createFilter(dataView, timeRange);
     if (timeFilter) allFilters.push(timeFilter);
   }
   if (allFilters.length) {

@@ -5,10 +5,8 @@
   },
   "include": [
     "public/**/*",
-    "config.ts",
     "public/**/*.json",
     "server/**/*",
-    "config.ts",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -48,7 +46,8 @@
     "@kbn/data-view-utils",
     "@kbn/esql-utils",
     "@kbn/react-kibana-mount",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
+    "@kbn/language-documentation-popover"
   ],
   "exclude": [
     "target/**/*",

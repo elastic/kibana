@@ -40,10 +40,6 @@ import { getSafePaletteParams } from './utils';
 import { FormBasedPersistedState } from '../..';
 import { HEATMAP_RENDER_ARRAY_VALUES, HEATMAP_X_MISSING_AXIS } from '../../user_messages_ids';
 
-const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
-  defaultMessage: 'Magnitude',
-});
-
 interface HeatmapVisualizationDeps {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
@@ -108,6 +104,9 @@ export const getHeatmapVisualization = ({
 }: HeatmapVisualizationDeps): Visualization<HeatmapVisualizationState> => ({
   id: LENS_HEATMAP_ID,
 
+  getVisualizationTypeId(state) {
+    return state.shape;
+  },
   visualizationTypes: [
     {
       id: 'heatmap',
@@ -115,15 +114,12 @@ export const getHeatmapVisualization = ({
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
         defaultMessage: 'Heat map',
       }),
-      groupLabel: groupLabelForHeatmap,
-      showExperimentalBadge: false,
-      sortPriority: 1,
+      sortPriority: 8,
+      description: i18n.translate('xpack.lens.heatmap.visualizationDescription', {
+        defaultMessage: 'Show density or distribution across two dimensions.',
+      }),
     },
   ],
-
-  getVisualizationTypeId(state) {
-    return state.shape;
-  },
 
   getLayerIds(state) {
     return [state.layerId];

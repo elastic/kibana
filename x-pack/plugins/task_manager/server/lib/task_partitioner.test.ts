@@ -5,18 +5,25 @@
  * 2.0.
  */
 
+import { DEFAULT_KIBANAS_PER_PARTITION } from '../config';
 import {
   createDiscoveryServiceMock,
   createFindSO,
 } from '../kibana_discovery_service/mock_kibana_discovery_service';
 import { CACHE_INTERVAL, TaskPartitioner } from './task_partitioner';
+import { mockLogger } from '../test_utils';
 
 const POD_NAME = 'test-pod';
 
 describe('getAllPartitions()', () => {
   const discoveryServiceMock = createDiscoveryServiceMock(POD_NAME);
   test('correctly sets allPartitions in constructor', () => {
-    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+    const taskPartitioner = new TaskPartitioner({
+      podName: POD_NAME,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      kibanaDiscoveryService: discoveryServiceMock,
+      logger: mockLogger(),
+    });
     expect(taskPartitioner.getAllPartitions()).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
       26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
@@ -39,7 +46,12 @@ describe('getPodName()', () => {
   const discoveryServiceMock = createDiscoveryServiceMock(POD_NAME);
 
   test('correctly sets podName in constructor', () => {
-    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+    const taskPartitioner = new TaskPartitioner({
+      podName: POD_NAME,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      kibanaDiscoveryService: discoveryServiceMock,
+      logger: mockLogger(),
+    });
     expect(taskPartitioner.getPodName()).toEqual('test-pod');
   });
 });
@@ -74,12 +86,22 @@ describe('getPartitions()', () => {
   });
 
   test('correctly gets the partitons for this pod', async () => {
-    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+    const taskPartitioner = new TaskPartitioner({
+      podName: POD_NAME,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      kibanaDiscoveryService: discoveryServiceMock,
+      logger: mockLogger(),
+    });
     expect(await taskPartitioner.getPartitions()).toEqual(expectedPartitions);
   });
 
   test('correctly caches the partitions on 10 second interval', async () => {
-    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+    const taskPartitioner = new TaskPartitioner({
+      podName: POD_NAME,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      kibanaDiscoveryService: discoveryServiceMock,
+      logger: mockLogger(),
+    });
     const shorterInterval = CACHE_INTERVAL / 2;
 
     await taskPartitioner.getPartitions();
@@ -93,15 +115,41 @@ describe('getPartitions()', () => {
     expect(discoveryServiceMock.getActiveKibanaNodes).toHaveBeenCalledTimes(2);
   });
 
-  test('correctly catches the error from the discovery service and returns the cached value', async () => {
-    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+  test('skips the cache when there are no partitions stored', async () => {
+    discoveryServiceMock.getActiveKibanaNodes.mockResolvedValue([]);
+    const taskPartitioner = new TaskPartitioner({
+      podName: POD_NAME,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      kibanaDiscoveryService: discoveryServiceMock,
+      logger: mockLogger(),
+    });
 
+    await taskPartitioner.getPartitions();
+
+    jest.advanceTimersByTime(CACHE_INTERVAL);
+    await taskPartitioner.getPartitions();
+
+    jest.advanceTimersByTime(CACHE_INTERVAL);
+    await taskPartitioner.getPartitions();
+
+    expect(discoveryServiceMock.getActiveKibanaNodes).toHaveBeenCalledTimes(3);
+  });
+
+  test('correctly catches the error from the discovery service and returns the cached value', async () => {
+    const logger = mockLogger();
+    const taskPartitioner = new TaskPartitioner({
+      logger,
+      podName: POD_NAME,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      kibanaDiscoveryService: discoveryServiceMock,
+    });
     await taskPartitioner.getPartitions();
     expect(taskPartitioner.getPodPartitions()).toEqual(expectedPartitions);
 
-    discoveryServiceMock.getActiveKibanaNodes.mockRejectedValueOnce([]);
+    discoveryServiceMock.getActiveKibanaNodes.mockRejectedValueOnce(new Error('foo'));
     jest.advanceTimersByTime(CACHE_INTERVAL);
     await taskPartitioner.getPartitions();
     expect(taskPartitioner.getPodPartitions()).toEqual(expectedPartitions);
+    expect(logger.error).toHaveBeenCalledWith('Failed to load list of active kibana nodes: foo');
   });
 });

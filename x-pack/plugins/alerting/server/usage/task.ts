@@ -12,15 +12,19 @@ import {
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
-
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
-import { getTotalCountAggregations, getTotalCountInUse } from './lib/get_telemetry_from_kibana';
+import {
+  getTotalCountAggregations,
+  getTotalCountInUse,
+  getMWTelemetry,
+} from './lib/get_telemetry_from_kibana';
 import {
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
 } from './lib/get_telemetry_from_event_log';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
@@ -34,12 +38,6 @@ export function initializeAlertingTelemetry(
   eventLogIndex: string
 ) {
   registerAlertingTelemetryTask(logger, core, taskManager, eventLogIndex);
-}
-
-export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
-  if (taskManager) {
-    scheduleTasks(logger, taskManager).catch(() => {}); // it shouldn't reject, but just in case
-  }
 }
 
 function registerAlertingTelemetryTask(
@@ -56,6 +54,12 @@ function registerAlertingTelemetryTask(
       createTaskRunner: telemetryTaskRunner(logger, core, eventLogIndex, taskManager.index),
     },
   });
+}
+
+export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
+  if (taskManager) {
+    scheduleTasks(logger, taskManager).catch(() => {}); // it shouldn't reject, but just in case
+  }
 }
 
 async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -93,16 +97,26 @@ export function telemetryTaskRunner(
         .getStartServices()
         .then(([coreStart]) => coreStart.savedObjects.getIndexForType(RULE_SAVED_OBJECT_TYPE));
 
+    const getSavedObjectClient = () =>
+      core
+        .getStartServices()
+        .then(([coreStart]) =>
+          coreStart.savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE])
+        );
+
     return {
       async run() {
         const esClient = await getEsClient();
         const alertIndex = await getAlertIndex();
+        const savedObjectsClient = await getSavedObjectClient();
+
         return Promise.all([
           getTotalCountAggregations({ esClient, alertIndex, logger }),
           getTotalCountInUse({ esClient, alertIndex, logger }),
           getExecutionsPerDayCount({ esClient, eventLogIndex, logger }),
           getExecutionTimeoutsPerDayCount({ esClient, eventLogIndex, logger }),
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
+          getMWTelemetry({ logger, savedObjectsClient }),
         ])
           .then(
             ([
@@ -111,13 +125,15 @@ export function telemetryTaskRunner(
               dailyExecutionCounts,
               dailyExecutionTimeoutCounts,
               dailyFailedAndUnrecognizedTasks,
+              MWTelemetry,
             ]) => {
               const hasErrors =
                 totalCountAggregations.hasErrors ||
                 totalInUse.hasErrors ||
                 dailyExecutionCounts.hasErrors ||
                 dailyExecutionTimeoutCounts.hasErrors ||
-                dailyFailedAndUnrecognizedTasks.hasErrors;
+                dailyFailedAndUnrecognizedTasks.hasErrors ||
+                MWTelemetry.hasErrors;
 
               const errorMessages = [
                 totalCountAggregations.errorMessage,
@@ -125,6 +141,7 @@ export function telemetryTaskRunner(
                 dailyExecutionCounts.errorMessage,
                 dailyExecutionTimeoutCounts.errorMessage,
                 dailyFailedAndUnrecognizedTasks.errorMessage,
+                MWTelemetry.errorMessage,
               ].filter((message) => message !== undefined);
 
               const updatedState: LatestTaskStateSchema = {
@@ -147,6 +164,10 @@ export function telemetryTaskRunner(
                 count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
                 count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
                 count_rules_muted: totalCountAggregations.count_rules_muted,
+                count_mw_total: MWTelemetry.count_mw_total,
+                count_mw_with_repeat_toggle_on: MWTelemetry.count_mw_with_repeat_toggle_on,
+                count_mw_with_filter_alert_toggle_on:
+                  MWTelemetry.count_mw_with_filter_alert_toggle_on,
                 count_rules_with_muted_alerts: totalCountAggregations.count_rules_with_muted_alerts,
                 count_connector_types_by_consumers:
                   totalCountAggregations.count_connector_types_by_consumers,

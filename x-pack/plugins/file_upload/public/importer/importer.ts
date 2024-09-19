@@ -27,7 +27,7 @@ const DEFAULT_TIME_FIELD = '@timestamp';
 
 export abstract class Importer implements IImporter {
   protected _docArray: ImportDoc[] = [];
-  private _chunkSize = CHUNK_SIZE;
+  protected _chunkSize = CHUNK_SIZE;
   private _index: string | undefined;
   private _pipeline: IngestPipeline | undefined;
   private _timeFieldName: string | undefined;
@@ -282,6 +282,10 @@ function updatePipelineTimezone(ingestPipeline: IngestPipeline) {
 }
 
 function createDocumentChunks(docArray: ImportDoc[], chunkSize: number) {
+  if (chunkSize === 0) {
+    return [docArray];
+  }
+
   const chunks: ImportDoc[][] = [];
   // chop docArray into chunks
   const tempChunks = chunk(docArray, chunkSize);

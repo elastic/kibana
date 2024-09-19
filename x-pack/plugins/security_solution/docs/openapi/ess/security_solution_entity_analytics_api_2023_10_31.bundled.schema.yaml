@@ -4,7 +4,7 @@ info:
   title: Security Solution Entity Analytics API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -182,7 +182,7 @@ paths:
         - Security Solution Entity Analytics API
   /api/asset_criticality/list:
     get:
-      description: 'List asset criticality records, paging, sorting and filtering as needed.'
+      description: List asset criticality records, paging, sorting and filtering as needed.
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -256,6 +256,291 @@ paths:
       summary: List Asset Criticality Records
       tags:
         - Security Solution Entity Analytics API
+  /api/entity_store/engines:
+    get:
+      operationId: ListEntityStoreEngines
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/EngineDescriptor'
+                    type: array
+          description: Successful response
+      summary: List the Entity Store engines
+      tags:
+        - Security Solution Entity Analytics API
+  /api/entity_store/engines/{entityType}:
+    delete:
+      operationId: DeleteEntityStore
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+        - description: Control flag to also delete the entity data.
+          in: query
+          name: data
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+          description: Successful response
+      summary: Delete the Entity Store engine
+      tags:
+        - Security Solution Entity Analytics API
+    get:
+      operationId: GetEntityStoreEngine
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EngineDescriptor'
+          description: Successful response
+      summary: Get the Entity Store engine
+      tags:
+        - Security Solution Entity Analytics API
+  /api/entity_store/engines/{entityType}/init:
+    post:
+      operationId: InitEntityStore
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filter:
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/IndexPattern'
+        description: Schema for the engine initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EngineDescriptor'
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Solution Entity Analytics API
+  /api/entity_store/engines/{entityType}/start:
+    post:
+      operationId: StartEntityStore
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  started:
+                    type: boolean
+          description: Successful response
+      summary: Start the Entity Store engine
+      tags:
+        - Security Solution Entity Analytics API
+  /api/entity_store/engines/{entityType}/stats:
+    post:
+      operationId: GetEntityStoreStats
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  indexPattern:
+                    $ref: '#/components/schemas/IndexPattern'
+                  indices:
+                    items:
+                      type: object
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/EngineStatus'
+                  transforms:
+                    items:
+                      type: object
+                    type: array
+                  type:
+                    $ref: '#/components/schemas/EntityType'
+          description: Successful response
+      summary: Get the Entity Store engine stats
+      tags:
+        - Security Solution Entity Analytics API
+  /api/entity_store/engines/{entityType}/stop:
+    post:
+      operationId: StopEntityStore
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stopped:
+                    type: boolean
+          description: Successful response
+      summary: Stop the Entity Store engine
+      tags:
+        - Security Solution Entity Analytics API
+  /api/entity_store/entities/list:
+    get:
+      description: List entities records, paging, sorting and filtering as needed.
+      operationId: ListEntities
+      parameters:
+        - in: query
+          name: sort_field
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: sort_order
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+        - in: query
+          name: per_page
+          required: false
+          schema:
+            maximum: 10000
+            minimum: 1
+            type: integer
+        - description: An ES query to filter by.
+          in: query
+          name: filterQuery
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: entities_types
+          required: true
+          schema:
+            items:
+              $ref: '#/components/schemas/EntityType'
+            type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  inspect:
+                    $ref: '#/components/schemas/InspectQuery'
+                  page:
+                    minimum: 1
+                    type: integer
+                  per_page:
+                    maximum: 1000
+                    minimum: 1
+                    type: integer
+                  records:
+                    items:
+                      $ref: '#/components/schemas/Entity'
+                    type: array
+                  total:
+                    minimum: 0
+                    type: integer
+                required:
+                  - records
+                  - page
+                  - per_page
+                  - total
+          description: Entities returned successfully
+      summary: List Entity Store Entities
+      tags:
+        - Security Solution Entity Analytics API
+  /api/risk_score/engine/schedule_now:
+    post:
+      operationId: ScheduleRiskEngineNow
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineScheduleNowResponse'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
+          description: Unexpected error
+      summary: Schedule the risk engine to run as soon as possible
+      tags:
+        - Security Solution Entity Analytics API
 components:
   schemas:
     AssetCriticalityBulkUploadErrorItem:
@@ -323,11 +608,226 @@ components:
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality_level
+    EngineDescriptor:
+      type: object
+      properties:
+        filter:
+          type: string
+        indexPattern:
+          $ref: '#/components/schemas/IndexPattern'
+        status:
+          $ref: '#/components/schemas/EngineStatus'
+        type:
+          $ref: '#/components/schemas/EntityType'
+    EngineStatus:
+      enum:
+        - installing
+        - started
+        - stopped
+      type: string
+    Entity:
+      oneOf:
+        - $ref: '#/components/schemas/UserEntity'
+        - $ref: '#/components/schemas/HostEntity'
+    EntityType:
+      enum:
+        - user
+        - host
+      type: string
+    HostEntity:
+      type: object
+      properties:
+        entity:
+          type: object
+          properties:
+            definitionId:
+              type: string
+            definitionVersion:
+              type: string
+            displayName:
+              type: string
+            firstSeenTimestamp:
+              format: date-time
+              type: string
+            id:
+              type: string
+            identityFields:
+              items:
+                type: string
+              type: array
+            lastSeenTimestamp:
+              format: date-time
+              type: string
+            schemaVersion:
+              type: string
+            type:
+              enum:
+                - node
+              type: string
+          required:
+            - lastSeenTimestamp
+            - schemaVersion
+            - definitionVersion
+            - displayName
+            - identityFields
+            - id
+            - type
+            - firstSeenTimestamp
+            - definitionId
+        host:
+          type: object
+          properties:
+            architecture:
+              items:
+                type: string
+              type: array
+            domain:
+              items:
+                type: string
+              type: array
+            hostname:
+              items:
+                type: string
+              type: array
+            id:
+              items:
+                type: string
+              type: array
+            ip:
+              items:
+                type: string
+              type: array
+            mac:
+              items:
+                type: string
+              type: array
+            name:
+              type: string
+            type:
+              items:
+                type: string
+              type: array
+          required:
+            - name
     IdField:
       enum:
         - host.name
         - user.name
       type: string
+    IndexPattern:
+      type: string
+    InspectQuery:
+      type: object
+      properties:
+        dsl:
+          items:
+            type: string
+          type: array
+        response:
+          items:
+            type: string
+          type: array
+      required:
+        - dsl
+        - response
+    RiskEngineScheduleNowErrorResponse:
+      type: object
+      properties:
+        full_error:
+          type: string
+        message:
+          type: string
+      required:
+        - message
+        - full_error
+    RiskEngineScheduleNowResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+    TaskManagerUnavailableResponse:
+      description: Task manager is unavailable
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          minimum: 400
+          type: integer
+      required:
+        - status_code
+        - message
+    UserEntity:
+      type: object
+      properties:
+        entity:
+          type: object
+          properties:
+            definitionId:
+              type: string
+            definitionVersion:
+              type: string
+            displayName:
+              type: string
+            firstSeenTimestamp:
+              format: date-time
+              type: string
+            id:
+              type: string
+            identityFields:
+              items:
+                type: string
+              type: array
+            lastSeenTimestamp:
+              format: date-time
+              type: string
+            schemaVersion:
+              type: string
+            type:
+              enum:
+                - node
+              type: string
+          required:
+            - lastSeenTimestamp
+            - schemaVersion
+            - definitionVersion
+            - displayName
+            - identityFields
+            - id
+            - type
+            - firstSeenTimestamp
+            - definitionId
+        user:
+          type: object
+          properties:
+            domain:
+              items:
+                type: string
+              type: array
+            email:
+              items:
+                type: string
+              type: array
+            full_name:
+              items:
+                type: string
+              type: array
+            hash:
+              items:
+                type: string
+              type: array
+            id:
+              items:
+                type: string
+              type: array
+            name:
+              type: string
+            roles:
+              items:
+                type: string
+              type: array
+          required:
+            - name
   securitySchemes:
     BasicAuth:
       scheme: basic

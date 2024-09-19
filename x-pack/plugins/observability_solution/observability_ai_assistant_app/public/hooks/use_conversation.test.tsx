@@ -55,6 +55,7 @@ const mockService: MockedService = {
     predefinedConversation$: new Observable(),
   },
   navigate: jest.fn().mockReturnValue(of()),
+  scope: 'all',
 };
 
 const mockChatService = createMockChatService();
@@ -81,7 +82,7 @@ const useKibanaMockServices = {
 };
 
 describe('useConversation', () => {
-  let wrapper: WrapperComponent<UseConversationProps>;
+  let wrapper: WrapperComponent<PropsWithChildren<UseConversationProps>>;
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -22,7 +22,7 @@ import {
   EuiEmptyPrompt,
   EuiTitle,
 } from '@elastic/eui';
-import { RulesSettingsRange } from '../rules_settings_range';
+import { RuleSettingsRangeInput } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_range_input';
 
 const queryDelayDescription = i18n.translate(
   'xpack.triggersActionsUI.rulesSettings.modal.queryDelayDescription',
@@ -107,7 +107,7 @@ export const RulesSettingsQueryDelaySection = memo((props: RulesSettingsQueryDel
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <RulesSettingsRange
+          <RuleSettingsRangeInput
             data-test-subj="queryDelayRangeInput"
             min={MIN_QUERY_DELAY}
             max={MAX_QUERY_DELAY}

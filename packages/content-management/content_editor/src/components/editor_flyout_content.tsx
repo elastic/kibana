@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useCallback, useState, useMemo } from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +30,6 @@ import type { Item } from '../types';
 import { MetadataForm } from './metadata_form';
 import { useMetadataForm } from './use_metadata_form';
 import type { CustomValidators } from './use_metadata_form';
-import { ActivityView } from './activity_view';
 
 const getI18nTexts = ({ entityName }: { entityName: string }) => ({
   saveButtonLabel: i18n.translate('contentManagement.contentEditor.saveButtonLabel', {
@@ -56,7 +57,7 @@ export interface Props {
   }) => Promise<void>;
   customValidators?: CustomValidators;
   onCancel: () => void;
-  showActivityView?: boolean;
+  appendRows?: React.ReactNode;
 }
 
 const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
@@ -70,7 +71,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   onSave,
   onCancel,
   customValidators,
-  showActivityView,
+  appendRows,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -151,7 +152,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
           TagList={TagList}
           TagSelector={TagSelector}
         >
-          {showActivityView && <ActivityView item={item} />}
+          {appendRows}
         </MetadataForm>
       </EuiFlyoutBody>
 

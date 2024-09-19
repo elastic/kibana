@@ -10,7 +10,7 @@ import { FC } from 'react';
 import { kea, MakeLogicType } from 'kea';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
   ApplicationStart,
@@ -24,7 +24,7 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { IndexMappingProps } from '@kbn/index-management';
+import { IndexMappingProps } from '@kbn/index-management-shared-types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
@@ -48,7 +48,7 @@ export interface KibanaLogicProps {
   application: ApplicationStart;
   capabilities: Capabilities;
   charts?: ChartsPluginStart;
-  cloud?: CloudSetup;
+  cloud?: CloudSetup & CloudStart;
   config: ClientConfigType;
   connectorTypes?: ConnectorDefinition[];
   console?: ConsolePluginStart;
@@ -68,8 +68,8 @@ export interface KibanaLogicProps {
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   searchHomepage?: SearchHomepagePluginStart;
-  searchPlayground?: SearchPlaygroundPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -83,7 +83,7 @@ export interface KibanaValues {
   application: ApplicationStart;
   capabilities: Capabilities;
   charts: ChartsPluginStart | null;
-  cloud: CloudSetup | null;
+  cloud: (CloudSetup & CloudStart) | null;
   config: ClientConfigType;
   connectorTypes: ConnectorDefinition[];
   consolePlugin: ConsolePluginStart | null;
@@ -103,8 +103,8 @@ export interface KibanaValues {
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   searchHomepage: SearchHomepagePluginStart | null;
-  searchPlayground: SearchPlaygroundPluginStart | null;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | null;
+  searchPlayground: SearchPlaygroundPluginStart | null;
   security: SecurityPluginStart | null;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -150,8 +150,8 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
     searchHomepage: [props.searchHomepage || null, {}],
-    searchPlayground: [props.searchPlayground || null, {}],
     searchInferenceEndpoints: [props.searchInferenceEndpoints || null, {}],
+    searchPlayground: [props.searchPlayground || null, {}],
     security: [props.security || null, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
@@ -168,7 +168,10 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     ],
   }),
   selectors: ({ selectors }) => ({
-    isCloud: [() => [selectors.cloud], (cloud?: CloudSetup) => Boolean(cloud?.isCloudEnabled)],
+    isCloud: [
+      () => [selectors.cloud],
+      (cloud?: CloudSetup & CloudStart) => Boolean(cloud?.isCloudEnabled),
+    ],
   }),
 });
 

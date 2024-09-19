@@ -14,10 +14,10 @@ import { renderWrapper } from '../../test/mock_server/mock_server_test_provider'
 import { Configurations } from './configurations';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
-import { findingsNavigation } from '../../common/navigation/constants';
+import { findingsNavigation } from '@kbn/cloud-security-posture';
 import userEvent from '@testing-library/user-event';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { CspClientPluginStartDeps } from '../../types';
+import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import * as statusHandlers from '../../../server/routes/status/status.handlers.mock';
 import {
   bsearchFindingsHandler,
@@ -128,18 +128,19 @@ describe('<Findings />', () => {
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
       const queryInput = screen.getByTestId('queryInput');
-      userEvent.paste(queryInput, `rule.section : ${finding1.rule.section}`);
+      await userEvent.click(queryInput);
+      await userEvent.paste(`rule.section : ${finding1.rule.section}`);
 
       const submitButton = screen.getByTestId('querySubmitButton');
-      userEvent.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
 
       expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
       expect(screen.queryByText(finding2.resource.id)).not.toBeInTheDocument();
 
-      userEvent.clear(queryInput);
-      userEvent.click(submitButton);
+      await userEvent.clear(queryInput);
+      await userEvent.click(submitButton);
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
     });
     it('renders no results message and reset button when search query does not match', async () => {
@@ -157,10 +158,11 @@ describe('<Findings />', () => {
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
       const queryInput = screen.getByTestId('queryInput');
-      userEvent.paste(queryInput, `rule.section : Invalid`);
+      await userEvent.click(queryInput);
+      await userEvent.paste(`rule.section : Invalid`);
 
       const submitButton = screen.getByTestId('querySubmitButton');
-      userEvent.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() =>
         expect(screen.getByText(/no results match your search criteria/i)).toBeInTheDocument()
@@ -170,7 +172,7 @@ describe('<Findings />', () => {
         name: /reset filters/i,
       });
 
-      userEvent.click(resetButton);
+      await userEvent.click(resetButton);
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
     });
     it('add filter', async () => {
@@ -187,7 +189,7 @@ describe('<Findings />', () => {
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
-      userEvent.click(screen.getByTestId('addFilter'), undefined, { skipPointerEventsCheck: true });
+      await userEvent.click(screen.getByTestId('addFilter'), { pointerEventsCheck: 0 });
 
       await waitFor(() =>
         expect(screen.getByTestId('filterFieldSuggestionList')).toBeInTheDocument()
@@ -197,13 +199,14 @@ describe('<Findings />', () => {
         screen.getByTestId('filterFieldSuggestionList')
       ).getByTestId('comboBoxSearchInput');
 
-      userEvent.paste(filterFieldSuggestionListInput, 'rule.section');
-      userEvent.keyboard('{enter}');
+      await userEvent.click(filterFieldSuggestionListInput);
+      await userEvent.paste('rule.section');
+      await userEvent.keyboard('{enter}');
 
       const filterOperatorListInput = within(screen.getByTestId('filterOperatorList')).getByTestId(
         'comboBoxSearchInput'
       );
-      userEvent.click(filterOperatorListInput, undefined, { skipPointerEventsCheck: true });
+      await userEvent.click(filterOperatorListInput, { pointerEventsCheck: 0 });
 
       const filterOption = within(
         screen.getByTestId('comboBoxOptionsList filterOperatorList-optionsList')
@@ -211,11 +214,10 @@ describe('<Findings />', () => {
       fireEvent.click(filterOption);
 
       const filterParamsInput = within(screen.getByTestId('filterParams')).getByRole('textbox');
-      userEvent.paste(filterParamsInput, finding1.rule.section);
+      await userEvent.click(filterParamsInput);
+      await userEvent.paste(finding1.rule.section);
 
-      userEvent.click(screen.getByTestId('saveFilter'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByTestId('saveFilter'), { pointerEventsCheck: 0 });
 
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
       expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
@@ -271,7 +273,7 @@ describe('<Findings />', () => {
       const deleteFilter = screen.getByRole('button', {
         name: `Delete rule.section: ${finding1.rule.section}`,
       });
-      userEvent.click(deleteFilter);
+      await userEvent.click(deleteFilter);
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
@@ -332,7 +334,7 @@ describe('<Findings />', () => {
       const passedFindingsButton = screen.getByRole('button', {
         name: /passed findings: 1/i,
       });
-      userEvent.click(passedFindingsButton);
+      await userEvent.click(passedFindingsButton);
 
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
 
@@ -368,7 +370,7 @@ describe('<Findings />', () => {
       const failedFindingsButton = screen.getByRole('button', {
         name: /failed findings: 1/i,
       });
-      userEvent.click(failedFindingsButton);
+      await userEvent.click(failedFindingsButton);
 
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
 

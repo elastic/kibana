@@ -152,7 +152,7 @@
         "label": "useIfMounted",
         "description": [],
         "signature": [
-          "() => (func: any) => void"
+          "() => (func?: (() => void) | undefined) => void"
         ],
         "path": "packages/react/kibana_mount/utils.ts",
         "deprecated": false,

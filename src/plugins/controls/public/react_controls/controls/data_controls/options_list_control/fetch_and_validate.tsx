@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -25,13 +26,11 @@ import { isValidSearch } from '../../../../../common/options_list/is_valid_searc
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { ControlFetchContext } from '../../../control_group/control_fetch';
 import { ControlStateManager } from '../../types';
-import { DataControlServices } from '../types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlApi } from './types';
 
 export function fetchAndValidate$({
   api,
-  services,
   stateManager,
 }: {
   api: Pick<OptionsListControlApi, 'dataViews' | 'field$' | 'setBlockingError' | 'parentApi'> &
@@ -40,7 +39,6 @@ export function fetchAndValidate$({
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
-  services: DataControlServices;
   stateManager: ControlStateManager<
     Pick<OptionsListComponentState, 'requestSize' | 'runPastTimeout' | 'searchTechnique' | 'sort'>
   > & {
@@ -55,6 +53,7 @@ export function fetchAndValidate$({
     api.field$,
     api.controlFetch$,
     api.parentApi.allowExpensiveQueries$,
+    api.parentApi.ignoreParentSettings$,
     api.debouncedSearchString,
     stateManager.sort,
     stateManager.searchTechnique,
@@ -86,6 +85,7 @@ export function fetchAndValidate$({
           field,
           controlFetchContext,
           allowExpensiveQueries,
+          ignoreParentSettings,
           searchString,
           sort,
           searchTechnique,
@@ -116,13 +116,14 @@ export function fetchAndValidate$({
           field: field.toSpec(),
           size: requestSize,
           allowExpensiveQueries,
+          ignoreValidations: ignoreParentSettings?.ignoreValidations,
           ...controlFetchContext,
         };
 
         const newAbortController = new AbortController();
         abortController = newAbortController;
         try {
-          return await requestCache.runFetchRequest(request, newAbortController.signal, services);
+          return await requestCache.runFetchRequest(request, newAbortController.signal);
         } catch (error) {
           return { error };
         }

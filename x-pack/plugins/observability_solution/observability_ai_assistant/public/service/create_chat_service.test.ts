@@ -70,6 +70,7 @@ describe('createChatService', () => {
       apiClient: clientSpy,
       registrations: [],
       signal: new AbortController().signal,
+      scope: 'observability',
     });
   });
 
@@ -79,7 +80,12 @@ describe('createChatService', () => {
 
   describe('chat', () => {
     function chat({ signal }: { signal: AbortSignal } = { signal: new AbortController().signal }) {
-      return service.chat('my_test', { signal, messages: [], connectorId: '' });
+      return service.chat('my_test', {
+        signal,
+        messages: [],
+        connectorId: '',
+        scope: 'observability',
+      });
     }
 
     it('correctly parses a stream of JSON lines', async () => {
@@ -227,40 +233,6 @@ describe('createChatService', () => {
             }, 0);
           })
       ).rejects.toEqual(expect.any(AbortError));
-    });
-  });
-
-  describe('complete', () => {
-    it("sends the user's preferred response language to the API", async () => {
-      respondWithChunks({
-        chunks: [
-          '{"id":"my-id","type":"chatCompletionChunk","message":{"content":"Some message"}}',
-        ],
-      });
-
-      const response$ = service.complete({
-        connectorId: '',
-        getScreenContexts: () => [],
-        messages: [],
-        persist: false,
-        disableFunctions: false,
-        signal: new AbortController().signal,
-        responseLanguage: 'orcish',
-      });
-
-      await getConcatenatedMessage(response$);
-
-      expect(clientSpy).toHaveBeenNthCalledWith(
-        2,
-        'POST /internal/observability_ai_assistant/chat/complete',
-        expect.objectContaining({
-          params: expect.objectContaining({
-            body: expect.objectContaining({
-              responseLanguage: 'orcish',
-            }),
-          }),
-        })
-      );
     });
   });
 });

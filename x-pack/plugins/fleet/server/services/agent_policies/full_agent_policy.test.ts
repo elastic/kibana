@@ -221,6 +221,7 @@ describe('getFullAgentPolicy', () => {
           enabled: false,
           logs: false,
           metrics: false,
+          traces: false,
         },
       },
     });
@@ -257,6 +258,7 @@ describe('getFullAgentPolicy', () => {
           enabled: true,
           logs: true,
           metrics: false,
+          traces: false,
         },
       },
     });
@@ -293,12 +295,50 @@ describe('getFullAgentPolicy', () => {
           enabled: true,
           logs: false,
           metrics: true,
+          traces: false,
         },
       },
     });
   });
 
-  it('should return a policy with monitoring enabled but no logs/metrics if keep_monitoring_alive is true', async () => {
+  it('should return a policy with monitoring if monitoring is enabled for traces', async () => {
+    mockAgentPolicy({
+      namespace: 'default',
+      revision: 1,
+      monitoring_enabled: ['traces'],
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      outputs: {
+        default: {
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      },
+      inputs: [],
+      revision: 1,
+      fleet: {
+        hosts: ['http://fleetserver:8220'],
+      },
+      agent: {
+        download: {
+          sourceURI: 'http://default-registry.co',
+        },
+        monitoring: {
+          namespace: 'default',
+          use_output: 'default',
+          enabled: true,
+          logs: false,
+          metrics: false,
+          traces: true,
+        },
+      },
+    });
+  });
+
+  it('should return a policy with monitoring enabled but no logs/metrics/traces if keep_monitoring_alive is true', async () => {
     mockAgentPolicy({
       keep_monitoring_alive: true,
     });
@@ -309,6 +349,7 @@ describe('getFullAgentPolicy', () => {
       enabled: true,
       logs: false,
       metrics: false,
+      traces: false,
     });
   });
 
@@ -325,6 +366,7 @@ describe('getFullAgentPolicy', () => {
       {
         logs: false,
         metrics: true,
+        traces: false,
       },
       'testnamespace'
     );
@@ -553,6 +595,7 @@ describe('getFullAgentPolicy', () => {
           enabled: true,
           logs: false,
           metrics: true,
+          traces: false,
         },
       },
     });
@@ -590,6 +633,7 @@ describe('getFullAgentPolicy', () => {
           enabled: true,
           logs: false,
           metrics: true,
+          traces: false,
         },
         features: {
           fqdn: {
@@ -743,6 +787,7 @@ describe('getFullAgentPolicy', () => {
           enabled: false,
           logs: false,
           metrics: false,
+          traces: false,
         },
       },
       fleet: {
