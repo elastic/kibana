@@ -36,6 +36,15 @@ export function isLogoObject(arg: unknown): arg is { icon: string } {
   return isPopulatedObject(arg) && Object.hasOwn(arg, 'icon');
 }
 
+const SCHEMA = {
+  strict: true,
+  fields: {
+    tags: {
+      type: 'string',
+    },
+  },
+};
+
 export const SuppliedConfigurations = () => {
   const {
     services: {
@@ -101,18 +110,6 @@ export const SuppliedConfigurations = () => {
     ];
   }, [modules]);
 
-  const schema = useMemo(
-    () => ({
-      strict: true,
-      fields: {
-        tags: {
-          type: 'string',
-        },
-      },
-    }),
-    []
-  );
-
   const setSearchQueryText = useCallback(
     (value: string) => {
       setSuppliedConfigurationsPageState({ queryText: value });
@@ -155,7 +152,7 @@ export const SuppliedConfigurations = () => {
             }
           ),
           incremental: true,
-          schema,
+          schema: SCHEMA,
         }}
         filters={filters}
         onChange={onChange}
