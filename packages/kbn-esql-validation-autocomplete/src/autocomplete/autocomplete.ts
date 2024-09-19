@@ -897,53 +897,55 @@ async function getExpressionSuggestionsByType(
 
         if (lastIndex && lastIndex.text && lastIndex.text !== EDITOR_MARKER) {
           const sources = await getSources();
-          const sourceIdentifier = lastIndex.text.replace(EDITOR_MARKER, '');
-          if (sourceExists(sourceIdentifier, new Set(sources.map(({ name }) => name)))) {
-            const exactMatch = sources.find(({ name: _name }) => _name === sourceIdentifier);
-            if (exactMatch?.dataStreams) {
-              // this is an integration name, suggest the datastreams
-              addSuggestionsBasedOnQuote(
-                buildSourcesDefinitions(
+          const suggestionsToAdd = await handleFragment(
+            innerText,
+            (fragment) =>
+              sourceExists(fragment, new Set(sources.map(({ name: sourceName }) => sourceName))),
+            (_fragment, rangeToReplace) => {
+              return getSourceSuggestions(sources).map((suggestion) => ({
+                ...suggestion,
+                rangeToReplace,
+              }));
+            },
+            (fragment, rangeToReplace) => {
+              const exactMatch = sources.find(({ name: _name }) => _name === fragment);
+              if (exactMatch?.dataStreams) {
+                // this is an integration name, suggest the datastreams
+                const definitions = buildSourcesDefinitions(
                   exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
-                )
-              );
-            } else {
-              // this is a complete source name
-              const rangeToReplace = {
-                start: innerText.length - sourceIdentifier.length + 1,
-                end: innerText.length + 1,
-              };
+                );
 
-              const suggestionsToAdd: SuggestionRawDefinition[] = [
-                {
-                  ...pipeCompleteItem,
-                  filterText: sourceIdentifier,
-                  text: sourceIdentifier + ' | ',
-                  command: TRIGGER_SUGGESTION_COMMAND,
-                  rangeToReplace,
-                },
-                {
-                  ...commaCompleteItem,
-                  filterText: sourceIdentifier,
-                  text: sourceIdentifier + ', ',
-                  command: TRIGGER_SUGGESTION_COMMAND,
-                  rangeToReplace,
-                },
-                {
-                  ...buildOptionDefinition(metadataOption),
-                  filterText: sourceIdentifier,
-                  text: sourceIdentifier + ' METADATA ',
-                  asSnippet: false, // turn this off because $ could be contained within the source name
-                  rangeToReplace,
-                },
-              ];
+                return canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions;
+              } else {
+                const _suggestions: SuggestionRawDefinition[] = [
+                  {
+                    ...pipeCompleteItem,
+                    filterText: fragment,
+                    text: fragment + ' | ',
+                    command: TRIGGER_SUGGESTION_COMMAND,
+                    rangeToReplace,
+                  },
+                  {
+                    ...commaCompleteItem,
+                    filterText: fragment,
+                    text: fragment + ', ',
+                    command: TRIGGER_SUGGESTION_COMMAND,
+                    rangeToReplace,
+                  },
+                  {
+                    ...buildOptionDefinition(metadataOption),
+                    filterText: fragment,
+                    text: fragment + ' METADATA ',
+                    asSnippet: false, // turn this off because $ could be contained within the source name
+                    rangeToReplace,
+                  },
+                ];
 
-              addSuggestionsBasedOnQuote(suggestionsToAdd);
+                return _suggestions;
+              }
             }
-          } else {
-            // Just a partial source name
-            await addSuggestionsBasedOnQuote(getSourceSuggestions(sources));
-          }
+          );
+          addSuggestionsBasedOnQuote(suggestionsToAdd);
         } else {
           // FROM <suggest> or no index/text
           await addSuggestionsBasedOnQuote(getSourceSuggestions(await getSources()));
