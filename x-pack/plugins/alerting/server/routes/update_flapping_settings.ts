@@ -61,6 +61,7 @@ export const updateFlappingSettingsRoute = (
         body: bodySchema,
       },
       options: {
+        access: 'internal',
         tags: [`access:${API_PRIVILEGES.WRITE_FLAPPING_SETTINGS}`],
       },
     },

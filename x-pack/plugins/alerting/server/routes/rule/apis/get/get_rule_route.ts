@@ -100,4 +100,5 @@ export const getInternalRuleRoute = (
     licenseState,
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
+    options: { access: 'internal' },
   });
