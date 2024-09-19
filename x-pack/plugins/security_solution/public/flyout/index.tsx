@@ -32,7 +32,7 @@ import type { RulePanelExpandableFlyoutProps } from './rule_details/right';
 import { RulePanel, RulePanelKey, RulePreviewPanelKey } from './rule_details/right';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey, UserPreviewPanelKey } from './entity_details/user_right';
-import type { UserDetailsPanelProps } from './entity_details/user_details_left';
+import type { UserDetailsExpandableFlyoutProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
 import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
@@ -102,7 +102,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: UserDetailsPanelKey,
     component: (props) => (
-      <UserDetailsPanel {...({ ...props.params, path: props.path } as UserDetailsPanelProps)} />
+      <UserDetailsPanel {...(props as UserDetailsExpandableFlyoutProps).params} />
     ),
   },
   {

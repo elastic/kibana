@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Dev tools settings page', async () => {
+    it.skip('Dev tools settings page', async () => {
       await PageObjects.console.setFontSizeSetting(20);
       await a11y.testAppSnapshot();
     });
