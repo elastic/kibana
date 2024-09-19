@@ -121,10 +121,18 @@ export const IOS_AGENT_NAMES: IOSAgentName[] = ['ios/swift', 'opentelemetry/swif
 export type ServerlessType = 'aws.lambda' | 'azure.functions';
 export const SERVERLESS_TYPE: ServerlessType[] = ['aws.lambda', 'azure.functions'];
 
-export type AgentName = ElasticAgentName | OpenTelemetryAgentName | JavaAgentName | RumAgentName;
+export type AgentName =
+  | ElasticAgentName
+  | OpenTelemetryAgentName
+  | JavaAgentName
+  | RumAgentName
+  | AndroidAgentName
+  | IOSAgentName;
 export const AGENT_NAMES: AgentName[] = [
   ...ELASTIC_AGENT_NAMES,
   ...OPEN_TELEMETRY_AGENT_NAMES,
   ...JAVA_AGENT_NAMES,
   ...RUM_AGENT_NAMES,
+  ...ANDROID_AGENT_NAMES,
+  ...IOS_AGENT_NAMES,
 ];
