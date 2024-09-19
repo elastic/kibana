@@ -8,8 +8,9 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatIndexReadOnly } from './threat_index';
+import { mockThreatMatchRule } from '../../storybook/mocks';
 
 export default {
   component: ThreatIndexReadOnly,
@@ -17,22 +18,17 @@ export default {
 };
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
+  finalDiffableRule: DiffableRule;
 }
 
 const Template: Story<TemplateProps> = (args) => {
-  return (
-    <FieldReadOnly
-      fieldName="threat_index"
-      finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-    />
-  );
+  return <FieldReadOnly fieldName="threat_index" finalDiffableRule={args.finalDiffableRule} />;
 };
 
 export const Default = Template.bind({});
 
 Default.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockThreatMatchRule({
     threat_index: ['logs-ti_*', 'logs-defend_*'],
-  },
+  }),
 };
