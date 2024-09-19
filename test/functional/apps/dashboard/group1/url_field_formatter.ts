@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(currentUrl).to.equal(fieldUrl);
   };
 
-  describe('Changing field formatter to Url', () => {
+  // Fails in chrome 129+: https://github.com/elastic/kibana-operations/issues/199
+  describe.skip('Changing field formatter to Url', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.savedObjects.cleanStandardList();
