@@ -52,6 +52,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.allConfigs = Object.values({
         ...action.payload.upConfigs,
         ...action.payload.downConfigs,
+        ...action.payload.pendingConfigs,
       });
       state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
       state.loaded = true;

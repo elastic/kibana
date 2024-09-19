@@ -209,6 +209,7 @@ export async function queryMonitorStatus({
             type: monitor.attributes[ConfigKey.MONITOR_TYPE],
             projectId: monitor.attributes[ConfigKey.PROJECT_ID],
             isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
+            updated_at: monitor.updated_at,
           };
 
           if (downCount > 0) {
@@ -253,6 +254,7 @@ export async function queryMonitorStatus({
         type: monitor.attributes[ConfigKey.MONITOR_TYPE],
         projectId: monitor.attributes[ConfigKey.PROJECT_ID],
         isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
+        updated_at: monitor.updated_at,
       };
     });
   }

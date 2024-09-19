@@ -48,6 +48,7 @@ export const OverviewStatusMetaDataCodec = t.intersection([
   }),
   t.partial({
     projectId: t.string,
+    updated_at: t.string,
   }),
 ]);
 
@@ -59,6 +60,7 @@ export const OverviewPendingStatusMetaDataCodec = t.intersection([
     locationId: t.string,
   }),
   t.partial({
+    locationLabel: t.string,
     timestamp: t.string,
     ping: OverviewPingCodec,
     name: t.string,
@@ -68,6 +70,7 @@ export const OverviewPendingStatusMetaDataCodec = t.intersection([
     isStatusAlertEnabled: t.boolean,
     type: t.string,
     projectId: t.string,
+    updated_at: t.string,
   }),
 ]);
 
