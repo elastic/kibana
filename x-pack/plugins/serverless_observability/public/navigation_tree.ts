@@ -8,10 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { CoreStart } from '@kbn/core/public';
+import { entityCentricExperience } from '@kbn/observability-plugin/common/ui_settings_keys';
 
 export const navigationTree = (core?: CoreStart): NavigationTreeDefinition => {
   const isEntityCentricExperienceSettingEnabled = core?.uiSettings.get<boolean>(
-    'observability:entityCentricExperience',
+    entityCentricExperience,
     true
   );
 
