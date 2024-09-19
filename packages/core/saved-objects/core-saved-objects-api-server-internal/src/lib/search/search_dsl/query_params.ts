@@ -217,36 +217,29 @@ export function getQueryParams({
   };
 
   if (search) {
-    const { fields, nestedFields } = extractFieldsAndNestedFields({
-      searchFields: searchFieldsParam,
-      types,
-      mappings,
-    });
-
     const useMatchPhrasePrefix = shouldUseMatchPhrasePrefix(search);
     const isSearchingInAllFields =
       searchFieldsParam.length === 0 ||
       (searchFieldsParam.length === 1 && searchFieldsParam[0] === '*');
-    const useNestedStringClause =
-      nestedFields.searchFields.size > 0 && !isSearchingInAllFields && !useMatchPhrasePrefix;
-    // TODO: move into extractFieldsAndNestedFields fn
-    const simpleQueryOptions = useNestedStringClause
-      ? { types: fields.types, searchFields: fields.searchFields }
-      : {
-          types,
-          searchFields: searchFieldsParam,
-        };
 
-    const useSimpleQueryStringClause =
-      isSearchingInAllFields || simpleQueryOptions.searchFields.length > 0;
+    const { simpleQuerySearchFields, simpleQueryTypes, nestedQueryFields } = getFieldsByQueryType({
+      searchFields: searchFieldsParam,
+      types,
+      mappings,
+      useMatchPhrasePrefix,
+      isSearchingInAllFields,
+    });
+
+    const useNestedStringClause = nestedQueryFields.size > 0;
+    const useSimpleQueryStringClause = isSearchingInAllFields || simpleQuerySearchFields.length > 0;
     const useSimpleQueryStringClauseOnly = !useNestedStringClause && !useMatchPhrasePrefix;
     const useNestedStringClauseOnly = !useSimpleQueryStringClause && !useMatchPhrasePrefix;
 
     const simpleQueryStringClause = useSimpleQueryStringClause
       ? getSimpleQueryStringClause({
           search,
-          searchFields: simpleQueryOptions.searchFields,
-          types: simpleQueryOptions.types,
+          searchFields: simpleQuerySearchFields,
+          types: simpleQueryTypes,
           rootSearchFields,
           defaultSearchOperator,
         })
@@ -255,15 +248,15 @@ export function getQueryParams({
     const nestedStringClause = useNestedStringClause
       ? getNestedQueryStringClause({
           search,
-          nestedFields: nestedFields.searchFields,
+          nestedFields: nestedQueryFields,
         })
       : [];
 
     const matchPhrasePrefixClause = useMatchPhrasePrefix
       ? getMatchPhrasePrefixClauses({
           search,
-          searchFields: simpleQueryOptions.searchFields,
-          types: simpleQueryOptions.types,
+          searchFields: simpleQuerySearchFields,
+          types: simpleQueryTypes,
           registry,
           mappings,
         })
@@ -384,57 +377,70 @@ const getMatchPhrasePrefixFields = ({
   return output;
 };
 
-const extractFieldsAndNestedFields = ({
+const trimBoostAndWildcardFromField = (field: string) => {
+  return field.replace(/[*^].$/, '');
+};
+
+const getFieldsByQueryType = ({
   searchFields,
   types,
   mappings,
+  useMatchPhrasePrefix,
+  isSearchingInAllFields,
 }: {
   searchFields: string[];
   types: string[];
   mappings: IndexMapping;
-}) => {
-  const usedFields: Set<string> = new Set();
-  const typesUsedByFields: Set<string> = new Set();
-  const usedNestedFields: Map<string, string[]> = new Map();
+  useMatchPhrasePrefix: boolean;
+  isSearchingInAllFields: boolean;
+}): {
+  simpleQueryTypes: string[];
+  simpleQuerySearchFields: string[];
+  nestedQueryFields: Map<string, string[]>;
+} => {
+  const simpleQueryTypes: Set<string> = new Set();
+  const simpleQuerySearchFields: Set<string> = new Set();
+  const nestedQueryFields: Map<string, string[]> = new Map();
 
   types.forEach((type) => {
     searchFields.forEach((rawSearchField) => {
-      const isFieldDefinedAsNested = rawSearchField.split('.').length > 1;
-      // Keeps the prefix only when boosting or wildcard
-      const searchField = rawSearchField.replace(/[*^].$/, '');
+      const searchField = trimBoostAndWildcardFromField(rawSearchField);
       const isBoostedOrWildcard = rawSearchField !== searchField;
+      const isFieldDefinedAsNested = searchField.split('.').length > 1;
       const absoluteFieldPath = `${type}.${searchField}`;
       const nodeType = getProperty(mappings, absoluteFieldPath)?.type;
       const parentNode = absoluteFieldPath.split('.').slice(0, -1).join('.');
       const parentNodeType = getProperty(mappings, parentNode)?.type;
 
-      if (isFieldDefinedAsNested) {
-        if (nodeType !== undefined) {
-          if (parentNodeType === 'nested') {
-            usedNestedFields.set(parentNode, [
-              ...(usedNestedFields.get(parentNode) || []),
-              absoluteFieldPath,
-            ]);
-          } else {
-            usedFields.add(rawSearchField);
-            typesUsedByFields.add(type);
-          }
+      if (isFieldDefinedAsNested && nodeType !== undefined) {
+        if (parentNodeType === 'nested') {
+          nestedQueryFields.set(parentNode, [
+            ...(nestedQueryFields.get(parentNode) || []),
+            absoluteFieldPath,
+          ]);
+        } else {
+          simpleQuerySearchFields.add(rawSearchField);
+          simpleQueryTypes.add(type);
         }
       } else if (isBoostedOrWildcard || (nodeType !== undefined && nodeType !== 'nested')) {
-        usedFields.add(rawSearchField);
-        typesUsedByFields.add(type);
+        simpleQuerySearchFields.add(rawSearchField);
+        simpleQueryTypes.add(type);
       }
     });
   });
 
+  if (nestedQueryFields.size === 0 || isSearchingInAllFields || useMatchPhrasePrefix) {
+    return {
+      simpleQueryTypes: types,
+      simpleQuerySearchFields: searchFields,
+      nestedQueryFields: new Map(),
+    };
+  }
+
   return {
-    fields: {
-      types: Array.from(typesUsedByFields),
-      searchFields: Array.from(usedFields.values()),
-    },
-    nestedFields: {
-      searchFields: usedNestedFields,
-    },
+    simpleQueryTypes: Array.from(simpleQueryTypes.values()),
+    simpleQuerySearchFields: Array.from(simpleQuerySearchFields.values()),
+    nestedQueryFields,
   };
 };
 

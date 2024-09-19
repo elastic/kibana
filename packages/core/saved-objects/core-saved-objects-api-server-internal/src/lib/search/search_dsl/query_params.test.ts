@@ -843,14 +843,14 @@ describe('#getQueryParams', () => {
       it('should ignore nested fields when searching for wildcard', () => {
         const result = getQueryParams({
           registry,
-          search: 'foo',
-          type: ['nestedtype'],
+          search: 'foo*',
+          type: ['nestedtype', 'saved'],
           mappings: nestedFieldMappings,
         });
 
-        const mustClause = result.query.bool.must;
-        const nestedTypeTitleQueryClause = mustClause[0].nested;
-        const simpleQueryClause = mustClause[0].simple_query_string;
+        const shouldClause = result.query.bool.should;
+        const nestedTypeTitleQueryClause = shouldClause[0].nested;
+        const simpleQueryClause = shouldClause[0].simple_query_string;
 
         expect(nestedTypeTitleQueryClause).toBe(undefined);
 
