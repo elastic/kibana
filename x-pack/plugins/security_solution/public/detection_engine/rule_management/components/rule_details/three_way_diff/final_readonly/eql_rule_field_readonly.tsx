@@ -11,6 +11,7 @@ import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { EqlQueryReadOnly } from './fields/eql_query/eql_query';
 import { TypeReadOnly } from './fields/type/type';
 import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface EqlRuleFieldReadOnlyProps {
   fieldName: keyof DiffableEqlFields;
@@ -35,9 +36,12 @@ export function EqlRuleFieldReadOnly({ fieldName, finalDiffableRule }: EqlRuleFi
           dataSource={finalDiffableRule.data_source}
         />
       );
+    case 'event_category_override':
+      /* Event Category Override is not displayed in UI */
+      return null;
     case 'type':
       return <TypeReadOnly type={finalDiffableRule.type} />;
     default:
-      return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
+      return assertUnreachable(fieldName);
   }
 }
