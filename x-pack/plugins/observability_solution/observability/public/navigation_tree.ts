@@ -421,6 +421,7 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                 title: 'Data',
                 children: [
                   { link: 'management:index_management' },
+                  { link: 'management:data_quality' },
                   { link: 'management:index_lifecycle_management' },
                   { link: 'management:snapshot_restore' },
                   { link: 'management:rollup_jobs' },
