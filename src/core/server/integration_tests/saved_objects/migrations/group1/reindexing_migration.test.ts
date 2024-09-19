@@ -20,14 +20,14 @@ import {
   clearLog,
 } from '../kibana_migrator_test_kit';
 
-import {
-  createBaseline,
-  baselineDocuments,
-  getReindexingMigratorTestKit,
-} from '../kibana_migrator_test_kit.fixtures';
+import { getReindexingMigratorTestKit } from '../kibana_migrator_test_kit.fixtures';
 
 import { delay } from '../test_utils';
 import { omit } from 'lodash';
+import {
+  BASELINE_DOCUMENTS_PER_TYPE_1K,
+  BASELINE_TEST_ARCHIVE_1K,
+} from '../kibana_migrator_archive_utils';
 
 const logFilePath = join(__dirname, 'reindexing_migration.log');
 
@@ -37,8 +37,7 @@ describe('reindexing migrations', () => {
   let migrationResults: MigrationResult[];
 
   beforeAll(async () => {
-    es = await startElasticsearch();
-    await createBaseline();
+    es = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_1K });
     await clearLog(logFilePath);
     kit = await getReindexingMigratorTestKit({ logFilePath });
     migrationResults = await kit.runMigrations();
@@ -89,15 +88,13 @@ describe('reindexing migrations', () => {
   });
 
   it('execute the excludeOnUpgrade hook', async () => {
-    const afterCount = await getAggregatedTypesCount(kit.client, defaultKibanaIndex);
-    // assert we filtered some documents
-    const beforeCountComplex = baselineDocuments.filter(({ type }) => type === 'complex').length;
-    expect(afterCount.complex).not.toEqual(beforeCountComplex);
-    expect(afterCount).toMatchInlineSnapshot(`
+    const count = await getAggregatedTypesCount(kit.client);
+
+    expect(count).toMatchInlineSnapshot(`
       Object {
-        "basic": 3,
-        "complex": 2,
-        "deprecated": 3,
+        "basic": ${BASELINE_DOCUMENTS_PER_TYPE_1K},
+        "complex": ${BASELINE_DOCUMENTS_PER_TYPE_1K / 2},
+        "deprecated": ${BASELINE_DOCUMENTS_PER_TYPE_1K},
       }
     `);
   });

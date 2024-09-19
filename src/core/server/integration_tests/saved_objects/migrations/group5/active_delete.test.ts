@@ -17,6 +17,7 @@ import {
   currentVersion,
   defaultKibanaIndex,
   startElasticsearch,
+  getAggregatedTypesCount,
 } from '../kibana_migrator_test_kit';
 
 import {
@@ -24,7 +25,6 @@ import {
   getCompatibleMigratorTestKit,
   getUpToDateMigratorTestKit,
   getReindexingMigratorTestKit,
-  baselineTypes,
 } from '../kibana_migrator_test_kit.fixtures';
 
 describe('when upgrading to a new stack version', () => {
@@ -44,12 +44,12 @@ describe('when upgrading to a new stack version', () => {
       let indexContents: SearchResponse<{ type: string }, Record<string, AggregationsAggregate>>;
 
       beforeAll(async () => {
-        esClient = await createBaseline();
+        esClient = await createBaseline({ documentsPerType: 10 });
 
         await clearLog();
         // remove the 'deprecated' type from the mappings, so that it is considered unknown
         const { client, runMigrations } = await getUpToDateMigratorTestKit({
-          types: baselineTypes.filter((type) => type.name !== 'deprecated'),
+          filterDeprecated: true,
           settings: {
             migrations: {
               discardUnknownObjects: nextMinor,
@@ -92,7 +92,7 @@ describe('when upgrading to a new stack version', () => {
 
       describe('CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
         it('preserves documents with known types', async () => {
-          expect(countResultsByType(indexContents, 'basic')).toEqual(3);
+          expect(countResultsByType(indexContents, 'basic')).toEqual(10);
         });
 
         it('deletes documents with unknown types', async () => {
@@ -108,24 +108,19 @@ describe('when upgrading to a new stack version', () => {
             (result) => result._source?.type === 'complex'
           );
 
-          expect(complexDocuments.length).toEqual(2);
-          expect(complexDocuments[0]._source).toEqual(
-            expect.objectContaining({
-              complex: {
-                name: 'complex-baz',
-                value: 2,
-              },
-              type: 'complex',
-            })
-          );
-          expect(complexDocuments[1]._source).toEqual(
-            expect.objectContaining({
-              complex: {
-                name: 'complex-lipsum',
-                value: 3,
-              },
-              type: 'complex',
-            })
+          expect(complexDocuments.length).toEqual(5);
+
+          complexDocuments.forEach(({ _source }, value) =>
+            expect(_source).toEqual(
+              expect.objectContaining({
+                complex: {
+                  name: `complex-${value}`,
+                  firstHalf: true,
+                  value,
+                },
+                type: 'complex',
+              })
+            )
           );
         });
       });
@@ -133,7 +128,7 @@ describe('when upgrading to a new stack version', () => {
 
     describe('and discardUnknownObjects = false', () => {
       beforeAll(async () => {
-        esClient = await createBaseline();
+        esClient = await createBaseline({ documentsPerType: 10 });
       });
       afterAll(async () => {
         await esClient?.indices.delete({ index: `${defaultKibanaIndex}_${currentVersion}_001` });
@@ -145,7 +140,7 @@ describe('when upgrading to a new stack version', () => {
       it('fails if unknown documents exist', async () => {
         // remove the 'deprecated' type from the mappings, so that it is considered unknown
         const { runMigrations } = await getUpToDateMigratorTestKit({
-          types: baselineTypes.filter((type) => type.name !== 'deprecated'),
+          filterDeprecated: true,
         });
 
         try {
@@ -189,7 +184,7 @@ describe('when upgrading to a new stack version', () => {
         expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
 
         const indexContents = await client.search({ index: defaultKibanaIndex, size: 100 });
-        expect(indexContents.hits.hits.length).toEqual(8);
+        expect(indexContents.hits.hits.length).toEqual(25);
       });
     });
   });
@@ -199,7 +194,7 @@ describe('when upgrading to a new stack version', () => {
       let indexContents: SearchResponse<{ type: string }, Record<string, AggregationsAggregate>>;
 
       beforeAll(async () => {
-        esClient = await createBaseline();
+        esClient = await createBaseline({ documentsPerType: 10 });
 
         await clearLog();
         const { client, runMigrations } = await getCompatibleMigratorTestKit({
@@ -249,7 +244,7 @@ describe('when upgrading to a new stack version', () => {
 
       describe('CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
         it('preserves documents with known types', async () => {
-          expect(countResultsByType(indexContents, 'basic')).toEqual(3);
+          expect(countResultsByType(indexContents, 'basic')).toEqual(10);
         });
 
         it('deletes documents with unknown types', async () => {
@@ -265,24 +260,19 @@ describe('when upgrading to a new stack version', () => {
             (result) => result._source?.type === 'complex'
           );
 
-          expect(complexDocuments.length).toEqual(2);
-          expect(complexDocuments[0]._source).toEqual(
-            expect.objectContaining({
-              complex: {
-                name: 'complex-baz',
-                value: 2,
-              },
-              type: 'complex',
-            })
-          );
-          expect(complexDocuments[1]._source).toEqual(
-            expect.objectContaining({
-              complex: {
-                name: 'complex-lipsum',
-                value: 3,
-              },
-              type: 'complex',
-            })
+          expect(complexDocuments.length).toEqual(5);
+
+          complexDocuments.forEach(({ _source }, value) =>
+            expect(_source).toEqual(
+              expect.objectContaining({
+                complex: {
+                  name: `complex-${value}`,
+                  firstHalf: true,
+                  value,
+                },
+                type: 'complex',
+              })
+            )
           );
         });
       });
@@ -290,7 +280,7 @@ describe('when upgrading to a new stack version', () => {
 
     describe('and discardUnknownObjects = false', () => {
       beforeAll(async () => {
-        esClient = await createBaseline();
+        esClient = await createBaseline({ documentsPerType: 10 });
       });
       afterAll(async () => {
         await esClient?.indices.delete({ index: `${defaultKibanaIndex}_${currentVersion}_001` });
@@ -347,14 +337,14 @@ describe('when upgrading to a new stack version', () => {
 
         const indexContents = await client.search({ index: defaultKibanaIndex, size: 100 });
 
-        expect(indexContents.hits.hits.length).toEqual(8);
+        expect(indexContents.hits.hits.length).toEqual(25);
       });
     });
   });
 
   describe('if the mappings do NOT match (diffMappings() === true) and they are NOT compatible', () => {
     beforeAll(async () => {
-      esClient = await createBaseline();
+      esClient = await createBaseline({ documentsPerType: 10 });
     });
     afterAll(async () => {
       await esClient?.indices.delete({ index: `${defaultKibanaIndex}_${currentVersion}_001` });
@@ -381,15 +371,14 @@ describe('when upgrading to a new stack version', () => {
       expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.');
       expect(logs).toMatch('MARK_VERSION_INDEX_READY -> DONE');
 
-      const indexContents: SearchResponse<
-        { type: string },
-        Record<string, AggregationsAggregate>
-      > = await client.search({ index: defaultKibanaIndex, size: 100 });
-
-      expect(indexContents.hits.hits.length).toEqual(8); // we're removing a couple of 'complex' (value < = 1)
-
-      // double-check that the deprecated documents have not been deleted
-      expect(countResultsByType(indexContents, 'deprecated')).toEqual(3);
+      const counts = await getAggregatedTypesCount(client);
+      expect(counts).toMatchInlineSnapshot(`
+        Object {
+          "basic": 10,
+          "complex": 5,
+          "deprecated": 10,
+        }
+      `);
     });
   });
 });

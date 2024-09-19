@@ -55,145 +55,56 @@ export const baselineTypes: Array<SavedObjectsType<any>> = [
       properties: {
         name: { type: 'text' },
         value: { type: 'integer' },
+        firstHalf: { type: 'boolean' },
       },
     },
     excludeOnUpgrade: () => {
       return {
         bool: {
-          must: [{ term: { type: 'complex' } }, { range: { 'complex.value': { lte: 1 } } }],
+          must: [{ term: { type: 'complex' } }, { term: { 'complex.firstHalf': false } }],
         },
       };
     },
   },
 ];
 
-export const baselineDocuments: SavedObjectsBulkCreateObject[] = [
-  ...['server-foo', 'server-bar', 'server-baz'].map((name) => ({
-    type: 'server',
-    attributes: {
-      name,
-    },
-  })),
-  ...['basic-foo', 'basic-bar', 'basic-baz'].map((name) => ({
-    type: 'basic',
-    attributes: {
-      name,
-    },
-  })),
-  ...['deprecated-foo', 'deprecated-bar', 'deprecated-baz'].map((name) => ({
-    type: 'deprecated',
-    attributes: {
-      name,
-    },
-  })),
-  ...['complex-foo', 'complex-bar', 'complex-baz', 'complex-lipsum'].map((name, index) => ({
-    type: 'complex',
-    attributes: {
-      name,
-      value: index,
-    },
-  })),
-];
+export const getUpToDateBaselineTypes = (filterDeprecated: boolean) =>
+  baselineTypes.filter((type) => !filterDeprecated || type.name !== 'deprecated');
 
-export const createBaseline = async () => {
-  const { client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
-    kibanaIndex: defaultKibanaIndex,
-    types: baselineTypes,
-  });
-
-  // remove the testing index (current and next minor)
-  await client.indices.delete({
-    index: [
-      defaultKibanaIndex,
-      `${defaultKibanaIndex}_${currentVersion}_001`,
-      `${defaultKibanaIndex}_${nextMinor}_001`,
-    ],
-    ignore_unavailable: true,
-  });
-
-  await runMigrations();
-
-  await savedObjectsRepository.bulkCreate(baselineDocuments, {
-    refresh: 'wait_for',
-  });
-
-  return client;
-};
-
-interface GetMutatedMigratorParams {
-  logFilePath?: string;
-  kibanaVersion?: string;
-  types?: Array<SavedObjectsType<any>>;
-  settings?: Record<string, any>;
-}
-
-export const getUpToDateMigratorTestKit = async ({
-  logFilePath = defaultLogFilePath,
-  kibanaVersion = nextMinor,
-  types = baselineTypes,
-  settings = {},
-}: GetMutatedMigratorParams = {}) => {
-  return await getKibanaMigratorTestKit({
-    types,
-    logFilePath,
-    kibanaVersion,
-    settings,
-  });
-};
-
-export const getCompatibleMigratorTestKit = async ({
-  logFilePath = defaultLogFilePath,
-  filterDeprecated = false,
-  kibanaVersion = nextMinor,
-  settings = {},
-}: GetMutatedMigratorParams & {
-  filterDeprecated?: boolean;
-} = {}) => {
-  const types = baselineTypes
-    .filter((type) => !filterDeprecated || type.name !== 'deprecated')
-    .map<SavedObjectsType>((type) => {
-      if (type.name === 'complex') {
-        return {
-          ...type,
-          mappings: {
-            properties: {
-              ...type.mappings.properties,
-              createdAt: { type: 'date' },
-            },
+export const getCompatibleBaselineTypes = (filterDeprecated: boolean) =>
+  getUpToDateBaselineTypes(filterDeprecated).map<SavedObjectsType>((type) => {
+    // introduce a compatible change
+    if (type.name === 'complex') {
+      return {
+        ...type,
+        mappings: {
+          properties: {
+            ...type.mappings.properties,
+            createdAt: { type: 'date' },
           },
-          modelVersions: {
-            ...type.modelVersions,
-            2: {
-              changes: [
-                {
-                  type: 'mappings_addition',
-                  addedMappings: {
-                    createdAt: { type: 'date' },
-                  },
+        },
+        modelVersions: {
+          ...type.modelVersions,
+          2: {
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  createdAt: { type: 'date' },
                 },
-              ],
-            },
+              },
+            ],
           },
-        };
-      } else {
-        return type;
-      }
-    });
-
-  return await getKibanaMigratorTestKit({
-    logFilePath,
-    types,
-    kibanaVersion,
-    settings,
+        },
+      };
+    } else {
+      return type;
+    }
   });
-};
 
-export const getReindexingMigratorTestKit = async ({
-  logFilePath = defaultLogFilePath,
-  kibanaVersion = nextMinor,
-  settings = {},
-}: GetMutatedMigratorParams = {}) => {
-  const types = baselineTypes.map<SavedObjectsType>((type) => {
+export const getReindexingBaselineTypes = (filterDeprecated: boolean) =>
+  getUpToDateBaselineTypes(filterDeprecated).map<SavedObjectsType>((type) => {
+    // introduce an incompatible change
     if (type.name === 'complex') {
       return {
         ...type,
@@ -227,9 +138,121 @@ export const getReindexingMigratorTestKit = async ({
     }
   });
 
+export interface GetBaselineDocumentsParams {
+  documentsPerType?: number;
+}
+
+export const getBaselineDocuments = (
+  params: GetBaselineDocumentsParams = {}
+): SavedObjectsBulkCreateObject[] => {
+  const documentsPerType = params.documentsPerType ?? 4;
+
+  return [
+    ...new Array(documentsPerType).fill(true).map((_, index) => ({
+      type: 'server',
+      attributes: {
+        name: `server-${index}`,
+      },
+    })),
+    ...new Array(documentsPerType).fill(true).map((_, index) => ({
+      type: 'basic',
+      attributes: {
+        name: `basic-${index}`,
+      },
+    })),
+    ...new Array(documentsPerType).fill(true).map((_, index) => ({
+      type: 'deprecated',
+      attributes: {
+        name: `deprecated-${index}`,
+      },
+    })),
+    ...new Array(documentsPerType).fill(true).map((_, index) => ({
+      type: 'complex',
+      attributes: {
+        name: `complex-${index}`,
+        firstHalf: index < documentsPerType / 2,
+        value: index,
+      },
+    })),
+  ];
+};
+
+export interface CreateBaselineParams {
+  documentsPerType?: number;
+}
+
+export const createBaseline = async (params: CreateBaselineParams = {}) => {
+  const { client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
+    kibanaIndex: defaultKibanaIndex,
+    types: baselineTypes,
+  });
+
+  // remove the testing index (current and next minor)
+  await client.indices.delete({
+    index: [
+      defaultKibanaIndex,
+      `${defaultKibanaIndex}_${currentVersion}_001`,
+      `${defaultKibanaIndex}_${nextMinor}_001`,
+    ],
+    ignore_unavailable: true,
+  });
+
+  await runMigrations();
+
+  await savedObjectsRepository.bulkCreate(getBaselineDocuments(params), {
+    refresh: 'wait_for',
+  });
+
+  return client;
+};
+
+interface GetMutatedMigratorParams {
+  logFilePath?: string;
+  kibanaVersion?: string;
+  filterDeprecated?: boolean;
+  types?: Array<SavedObjectsType<any>>;
+  settings?: Record<string, any>;
+}
+
+export const getUpToDateMigratorTestKit = async ({
+  logFilePath = defaultLogFilePath,
+  filterDeprecated = false,
+  kibanaVersion = nextMinor,
+  settings = {},
+}: GetMutatedMigratorParams = {}) => {
+  return await getKibanaMigratorTestKit({
+    types: getUpToDateBaselineTypes(filterDeprecated),
+    logFilePath,
+    kibanaVersion,
+    settings,
+  });
+};
+
+export const getCompatibleMigratorTestKit = async ({
+  logFilePath = defaultLogFilePath,
+  filterDeprecated = false,
+  kibanaVersion = nextMinor,
+  settings = {},
+}: GetMutatedMigratorParams & {
+  filterDeprecated?: boolean;
+} = {}) => {
   return await getKibanaMigratorTestKit({
     logFilePath,
-    types,
+    types: getCompatibleBaselineTypes(filterDeprecated),
+    kibanaVersion,
+    settings,
+  });
+};
+
+export const getReindexingMigratorTestKit = async ({
+  logFilePath = defaultLogFilePath,
+  filterDeprecated = false,
+  kibanaVersion = nextMinor,
+  settings = {},
+}: GetMutatedMigratorParams = {}) => {
+  return await getKibanaMigratorTestKit({
+    logFilePath,
+    types: getReindexingBaselineTypes(filterDeprecated),
     kibanaVersion,
     settings,
   });

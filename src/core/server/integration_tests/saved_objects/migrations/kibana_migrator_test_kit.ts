@@ -90,10 +90,12 @@ export interface KibanaMigratorTestKit {
 }
 
 export const startElasticsearch = async ({
+  esVersion,
   basePath,
   dataArchive,
   timeout,
 }: {
+  esVersion?: string;
   basePath?: string;
   dataArchive?: string;
   timeout?: number;
@@ -105,6 +107,7 @@ export const startElasticsearch = async ({
         license: 'basic',
         basePath,
         dataArchive,
+        esVersion,
       },
     },
   });
@@ -344,7 +347,7 @@ export const deleteSavedObjectIndices = async (
 
 export const getAggregatedTypesCount = async (
   client: ElasticsearchClient,
-  index: string
+  index: string = defaultKibanaIndex
 ): Promise<Record<string, number>> => {
   try {
     await client.indices.refresh({ index });
@@ -386,20 +389,6 @@ export const getAggregatedTypesCount = async (
     }
     throw error;
   }
-};
-
-export const getAggregatedTypesCountAllIndices = async (esClient: ElasticsearchClient) => {
-  const typeBreakdown = await Promise.all(
-    ALL_SAVED_OBJECT_INDICES.map((index) => getAggregatedTypesCount(esClient, index))
-  );
-
-  return ALL_SAVED_OBJECT_INDICES.reduce<Record<string, Record<string, number> | undefined>>(
-    (acc, index, pos) => {
-      acc[index] = typeBreakdown[pos];
-      return acc;
-    },
-    {}
-  );
 };
 
 const registerTypes = (
