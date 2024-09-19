@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { documentationService } from '../../../../services';
-import { UIM_APP_NAME } from '../../../../../../common/constants/ui_metric';
-import { httpService } from '../../../../services/http';
-import { notificationService } from '../../../../services/notification';
-import { UiMetricService } from '../../../../services/ui_metric';
-import { AppDependencies, IndexManagementAppContext } from '../../../..';
+import { documentationService } from '../../../../../services';
+import { UIM_APP_NAME } from '../../../../../../../common/constants/ui_metric';
+import { httpService } from '../../../../../services/http';
+import { notificationService } from '../../../../../services/notification';
+import { UiMetricService } from '../../../../../services/ui_metric';
+import { AppDependencies, IndexManagementAppContext } from '../../../../..';
 import { IndexMappingWithContextProps } from './index_mapping_with_context_types';
-import { DetailsPageMappings } from './details_page_mappings';
+import { DetailsPageMappings } from '../details_page_mappings';
 
 export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = ({
   core,

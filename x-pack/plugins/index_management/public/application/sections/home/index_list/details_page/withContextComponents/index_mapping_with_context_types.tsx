@@ -6,15 +6,15 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import type { IndexSettingProps } from '@kbn/index-management-shared-types';
-import { AppDependencies } from '../../../../app_context';
-import { ExtensionsService } from '../../../../../services/extensions_service';
+import { IndexMappingProps } from '@kbn/index-management-shared-types';
+import { AppDependencies } from '../../../../../app_context';
+import { ExtensionsService } from '../../../../../../services/extensions_service';
 
-export type IndexSettingWithContextProps = {
+export type IndexMappingWithContextProps = {
   core: CoreStart;
   // omitting services here to constitute them inside the component
   // this helps reduce bundle size significantly
   dependencies: Omit<AppDependencies, 'services'> & {
     services: { extensionsService: ExtensionsService };
   };
-} & IndexSettingProps;
+} & IndexMappingProps;

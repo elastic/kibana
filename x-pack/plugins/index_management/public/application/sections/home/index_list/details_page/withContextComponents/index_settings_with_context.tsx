@@ -5,13 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { documentationService } from '../../../../services';
-import { UIM_APP_NAME } from '../../../../../../common/constants/ui_metric';
-import { httpService } from '../../../../services/http';
-import { notificationService } from '../../../../services/notification';
-import { UiMetricService } from '../../../../services/ui_metric';
-import { AppDependencies, IndexManagementAppContext } from '../../../..';
-import { DetailsPageSettings } from './details_page_settings';
+import { documentationService } from '../../../../../services';
+import { UIM_APP_NAME } from '../../../../../../../common/constants/ui_metric';
+import { httpService } from '../../../../../services/http';
+import { notificationService } from '../../../../../services/notification';
+import { UiMetricService } from '../../../../../services/ui_metric';
+import { AppDependencies, IndexManagementAppContext } from '../../../../..';
+import { DetailsPageSettings } from '../details_page_settings';
 import { IndexSettingWithContextProps } from './index_settings_with_context_types';
 
 export const IndexSettingsWithContext: React.FC<IndexSettingWithContextProps> = ({
