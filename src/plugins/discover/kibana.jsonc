@@ -30,7 +30,8 @@
       "unifiedDocViewer",
       "unifiedSearch",
       "unifiedHistogram",
-      "contentManagement"
+      "contentManagement",
+      "discoverShared"
     ],
     "optionalPlugins": [
       "dataVisualizer",

@@ -8,32 +8,33 @@
  */
 
 import React from 'react';
-import { getDiscoverCellRenderer } from '@kbn/security-solution-common';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { SecurityProfileProviderFactory } from '../types';
 
 export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   RootProfileProvider
-> = (services: ProfileProviderServices) => ({
-  profileId: 'security-root-profile',
-  isExperimental: true,
-  profile: {
-    getCellRenderers: (prev) => (params) => ({
-      ...prev(params),
-      'host.name': (props) => {
-        const CellRenderer = getDiscoverCellRenderer({
-          fieldName: 'host.name',
-        });
-        return <CellRenderer {...props} />;
-      },
-    }),
-  },
-  resolve: (params) => {
-    if (params.solutionNavId === SolutionType.Security) {
-      return { isMatch: true, context: { solutionType: SolutionType.Security } };
-    }
-
-    return { isMatch: false };
-  },
-});
+> = (services: ProfileProviderServices) => {
+  const { discoverFeaturesRegistry } = services;
+  const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-render');
+  return {
+    profileId: 'security-root-profile',
+    isExperimental: true,
+    profile: {
+      getCellRenderers: (prev) => () => ({
+        ...prev(),
+        'host.name': (props) => {
+          if (!cellRendererFeature) return undefined;
+          const CellRenderer = cellRendererFeature.getRender();
+          return <CellRenderer {...props} />;
+        },
+      }),
+    },
+    resolve: (params) => {
+      if (params.solutionNavId === SolutionType.Security) {
+        return { isMatch: true, context: { solutionType: SolutionType.Security } };
+      }
+      return { isMatch: false };
+    },
+  };
+};

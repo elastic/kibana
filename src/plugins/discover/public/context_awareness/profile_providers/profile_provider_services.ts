@@ -9,6 +9,7 @@
 
 import { createLogsContextService, LogsContextService } from '@kbn/discover-utils';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { DiscoverFeaturesService } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import type { DiscoverServices } from '../../build_services';
 
 /**
@@ -26,6 +27,7 @@ export interface ProfileProviderServices extends DiscoverServices {
    * A service containing methods used for logs profiles
    */
   logsContextService: LogsContextService;
+  discoverFeaturesRegistry: DiscoverFeaturesService['registry'];
 }
 
 /**
@@ -41,5 +43,6 @@ export const createProfileProviderServices = async (
     logsContextService: await createLogsContextService({
       logsDataAccess: discoverServices.logsDataAccess,
     }),
+    discoverFeaturesRegistry: discoverServices?.discoverShared.features.registry,
   };
 };

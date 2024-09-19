@@ -61,6 +61,7 @@ import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { IntegrationAssistantPluginStart } from '@kbn/integration-assistant-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -156,6 +157,7 @@ export interface StartPlugins {
   core: CoreStart;
   integrationAssistant?: IntegrationAssistantPluginStart;
   serverless?: ServerlessPluginStart;
+  discoverShared?: DiscoverSharedPublicStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
