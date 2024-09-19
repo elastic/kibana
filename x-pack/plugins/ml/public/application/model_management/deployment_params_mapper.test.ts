@@ -59,6 +59,25 @@ describe('DeploymentParamsMapper', () => {
           deployment_id: 'test-deployment',
           model_id: 'test-model',
           priority: 'low',
+          threads_per_allocation: 2,
+        });
+
+        expect(
+          mapper.mapUiToUiDeploymentParams({
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForIngest',
+            adaptiveResources: false,
+            vCPUUsage: 'low',
+          })
+        ).toEqual({
+          adaptive_allocations: {
+            enabled: true,
+            max_number_of_allocations: 2,
+            min_number_of_allocations: 1,
+          },
+          deployment_id: 'test-deployment',
+          model_id: 'test-model',
+          priority: 'low',
           threads_per_allocation: 1,
         });
       });
@@ -80,9 +99,9 @@ describe('DeploymentParamsMapper', () => {
       });
 
       it('should provide vCPU level', () => {
-        expect(mapper.getVCPURange('low')).toEqual({ max: 1, min: 1 });
-        expect(mapper.getVCPURange('medium')).toEqual({ max: 16, min: 2 });
-        expect(mapper.getVCPURange('high')).toEqual({ max: 32, min: 16 });
+        expect(mapper.getVCPURange('low')).toEqual({ min: 1, max: 2 });
+        expect(mapper.getVCPURange('medium')).toEqual({ min: 3, max: 16 });
+        expect(mapper.getVCPURange('high')).toEqual({ min: 17, max: 32 });
       });
     });
 
@@ -110,7 +129,7 @@ describe('DeploymentParamsMapper', () => {
           model_id: modelId,
           deployment_id: 'test-deployment',
           priority: 'low',
-          threads_per_allocation: 1,
+          threads_per_allocation: 2,
           number_of_allocations: 1,
         });
 
@@ -156,7 +175,7 @@ describe('DeploymentParamsMapper', () => {
           deployment_id: 'test-deployment',
           priority: 'low',
           threads_per_allocation: 1,
-          number_of_allocations: 1,
+          number_of_allocations: 2,
         });
 
         expect(
@@ -202,7 +221,7 @@ describe('DeploymentParamsMapper', () => {
           model_id: modelId,
           deployment_id: 'test-deployment',
           priority: 'low',
-          threads_per_allocation: 1,
+          threads_per_allocation: 2,
           adaptive_allocations: {
             enabled: true,
             min_number_of_allocations: 1,
@@ -381,7 +400,7 @@ describe('DeploymentParamsMapper', () => {
           model_id: modelId,
           deployment_id: 'test-deployment',
           priority: 'low',
-          threads_per_allocation: 1,
+          threads_per_allocation: 2,
           number_of_allocations: 1,
         });
 
@@ -428,7 +447,7 @@ describe('DeploymentParamsMapper', () => {
           model_id: modelId,
           deployment_id: 'test-deployment',
           priority: 'low',
-          threads_per_allocation: 1,
+          threads_per_allocation: 2,
           adaptive_allocations: {
             enabled: true,
             min_number_of_allocations: 1,
@@ -489,7 +508,7 @@ describe('DeploymentParamsMapper', () => {
           adaptive_allocations: {
             enabled: true,
             min_number_of_allocations: 1,
-            max_number_of_allocations: 1,
+            max_number_of_allocations: 2,
           },
         });
 
@@ -507,7 +526,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 1,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 2,
+            min_number_of_allocations: 3,
             max_number_of_allocations: 32,
           },
         });
@@ -526,7 +545,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 1,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 32,
+            min_number_of_allocations: 33,
             max_number_of_allocations: 99999,
           },
         });

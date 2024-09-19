@@ -28,9 +28,18 @@ export class DeploymentParamsMapper {
    * vCPUs level breakpoints for cloud cluster with enabled ML autoscaling
    */
   private readonly autoscalingVCPUBreakpoints: VCPUBreakpoints = {
-    low: { min: 1, max: 1 },
-    medium: { min: 2, max: 32 },
-    high: { min: 32, max: 99999 },
+    low: { min: 1, max: 2 },
+    medium: { min: 3, max: 32 },
+    high: { min: 33, max: 99999 },
+  };
+
+  /**
+   * vCPUs level breakpoints for serverless projects
+   */
+  private readonly serverlessVCPUBreakpoints: VCPUBreakpoints = {
+    low: { min: 1, max: 2 },
+    medium: { min: 3, max: 32 },
+    high: { min: 33, max: 500 },
   };
 
   /**
@@ -59,22 +68,28 @@ export class DeploymentParamsMapper {
     const mediumValue = this.mlServerLimits!.total_ml_processors! / 2;
 
     this.hardwareVCPUBreakpoints = {
-      low: { min: 1, max: 1 },
-      medium: { min: Math.min(2, mediumValue), max: mediumValue },
+      low: { min: 1, max: 2 },
+      medium: { min: Math.min(3, mediumValue), max: mediumValue },
       high: {
-        min: mediumValue,
+        min: mediumValue + 1,
         max: this.mlServerLimits!.total_ml_processors!,
       },
     };
 
-    this.vCpuBreakpoints = this.cloudInfo.isMlAutoscalingEnabled
-      ? this.autoscalingVCPUBreakpoints
-      : this.hardwareVCPUBreakpoints;
+    if (!this.showNodeInfo) {
+      this.vCpuBreakpoints = this.serverlessVCPUBreakpoints;
+    } else if (this.cloudInfo.isMlAutoscalingEnabled) {
+      this.vCpuBreakpoints = this.autoscalingVCPUBreakpoints;
+    } else {
+      this.vCpuBreakpoints = this.hardwareVCPUBreakpoints;
+    }
   }
 
   private getNumberOfThreads(input: DeploymentParamsUI): number {
-    if (input.vCPUUsage === 'low') return 1;
-    return input.optimized === 'optimizedForIngest' ? 1 : Math.max(...this.threadingParamsValues);
+    // 1 thread for ingest at all times
+    if (input.optimized === 'optimizedForIngest') return 1;
+    // for search deployments with low vCPUs level set 2, otherwise max available
+    return input.vCPUUsage === 'low' ? 2 : Math.max(...this.threadingParamsValues);
   }
 
   private getAllocationsParams(
