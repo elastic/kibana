@@ -51,6 +51,7 @@ type RenderOptions =
   | (RenderingPrebootDeps & {
       status?: never;
       elasticsearch?: never;
+      featureFlags?: never;
       customBranding?: never;
       userSettings?: never;
     });
@@ -85,6 +86,7 @@ export class RenderingService {
 
   public async setup({
     elasticsearch,
+    featureFlags,
     http,
     status,
     uiPlugins,
@@ -106,6 +108,7 @@ export class RenderingService {
     return {
       render: this.render.bind(this, {
         elasticsearch,
+        featureFlags,
         http,
         uiPlugins,
         status,
@@ -125,8 +128,16 @@ export class RenderingService {
     },
     { isAnonymousPage = false, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
-    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings, i18n } =
-      renderOptions;
+    const {
+      elasticsearch,
+      featureFlags,
+      http,
+      uiPlugins,
+      status,
+      customBranding,
+      userSettings,
+      i18n,
+    } = renderOptions;
 
     const env = {
       mode: this.coreContext.env.mode,
@@ -251,6 +262,9 @@ export class RenderingService {
         assetsHrefBase: staticAssetsHrefBase,
         logging: loggingConfig,
         env,
+        featureFlags: {
+          overrides: featureFlags?.getOverrides() || {},
+        },
         clusterInfo,
         apmConfig,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
