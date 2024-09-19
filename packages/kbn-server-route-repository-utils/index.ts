@@ -27,4 +27,5 @@ export type {
   DefaultRouteHandlerResources,
   IoTsParamsObject,
   ZodParamsObject,
+  RequestCacheOptions,
 } from './src/typings';

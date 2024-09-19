@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
-import { EntityTypeDefinition } from '../../../common/entities';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
+import { InventoryEntityDefinition } from '../../../common/entities';
 
 export function EntityTypeListItem({
   href,
@@ -54,7 +54,7 @@ export function EntityTypeListBase({
   error,
 }: {
   loading?: boolean;
-  definitions?: Array<EntityTypeDefinition & { count: number }>;
+  definitions?: InventoryEntityDefinition[];
   error?: Error;
 }) {
   const router = useInventoryRouter();
@@ -94,7 +94,7 @@ export function EntityTypeList() {
 
   const { value, loading, error } = useAbortableAsync(
     ({ signal }) => {
-      return inventoryAPIClient.fetch('GET /internal/inventory/entity_types', {
+      return inventoryAPIClient.fetch('GET /internal/inventory/entities/definition/inventory', {
         signal,
       });
     },

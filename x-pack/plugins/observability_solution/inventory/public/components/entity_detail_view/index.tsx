@@ -17,17 +17,15 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import React, { useMemo, useState } from 'react';
-import { Required } from 'utility-types';
 import { uniqBy } from 'lodash';
 import { css } from '@emotion/css';
-import type { Entity, EntityTypeDefinition } from '../../../common/entities';
-import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
+import type { Entity, EntityDefinition } from '../../../common/entities';
 import { useInventoryBreadcrumbs } from '../../hooks/use_inventory_breadcrumbs';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { getDataStreamsForEntity } from '../../util/entities/get_data_streams_for_entity';
-import { esqlResultToPlainObjects } from '../../util/esql_result_to_plain_objects';
 import { EntityMetadata } from '../entity_metadata';
 import { EntityOverview } from '../entity_overview';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -36,14 +34,36 @@ import { InventoryPageHeader } from '../inventory_page_header';
 import { InventoryPageHeaderTitle } from '../inventory_page_header/inventory_page_header_title';
 import { LoadingPanel } from '../loading_panel';
 
-export function EntityDetailView<TEntity extends Entity>() {
-  const {
-    path: { type, id, tab },
-  } = useInventoryParams('/{type}/{id}/{tab}');
+interface TabDependencies {
+  entity: Entity;
+  typeDefinition: EntityDefinition;
+  dataStreams: Array<{ name: string }>;
+}
 
-  const entityQueryResult = useEsqlQueryResult({
-    query: `FROM entities-*-latest | WHERE entity.type == "${type}" AND entity.displayName == "${id}" | LIMIT 1`,
-  });
+interface Tab {
+  name: string;
+  label: string;
+  content: React.ReactElement;
+}
+
+export function EntityDetailViewWithoutParams({
+  tab,
+  displayName,
+  type,
+  getAdditionalTabs,
+}: {
+  tab: string;
+  displayName: string;
+  type: string;
+  getAdditionalTabs?: (dependencies: TabDependencies) => Tab[];
+}) {
+  const {
+    dependencies: {
+      start: { data },
+    },
+  } = useKibana();
+
+  const { absoluteTimeRange } = useDateRange({ data });
 
   const router = useInventoryRouter();
 
@@ -54,38 +74,47 @@ export function EntityDetailView<TEntity extends Entity>() {
     },
   } = useKibana();
 
+  const entityFetch = useAbortableAsync(
+    ({ signal }) => {
+      return inventoryAPIClient.fetch('GET /internal/inventory/entity/{type}/{displayName}', {
+        signal,
+        params: {
+          path: {
+            type,
+            displayName,
+          },
+        },
+      });
+    },
+    [type, displayName, inventoryAPIClient]
+  );
+
   const dashboardLocator = useMemo(
     () => share.url.locators.get(DASHBOARD_APP_LOCATOR),
     [share.url.locators]
   );
 
-  const typeDefinitionFetch = useAbortableAsync(
+  const typeDefinitionsFetch = useAbortableAsync(
     ({ signal }) => {
-      return inventoryAPIClient.fetch('GET /internal/inventory/entity_types', {
+      return inventoryAPIClient.fetch('GET /internal/inventory/entities/definition/inventory', {
         signal,
       });
     },
     [inventoryAPIClient]
   );
 
-  const typeDefinition = typeDefinitionFetch.value?.definitions.find(
-    (definition) => definition.discoveryDefinition?.type === type
+  const typeDefinition = typeDefinitionsFetch.value?.definitions.find(
+    (definition) => definition.type === type
   );
 
-  const entity = useMemo<TEntity | undefined>(() => {
-    if (!entityQueryResult.value) {
+  const entity = useMemo<Entity | undefined>(() => {
+    if (!entityFetch.value) {
       return undefined;
     }
 
-    const properties = esqlResultToPlainObjects<TEntity['properties']>(entityQueryResult.value)[0];
+    return entityFetch.value.entity;
+  }, [entityFetch.value]);
 
-    return {
-      id: properties['entity.id'],
-      label: properties['entity.displayName'],
-      type: properties['entity.type'],
-      properties,
-    } as TEntity;
-  }, [entityQueryResult.value]);
   useInventoryBreadcrumbs(() => {
     if (!typeDefinition) {
       return [];
@@ -93,27 +122,50 @@ export function EntityDetailView<TEntity extends Entity>() {
 
     return [
       {
-        title: typeDefinition?.discoveryDefinition?.name ?? typeDefinition.name,
+        title: typeDefinition.label,
         path: `/{type}`,
         params: { path: { type } },
       } as const,
-      { title: id, path: `/{type}/{id}`, params: { path: { type } } } as const,
+      {
+        title: displayName,
+        path: `/{type}/{displayName}`,
+        params: { path: { type, displayName } },
+      } as const,
     ];
-  }, [id, type, typeDefinition]);
+  }, [displayName, type, typeDefinition]);
 
   const entityDataStreamsFetch = useAbortableAsync(
     async ({ signal }) => {
-      if (!entity || !typeDefinition || !typeDefinition.discoveryDefinition) {
+      if (!entity || !typeDefinition) {
         return undefined;
+      }
+      if (typeDefinition.type === 'data_stream') {
+        return {
+          dataStreams: [
+            {
+              name: displayName,
+            },
+          ],
+        };
       }
       return getDataStreamsForEntity({
         entity,
-        typeDefinition: typeDefinition as Required<EntityTypeDefinition, 'discoveryDefinition'>,
         inventoryAPIClient,
         signal,
+        start: absoluteTimeRange.start,
+        end: absoluteTimeRange.end,
+        identityFields: typeDefinition.identityFields,
+        sources: typeDefinition.sources,
       });
     },
-    [entity, typeDefinition, inventoryAPIClient]
+    [
+      entity,
+      typeDefinition,
+      inventoryAPIClient,
+      absoluteTimeRange.start,
+      absoluteTimeRange.end,
+      displayName,
+    ]
   );
 
   const integrationsFetch = useAbortableAsync(
@@ -133,7 +185,9 @@ export function EntityDetailView<TEntity extends Entity>() {
           signal,
           params: {
             body: {
-              dataStreams: dataStreams.map((dataStream) => dataStream.name),
+              dataStreams: dataStreams
+                .map((dataStream) => dataStream.name)
+                .filter((dataStream) => !dataStream.includes(':')),
             },
           },
         })
@@ -146,92 +200,108 @@ export function EntityDetailView<TEntity extends Entity>() {
 
   const dataStreamsWithIntegrations = integrationsFetch.value;
 
-  const quickLinksAsync = useAbortableAsync(
-    async ({ signal }) => {
-      if (!entity || !typeDefinition || !dataStreamsWithIntegrations?.length) {
+  const quickLinksAsync = useAbortableAsync(async () => {
+    if (!entity || !typeDefinition || !dataStreamsWithIntegrations?.length) {
+      return [];
+    }
+
+    const allPromises = dataStreamsWithIntegrations.flatMap((dataStream) => {
+      if (!dataStream.integration || !dataStream.dashboards?.length) {
         return [];
       }
+      return dataStream.dashboards.map(async (dashboard) => {
+        const query =
+          typeDefinition.identityFields
+            .map((identityField) => {
+              const value = entity.properties[identityField.field];
+              if (!value) {
+                return `(NOT ${identityField.field}:*)`;
+              }
+              return `(${identityField.field}:${value})`;
+            })
+            .join(' AND ') ?? '';
 
-      const allPromises = dataStreamsWithIntegrations.flatMap((dataStream) => {
-        if (!dataStream.integration || !dataStream.dashboards?.length) {
-          return [];
-        }
-        return dataStream.dashboards.map(async (dashboard) => {
-          const query =
-            typeDefinition.discoveryDefinition?.identityFields
-              .map((identityField) => {
-                const value = entity.properties[identityField.field];
-                if (!value) {
-                  return `(NOT ${identityField.field}:*)`;
-                }
-                return `(${identityField.field}:${value})`;
-              })
-              .join(' AND ') ?? '';
-
-          const href = await dashboardLocator?.getRedirectUrl({
-            dashboardId: dashboard.id,
-            query: query ? { query, language: 'kuery' } : undefined,
-          });
-
-          return {
-            group: i18n.translate('xpack.inventory.entityDetailView.quickLinks.dashboards', {
-              defaultMessage: 'Dashboards',
-            }),
-            label: dashboard.title,
-            href,
-          };
+        const href = await dashboardLocator?.getRedirectUrl({
+          dashboardId: dashboard.id,
+          query: query ? { query, language: 'kuery' } : undefined,
         });
+
+        return {
+          group: i18n.translate('xpack.inventory.entityDetailView.quickLinks.dashboards', {
+            defaultMessage: 'Dashboards',
+          }),
+          label: dashboard.title,
+          href,
+        };
       });
+    });
 
-      const quickLinks = await await Promise.all(allPromises);
+    const quickLinks = await await Promise.all(allPromises);
 
-      return uniqBy(quickLinks, (link) => link.label);
-    },
-    [dataStreamsWithIntegrations, dashboardLocator, entity, typeDefinition]
-  );
+    return uniqBy(quickLinks, (link) => link.label);
+  }, [dataStreamsWithIntegrations, dashboardLocator, entity, typeDefinition]);
 
   const [isQuickLinksPopoverOpen, setIsQuickLinksPopoverOpen] = useState(false);
 
-  if (!entity || !typeDefinition || !typeDefinition.discoveryDefinition || !dataStreams) {
+  if (!entity || !typeDefinition || !dataStreams) {
     return <LoadingPanel />;
   }
 
   const tabs = {
     overview: {
-      href: router.link('/{type}/{id}/{tab}', { path: { type, id, tab: 'overview' } }),
+      href: router.link('/{type}/{displayName}/{tab}', {
+        path: { type, displayName, tab: 'overview' },
+      }),
       label: i18n.translate('xpack.inventory.entityDetailView.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
       content: (
         <EntityOverview
           entity={entity}
-          typeDefinition={typeDefinition as Required<EntityTypeDefinition, 'discoveryDefinition'>}
-          allTypeDefinitions={typeDefinitionFetch.value!.definitions}
+          typeDefinition={typeDefinition}
+          allTypeDefinitions={typeDefinitionsFetch.value!.definitions}
           dataStreams={dataStreams}
           dataStreamsWithIntegrations={dataStreamsWithIntegrations}
         />
       ),
     },
     metadata: {
-      href: router.link('/{type}/{id}/{tab}', { path: { type, id, tab: 'metadata' } }),
+      href: router.link('/{type}/{displayName}/{tab}', {
+        path: { type, displayName, tab: 'metadata' },
+      }),
       label: i18n.translate('xpack.inventory.entityDetailView.metadataTabLabel', {
         defaultMessage: 'Metadata',
       }),
       content: <EntityMetadata entity={entity} />,
     },
     relationships: {
-      href: router.link('/{type}/{id}/{tab}', { path: { type, id, tab: 'relationships' } }),
+      href: router.link('/{type}/{displayName}/{tab}', {
+        path: { type, displayName, tab: 'relationships' },
+      }),
       label: i18n.translate('xpack.inventory.entityDetailView.relatedTabLabel', {
         defaultMessage: 'Relationships',
       }),
-      content: (
-        <EntityRelationshipsView
-          entity={entity}
-          typeDefinition={typeDefinition as Required<EntityTypeDefinition, 'discoveryDefinition'>}
-          allTypeDefinitions={typeDefinitionFetch.value!.definitions}
-        />
-      ),
+      content: <EntityRelationshipsView entity={entity} dataStreams={dataStreams} />,
     },
+    ...Object.fromEntries(
+      getAdditionalTabs?.({
+        entity,
+        typeDefinition,
+        dataStreams,
+      }).map(({ name, ...rest }) => [
+        name,
+        {
+          ...rest,
+          href: router.link(`/{type}/{displayName}/{tab}`, {
+            path: {
+              type,
+              displayName,
+              tab,
+            },
+          }),
+        },
+      ]) ?? []
+    ),
   };
 
   const selectedTab = tabs[tab as keyof typeof tabs];
@@ -243,7 +313,7 @@ export function EntityDetailView<TEntity extends Entity>() {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <InventoryPageHeader>
-        <InventoryPageHeaderTitle title={id}>
+        <InventoryPageHeaderTitle title={displayName}>
           <EuiBadge>{type}</EuiBadge>
           {quickLinks.length ? (
             <EuiPopover
@@ -301,4 +371,12 @@ export function EntityDetailView<TEntity extends Entity>() {
       {selectedTab.content}
     </EuiFlexGroup>
   );
+}
+
+export function EntityDetailView() {
+  const {
+    path: { type, displayName, tab },
+  } = useInventoryParams('/{type}/{displayName}/{tab}');
+
+  return <EntityDetailViewWithoutParams type={type} displayName={displayName} tab={tab} />;
 }

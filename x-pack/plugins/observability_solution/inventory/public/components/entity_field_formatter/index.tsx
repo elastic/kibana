@@ -15,7 +15,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { castArray } from 'lodash';
 import { CoreSetup } from '@kbn/core/public';
 import type { InventoryAPIClient } from '../../api';
-import type { EntityTypeDefinition } from '../../../common/entities';
+import { InventoryEntityDefinition } from '../../../common/entities';
 
 export function createEntityFieldFormatterClass({
   inventoryAPIClient,
@@ -26,17 +26,17 @@ export function createEntityFieldFormatterClass({
 }) {
   const typeByField = new Map<string, string>();
 
-  const definitionsByType = new Map<string, EntityTypeDefinition>();
+  const definitionsByType = new Map<string, InventoryEntityDefinition>();
 
   inventoryAPIClient
-    .fetch('GET /internal/inventory/entity_types', {
+    .fetch('GET /internal/inventory/entities/definition/inventory', {
       signal: new AbortController().signal,
     })
     .then((response) => {
       response.definitions.forEach((definition) => {
-        definitionsByType.set(definition.name, definition);
-        definition.discoveryDefinition?.identityFields?.forEach(({ field }) => {
-          typeByField.set(field, definition.name);
+        definitionsByType.set(definition.definitionType, definition);
+        definition.identityFields?.forEach(({ field }) => {
+          typeByField.set(field, definition.definitionType);
         });
       });
     });
@@ -59,16 +59,12 @@ export function createEntityFieldFormatterClass({
         if (entityType) {
           const definition = definitionsByType.get(entityType)!;
 
-          if (
-            definition.discoveryDefinition?.identityFields?.find(
-              (field) => field.field === fieldName
-            )
-          ) {
+          if (definition.identityFields.find((field) => field.field === fieldName)) {
             const items = castArray(value).map((valueAtIndex) => {
               const id = valueAtIndex;
               return `<a href="${coreSetup.http.basePath.prepend(
                 `/app/observability/entities/${encodeURIComponent(
-                  definition.discoveryDefinition?.type ?? ''
+                  definition.definitionType ?? ''
                 )}/${id}`
               )}">${valueAtIndex}</a>`;
             });

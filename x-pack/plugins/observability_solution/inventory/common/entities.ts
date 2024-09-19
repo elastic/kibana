@@ -4,79 +4,63 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EntityDefinition as EntityDiscoveryDefinition } from '@kbn/entities-schema';
 
-export interface Entity<TAttributes extends Record<string, any> = Record<string, any>> {
-  id: string;
-  label: string;
-  type: string;
-  properties: TAttributes & {
-    'entity.id': string;
-    'entity.type': string;
-    'entity.displayName': string;
-  };
-}
-
-export interface EntityTypeDefinition {
-  name: string;
-  label: string;
-  icon: string;
-  discoveryDefinition?: EntityDiscoveryDefinition;
-}
-
-interface ConcreteIdentifyField {
-  identity: {
-    type: 'concrete';
-  };
+export interface IdentityField {
   field: string;
-  value: string;
+  optional: boolean;
 }
 
-interface VirtualIdentityField {
-  identity: {
-    type: 'virtual';
-  };
-  field: string;
-  optional?: boolean;
-  source?: string;
+interface ExtractionMetadataField {
+  source: string;
+  destination: string;
+  limit: number;
+}
+interface MetadataField {
+  destination: string;
+  source: string;
 }
 
-export type IdentityField = ConcreteIdentifyField | VirtualIdentityField;
-
-interface VirtualMetadataField {
-  metadata: {
-    type: 'virtual';
-  };
-  field: string;
-  source?: string;
-  type: 'keyword';
-  limit?: number;
-}
-
-type MetadataField = VirtualMetadataField;
-
-export interface VirtualEntityDefinition {
-  definition: {
-    id?: string;
-    type: 'virtual';
-  };
-  entity: {
-    type: string;
-  };
+export interface EntityDataSource {
   indexPatterns: string[];
+}
+
+interface ExtractionDefinition {
+  source: EntityDataSource;
+  metadata: ExtractionMetadataField[];
+}
+
+interface EntityDefinitionBase {
+  id: string;
+  type: string;
+  label: string;
   identityFields: IdentityField[];
   metadata: MetadataField[];
+  displayNameTemplate: string;
+  managed: boolean;
 }
 
-interface ConcreteEntityDefinition {
-  definition: {
-    id: string;
-    type: 'concrete';
-  };
-  entity: {
-    type: string;
-  };
-  identityFields: ConcreteIdentifyField[];
+export interface InventoryEntityDefinition extends EntityDefinitionBase {
+  definitionType: 'inventory';
+  extractionDefinitions: ExtractionDefinition[];
+  sources: EntityDataSource[];
 }
 
-export type EntityDefinition = VirtualEntityDefinition | ConcreteEntityDefinition;
+export interface VirtualEntityDefinition extends EntityDefinitionBase {
+  definitionType: 'virtual';
+  parentTypeId: string;
+  parentEntityId?: string;
+}
+
+export type EntityMetricDefinition = {
+  id: string;
+  displayName: string;
+  properties: Record<string, unknown>;
+} & ({ filter: string } | { expression: string });
+
+export type EntityDefinition = InventoryEntityDefinition | EntityDefinitionBase;
+
+export interface Entity {
+  type: string;
+  displayName: string;
+  properties: Record<string, unknown>;
+}

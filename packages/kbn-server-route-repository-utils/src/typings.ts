@@ -249,13 +249,17 @@ export interface RouteRepositoryClient<
   fetch<TEndpoint extends Extract<keyof TServerRouteRepository, string>>(
     endpoint: TEndpoint,
     ...args: MaybeOptionalArgs<
-      ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions
+      ClientRequestParamsOf<TServerRouteRepository, TEndpoint> &
+        DefaultClientOptions &
+        TAdditionalClientOptions
     >
   ): Promise<ReturnOf<TServerRouteRepository, TEndpoint>>;
   stream<TEndpoint extends Extract<keyof TServerRouteRepository, string>>(
     endpoint: TEndpoint,
     ...args: MaybeOptionalArgs<
-      ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions
+      ClientRequestParamsOf<TServerRouteRepository, TEndpoint> &
+        DefaultClientOptions &
+        TAdditionalClientOptions
     >
   ): ReturnOf<TServerRouteRepository, TEndpoint> extends Observable<infer TReturnType>
     ? TReturnType extends ServerSentEvent
@@ -270,7 +274,17 @@ interface CoreRouteHandlerResources {
   context: RequestHandlerContext;
 }
 
-export type DefaultClientOptions = HttpFetchOptions;
+export interface RequestCacheOptions {
+  mode: 'always' | 'default' | 'never';
+  type?: 'inMemory';
+  refresh?: boolean;
+}
+
+export type DefaultClientOptions = Partial<
+  HttpFetchOptions & {
+    caching?: Partial<RequestCacheOptions>;
+  }
+>;
 
 export interface DefaultRouteHandlerResources extends CoreRouteHandlerResources {
   logger: Logger;

@@ -94,7 +94,6 @@
     "@kbn/home-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/guided-onboarding-plugin",
-    "@kbn/inventory-plugin",
     "@kbn/investigate-plugin",
     "@kbn/license-management-plugin",
     "@kbn/presentation-util-plugin",

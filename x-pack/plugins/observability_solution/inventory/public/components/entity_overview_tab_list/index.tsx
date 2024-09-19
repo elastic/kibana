@@ -11,7 +11,7 @@ export function EntityOverviewTabList<
   T extends { name: string; label: string; href: string; selected: boolean }
 >({ tabs }: { tabs: T[] }) {
   return (
-    <EuiTabs size="xl">
+    <EuiTabs size="m">
       {tabs.map((tab) => {
         return (
           <EuiTab key={tab.name} href={tab.href} isSelected={tab.selected}>

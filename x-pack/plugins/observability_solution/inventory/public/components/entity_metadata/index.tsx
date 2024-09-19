@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import type { Entity } from '../../../common/entities';
 
-export function EntityMetadata<TEntity extends Entity>({ entity }: { entity: TEntity }) {
+export function EntityMetadata({ entity }: { entity: Entity }) {
   const fields = useMemo(() => {
     return Object.entries(entity.properties).map(([field, value]) => {
       return {

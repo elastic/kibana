@@ -12,9 +12,9 @@ import { configureStore } from '@reduxjs/toolkit';
 import React, { FC, PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ExpandableFlyoutContextProvider } from '../context';
-import { reducer } from '../reducer';
-import { Context } from '../redux';
-import { initialState, State } from '../state';
+import { panelsReducer } from '../store/reducers';
+import { Context } from '../store/redux';
+import { initialState, State } from '../store/state';
 
 interface TestProviderProps {
   state?: State;
@@ -27,7 +27,9 @@ export const TestProvider: FC<PropsWithChildren<TestProviderProps>> = ({
   urlKey,
 }) => {
   const store = configureStore({
-    reducer,
+    reducer: {
+      panels: panelsReducer,
+    },
     devTools: false,
     preloadedState: state,
     enhancers: [],

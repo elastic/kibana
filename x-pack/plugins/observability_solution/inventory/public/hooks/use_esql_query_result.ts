@@ -4,48 +4,49 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import {
-  AbortableAsyncState,
-  useAbortableAsync,
-} from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { EsqlQueryResult, runEsqlQuery } from '../util/run_esql_query';
+
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from './use_kibana';
 
 export function useEsqlQueryResult({
   query,
+  kuery,
   start,
   end,
-  kqlFilter,
+  operationName,
   dslFilter,
 }: {
   query?: string;
-  start?: number;
-  end?: number;
-  kqlFilter?: string;
+  kuery?: string;
+  start: number;
+  end: number;
+  operationName: string;
   dslFilter?: QueryDslQueryContainer[];
-}): AbortableAsyncState<EsqlQueryResult> {
+}) {
   const {
-    dependencies: {
-      start: { data },
-    },
+    services: { inventoryAPIClient },
   } = useKibana();
 
   return useAbortableAsync(
-    async ({ signal }) => {
+    ({ signal }) => {
       if (!query) {
         return undefined;
       }
-      return runEsqlQuery({
-        query,
-        start,
-        end,
-        kqlFilter,
-        dslFilter,
+      return inventoryAPIClient.fetch('POST /internal/inventory/esql', {
         signal,
-        data,
+        params: {
+          body: {
+            query,
+            start,
+            end,
+            kuery: kuery ?? '',
+            operationName,
+            dslFilter,
+          },
+        },
       });
     },
-    [query, start, end, kqlFilter, dslFilter, data]
+    [inventoryAPIClient, query, start, end, kuery, operationName, dslFilter]
   );
 }

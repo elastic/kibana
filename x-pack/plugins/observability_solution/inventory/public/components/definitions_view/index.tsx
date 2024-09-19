@@ -14,19 +14,24 @@ import {
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
-  EuiIcon,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
+import { omit } from 'lodash';
+import { EntityDefinition as EEMEntityDefinition } from '@kbn/entities-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { LoadingPanel } from '../loading_panel';
-import { EntityTypeDefinition } from '../../../common/entities';
 import { EntityDefinitionFormFlyout } from '../entity_definition_form_flyout';
 import { CreateEntityTypeDefinitionButton } from './create_entity_type_definition_button';
 import { InventoryPageHeader } from '../inventory_page_header';
 import { InventoryPageHeaderTitle } from '../inventory_page_header/inventory_page_header_title';
+import { InventoryEntityDefinition } from '../../../common/entities';
 
-function EnableEntityDiscoveryCallout({ onEnableClick }: { onEnableClick: () => Promise<void> }) {
+function EnableManagedDefinitionsCallout({
+  onEnableClick,
+}: {
+  onEnableClick: () => Promise<void>;
+}) {
   const [loading, setLoading] = useState(false);
 
   return (
@@ -38,7 +43,7 @@ function EnableEntityDiscoveryCallout({ onEnableClick }: { onEnableClick: () => 
       <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
         <EuiText>
           {i18n.translate('xpack.inventory.definitionsView.enableEntityDiscoveryCalloutTitle', {
-            defaultMessage: 'Enable automatic discovery of entities.',
+            defaultMessage: 'Enable automatic discovery of data streams.',
           })}
         </EuiText>
         <EuiButton
@@ -76,7 +81,7 @@ function DefinitionsViewContent() {
 
   const entityTypesFetch = useAbortableAsync(
     ({ signal }) => {
-      return inventoryAPIClient.fetch('GET /internal/inventory/entity_types', {
+      return inventoryAPIClient.fetch('GET /internal/inventory/entities/definition/inventory', {
         signal,
       });
     },
@@ -90,29 +95,28 @@ function DefinitionsViewContent() {
     [entityClient]
   );
 
-  const [selectedDiscoveryDefinition, setSelectedDiscoveryDefinition] = useState<
-    Required<EntityTypeDefinition>['discoveryDefinition'] | undefined
+  const [selectedEntityDefinition, setSelectedEntityDefinition] = useState<
+    InventoryEntityDefinition | undefined
   >();
 
   const columns = useMemo(() => {
-    const items: Array<EuiBasicTableColumn<EntityTypeDefinition>> = [
+    const items: Array<EuiBasicTableColumn<InventoryEntityDefinition>> = [
       {
         name: 'label',
         field: 'label',
         render: (value, definition) => {
-          const { icon, label, discoveryDefinition } = definition;
+          const { label } = definition;
           return (
             <EuiLink
               data-test-subj="definitionsView"
               onClick={() => {
-                setSelectedDiscoveryDefinition(definition.discoveryDefinition);
+                setSelectedEntityDefinition(definition);
               }}
-              disabled={!discoveryDefinition}
+              disabled={!selectedEntityDefinition}
             >
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                <EuiIcon type={icon} size="s" />
                 <EuiText size="s">{label}</EuiText>
-                {discoveryDefinition?.managed || !discoveryDefinition ? (
+                {selectedEntityDefinition?.managed ? (
                   <EuiBadge>
                     {i18n.translate('xpack.inventory.definitionsViewTable.managed', {
                       defaultMessage: 'Managed',
@@ -127,7 +131,7 @@ function DefinitionsViewContent() {
     ];
 
     return items;
-  }, []);
+  }, [selectedEntityDefinition]);
 
   const items = useMemo(() => {
     return entityTypesFetch.value?.definitions ?? [];
@@ -139,7 +143,7 @@ function DefinitionsViewContent() {
 
   if (!isDiscoveryEnabledFetch.value?.enabled) {
     return (
-      <EnableEntityDiscoveryCallout
+      <EnableManagedDefinitionsCallout
         onEnableClick={() => {
           return entityClient
             .enableManagedEntityDiscovery()
@@ -161,20 +165,55 @@ function DefinitionsViewContent() {
     );
   }
 
+  function eemDefinitionFromInventory(definition: InventoryEntityDefinition): EEMEntityDefinition {
+    return {
+      history: {
+        timestampField: '@timestamp',
+        interval: '1m',
+        settings: {
+          lookbackPeriod: '10m',
+          frequency: '2m',
+          syncDelay: '2m',
+        },
+      },
+      displayNameTemplate: definition.displayNameTemplate,
+      id: definition.id,
+      type: definition.type,
+      identityFields: definition.identityFields,
+      indexPatterns: definition.extractionDefinitions.flatMap(
+        (extractionDefinition) => extractionDefinition.source.indexPatterns
+      ),
+      managed: definition.managed,
+      name: definition.label,
+      version: '1.0.0',
+      metadata: definition.extractionDefinitions
+        .flatMap((extractionDefinition) => extractionDefinition.metadata)
+        .map((option) => {
+          return {
+            ...option,
+            aggregation: {
+              type: 'terms',
+              limit: 10,
+            },
+          };
+        }),
+    };
+  }
+
   return (
     <>
-      {selectedDiscoveryDefinition ? (
+      {selectedEntityDefinition ? (
         <EntityDefinitionFormFlyout
           onClose={() => {
-            setSelectedDiscoveryDefinition(undefined);
+            setSelectedEntityDefinition(undefined);
           }}
-          definition={selectedDiscoveryDefinition}
+          definition={selectedEntityDefinition}
           onSubmit={async (definition) => {
             return entityClient
-              .updateEntityDefinition(definition.id, {
-                version: definition.version,
-                description: definition.description,
-              })
+              .updateEntityDefinition(
+                definition.id,
+                omit(eemDefinitionFromInventory(definition), 'id')
+              )
               .catch((error) => {
                 notifications.showErrorDialog({
                   title: i18n.translate('xpack.inventory.definitionsView.updateDefinitionError', {
@@ -191,15 +230,17 @@ function DefinitionsViewContent() {
         <EuiBasicTable columns={columns} items={items} />
         <CreateEntityTypeDefinitionButton
           onSubmit={async (definition) => {
-            return entityClient.createEntityDefinition(definition).catch((error) => {
-              notifications.showErrorDialog({
-                title: i18n.translate('xpack.inventory.definitionsView.createDefinitionError', {
-                  defaultMessage: 'Failed to create entity definition',
-                }),
-                error,
+            return entityClient
+              .createEntityDefinition(eemDefinitionFromInventory(definition))
+              .catch((error) => {
+                notifications.showErrorDialog({
+                  title: i18n.translate('xpack.inventory.definitionsView.createDefinitionError', {
+                    defaultMessage: 'Failed to create entity definition',
+                  }),
+                  error,
+                });
+                throw error;
               });
-              throw error;
-            });
           }}
         />
       </EuiFlexGroup>

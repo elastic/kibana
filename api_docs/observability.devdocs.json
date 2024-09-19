@@ -2892,6 +2892,27 @@
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsSetup.inventory",
+            "type": "Object",
+            "tags": [],
+            "label": "inventory",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inventory",
+                "scope": "public",
+                "docId": "kibInventoryPluginApi",
+                "section": "def-public.InventoryPublicSetup",
+                "text": "InventoryPublicSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3836,6 +3857,27 @@
                 "docId": "kibInvestigatePluginApi",
                 "section": "def-public.InvestigatePublicStart",
                 "text": "InvestigatePublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.inventory",
+            "type": "Object",
+            "tags": [],
+            "label": "inventory",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inventory",
+                "scope": "public",
+                "docId": "kibInventoryPluginApi",
+                "section": "def-public.InventoryPublicStart",
+                "text": "InventoryPublicStart"
               },
               " | undefined"
             ],
@@ -8785,7 +8827,7 @@
             "label": "config",
             "description": [],
             "signature": [
-              "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
+              "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
             "deprecated": false,
@@ -8805,7 +8847,15 @@
         "label": "AbstractObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ [x: string]: { endpoint: string; params?: ",
+          "{ [x: string]: ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<string, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -8813,7 +8863,7 @@
             "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
-          " | undefined; handler: ({}: any) => Promise<any>; } & Record<string, any>; }"
+          " | undefined, any, any, Record<string, any>>; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
         "deprecated": false,
@@ -8877,7 +8927,15 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": { endpoint: \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\"; params?: ",
+          "{ \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\", ",
           "TypeC",
           "<{ query: ",
           "TypeC",
@@ -8887,7 +8945,7 @@
           "StringC",
           ">; namespace: ",
           "StringC",
-          "; }>; }> | undefined; handler: ({}: ",
+          "; }>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8895,7 +8953,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { query: { registrationContexts: string[]; namespace: string; }; }; }) => Promise<string[]>; } & ",
+          ", string[], ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8903,7 +8961,15 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /internal/observability/assistant/alert_details_contextual_insights\": { endpoint: \"GET /internal/observability/assistant/alert_details_contextual_insights\"; params?: ",
+          ">; \"GET /internal/observability/assistant/alert_details_contextual_insights\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/assistant/alert_details_contextual_insights\", ",
           "TypeC",
           "<{ query: ",
           "IntersectionC",
@@ -8931,7 +8997,7 @@
           "StringC",
           "; 'kubernetes.pod.name': ",
           "StringC",
-          "; }>]>; }> | undefined; handler: ({}: ",
+          "; }>]>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8939,9 +9005,9 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { query: { alert_started_at: string; } & { alert_rule_parameter_time_size?: string | undefined; alert_rule_parameter_time_unit?: string | undefined; 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.name'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; }; }; }) => Promise<{ alertContext: ",
+          ", { alertContext: ",
           "AlertDetailsContextualInsight",
-          "[]; }>; } & ",
+          "[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8949,7 +9015,15 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; }[TEndpoint] extends { endpoint: any; params?: any; handler: ({}: any) => Promise<infer TReturnType>; } & ",
+          ">; }[TEndpoint] extends ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -8957,7 +9031,7 @@
             "section": "def-common.ServerRouteCreateOptions",
             "text": "ServerRouteCreateOptions"
           },
-          " ? TReturnType extends ",
+          "> ? TReturnType extends ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -8990,7 +9064,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
+          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability/server/index.ts",
         "deprecated": false,
@@ -9005,7 +9079,15 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": { endpoint: \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\"; params?: ",
+          "{ \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\", ",
           "TypeC",
           "<{ query: ",
           "TypeC",
@@ -9015,7 +9097,7 @@
           "StringC",
           ">; namespace: ",
           "StringC",
-          "; }>; }> | undefined; handler: ({}: ",
+          "; }>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9023,7 +9105,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { query: { registrationContexts: string[]; namespace: string; }; }; }) => Promise<string[]>; } & ",
+          ", string[], ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9031,7 +9113,15 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /internal/observability/assistant/alert_details_contextual_insights\": { endpoint: \"GET /internal/observability/assistant/alert_details_contextual_insights\"; params?: ",
+          ">; \"GET /internal/observability/assistant/alert_details_contextual_insights\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/assistant/alert_details_contextual_insights\", ",
           "TypeC",
           "<{ query: ",
           "IntersectionC",
@@ -9059,7 +9149,7 @@
           "StringC",
           "; 'kubernetes.pod.name': ",
           "StringC",
-          "; }>]>; }> | undefined; handler: ({}: ",
+          "; }>]>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9067,9 +9157,9 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { query: { alert_started_at: string; } & { alert_rule_parameter_time_size?: string | undefined; alert_rule_parameter_time_unit?: string | undefined; 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.name'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; }; }; }) => Promise<{ alertContext: ",
+          ", { alertContext: ",
           "AlertDetailsContextualInsight",
-          "[]; }>; } & ",
+          "[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9077,7 +9167,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; }"
+          ">; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability/server/routes/get_global_observability_server_route_repository.ts",
         "deprecated": false,
@@ -12845,6 +12935,104 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.profilingFetchTopNFunctionsFromStacktraces.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.searchExcludedDataTiers",
+            "type": "Object",
+            "tags": [],
+            "label": "[searchExcludedDataTiers]",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.searchExcludedDataTiers.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.searchExcludedDataTiers.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.searchExcludedDataTiers.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.searchExcludedDataTiers.value",
+                "type": "Array",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "never[]"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.searchExcludedDataTiers.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<(\"data_cold\" | \"data_frozen\")[]>"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.searchExcludedDataTiers.requiresPageReload",
                 "type": "boolean",
                 "tags": [],
                 "label": "requiresPageReload",

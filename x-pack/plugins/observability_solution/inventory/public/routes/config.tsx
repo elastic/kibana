@@ -4,24 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { createRouter, Outlet, RouteMap } from '@kbn/typed-react-router-config';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { InventoryPageTemplate } from '../components/inventory_page_template';
-import { DatasetInventoryView } from '../components/dataset_inventory_view';
-import { DatasetAnalysisView } from '../components/dataset_analysis_view';
-import { DatasetOverview } from '../components/dataset_overview';
-import { DatasetDetailView } from '../components/dataset_detail_view';
-import { DatasetMetricsView } from '../components/dataset_metrics_view';
-import { RedirectTo } from '../components/redirect_to';
+import { createRouter, Outlet, RouteMap } from '@kbn/typed-react-router-config';
+import * as t from 'io-ts';
+import React from 'react';
 import { AllInventoryView } from '../components/all_inventory_view';
-import { DatasetManagementView } from '../components/dataset_management_view';
-import { InventoryRouterBreadcrumb } from '../components/inventory_router_breadcrumb';
+import { DatasetManagementParseView } from '../components/dataset_management_parse_view';
 import { DatasetManagementSplitView } from '../components/dataset_management_split_view';
 import { DefinitionsView } from '../components/definitions_view';
 import { EntityDetailView } from '../components/entity_detail_view';
-import { DatasetManagementParseView } from '../components/dataset_management_parse_view';
+import { InventoryPageTemplate } from '../components/inventory_page_template';
+import { InventoryRouterBreadcrumb } from '../components/inventory_router_breadcrumb';
+import { RedirectTo } from '../components/redirect_to';
+import { TypeInventoryView } from '../components/type_inventory_view';
+import { DataStreamDetailView } from '../components/data_stream_detail_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -60,60 +56,35 @@ const inventoryRoutes = {
           </InventoryRouterBreadcrumb>
         ),
       },
-      '/data_stream/analyze': {
-        element: <DatasetAnalysisView />,
+      '/data_stream/{displayName}': {
+        element: <Outlet />,
         params: t.type({
-          query: t.type({
-            indexPatterns: t.string,
+          path: t.type({
+            displayName: t.string,
           }),
         }),
-      },
-      '/data_stream': {
-        element: (
-          <InventoryRouterBreadcrumb
-            title={i18n.translate('xpack.inventory.datastreamsBreadcrumbTitle', {
-              defaultMessage: 'Data streams',
-            })}
-            path="/data_stream"
-          >
-            <Outlet />
-          </InventoryRouterBreadcrumb>
-        ),
         children: {
-          '/data_stream': {
-            element: <DatasetInventoryView />,
+          '/data_stream/{displayName}': {
+            element: (
+              <RedirectTo
+                path="/data_stream/{displayName}/{tab}"
+                params={{ path: { tab: 'overview' } }}
+              />
+            ),
           },
-          '/data_stream/{id}': {
+          '/data_stream/{displayName}/{tab}': {
+            element: <DataStreamDetailView />,
             params: t.type({
               path: t.type({
-                id: t.string,
+                tab: t.string,
               }),
             }),
-            element: (
-              <DatasetDetailView>
-                <Outlet />
-              </DatasetDetailView>
-            ),
-            children: {
-              '/data_stream/{id}/overview': {
-                element: <DatasetOverview />,
-              },
-              '/data_stream/{id}/metrics': {
-                element: <DatasetMetricsView />,
-              },
-              '/data_stream/{id}/management': {
-                element: <DatasetManagementView />,
-              },
-              '/data_stream/{id}/management/split': {
-                element: <DatasetManagementSplitView />,
-              },
-              '/data_stream/{id}/management/parse': {
-                element: <DatasetManagementParseView />,
-              },
-              '/data_stream/{id}': {
-                element: <RedirectTo path="/data_stream/{id}/overview" />,
-              },
-            },
+          },
+          '/data_stream/{id}/management/split': {
+            element: <DatasetManagementSplitView />,
+          },
+          '/data_stream/{id}/management/parse': {
+            element: <DatasetManagementParseView />,
           },
         },
       },
@@ -123,18 +94,24 @@ const inventoryRoutes = {
           path: t.type({ type: t.string }),
         }),
         children: {
-          '/{type}/{id}': {
+          '/{type}': {
+            element: <TypeInventoryView />,
+          },
+          '/{type}/{displayName}': {
             params: t.type({
-              path: t.type({ id: t.string }),
+              path: t.type({ displayName: t.string }),
             }),
             element: <Outlet />,
             children: {
-              '/{type}/{id}': {
+              '/{type}/{displayName}': {
                 element: (
-                  <RedirectTo path="/{type}/{id}/{tab}" params={{ path: { tab: 'overview' } }} />
+                  <RedirectTo
+                    path="/{type}/{displayName}/{tab}"
+                    params={{ path: { tab: 'overview' } }}
+                  />
                 ),
               },
-              '/{type}/{id}/{tab}': {
+              '/{type}/{displayName}/{tab}': {
                 element: <EntityDetailView />,
                 params: t.type({
                   path: t.type({ tab: t.string }),

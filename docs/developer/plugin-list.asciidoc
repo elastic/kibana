@@ -570,7 +570,7 @@ security and spaces filtering.
 |Exposes services to access entities data.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager/README.md[entityManager]
+|{kib-repo}blob/{branch}/x-pack/plugins/entity_manager/README.md[entityManager]
 |This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
 
 
@@ -649,7 +649,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/inventory/README.md[inventory]
-|undefined
+|Home of the Inventory plugin, which renders the... inventory.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
@@ -844,12 +844,13 @@ Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security_solution_ess/README.md[securitySolutionEss]
-|This plugin contains the ESS/on-prem deployments (non-serverless) specific logic for Security Solution.
+|The security_solution_ess plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate ESS-specific logic.
+This plugin is only enabled when the application is built for stateful deployments (ESS or on-prem), keeping the main security_solution plugin clean and agnostic of the offering model.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_serverless/README.mdx[securitySolutionServerless]
-|This plugin contains configuration and code used to create a Serverless Security project.
-It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
+|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_serverless/README.md[securitySolutionServerless]
+|The security_solution_serverless plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate serverless-specific logic.
+This plugin is only enabled when the application is built for serverless project, keeping the main security_solution plugin clean and agnostic of the offering model.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/serverless/README.mdx[serverless]

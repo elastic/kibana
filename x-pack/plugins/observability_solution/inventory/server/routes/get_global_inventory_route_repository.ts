@@ -7,11 +7,13 @@
 
 import { entitiesRoutes } from './entities/route';
 import { datasetsRoutes } from './datasets/route';
+import { esqlRoutes } from './esql/route';
 
 export function getGlobalInventoryServerRouteRepository() {
   return {
     ...entitiesRoutes,
     ...datasetsRoutes,
+    ...esqlRoutes,
   };
 }
 

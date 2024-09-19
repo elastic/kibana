@@ -126,7 +126,8 @@ import {
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
 import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
-import { VisualizeSerializedState } from './react_embeddable/types';
+import type { VisualizeSerializedState } from './embeddable/types';
+import { getVisualizeEmbeddableFactoryLazy } from './embeddable';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -308,7 +309,10 @@ export class VisualizationsPlugin
          * this should be replaced to use only scoped history after moving legacy apps to browser routing
          */
         const history = createHashHistory();
-        const { createVisEmbeddableFromObject } = await import('./embeddable');
+        const [{ createVisEmbeddableFromObject }, { renderApp }] = await Promise.all([
+          import('./legacy/embeddable'),
+          import('./visualize_app'),
+        ]);
         const services: VisualizeServices = {
           ...coreStart,
           history,
@@ -352,7 +356,6 @@ export class VisualizationsPlugin
         };
 
         params.element.classList.add('visAppWrapper');
-        const { renderApp } = await import('./visualize_app');
         if (pluginsStart.screenshotMode.isScreenshotMode()) {
           params.element.classList.add('visEditorScreenshotModeActive');
           // @ts-expect-error TS error, cannot find type declaration for scss
@@ -407,7 +410,7 @@ export class VisualizationsPlugin
         plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
       } = start();
 
-      const { getVisualizeEmbeddableFactory } = await import('./react_embeddable');
+      const getVisualizeEmbeddableFactory = await getVisualizeEmbeddableFactoryLazy();
       return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
     });
     embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({

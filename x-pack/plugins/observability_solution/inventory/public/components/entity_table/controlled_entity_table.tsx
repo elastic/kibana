@@ -10,18 +10,25 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import { css } from '@emotion/css';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { InventorySearchBar } from '../inventory_search_bar';
+import { Entity } from '../../../common/entities';
 
-export function ControlledEntityTable<TEntity extends { id: string; name: string; type: string }>({
+export function ControlledEntityTable({
   rows,
   columns,
   loading,
+  timeRange,
+  onTimeRangeChange,
   kqlFilter,
   onKqlFilterChange,
   onKqlFilterSubmit,
@@ -29,10 +36,16 @@ export function ControlledEntityTable<TEntity extends { id: string; name: string
   onPaginationChange,
   totalItemCount,
   dataViews,
+  showTypeSelect,
+  selectedType,
+  availableTypes,
+  onSelectedTypeChange,
 }: {
-  rows: TEntity[];
-  columns: Array<EuiBasicTableColumn<TEntity>>;
+  rows: Entity[];
+  columns: Array<EuiBasicTableColumn<Entity>>;
   kqlFilter: string;
+  timeRange: TimeRange;
+  onTimeRangeChange: (nextTimeRange: TimeRange) => void;
   onKqlFilterChange: (nextKql: string) => void;
   onKqlFilterSubmit: () => void;
   loading: boolean;
@@ -40,40 +53,44 @@ export function ControlledEntityTable<TEntity extends { id: string; name: string
   onPaginationChange: (pagination: { pageSize: number; pageIndex: number }) => void;
   totalItemCount: number;
   dataViews?: DataView[];
+  showTypeSelect?: boolean;
+  selectedType?: string;
+  onSelectedTypeChange?: (nextType: string) => void;
+  availableTypes?: Array<{ label: string; value: string }>;
 }) {
   const router = useInventoryRouter();
 
-  const displayedColumns = useMemo<Array<EuiBasicTableColumn<TEntity>>>(() => {
+  const displayedColumns = useMemo<Array<EuiBasicTableColumn<Entity>>>(() => {
     return [
-      {
-        field: 'name',
-        name: i18n.translate('xpack.inventory.entityTable.nameColumnLabel', {
-          defaultMessage: 'Name',
-        }),
-        width: '80%',
-        render: (_, { id, type, name }) => {
-          return (
-            <EuiLink
-              data-test-subj="inventoryColumnsLink"
-              href={router.link('/{type}/{id}', {
-                path: {
-                  id,
-                  type,
-                },
-              })}
-            >
-              {name}
-            </EuiLink>
-          );
-        },
-      },
       {
         field: 'type',
         name: i18n.translate('xpack.inventory.entityTable.typeColumnLabel', {
           defaultMessage: 'Type',
         }),
+        width: '96px',
         render: (_, { type }) => {
           return <EuiBadge>{type}</EuiBadge>;
+        },
+      },
+      {
+        field: 'name',
+        name: i18n.translate('xpack.inventory.entityTable.nameColumnLabel', {
+          defaultMessage: 'Name',
+        }),
+        render: (_, { type, displayName }) => {
+          return (
+            <EuiLink
+              data-test-subj="inventoryColumnsLink"
+              href={router.link('/{type}/{displayName}', {
+                path: {
+                  displayName,
+                  type,
+                },
+              })}
+            >
+              {displayName}
+            </EuiLink>
+          );
         },
       },
     ];
@@ -86,20 +103,47 @@ export function ControlledEntityTable<TEntity extends { id: string; name: string
 
   return (
     <EuiFlexGroup direction="column">
-      <InventorySearchBar
-        query={kqlFilter}
-        onQueryChange={({ query }) => {
-          onKqlFilterChange(query);
-        }}
-        onQuerySubmit={() => {
-          onKqlFilterSubmit();
-        }}
-        placeholder={i18n.translate('xpack.inventory.entityTable.filterEntitiesPlaceholder', {
-          defaultMessage: 'Filter entities',
-        })}
-        dataViews={dataViews}
-      />
-      <EuiBasicTable<TEntity>
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem grow>
+          <InventorySearchBar
+            query={kqlFilter}
+            onQueryChange={({ query }) => {
+              onKqlFilterChange(query);
+            }}
+            onQuerySubmit={({ dateRange }) => {
+              onKqlFilterSubmit();
+              if (dateRange) {
+                onTimeRangeChange(dateRange);
+              }
+            }}
+            placeholder={i18n.translate('xpack.inventory.entityTable.filterEntitiesPlaceholder', {
+              defaultMessage: 'Filter entities',
+            })}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
+            dataViews={dataViews}
+          />
+        </EuiFlexItem>
+        {showTypeSelect ? (
+          <EuiFlexItem
+            className={css`
+              width: 192px;
+            `}
+            grow={false}
+          >
+            <EuiSelect
+              data-test-subj="entityTableTypeSelect"
+              value={selectedType}
+              onChange={(event) => {
+                onSelectedTypeChange?.(event.currentTarget.value);
+              }}
+              isLoading={!availableTypes}
+              options={availableTypes?.map(({ value, label }) => ({ value, text: label }))}
+            />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      <EuiBasicTable<Entity>
         columns={displayedColumns}
         items={displayedRows}
         itemId="name"
@@ -112,7 +156,7 @@ export function ControlledEntityTable<TEntity extends { id: string; name: string
         noItemsMessage={i18n.translate('xpack.inventory.entityTable.noItemsMessage', {
           defaultMessage: `No entities found`,
         })}
-        onChange={(criteria: CriteriaWithPagination<TEntity>) => {
+        onChange={(criteria: CriteriaWithPagination<Entity>) => {
           const { size, index } = criteria.page;
           onPaginationChange({ pageIndex: index, pageSize: size });
         }}

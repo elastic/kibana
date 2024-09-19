@@ -4,28 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import pLimit from 'p-limit';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
+import { groupBy } from 'lodash';
 import React from 'react';
-import { Required } from 'utility-types';
-import { parse, render } from 'mustache';
-import { Entity, EntityTypeDefinition } from '../../../common/entities';
+import { Entity } from '../../../common/entities';
 import { useKibana } from '../../hooks/use_kibana';
-import { getDataStreamsForEntity } from '../../util/entities/get_data_streams_for_entity';
-import { getEntitiesFromSource } from '../../util/entities/get_entities_from_source';
-import { getEntitySourceDslFilter } from '../../util/entities/get_entity_source_dsl_filter';
 import { EntityTable } from '../entity_table';
 
 export function EntityRelationshipsView({
   entity,
-  typeDefinition,
-  allTypeDefinitions,
+  dataStreams,
 }: {
   entity: Entity;
-  typeDefinition: Required<EntityTypeDefinition, 'discoveryDefinition'>;
-  allTypeDefinitions: EntityTypeDefinition[];
+  dataStreams: Array<{ name: string }>;
 }) {
   const {
     dependencies: {
@@ -34,92 +27,82 @@ export function EntityRelationshipsView({
     services: { inventoryAPIClient },
   } = useKibana();
 
-  const entityDataStreamsFetch = useAbortableAsync(
-    ({ signal }) => {
-      return getDataStreamsForEntity({
-        entity,
-        inventoryAPIClient,
-        signal,
-        typeDefinition,
-      });
-    },
-    [entity, typeDefinition, inventoryAPIClient]
-  );
+  const {
+    absoluteTimeRange: { start, end },
+  } = useDateRange({ data });
 
-  const dataStreams = entityDataStreamsFetch.value?.dataStreams;
-
-  const relationshipsFetch = useAbortableAsync(
-    async ({ signal }): Promise<undefined | QueryDslQueryContainer[]> => {
+  const relationshipQueryFetch = useAbortableAsync(
+    async ({ signal }) => {
       if (!dataStreams) {
         return undefined;
       }
 
-      const entityFilter = getEntitySourceDslFilter({
-        entity,
-        identityFields: typeDefinition.discoveryDefinition.identityFields,
-      });
+      const queries = await inventoryAPIClient
+        .fetch('POST /internal/inventory/entity/relationships', {
+          signal,
+          params: {
+            body: {
+              type: entity.type,
+              displayName: entity.displayName,
+              start,
+              end,
+              indexPatterns: dataStreams.map((dataStream) => dataStream.name),
+            },
+          },
+        })
+        .then((response) => {
+          const relationshipsByType = groupBy(
+            response.relatedEntities,
+            (relatedEntity) => relatedEntity.type
+          );
 
-      const allOtherDefinitions = allTypeDefinitions.filter((currentDefinition) => {
-        return currentDefinition.discoveryDefinition?.id !== typeDefinition.discoveryDefinition?.id;
-      });
-
-      const limiter = pLimit(5);
-
-      const allFilters = (
-        await Promise.all(
-          allOtherDefinitions.map((currentDefinition) => {
-            return limiter(async () => {
-              const entitiesForDefinition = await getEntitiesFromSource({
-                dslFilter: entityFilter,
-                indexPatterns: dataStreams.map((dataStream) => dataStream.name),
-                data,
-                definition: currentDefinition,
-                signal,
-              });
-
-              const tpl = currentDefinition.discoveryDefinition?.displayNameTemplate!;
-              parse(tpl);
-
-              const entityQueries = entitiesForDefinition.flatMap((foundEntity) => {
-                const index = foundEntity._index ?? '';
-                const remote = index.includes(':') ? index.split(':')[0] + ':' : '';
-
-                const displayName = render(tpl, { ...foundEntity, remote });
-                return [
+          return Object.entries(relationshipsByType).map(([type, entities]) => {
+            return {
+              bool: {
+                filter: [
                   {
-                    bool: {
-                      filter: [
-                        {
-                          term: {
-                            'entity.displayName.keyword': displayName,
-                          },
-                        },
-                        { term: { 'entity.type': currentDefinition.discoveryDefinition?.type } },
-                      ],
+                    term: {
+                      'entity.type': type,
                     },
                   },
-                ];
-              });
+                  {
+                    terms: {
+                      ['entity.displayName.keyword']: entities.map(
+                        (relatedEntity) => relatedEntity.displayName
+                      ),
+                    },
+                  },
+                ],
+              },
+            };
+          });
+        });
 
-              return entityQueries;
-            });
-          })
-        )
-      ).flat();
+      if (!queries.length) {
+        return [
+          {
+            bool: {
+              must_not: {
+                match_all: {},
+              },
+            },
+          },
+        ];
+      }
 
       return [
         {
           bool: {
-            should: allFilters,
+            should: queries,
             minimum_should_match: 1,
           },
         },
       ];
     },
-    [dataStreams, entity, typeDefinition, allTypeDefinitions, data]
+    [dataStreams, entity, inventoryAPIClient, start, end]
   );
 
-  const dslFilter = relationshipsFetch.value;
+  const dslFilter = relationshipQueryFetch.value;
 
   return (
     <EuiFlexGroup direction="column">
