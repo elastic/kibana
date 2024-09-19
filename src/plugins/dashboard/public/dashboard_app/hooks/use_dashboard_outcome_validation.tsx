@@ -9,12 +9,11 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { pluginServices } from '../../services/plugin_services';
-import { createDashboardEditUrl } from '../../dashboard_constants';
-import { useDashboardMountContext } from './dashboard_mount_context';
-import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
 import { DashboardCreationOptions } from '../..';
-import { spacesService } from '../../services/kibana_services';
+import { createDashboardEditUrl } from '../../dashboard_constants';
+import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
+import { screenshotModeService, spacesService } from '../../services/kibana_services';
+import { useDashboardMountContext } from './dashboard_mount_context';
 
 export const useDashboardOutcomeValidation = () => {
   const [aliasId, setAliasId] = useState<string>();
@@ -23,11 +22,6 @@ export const useDashboardOutcomeValidation = () => {
 
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
   const scopedHistory = getScopedHistory?.();
-
-  /**
-   * Unpack dashboard services
-   */
-  const { screenshotMode } = pluginServices.getServices();
 
   const validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'] = useCallback(
     ({ dashboardFound, resolveMeta, dashboardId }: LoadDashboardReturn) => {
@@ -42,7 +36,7 @@ export const useDashboardOutcomeValidation = () => {
          */
         if (loadOutcome === 'aliasMatch' && dashboardId && alias) {
           const path = scopedHistory.location.hash.replace(dashboardId, alias);
-          if (screenshotMode.isScreenshotMode()) {
+          if (screenshotModeService.isScreenshotMode()) {
             scopedHistory.replace(path); // redirect without the toast when in screenshot mode.
           } else {
             spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose });
@@ -55,7 +49,7 @@ export const useDashboardOutcomeValidation = () => {
       }
       return 'valid';
     },
-    [scopedHistory, screenshotMode]
+    [scopedHistory]
   );
 
   const getLegacyConflictWarning = useMemo(() => {

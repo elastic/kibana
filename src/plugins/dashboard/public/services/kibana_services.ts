@@ -18,12 +18,16 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+
 import type { DashboardStartDependencies } from '../plugin';
 
 // export let dataViewsService: DataViewsPublicPluginStart;
@@ -37,11 +41,14 @@ export let navigationService: NavigationPublicPluginStart;
 export let noDataPageService: NoDataPagePluginStart | undefined;
 export let observabilityAssistantService: ObservabilityAIAssistantPublicStart | undefined;
 export let presentationUtilService: PresentationUtilPluginStart;
+export let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
+export let screenshotModeService: ScreenshotModePluginStart;
 export let serverlessService: ServerlessPluginStart | undefined;
 export let shareService: SharePluginStart | undefined;
 export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
 export let urlForwardingService: UrlForwardingStart;
+export let usageCollectionService: UsageCollectionStart | undefined;
 export let visualizationsService: VisualizationsStart;
 
 const servicesReady$ = new BehaviorSubject(false);
@@ -56,11 +63,14 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   noDataPageService = deps.noDataPage;
   observabilityAssistantService = deps.observabilityAIAssistant;
   presentationUtilService = deps.presentationUtil;
+  savedObjectsTaggingService = deps.savedObjectsTaggingOss;
   serverlessService = deps.serverless;
+  screenshotModeService = deps.screenshotMode;
   shareService = deps.share;
   spacesService = deps.spaces;
   uiActionsService = deps.uiActions;
   urlForwardingService = deps.urlForwarding;
+  usageCollectionService = deps.usageCollection;
   visualizationsService = deps.visualizations;
   // dataViewsService = deps.dataViews;
 

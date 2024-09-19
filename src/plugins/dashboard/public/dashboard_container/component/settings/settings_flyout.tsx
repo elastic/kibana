@@ -9,27 +9,30 @@
 
 import React, { useCallback, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { i18n } from '@kbn/i18n';
+
 import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
-  EuiForm,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiTitle,
-  EuiCallOut,
+  EuiForm,
+  EuiFormRow,
+  EuiIconTip,
   EuiSwitch,
   EuiText,
-  EuiIconTip,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { DashboardContainerInput } from '../../../../common';
+import { savedObjectsTaggingService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
@@ -41,7 +44,6 @@ const DUPLICATE_TITLE_CALLOUT_ID = 'duplicateTitleCallout';
 
 export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   const {
-    savedObjectsTagging: { components },
     dashboardContentManagement: { checkForDuplicateDashboardTitle },
   } = pluginServices.getServices();
 
@@ -126,7 +128,9 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   };
 
   const renderTagSelector = () => {
-    if (!components) return;
+    const api = savedObjectsTaggingService?.getTaggingApi();
+    if (!api) return;
+
     return (
       <EuiFormRow
         label={
@@ -136,7 +140,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           />
         }
       >
-        <components.TagSelector
+        <api.ui.components.TagSelector
           selected={dashboardSettingsState.tags}
           onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
         />

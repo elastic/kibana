@@ -85,7 +85,12 @@ import {
 } from '../../dashboard_constants';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
 import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
-import { coreServices, dataService, embeddableService } from '../../services/kibana_services';
+import {
+  coreServices,
+  dataService,
+  embeddableService,
+  usageCollectionService,
+} from '../../services/kibana_services';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
@@ -250,8 +255,6 @@ export class DashboardContainer
       });
     }
 
-    const { usageCollection } = pluginServices.getServices();
-
     super(
       {
         ...initialInput,
@@ -269,8 +272,8 @@ export class DashboardContainer
     this.controlGroupApi$ = controlGroupApi$;
     this.untilContainerInitialized = untilContainerInitialized;
 
-    this.trackPanelAddMetric = usageCollection.reportUiCounter?.bind(
-      usageCollection,
+    this.trackPanelAddMetric = usageCollectionService?.reportUiCounter.bind(
+      usageCollectionService,
       DASHBOARD_UI_METRIC_ID
     );
 

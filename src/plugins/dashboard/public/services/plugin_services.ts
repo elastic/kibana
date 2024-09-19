@@ -25,24 +25,16 @@ import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboar
 import { dashboardRecentlyAccessedFactory } from './dashboard_recently_accessed/dashboard_recently_accessed';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context_service';
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service';
-import { savedObjectsTaggingServiceFactory } from './saved_objects_tagging/saved_objects_tagging_service';
-import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode_service';
-import { usageCollectionServiceFactory } from './usage_collection/usage_collection_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
-    'savedObjectsTagging',
     'initializerContext',
     'dashboardBackup',
-    'screenshotMode',
   ]),
   dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory),
 
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
-  savedObjectsTagging: new PluginServiceProvider(savedObjectsTaggingServiceFactory),
-  screenshotMode: new PluginServiceProvider(screenshotModeServiceFactory),
-  usageCollection: new PluginServiceProvider(usageCollectionServiceFactory),
   savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
   contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
   dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedFactory),

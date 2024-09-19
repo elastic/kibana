@@ -27,6 +27,7 @@ import {
   coreServices,
   dataService,
   embeddableService,
+  usageCollectionService,
   visualizationsService,
 } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
@@ -35,7 +36,6 @@ import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 export function DashboardEmptyScreen() {
   const {
-    usageCollection,
     dashboardCapabilities: { showWriteControls },
   } = pluginServices.getServices();
 
@@ -54,8 +54,8 @@ export function DashboardEmptyScreen() {
 
   const goToLens = useCallback(() => {
     if (!lensAlias || !lensAlias.alias) return;
-    const trackUiMetric = usageCollection.reportUiCounter?.bind(
-      usageCollection,
+    const trackUiMetric = usageCollectionService?.reportUiCounter.bind(
+      usageCollectionService,
       DASHBOARD_UI_METRIC_ID
     );
 
@@ -70,7 +70,7 @@ export function DashboardEmptyScreen() {
         searchSessionId: dataService.search.session.getSessionId(),
       },
     });
-  }, [lensAlias, originatingApp, originatingPath, usageCollection]);
+  }, [lensAlias, originatingApp, originatingPath]);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = coreServices.http.basePath.prepend(

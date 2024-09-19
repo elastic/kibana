@@ -7,17 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { TableListView } from '@kbn/content-management-table-list-view';
-import {
-  TableListViewKibanaProvider,
-  type TableListViewKibanaDependencies,
-} from '@kbn/content-management-table-list-view-table';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
+import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
-import { coreServices } from '../services/kibana_services';
+import { coreServices, savedObjectsTaggingService } from '../services/kibana_services';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
@@ -31,7 +28,6 @@ export const DashboardListing = ({
   useSessionStorageIntegration,
 }: DashboardListingProps) => {
   const {
-    savedObjectsTagging,
     dashboardContentInsights: { contentInsightsClient },
     dashboardFavorites,
   } = pluginServices.getServices();
@@ -49,20 +45,12 @@ export const DashboardListing = ({
       initialFilter,
     });
 
-  const savedObjectsTaggingFakePlugin = useMemo(() => {
-    return savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
-      ? ({
-          ui: savedObjectsTagging,
-        } as TableListViewKibanaDependencies['savedObjectsTagging'])
-      : undefined;
-  }, [savedObjectsTagging]);
-
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
         {...{
           core: coreServices,
-          savedObjectsTagging: savedObjectsTaggingFakePlugin,
+          savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
           FormattedRelative,
           favorites: dashboardFavorites,
           contentInsightsClient,

@@ -23,8 +23,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
 import { DashboardApi } from '../../dashboard_api/types';
-import { embeddableService } from '../../services/kibana_services';
-import { pluginServices } from '../../services/plugin_services';
+import { embeddableService, screenshotModeService } from '../../services/kibana_services';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
 import {
   DashboardContainerFactory,
@@ -57,8 +56,6 @@ export function DashboardRenderer({
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
   const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
   const [dashboardMissing, setDashboardMissing] = useState(false);
-
-  const { screenshotMode } = pluginServices.getServices();
 
   const id = useMemo(() => uuidv4(), []);
 
@@ -142,7 +139,7 @@ export function DashboardRenderer({
 
   const viewportClasses = classNames(
     'dashboardViewport',
-    { 'dashboardViewport--screenshotMode': screenshotMode },
+    { 'dashboardViewport--screenshotMode': screenshotModeService.isScreenshotMode() },
     { 'dashboardViewport--loading': loading }
   );
 

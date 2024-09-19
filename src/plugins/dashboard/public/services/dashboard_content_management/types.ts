@@ -16,8 +16,6 @@ import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content
 import { DashboardStartDependencies } from '../../plugin';
 import { DashboardBackupServiceType } from '../dashboard_backup/types';
 import { DashboardInitializerContextService } from '../initializer_context/types';
-import { DashboardSavedObjectsTaggingService } from '../saved_objects_tagging/types';
-import { DashboardScreenshotModeService } from '../screenshot_mode/types';
 import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import {
   FindDashboardsByIdResponse,
@@ -27,9 +25,7 @@ import {
 
 export interface DashboardContentManagementRequiredServices {
   dashboardBackup: DashboardBackupServiceType;
-  screenshotMode: DashboardScreenshotModeService;
   initializerContext: DashboardInitializerContextService;
-  savedObjectsTagging: DashboardSavedObjectsTaggingService;
 }
 
 export interface DashboardContentManagementService {
@@ -49,7 +45,6 @@ export interface DashboardContentManagementService {
 export interface LoadDashboardFromSavedObjectProps {
   id?: string;
   contentManagement: DashboardStartDependencies['contentManagement'];
-  savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
 }
 
 type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];

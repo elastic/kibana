@@ -39,13 +39,12 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
   { startPlugins: { contentManagement } },
   requiredServices
 ) => {
-  const { dashboardBackup, initializerContext, savedObjectsTagging } = requiredServices;
+  const { dashboardBackup, initializerContext } = requiredServices;
   return {
     loadDashboardState: ({ id }) =>
       loadDashboardState({
         id,
         contentManagement,
-        savedObjectsTagging,
       }),
     saveDashboardState: ({
       controlGroupReferences,
@@ -63,7 +62,6 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
         dashboardBackup,
         contentManagement,
         initializerContext,
-        savedObjectsTagging,
       }),
     findDashboards: {
       search: ({ hasReference, hasNoReference, search, size, options }) =>
@@ -82,7 +80,6 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
     checkForDuplicateDashboardTitle: (props) =>
       checkForDuplicateDashboardTitle(props, contentManagement),
     deleteDashboards: (ids) => deleteDashboards(ids, contentManagement),
-    updateDashboardMeta: (props) =>
-      updateDashboardMeta(props, { contentManagement, savedObjectsTagging }),
+    updateDashboardMeta: (props) => updateDashboardMeta(props, { contentManagement }),
   };
 };

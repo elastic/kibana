@@ -33,9 +33,9 @@ import {
   coreServices,
   dataService,
   embeddableService,
+  screenshotModeService,
   shareService,
 } from '../services/kibana_services';
-import { pluginServices } from '../services/plugin_services';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
@@ -76,11 +76,8 @@ export function DashboardApp({
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
 
   /**
-   * Unpack & set up dashboard services
+   * Set up dashboard services
    */
-  const {
-    screenshotMode: { isScreenshotMode, getScreenshotContext },
-  } = pluginServices.getServices();
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
@@ -134,7 +131,8 @@ export function DashboardApp({
         ...stateFromLocator,
 
         // if print mode is active, force viewMode.PRINT
-        ...(isScreenshotMode() && getScreenshotContext('layout') === 'print'
+        ...(screenshotModeService.isScreenshotMode() &&
+        screenshotModeService.getScreenshotContext('layout') === 'print'
           ? { viewMode: ViewMode.PRINT }
           : {}),
       };
@@ -167,15 +165,7 @@ export function DashboardApp({
         getCurrentPath: () => `#${createDashboardEditUrl(dashboardId)}`,
       }),
     });
-  }, [
-    history,
-    embedSettings,
-    validateOutcome,
-    getScopedHistory,
-    isScreenshotMode,
-    kbnUrlStateStorage,
-    getScreenshotContext,
-  ]);
+  }, [history, embedSettings, validateOutcome, getScopedHistory, kbnUrlStateStorage]);
 
   /**
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL

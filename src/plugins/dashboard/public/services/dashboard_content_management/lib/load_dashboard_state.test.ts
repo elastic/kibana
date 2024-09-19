@@ -7,21 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registry } from '../../plugin_services.stub';
-import { pluginServices } from '../../plugin_services';
 import { getSampleDashboardInput } from '../../../mocks';
-import { loadDashboardState } from './load_dashboard_state';
+import { pluginServices } from '../../plugin_services';
+import { registry } from '../../plugin_services.stub';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
-import { dataService, embeddableService } from '../../kibana_services';
+import { loadDashboardState } from './load_dashboard_state';
 
 pluginServices.setRegistry(registry.start({}));
-const { contentManagement, savedObjectsTagging } = pluginServices.getServices();
+const { contentManagement } = pluginServices.getServices();
 
 const allServices = {
-  data: dataService,
-  embeddable: embeddableService,
   contentManagement,
-  savedObjectsTagging,
 };
 
 describe('Load dashboard state', () => {

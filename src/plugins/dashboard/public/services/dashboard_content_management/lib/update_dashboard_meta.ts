@@ -12,7 +12,7 @@ import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardCrudTypes } from '../../../../common/content_management';
 import { findDashboardsByIds } from './find_dashboards';
-import { DashboardContentManagementRequiredServices } from '../types';
+import { savedObjectsTaggingService } from '../../kibana_services';
 
 type UpdateDashboardMetaProps = Pick<
   DashboardContainerInput,
@@ -20,21 +20,21 @@ type UpdateDashboardMetaProps = Pick<
 >;
 interface UpdateDashboardMetaDependencies {
   contentManagement: DashboardStartDependencies['contentManagement'];
-  savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
 }
 
 export const updateDashboardMeta = async (
   { id, title, description = '', tags }: UpdateDashboardMetaProps,
-  { contentManagement, savedObjectsTagging }: UpdateDashboardMetaDependencies
+  { contentManagement }: UpdateDashboardMetaDependencies
 ) => {
+  const taggingApi = savedObjectsTaggingService?.getTaggingApi();
   const [dashboard] = await findDashboardsByIds(contentManagement, [id]);
   if (dashboard.status === 'error') {
     return;
   }
 
   const references =
-    savedObjectsTagging.updateTagsReferences && tags.length
-      ? savedObjectsTagging.updateTagsReferences(dashboard.references, tags)
+    taggingApi?.ui.updateTagsReferences && tags.length
+      ? taggingApi.ui.updateTagsReferences(dashboard.references, tags)
       : dashboard.references;
 
   await contentManagement.client.update<

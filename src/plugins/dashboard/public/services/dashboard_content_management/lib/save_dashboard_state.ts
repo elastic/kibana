@@ -20,7 +20,12 @@ import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
 import { DashboardStartDependencies } from '../../../plugin';
-import { coreServices, dataService, embeddableService } from '../../kibana_services';
+import {
+  coreServices,
+  dataService,
+  embeddableService,
+  savedObjectsTaggingService,
+} from '../../kibana_services';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import {
   DashboardContentManagementRequiredServices,
@@ -43,7 +48,6 @@ type SaveDashboardStateProps = SaveDashboardProps & {
   contentManagement: DashboardStartDependencies['contentManagement'];
   dashboardBackup: DashboardContentManagementRequiredServices['dashboardBackup'];
   initializerContext: DashboardContentManagementRequiredServices['initializerContext'];
-  savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
 };
 
 export const saveDashboardState = async ({
@@ -54,7 +58,6 @@ export const saveDashboardState = async ({
   panelReferences,
   dashboardBackup,
   contentManagement,
-  savedObjectsTagging,
 }: SaveDashboardStateProps): Promise<SaveDashboardReturn> => {
   const {
     search: dataSearchService,
@@ -163,8 +166,9 @@ export const saveDashboardState = async ({
     { embeddablePersistableStateService: embeddableService }
   );
 
-  const references = savedObjectsTagging.updateTagsReferences
-    ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
+  const taggingApi = savedObjectsTaggingService?.getTaggingApi();
+  const references = taggingApi?.ui.updateTagsReferences
+    ? taggingApi?.ui.updateTagsReferences(dashboardReferences, tags)
     : dashboardReferences;
 
   const allReferences = [

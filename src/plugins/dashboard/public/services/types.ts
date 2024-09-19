@@ -20,9 +20,6 @@ import { DashboardContentManagementService } from './dashboard_content_managemen
 import { DashboardFavoritesService } from './dashboard_favorites/types';
 import { DashboardRecentlyAccessedService } from './dashboard_recently_accessed/types';
 import { DashboardInitializerContextService } from './initializer_context/types';
-import { DashboardSavedObjectsTaggingService } from './saved_objects_tagging/types';
-import { DashboardScreenshotModeService } from './screenshot_mode/types';
-import { DashboardUsageCollectionService } from './usage_collection/types';
 
 export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardStartDependencies> & {
   initContext: PluginInitializerContext; // need a custom type so that initContext is a required parameter for initializerContext
@@ -33,9 +30,6 @@ export interface DashboardServices {
 
   dashboardCapabilities: DashboardCapabilitiesService;
   initializerContext: DashboardInitializerContextService;
-  savedObjectsTagging: DashboardSavedObjectsTaggingService; // TODO: make this optional in follow up
-  screenshotMode: DashboardScreenshotModeService;
-  usageCollection: DashboardUsageCollectionService; // TODO: make this optional in follow up
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboardRecentlyAccessed: DashboardRecentlyAccessedService;

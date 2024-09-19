@@ -21,15 +21,14 @@ import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import {
   dataService,
   embeddableService,
+  usageCollectionService,
   visualizationsService,
 } from '../../services/kibana_services';
-import { pluginServices } from '../../services/plugin_services';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { EditorMenu } from './editor_menu';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
-  const { usageCollection } = pluginServices.getServices();
   const { euiTheme } = useEuiTheme();
 
   const dashboardApi = useDashboardApi();
@@ -38,8 +37,8 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
 
   const lensAlias = visualizationsService.getAliases().find(({ name }) => name === 'lens');
 
-  const trackUiMetric = usageCollection.reportUiCounter?.bind(
-    usageCollection,
+  const trackUiMetric = usageCollectionService?.reportUiCounter.bind(
+    usageCollectionService,
     DASHBOARD_UI_METRIC_ID
   );
 

@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import {
-  type TableListViewKibanaDependencies,
   TableListViewKibanaProvider,
   TableListViewTable,
 } from '@kbn/content-management-table-list-view-table';
+import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
+import { coreServices, savedObjectsTaggingService } from '../services/kibana_services';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
 import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
-import { coreServices } from '../services/kibana_services';
 
 export const DashboardListingTable = ({
   disableCreateDashboardButton,
@@ -33,7 +32,6 @@ export const DashboardListingTable = ({
   showCreateDashboardButton = true,
 }: DashboardListingProps) => {
   const {
-    savedObjectsTagging,
     dashboardContentInsights: { contentInsightsClient },
   } = pluginServices.getServices();
 
@@ -56,21 +54,11 @@ export const DashboardListingTable = ({
     showCreateDashboardButton,
   });
 
-  const savedObjectsTaggingFakePlugin = useMemo(
-    () =>
-      savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
-        ? ({
-            ui: savedObjectsTagging,
-          } as TableListViewKibanaDependencies['savedObjectsTagging'])
-        : undefined,
-    [savedObjectsTagging]
-  );
-
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
         core={coreServices}
-        savedObjectsTagging={savedObjectsTaggingFakePlugin}
+        savedObjectsTagging={savedObjectsTaggingService?.getTaggingApi()}
         FormattedRelative={FormattedRelative}
         contentInsightsClient={contentInsightsClient}
       >

@@ -23,7 +23,7 @@ import {
 } from '../../../../common';
 import { DashboardCrudTypes } from '../../../../common/content_management';
 import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
-import { dataService, embeddableService } from '../../kibana_services';
+import { dataService, embeddableService, savedObjectsTaggingService } from '../../kibana_services';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 import { convertNumberToDashboardVersion } from './dashboard_versioning';
@@ -41,7 +41,6 @@ export function migrateLegacyQuery(query: Query | { [key: string]: any } | strin
 export const loadDashboardState = async ({
   id,
   contentManagement,
-  savedObjectsTagging,
 }: LoadDashboardFromSavedObjectProps): Promise<LoadDashboardReturn> => {
   const {
     search: dataSearchService,
@@ -184,7 +183,7 @@ export const loadDashboardState = async ({
     title,
 
     viewMode: ViewMode.VIEW, // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
-    tags: savedObjectsTagging.getTagIdsFromReferences?.(references) ?? [],
+    tags: savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
 
     controlGroupInput: attributes.controlGroupInput,
 
