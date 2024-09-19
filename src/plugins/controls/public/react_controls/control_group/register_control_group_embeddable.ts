@@ -7,23 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup } from '@kbn/core/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import type { ControlsPluginStartDeps } from '../../types';
 import { CONTROL_GROUP_TYPE } from '../../../common';
+import { untilPluginStartServicesReady } from '../../services/kibana_services';
 
-export function registerControlGroupEmbeddable(
-  coreSetup: CoreSetup<ControlsPluginStartDeps>,
-  embeddableSetup: EmbeddableSetup
-) {
+export function registerControlGroupEmbeddable(embeddableSetup: EmbeddableSetup) {
   embeddableSetup.registerReactEmbeddableFactory(CONTROL_GROUP_TYPE, async () => {
-    const [{ getControlGroupEmbeddableFactory }, [coreStart, depsStart]] = await Promise.all([
+    const [{ getControlGroupEmbeddableFactory }] = await Promise.all([
       import('./get_control_group_factory'),
-      coreSetup.getStartServices(),
+      untilPluginStartServicesReady(),
     ]);
-    return getControlGroupEmbeddableFactory({
-      core: coreStart,
-      dataViews: depsStart.data.dataViews,
-    });
+    return getControlGroupEmbeddableFactory();
   });
 }
