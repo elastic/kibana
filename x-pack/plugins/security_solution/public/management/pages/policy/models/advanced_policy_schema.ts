@@ -1582,6 +1582,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.dev_drives.harden',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.dev_drives.harden',
+      {
+        defaultMessage:
+          'Controls whetever malware protection is applied to dev drives. Default: false',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.malware.networkshare',
     first_supported_version: '8.9',
     documentation: i18n.translate(
