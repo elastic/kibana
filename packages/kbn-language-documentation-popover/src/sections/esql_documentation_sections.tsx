@@ -17,11 +17,8 @@ const Markdown = (props: Parameters<typeof SharedUXMarkdown>[0]) => (
 
 export const initialSection = (
   <Markdown
-    markdownContent={i18n.translate(
-      'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.markdown',
-      {
-        defaultMessage: `## ES|QL
-
+    markdownContent={i18n.translate('languageDocumentationPopover.documentationESQL.markdown', {
+      defaultMessage: `
 An ES|QL (Elasticsearch query language) query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch. 
 
 A source command can be followed by one or more **processing commands**. Processing commands can change the output table of the previous command by adding, removing, and changing rows and columns.
@@ -34,34 +31,30 @@ source-command
 
 The result of a query is the table produced by the final processing command.                                  
                                       `,
-      }
-    )}
+    })}
   />
 );
 
 export const sourceCommands = {
-  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.sourceCommands', {
+  label: i18n.translate('languageDocumentationPopover.documentationESQL.sourceCommands', {
     defaultMessage: 'Source commands',
   }),
   description: i18n.translate(
-    'textBasedEditor.query.textBasedLanguagesEditor.commandsDescription',
+    'languageDocumentationPopover.documentationESQL.commandsDescription',
     {
       defaultMessage: `A source command produces a table, typically with data from Elasticsearch. ES|QL supports the following source commands.`,
     }
   ),
   items: [
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from',
-        {
-          defaultMessage: 'FROM',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.from', {
+        defaultMessage: 'FROM',
+      }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from.markdown',
+            'languageDocumentationPopover.documentationESQL.from.markdown',
             {
               defaultMessage: `### FROM
 The \`FROM\` source command returns a table with up to 10,000 documents from a data stream, index, or alias. Each row in the resulting table represents a document. Each column corresponds to a field, and can be accessed by the name of that field.
@@ -119,16 +112,13 @@ FROM employees [METADATA _index, _id]
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.row',
-        {
-          defaultMessage: 'ROW',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.row', {
+        defaultMessage: 'ROW',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.row.markdown',
+            'languageDocumentationPopover.documentationESQL.row.markdown',
             {
               defaultMessage: `### ROW
 The \`ROW\` source command produces a row with one or more columns with values that you specify. This can be useful for testing.
@@ -157,16 +147,13 @@ ROW a = ROUND(1.23, 0)
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.show',
-        {
-          defaultMessage: 'SHOW',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.show', {
+        defaultMessage: 'SHOW',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.show.markdown',
+            'languageDocumentationPopover.documentationESQL.show.markdown',
             {
               defaultMessage: `### SHOW
 The \`SHOW <item>\` source command returns information about the deployment and its capabilities:
@@ -186,28 +173,25 @@ The \`SHOW <item>\` source command returns information about the deployment and 
 };
 
 export const processingCommands = {
-  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.processingCommands', {
+  label: i18n.translate('languageDocumentationPopover.documentationESQL.processingCommands', {
     defaultMessage: 'Processing commands',
   }),
   description: i18n.translate(
-    'textBasedEditor.query.textBasedLanguagesEditor.processingCommandsDescription',
+    'languageDocumentationPopover.documentationESQL.processingCommandsDescription',
     {
       defaultMessage: `Processing commands change an input table by adding, removing, or changing rows and columns. ES|QL supports the following processing commands.`,
     }
   ),
   items: [
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dissect',
-        {
-          defaultMessage: 'DISSECT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.dissect', {
+        defaultMessage: 'DISSECT',
+      }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dissect.markdown',
+            'languageDocumentationPopover.documentationESQL.dissect.markdown',
             {
               defaultMessage: `### DISSECT
 \`DISSECT\` enables you to extract structured data out of a string. \`DISSECT\` matches the string against a delimiter-based pattern, and extracts the specified keys as columns.
@@ -227,16 +211,13 @@ ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.drop',
-        {
-          defaultMessage: 'DROP',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.drop', {
+        defaultMessage: 'DROP',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.drop.markdown',
+            'languageDocumentationPopover.documentationESQL.drop.markdown',
             {
               defaultMessage: `### DROP
 Use \`DROP\` to remove columns from a table:
@@ -261,17 +242,14 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.enrich',
-        {
-          defaultMessage: 'ENRICH',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.enrich', {
+        defaultMessage: 'ENRICH',
+      }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.enrich.markdown',
+            'languageDocumentationPopover.documentationESQL.enrich.markdown',
             {
               defaultMessage: `### ENRICH
 You can use \`ENRICH\` to add data from your existing indices to incoming records. It’s similar to [ingest enrich](https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-enriching-data.html), but it works at query time.
@@ -317,16 +295,13 @@ In case of name collisions, the newly created fields will override the existing 
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eval',
-        {
-          defaultMessage: 'EVAL',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.eval', {
+        defaultMessage: 'EVAL',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eval.markdown',
+            'languageDocumentationPopover.documentationESQL.eval.markdown',
             {
               defaultMessage: `### EVAL
 \`EVAL\` enables you to add new columns:
@@ -356,17 +331,14 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.grok',
-        {
-          defaultMessage: 'GROK',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.grok', {
+        defaultMessage: 'GROK',
+      }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.grok.markdown',
+            'languageDocumentationPopover.documentationESQL.grok.markdown',
             {
               defaultMessage: `### GROK
 \`GROK\` enables you to extract structured data out of a string. \`GROK\` matches the string against patterns, based on regular expressions, and extracts the specified patterns as columns.
@@ -386,16 +358,13 @@ ROW a = "12 15.5 15.6 true"
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.keep',
-        {
-          defaultMessage: 'KEEP',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.keep', {
+        defaultMessage: 'KEEP',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.keep.markdown',
+            'languageDocumentationPopover.documentationESQL.keep.markdown',
             {
               defaultMessage: `### KEEP
 The \`KEEP\` command enables you to specify what columns are returned and the order in which they are returned.
@@ -429,16 +398,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.limit',
-        {
-          defaultMessage: 'LIMIT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.limit', {
+        defaultMessage: 'LIMIT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.limit.markdown',
+            'languageDocumentationPopover.documentationESQL.limit.markdown',
             {
               defaultMessage: `### LIMIT
 The \`LIMIT\` processing command enables you to limit the number of rows:
@@ -456,16 +422,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvExpand',
-        {
-          defaultMessage: 'MV_EXPAND',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mvExpand', {
+        defaultMessage: 'MV_EXPAND',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvExpand.markdown',
+            'languageDocumentationPopover.documentationESQL.mvExpand.markdown',
             {
               defaultMessage: `### MV_EXPAND
 The \`MV_EXPAND\` processing command expands multivalued fields into one row per value, duplicating other fields:              
@@ -482,16 +445,13 @@ ROW a=[1,2,3], b="b", j=["a","b"]
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rename',
-        {
-          defaultMessage: 'RENAME',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.rename', {
+        defaultMessage: 'RENAME',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rename.markdown',
+            'languageDocumentationPopover.documentationESQL.rename.markdown',
             {
               defaultMessage: `### RENAME
 Use \`RENAME\` to rename a column using the following syntax:
@@ -527,16 +487,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sort',
-        {
-          defaultMessage: 'SORT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.sort', {
+        defaultMessage: 'SORT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sort.markdown',
+            'languageDocumentationPopover.documentationESQL.sort.markdown',
             {
               defaultMessage: `### SORT
 Use the \`SORT\` command to sort rows on one or more fields:
@@ -580,16 +537,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.statsby',
-        {
-          defaultMessage: 'STATS ... BY',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.statsby', {
+        defaultMessage: 'STATS ... BY',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.statsby.markdown',
+            'languageDocumentationPopover.documentationESQL.statsby.markdown',
             {
               defaultMessage: `### STATS ... BY
 Use \`STATS ... BY\` to group rows according to a common value and calculate one or more aggregated values over the grouped rows.
@@ -670,16 +624,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.where',
-        {
-          defaultMessage: 'WHERE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.where', {
+        defaultMessage: 'WHERE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.where.markdown',
+            'languageDocumentationPopover.documentationESQL.where.markdown',
             {
               defaultMessage: `### WHERE
 Use \`WHERE\` to produce a table that contains all the rows from the input table for which the provided condition evaluates to \`true\`:
@@ -708,27 +659,24 @@ Refer to **Operators** for an overview of the supported operators.
 };
 
 export const groupingFunctions = {
-  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.groupingFunctions', {
+  label: i18n.translate('languageDocumentationPopover.documentationESQL.groupingFunctions', {
     defaultMessage: 'Grouping functions',
   }),
   description: i18n.translate(
-    'textBasedEditor.query.textBasedLanguagesEditor.groupingFunctionsDocumentationESQLDescription',
+    'languageDocumentationPopover.documentationESQL.groupingFunctionsDocumentationESQLDescription',
     {
       defaultMessage: `These grouping functions can be used with \`STATS...BY\`:`,
     }
   ),
   items: [
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction',
-        {
-          defaultMessage: 'BUCKET',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.autoBucketFunction', {
+        defaultMessage: 'BUCKET',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.autoBucketFunction.markdown',
             {
               defaultMessage: `### BUCKET
 Creates groups of values - buckets - out of a datetime or numeric input. The size of the buckets can either be provided directly, or chosen based on a recommended count and values range.
@@ -844,27 +792,24 @@ FROM employees
 };
 
 export const operators = {
-  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.operators', {
+  label: i18n.translate('languageDocumentationPopover.documentationESQL.operators', {
     defaultMessage: 'Operators',
   }),
   description: i18n.translate(
-    'textBasedEditor.query.textBasedLanguagesEditor.operatorsDocumentationESQLDescription',
+    'languageDocumentationPopover.documentationESQL.operatorsDocumentationESQLDescription',
     {
       defaultMessage: `ES|QL supports the following operators:`,
     }
   ),
   items: [
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.binaryOperators',
-        {
-          defaultMessage: 'Binary operators',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.binaryOperators', {
+        defaultMessage: 'Binary operators',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.binaryOperators.markdown',
+            'languageDocumentationPopover.documentationESQL.binaryOperators.markdown',
             {
               defaultMessage: `### Binary operators
 These binary comparison operators are supported:
@@ -889,16 +834,13 @@ These binary comparison operators are supported:
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.booleanOperators',
-        {
-          defaultMessage: 'Boolean operators',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.booleanOperators', {
+        defaultMessage: 'Boolean operators',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.booleanOperators.markdown',
+            'languageDocumentationPopover.documentationESQL.booleanOperators.markdown',
             {
               defaultMessage: `### Boolean operators
 The following boolean operators are supported:
@@ -915,19 +857,16 @@ The following boolean operators are supported:
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.castOperator',
-        {
-          defaultMessage: 'Cast (::)',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.castOperator', {
+        defaultMessage: 'Cast (::)',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.castOperator.markdown',
+            'languageDocumentationPopover.documentationESQL.castOperator.markdown',
             {
               defaultMessage: `### CAST (\`::\`)
-The \`::\` operator provides a convenient alternative syntax to the \`TO_<type>\` type conversion functions.
+The \`::\` operator provides a convenient alternative syntax to the \`TO_<type>\` type conversion functions.
 
 Example:
 \`\`\`
@@ -943,16 +882,13 @@ ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.inOperator',
-        {
-          defaultMessage: 'IN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.inOperator', {
+        defaultMessage: 'IN',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.inOperator.markdown',
+            'languageDocumentationPopover.documentationESQL.inOperator.markdown',
             {
               defaultMessage: `### IN
 The \`IN\` operator allows testing whether a field or expression equals an element in a list of literals, fields or expressions:
@@ -970,16 +906,13 @@ ROW a = 1, b = 4, c = 3
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stringOperators',
-        {
-          defaultMessage: 'LIKE and RLIKE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.stringOperators', {
+        defaultMessage: 'LIKE and RLIKE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stringOperators.markdown',
+            'languageDocumentationPopover.documentationESQL.stringOperators.markdown',
             {
               defaultMessage: `### LIKE and RLIKE
 For string comparison using wildcards or regular expressions, use \`LIKE\` or \`RLIKE\`:
@@ -1011,16 +944,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.predicates',
-        {
-          defaultMessage: 'NULL values',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.predicates', {
+        defaultMessage: 'NULL values',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.predicates.markdown',
+            'languageDocumentationPopover.documentationESQL.predicates.markdown',
             {
               defaultMessage: `### NULL values
 For NULL comparison use the \`IS NULL\` and \`IS NOT NULL\` predicates:
