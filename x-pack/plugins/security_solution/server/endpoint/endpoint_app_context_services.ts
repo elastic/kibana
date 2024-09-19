@@ -7,10 +7,12 @@
 
 import type {
   ElasticsearchClient,
+  HttpServiceSetup,
   KibanaRequest,
   Logger,
   LoggerFactory,
   SavedObjectsClientContract,
+  SavedObjectsServiceStart,
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
@@ -24,6 +26,7 @@ import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/aler
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { SavedObjectsClientFactory } from './services/saved_objects';
 import type { ResponseActionsClient } from './services';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from './services';
 import {
@@ -54,10 +57,12 @@ import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
+
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
   cloud: CloudSetup;
   loggerFactory: LoggerFactory;
+  httpServiceSetup: HttpServiceSetup;
 }
 
 export interface EndpointAppContextServiceStartContract {
@@ -81,7 +86,8 @@ export interface EndpointAppContextServiceStartContract {
   messageSigningService: MessageSigningServiceInterface | undefined;
   esClient: ElasticsearchClient;
   productFeaturesService: ProductFeaturesService;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract; // FIXME:PT can we delete this? need to check
+  savedObjectsServiceStart: SavedObjectsServiceStart;
   connectorActions: ActionsPluginStartContract;
 }
 
@@ -93,6 +99,8 @@ export class EndpointAppContextService {
   private setupDependencies: EndpointAppContextServiceSetupContract | null = null;
   private startDependencies: EndpointAppContextServiceStartContract | null = null;
   private fleetServicesFactory: EndpointFleetServicesFactoryInterface | null = null;
+  private savedObjectsFactoryService: SavedObjectsClientFactory | null = null;
+
   public security: SecurityServiceStart | undefined;
 
   public setup(dependencies: EndpointAppContextServiceSetupContract) {
@@ -107,6 +115,10 @@ export class EndpointAppContextService {
     this.startDependencies = dependencies;
     this.security = dependencies.security;
     this.fleetServicesFactory = dependencies.endpointFleetServicesFactory;
+    this.savedObjectsFactoryService = new SavedObjectsClientFactory(
+      dependencies.savedObjectsServiceStart,
+      this.setupDependencies.httpServiceSetup
+    );
 
     if (dependencies.registerIngestCallback && dependencies.manifestManager) {
       const {
@@ -177,7 +189,21 @@ export class EndpointAppContextService {
     }
   }
 
-  public stop() {}
+  public stop() {
+    this.startDependencies = null;
+    this.savedObjectsFactoryService = null;
+  }
+
+  /**
+   * Property providing access to saved objects client factory
+   */
+  public get savedObjects(): SavedObjectsClientFactory {
+    if (!this.savedObjectsFactoryService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.savedObjectsFactoryService;
+  }
 
   private getFleetAuthzService(): FleetStartContract['authz'] {
     if (!this.startDependencies?.fleetAuthzService) {

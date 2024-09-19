@@ -238,6 +238,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       securitySolutionRequestContextFactory: requestContextFactory,
       cloud: plugins.cloud,
       loggerFactory: this.pluginContext.logger,
+      httpServiceSetup: core.http,
     });
 
     initUsageCollectors({
@@ -640,6 +641,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       esClient: core.elasticsearch.client.asInternalUser,
       productFeaturesService,
       savedObjectsClient,
+      savedObjectsServiceStart: core.savedObjects,
       connectorActions: plugins.actions,
     });
 
