@@ -395,7 +395,7 @@ interface NewTermsFieldsProps {
   newTermsFields: string[];
 }
 
-const NewTermsFields = ({ newTermsFields }: NewTermsFieldsProps) => (
+export const NewTermsFields = ({ newTermsFields }: NewTermsFieldsProps) => (
   <BadgeList badges={newTermsFields} data-test-subj="newTermsFieldsPropertyValue" />
 );
 

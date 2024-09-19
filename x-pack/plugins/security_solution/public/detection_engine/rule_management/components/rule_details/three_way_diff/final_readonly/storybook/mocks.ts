@@ -16,6 +16,7 @@ import type {
   DiffableEqlFields,
   DiffableEsqlFields,
   DiffableMachineLearningFields,
+  DiffableNewTermsFields,
   DiffableRule,
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
@@ -271,6 +272,28 @@ export function mockThreatMatchRule(
   return {
     ...commonDiffableRuleFields,
     ...threatMatchDiffableRuleFields,
+    ...overrides,
+  };
+}
+
+const newTermsDiffableRuleFields: DiffableNewTermsFields = {
+  type: 'new_terms',
+  kql_query: {
+    type: KqlQueryType.inline_query,
+    query: '*',
+    language: 'kuery',
+    filters: [],
+  },
+  new_terms_fields: ['host.name'],
+  history_window_start: 'now-7d',
+};
+
+export function mockNewTermsRule(
+  overrides: Partial<DiffableCommonFields & DiffableNewTermsFields>
+): DiffableRule {
+  return {
+    ...commonDiffableRuleFields,
+    ...newTermsDiffableRuleFields,
     ...overrides,
   };
 }
