@@ -172,6 +172,7 @@ export type ICMPFields = t.TypeOf<typeof ICMPFieldsCodec>;
 export const HTTPSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.METADATA]: MetadataCodec,
+    // string is for yaml config and number for public api
     [ConfigKey.MAX_REDIRECTS]: t.union([t.string, t.number]),
     [ConfigKey.URLS]: getNonEmptyStringCodec('url'),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
