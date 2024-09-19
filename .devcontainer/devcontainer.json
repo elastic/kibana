@@ -23,8 +23,16 @@
     9230,
     9231
   ],
-  "postStartCommand": "/workspaces/kibana/.devcontainer/scripts/post_start.sh",
+  "onCreateCommand": "echo $LOCAL_WORKSPACE_FOLDER && echo $LOCAL_WORKSPACE_FOLDER_BASENAME && echo $CONTAINER_WORKSPACE_FOLDER && echo $CONTAINER_WORKSPACE_FOLDER_BASENAME",
+  "postStartCommand": "${containerWorkspaceFolder}/.devcontainer/scripts/post_start.sh",
   "remoteUser": "vscode",
+  "containerEnv": {
+    "KBN_DIR": "${containerWorkspaceFolder}",
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+    "LOCAL_WORKSPACE_FOLDER_BASENAME": "${localWorkspaceFolderBasename}",
+    "CONTAINER_WORKSPACE_FOLDER": "${containerWorkspaceFolder}",
+    "CONTAINER_WORKSPACE_FOLDER_BASENAME": "${containerWorkspaceFolderBasename}"
+  },
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest",

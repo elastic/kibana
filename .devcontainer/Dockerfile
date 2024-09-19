@@ -4,7 +4,6 @@ ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 ENV HOME=/home/vscode
 ENV NVM_DIR=${HOME}/nvm
 ENV NVM_VERSION=v0.39.1
-ENV KBN_DIR=/workspaces/kibana
 ENV OPENSSL_PATH=${HOME}/openssl
 # Only specific versions are FIPS certified.
 ENV OPENSSL_VERSION='3.0.8'
