@@ -4,7 +4,7 @@ info:
   title: Security AI Assistant API (Elastic Cloud & self-hosted)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -309,7 +309,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Conversations API
-  '/api/security_ai_assistant/current_user/conversations/{id}':
+  /api/security_ai_assistant/current_user/conversations/{id}:
     delete:
       description: Delete an existing conversation using the conversation ID.
       operationId: DeleteConversation
@@ -1213,13 +1213,13 @@ components:
       type: object
       properties:
         traceId:
-          description: 'Could be any string, not necessarily a UUID'
+          description: Could be any string, not necessarily a UUID
           type: string
         transactionId:
-          description: 'Could be any string, not necessarily a UUID'
+          description: Could be any string, not necessarily a UUID
           type: string
     User:
-      description: 'Could be any string, not necessarily a UUID'
+      description: Could be any string, not necessarily a UUID
       type: object
       properties:
         id:
