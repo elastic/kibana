@@ -242,10 +242,10 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
     (signal) => signal._source[ALERT_BUILDING_BLOCK_TYPE] == null
   );
 
-  console.error(
-    'SUPPRESSIBLE WRAPPED values',
-    sequenceAlerts.map((doc) => doc._source[ALERT_SUPPRESSION_TERMS])
-  );
+  // console.error(
+  //   'SUPPRESSIBLE WRAPPED values',
+  //   JSON.stringify(sequenceAlerts.map((doc) => doc._source[ALERT_SUPPRESSION_TERMS]))
+  // );
 
   // console.error(
   //   'SUPPRESSIBLE WRAPPED original time',
