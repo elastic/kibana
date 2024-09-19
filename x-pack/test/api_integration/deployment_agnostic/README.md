@@ -192,6 +192,28 @@ We do not recommend use of custom server arguments because it may lead to unexpe
 
 6. Add FTR Configs Path to FTR Manifest Files Located in `.buildkite/`
 
+## Running the tests
+
+### Stateful
+
+```sh
+# start server
+node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/<solution>.stateful.config.ts
+
+# run tests
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/<solution>.stateful.config.ts --grep=$
+```
+
+### Serverless
+
+```sh
+# start server
+node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/<solution>.serverless.config.ts
+
+# run tests
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/<solution>.serverless.config.ts --grep=$
+```
+
 ## Tagging and Skipping the Tests
 Since deployment-agnostic tests are designed to run both locally and on MKI/Cloud, we believe no extra tagging is required. If a test is not working on MKI/Cloud or both, there is most likely an issue with the FTR service or the configuration file it uses.
 

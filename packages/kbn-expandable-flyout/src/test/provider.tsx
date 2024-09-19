@@ -11,8 +11,13 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import React, { FC, PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import {
+  savePushVsOverlayToLocalStorageMiddleware,
+  saveUserSectionWidthsToLocalStorageMiddleware,
+  saveUserFlyoutWidthsToLocalStorageMiddleware,
+} from '../store/middlewares';
 import { ExpandableFlyoutContextProvider } from '../context';
-import { panelsReducer } from '../store/reducers';
+import { panelsReducer, uiReducer } from '../store/reducers';
 import { Context } from '../store/redux';
 import { initialState, State } from '../store/state';
 
@@ -29,10 +34,15 @@ export const TestProvider: FC<PropsWithChildren<TestProviderProps>> = ({
   const store = configureStore({
     reducer: {
       panels: panelsReducer,
+      ui: uiReducer,
     },
     devTools: false,
     preloadedState: state,
-    enhancers: [],
+    middleware: [
+      savePushVsOverlayToLocalStorageMiddleware,
+      saveUserSectionWidthsToLocalStorageMiddleware,
+      saveUserFlyoutWidthsToLocalStorageMiddleware,
+    ],
   });
 
   return (
