@@ -10,6 +10,7 @@ import type { DiffableNewTermsFields } from '../../../../../../../common/api/det
 import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { KqlQueryReadOnly } from './fields/kql_query';
 import { TypeReadOnly } from './fields/type/type';
+import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
 
 interface NewTermsRuleFieldReadOnlyProps {
   fieldName: keyof DiffableNewTermsFields;
@@ -21,6 +22,13 @@ export function NewTermsRuleFieldReadOnly({
   finalDiffableRule,
 }: NewTermsRuleFieldReadOnlyProps) {
   switch (fieldName) {
+    case 'alert_suppression':
+      return (
+        <AlertSuppressionReadOnly
+          alertSuppression={finalDiffableRule.alert_suppression}
+          ruleType={finalDiffableRule.type}
+        />
+      );
     case 'data_source':
       return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;
     case 'kql_query':

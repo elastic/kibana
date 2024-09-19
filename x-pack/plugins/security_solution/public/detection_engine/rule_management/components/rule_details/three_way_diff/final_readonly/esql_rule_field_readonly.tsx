@@ -9,6 +9,7 @@ import React from 'react';
 import type { DiffableEsqlFields } from '../../../../../../../common/api/detection_engine';
 import { EsqlQueryReadOnly } from './fields/esql_query/esql_query';
 import { TypeReadOnly } from './fields/type/type';
+import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
 
 interface EsqlRuleFieldReadOnlyProps {
   fieldName: keyof DiffableEsqlFields;
@@ -20,6 +21,13 @@ export function EsqlRuleFieldReadOnly({
   finalDiffableRule,
 }: EsqlRuleFieldReadOnlyProps) {
   switch (fieldName) {
+    case 'alert_suppression':
+      return (
+        <AlertSuppressionReadOnly
+          alertSuppression={finalDiffableRule.alert_suppression}
+          ruleType={finalDiffableRule.type}
+        />
+      );
     case 'esql_query':
       return <EsqlQueryReadOnly esqlQuery={finalDiffableRule.esql_query} />;
     case 'type':

@@ -14,6 +14,7 @@ import { ThreatIndicatorPathReadOnly } from './fields/threat_indicator_path/thre
 import { ThreatMappingReadOnly } from './fields/threat_mapping/threat_mapping';
 import { ThreatQueryReadOnly } from './fields/threat_query/threat_query';
 import { TypeReadOnly } from './fields/type/type';
+import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
 
 interface ThreatMatchRuleFieldReadOnlyProps {
   fieldName: keyof DiffableThreatMatchFields;
@@ -25,6 +26,13 @@ export function ThreatMatchRuleFieldReadOnly({
   finalDiffableRule,
 }: ThreatMatchRuleFieldReadOnlyProps) {
   switch (fieldName) {
+    case 'alert_suppression':
+      return (
+        <AlertSuppressionReadOnly
+          alertSuppression={finalDiffableRule.alert_suppression}
+          ruleType={finalDiffableRule.type}
+        />
+      );
     case 'data_source':
       return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;
     case 'kql_query':

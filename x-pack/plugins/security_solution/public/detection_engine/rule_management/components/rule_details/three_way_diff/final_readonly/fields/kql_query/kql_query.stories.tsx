@@ -28,12 +28,12 @@ export default {
 
 interface TemplateProps {
   finalDiffableRule: DiffableRule;
-  kibanaServicesMock?: Record<string, unknown>;
+  kibanaServicesOverrides?: Record<string, unknown>;
 }
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
+    <ThreeWayDiffStorybookProviders kibanaServicesOverrides={args.kibanaServicesOverrides}>
       <FieldReadOnly fieldName="kql_query" finalDiffableRule={args.finalDiffableRule} />
     </ThreeWayDiffStorybookProviders>
   );
@@ -46,7 +46,7 @@ InlineKqlQueryWithIndexPatterns.args = {
     kql_query: inlineKqlQuery,
     data_source: dataSourceWithIndexPatterns,
   }),
-  kibanaServicesMock: {
+  kibanaServicesOverrides: {
     data: {
       dataViews: {
         create: async () => mockDataView(),
@@ -62,7 +62,7 @@ InlineKqlQueryWithDataView.args = {
     kql_query: inlineKqlQuery,
     data_source: dataSourceWithDataView,
   }),
-  kibanaServicesMock: {
+  kibanaServicesOverrides: {
     data: {
       dataViews: {
         get: async () => mockDataView(),
@@ -81,7 +81,7 @@ InlineKqlQueryWithoutDataSource.args = {
   finalDiffableRule: mockCustomQueryRule({
     kql_query: inlineKqlQuery,
   }),
-  kibanaServicesMock: {
+  kibanaServicesOverrides: {
     data: {
       dataViews: {
         create: async () => mockDataView(),
@@ -98,7 +98,7 @@ SavedKqlQueryWithIndexPatterns.args = {
     data_source: dataSourceWithIndexPatterns,
     type: 'saved_query',
   }),
-  kibanaServicesMock: {
+  kibanaServicesOverrides: {
     data: {
       dataViews: {
         create: async () => mockDataView(),
@@ -118,7 +118,7 @@ SavedKqlQueryWithDataView.args = {
     data_source: dataSourceWithDataView,
     type: 'saved_query',
   }),
-  kibanaServicesMock: {
+  kibanaServicesOverrides: {
     data: {
       dataViews: {
         get: async () => mockDataView(),

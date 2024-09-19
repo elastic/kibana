@@ -10,6 +10,7 @@ import type { DiffableEqlFields } from '../../../../../../../common/api/detectio
 import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { EqlQueryReadOnly } from './fields/eql_query/eql_query';
 import { TypeReadOnly } from './fields/type/type';
+import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
 
 interface EqlRuleFieldReadOnlyProps {
   fieldName: keyof DiffableEqlFields;
@@ -18,6 +19,13 @@ interface EqlRuleFieldReadOnlyProps {
 
 export function EqlRuleFieldReadOnly({ fieldName, finalDiffableRule }: EqlRuleFieldReadOnlyProps) {
   switch (fieldName) {
+    case 'alert_suppression':
+      return (
+        <AlertSuppressionReadOnly
+          alertSuppression={finalDiffableRule.alert_suppression}
+          ruleType={finalDiffableRule.type}
+        />
+      );
     case 'data_source':
       return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;
     case 'eql_query':

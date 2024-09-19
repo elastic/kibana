@@ -9,6 +9,7 @@ import React from 'react';
 import type { DiffableMachineLearningFields } from '../../../../../../../common/api/detection_engine';
 import { MachineLearningJobIdReadOnly } from './fields/machine_learning_job_id/machine_learning_job_id';
 import { TypeReadOnly } from './fields/type/type';
+import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
 
 interface MachineLearningRuleFieldReadOnlyProps {
   fieldName: keyof DiffableMachineLearningFields;
@@ -20,6 +21,13 @@ export function MachineLearningRuleFieldReadOnly({
   finalDiffableRule,
 }: MachineLearningRuleFieldReadOnlyProps) {
   switch (fieldName) {
+    case 'alert_suppression':
+      return (
+        <AlertSuppressionReadOnly
+          alertSuppression={finalDiffableRule.alert_suppression}
+          ruleType={finalDiffableRule.type}
+        />
+      );
     case 'machine_learning_job_id':
       return (
         <MachineLearningJobIdReadOnly

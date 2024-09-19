@@ -354,7 +354,7 @@ interface SuppressAlertsByFieldProps {
   fields: string[];
 }
 
-const SuppressAlertsByField = ({ fields }: SuppressAlertsByFieldProps) => (
+export const SuppressAlertsByField = ({ fields }: SuppressAlertsByFieldProps) => (
   <BadgeList badges={fields} data-test-subj="alertSuppressionGroupByPropertyValue" />
 );
 
@@ -362,7 +362,7 @@ interface SuppressAlertsDurationProps {
   duration?: Duration;
 }
 
-const SuppressAlertsDuration = ({ duration }: SuppressAlertsDurationProps) => {
+export const SuppressAlertsDuration = ({ duration }: SuppressAlertsDurationProps) => {
   const durationDescription = duration
     ? `${duration.value}${duration.unit}`
     : descriptionStepI18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
@@ -378,7 +378,7 @@ interface MissingFieldsStrategyProps {
   missingFieldsStrategy?: AlertSuppressionMissingFieldsStrategy;
 }
 
-const MissingFieldsStrategy = ({ missingFieldsStrategy }: MissingFieldsStrategyProps) => {
+export const MissingFieldsStrategy = ({ missingFieldsStrategy }: MissingFieldsStrategyProps) => {
   const missingFieldsDescription =
     missingFieldsStrategy === AlertSuppressionMissingFieldsStrategyEnum.suppress
       ? descriptionStepI18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS

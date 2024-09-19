@@ -9,8 +9,9 @@ import React from 'react';
 import type { DiffableCustomQueryFields } from '../../../../../../../common/api/detection_engine';
 import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { KqlQueryReadOnly } from './fields/kql_query';
-// import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { TypeReadOnly } from './fields/type/type';
+import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
 
 interface CustomQueryRuleFieldReadOnlyProps {
   fieldName: keyof DiffableCustomQueryFields;
@@ -22,6 +23,13 @@ export function CustomQueryRuleFieldReadOnly({
   finalDiffableRule,
 }: CustomQueryRuleFieldReadOnlyProps) {
   switch (fieldName) {
+    case 'alert_suppression':
+      return (
+        <AlertSuppressionReadOnly
+          alertSuppression={finalDiffableRule.alert_suppression}
+          ruleType={finalDiffableRule.type}
+        />
+      );
     case 'data_source':
       return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;
     case 'kql_query':
@@ -35,6 +43,6 @@ export function CustomQueryRuleFieldReadOnly({
     case 'type':
       return <TypeReadOnly type={finalDiffableRule.type} />;
     default:
-    // return assertUnreachable(fieldName);
+      return assertUnreachable(fieldName);
   }
 }
