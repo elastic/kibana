@@ -91,9 +91,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectWithDataTabsExists();
           await pageObjects.svlSearchIndexDetailPage.expectShouldDefaultToDataTab();
         });
-        it('should be able to change tabs', async () => {
+        it('should be able to change tabs to mappings and mappings is shown', async () => {
           await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('mappingsTab');
           await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings');
+          await pageObjects.svlSearchIndexDetailPage.expectMappingsComponentIsVisible();
+        });
+        it('should be able to change tabs to settings and settings is shown', async () => {
+          await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('settingsTab');
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('settings');
+          await pageObjects.svlSearchIndexDetailPage.expectSettingsComponentIsVisible();
         });
       });
 
