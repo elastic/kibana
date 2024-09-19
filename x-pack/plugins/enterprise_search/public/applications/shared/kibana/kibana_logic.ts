@@ -10,7 +10,7 @@ import { FC } from 'react';
 import { kea, MakeLogicType } from 'kea';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
   ApplicationStart,
@@ -24,7 +24,7 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { IndexMappingProps } from '@kbn/index-management';
+import { IndexMappingProps } from '@kbn/index-management-shared-types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
@@ -48,7 +48,7 @@ export interface KibanaLogicProps {
   application: ApplicationStart;
   capabilities: Capabilities;
   charts?: ChartsPluginStart;
-  cloud?: CloudSetup;
+  cloud?: CloudSetup & CloudStart;
   config: ClientConfigType;
   connectorTypes?: ConnectorDefinition[];
   console?: ConsolePluginStart;
@@ -83,7 +83,7 @@ export interface KibanaValues {
   application: ApplicationStart;
   capabilities: Capabilities;
   charts: ChartsPluginStart | null;
-  cloud: CloudSetup | null;
+  cloud: (CloudSetup & CloudStart) | null;
   config: ClientConfigType;
   connectorTypes: ConnectorDefinition[];
   consolePlugin: ConsolePluginStart | null;
@@ -168,7 +168,10 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     ],
   }),
   selectors: ({ selectors }) => ({
-    isCloud: [() => [selectors.cloud], (cloud?: CloudSetup) => Boolean(cloud?.isCloudEnabled)],
+    isCloud: [
+      () => [selectors.cloud],
+      (cloud?: CloudSetup & CloudStart) => Boolean(cloud?.isCloudEnabled),
+    ],
   }),
 });
 

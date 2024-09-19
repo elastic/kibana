@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('apis', () => {
     // load new oblt deployment-agnostic test here
     loadTestFile(require.resolve('../../apis/observability/alerting'));
+    loadTestFile(require.resolve('../../apis/observability/dataset_quality'));
   });
 }
