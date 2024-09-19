@@ -5,16 +5,10 @@
  * 2.0.
  */
 import { uniq } from 'lodash';
-import type {
-  ElasticsearchClient,
-  Logger,
-  SavedObjectsClientContract,
-  SavedObjectsServiceStart,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import type {
   HostInfo,
@@ -48,7 +42,6 @@ import {
   fleetAgentStatusToEndpointHostStatus,
   wrapErrorIfNeeded,
 } from '../../utils';
-import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
 import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 import { EndpointError } from '../../../../common/endpoint/errors';
@@ -65,38 +58,12 @@ const isAgentPolicyWithPackagePolicies = (
 };
 
 export class EndpointMetadataService {
-  /**
-   * For internal use only by the `this.DANGEROUS_INTERNAL_SO_CLIENT`
-   * @deprecated
-   */
-  private __DANGEROUS_INTERNAL_SO_CLIENT: SavedObjectsClientContract | undefined;
-
   constructor(
-    private savedObjectsStart: SavedObjectsServiceStart,
-    private readonly agentPolicyService: AgentPolicyServiceInterface,
-    private readonly packagePolicyService: PackagePolicyClient,
+    private readonly esClient: ElasticsearchClient,
+    private readonly soClient: SavedObjectsClientContract,
+    private readonly fleetServices: EndpointFleetServicesInterface,
     private readonly logger?: Logger
   ) {}
-
-  /**
-   * An INTERNAL Saved Object client that is effectively the system user and has all privileges and permissions and
-   * can access any saved object. Used primarly to retrieve fleet data for endpoint enrichment (so that users are
-   * not required to have superuser role)
-   *
-   * **IMPORTANT: SHOULD BE USED ONLY FOR READ-ONLY ACCESS AND WITH DISCRETION**
-   *
-   * @private
-   */
-  private get DANGEROUS_INTERNAL_SO_CLIENT() {
-    // The INTERNAL SO client must be created during the first time its used. This is because creating it during
-    // instance initialization (in `constructor(){}`) causes the SO Client to be invalid (perhaps because this
-    // instantiation is happening during the plugin's the start phase)
-    if (!this.__DANGEROUS_INTERNAL_SO_CLIENT) {
-      this.__DANGEROUS_INTERNAL_SO_CLIENT = createInternalReadonlySoClient(this.savedObjectsStart);
-    }
-
-    return this.__DANGEROUS_INTERNAL_SO_CLIENT;
-  }
 
   /**
    * Retrieve a single endpoint host metadata. Note that the return endpoint document, if found,
@@ -328,8 +295,8 @@ export class EndpointMetadataService {
    * @throws
    */
   async getFleetAgentPolicy(agentPolicyId: string): Promise<AgentPolicyWithPackagePolicies> {
-    const agentPolicy = await this.agentPolicyService
-      .get(this.DANGEROUS_INTERNAL_SO_CLIENT, agentPolicyId, true)
+    const agentPolicy = await this.fleetServices.agentPolicy
+      .get(this.soClient, agentPolicyId, true)
       .catch(catchAndWrapError);
 
     if (agentPolicy) {
@@ -347,8 +314,8 @@ export class EndpointMetadataService {
    * @throws
    */
   async getFleetEndpointPackagePolicy(endpointPolicyId: string): Promise<PolicyData> {
-    const endpointPackagePolicy = await this.packagePolicyService
-      .get(this.DANGEROUS_INTERNAL_SO_CLIENT, endpointPolicyId)
+    const endpointPackagePolicy = await this.fleetServices.packagePolicy
+      .get(this.soClient, endpointPolicyId)
       .catch(catchAndWrapError);
 
     if (!endpointPackagePolicy) {
@@ -404,8 +371,8 @@ export class EndpointMetadataService {
     const agentPolicyIds: string[] = docs.map((doc) => doc._source?.united?.agent?.policy_id ?? '');
 
     const agentPolicies =
-      (await this.agentPolicyService
-        .getByIds(this.DANGEROUS_INTERNAL_SO_CLIENT, agentPolicyIds)
+      (await this.fleetServices.agentPolicy
+        .getByIds(this.soClient, agentPolicyIds)
         .catch(catchAndWrapError)) ?? [];
 
     const agentPoliciesMap = agentPolicies.reduce<Record<string, AgentPolicy>>(
@@ -463,10 +430,7 @@ export class EndpointMetadataService {
   }
 
   async getAllEndpointPackagePolicies() {
-    return getAllEndpointPackagePolicies(
-      this.packagePolicyService,
-      this.DANGEROUS_INTERNAL_SO_CLIENT
-    );
+    return getAllEndpointPackagePolicies(this.fleetServices.packagePolicy, this.soClient);
   }
 
   async getMetadataForEndpoints(
