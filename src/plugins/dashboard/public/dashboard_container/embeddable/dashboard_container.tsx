@@ -357,8 +357,8 @@ export class DashboardContainer
         if (this.animatePanelTransforms$.value !== state.componentState.animatePanelTransforms) {
           this.animatePanelTransforms$.next(state.componentState.animatePanelTransforms);
         }
-        if (this.embeddedExternally$.value !== state.explicitInput.isEmbeddedExternally) {
-          this.embeddedExternally$.next(state.explicitInput.isEmbeddedExternally);
+        if (this.embeddedExternally$.value !== state.componentState.isEmbeddedExternally) {
+          this.embeddedExternally$.next(state.componentState.isEmbeddedExternally);
         }
         if (this.panels$.value !== state.explicitInput.panels) {
           this.panels$.next(state.explicitInput.panels);
