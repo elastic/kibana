@@ -52,4 +52,5 @@ export const createStorybookService = (): ObservabilityAIAssistantService => ({
     predefinedConversation$: new Observable(),
   },
   navigate: async () => of(),
+  scope: 'observability',
 });

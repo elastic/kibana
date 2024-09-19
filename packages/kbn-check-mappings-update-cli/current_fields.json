@@ -312,6 +312,12 @@
   "entity-discovery-api-key": [
     "apiKey"
   ],
+  "entity-engine-status": [
+    "filter",
+    "indexPattern",
+    "status",
+    "type"
+  ],
   "epm-packages": [
     "additional_spaces_installed_kibana",
     "es_index_patterns",

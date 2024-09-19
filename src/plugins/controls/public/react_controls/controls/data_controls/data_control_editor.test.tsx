@@ -12,29 +12,33 @@ import { BehaviorSubject } from 'rxjs';
 
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act, fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
 
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+  type DefaultDataControlState,
+} from '../../../../common';
+import { dataViewsService } from '../../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
-jest.mock('../../control_factory_registry', () => ({
-  ...jest.requireActual('../../control_factory_registry'),
-  getAllControlTypes: jest.fn(),
-  getControlFactory: jest.fn(),
-}));
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
-import { ControlGroupApi } from '../../control_group/types';
+import type { ControlGroupApi } from '../../control_group/types';
+import type { ControlFactory } from '../types';
 import { DataControlEditor } from './data_control_editor';
 import {
   getMockedOptionsListControlFactory,
   getMockedRangeSliderControlFactory,
   getMockedSearchControlFactory,
 } from './mocks/factory_mocks';
-import { ControlFactory } from '../types';
-import { DataControlApi, DataControlFactory, DefaultDataControlState } from './types';
+import type { DataControlApi, DataControlFactory } from './types';
 
-const mockDataViews = dataViewPluginMocks.createStartContract();
+jest.mock('../../control_factory_registry', () => ({
+  ...jest.requireActual('../../control_factory_registry'),
+  getAllControlTypes: jest.fn(),
+  getControlFactory: jest.fn(),
+}));
+
 const mockDataView = createStubDataView({
   spec: {
     id: 'logstash-*',
@@ -53,7 +57,6 @@ const mockDataView = createStubDataView({
     timeFieldName: '@timestamp',
   },
 });
-mockDataViews.get = jest.fn().mockResolvedValue(mockDataView);
 
 const dashboardApi = {
   timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
@@ -77,7 +80,7 @@ describe('Data control editor', () => {
     controlType?: string;
     initialDefaultPanelTitle?: string;
   }) => {
-    mockDataViews.get = jest.fn().mockResolvedValue(mockDataView);
+    dataViewsService.get = jest.fn().mockResolvedValue(mockDataView);
 
     const controlEditor = render(
       <I18nProvider>
@@ -92,13 +95,12 @@ describe('Data control editor', () => {
           controlId={controlId}
           controlType={controlType}
           initialDefaultPanelTitle={initialDefaultPanelTitle}
-          services={{ dataViews: mockDataViews }}
         />
       </I18nProvider>
     );
 
     await waitFor(() => {
-      expect(mockDataViews.get).toHaveBeenCalledTimes(1);
+      expect(dataViewsService.get).toHaveBeenCalledTimes(1);
     });
 
     return controlEditor;

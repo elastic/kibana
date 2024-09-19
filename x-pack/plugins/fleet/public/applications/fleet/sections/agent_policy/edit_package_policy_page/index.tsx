@@ -594,7 +594,7 @@ export const EditPackagePolicyForm = memo<{
                                 content: (
                                   <FormattedMessage
                                     id="xpack.fleet.agentPolicy.saveIntegrationTooltip"
-                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations. Contact your administrator."
+                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations and Agent Policies. Contact your administrator."
                                   />
                                 ),
                               }

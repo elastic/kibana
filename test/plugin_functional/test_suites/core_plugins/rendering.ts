@@ -102,7 +102,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
         'console.autocompleteDefinitions.endpointsAvailability (stack?|serverless?)',
-        'console.dev.enableMonaco (boolean?)',
         'console.ui.enabled (boolean?)',
         'console.ui.embeddedEnabled (boolean?)',
         'dashboard.allowByValueEmbeddables (boolean?)',
@@ -236,8 +235,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.trial_end_date (string?)',
         'xpack.cloud_integrations.chat.chatURL (string?)',
         'xpack.cloud_integrations.chat.trialBuffer (number?)',
-        // No PII. This is an escape patch to override LaunchDarkly's flag resolution mechanism for testing or quick fix.
-        'xpack.cloud_integrations.experiments.flag_overrides (record?)',
         // Commented because it's inside a schema conditional, and the test is not able to resolve it. But it's shared.
         // Added here for documentation purposes.
         // 'xpack.cloud_integrations.experiments.launch_darkly.client_id (string)',
@@ -295,6 +292,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableLegacyTemplates (boolean?|never)',
         'xpack.index_management.enableIndexStats (boolean?|never)',
         'xpack.index_management.enableDataStreamStats (boolean?|never)',
+        'xpack.index_management.enableSizeAndDocCount (boolean?|never)',
         'xpack.index_management.editableIndexSettings (all?|limited?|never)',
         'xpack.index_management.enableMappingsSourceFieldSection (boolean?|never)',
         'xpack.index_management.dev.enableSemanticText (boolean?)',
