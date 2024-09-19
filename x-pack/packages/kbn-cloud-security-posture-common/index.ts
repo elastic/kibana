@@ -19,6 +19,7 @@ export type {
 } from './types/status';
 export type { CspFinding, CspFindingResult } from './types/findings';
 export type { BenchmarksCisId } from './types/benchmark';
+export type { VulnSeverity } from './types/vulnerabilities';
 export * from './constants';
 export {
   extractErrorMessage,
