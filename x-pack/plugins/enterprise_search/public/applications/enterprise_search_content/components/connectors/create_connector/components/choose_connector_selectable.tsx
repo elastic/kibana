@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
+
+import { useActions, useValues } from 'kea';
 
 import {
   EuiBadge,
@@ -18,30 +20,36 @@ import {
   EuiSelectableOption,
   useEuiTheme,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
+import { SelfManagePreference } from '../create_connector';
 
 interface ChooseConnectorSelectableProps {
-  allConnectors: ConnectorDefinition[];
-  connectorSelected: ConnectorDefinition;
-  selfManaged: boolean;
-  setConnectorSelected: Function;
+  selfManaged: SelfManagePreference;
 }
 interface OptionData {
   secondaryContent?: string;
 }
 
 export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps> = ({
-  setConnectorSelected,
-  connectorSelected,
   selfManaged,
-  allConnectors,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [selectableOptions, selectableSetOptions] = useState<
     Array<EuiSelectableOption<OptionData>>
   >([]);
+  const { connectorTypes } = useValues(KibanaLogic);
+  const allConnectors = useMemo(
+    () => connectorTypes.sort((a, b) => a.name.localeCompare(b.name)),
+    [connectorTypes]
+  );
+  const { selectedConnector } = useValues(NewConnectorLogic);
+  const { setSelectedConnector } = useActions(NewConnectorLogic);
+
   const getInitialOptions = () => {
     return allConnectors.map((connector, key) => {
       const append: JSX.Element[] = [];
@@ -67,7 +75,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
           </EuiBadge>
         );
       }
-      if (!selfManaged && !connector.isNative) {
+      if (selfManaged === 'native' && !connector.isNative) {
         append.push(
           <EuiBadge key={key + '-self'} iconType={'warning'} color="warning">
             {i18n.translate(
@@ -102,9 +110,9 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         position: relative;
       `}
     >
-      {connectorSelected.iconPath && ( // TODO this is a hack, that shouldn't be merged like this.
+      {selectedConnector?.iconPath && ( // TODO: this is a hack, that shouldn't be merged like this.
         <EuiIcon
-          type={connectorSelected.iconPath}
+          type={selectedConnector.iconPath}
           size="l"
           css={css`
             position: absolute;
@@ -122,7 +130,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         )}
         css={css`
           .euiFormControlLayoutIcons--left {
-            display: ${connectorSelected.iconPath
+            display: ${selectedConnector?.iconPath
               ? 'none'
               : ''}; // TODO this is a hack, that shouldn't be merged like this.
           }
@@ -139,10 +147,10 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
           setIsOpen(false);
           if (changedOption.checked === 'on') {
             const keySelected = Number(changedOption.key);
-            setConnectorSelected(allConnectors[keySelected]);
+            setSelectedConnector(allConnectors[keySelected]);
             setSearchValue(allConnectors[keySelected].name);
           } else {
-            setConnectorSelected({ name: '' });
+            setSelectedConnector(null);
             setSearchValue('');
           }
         }}
@@ -157,12 +165,12 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
           fullWidth: true,
           isClearable: true,
           onChange: (value) => {
-            if (value !== connectorSelected.name) {
+            if (value !== selectedConnector?.name) {
               setSearchValue(value);
             }
           },
-          onFocus: () => setIsOpen(true), // TODO useCallback
           onClick: () => setIsOpen(true), // TODO useCallback
+          onFocus: () => setIsOpen(true), // TODO useCallback
           placeholder: i18n.translate(
             'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.placeholder.text',
             { defaultMessage: 'Choose a data source' }

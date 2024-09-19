@@ -27,7 +27,6 @@ import { Connector } from '@kbn/search-connectors/types/connectors';
 import * as Constants from '../../../../shared/constants';
 
 interface ConfigurationStepProps {
-  connector: Connector;
   currentStep: number;
   isNextStepEnabled: boolean;
   setCurrentStep: Function;
@@ -39,7 +38,6 @@ interface ConfigurationStepProps {
 
 export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
   title,
-  connector,
   currentStep,
   setCurrentStep,
   isNextStepEnabled,

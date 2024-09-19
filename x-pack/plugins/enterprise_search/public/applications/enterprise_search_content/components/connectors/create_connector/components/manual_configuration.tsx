@@ -6,6 +6,8 @@
  */
 import React, { useState } from 'react';
 
+import { useActions, useValues } from 'kea';
+
 import {
   EuiButton,
   EuiButtonIcon,
@@ -39,22 +41,15 @@ import { TryInConsoleButton } from '@kbn/try-in-console';
 import { CREATE_CONNECTOR_PLUGIN } from '../../../../../../../common/constants';
 import { KibanaDeps } from '../../../../../../../common/types';
 
-import { AttachIndexBox } from '../../../connector_detail/attach_index_box';
-import { ConnectorViewValues } from '../../../connector_detail/connector_view_logic';
+import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
 
 export interface ManualConfigurationProps {
-  connector: ConnectorViewValues;
-  connectorName: string;
   isDisabled: boolean;
-  setConnectorName: Function;
   setIsNextStepEnabled: Function;
 }
 
 export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
   isDisabled,
-  connectorName,
-  setConnectorName,
-  connector,
   setIsNextStepEnabled,
 }) => {
   const { services } = useKibana<KibanaDeps>();
@@ -62,6 +57,8 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: 'splitButtonPopover',
   });
+  const { selectedConnector } = useValues(NewConnectorLogic);
+  const { setRawName } = useActions(NewConnectorLogic);
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
   };
@@ -198,10 +195,10 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
                 data-test-subj="enterpriseSearchStartStepFieldText"
                 fullWidth
                 name="first"
-                value={connectorName}
+                value={selectedConnector?.name ?? ''}
                 onChange={(e) => {
-                  if (e.target.value !== connectorName) {
-                    setConnectorName(e.target.value);
+                  if (e.target.value !== selectedConnector?.name ?? '') {
+                    setRawName(e.target.value);
                   }
                 }}
               />
@@ -209,9 +206,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
           </EuiPanel>
         </EuiFlexItem>
         <EuiSpacer size="m" />
-        <EuiFlexItem>
-          <AttachIndexBox connector={connector} />
-        </EuiFlexItem>
+        <EuiFlexItem>{/* <AttachIndexBox connector={connector} /> */}</EuiFlexItem>
         <EuiSpacer size="m" />
         <EuiFlexItem>
           <EuiPanel hasBorder>
@@ -303,7 +298,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
       </EuiFlyoutFooter>
     </>
   );
-  
+
   const items = [
     <EuiContextMenuItem
       key="copy"

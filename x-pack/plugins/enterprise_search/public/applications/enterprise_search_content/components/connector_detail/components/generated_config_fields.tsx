@@ -35,7 +35,6 @@ import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../../routes';
 
 export interface GeneratedConfigFieldsProps {
   apiKey?: ApiKey;
-  connector: Connector;
   generateApiKey: () => void;
   isGenerateLoading: boolean;
 }
@@ -79,7 +78,6 @@ const ConfirmModal: React.FC<{
 
 export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   apiKey,
-  connector,
   generateApiKey,
   isGenerateLoading,
 }) => {

@@ -30,43 +30,31 @@ import {
 
 import { EuiStepInterface } from '@elastic/eui/src/components/steps/step';
 import { i18n } from '@kbn/i18n';
-import { ConnectorStatus } from '@kbn/search-connectors';
-import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
 import * as Constants from '../../../../shared/constants';
-import { KibanaLogic } from '../../../../shared/kibana';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
+import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
 import { errorToText } from '../../new_index/utils/error_to_text';
 import { connectorsBreadcrumbs } from '../connectors';
 
 import connectorsBackgroundImage from './assets/connector_logos_comp.png';
 
 import { ConfigurationStep } from './configuration_step';
-import { CreateConnectorLogic } from './create_connector_logic';
 import { DeploymentStep } from './deployment_step';
 import { FinishUpStep } from './finish_up_step';
 import { StartStep } from './start_step';
 
+export type SelfManagePreference = 'native' | 'selfManaged';
 export const CreateConnector: React.FC = () => {
-  const { apiReset, createConnector } = useActions(CreateConnectorLogic);
-  const { error, status } = useValues(AddConnectorApiLogic);
+  const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
-  const [selfManaged, setSelfManaged] = useState(false);
-  const { connectorTypes } = useValues(KibanaLogic);
-  const allConnectors = connectorTypes.sort((a, b) => a.name.localeCompare(b.name)); // alphabetically ordered
+  const [selfManagePreference, setSelfManagePreference] = useState<SelfManagePreference>('native');
   const { fetchConnector } = useActions(ConnectorViewLogic);
   const [syncing, setSyncing] = useState(false);
-  const { connector } = useValues(ConnectorViewLogic);
+  // const { connector } = useValues(ConnectorViewLogic);
 
-  let isNative = true; // isNativeAvailable && isNativeProp
-  let serviceType = ''; // TODO: Review
-
-  if (connector) {
-    connector.status = 'created' as ConnectorStatus;
-    connector.api_key_id = '123';
-  }
   useEffect(() => {
     fetchConnector({ connectorId: 'eIwou5AB7hZjs4c7Qmm4' });
   }, []);
@@ -76,21 +64,19 @@ export const CreateConnector: React.FC = () => {
     useState<EuiStepStatus>('incomplete');
   const [finishUpStepStatus, setFinishUpStepStatus] = useState<EuiStepStatus>('incomplete');
   const [currentStep, setCurrentStep] = useState(0);
-  const [connectorSelected, setConnectorSelected] = useState<ConnectorDefinition>({
-    docsUrl: '',
-    externalAuthDocsUrl: '',
-    externalDocsUrl: '',
-    iconPath: '',
-    isBeta: true,
-    isNative: true,
-    keywords: [],
-    name: '',
-    serviceType: '',
-  });
-  const [connectorName, setConnectorName] = useState('');
   const [deploymentStepComplete, setDeploymentStepComplete] = useState(false);
   const [configurationStepComplete, setConfigurationStepComplete] = useState(false);
   const [finishUpStepComplete, setFinishUpStepComplete] = useState(false);
+  const { selectedConnector } = useValues(NewConnectorLogic);
+
+  useEffect(() => {
+    // TODO: separate this to ability and preference
+    if (!selectedConnector?.isNative || !selfManagePreference) {
+      setSelfManagePreference('selfManaged');
+    } else {
+      setSelfManagePreference('native');
+    }
+  }, [selectedConnector]);
 
   interface CustomEuiStepInterface extends EuiStepInterface {
     content: JSX.Element;
@@ -103,31 +89,17 @@ export const CreateConnector: React.FC = () => {
           title={i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
             defaultMessage: 'Start',
           })}
-          allConnectors={allConnectors}
-          connectorName={connectorName}
-          connectorSelected={connectorSelected}
           currentStep={currentStep}
           isNextStepEnabled={deploymentStepComplete}
-          selfManaged={selfManaged}
-          setConnectorName={setConnectorName}
-          setConnectorSelected={setConnectorSelected}
+          selfManagePreference={selfManagePreference}
           setCurrentStep={setCurrentStep}
           setNextStepEnabled={setDeploymentStepComplete}
-          setSelfManaged={setSelfManaged}
-          // TODO:
-          connector={connector}
-          error={errorToText(error)}
-          onNameChange={() => {
-            apiReset();
+          onSelfManagePreferenceChange={(preference) => {
+            setSelfManagePreference(preference);
           }}
-          onSubmit={(name) =>
-            createConnector({
-              isNative,
-              language: null,
-              name,
-              serviceType,
-            })
-          }
+          error={errorToText(error)}
+          onNameChange={() => {}}
+          onSubmit={() => {}}
         />
       ),
       status: startStepStatus,
@@ -160,7 +132,7 @@ export const CreateConnector: React.FC = () => {
             'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
             { defaultMessage: 'Configuration' }
           )}
-          connector={connector}
+          // connector={connector}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
           isNextStepEnabled={finishUpStepComplete}
@@ -203,30 +175,27 @@ export const CreateConnector: React.FC = () => {
           title={i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
             defaultMessage: 'Start',
           })}
-          setSelfManaged={setSelfManaged}
-          selfManaged={selfManaged}
-          setConnectorSelected={setConnectorSelected}
-          connectorSelected={connectorSelected}
-          allConnectors={allConnectors}
-          connectorName={connectorName}
-          setConnectorName={setConnectorName}
+          selfManagePreference={selfManagePreference}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
           isNextStepEnabled={configurationStepComplete}
           setNextStepEnabled={setConfigurationStepComplete}
-          connector={connector}
+          onSelfManagePreferenceChange={(preference) => {
+            setSelfManagePreference(preference);
+          }}
           error={errorToText(error)}
           onNameChange={() => {
-            apiReset();
+            // apiReset();
           }}
-          onSubmit={(name) =>
-            createConnector({
-              isNative,
-              language: null,
-              name,
-              serviceType,
-            })
-          }
+          onSubmit={() => {}}
+          // onSubmit={(name) =>
+          // createConnector({
+          //  isNative,
+          //  language: null,
+          //  name,
+          //  serviceType,
+          // })
+          // }
         />
       ),
       status: startStepStatus,
@@ -247,7 +216,7 @@ export const CreateConnector: React.FC = () => {
             'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
             { defaultMessage: 'Configuration' }
           )}
-          connector={connector}
+          // connector={connector}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
           isNextStepEnabled={finishUpStepComplete}
@@ -282,7 +251,7 @@ export const CreateConnector: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (selfManaged === true) {
+    if (selfManagePreference === 'selfManaged') {
       switch (currentStep) {
         case 0:
           setStartStepStatus('current');
@@ -333,11 +302,6 @@ export const CreateConnector: React.FC = () => {
       }
     }
   }, [currentStep]);
-
-  useEffect(() => {
-    isNative = connectorSelected.isNative;
-    serviceType = connectorSelected.serviceType;
-  }, [connectorSelected]);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -393,7 +357,9 @@ export const CreateConnector: React.FC = () => {
 
             <EuiSteps
               titleSize="xxs"
-              steps={selfManaged === true ? selfManagedSteps : elasticManagedSteps}
+              steps={
+                selfManagePreference === 'selfManaged' ? selfManagedSteps : elasticManagedSteps
+              }
               css={() => css`
                 .euiStep__content {
                   padding-block-end: ${euiTheme.size.xs};
@@ -401,18 +367,18 @@ export const CreateConnector: React.FC = () => {
               `}
             />
             <EuiSpacer size="xl" />
-            {connectorSelected.docsUrl && connectorSelected.docsUrl !== '' && (
+            {selectedConnector?.docsUrl && selectedConnector?.docsUrl !== '' && (
               <>
                 <EuiText size="s">
                   <p>
                     <EuiLink
                       external
                       data-test-subj="enterpriseSearchCreateConnectorConnectorDocsLink"
-                      href={connectorSelected.docsUrl}
+                      href={selectedConnector?.docsUrl}
                       target="_blank"
                     >
                       {'Elastic '}
-                      {connectorSelected.name}
+                      {selectedConnector?.name}
                       {i18n.translate(
                         'xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel',
                         { defaultMessage: ' connector reference' }
@@ -440,12 +406,12 @@ export const CreateConnector: React.FC = () => {
                           <>
                             <EuiIcon
                               size="l"
-                              type={connectorSelected.iconPath}
+                              type={selectedConnector?.iconPath ?? ''}
                               css={css`
                                 margin-right: ${euiTheme.size.m};
                               `}
                             />
-                            {connectorSelected.name}
+                            {selectedConnector?.name}
                           </>
                         ),
                         value: 'item1',
@@ -455,7 +421,7 @@ export const CreateConnector: React.FC = () => {
                 </EuiFormRow>
                 <EuiSpacer size="s" />
                 <EuiBadge color="hollow">
-                  {selfManaged
+                  {selfManagePreference
                     ? i18n.translate(
                         'xpack.enterpriseSearch.createConnector.badgeType.selfManaged',
                         {
@@ -475,7 +441,7 @@ export const CreateConnector: React.FC = () => {
         </EuiFlexItem>
         {/* Col 2 */}
         <EuiFlexItem grow={7}>
-          {selfManaged === true
+          {selfManagePreference === 'selfManaged'
             ? selfManagedSteps[currentStep].content
             : elasticManagedSteps[currentStep].content}
         </EuiFlexItem>

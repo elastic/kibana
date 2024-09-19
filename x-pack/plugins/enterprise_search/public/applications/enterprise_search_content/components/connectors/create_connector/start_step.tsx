@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -25,8 +25,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { Connector } from '@kbn/search-connectors/types/connectors';
-import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
 import * as Constants from '../../../../shared/constants';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
@@ -37,58 +35,46 @@ import { NewConnectorLogic } from '../../new_index/method_connector/new_connecto
 import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 import { ManualConfiguration } from './components/manual_configuration';
-import { CreateConnectorLogic } from './create_connector_logic';
+import { SelfManagePreference } from './create_connector';
 
 interface StartStepProps {
-  allConnectors: ConnectorDefinition[];
-  connector: Connector;
-  connectorName: string;
-  connectorSelected: ConnectorDefinition;
   currentStep: number;
   error?: string | React.ReactNode;
   isNextStepEnabled: boolean;
   onNameChange?(name: string): void;
+  onSelfManagePreferenceChange(preference: SelfManagePreference): void;
   onSubmit(name: string): void;
-  selfManaged: boolean;
-  setConnectorName: Function;
-  setConnectorSelected: Function;
+  selfManagePreference: SelfManagePreference;
   setCurrentStep: Function;
   setNextStepEnabled: Function;
-  setSelfManaged: Function;
   title: string;
 }
 
 export const StartStep: React.FC<StartStepProps> = ({
-  setSelfManaged,
   title,
-  selfManaged,
-  setConnectorSelected,
-  connectorSelected,
-  allConnectors,
-  connectorName,
-  setConnectorName,
+  selfManagePreference,
   currentStep,
   setCurrentStep,
   isNextStepEnabled,
   setNextStepEnabled,
-  connector,
   onNameChange,
+  onSelfManagePreferenceChange,
   onSubmit,
   error,
 }) => {
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
-  const [radioIdSelected, setRadioIdSelected] = useState(
-    selfManaged ? selfManagedRadioButtonId : elasticManagedRadioButtonId
-  );
   const { isGenerateLoading } = useValues(DeploymentLogic);
-  const { setNewConnectorServiceType } = useActions(CreateConnectorLogic);
 
-  // FORM
+  const {
+    fullIndexName,
+    fullIndexNameExists,
+    fullIndexNameIsValid,
+    canConfigureConnector,
+    selectedConnector,
+  } = useValues(NewConnectorLogic);
+  const { setRawName } = useActions(NewConnectorLogic);
 
-  const { fullIndexName, fullIndexNameExists, fullIndexNameIsValid, rawName } =
-    useValues(NewConnectorLogic);
-  const { setRawName, generateConnectorName } = useActions(NewConnectorLogic);
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
     if (onNameChange) {
@@ -96,13 +82,6 @@ export const StartStep: React.FC<StartStepProps> = ({
     }
   };
 
-  const selectNewConnector = (connector: ConnectorDefinition) => {
-    if (rawName === '') {
-      generateConnectorName({ connectorType: connector.serviceType });
-    }
-    setNewConnectorServiceType(connector.serviceType);
-    setConnectorSelected(connector);
-  };
   const formInvalid = !!error || fullIndexNameExists || !fullIndexNameIsValid;
 
   const formError = () => {
@@ -132,33 +111,10 @@ export const StartStep: React.FC<StartStepProps> = ({
     }
     return error;
   };
-  // END FORM
-  useEffect(() => {
-    setSelfManaged(radioIdSelected === selfManagedRadioButtonId ? true : false);
-  }, [radioIdSelected]);
-  useEffect(() => {
-    setRadioIdSelected(selfManaged ? selfManagedRadioButtonId : elasticManagedRadioButtonId);
-  }, [selfManaged]);
-
-  useEffect(() => {
-    if (connectorSelected && connectorSelected.name !== '') {
-      // TODO: self managed should be calculated by the logic
-      if (!connectorSelected.isNative && !selfManaged) {
-        setSelfManaged(true);
-      }
-      // const name = // TODO: replace with logic
-      //  connectorSelected.name
-      //    .toLocaleLowerCase()
-      //    .replace(/[^\w-]/g, '')
-      //    .replace(/ /g, '-') + '-aa3f';
-      // setConnectorName(name);
-    }
-  }, [connectorSelected]);
 
   return (
     <EuiForm component="form" id="enterprise-search-create-connector">
       <EuiFlexGroup gutterSize="m" direction="column">
-        {/* Start */}
         <EuiFlexItem>
           <EuiPanel hasShadow={false} hasBorder paddingSize="l">
             <EuiTitle size="m">
@@ -174,12 +130,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Connector' }
                   )}
                 >
-                  <ChooseConnectorSelectable
-                    selfManaged={selfManaged}
-                    setConnectorSelected={selectNewConnector}
-                    connectorSelected={connectorSelected}
-                    allConnectors={allConnectors}
-                  />
+                  <ChooseConnectorSelectable selfManaged={selfManagePreference} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -251,15 +202,15 @@ export const StartStep: React.FC<StartStepProps> = ({
                     'xpack.enterpriseSearch.createConnector.startStep.euiRadio.elasticManagedLabel',
                     { defaultMessage: 'Elastic managed' }
                   )}
-                  checked={!selfManaged}
-                  disabled={connectorSelected.isNative === false}
-                  onChange={() => setRadioIdSelected(elasticManagedRadioButtonId)}
+                  checked={selfManagePreference === 'native'}
+                  disabled={selectedConnector?.isNative === false}
+                  onChange={() => onSelfManagePreferenceChange('native')}
                   name="setUp"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <ConnectorDescriptionPopover
-                  isDisabled={connectorSelected.isNative === false}
+                  isDisabled={selectedConnector?.isNative === false}
                   isNative
                 />
               </EuiFlexItem>
@@ -271,8 +222,8 @@ export const StartStep: React.FC<StartStepProps> = ({
                     'xpack.enterpriseSearch.createConnector.startStep.euiRadio.selfManagedLabel',
                     { defaultMessage: 'Self managed' }
                   )}
-                  checked={selfManaged}
-                  onChange={() => setRadioIdSelected(selfManagedRadioButtonId)}
+                  checked={selfManagePreference === 'selfManaged'}
+                  onChange={() => onSelfManagePreferenceChange('selfManaged')}
                   name="setUp"
                 />
               </EuiFlexItem>
@@ -282,19 +233,15 @@ export const StartStep: React.FC<StartStepProps> = ({
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
-        {selfManaged ? (
+        {selfManagePreference === 'selfManaged' ? (
           <EuiFlexItem>
             <EuiPanel
               hasShadow={false}
               hasBorder
               paddingSize="l"
-              color={connectorSelected.name !== '' && connectorName !== '' ? 'plain' : 'subdued'}
+              color={selectedConnector?.name ? 'plain' : 'subdued'}
             >
-              <EuiText
-                color={
-                  connectorSelected.name !== '' && connectorName !== '' ? 'default' : 'subdued'
-                }
-              >
+              <EuiText color={selectedConnector?.name ? 'default' : 'subdued'}>
                 <h3>
                   {i18n.translate(
                     'xpack.enterpriseSearch.createConnector.startStep.h4.deploymentLabel',
@@ -305,12 +252,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 </h3>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText
-                color={
-                  connectorSelected.name !== '' && connectorName !== '' ? 'default' : 'subdued'
-                }
-                size="s"
-              >
+              <EuiText color={selectedConnector?.name ? 'default' : 'subdued'} size="s">
                 <p>
                   {i18n.translate(
                     'xpack.enterpriseSearch.createConnector.startStep.p.youWillStartTheLabel',
@@ -326,7 +268,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 data-test-subj="enterpriseSearchStartStepNextButton"
                 onClick={() => setCurrentStep(currentStep + 1)}
                 fill
-                disabled={connectorSelected.name === '' || connectorName === ''}
+                disabled={canConfigureConnector}
               >
                 {Constants.NEXT_BUTTON_LABEL}
               </EuiButton>
@@ -335,16 +277,12 @@ export const StartStep: React.FC<StartStepProps> = ({
         ) : (
           <EuiFlexItem>
             <EuiPanel
-              color={connectorSelected.name !== '' && connectorName !== '' ? 'plain' : 'subdued'}
+              color={selectedConnector?.name ? 'plain' : 'subdued'}
               hasShadow={false}
               hasBorder
               paddingSize="l"
             >
-              <EuiText
-                color={
-                  connectorSelected.name !== '' && connectorName !== '' ? 'default' : 'subdued'
-                }
-              >
+              <EuiText color={selectedConnector?.name ? 'default' : 'subdued'}>
                 <h3>
                   {i18n.translate(
                     'xpack.enterpriseSearch.createConnector.startStep.h4.configureIndexAndAPILabel',
@@ -355,12 +293,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 </h3>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText
-                color={
-                  connectorSelected.name !== '' && connectorName !== '' ? 'default' : 'subdued'
-                }
-                size="s"
-              >
+              <EuiText color={selectedConnector?.name ? 'default' : 'subdued'} size="s">
                 <p>
                   {i18n.translate(
                     'xpack.enterpriseSearch.createConnector.startStep.p.thisProcessWillCreateLabel',
@@ -381,7 +314,6 @@ export const StartStep: React.FC<StartStepProps> = ({
                       id: 'string',
                       name: 'my-api-key',
                     }}
-                    connector={connector}
                     generateApiKey={() => {}}
                     isGenerateLoading={false}
                   />
@@ -400,7 +332,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     <EuiButton
                       data-test-subj="entSearchContent-connector-configuration-generateConfigButton"
                       data-telemetry-id="entSearchContent-connector-configuration-generateConfigButton"
-                      disabled={connectorSelected.name === '' || connectorName === ''}
+                      disabled={!canConfigureConnector}
                       fill
                       iconType="sparkles"
                       isLoading={isGenerateLoading}
@@ -425,10 +357,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <ManualConfiguration
-                      isDisabled={connectorSelected.name === '' || connectorName === ''}
-                      connectorName={connectorName}
-                      setConnectorName={setConnectorName}
-                      connector={connector}
+                      isDisabled={!canConfigureConnector}
                       setIsNextStepEnabled={setNextStepEnabled}
                     />
                   </EuiFlexItem>

@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   AddConnectorApiLogic,
@@ -31,6 +33,7 @@ import { LanguageForOptimization } from '../types';
 import { getLanguageForOptimization } from '../utils';
 
 export interface NewConnectorValues {
+  canConfigureConnector: boolean;
   data: IndexExistsApiResponse;
   fullIndexName: string;
   fullIndexNameExists: boolean;
@@ -39,6 +42,7 @@ export interface NewConnectorValues {
   language: LanguageForOptimization;
   languageSelectValue: string;
   rawName: string;
+  selectedConnector: ConnectorDefinition | null;
 }
 
 type NewConnectorActions = Pick<
@@ -52,6 +56,9 @@ type NewConnectorActions = Pick<
   setGeneratedName(name: string): { name: string };
   setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
+  setSelectedConnector(connector: ConnectorDefinition | null): {
+    connector: ConnectorDefinition | null;
+  };
 };
 
 export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnectorActions>>({
@@ -59,6 +66,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
     setGeneratedName: (name) => ({ name }),
     setLanguageSelectValue: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
+    setSelectedConnector: (connector) => ({ connector }),
   },
   connect: {
     actions: [
@@ -71,9 +79,14 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
     ],
     values: [IndexExistsApiLogic, ['data']],
   },
-  listeners: ({ actions }) => ({
+  listeners: ({ actions, values }) => ({
     connectorNameGenerated: ({ connectorName }) => {
       actions.setGeneratedName(connectorName);
+    },
+    setSelectedConnector: ({ connector }) => {
+      if (values.rawName === '' && connector) {
+        actions.generateConnectorName({ connectorType: connector.serviceType });
+      }
     },
   }),
   path: ['enterprise_search', 'content', 'new_search_index'],
@@ -100,8 +113,22 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
         setRawName: (_, { rawName }) => rawName,
       },
     ],
+    selectedConnector: [
+      null,
+      {
+        setSelectedConnector: (
+          _: NewConnectorValues['selectedConnector'],
+          { connector }: { connector: NewConnectorValues['selectedConnector'] }
+        ) => connector,
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
+    canConfigureConnector: [
+      () => [selectors.fullIndexName, selectors.selectedConnector],
+      (fullIndexName: string, selectedConnector: NewConnectorValues['selectedConnector']) =>
+        fullIndexName && selectedConnector?.name,
+    ],
     fullIndexName: [
       () => [selectors.rawName, selectors.generatedName],
       (name: string, generatedName: string) => (name ? name : generatedName),
