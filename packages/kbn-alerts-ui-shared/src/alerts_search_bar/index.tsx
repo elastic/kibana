@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, useEffect, useState } from 'react';
+import { useCallback, useMemo, useEffect, useState, useRef } from 'react';
 import { cloneDeep } from 'lodash';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
@@ -44,6 +44,7 @@ export const AlertsSearchBar = ({
   onFiltersUpdated,
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
+  const isFirstRender = useRef(false);
   const { dataView } = useAlertsDataView({
     featureIds,
     http,
@@ -107,10 +108,9 @@ export const AlertsSearchBar = ({
   };
 
   useEffect(() => {
-    let isFirstRender = true;
-
-    if (initialFilters?.length && isFirstRender) {
+    if (initialFilters?.length && !isFirstRender.current) {
       dataService.query.filterManager.addFilters(cloneDeep(initialFilters));
+      isFirstRender.current = true;
     }
 
     const subscription = dataService.query.state$.subscribe((state) => {
@@ -120,7 +120,7 @@ export const AlertsSearchBar = ({
     });
 
     return () => {
-      isFirstRender = false;
+      isFirstRender.current = false;
       subscription.unsubscribe();
       dataService.query.filterManager.removeAll();
     };

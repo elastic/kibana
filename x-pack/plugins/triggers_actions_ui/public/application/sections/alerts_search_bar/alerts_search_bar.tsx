@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
@@ -58,6 +58,7 @@ export function AlertsSearchBar({
   } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
+  const isFirstRender = useRef(false);
   const { dataView } = useAlertsDataView({
     featureIds,
     http,
@@ -171,10 +172,9 @@ export function AlertsSearchBar({
   }, [initialFilters, onFiltersUpdated, quickFilters, showFilterBar]);
 
   useEffect(() => {
-    let isFirstRender = true;
-
-    if (initialFilters?.length && isFirstRender) {
+    if (initialFilters?.length && !isFirstRender.current) {
       dataService.query.filterManager.addFilters(cloneDeep(initialFilters));
+      isFirstRender.current = true;
     }
 
     const subscription = dataService.query.state$.subscribe((state) => {
@@ -184,7 +184,7 @@ export function AlertsSearchBar({
     });
 
     return () => {
-      isFirstRender = false;
+      isFirstRender.current = false;
       subscription.unsubscribe();
       dataService.query.filterManager.removeAll();
     };
