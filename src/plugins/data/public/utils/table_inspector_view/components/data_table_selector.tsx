@@ -85,35 +85,37 @@ export class TableSelector extends Component<TableSelectorProps, TableSelectorSt
             />
           </strong>
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiPopover
-            id="inspectorTableChooser"
-            button={
-              <EuiButtonEmpty
-                iconType="arrowDown"
-                iconSide="right"
-                size="s"
-                onClick={this.togglePopover}
-                data-test-subj="inspectorTableChooser"
-              >
-                <FormattedMessage
-                  id="data.inspector.table.inspectorTableChooserButton"
-                  defaultMessage="Table {index}"
-                  values={{ index: currentIndex + 1 }}
-                />
-              </EuiButtonEmpty>
-            }
-            isOpen={this.state.isPopoverOpen}
-            closePopover={this.closePopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-            repositionOnScroll
-          >
-            <EuiContextMenuPanel
-              items={this.props.tables.map(this.renderTableDropdownItem)}
-              data-test-subj="inspectorTableChooserMenuPanel"
-            />
-          </EuiPopover>
+        <EuiFlexItem>
+          <div>
+            <EuiPopover
+              id="inspectorTableChooser"
+              button={
+                <EuiButtonEmpty
+                  iconType="arrowDown"
+                  iconSide="right"
+                  size="s"
+                  onClick={this.togglePopover}
+                  data-test-subj="inspectorTableChooser"
+                >
+                  <FormattedMessage
+                    id="data.inspector.table.inspectorTableChooserButton"
+                    defaultMessage="Table {index}"
+                    values={{ index: currentIndex + 1 }}
+                  />
+                </EuiButtonEmpty>
+              }
+              isOpen={this.state.isPopoverOpen}
+              closePopover={this.closePopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+              repositionOnScroll
+            >
+              <EuiContextMenuPanel
+                items={this.props.tables.map(this.renderTableDropdownItem)}
+                data-test-subj="inspectorTableChooserMenuPanel"
+              />
+            </EuiPopover>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

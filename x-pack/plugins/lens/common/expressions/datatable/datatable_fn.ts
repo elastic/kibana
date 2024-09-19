@@ -54,6 +54,10 @@ export const datatableFn =
       untransposedData = cloneDeep(table);
       // transposes table and args inplace
       transposeTable(args, table, formatters);
+
+      if (context?.inspectorAdapters?.tables) {
+        context.inspectorAdapters.tables.logDatatable('transpose', table);
+      }
     }
 
     const columnsWithSummary = args.columns.filter((c) => c.summaryRow);
