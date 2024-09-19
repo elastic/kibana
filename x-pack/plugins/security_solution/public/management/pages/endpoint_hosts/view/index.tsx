@@ -354,24 +354,22 @@ export const EndpointList = () => {
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
 
-  const hasPolicyData = useMemo(() => policyItems && policyItems.length > 0, [policyItems]);
-  const hasListData = useMemo(() => listData && listData.length > 0, [listData]);
+  const hasPolicyData = policyItems && policyItems.length > 0;
+  const hasListData = listData && listData.length > 0;
 
   const refreshStyle = useMemo(() => {
     return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
   }, [endpointsExist]);
 
-  const refreshIsPaused = useMemo(() => {
-    return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
-  }, [endpointsExist, hasSelectedEndpoint, isAutoRefreshEnabled]);
+  const refreshIsPaused = !endpointsExist
+    ? false
+    : hasSelectedEndpoint
+    ? true
+    : !isAutoRefreshEnabled;
 
-  const refreshInterval = useMemo(() => {
-    return !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
-  }, [endpointsExist, autoRefreshInterval]);
+  const refreshInterval = !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
 
-  const shouldShowKQLBar = useMemo(() => {
-    return endpointsExist && !patternsError;
-  }, [endpointsExist, patternsError]);
+  const shouldShowKQLBar = endpointsExist && !patternsError;
 
   const paginationSetup = useMemo(() => {
     return {
