@@ -18,7 +18,10 @@ import { AggTypesDependencies } from '..';
  * @returns true if response is abort
  */
 export const isAbortResponse = (response?: IKibanaSearchResponse) => {
-  return !response || (!response.rawResponse && !response.response);
+  return (
+    !response ||
+    (!response.rawResponse && !(response as unknown as Record<string, unknown>).response)
+  );
 };
 
 /**
