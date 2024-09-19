@@ -38,6 +38,9 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       packageService,
     } = this.fleetDependencies;
 
+    let internalSoClient: SavedObjectsClientContract;
+    let internalReadonlySoClient: SavedObjectsClientContract;
+
     return {
       agent: agentService.asInternalUser,
       agentPolicy,
@@ -46,8 +49,21 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
 
       endpointPolicyKuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "endpoint"`,
 
-      internalReadonlySoClient: createInternalReadonlySoClient(this.savedObjectsStart),
-      internalSoClient: createInternalSoClient(this.savedObjectsStart),
+      get internalReadonlySoClient() {
+        if (!internalReadonlySoClient) {
+          internalReadonlySoClient = createInternalReadonlySoClient(this.savedObjectsStart);
+        }
+
+        return internalReadonlySoClient;
+      },
+
+      get internalSoClient() {
+        if (!internalSoClient) {
+          internalSoClient = createInternalSoClient(this.savedObjectsStart);
+        }
+
+        return internalSoClient;
+      },
     };
   }
 }
