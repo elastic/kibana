@@ -360,6 +360,13 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   public readonly hosts: string[];
 
   /**
+   * Optional host that users can use to connect to your Elasticsearch cluster,
+   * this URL will be shown in Kibana as the Elasticsearch URL
+   */
+
+  public readonly publicBaseUrl?: string;
+
+  /**
    * List of Kibana client-side headers to send to Elasticsearch when request
    * scoped cluster client is used. If this is an empty array then *no* client-side
    * will be sent.
@@ -473,6 +480,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
     this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
     this.dnsCacheTtl = rawConfig.dnsCacheTtl;
+    this.publicBaseUrl = rawConfig.publicBaseUrl;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

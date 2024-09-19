@@ -111,6 +111,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
             __one_of: [false, true],
           },
           ignore_above: 10,
+          normalizer: '',
           position_increment_gap: 0,
 
           // numeric
