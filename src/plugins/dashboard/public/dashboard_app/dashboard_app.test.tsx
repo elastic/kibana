@@ -60,6 +60,7 @@ describe('Dashboard App', () => {
     render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} />);
 
     await waitFor(() => {
+      expect(expandPanelSpyInRouter).not.toHaveBeenCalled();
       // this value should be undefined by default
       expect(mockDashboard.expandedPanelId.getValue()).toBe(undefined);
       // history should not be called
@@ -87,6 +88,7 @@ describe('Dashboard App', () => {
 
     // simulate minimizing a panel
     mockDashboard.expandedPanelId.next(undefined);
+
     await waitFor(() => {
       expect(mockDashboard.expandedPanelId.getValue()).toBe(undefined);
       expect(historySpy).toHaveBeenCalledTimes(1);
