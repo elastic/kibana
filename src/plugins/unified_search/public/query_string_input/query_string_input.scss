@@ -24,9 +24,15 @@
   // Unlike most inputs within layout control groups, the text area still needs a border
   // for multi-line content. These adjusts help it sit above the control groups
   // shadow to line up correctly.
-  padding: ($euiSizeS + 2px) $euiSizeS $euiSizeS;
+  padding: $euiSizeS;
+  padding-top: $euiSizeS + 2px;
+  padding-left: $euiSizeXXL; // Account for search icon
   // Firefox adds margin to textarea
   margin: 0;
+
+  &--isClearable {
+    padding-right: $euiSizeXXL; // Account for clear button
+  }
 
   &:not(.kbnQueryBar__textarea--autoHeight) {
     overflow-y: hidden;
@@ -45,12 +51,6 @@
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
   }
-
-  &--isClearable {
-    @include euiFormControlWithIcon($isIconOptional: false, $side: 'right');
-  }
-
-  @include euiFormControlWithIcon($isIconOptional: true);
 
   ~.euiFormControlLayoutIcons {
     // By default form control layout icon is vertically centered, but our textarea
