@@ -5,27 +5,35 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiIcon, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
+import { union } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ObservabilityOnboardingAppServices } from '../../..';
 import {
   FIREHOSE_CLOUDFORMATION_STACK_NAME,
   FIREHOSE_LOGS_STREAM_NAME,
+  type AWSIndexName,
 } from '../../../../common/aws_firehose';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { AccordionWithIcon } from '../shared/accordion_with_icon';
 import { GetStartedPanel } from '../shared/get_started_panel';
-import { ProgressIndicator } from '../shared/progress_indicator';
 import { useAWSServiceGetStartedList } from './use_aws_service_get_started_list';
+import { AutoRefreshCallout } from './auto_refresh_callout';
+import { ProgressCallout } from './progress_callout';
+import { HAS_DATA_FETCH_INTERVAL } from './utils';
 
-const FETCH_INTERVAL = 2000;
 const REQUEST_PENDING_STATUS_LIST = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
 
 export function VisualizeData() {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
-  const { euiTheme } = useEuiTheme();
+  const [orderedPopulatedAWSLogsIndexList, setOrderedPopulatedAWSLogsIndexList] = useState<
+    AWSIndexName[]
+  >([]);
+  const [shouldShowDataReceivedToast, setShouldShowDataReceivedToast] = useState<boolean>(true);
   const {
     data: populatedAWSLogsIndexList,
     status,
@@ -40,6 +48,49 @@ export function VisualizeData() {
       },
     });
   }, []);
+  const {
+    services: { notifications },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+
+  useEffect(() => {
+    if (
+      shouldShowDataReceivedToast &&
+      Array.isArray(populatedAWSLogsIndexList) &&
+      populatedAWSLogsIndexList.length > 0
+    ) {
+      notifications?.toasts.addSuccess(
+        {
+          title: i18n.translate(
+            'xpack.observability_onboarding.firehosePanel.dataReceivedToastTitle',
+            {
+              defaultMessage: 'Your data is on its way',
+            }
+          ),
+          text: i18n.translate(
+            'xpack.observability_onboarding.firehosePanel.dataReceivedToastText',
+            {
+              defaultMessage:
+                'We’ve begun processing your data. In the background, we automatically refresh every few seconds to capture more incoming data.',
+            }
+          ),
+        },
+        {
+          toastLifeTimeMs: 10000,
+        }
+      );
+      setShouldShowDataReceivedToast(false);
+    }
+
+    setOrderedPopulatedAWSLogsIndexList((currentList) =>
+      /**
+       * Using union() to ensure items in the array are unique
+       * add stay in the insertion order to keep the order of
+       * the AWS services in the UI.
+       */
+      union(currentList, populatedAWSLogsIndexList)
+    );
+  }, [notifications?.toasts, populatedAWSLogsIndexList, shouldShowDataReceivedToast]);
+
   const awsServiceGetStartedConfigList = useAWSServiceGetStartedList();
 
   useInterval(() => {
@@ -48,7 +99,7 @@ export function VisualizeData() {
     }
 
     refetch();
-  }, FETCH_INTERVAL);
+  }, HAS_DATA_FETCH_INTERVAL);
 
   if (populatedAWSLogsIndexList === undefined) {
     return null;
@@ -56,58 +107,58 @@ export function VisualizeData() {
 
   return (
     <>
-      <ProgressIndicator
-        title={i18n.translate('xpack.observability_onboarding.firehosePanel.waitingForDataTitle', {
-          defaultMessage: 'Waiting for data from the Firehose stream',
-        })}
-        isLoading={true}
-        css={css`
-          max-width: 40%;
-        `}
-      />
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="xpack.observability_onboarding.firehosePanel.visualizeDataDescription"
+            defaultMessage="Once the Firehose stream is created, data capture will begin automatically, and the incoming data will be displayed below."
+          />
+        </p>
+      </EuiText>
 
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="m" />
+
+      {orderedPopulatedAWSLogsIndexList.length === 0 && <ProgressCallout />}
+      {orderedPopulatedAWSLogsIndexList.length > 0 && <AutoRefreshCallout />}
+
+      <EuiSpacer size="m" />
 
       <div data-test-subj="observabilityOnboardingAWSServiceList">
-        {awsServiceGetStartedConfigList.map(
-          ({ id, indexNameList, actionLinks, title, logoURL, previewImage }) => {
-            const isEnabled = indexNameList.some((indexName) =>
-              populatedAWSLogsIndexList.includes(indexName)
-            );
+        {orderedPopulatedAWSLogsIndexList.map((indexName, index) => {
+          const getStartedConfig = awsServiceGetStartedConfigList.find(({ indexNameList }) =>
+            indexNameList.includes(indexName)
+          );
 
-            return (
-              <AccordionWithIcon
-                data-test-subj={`observabilityOnboardingAWSService-${id}`}
-                key={id}
-                id={`${accordionId}_${id}`}
-                icon={<EuiIcon type={logoURL} size="l" />}
-                title={i18n.translate(
-                  'xpack.observability_onboarding.firehosePanel.awsServiceDataFoundTitle',
-                  {
-                    defaultMessage: '{title}',
-                    values: { title },
-                  }
-                )}
-                extraAction={
-                  isEnabled ? <EuiIcon type="checkInCircleFilled" color="success" /> : null
-                }
-                isDisabled={!isEnabled}
-                css={{
-                  paddingRight: euiTheme.size.s,
-                  filter: `grayscale(${isEnabled ? 0 : 1})`,
-                }}
-              >
-                <GetStartedPanel
-                  integration="aws"
-                  newTab
-                  isLoading={false}
-                  actionLinks={actionLinks}
-                  previewImage={previewImage}
-                />
-              </AccordionWithIcon>
-            );
+          if (!getStartedConfig) {
+            return null;
           }
-        )}
+
+          const { id, actionLinks, title, logoURL, previewImage } = getStartedConfig;
+
+          return (
+            <AccordionWithIcon
+              data-test-subj={`observabilityOnboardingAWSService-${id}`}
+              key={id}
+              id={`${accordionId}_${id}`}
+              icon={<EuiIcon type={logoURL} size="l" />}
+              title={title}
+              initialIsOpen={true}
+              borders={
+                index === 0 || index === orderedPopulatedAWSLogsIndexList.length - 1
+                  ? 'none'
+                  : 'horizontal'
+              }
+            >
+              <GetStartedPanel
+                integration="aws"
+                newTab
+                isLoading={false}
+                actionLinks={actionLinks}
+                previewImage={previewImage}
+              />
+            </AccordionWithIcon>
+          );
+        })}
       </div>
     </>
   );

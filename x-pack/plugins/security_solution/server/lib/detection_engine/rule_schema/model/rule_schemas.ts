@@ -162,6 +162,7 @@ export const EqlSpecificRuleParams = z.object({
   timestampField: TimestampField.optional(),
   tiebreakerField: TiebreakerField.optional(),
   alertSuppression: AlertSuppressionCamel.optional(),
+  responseActions: z.array(RuleResponseAction).optional(),
 });
 
 export type EqlRuleParams = BaseRuleParams & EqlSpecificRuleParams;
@@ -173,6 +174,7 @@ export const EsqlSpecificRuleParams = z.object({
   language: z.literal('esql'),
   query: RuleQuery,
   alertSuppression: AlertSuppressionCamel.optional(),
+  responseActions: z.array(RuleResponseAction).optional(),
 });
 
 export type EsqlRuleParams = BaseRuleParams & EsqlSpecificRuleParams;
@@ -280,6 +282,7 @@ export const NewTermsSpecificRuleParams = z.object({
   language: KqlQueryLanguage,
   dataViewId: DataViewId.optional(),
   alertSuppression: AlertSuppressionCamel.optional(),
+  responseActions: z.array(RuleResponseAction).optional(),
 });
 
 export type NewTermsRuleParams = BaseRuleParams & NewTermsSpecificRuleParams;

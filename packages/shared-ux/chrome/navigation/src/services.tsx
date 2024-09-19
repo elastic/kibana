@@ -36,7 +36,7 @@ export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationKibanaDepe
   const { chrome, http, analytics } = core;
   const { basePath } = http;
   const { navigateToUrl } = core.application;
-  const isSideNavCollapsed = useObservable(chrome.getIsSideNavCollapsed$(), true);
+  const isSideNavCollapsed = useObservable(chrome.sideNav.getIsCollapsed$(), true);
 
   const value: NavigationServices = useMemo(
     () => ({
