@@ -34,7 +34,7 @@ import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 import { IndexDocuments } from '../index_documents/index_documents';
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
-import { SearchIndicesDetailsMappingsTabs } from '../../routes';
+import { SearchIndexDetailsTabs } from '../../routes';
 import { SearchIndexDetailsMappings } from './details_page_mappings';
 import { SearchIndexDetailsSettings } from './details_page_settings';
 
@@ -50,40 +50,40 @@ export const SearchIndexDetailsPage = () => {
     isInitialLoading: isMappingsInitialLoading,
   } = useIndexMapping(indexName);
 
-  const SearchIndexDetailsTabs: EuiTabbedContentTab[] = useMemo(() => {
+  const detailsPageTabs: EuiTabbedContentTab[] = useMemo(() => {
     return [
       {
-        id: SearchIndicesDetailsMappingsTabs.DATA,
+        id: SearchIndexDetailsTabs.DATA,
         name: i18n.translate('xpack.searchIndices.documentsTabLabel', {
           defaultMessage: 'Data',
         }),
         content: <IndexDocuments indexName={indexName} />,
-        'data-test-subj': `${SearchIndicesDetailsMappingsTabs.DATA}Tab`,
+        'data-test-subj': `${SearchIndexDetailsTabs.DATA}Tab`,
       },
       {
-        id: SearchIndicesDetailsMappingsTabs.MAPPINGS,
+        id: SearchIndexDetailsTabs.MAPPINGS,
         name: i18n.translate('xpack.searchIndices.mappingsTabLabel', {
           defaultMessage: 'Mappings',
         }),
         content: <SearchIndexDetailsMappings index={index} />,
-        'data-test-subj': `${SearchIndicesDetailsMappingsTabs.MAPPINGS}Tab`,
+        'data-test-subj': `${SearchIndexDetailsTabs.MAPPINGS}Tab`,
       },
       {
-        id: SearchIndicesDetailsMappingsTabs.SETTINGS,
+        id: SearchIndexDetailsTabs.SETTINGS,
         name: i18n.translate('xpack.searchIndices.settingsTabLabel', {
           defaultMessage: 'Settings',
         }),
         content: <SearchIndexDetailsSettings indexName={indexName} />,
-        'data-test-subj': `${SearchIndicesDetailsMappingsTabs.SETTINGS}Tab`,
+        'data-test-subj': `${SearchIndexDetailsTabs.SETTINGS}Tab`,
       },
     ];
   }, [index, indexName]);
-  const [selectedTab, setSelectedTab] = useState(SearchIndexDetailsTabs[0]);
+  const [selectedTab, setSelectedTab] = useState(detailsPageTabs[0]);
 
   useEffect(() => {
-    const newTab = SearchIndexDetailsTabs.find((tab) => tab.id === tabId);
+    const newTab = detailsPageTabs.find((tab) => tab.id === tabId);
     if (newTab) setSelectedTab(newTab);
-  }, [SearchIndexDetailsTabs, tabId]);
+  }, [detailsPageTabs, tabId]);
 
   const handleTabClick = useCallback(
     (tab) => {
@@ -223,7 +223,7 @@ export const SearchIndexDetailsPage = () => {
               <EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTabbedContent
-                    tabs={SearchIndexDetailsTabs}
+                    tabs={detailsPageTabs}
                     onTabClick={handleTabClick}
                     selectedTab={selectedTab}
                   />
