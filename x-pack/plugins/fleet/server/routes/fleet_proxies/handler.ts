@@ -101,7 +101,7 @@ export const putFleetProxyHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const proxyId = request.params.itemId;
-    const coreContext = await await context.core;
+    const coreContext = await context.core;
     const soClient = coreContext.savedObjects.client;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
