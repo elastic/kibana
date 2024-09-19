@@ -22,8 +22,8 @@ import {
   LATEST_VULNERABILITIES_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import { FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
+import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import { VULNERABILITY_FIELDS } from '../../../common/constants';
-import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getCaseInsensitiveSortScript } from '../utils/custom_sort_script';
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
