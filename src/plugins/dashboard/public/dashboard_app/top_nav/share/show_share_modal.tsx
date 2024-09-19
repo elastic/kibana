@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiCheckboxGroup } from '@elastic/eui';
@@ -16,11 +17,7 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import { omit } from 'lodash';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
-import {
-  convertPanelMapToSavedPanels,
-  DashboardContainerInput,
-  DashboardPanelMap,
-} from '../../../../common';
+import { convertPanelMapToSavedPanels, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
 import { dashboardUrlParams } from '../../dashboard_router';
@@ -34,7 +31,7 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
-  getDashboardState: () => DashboardContainerInput;
+  getPanelsState: () => DashboardPanelMap;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -50,7 +47,7 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
-  getDashboardState,
+  getPanelsState,
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
@@ -139,7 +136,7 @@ export function ShowShareModal({
       return;
     }
 
-    const latestPanels = getDashboardState().panels;
+    const latestPanels = getPanelsState();
     // apply modifications to panels.
     const modifiedPanels = panelModifications
       ? Object.entries(panelModifications).reduce((acc, [panelId, unsavedPanel]) => {

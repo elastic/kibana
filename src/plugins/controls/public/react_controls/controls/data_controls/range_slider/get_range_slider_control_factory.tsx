@@ -1,25 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, debounceTime, map, skip } from 'rxjs';
+
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+
+import { RANGE_SLIDER_CONTROL } from '../../../../../common';
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory, DataControlServices } from '../types';
+import type { DataControlFactory, DataControlServices } from '../types';
 import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
-import { RangeSliderStrings } from './range_slider_strings';
-import { RangesliderControlApi, RangesliderControlState } from './types';
 import { initializeRangeControlSelections } from './range_control_selections';
-import { RANGE_SLIDER_CONTROL } from '../../../../../common';
+import { RangeSliderStrings } from './range_slider_strings';
+import type { RangesliderControlApi, RangesliderControlState } from './types';
 
 export const getRangesliderControlFactory = (
   services: DataControlServices

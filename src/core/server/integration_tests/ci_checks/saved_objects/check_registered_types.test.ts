@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
@@ -92,6 +93,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "enterprise_search_telemetry": "9ac912e1417fc8681e0cd383775382117c9e3d3d",
         "entity-definition": "61be3e95966045122b55e181bb39658b1dc9bbe9",
         "entity-discovery-api-key": "c267a65c69171d1804362155c1378365f5acef88",
+        "entity-engine-status": "0738aa1a06d3361911740f8f166071ea43a00927",
         "epm-packages": "8042d4a1522f6c4e6f5486e791b3ffe3a22f88fd",
         "epm-packages-assets": "7a3e58efd9a14191d0d1a00b8aaed30a145fd0b1",
         "event-annotation-group": "715ba867d8c68f3c9438052210ea1c30a9362582",

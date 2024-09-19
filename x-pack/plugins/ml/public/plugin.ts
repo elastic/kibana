@@ -70,10 +70,9 @@ import {
   initExperimentalFeatures,
 } from '../common/constants/app';
 import type { ElasticModels } from './application/services/elastic_models_service';
-import type { MlApiServices } from './application/services/ml_api_service';
+import type { MlApi } from './application/services/ml_api_service';
 import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
-import { getMlServices } from './embeddables/single_metric_viewer/get_services';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -275,8 +274,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 registerEmbeddables(pluginsSetup.embeddable, core);
 
                 if (pluginsSetup.cases) {
-                  const mlServices = await getMlServices(coreStart, pluginStart);
-                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart, mlServices);
+                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
                 }
 
                 if (pluginsSetup.maps) {
@@ -314,13 +312,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   ): {
     locator?: LocatorPublic<MlLocatorParams>;
     elasticModels?: ElasticModels;
-    mlApi?: MlApiServices;
+    mlApi?: MlApi;
     components: { AnomalySwimLane: typeof AnomalySwimLane };
   } {
     return {
       locator: this.locator,
       elasticModels: this.sharedMlServices?.elasticModels,
-      mlApi: this.sharedMlServices?.mlApiServices,
+      mlApi: this.sharedMlServices?.mlApi,
       components: {
         AnomalySwimLane,
       },

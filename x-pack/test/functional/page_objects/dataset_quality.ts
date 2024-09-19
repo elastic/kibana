@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import querystring from 'querystring';
 import rison from '@kbn/rison';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
@@ -91,6 +92,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityTable: 'datasetQualityTable',
     datasetQualityFiltersContainer: 'datasetQualityFiltersContainer',
     datasetQualityExpandButton: 'datasetQualityExpandButton',
+    datasetQualityDetailsDegradedFieldsExpandButton:
+      'datasetQualityDetailsDegradedFieldsExpandButton',
+    datasetQualityDetailsDegradedFieldFlyout: 'datasetQualityDetailsDegradedFieldFlyout',
     datasetDetailsContainer: 'datasetDetailsContainer',
     datasetQualityDetailsTitle: 'datasetQualityDetailsTitle',
     datasetQualityDetailsDegradedFieldTable: 'datasetQualityDetailsDegradedFieldTable',
@@ -116,7 +120,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityDetailsIntegrationRowVersion: 'datasetQualityDetailsFieldsList-version',
     datasetQualityDetailsLinkToDiscover: 'datasetQualityDetailsLinkToDiscover',
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
-    datasetQualityNoDataEmptyState: 'datasetQualityNoDataEmptyState',
+    datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
 
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
@@ -127,6 +131,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'unifiedHistogramBreakdownSelectorSelectorSearch',
     unifiedHistogramBreakdownSelectorSelectable: 'unifiedHistogramBreakdownSelectorSelectable',
     managementHome: 'managementHome',
+    euiFlyoutCloseButton: 'euiFlyoutCloseButton',
   };
 
   return {
@@ -191,6 +196,10 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       if (isStateful) {
         await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
       }
+    },
+
+    async waitUntilDegradedFieldFlyoutLoaded() {
+      await testSubjects.existOrFail(testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout);
     },
 
     async parseSummaryPanel(excludeKeys: string[] = []): Promise<SummaryPanelKpi> {
@@ -282,7 +291,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async parseDegradedFieldTable() {
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetQualityDetailsDegradedFieldTable();
-      return this.parseTable(table, ['Field', 'Docs count', 'Last Occurrence']);
+      return this.parseTable(table, ['0', 'Field', 'Docs count', 'Last Occurrence']);
     },
 
     async filterForIntegrations(integrations: string[]) {
@@ -396,6 +405,39 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         fieldText,
         fieldText
       );
+    },
+
+    async openDegradedFieldFlyout(fieldName: string) {
+      await this.waitUntilTableLoaded();
+      const cols = await this.parseDegradedFieldTable();
+      const fieldNameCol = cols.Field;
+      const fieldNameColCellTexts = await fieldNameCol.getCellTexts();
+      const testDatasetRowIndex = fieldNameColCellTexts.findIndex((dName) => dName === fieldName);
+
+      expect(testDatasetRowIndex).to.be.greaterThan(-1);
+
+      const expandColumn = cols['0'];
+      const expandButtons = await expandColumn.getCellChildren(
+        `[data-test-subj=${testSubjectSelectors.datasetQualityDetailsDegradedFieldsExpandButton}]`
+      );
+
+      expect(expandButtons.length).to.be.greaterThan(0);
+
+      const fieldExpandButton = expandButtons[testDatasetRowIndex];
+
+      // Check if 'title' attribute is "Expand" or "Collapse"
+      const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
+
+      // Open if collapsed
+      if (isCollapsed) {
+        await fieldExpandButton.click();
+      }
+
+      await this.waitUntilDegradedFieldFlyoutLoaded();
+    },
+
+    async closeFlyout() {
+      return testSubjects.click(testSubjectSelectors.euiFlyoutCloseButton);
     },
 
     async parseTable(tableWrapper: WebElementWrapper, columnNamesOrIndexes: string[]) {

@@ -30,7 +30,7 @@
         "label": "CreateInvestigationItemParams",
         "description": [],
         "signature": [
-          "{ title: string; type: string; params: { [x: string]: any; }; }"
+          "{ params: Record<string, any>; type: string; title: string; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create_item.ts",
         "deprecated": false,
@@ -45,7 +45,7 @@
         "label": "CreateInvestigationItemResponse",
         "description": [],
         "signature": [
-          "{ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; }"
+          "{ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create_item.ts",
         "deprecated": false,
@@ -75,7 +75,7 @@
         "label": "CreateInvestigationNoteResponse",
         "description": [],
         "signature": [
-          "{ id: string; content: string; createdAt: number; createdBy: string; }"
+          "{ id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create_note.ts",
         "deprecated": false,
@@ -90,7 +90,7 @@
         "label": "CreateInvestigationParams",
         "description": [],
         "signature": [
-          "{ id: string; title: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; }"
+          "{ params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create.ts",
         "deprecated": false,
@@ -105,7 +105,7 @@
         "label": "CreateInvestigationResponse",
         "description": [],
         "signature": [
-          "{ id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; items: ({ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; })[]; }"
+          "{ params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create.ts",
         "deprecated": false,
@@ -120,7 +120,7 @@
         "label": "DeleteInvestigationItemParams",
         "description": [],
         "signature": [
-          "{ investigationId: string; itemId: string; }"
+          "{ itemId: string; investigationId: string; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/delete_item.ts",
         "deprecated": false,
@@ -159,13 +159,28 @@
       },
       {
         "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.EventResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "EventResponse",
+        "description": [],
+        "signature": [
+          "{ id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; } & ({ eventType: \"annotation\"; annotationType?: string | undefined; } | { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; })"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
         "id": "def-common.FindInvestigationsParams",
         "type": "Type",
         "tags": [],
         "label": "FindInvestigationsParams",
         "description": [],
         "signature": [
-          "{ alertId?: string | undefined; page?: string | undefined; perPage?: string | undefined; }"
+          "{ page?: number | undefined; filter?: string | undefined; search?: string | undefined; perPage?: number | undefined; alertId?: string | undefined; } | undefined"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/find.ts",
         "deprecated": false,
@@ -180,9 +195,69 @@
         "label": "FindInvestigationsResponse",
         "description": [],
         "signature": [
-          "{ page: number; perPage: number; total: number; results: { id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; items: ({ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; })[]; }[]; }"
+          "{ page: number; results: { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }[]; perPage: number; total: number; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/find.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.GetAllInvestigationStatsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetAllInvestigationStatsResponse",
+        "description": [],
+        "signature": [
+          "{ count: Partial<Record<\"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\", number>>; total: number; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_all_investigation_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.GetAllInvestigationTagsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetAllInvestigationTagsResponse",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_all_investigation_tags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.GetEventsParams",
+        "type": "Type",
+        "tags": [],
+        "label": "GetEventsParams",
+        "description": [],
+        "signature": [
+          "{ filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; } | undefined"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.GetEventsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetEventsResponse",
+        "description": [],
+        "signature": [
+          "({ id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; } & ({ eventType: \"annotation\"; annotationType?: string | undefined; } | { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }))[]"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -195,7 +270,7 @@
         "label": "GetInvestigationItemsResponse",
         "description": [],
         "signature": [
-          "({ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; })[]"
+          "({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get_items.ts",
         "deprecated": false,
@@ -210,7 +285,7 @@
         "label": "GetInvestigationNotesResponse",
         "description": [],
         "signature": [
-          "{ id: string; content: string; createdAt: number; createdBy: string; }[]"
+          "{ id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get_notes.ts",
         "deprecated": false,
@@ -240,7 +315,7 @@
         "label": "GetInvestigationResponse",
         "description": [],
         "signature": [
-          "{ id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; items: ({ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; })[]; }"
+          "{ params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get.ts",
         "deprecated": false,
@@ -255,7 +330,7 @@
         "label": "InvestigationItem",
         "description": [],
         "signature": [
-          "{ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; }"
+          "{ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; }"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/investigation_item.ts",
         "deprecated": false,
@@ -270,7 +345,7 @@
         "label": "InvestigationItemResponse",
         "description": [],
         "signature": [
-          "{ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; }"
+          "{ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/investigation_item.ts",
         "deprecated": false,
@@ -285,9 +360,24 @@
         "label": "InvestigationNoteResponse",
         "description": [],
         "signature": [
-          "{ id: string; content: string; createdAt: number; createdBy: string; }"
+          "{ id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/investigation_note.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.InvestigationResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "InvestigationResponse",
+        "description": [],
+        "signature": [
+          "{ params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/investigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -300,9 +390,54 @@
         "label": "Item",
         "description": [],
         "signature": [
-          "{ title: string; type: string; params: { [x: string]: any; }; }"
+          "{ params: Record<string, any>; type: string; title: string; }"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/investigation_item.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.Status",
+        "type": "Type",
+        "tags": [],
+        "label": "Status",
+        "description": [],
+        "signature": [
+          "\"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\""
+        ],
+        "path": "packages/kbn-investigation-shared/src/schema/investigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.UpdateInvestigationItemParams",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateInvestigationItemParams",
+        "description": [],
+        "signature": [
+          "{ params: Record<string, any>; type: string; title: string; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update_item.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.UpdateInvestigationItemResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateInvestigationItemResponse",
+        "description": [],
+        "signature": [
+          "{ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update_item.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -330,9 +465,39 @@
         "label": "UpdateInvestigationNoteResponse",
         "description": [],
         "signature": [
-          "{ id: string; content: string; createdAt: number; createdBy: string; }"
+          "{ id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/update_note.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.UpdateInvestigationParams",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateInvestigationParams",
+        "description": [],
+        "signature": [
+          "{ params?: { timeRange: { from: number; to: number; }; } | undefined; tags?: string[] | undefined; title?: string | undefined; status?: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\" | undefined; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.UpdateInvestigationResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateInvestigationResponse",
+        "description": [],
+        "signature": [
+          "{ params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -347,12 +512,7 @@
         "label": "alertOriginSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"alert\">; id: ",
-          "StringC",
-          "; }>"
+          "Zod.ZodObject<{ type: Zod.ZodLiteral<\"alert\">; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"alert\"; }, { id: string; type: \"alert\"; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/origin.ts",
         "deprecated": false,
@@ -367,10 +527,7 @@
         "label": "blankOriginSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"blank\">; }>"
+          "Zod.ZodObject<{ type: Zod.ZodLiteral<\"blank\">; }, \"strip\", Zod.ZodTypeAny, { type: \"blank\"; }, { type: \"blank\"; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/origin.ts",
         "deprecated": false,
@@ -385,24 +542,7 @@
         "label": "createInvestigationItemParamsSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ investigationId: ",
-          "StringC",
-          "; }>; body: ",
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "StringC",
-          "; params: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "AnyC",
-          ">; }>; }>"
+          "Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; body: Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>; }, \"strip\", Zod.ZodTypeAny, { body: { params: Record<string, any>; type: string; title: string; }; path: { investigationId: string; }; }, { body: { params: Record<string, any>; type: string; title: string; }; path: { investigationId: string; }; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create_item.ts",
         "deprecated": false,
@@ -417,28 +557,7 @@
         "label": "createInvestigationItemResponseSchema",
         "description": [],
         "signature": [
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "StringC",
-          "; params: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "AnyC",
-          ">; }>]>"
+          "Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; }>, Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create_item.ts",
         "deprecated": false,
@@ -453,16 +572,7 @@
         "label": "createInvestigationNoteParamsSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ investigationId: ",
-          "StringC",
-          "; }>; body: ",
-          "TypeC",
-          "<{ content: ",
-          "StringC",
-          "; }>; }>"
+          "Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; body: Zod.ZodObject<{ content: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { content: string; }, { content: string; }>; }, \"strip\", Zod.ZodTypeAny, { body: { content: string; }; path: { investigationId: string; }; }, { body: { content: string; }; path: { investigationId: string; }; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create_note.ts",
         "deprecated": false,
@@ -477,16 +587,7 @@
         "label": "createInvestigationNoteResponseSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; content: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; content: Zod.ZodString; createdAt: Zod.ZodNumber; updatedAt: Zod.ZodNumber; createdBy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create_note.ts",
         "deprecated": false,
@@ -501,34 +602,7 @@
         "label": "createInvestigationParamsSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ body: ",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; title: ",
-          "StringC",
-          "; params: ",
-          "TypeC",
-          "<{ timeRange: ",
-          "TypeC",
-          "<{ from: ",
-          "NumberC",
-          "; to: ",
-          "NumberC",
-          "; }>; }>; origin: ",
-          "UnionC",
-          "<[",
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"alert\">; id: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"blank\">; }>]>; }>; }>"
+          "Zod.ZodObject<{ body: Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; params: Zod.ZodObject<{ timeRange: Zod.ZodObject<{ from: Zod.ZodNumber; to: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { from: number; to: number; }, { from: number; to: number; }>; }, \"strip\", Zod.ZodTypeAny, { timeRange: { from: number; to: number; }; }, { timeRange: { from: number; to: number; }; }>; origin: Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"alert\">; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"alert\"; }, { id: string; type: \"alert\"; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"blank\">; }, \"strip\", Zod.ZodTypeAny, { type: \"blank\"; }, { type: \"blank\"; }>]>; tags: Zod.ZodArray<Zod.ZodString, \"many\">; }, \"strip\", Zod.ZodTypeAny, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; }, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; }; }, { body: { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; }; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create.ts",
         "deprecated": false,
@@ -543,78 +617,7 @@
         "label": "createInvestigationResponseSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; title: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; params: ",
-          "TypeC",
-          "<{ timeRange: ",
-          "TypeC",
-          "<{ from: ",
-          "NumberC",
-          "; to: ",
-          "NumberC",
-          "; }>; }>; origin: ",
-          "UnionC",
-          "<[",
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"alert\">; id: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"blank\">; }>]>; status: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"ongoing\">, ",
-          "LiteralC",
-          "<\"closed\">]>; notes: ",
-          "ArrayC",
-          "<",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; content: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>>; items: ",
-          "ArrayC",
-          "<",
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "StringC",
-          "; params: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "AnyC",
-          ">; }>]>>; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; params: Zod.ZodObject<{ timeRange: Zod.ZodObject<{ from: Zod.ZodNumber; to: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { from: number; to: number; }, { from: number; to: number; }>; }, \"strip\", Zod.ZodTypeAny, { timeRange: { from: number; to: number; }; }, { timeRange: { from: number; to: number; }; }>; origin: Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"alert\">; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"alert\"; }, { id: string; type: \"alert\"; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"blank\">; }, \"strip\", Zod.ZodTypeAny, { type: \"blank\"; }, { type: \"blank\"; }>]>; status: Zod.ZodUnion<[Zod.ZodLiteral<\"triage\">, Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"mitigated\">, Zod.ZodLiteral<\"resolved\">, Zod.ZodLiteral<\"cancelled\">]>; tags: Zod.ZodArray<Zod.ZodString, \"many\">; notes: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; content: Zod.ZodString; createdAt: Zod.ZodNumber; updatedAt: Zod.ZodNumber; createdBy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }>, \"many\">; items: Zod.ZodArray<Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; }>, Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create.ts",
         "deprecated": false,
@@ -629,14 +632,7 @@
         "label": "deleteInvestigationItemParamsSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ investigationId: ",
-          "StringC",
-          "; itemId: ",
-          "StringC",
-          "; }>; }>"
+          "Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; itemId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { itemId: string; investigationId: string; }, { itemId: string; investigationId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { itemId: string; investigationId: string; }; }, { path: { itemId: string; investigationId: string; }; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/delete_item.ts",
         "deprecated": false,
@@ -651,14 +647,7 @@
         "label": "deleteInvestigationNoteParamsSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ investigationId: ",
-          "StringC",
-          "; noteId: ",
-          "StringC",
-          "; }>; }>"
+          "Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; noteId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; noteId: string; }, { investigationId: string; noteId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { investigationId: string; noteId: string; }; }, { path: { investigationId: string; noteId: string; }; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/delete_note.ts",
         "deprecated": false,
@@ -673,14 +662,39 @@
         "label": "deleteInvestigationParamsSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ investigationId: ",
-          "StringC",
-          "; }>; }>"
+          "Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { investigationId: string; }; }, { path: { investigationId: string; }; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.eventResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "eventResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; timestamp: Zod.ZodNumber; eventType: Zod.ZodUnion<[Zod.ZodLiteral<\"annotation\">, Zod.ZodLiteral<\"alert\">, Zod.ZodLiteral<\"error_rate\">, Zod.ZodLiteral<\"latency\">, Zod.ZodLiteral<\"anomaly\">]>; source: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; }, \"strip\", Zod.ZodTypeAny, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }>, Zod.ZodDiscriminatedUnion<\"eventType\", [Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"annotation\">; annotationType: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { eventType: \"annotation\"; annotationType?: string | undefined; }, { eventType: \"annotation\"; annotationType?: string | undefined; }>, Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"alert\">; alertStatus: Zod.ZodUnion<[Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"flapping\">, Zod.ZodLiteral<\"recovered\">, Zod.ZodLiteral<\"untracked\">]>; }, \"strip\", Zod.ZodTypeAny, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }>]>>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.eventSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "eventSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; timestamp: Zod.ZodNumber; eventType: Zod.ZodUnion<[Zod.ZodLiteral<\"annotation\">, Zod.ZodLiteral<\"alert\">, Zod.ZodLiteral<\"error_rate\">, Zod.ZodLiteral<\"latency\">, Zod.ZodLiteral<\"anomaly\">]>; source: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; }, \"strip\", Zod.ZodTypeAny, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }>, Zod.ZodDiscriminatedUnion<\"eventType\", [Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"annotation\">; annotationType: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { eventType: \"annotation\"; annotationType?: string | undefined; }, { eventType: \"annotation\"; annotationType?: string | undefined; }>, Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"alert\">; alertStatus: Zod.ZodUnion<[Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"flapping\">, Zod.ZodLiteral<\"recovered\">, Zod.ZodLiteral<\"untracked\">]>; }, \"strip\", Zod.ZodTypeAny, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }>]>>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/schema/event.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -693,16 +707,7 @@
         "label": "findInvestigationsParamsSchema",
         "description": [],
         "signature": [
-          "PartialC",
-          "<{ query: ",
-          "PartialC",
-          "<{ alertId: ",
-          "StringC",
-          "; page: ",
-          "StringC",
-          "; perPage: ",
-          "StringC",
-          "; }>; }>"
+          "Zod.ZodObject<{ query: Zod.ZodOptional<Zod.ZodObject<{ alertId: Zod.ZodOptional<Zod.ZodString>; search: Zod.ZodOptional<Zod.ZodString>; filter: Zod.ZodOptional<Zod.ZodString>; page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { page?: number | undefined; filter?: string | undefined; search?: string | undefined; perPage?: number | undefined; alertId?: string | undefined; }, { page?: number | undefined; filter?: string | undefined; search?: string | undefined; perPage?: number | undefined; alertId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { query?: { page?: number | undefined; filter?: string | undefined; search?: string | undefined; perPage?: number | undefined; alertId?: string | undefined; } | undefined; }, { query?: { page?: number | undefined; filter?: string | undefined; search?: string | undefined; perPage?: number | undefined; alertId?: string | undefined; } | undefined; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/find.ts",
         "deprecated": false,
@@ -717,90 +722,99 @@
         "label": "findInvestigationsResponseSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ page: ",
-          "NumberC",
-          "; perPage: ",
-          "NumberC",
-          "; total: ",
-          "NumberC",
-          "; results: ",
-          "ArrayC",
-          "<",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; title: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; params: ",
-          "TypeC",
-          "<{ timeRange: ",
-          "TypeC",
-          "<{ from: ",
-          "NumberC",
-          "; to: ",
-          "NumberC",
-          "; }>; }>; origin: ",
-          "UnionC",
-          "<[",
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"alert\">; id: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"blank\">; }>]>; status: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"ongoing\">, ",
-          "LiteralC",
-          "<\"closed\">]>; notes: ",
-          "ArrayC",
-          "<",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; content: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>>; items: ",
-          "ArrayC",
-          "<",
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "StringC",
-          "; params: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "AnyC",
-          ">; }>]>>; }>>; }>"
+          "Zod.ZodObject<{ page: Zod.ZodNumber; perPage: Zod.ZodNumber; total: Zod.ZodNumber; results: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; params: Zod.ZodObject<{ timeRange: Zod.ZodObject<{ from: Zod.ZodNumber; to: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { from: number; to: number; }, { from: number; to: number; }>; }, \"strip\", Zod.ZodTypeAny, { timeRange: { from: number; to: number; }; }, { timeRange: { from: number; to: number; }; }>; origin: Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"alert\">; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"alert\"; }, { id: string; type: \"alert\"; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"blank\">; }, \"strip\", Zod.ZodTypeAny, { type: \"blank\"; }, { type: \"blank\"; }>]>; status: Zod.ZodUnion<[Zod.ZodLiteral<\"triage\">, Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"mitigated\">, Zod.ZodLiteral<\"resolved\">, Zod.ZodLiteral<\"cancelled\">]>; tags: Zod.ZodArray<Zod.ZodString, \"many\">; notes: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; content: Zod.ZodString; createdAt: Zod.ZodNumber; updatedAt: Zod.ZodNumber; createdBy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }>, \"many\">; items: Zod.ZodArray<Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; }>, Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { page: number; results: { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }[]; perPage: number; total: number; }, { page: number; results: { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }[]; perPage: number; total: number; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/find.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.getAllInvestigationStatsParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getAllInvestigationStatsParamsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ query: Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>; }, \"strip\", Zod.ZodTypeAny, { query: {}; }, { query: {}; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_all_investigation_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.getAllInvestigationStatsResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getAllInvestigationStatsResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ count: Zod.ZodRecord<Zod.ZodUnion<[Zod.ZodLiteral<\"triage\">, Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"mitigated\">, Zod.ZodLiteral<\"resolved\">, Zod.ZodLiteral<\"cancelled\">]>, Zod.ZodNumber>; total: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { count: Partial<Record<\"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\", number>>; total: number; }, { count: Partial<Record<\"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\", number>>; total: number; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_all_investigation_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.getAllInvestigationTagsParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getAllInvestigationTagsParamsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ query: Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>; }, \"strip\", Zod.ZodTypeAny, { query: {}; }, { query: {}; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_all_investigation_tags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.getAllInvestigationTagsResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getAllInvestigationTagsResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodArray<Zod.ZodString, \"many\">"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_all_investigation_tags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.getEventsParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getEventsParamsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ query: Zod.ZodOptional<Zod.ZodObject<{ rangeFrom: Zod.ZodOptional<Zod.ZodString>; rangeTo: Zod.ZodOptional<Zod.ZodString>; filter: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; }, { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { query?: { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; } | undefined; }, { query?: { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; } | undefined; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.getEventsResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getEventsResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodArray<Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; timestamp: Zod.ZodNumber; eventType: Zod.ZodUnion<[Zod.ZodLiteral<\"annotation\">, Zod.ZodLiteral<\"alert\">, Zod.ZodLiteral<\"error_rate\">, Zod.ZodLiteral<\"latency\">, Zod.ZodLiteral<\"anomaly\">]>; source: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; }, \"strip\", Zod.ZodTypeAny, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }>, Zod.ZodDiscriminatedUnion<\"eventType\", [Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"annotation\">; annotationType: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { eventType: \"annotation\"; annotationType?: string | undefined; }, { eventType: \"annotation\"; annotationType?: string | undefined; }>, Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"alert\">; alertStatus: Zod.ZodUnion<[Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"flapping\">, Zod.ZodLiteral<\"recovered\">, Zod.ZodLiteral<\"untracked\">]>; }, \"strip\", Zod.ZodTypeAny, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }>]>>, \"many\">"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -813,12 +827,7 @@
         "label": "getInvestigationItemsParamsSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ investigationId: ",
-          "StringC",
-          "; }>; }>"
+          "Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { investigationId: string; }; }, { path: { investigationId: string; }; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get_items.ts",
         "deprecated": false,
@@ -833,30 +842,7 @@
         "label": "getInvestigationItemsResponseSchema",
         "description": [],
         "signature": [
-          "ArrayC",
-          "<",
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "StringC",
-          "; params: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "AnyC",
-          ">; }>]>>"
+          "Zod.ZodArray<Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; }>, Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>>, \"many\">"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get_items.ts",
         "deprecated": false,
@@ -871,12 +857,7 @@
         "label": "getInvestigationNotesParamsSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ investigationId: ",
-          "StringC",
-          "; }>; }>"
+          "Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { investigationId: string; }; }, { path: { investigationId: string; }; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get_notes.ts",
         "deprecated": false,
@@ -891,18 +872,7 @@
         "label": "getInvestigationNotesResponseSchema",
         "description": [],
         "signature": [
-          "ArrayC",
-          "<",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; content: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>>"
+          "Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; content: Zod.ZodString; createdAt: Zod.ZodNumber; updatedAt: Zod.ZodNumber; createdBy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }>, \"many\">"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get_notes.ts",
         "deprecated": false,
@@ -917,12 +887,7 @@
         "label": "getInvestigationParamsSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ investigationId: ",
-          "StringC",
-          "; }>; }>"
+          "Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { investigationId: string; }; }, { path: { investigationId: string; }; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get.ts",
         "deprecated": false,
@@ -937,78 +902,7 @@
         "label": "getInvestigationResponseSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; title: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; params: ",
-          "TypeC",
-          "<{ timeRange: ",
-          "TypeC",
-          "<{ from: ",
-          "NumberC",
-          "; to: ",
-          "NumberC",
-          "; }>; }>; origin: ",
-          "UnionC",
-          "<[",
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"alert\">; id: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"blank\">; }>]>; status: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"ongoing\">, ",
-          "LiteralC",
-          "<\"closed\">]>; notes: ",
-          "ArrayC",
-          "<",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; content: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>>; items: ",
-          "ArrayC",
-          "<",
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "StringC",
-          "; params: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "AnyC",
-          ">; }>]>>; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; params: Zod.ZodObject<{ timeRange: Zod.ZodObject<{ from: Zod.ZodNumber; to: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { from: number; to: number; }, { from: number; to: number; }>; }, \"strip\", Zod.ZodTypeAny, { timeRange: { from: number; to: number; }; }, { timeRange: { from: number; to: number; }; }>; origin: Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"alert\">; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"alert\"; }, { id: string; type: \"alert\"; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"blank\">; }, \"strip\", Zod.ZodTypeAny, { type: \"blank\"; }, { type: \"blank\"; }>]>; status: Zod.ZodUnion<[Zod.ZodLiteral<\"triage\">, Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"mitigated\">, Zod.ZodLiteral<\"resolved\">, Zod.ZodLiteral<\"cancelled\">]>; tags: Zod.ZodArray<Zod.ZodString, \"many\">; notes: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; content: Zod.ZodString; createdAt: Zod.ZodNumber; updatedAt: Zod.ZodNumber; createdBy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }>, \"many\">; items: Zod.ZodArray<Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; }>, Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get.ts",
         "deprecated": false,
@@ -1023,28 +917,7 @@
         "label": "investigationItemResponseSchema",
         "description": [],
         "signature": [
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "StringC",
-          "; params: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "AnyC",
-          ">; }>]>"
+          "Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; }>, Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/investigation_item.ts",
         "deprecated": false,
@@ -1059,28 +932,7 @@
         "label": "investigationItemSchema",
         "description": [],
         "signature": [
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "StringC",
-          "; params: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "AnyC",
-          ">; }>]>"
+          "Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; }>, Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>>"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/investigation_item.ts",
         "deprecated": false,
@@ -1095,16 +947,7 @@
         "label": "investigationNoteResponseSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; content: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; content: Zod.ZodString; createdAt: Zod.ZodNumber; updatedAt: Zod.ZodNumber; createdBy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/investigation_note.ts",
         "deprecated": false,
@@ -1119,18 +962,24 @@
         "label": "investigationNoteSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; content: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; content: Zod.ZodString; createdAt: Zod.ZodNumber; updatedAt: Zod.ZodNumber; createdBy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/investigation_note.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.investigationResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "investigationResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; params: Zod.ZodObject<{ timeRange: Zod.ZodObject<{ from: Zod.ZodNumber; to: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { from: number; to: number; }, { from: number; to: number; }>; }, \"strip\", Zod.ZodTypeAny, { timeRange: { from: number; to: number; }; }, { timeRange: { from: number; to: number; }; }>; origin: Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"alert\">; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"alert\"; }, { id: string; type: \"alert\"; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"blank\">; }, \"strip\", Zod.ZodTypeAny, { type: \"blank\"; }, { type: \"blank\"; }>]>; status: Zod.ZodUnion<[Zod.ZodLiteral<\"triage\">, Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"mitigated\">, Zod.ZodLiteral<\"resolved\">, Zod.ZodLiteral<\"cancelled\">]>; tags: Zod.ZodArray<Zod.ZodString, \"many\">; notes: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; content: Zod.ZodString; createdAt: Zod.ZodNumber; updatedAt: Zod.ZodNumber; createdBy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }>, \"many\">; items: Zod.ZodArray<Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; }>, Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/investigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1143,78 +992,7 @@
         "label": "investigationSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; title: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; params: ",
-          "TypeC",
-          "<{ timeRange: ",
-          "TypeC",
-          "<{ from: ",
-          "NumberC",
-          "; to: ",
-          "NumberC",
-          "; }>; }>; origin: ",
-          "UnionC",
-          "<[",
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"alert\">; id: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ type: ",
-          "LiteralC",
-          "<\"blank\">; }>]>; status: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"ongoing\">, ",
-          "LiteralC",
-          "<\"closed\">]>; notes: ",
-          "ArrayC",
-          "<",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; content: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>>; items: ",
-          "ArrayC",
-          "<",
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "StringC",
-          "; params: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "AnyC",
-          ">; }>]>>; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; params: Zod.ZodObject<{ timeRange: Zod.ZodObject<{ from: Zod.ZodNumber; to: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { from: number; to: number; }, { from: number; to: number; }>; }, \"strip\", Zod.ZodTypeAny, { timeRange: { from: number; to: number; }; }, { timeRange: { from: number; to: number; }; }>; origin: Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"alert\">; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"alert\"; }, { id: string; type: \"alert\"; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"blank\">; }, \"strip\", Zod.ZodTypeAny, { type: \"blank\"; }, { type: \"blank\"; }>]>; status: Zod.ZodUnion<[Zod.ZodLiteral<\"triage\">, Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"mitigated\">, Zod.ZodLiteral<\"resolved\">, Zod.ZodLiteral<\"cancelled\">]>; tags: Zod.ZodArray<Zod.ZodString, \"many\">; notes: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; content: Zod.ZodString; createdAt: Zod.ZodNumber; updatedAt: Zod.ZodNumber; createdBy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }>, \"many\">; items: Zod.ZodArray<Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; }>, Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/investigation.ts",
         "deprecated": false,
@@ -1229,20 +1007,54 @@
         "label": "itemSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "StringC",
-          "; params: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "AnyC",
-          ">; }>"
+          "Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/investigation_item.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.statusSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "statusSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodUnion<[Zod.ZodLiteral<\"triage\">, Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"mitigated\">, Zod.ZodLiteral<\"resolved\">, Zod.ZodLiteral<\"cancelled\">]>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/schema/investigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.updateInvestigationItemParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "updateInvestigationItemParamsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; itemId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { itemId: string; investigationId: string; }, { itemId: string; investigationId: string; }>; body: Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>; }, \"strip\", Zod.ZodTypeAny, { body: { params: Record<string, any>; type: string; title: string; }; path: { itemId: string; investigationId: string; }; }, { body: { params: Record<string, any>; type: string; title: string; }; path: { itemId: string; investigationId: string; }; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update_item.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.updateInvestigationItemResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "updateInvestigationItemResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; }>, Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update_item.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1255,18 +1067,7 @@
         "label": "updateInvestigationNoteParamsSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ investigationId: ",
-          "StringC",
-          "; noteId: ",
-          "StringC",
-          "; }>; body: ",
-          "TypeC",
-          "<{ content: ",
-          "StringC",
-          "; }>; }>"
+          "Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; noteId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; noteId: string; }, { investigationId: string; noteId: string; }>; body: Zod.ZodObject<{ content: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { content: string; }, { content: string; }>; }, \"strip\", Zod.ZodTypeAny, { body: { content: string; }; path: { investigationId: string; noteId: string; }; }, { body: { content: string; }; path: { investigationId: string; noteId: string; }; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/update_note.ts",
         "deprecated": false,
@@ -1281,18 +1082,39 @@
         "label": "updateInvestigationNoteResponseSchema",
         "description": [],
         "signature": [
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; content: ",
-          "StringC",
-          "; createdAt: ",
-          "NumberC",
-          "; createdBy: ",
-          "StringC",
-          "; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; content: Zod.ZodString; createdAt: Zod.ZodNumber; updatedAt: Zod.ZodNumber; createdBy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/update_note.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.updateInvestigationParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "updateInvestigationParamsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ path: Zod.ZodObject<{ investigationId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { investigationId: string; }, { investigationId: string; }>; body: Zod.ZodObject<{ title: Zod.ZodOptional<Zod.ZodString>; status: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodLiteral<\"triage\">, Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"mitigated\">, Zod.ZodLiteral<\"resolved\">, Zod.ZodLiteral<\"cancelled\">]>>; params: Zod.ZodOptional<Zod.ZodObject<{ timeRange: Zod.ZodObject<{ from: Zod.ZodNumber; to: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { from: number; to: number; }, { from: number; to: number; }>; }, \"strip\", Zod.ZodTypeAny, { timeRange: { from: number; to: number; }; }, { timeRange: { from: number; to: number; }; }>>; tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { params?: { timeRange: { from: number; to: number; }; } | undefined; tags?: string[] | undefined; title?: string | undefined; status?: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\" | undefined; }, { params?: { timeRange: { from: number; to: number; }; } | undefined; tags?: string[] | undefined; title?: string | undefined; status?: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { params?: { timeRange: { from: number; to: number; }; } | undefined; tags?: string[] | undefined; title?: string | undefined; status?: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\" | undefined; }; path: { investigationId: string; }; }, { body: { params?: { timeRange: { from: number; to: number; }; } | undefined; tags?: string[] | undefined; title?: string | undefined; status?: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\" | undefined; }; path: { investigationId: string; }; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.updateInvestigationResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "updateInvestigationResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; params: Zod.ZodObject<{ timeRange: Zod.ZodObject<{ from: Zod.ZodNumber; to: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { from: number; to: number; }, { from: number; to: number; }>; }, \"strip\", Zod.ZodTypeAny, { timeRange: { from: number; to: number; }; }, { timeRange: { from: number; to: number; }; }>; origin: Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"alert\">; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"alert\"; }, { id: string; type: \"alert\"; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"blank\">; }, \"strip\", Zod.ZodTypeAny, { type: \"blank\"; }, { type: \"blank\"; }>]>; status: Zod.ZodUnion<[Zod.ZodLiteral<\"triage\">, Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"mitigated\">, Zod.ZodLiteral<\"resolved\">, Zod.ZodLiteral<\"cancelled\">]>; tags: Zod.ZodArray<Zod.ZodString, \"many\">; notes: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; content: Zod.ZodString; createdAt: Zod.ZodNumber; updatedAt: Zod.ZodNumber; createdBy: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }>, \"many\">; items: Zod.ZodArray<Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; createdAt: Zod.ZodNumber; createdBy: Zod.ZodString; updatedAt: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; createdBy: string; createdAt: number; updatedAt: number; }, { id: string; createdBy: string; createdAt: number; updatedAt: number; }>, Zod.ZodObject<{ title: Zod.ZodString; type: Zod.ZodString; params: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { params: Record<string, any>; type: string; title: string; }, { params: Record<string, any>; type: string; title: string; }>>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }, { params: { timeRange: { from: number; to: number; }; }; id: string; tags: string[]; title: string; createdBy: string; createdAt: number; updatedAt: number; status: \"active\" | \"triage\" | \"mitigated\" | \"resolved\" | \"cancelled\"; items: ({ id: string; createdBy: string; createdAt: number; updatedAt: number; } & { params: Record<string, any>; type: string; title: string; })[]; origin: { id: string; type: \"alert\"; } | { type: \"blank\"; }; notes: { id: string; createdBy: string; createdAt: number; updatedAt: number; content: string; }[]; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

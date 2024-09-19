@@ -25,43 +25,43 @@ export const getMlServices = async (
     { fieldFormatServiceFactory },
     { indexServiceFactory },
     { timeSeriesExplorerServiceFactory },
-    { mlApiServicesProvider },
-    { mlJobServiceFactory },
+    { mlApiProvider },
     { mlResultsServiceProvider },
     { MlCapabilitiesService },
     { timeSeriesSearchServiceFactory },
     { toastNotificationServiceProvider },
+    { mlJobServiceFactory },
   ] = await Promise.all([
     await import('../../application/services/anomaly_detector_service'),
     await import('../../application/services/field_format_service_factory'),
     await import('../../application/util/index_service'),
     await import('../../application/util/time_series_explorer_service'),
     await import('../../application/services/ml_api_service'),
-    await import('../../application/services/job_service'),
     await import('../../application/services/results_service'),
     await import('../../application/capabilities/check_capabilities'),
     await import(
       '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'
     ),
     await import('../../application/services/toast_notification_service'),
+    await import('../../application/services/job_service'),
   ]);
 
   const httpService = new HttpService(coreStart.http);
   const anomalyDetectorService = new AnomalyDetectorService(httpService);
-  const mlApiServices = mlApiServicesProvider(httpService);
+  const mlApi = mlApiProvider(httpService);
   const toastNotificationService = toastNotificationServiceProvider(coreStart.notifications.toasts);
-  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApiServices);
-  const mlResultsService = mlResultsServiceProvider(mlApiServices);
-  const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApiServices);
+  const mlJobService = mlJobServiceFactory(mlApi);
+  const mlResultsService = mlResultsServiceProvider(mlApi);
+  const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApi);
   const mlTimeSeriesExplorerService = timeSeriesExplorerServiceFactory(
     coreStart.uiSettings,
-    mlApiServices,
+    mlApi,
     mlResultsService
   );
-  const mlCapabilities = new MlCapabilitiesService(mlApiServices);
+  const mlCapabilities = new MlCapabilitiesService(mlApi);
   const anomalyExplorerService = new AnomalyExplorerChartsService(
     pluginsStart.data.query.timefilter.timefilter,
-    mlApiServices,
+    mlApi,
     mlResultsService
   );
   // Note on the following services:
@@ -74,14 +74,13 @@ export const getMlServices = async (
   //   its own context or possibly without having a singleton like state at all, since the
   //   way this manages its own state right now doesn't consider React component lifecycles.
   const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
-  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils, mlJobService);
+  const mlFieldFormatService = fieldFormatServiceFactory(mlApi, mlIndexUtils, mlJobService);
   return {
     anomalyDetectorService,
     anomalyExplorerService,
-    mlApiServices,
+    mlApi,
     mlCapabilities,
     mlFieldFormatService,
-    mlJobService,
     mlResultsService,
     mlTimeSeriesSearchService,
     mlTimeSeriesExplorerService,

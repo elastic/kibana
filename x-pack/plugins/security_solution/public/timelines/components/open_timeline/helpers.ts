@@ -262,7 +262,7 @@ export const defaultTimelineToTimelineModel = (
           }
         : timeline.dateRange,
     dataProviders: getDataProviders(duplicate, timeline.dataProviders, timelineType),
-    excludedRowRendererIds: isTemplate ? [] : RowRendererValues,
+    excludedRowRendererIds: isTemplate ? [] : timeline.excludedRowRendererIds ?? RowRendererValues,
     eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
     filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
     isFavorite: duplicate

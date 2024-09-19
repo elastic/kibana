@@ -689,6 +689,146 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
+        "id": "def-common.isBasicMetricAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "isBasicMetricAgg",
+        "description": [],
+        "signature": [
+          "(agg: unknown) => agg is Record<string, Pick<",
+          "AggregationsMetricAggregationBase",
+          ", \"field\"> | undefined>"
+        ],
+        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-common.isBasicMetricAgg.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "agg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.isDerivativeAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "isDerivativeAgg",
+        "description": [],
+        "signature": [
+          "(agg: unknown) => agg is Pick<",
+          "AggregationsAggregationContainer",
+          ", \"derivative\">"
+        ],
+        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-common.isDerivativeAgg.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "agg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.isSumBucketAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "isSumBucketAgg",
+        "description": [],
+        "signature": [
+          "(agg: unknown) => agg is Pick<",
+          "AggregationsAggregationContainer",
+          ", \"sum_bucket\">"
+        ],
+        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-common.isSumBucketAgg.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "agg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.isTermsWithAggregation",
+        "type": "Function",
+        "tags": [],
+        "label": "isTermsWithAggregation",
+        "description": [],
+        "signature": [
+          "(agg: unknown) => agg is Pick<",
+          "AggregationsAggregationContainer",
+          ", \"aggregations\" | \"terms\">"
+        ],
+        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-common.isTermsWithAggregation.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "agg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
         "id": "def-common.networkTraffic",
         "type": "Function",
         "tags": [],
@@ -2525,98 +2665,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "metricsDataAccess",
-        "id": "def-common.ESBasicMetricAggRT",
-        "type": "Object",
-        "tags": [],
-        "label": "ESBasicMetricAggRT",
-        "description": [],
-        "signature": [
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "UnionC",
-          "<[",
-          "UndefinedC",
-          ", ",
-          "TypeC",
-          "<{ field: ",
-          "StringC",
-          "; }>]>>"
-        ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "metricsDataAccess",
-        "id": "def-common.ESDerivativeAggRT",
-        "type": "Object",
-        "tags": [],
-        "label": "ESDerivativeAggRT",
-        "description": [],
-        "signature": [
-          "TypeC",
-          "<{ derivative: ",
-          "TypeC",
-          "<{ buckets_path: ",
-          "StringC",
-          "; gap_policy: ",
-          "KeyofC",
-          "<{ skip: null; insert_zeros: null; }>; unit: ",
-          "StringC",
-          "; }>; }>"
-        ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "metricsDataAccess",
-        "id": "def-common.ESSumBucketAggRT",
-        "type": "Object",
-        "tags": [],
-        "label": "ESSumBucketAggRT",
-        "description": [],
-        "signature": [
-          "TypeC",
-          "<{ sum_bucket: ",
-          "TypeC",
-          "<{ buckets_path: ",
-          "StringC",
-          "; }>; }>"
-        ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "metricsDataAccess",
-        "id": "def-common.ESTermsWithAggregationRT",
-        "type": "Object",
-        "tags": [],
-        "label": "ESTermsWithAggregationRT",
-        "description": [],
-        "signature": [
-          "TypeC",
-          "<{ terms: ",
-          "TypeC",
-          "<{ field: ",
-          "StringC",
-          "; }>; aggregations: ",
-          "UnknownRecordC",
-          "; }>"
-        ],
-        "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "metricsDataAccess",
         "id": "def-common.InventoryFormatterTypeRT",

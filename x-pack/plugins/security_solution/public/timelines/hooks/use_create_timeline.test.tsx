@@ -44,7 +44,9 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -61,7 +63,9 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -105,7 +109,9 @@ describe('useCreateTimeline', () => {
           onClick,
         }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -123,7 +129,9 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -144,7 +152,9 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 

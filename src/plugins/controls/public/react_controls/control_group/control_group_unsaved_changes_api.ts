@@ -1,26 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { omit } from 'lodash';
+import { combineLatest, map } from 'rxjs';
+
 import {
   childrenUnsavedChanges$,
   initializeUnsavedChanges,
-  PresentationContainer,
+  type PresentationContainer,
 } from '@kbn/presentation-containers';
 import {
   apiPublishesUnsavedChanges,
-  PublishesUnsavedChanges,
-  StateComparators,
+  type PublishesUnsavedChanges,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
-import { combineLatest, map } from 'rxjs';
-import { ControlsInOrder, getControlsInOrder } from './init_controls_manager';
-import { ControlGroupRuntimeState, ControlPanelsState } from './types';
+
+import type { ControlGroupRuntimeState, ControlPanelsState } from '../../../common';
 import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
+import { getControlsInOrder, type ControlsInOrder } from './init_controls_manager';
 
 export type ControlGroupComparatorState = Pick<
   ControlGroupRuntimeState,

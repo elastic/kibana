@@ -12,7 +12,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { SamplesFormat } from '../common';
+import { ESProcessorItem, SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -54,12 +54,14 @@ export interface CategorizationState {
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;
+  hasTriedOnce: boolean;
   currentPipeline: object;
   currentProcessors: object[];
   invalidCategorization: object[];
   previousInvalidCategorization: string;
   initialPipeline: object;
   results: object;
+  samplesFormat: SamplesFormat;
 }
 
 export interface EcsMappingState {
@@ -67,6 +69,7 @@ export interface EcsMappingState {
   chunkSize: number;
   lastExecutedChain: string;
   rawSamples: string[];
+  additionalProcessors: ESProcessorItem[];
   prefixedSamples: string[];
   combinedSamples: string;
   sampleChunks: string[];
@@ -78,23 +81,58 @@ export interface EcsMappingState {
   finalMapping: object;
   chunkMapping: object;
   useFinalMapping: boolean;
+  hasTriedOnce: boolean;
   currentPipeline: object;
   duplicateFields: string[];
   missingKeys: string[];
   invalidEcsFields: string[];
   results: object;
-  samplesFormat: string;
+  samplesFormat: SamplesFormat;
   ecsVersion: string;
 }
 
 export interface LogFormatDetectionState {
   lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
   logSamples: string[];
+  jsonSamples: string[];
   exAnswer: string;
   finalized: boolean;
   samplesFormat: SamplesFormat;
+  header: boolean;
   ecsVersion: string;
   results: object;
+  additionalProcessors: ESProcessorItem[]; // # This will be generated in the sub-graphs
+}
+
+export interface KVState {
+  lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
+  kvProcessor: ESProcessorItem;
+  grokPattern: string;
+  logSamples: string[];
+  kvLogMessages: string[];
+  jsonSamples: string[];
+  finalized: boolean;
+  header: boolean;
+  errors: object;
+  additionalProcessors: object[];
+  ecsVersion: string;
+}
+
+export interface UnstructuredLogState {
+  lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
+  grokPatterns: string[];
+  logSamples: string[];
+  jsonSamples: string[];
+  finalized: boolean;
+  errors: object;
+  additionalProcessors: object[];
+  ecsVersion: string;
 }
 
 export interface RelatedState {
@@ -110,11 +148,13 @@ export interface RelatedState {
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;
+  hasTriedOnce: boolean;
   currentPipeline: object;
   currentProcessors: object[];
   initialPipeline: object;
   results: object;
   lastExecutedChain: string;
+  samplesFormat: SamplesFormat;
 }
 
 export type ChatModels =

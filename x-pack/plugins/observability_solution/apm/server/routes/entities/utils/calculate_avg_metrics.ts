@@ -7,9 +7,9 @@
 
 import { mapValues, isNumber } from 'lodash';
 import { EntityMetrics } from '../../../../common/entities/types';
-import { MergedServiceEntities } from '../types';
+import type { MergedServiceEntity } from './merge_entities';
 
-export function calculateAvgMetrics(entities: MergedServiceEntities[]) {
+export function calculateAvgMetrics(entities: MergedServiceEntity[]) {
   return entities.map((entity) => {
     const transformedMetrics = mergeMetrics(entity.metrics);
     const averages = mapValues(transformedMetrics, (values: number[]) => {

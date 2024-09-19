@@ -28,6 +28,7 @@ import {
 } from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 
 export type SlackConnectorType = ConnectorType<
@@ -175,7 +176,7 @@ async function slackExecutor(
 
     // special handling for 5xx
     if (status >= 500) {
-      return retryResult(actionId, err.message);
+      return retryResult(actionId, err.message, TaskErrorSource.FRAMEWORK);
     }
 
     // special handling for rate limiting
@@ -183,7 +184,7 @@ async function slackExecutor(
       return pipe(
         getRetryAfterIntervalFromHeaders(headers),
         map((retry) => retryResultSeconds(actionId, err.message, retry)),
-        getOrElse(() => retryResult(actionId, err.message))
+        getOrElse(() => retryResult(actionId, err.message, TaskErrorSource.USER))
       );
     }
 
@@ -245,7 +246,11 @@ function serviceErrorResult(
   };
 }
 
-function retryResult(actionId: string, message: string): ConnectorTypeExecutorResult<void> {
+function retryResult(
+  actionId: string,
+  serviceMessage: string,
+  errorSource: TaskErrorSource
+): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate(
     'xpack.stackConnectors.slack.errorPostingRetryLaterErrorMessage',
     {
@@ -257,6 +262,8 @@ function retryResult(actionId: string, message: string): ConnectorTypeExecutorRe
     message: errMessage,
     retry: true,
     actionId,
+    errorSource,
+    serviceMessage,
   };
 }
 
@@ -283,5 +290,6 @@ function retryResultSeconds(
     retry,
     actionId,
     serviceMessage: message,
+    errorSource: TaskErrorSource.USER,
   };
 }
