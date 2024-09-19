@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { i18n } from '@kbn/i18n';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
 import {
@@ -16,7 +17,13 @@ import {
   CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
 } from './test_ids';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW } from '../../../../common/components/event_details/insights/translations';
+
+const SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.flyout.right.overview.insights.suppressedAlertsCountTechnicalPreview',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);
 
 export interface SuppressedAlertsProps {
   /**

@@ -51,18 +51,18 @@ export class SupertestWithRoleScope {
       throw new Error('The instance has already been destroyed.');
     }
     // set role-based API key by default
-    agent.set(this.roleAuthc.apiKeyHeader);
+    void agent.set(this.roleAuthc.apiKeyHeader);
 
     if (withInternalHeaders) {
-      agent.set(this.samlAuth.getInternalRequestHeader());
+      void agent.set(this.samlAuth.getInternalRequestHeader());
     }
 
     if (withCommonHeaders) {
-      agent.set(this.samlAuth.getCommonRequestHeader());
+      void agent.set(this.samlAuth.getCommonRequestHeader());
     }
 
     if (withCustomHeaders) {
-      agent.set(withCustomHeaders);
+      void agent.set(withCustomHeaders);
     }
 
     return agent;

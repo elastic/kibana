@@ -121,7 +121,7 @@ export function createScenarios(
     expect(queueReportError).to.be(true);
   };
   const tryGeneratePdfNotAvailable = async () => {
-    PageObjects.share.clickShareTopNavButton();
+    await PageObjects.share.clickShareTopNavButton();
     await testSubjects.missingOrFail(`Export`);
   };
   const tryGeneratePdfSuccess = async () => {

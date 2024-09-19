@@ -85,7 +85,7 @@ describe('ClientLibrariesPopover', () => {
       wrapper
         .find(EuiContextMenuPanel)
         .prop('items')
-        ?.map((item: HTMLElement) => shallow(<div>{item}</div>)) || [];
+        ?.map((item: React.ReactNode) => shallow(<div>{item}</div>)) || [];
 
     expect(contextMenuItems.length > 0).toBeTruthy();
 

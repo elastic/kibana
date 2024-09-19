@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 
 import { TimeseriesChart } from './timeseries_chart';
@@ -37,10 +37,6 @@ jest.mock('../../../util/time_series_explorer_service', () => ({
   },
 }));
 
-jest.mock('../../../services/field_format_service', () => ({
-  mlFieldFormatService: {},
-}));
-
 function getTimeseriesChartPropsMock() {
   return {
     contextChartSelected: jest.fn(),
@@ -55,12 +51,13 @@ function getTimeseriesChartPropsMock() {
   };
 }
 
-const servicesMock = {
+const kibanaReactContextMock = createKibanaReactContext({
   mlServices: {
-    mlApiServices: {},
+    mlApi: {},
     mlResultsService: {},
   },
-};
+  notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
+});
 
 describe('TimeseriesChart', () => {
   const mockedGetBBox = { x: 0, y: -10, width: 40, height: 20 };
@@ -78,9 +75,9 @@ describe('TimeseriesChart', () => {
     const props = getTimeseriesChartPropsMock();
 
     const wrapper = mountWithIntl(
-      <KibanaContextProvider services={servicesMock}>
+      <kibanaReactContextMock.Provider>
         <TimeseriesChart {...props} />
-      </KibanaContextProvider>
+      </kibanaReactContextMock.Provider>
     );
 
     expect(wrapper.html()).toBe('<div class="ml-timeseries-chart-react"></div>');

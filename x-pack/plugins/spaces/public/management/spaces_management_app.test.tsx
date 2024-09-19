@@ -31,6 +31,9 @@ const config: ConfigType = {
   maxSpaces: 1000,
   allowFeatureVisibility: true,
   allowSolutionVisibility: true,
+  experimental: {
+    forceSolutionVisibility: false,
+  },
 };
 
 const eventTracker = new EventTracker({ reportEvent: jest.fn() });
@@ -57,6 +60,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
       config,
       getRolesAPIClient: jest.fn(),
+      getPrivilegesAPIClient: jest.fn(),
       eventTracker,
     })
     .mount({
@@ -79,6 +83,7 @@ describe('spacesManagementApp', () => {
         getStartServices: coreMock.createSetup().getStartServices as any,
         config,
         getRolesAPIClient: jest.fn(),
+        getPrivilegesAPIClient: jest.fn(),
         eventTracker,
       })
     ).toMatchInlineSnapshot(`

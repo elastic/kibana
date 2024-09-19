@@ -270,7 +270,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
     expect(findDiffLineContaining('-  "note": "",+  "note": "abc",')).not.toBeNull();
   });
 
-  it('Unchanged sections of a rule should be hidden by default', () => {
+  it('Unchanged sections of a rule should be hidden by default', async () => {
     const oldRule: RuleResponse = {
       ...savedRuleMock,
       version: 1,
@@ -285,13 +285,13 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
     expect(screen.queryAllByText('"author":', { exact: false })).toHaveLength(0);
     expect(screen.queryAllByText('Expand 44 unchanged lines')).toHaveLength(1);
 
-    userEvent.click(screen.getByText('Expand 44 unchanged lines'));
+    await userEvent.click(screen.getByText('Expand 44 unchanged lines'));
 
     expect(screen.queryAllByText('Expand 44 unchanged lines')).toHaveLength(0);
     expect(screen.queryAllByText('"author":', { exact: false })).toHaveLength(2);
   });
 
-  it('Properties should be sorted alphabetically', () => {
+  it('Properties should be sorted alphabetically', async () => {
     const oldRule: RuleResponse = {
       ...savedRuleMock,
       version: 1,
@@ -326,7 +326,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
     const arePropertiesSortedInConciseView = checkRenderedPropertyNamesAreSorted();
     expect(arePropertiesSortedInConciseView).toBe(true);
 
-    userEvent.click(screen.getByText('Expand 44 unchanged lines'));
+    await userEvent.click(screen.getByText('Expand 44 unchanged lines'));
     const arePropertiesSortedInExpandedView = checkRenderedPropertyNamesAreSorted();
     expect(arePropertiesSortedInExpandedView).toBe(true);
   });

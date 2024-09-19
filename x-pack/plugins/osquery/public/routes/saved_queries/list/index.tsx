@@ -157,7 +157,7 @@ const SavedQueriesPageComponent = () => {
     [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
-  const renderUpdatedAt = useCallback((updatedAt, item) => {
+  const renderUpdatedAt = useCallback((updatedAt: any, item: any) => {
     if (!updatedAt) return '-';
 
     const updatedBy = item.updated_by !== item.created_by ? ` @ ${item.updated_by}` : '';
@@ -223,7 +223,7 @@ const SavedQueriesPageComponent = () => {
     [renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt]
   );
 
-  const onTableChange = useCallback(({ page = {}, sort = {} }) => {
+  const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {
     setPageIndex(page.index);
     setPageSize(page.size);
     setSortField(sort.field);

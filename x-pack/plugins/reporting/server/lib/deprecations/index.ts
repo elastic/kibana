@@ -19,7 +19,7 @@ function deprecationError(
     return [
       {
         title,
-        level: 'fetch_error', // NOTE: is fetch_error not shown in the Upgrade Assistant UI?
+        level: 'fetch_error',
         deprecationType: 'feature',
         message: i18n.translate(
           'xpack.reporting.deprecations.reportingRole.forbiddenErrorMessage',
@@ -44,7 +44,7 @@ function deprecationError(
   return [
     {
       title,
-      level: 'fetch_error', // NOTE: is fetch_error not shown in the Upgrade Assistant UI?
+      level: 'fetch_error',
       deprecationType: 'feature',
       message: i18n.translate('xpack.reporting.deprecations.reportingRole.unknownErrorMessage', {
         defaultMessage: 'Failed to perform deprecation check. Check Kibana logs for more details.',

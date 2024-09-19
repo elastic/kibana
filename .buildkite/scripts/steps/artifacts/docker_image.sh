@@ -6,6 +6,8 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/artifacts/env.sh
 
+source .buildkite/scripts/common/util.sh
+
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   KIBANA_IMAGE_TAG="git-$GIT_ABBREV_COMMIT"
@@ -50,8 +52,8 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
 
   echo "--- Push images"
-  docker image push "$KIBANA_IMAGE-arm64"
-  docker image push "$KIBANA_IMAGE-amd64"
+  docker_with_retry push "$KIBANA_IMAGE-arm64"
+  docker_with_retry push "$KIBANA_IMAGE-amd64"
 
   echo "--- Create and push manifests"
   docker manifest create \
@@ -118,6 +120,12 @@ echo "--- Trigger image tag update"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   cat << EOF | buildkite-agent pipeline upload
 steps:
+  - label: "Trigger cve-slo-status pipeline for $KIBANA_IMAGE"
+    trigger: cve-slo-status
+    build:
+      env:
+        CONTAINER: "$KIBANA_IMAGE"
+    soft_fail: true
   - label: ":argo: Update kibana image tag for kibana-controller using gpctl"
     branches: main
     trigger: gpctl-promote-with-e2e-tests

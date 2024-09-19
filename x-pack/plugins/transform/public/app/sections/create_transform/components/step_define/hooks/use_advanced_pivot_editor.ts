@@ -10,7 +10,7 @@ import { XJsonMode } from '@kbn/ace';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
-import type { PostTransformsPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
+import type { PostTransformsPreviewRequestSchema } from '../../../../../../../server/routes/api_schemas/transforms';
 
 import type { StepDefineExposedState } from '../common';
 

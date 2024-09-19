@@ -7,9 +7,63 @@ check the <<release-notes, release notes>>.
 
 Previous versions: {kibana-ref-all}/8.14/whats-new.html[8.14] | {kibana-ref-all}/8.13/whats-new.html[8.13] | {kibana-ref-all}/8.12/whats-new.html[8.12] | {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
+[discrete]
+=== ES|QL
 
 [discrete]
-=== Analyst Experience
+==== Filter UX improvements in ES|QL
+
+We're thrilled to unveil a complete overhaul of filtering in the ES|QL UX. Now, you can seamlessly filter data by browsing a time series chart, allowing for quick and intuitive time-based filtering. Interactive chart filtering lets you refine your data directly by clicking on any chart, while creating WHERE clause filters from the Discover table or sidebar has never been easier. These enhancements streamline data exploration and analysis, making your ES|QL experience more efficient and user-friendly than ever.
+
+*Filter by clicking a chart:*
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt965a5190f246f7c8/669a7d41e5f7c84793b031cb/filter-by-clicking-chart.gif[Filter by clicking a chart]
+
+*Filter by browsing a time series chart:*
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blta20c9a93dded707c/669a7d40843f93a02fe51013/filter-by-brushing-time-series.gif[Filter by browsing a time series chart]
+
+*Create WHERE clause filters from Discover table or sidebar:*
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt50ac35ab3af29ff8/669a7d4006a6fafe4c7cb39d/create-where-clause-filters-from-sidebar.gif[Create WHERE clause filters from Discover table or sidebar]
+
+
+[discrete]
+==== Field statistics in ES|QL
+
+Field statistics are now available in ES|QL. This feature is designed to provide comprehensive insights for each data field. With this enhancement, you can access detailed statistics such as distributions, averages, and other key metrics, helping you quickly understand your data. This makes data exploration and quality assessment more efficient, providing deeper insights and streamlining the analysis of field-level data in ES|QL.
+
+image::images/field-statistics-esql.png[Field statistics in ES|QL]
+
+[discrete]
+==== Integrations support in the ES|QL editor when using FROM command.
+
+We're excited to announce enhanced support for integrations in the ES|QL editor with the *FROM* command. Previously, you could only access indices, but now you can also view a list of installed integrations directly within the editor. This improvement streamlines your workflow, making it easier to manage and utilize various integrations while working with your data.
+
+image::images/integrations-in-esql.png[Accessing an integration from ES|QL]
+
+
+[discrete]
+=== Dashboards
+
+[discrete]
+==== Field statistics in Dashboards
+
+It's now easier than ever to include your field statistics view from **Discover** into **Dashboards**. While running investigations, it is very common that you need to see some field information, such as unique values and their distribution, to make sense of the data. Select the fields that you want with your ES|QL query and get the document count, values, and distribution in your dashboard so you don't have to navigate back and forth to **Discover** to see this information.
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt9bc52ff7851acc52/669a4f6a490fbc64fa22f279/field-statistics.gif[Showing field statistics panel in Dashboards]
+
+[discrete]
+==== Statistics in legends
+
+Accelerate time to insights by summarizing the values of your charts using average, minimum, maximum, median, and variance, among many others. You can add these statistics for **Lens** and ES|QL visualizations. It is important to note that these statistics are computed using the data points from the chart considering the aggregation used and not the raw data. In the following example, the chart shows the median memory per host, so the Max = 15.3KB for the first series (artifacts.elastic.co) is the maximum value of the median memory per host. 
+
+image::images/statistics-in-legends.png[Statistics in legends]
+
+You can find the option to select statistics for your legends along with an explanation for each calculation when editing your visualization, as shown in the following image.
+
+image::images/statistics-in-legends2.png[Select statistics in legends]
+
 
 [discrete]
 ==== View dashboard creator and last editor
@@ -31,29 +85,7 @@ You can also see who last updated a dashboard by clicking the dashboard informat
 image::images/dashboard-last-editor.png[Dashboard details panel with the name of the last editor]
 
 [discrete]
-==== Field statistics in Dashboards
-
-It's now easier than ever to include your field statistics view from **Discover** into **Dashboards**. While running investigations, it is very common that you need to see some field information, such as unique values and their distribution, to make sense of the data. Select the fields that you want with your ES|QL query and get the document count, values, and distribution in your dashboard so you don't have to navigate back and forth to **Discover** to see this information.
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt9bc52ff7851acc52/669a4f6a490fbc64fa22f279/field-statistics.gif[Showing field statistics panel in Dashboards]
-
-[discrete]
-==== Statistics in legends
-
-Accelerate time to insights by summarizing the values of your charts using average, minimum, maximum, median, and variance, among many others. You can add these statistics for **Lens** and ES|QL visualizations. It is important to note that these statistics are computed using the data points from the chart considering the aggregation used and not the raw data. In the following example, the chart shows the median memory per host, so the Max = 15.3KB for the first series (artifacts.elastic.co) is the maximum value of the median memory per host. 
-
-image::images/statistics-in-legends.png[Statistics in legends]
-
-You can find the option to select statistics for your legends along with an explanation for each calculation when editing your visualization, as shown in the following image.
-
-image::images/statistics-in-legends2.png[Select statistics in legends]
-
-[discrete]
-==== Array of values for Metrics
-
-The new **Metrics** now supports fields that show an array of values.
-
-image::images/array-in-metrics.png[A metric showing an array of values, width=35%]
+=== Discover
 
 [discrete]
 ==== Push flyout for Discover document viewer
@@ -62,36 +94,6 @@ You can now seamlessly view document details and the main table simultaneously i
 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltb40a408acf4ab688/669a58ea9fecd85219d58ed2/discover-push-flyout.gif[Resizable push flyout in Discover]
 
-[discrete]
-==== Integrations support in the ES|QL editor when using FROM command.
-
-We're excited to announce enhanced support for integrations in the ES|QL editor with the *FROM* command. Previously, you could only access indices, but now you can also view a list of installed integrations directly within the editor. This improvement streamlines your workflow, making it easier to manage and utilize various integrations while working with your data.
-
-image::images/integrations-in-esql.png[Accessing an integration from ES|QL]
-
-[discrete]
-==== Field statistics in ES|QL
-
-Field statistics are now available in ES|QL. This feature is designed to provide comprehensive insights for each data field. With this enhancement, you can access detailed statistics such as distributions, averages, and other key metrics, helping you quickly understand your data. This makes data exploration and quality assessment more efficient, providing deeper insights and streamlining the analysis of field-level data in ES|QL.
-
-image::images/field-statistics-esql.png[Field statistics in ES|QL]
-
-[discrete]
-==== Filter UX improvements in ES|QL
-
-We're thrilled to unveil a complete overhaul of filtering in the ES|QL UX. Now, you can seamlessly filter data by browsing a time series chart, allowing for quick and intuitive time-based filtering. Interactive chart filtering lets you refine your data directly by clicking on any chart, while creating WHERE clause filters from the Discover table or sidebar has never been easier. These enhancements streamline data exploration and analysis, making your ES|QL experience more efficient and user-friendly than ever.
-
-*Filter by clicking a chart:*
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt965a5190f246f7c8/669a7d41e5f7c84793b031cb/filter-by-clicking-chart.gif[Filter by clicking a chart]
-
-*Filter by browsing a time series chart:*
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blta20c9a93dded707c/669a7d40843f93a02fe51013/filter-by-brushing-time-series.gif[Filter by browsing a time series chart]
-
-*Create WHERE clause filters from Discover table or sidebar:*
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt50ac35ab3af29ff8/669a7d4006a6fafe4c7cb39d/create-where-clause-filters-from-sidebar.gif[Create WHERE clause filters from Discover table or sidebar]
 
 [discrete]
 === Alerting, cases, and connectors
@@ -135,20 +137,6 @@ Analyze large volumes of logs efficiently, in very short times with Log Pattern 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt7e63d7e764ab183e/669a807bd316c7015db35458/ml-log-pattern-analysis.gif[New log pattern analysis interface]
 
 [discrete]
-==== ES|QL support for field statistics in Discover
-
-The Field statistics functionality now supports ES|QL, Elastic's primary query language.
-
-image::images/esql-field-statistics.png[Field statistics in ES|QL]
-
-[discrete]
-==== Field statistics embeddable panel in Dashboards
-
-You can now add field statistics panels with ES|QL support straight within your dashboards, eliminating the need to transition between **Discover** and **Dashboards**.
-
-image::images/field-statistics-panel-in-dashboards.png[Field statistics embeddable panel in Dashboards]
-
-[discrete]
 ==== Log Rate Analysis contextual insights in serverless Observability
 
 You can now see insights in natural language, for example for the root cause of a log rate change or threshold alert, in Log Rate Analysis. This feature is currently only available for Observability serverless projects.
@@ -156,41 +144,30 @@ You can now see insights in natural language, for example for the root cause of 
 image::images/obs-log-rate-analysis-insigths.png[Log Rate Analysis contextual insights in serverless Observability]
 
 [discrete]
-==== Anthropic integration with the Inference API
+==== Inference API improvements
 
-The inference API provides a seamless, intuitive interface to perform inference and other tasks against proprietary, hosted, and integrated external services. In 8.15, we're extending it to support Anthropic's chat completion API.
+The inference API provides a seamless, intuitive interface to perform inference and other tasks against proprietary, hosted, and integrated external services. In 8.15, we're extending it with the following capabilities:
 
-[discrete]
-==== Support for reranking with the Inference API
+* Support for Anthropic's chat completion API.
+* Ability to host cross encoder models and perform the reranking task.
 
-In 8.15, we're also extending the inference API with the ability to host cross encoder models in Elastic and perform the reranking task.
-
-[discrete]
-=== Global Experience
 
 [discrete]
-==== Simplified Sharing
+=== Managing {kib} users and objects
 
-You can now share a dashboard, search, or lens object in one click. When sharing an object, the most common actions are directly presented to you, and a short link is automatically generated, making it simpler than ever to share your work.
+[discrete]
+==== Sharing improvements
+
+You can now share a dashboard, search, or Lens object in one click. When sharing an object, the most common actions are directly presented to you, and a short link is automatically generated, making it simpler than ever to share your work.
 
 image::images/share-modal.png[New object share modal, width=50%]
 
 [discrete]
-==== “My dashboards” filter
-
-The days of manually scrolling through an endless list of dashboards are behind you. You can now filter by creator to go directly to the dashboards created by a specific teammate.
-
-NOTE: Only dashboards created on or after 8.14 will have a creator.
-
-[discrete]
-==== Quick API keys
+==== Quick API key creation
 
 Many API keys don’t require custom settings, so we made it simple to generate a standard key. From the **Endpoints & API keys** top menu in Search, you can create a key in seconds. 
 
 image::images/create-simple-api-key.png[Shortcut to create an API key, width=60%]
-
-[discrete]
-=== Platform Security
 
 [discrete]
 ==== Filtering by User in Kibana Audit Logs

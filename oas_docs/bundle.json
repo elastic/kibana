@@ -344,6 +344,1116 @@
   },
   "openapi": "3.0.0",
   "paths": {
+    "/api/actions": {
+      "get": {
+        "deprecated": true,
+        "operationId": "%2Fapi%2Factions#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "Get all connectors",
+        "tags": [
+          "connectors"
+        ]
+      }
+    },
+    "/api/actions/action": {
+      "post": {
+        "deprecated": true,
+        "operationId": "%2Fapi%2Factions%2Faction#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "actionTypeId": {
+                    "description": "The connector type identifier.",
+                    "type": "string"
+                  },
+                  "config": {
+                    "additionalProperties": {},
+                    "default": {},
+                    "type": "object"
+                  },
+                  "name": {
+                    "description": "The display name for the connector.",
+                    "type": "string"
+                  },
+                  "secrets": {
+                    "additionalProperties": {},
+                    "default": {},
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "name",
+                  "actionTypeId"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Create a connector",
+        "tags": [
+          "connectors"
+        ]
+      }
+    },
+    "/api/actions/action/{id}": {
+      "delete": {
+        "deprecated": true,
+        "description": "WARNING: When you delete a connector, it cannot be recovered.",
+        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "An identifier for the connector.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Delete a connector",
+        "tags": [
+          "connectors"
+        ]
+      },
+      "get": {
+        "deprecated": true,
+        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#1",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "An identifier for the connector.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get connector information",
+        "tags": [
+          "connectors"
+        ]
+      },
+      "put": {
+        "deprecated": true,
+        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#2",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "An identifier for the connector.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "config": {
+                    "additionalProperties": {},
+                    "default": {},
+                    "type": "object"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "secrets": {
+                    "additionalProperties": {},
+                    "default": {},
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Update a connector",
+        "tags": [
+          "connectors"
+        ]
+      }
+    },
+    "/api/actions/action/{id}/_execute": {
+      "post": {
+        "deprecated": true,
+        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D%2F_execute#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "An identifier for the connector.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "params": {
+                    "additionalProperties": {},
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "params"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Run a connector",
+        "tags": [
+          "connectors"
+        ]
+      }
+    },
+    "/api/actions/connector/{id}": {
+      "delete": {
+        "description": "WARNING: When you delete a connector, it cannot be recovered.",
+        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "An identifier for the connector.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Delete a connector",
+        "tags": [
+          "connectors"
+        ]
+      },
+      "get": {
+        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#1",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "An identifier for the connector.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get connector information",
+        "tags": [
+          "connectors"
+        ]
+      },
+      "post": {
+        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%3F%7D#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "An identifier for the connector.",
+            "in": "path",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "config": {
+                    "additionalProperties": {},
+                    "default": {},
+                    "type": "object"
+                  },
+                  "connector_type_id": {
+                    "description": "The type of connector.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The display name for the connector.",
+                    "type": "string"
+                  },
+                  "secrets": {
+                    "additionalProperties": {},
+                    "default": {},
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "name",
+                  "connector_type_id"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Create a connector",
+        "tags": [
+          "connectors"
+        ]
+      },
+      "put": {
+        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#2",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "An identifier for the connector.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "config": {
+                    "additionalProperties": {},
+                    "default": {},
+                    "type": "object"
+                  },
+                  "name": {
+                    "description": "The display name for the connector.",
+                    "type": "string"
+                  },
+                  "secrets": {
+                    "additionalProperties": {},
+                    "default": {},
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Update a connector",
+        "tags": [
+          "connectors"
+        ]
+      }
+    },
+    "/api/actions/connector/{id}/_execute": {
+      "post": {
+        "description": "You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.",
+        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D%2F_execute#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "An identifier for the connector.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "params": {
+                    "additionalProperties": {},
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "params"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    },
+                    "connector_type_id": {
+                      "description": "The connector type identifier.",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "The identifier for the connector.",
+                      "type": "string"
+                    },
+                    "is_deprecated": {
+                      "description": "Indicates whether the connector is deprecated.",
+                      "type": "boolean"
+                    },
+                    "is_missing_secrets": {
+                      "description": "Indicates whether the connector is missing secrets.",
+                      "type": "boolean"
+                    },
+                    "is_preconfigured": {
+                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                      "type": "boolean"
+                    },
+                    "is_system_action": {
+                      "description": "Indicates whether the connector is used for system actions.",
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "description": " The name of the rule.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "connector_type_id",
+                    "is_preconfigured",
+                    "is_deprecated",
+                    "is_system_action"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Run a connector",
+        "tags": [
+          "connectors"
+        ]
+      }
+    },
+    "/api/actions/connector_types": {
+      "get": {
+        "description": "You do not need any Kibana feature privileges to run this API.",
+        "operationId": "%2Fapi%2Factions%2Fconnector_types#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).",
+            "in": "query",
+            "name": "feature_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "Get connector types",
+        "tags": [
+          "connectors"
+        ]
+      }
+    },
+    "/api/actions/connectors": {
+      "get": {
+        "operationId": "%2Fapi%2Factions%2Fconnectors#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "Get all connectors",
+        "tags": [
+          "connectors"
+        ]
+      }
+    },
+    "/api/actions/list_action_types": {
+      "get": {
+        "deprecated": true,
+        "operationId": "%2Fapi%2Factions%2Flist_action_types#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "Get connector types",
+        "tags": [
+          "connectors"
+        ]
+      }
+    },
     "/api/alerting/rule/{id}": {
       "delete": {
         "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#2",
@@ -5153,6 +6263,9 @@
   "tags": [
     {
       "name": "alerting"
+    },
+    {
+      "name": "connectors"
     },
     {
       "name": "system"

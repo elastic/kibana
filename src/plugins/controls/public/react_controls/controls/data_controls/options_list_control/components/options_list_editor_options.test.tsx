@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 
-import userEvent from '@testing-library/user-event';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { act, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
+import type { DefaultDataControlState } from '../../../../../../common';
+import type { OptionsListControlState } from '../../../../../../common/options_list';
+import type { ControlGroupApi } from '../../../../control_group/types';
 import { getMockedControlGroupApi } from '../../../mocks/control_mocks';
-import { CustomOptionsComponentProps, DefaultDataControlState } from '../../types';
-import { OptionsListControlState } from '../types';
+import type { CustomOptionsComponentProps } from '../../types';
 import { OptionsListEditorOptions } from './options_list_editor_options';
-import { ControlGroupApi } from '../../../../control_group/types';
-import { BehaviorSubject } from 'rxjs';
 
 describe('Options list sorting button', () => {
   const getMockedState = <State extends DefaultDataControlState = DefaultDataControlState>(
@@ -50,19 +52,19 @@ describe('Options list sorting button', () => {
     return component;
   };
 
-  test('run past timeout', () => {
+  test('run past timeout', async () => {
     const component = mountComponent({
       initialState: getMockedState({ runPastTimeout: false }),
       field: { type: 'string' } as DataViewField,
     });
     const toggle = component.getByTestId('optionsListControl__runPastTimeoutAdditionalSetting');
     expect(toggle.getAttribute('aria-checked')).toBe('false');
-    userEvent.click(toggle);
+    await userEvent.click(toggle);
     expect(updateState).toBeCalledWith({ runPastTimeout: true });
     expect(toggle.getAttribute('aria-checked')).toBe('true');
   });
 
-  test('selection options', () => {
+  test('selection options', async () => {
     const component = mountComponent({
       initialState: getMockedState({ singleSelect: true }),
       field: { type: 'string' } as DataViewField,
@@ -72,7 +74,7 @@ describe('Options list sorting button', () => {
     expect(multiSelect).not.toBeChecked();
     expect(component.container.querySelector('input#single')).toBeChecked();
 
-    userEvent.click(multiSelect!);
+    await userEvent.click(multiSelect!);
     expect(updateState).toBeCalledWith({ singleSelect: false });
     expect(multiSelect).toBeChecked();
     expect(component.container.querySelector('input#single')).not.toBeChecked();
@@ -205,7 +207,7 @@ describe('Options list sorting button', () => {
 
         /** responds to change in search technique */
         const exactSearch = component.container.querySelector('input#exact');
-        userEvent.click(exactSearch!);
+        await userEvent.click(exactSearch!);
         expect(updateState).toBeCalledWith({ searchTechnique: 'exact' });
         expect(component.container.querySelector('input#prefix')).not.toBeChecked();
         expect(exactSearch).toBeChecked();
@@ -240,7 +242,7 @@ describe('Options list sorting button', () => {
 
         /** responds to change in search technique */
         const prefixSearch = component.container.querySelector('input#prefix');
-        userEvent.click(prefixSearch!);
+        await userEvent.click(prefixSearch!);
         expect(updateState).toBeCalledWith({ searchTechnique: 'prefix' });
 
         /** responds to the field type changing */
