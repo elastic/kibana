@@ -9,8 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import { AggregateQuery, Query, Filter, isOfAggregateQueryType } from '@kbn/es-query';
 import type { Suggestion } from './types';
+
+interface Reference {
+  name: string;
+  id: string;
+  type: string;
+}
 
 export const getLensAttributesFromSuggestion = ({
   filters,
@@ -46,13 +52,31 @@ export const getLensAttributesFromSuggestion = ({
           formBased: {},
         };
   const visualization = suggestionVisualizationState;
+
+  let references: Reference[] = [];
+  // need to iterate over the layers to create the references
+  if (
+    suggestion &&
+    'layers' in suggestionDatasourceState &&
+    !isOfAggregateQueryType(query) &&
+    dataView
+  ) {
+    const layerId = Object.keys(suggestionDatasourceState?.layers ?? {})[0];
+    references = [
+      {
+        id: dataView.id ?? '',
+        name: `indexpattern-datasource-layer-${layerId}`,
+        type: 'index-pattern',
+      },
+    ];
+  }
   const attributes = {
     title:
       suggestion?.title ??
       i18n.translate('visualizationUtils.config.suggestion.title', {
         defaultMessage: 'New suggestion',
       }),
-    references: [],
+    references,
     state: {
       datasourceStates,
       filters,

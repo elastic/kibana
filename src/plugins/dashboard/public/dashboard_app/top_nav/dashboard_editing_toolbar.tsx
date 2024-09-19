@@ -14,6 +14,7 @@ import { useEuiTheme } from '@elastic/eui';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { addPanelMenuTrigger } from '@kbn/ui-actions-plugin/public';
 
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
@@ -27,16 +28,14 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
   const {
     usageCollection,
     data: { search },
+    uiActions,
     embeddable: { getStateTransfer },
-    visualizations: { getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
   const { euiTheme } = useEuiTheme();
 
   const dashboardApi = useDashboardApi();
 
   const stateTransferService = getStateTransfer();
-
-  const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
 
   const trackUiMetric = usageCollection.reportUiCounter?.bind(
     usageCollection,
@@ -79,6 +78,21 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
     [stateTransferService, dashboardApi, search.session, trackUiMetric]
   );
 
+  const createNewLens = useCallback(() => {
+    const context = {
+      embeddable: dashboard,
+      trigger: addPanelMenuTrigger,
+    };
+
+    const createDSLLEnsChartAction = uiActions?.getAction?.('ACTION_CREATE_DSL_LENS_CHART');
+    if (createDSLLEnsChartAction) {
+      if (trackUiMetric) {
+        trackUiMetric(METRIC_TYPE.CLICK, `lens:create`);
+      }
+      createDSLLEnsChartAction.execute(context);
+    }
+  }, [uiActions, dashboard, trackUiMetric]);
+
   /**
    * embeddableFactory: Required, you can get the factory from embeddableStart.getEmbeddableFactory(<embeddable type, i.e. lens>)
    * initialInput: Optional, use it in case you want to pass your own input to the factory
@@ -111,7 +125,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
               isDisabled={isDisabled}
               iconType="lensApp"
               size="s"
-              onClick={createNewVisType(lensAlias)}
+              onClick={createNewLens}
               label={getCreateVisualizationButtonTitle()}
               data-test-subj="dashboardAddNewPanelButton"
             />

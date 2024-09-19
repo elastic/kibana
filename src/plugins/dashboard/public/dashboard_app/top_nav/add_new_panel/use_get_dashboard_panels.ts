@@ -74,7 +74,10 @@ export const useGetDashboardPanels = ({ api, createNewVisType }: UseGetDashboard
     .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
     )
-    .filter(({ disableCreate }: VisTypeAlias) => !disableCreate);
+    .filter(
+      ({ disableCreate, hideCreateInDashboard }: VisTypeAlias) =>
+        !disableCreate && !hideCreateInDashboard
+    );
 
   const augmentedCreateNewVisType = useCallback(
     (visType: Parameters<typeof createNewVisType>[0], cb: () => void) => {

@@ -29,6 +29,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
   }),
   order: 60,
   icon: 'lensApp',
+  hideCreateInDashboard: true,
   stage: 'production',
   appExtensions: {
     visualizations: {
