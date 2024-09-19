@@ -66,6 +66,7 @@ export const chatCompleteRoute = (
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           const logger: Logger = ctx.elasticAssistant.logger;
           telemetry = ctx.elasticAssistant.telemetry;
+          const inference = ctx.elasticAssistant.inference;
 
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
@@ -195,6 +196,7 @@ export const chatCompleteRoute = (
             context: ctx,
             getElser,
             logger,
+            inference,
             messages: messages ?? [],
             onLlmResponse,
             onNewReplacements,

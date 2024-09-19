@@ -74,7 +74,9 @@
               "section": "def-common.Message",
               "text": "Message"
             },
-            "[]; } & TToolOptions) => ",
+            "[]; functionCalling?: ",
+            "FunctionCallingMode",
+            " | undefined; } & TToolOptions) => ",
             "ChatCompletionResponse",
             "<TToolOptions>"
           ],
@@ -99,7 +101,9 @@
                   "section": "def-common.Message",
                   "text": "Message"
                 },
-                "[]; } & TToolOptions"
+                "[]; functionCalling?: ",
+                "FunctionCallingMode",
+                " | undefined; } & TToolOptions"
               ],
               "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
               "deprecated": false,
@@ -123,7 +127,9 @@
               "section": "def-common.Message",
               "text": "Message"
             },
-            "[] | undefined; }) => ",
+            "[] | undefined; functionCalling?: ",
+            "FunctionCallingMode",
+            " | undefined; }) => ",
             "Observable",
             "<",
             "OutputEvent",
@@ -166,7 +172,9 @@
                   "section": "def-common.Message",
                   "text": "Message"
                 },
-                "[] | undefined; }"
+                "[] | undefined; functionCalling?: ",
+                "FunctionCallingMode",
+                " | undefined; }"
               ],
               "path": "x-pack/plugins/inference/common/output/index.ts",
               "deprecated": false,
@@ -208,7 +216,7 @@
         "label": "naturalLanguageToEsql",
         "description": [],
         "signature": [
-          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  ...rest\n}: ",
+          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  ...rest\n}: ",
           "NlToEsqlTaskParams",
           "<TToolOptions>) => ",
           "Observable",
@@ -225,7 +233,7 @@
             "id": "def-server.naturalLanguageToEsql.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  ...rest\n}",
+            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  ...rest\n}",
             "description": [],
             "signature": [
               "NlToEsqlTaskParams",
@@ -338,7 +346,9 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; } & TToolOptions) => ",
+              "[]; functionCalling?: ",
+              "FunctionCallingMode",
+              " | undefined; } & TToolOptions) => ",
               "ChatCompletionResponse",
               "<TToolOptions>"
             ],
@@ -363,7 +373,9 @@
                     "section": "def-common.Message",
                     "text": "Message"
                   },
-                  "[]; } & TToolOptions"
+                  "[]; functionCalling?: ",
+                  "FunctionCallingMode",
+                  " | undefined; } & TToolOptions"
                 ],
                 "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
                 "deprecated": false,
@@ -389,7 +401,9 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[] | undefined; }) => ",
+              "[] | undefined; functionCalling?: ",
+              "FunctionCallingMode",
+              " | undefined; }) => ",
               "Observable",
               "<",
               "OutputEvent",
@@ -432,7 +446,9 @@
                     "section": "def-common.Message",
                     "text": "Message"
                   },
-                  "[] | undefined; }"
+                  "[] | undefined; functionCalling?: ",
+                  "FunctionCallingMode",
+                  " | undefined; }"
                 ],
                 "path": "x-pack/plugins/inference/common/output/index.ts",
                 "deprecated": false,
