@@ -28,7 +28,6 @@ import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 import { FiltersNotificationActionApi } from './filters_notification_action';
 
@@ -61,7 +60,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
   }, [api, setDisableEditButton]);
 
   const dataViews = useStateFromPublishingSubject(
-    api.parentApi?.dataViews ? api.parentApi.dataViews : new BehaviorSubject<DataView[]>([])
+    api.parentApi?.dataViews ? api.parentApi.dataViews : new BehaviorSubject(undefined)
   );
 
   return (
