@@ -14,7 +14,7 @@ import { pluginServices as presentationUtilPluginServices } from '@kbn/presentat
 import { registry as presentationUtilServicesRegistry } from '@kbn/presentation-util-plugin/public/services/plugin_services.story';
 import { render, waitFor } from '@testing-library/react';
 
-import type { ControlStyle, ControlWidth } from '../../../../common';
+import type { ControlLabelPosition, ControlWidth } from '../../../../common';
 import { ControlPanel } from './control_panel';
 
 describe('render', () => {
@@ -74,7 +74,7 @@ describe('render', () => {
       mockApi = {
         uuid: 'control1',
         parentApi: {
-          labelPosition: new BehaviorSubject<ControlStyle>('oneLine'),
+          labelPosition: new BehaviorSubject<ControlLabelPosition>('oneLine'),
         },
       };
       const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
@@ -92,7 +92,7 @@ describe('render', () => {
       mockApi = {
         uuid: 'control1',
         parentApi: {
-          labelPosition: new BehaviorSubject<ControlStyle>('twoLine'),
+          labelPosition: new BehaviorSubject<ControlLabelPosition>('twoLine'),
         },
       };
       const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
