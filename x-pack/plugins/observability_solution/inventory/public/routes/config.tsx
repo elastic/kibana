@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { createRouter, Outlet } from '@kbn/typed-react-router-config';
-import React from 'react';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import { Outlet, createRouter } from '@kbn/typed-react-router-config';
+import * as t from 'io-ts';
+import React from 'react';
+import { ENTITY_LAST_SEEN } from '../../common/es_fields/entities';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
 import { InventoryPage } from '../pages/inventory_page';
-import { ENTITY_LAST_SEEN } from '../../common/es_fields/entities';
+import { entityTypesRt } from '../../common/entities';
 
 /**
  * The array of route definitions to be used when the application
@@ -24,11 +25,16 @@ const inventoryRoutes = {
       </InventoryPageTemplate>
     ),
     params: t.type({
-      query: t.type({
-        sortField: t.string,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-        pageIndex: toNumberRt,
-      }),
+      query: t.intersection([
+        t.type({
+          sortField: t.string,
+          sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+          pageIndex: toNumberRt,
+        }),
+        t.partial({
+          entityTypes: entityTypesRt,
+        }),
+      ]),
     }),
     defaults: {
       query: {

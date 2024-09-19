@@ -11,6 +11,25 @@ import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { entityTypeRt } from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { getLatestEntities } from './get_latest_entities';
+import { getEntityTypes } from './get_entity_types';
+
+export const getEntityTypesRoute = createInventoryServerRoute({
+  endpoint: 'GET /internal/inventory/entities/types',
+  options: {
+    tags: ['access:inventory'],
+  },
+  handler: async ({ context, logger }) => {
+    const coreContext = await context.core;
+    const inventoryEsClient = createObservabilityEsClient({
+      client: coreContext.elasticsearch.client.asCurrentUser,
+      logger,
+      plugin: `@kbn/${INVENTORY_APP_ID}-plugin`,
+    });
+
+    const entityTypes = await getEntityTypes({ inventoryEsClient });
+    return { entityTypes };
+  },
+});
 
 export const listLatestEntitiesRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities',
@@ -51,4 +70,5 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
 
 export const entitiesRoutes = {
   ...listLatestEntitiesRoute,
+  ...getEntityTypesRoute,
 };

@@ -6,6 +6,7 @@
  */
 import * as t from 'io-ts';
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
+import { isRight } from 'fp-ts/lib/Either';
 
 export const entityTypeRt = t.union([
   t.literal('service'),
@@ -21,3 +22,29 @@ export const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   type: '*',
   dataset: ENTITY_LATEST,
 });
+
+const entityArrayRt = t.array(entityTypeRt);
+export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
+  'entityTypesRt',
+  entityArrayRt.is,
+  (input, context) => {
+    if (typeof input === 'string') {
+      const arr = input.split(',');
+      if (arr.length === 1 && arr[0] === '') {
+        return t.success([]);
+      }
+      const validation = entityArrayRt.decode(arr);
+      if (isRight(validation)) {
+        return t.success(validation.right);
+      }
+    } else if (Array.isArray(input)) {
+      const validation = entityArrayRt.decode(input);
+      if (isRight(validation)) {
+        return t.success(validation.right);
+      }
+    }
+
+    return t.failure(input, context);
+  },
+  (arr) => arr.join()
+);

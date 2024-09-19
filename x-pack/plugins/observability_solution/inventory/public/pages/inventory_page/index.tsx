@@ -12,6 +12,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { SearchBar } from '../../components/search_bar';
+import { EntityType } from '../../../common/entities';
 
 export function InventoryPage() {
   const {
@@ -19,6 +20,7 @@ export function InventoryPage() {
   } = useKibana();
   const { query } = useInventoryParams('/');
   const { sortDirection, sortField, pageIndex } = query;
+
   const inventoryRoute = useInventoryRouter();
 
   const { value = { entities: [] }, loading } = useAbortableAsync(
@@ -54,10 +56,20 @@ export function InventoryPage() {
     });
   }
 
+  function handleEntityTypesFilter(newEntityTypes: EntityType[]) {
+    inventoryRoute.push('/', {
+      path: {},
+      query: {
+        ...query,
+        entityTypes: newEntityTypes,
+      },
+    });
+  }
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <SearchBar />
+        <SearchBar onChangeEntyTypes={handleEntityTypesFilter} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EntitiesGrid

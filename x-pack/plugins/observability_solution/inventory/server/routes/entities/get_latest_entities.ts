@@ -20,9 +20,9 @@ import {
   ENTITY_TYPE,
 } from '../../../common/es_fields/entities';
 
-const BUILTIN_SERVICES_FROM_ECS_DATA = 'builtin_services_from_ecs_data';
-const BUILTIN_HOSTS_FROM_ECS_DATA = 'builtin_hosts_from_ecs_data';
-const BUILTIN_CONTAINERS_FROM_ECS_DATA = 'builtin_containers_from_ecs_data';
+export const BUILTIN_SERVICES_FROM_ECS_DATA = 'builtin_services_from_ecs_data';
+export const BUILTIN_HOSTS_FROM_ECS_DATA = 'builtin_hosts_from_ecs_data';
+export const BUILTIN_CONTAINERS_FROM_ECS_DATA = 'builtin_containers_from_ecs_data';
 
 export interface LatestEntity {
   [ENTITY_LAST_SEEN]: string;
@@ -31,7 +31,7 @@ export interface LatestEntity {
   [ENTITY_ID]: string;
 }
 
-const DEFAULT_ENTITY_TYPES = ['service', 'host', 'container'];
+export const DEFAULT_ENTITY_TYPES: EntityType[] = ['service', 'host', 'container'];
 
 export async function getLatestEntities({
   inventoryEsClient,

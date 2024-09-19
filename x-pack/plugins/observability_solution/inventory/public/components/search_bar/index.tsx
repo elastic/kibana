@@ -8,8 +8,13 @@ import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntityTypesControls } from './entity_types_controls';
 import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
+import { EntityType } from '../../../common/entities';
 
-export function SearchBar() {
+interface Props {
+  onChangeEntyTypes: (entityTypes: EntityType[]) => void;
+}
+
+export function SearchBar({ onChangeEntyTypes }: Props) {
   const {
     dependencies: {
       start: { unifiedSearch },
@@ -25,7 +30,7 @@ export function SearchBar() {
       appName="Inventory"
       showDatePicker={false}
       indexPatterns={dataView ? [dataView] : undefined}
-      renderQueryInputAppend={EntityTypesControls}
+      renderQueryInputAppend={() => <EntityTypesControls onChange={onChangeEntyTypes} />}
     />
   );
 }
