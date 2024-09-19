@@ -415,6 +415,7 @@
     "@kbn/data-search-plugin": "link:test/plugin_functional/plugins/data_search",
     "@kbn/data-service": "link:packages/kbn-data-service",
     "@kbn/data-stream-adapter": "link:packages/kbn-data-stream-adapter",
+    "@kbn/data-usage-plugin": "link:x-pack/plugins/data_usage",
     "@kbn/data-view-editor-plugin": "link:src/plugins/data_view_editor",
     "@kbn/data-view-field-editor-example-plugin": "link:examples/data_view_field_editor_example",
     "@kbn/data-view-field-editor-plugin": "link:src/plugins/data_view_field_editor",

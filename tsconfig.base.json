@@ -690,6 +690,8 @@
       "@kbn/data-service/*": ["packages/kbn-data-service/*"],
       "@kbn/data-stream-adapter": ["packages/kbn-data-stream-adapter"],
       "@kbn/data-stream-adapter/*": ["packages/kbn-data-stream-adapter/*"],
+      "@kbn/data-usage-plugin": ["x-pack/plugins/data_usage"],
+      "@kbn/data-usage-plugin/*": ["x-pack/plugins/data_usage/*"],
       "@kbn/data-view-editor-plugin": ["src/plugins/data_view_editor"],
       "@kbn/data-view-editor-plugin/*": ["src/plugins/data_view_editor/*"],
       "@kbn/data-view-field-editor-example-plugin": ["examples/data_view_field_editor_example"],
