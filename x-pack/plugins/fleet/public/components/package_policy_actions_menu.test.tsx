@@ -114,7 +114,7 @@ describe('PackagePolicyActionsMenu', () => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
   });
 
-  it.only('Should disable upgrade button if package does not have upgrade', async () => {
+  it('Should disable upgrade button if package does not have upgrade', async () => {
     for (let i = 0; i < 100; i++) {
       const agentPolicies = createMockAgentPolicies();
       const packagePolicy = createMockPackagePolicy({ hasUpgrade: false });
