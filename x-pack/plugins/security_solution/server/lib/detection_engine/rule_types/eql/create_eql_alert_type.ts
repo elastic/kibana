@@ -111,7 +111,7 @@ export const createEqlAlertType = (
         alertSuppression: completeRule.ruleParams.alertSuppression,
         licensing,
       });
-      const result = await eqlExecutor({
+      const { result, loggedRequests } = await eqlExecutor({
         completeRule,
         tuple,
         inputIndex,
@@ -131,9 +131,10 @@ export const createEqlAlertType = (
         alertWithSuppression,
         isAlertSuppressionActive: isNonSeqAlertSuppressionActive,
         experimentalFeatures,
+        state,
         scheduleNotificationResponseActionsService,
       });
-      return { ...result, state };
+      return { ...result, state, ...(loggedRequests ? { loggedRequests } : {}) };
     },
   };
 };
