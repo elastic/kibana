@@ -70,14 +70,7 @@ export const validateResponseActionsPermissions = async (
   ruleUpdate: RuleCreateProps | RuleUpdateProps,
   existingRule?: RuleAlertType | null
 ): Promise<void> => {
-  const { experimentalFeatures } = await securitySolution.getConfig();
-
-  if (
-    !shouldShowResponseActions(
-      ruleUpdate.type,
-      experimentalFeatures.automatedResponseActionsForMoreRulesEnabled
-    )
-  ) {
+  if (!shouldShowResponseActions(ruleUpdate.type)) {
     return;
   }
 
