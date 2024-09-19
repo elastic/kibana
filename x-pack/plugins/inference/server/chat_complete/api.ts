@@ -31,6 +31,7 @@ export function createChatCompleteApi({
     toolChoice,
     tools,
     system,
+    functionCalling,
   }): ChatCompletionResponse => {
     return defer(async () => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -58,6 +59,7 @@ export function createChatCompleteApi({
           toolChoice,
           tools,
           logger,
+          functionCalling,
         });
       }),
       chunksIntoMessage({

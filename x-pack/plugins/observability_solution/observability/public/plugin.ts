@@ -48,7 +48,6 @@ import { BehaviorSubject, from, map, mergeMap } from 'rxjs';
 
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { ENTITY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
@@ -358,16 +357,6 @@ export class Plugin
                   ]
                 : [];
 
-              const inventoryLink = [
-                {
-                  label: i18n.translate('xpack.observability.entitiesLinkTitle', {
-                    defaultMessage: 'Entities',
-                  }),
-                  app: ENTITY_APP_ID,
-                  path: '',
-                },
-              ];
-
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
@@ -442,7 +431,6 @@ export class Plugin
                   sortKey: 100,
                   entries: [
                     ...overviewLink,
-                    ...inventoryLink,
                     ...alertsLink,
                     ...sloLink,
                     ...casesLink,

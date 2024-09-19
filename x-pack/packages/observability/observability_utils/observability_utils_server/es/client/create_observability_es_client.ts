@@ -12,13 +12,24 @@ import type {
   EsqlQueryRequest,
   FieldCapsRequest,
   FieldCapsResponse,
+  MsearchMultisearchHeader,
+  MsearchRequest,
+  SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { Required } from 'utility-types';
+import { Required, ValuesType } from 'utility-types';
 
 type SearchRequest = ESSearchRequest & {
   index: string | string[];
   track_total_hits: number | boolean;
   size: number | boolean;
+};
+
+type MsearchRequestPair =
+  | Required<MsearchMultisearchHeader, 'index'>
+  | Omit<SearchRequest, 'index'>;
+
+type TypedMsearchRequest = MsearchRequest & {
+  searches: MsearchRequestPair[];
 };
 
 /**
@@ -30,6 +41,12 @@ export interface ObservabilityElasticsearchClient {
     operationName: string,
     parameters: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>>;
+  msearch<TDocument = unknown, TMSearchRequest extends TypedMsearchRequest = TypedMsearchRequest>(
+    operationName: string,
+    parameters: TMSearchRequest
+  ): Promise<{
+    responses: SearchResponse[];
+  }>;
   fieldCaps(
     operationName: string,
     request: Required<FieldCapsRequest, 'index_filter' | 'fields' | 'index'>
@@ -109,6 +126,22 @@ export function createObservabilityEsClient({
         return client.search<TDocument>(parameters) as unknown as Promise<
           InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
         >;
+      });
+    },
+    msearch<TDocument = unknown, TSearchRequest extends TypedMsearchRequest = TypedMsearchRequest>(
+      operationName: string,
+      parameters: TSearchRequest
+    ) {
+      return callWithLogger(operationName, parameters, () => {
+        return client.msearch<TDocument>(parameters) as unknown as Promise<{
+          responses: Array<
+            InferSearchResponseOf<
+              TDocument,
+              Exclude<ValuesType<TSearchRequest['searches']>, MsearchMultisearchHeader>,
+              { restTotalHitsAsInt: false }
+            >
+          >;
+        }>;
       });
     },
   };

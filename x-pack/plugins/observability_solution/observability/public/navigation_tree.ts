@@ -50,18 +50,6 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             },
           },
           {
-            link: 'entities' as const,
-            getIsActive: ({
-              pathNameSerialized,
-              prepend,
-            }: {
-              pathNameSerialized: string;
-              prepend: (path: string) => string;
-            }) => {
-              return pathNameSerialized.startsWith(prepend('/app/entities'));
-            },
-          },
-          {
             link: 'observability-overview:alerts',
           },
           {
@@ -78,6 +66,9 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
           },
           {
             link: 'slo',
+          },
+          {
+            link: 'entities',
           },
           {
             id: 'aiMl',
