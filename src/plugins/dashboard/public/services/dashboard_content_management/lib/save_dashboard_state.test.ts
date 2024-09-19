@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registry } from '../../plugin_services.stub';
-import { pluginServices } from '../../plugin_services';
-import { getSampleDashboardInput } from '../../../mocks';
-import { saveDashboardState } from './save_dashboard_state';
 import { DashboardContainerInput } from '../../../../common';
+import { getSampleDashboardInput } from '../../../mocks';
+import { coreServices } from '../../kibana_services';
+import { pluginServices } from '../../plugin_services';
+import { registry } from '../../plugin_services.stub';
+import { saveDashboardState } from './save_dashboard_state';
 
 pluginServices.setRegistry(registry.start({}));
 const {
   data,
   embeddable,
-  notifications,
   dashboardBackup,
   contentManagement,
   initializerContext,
@@ -42,7 +42,6 @@ contentManagement.client.update = jest.fn().mockImplementation(({ id }) => {
 const allServices = {
   data,
   embeddable,
-  notifications,
   dashboardBackup,
   contentManagement,
   initializerContext,
@@ -73,7 +72,7 @@ describe('Save dashboard state', () => {
     expect(allServices.contentManagement.client.update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'Boogaloo' })
     );
-    expect(allServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+    expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       title: `Dashboard 'BOO' was saved`,
       className: 'eui-textBreakWord',
       'data-test-subj': 'saveDashboardSuccess',
@@ -98,7 +97,7 @@ describe('Save dashboard state', () => {
         options: { references: [] },
       })
     );
-    expect(allServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+    expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       title: `Dashboard 'BooToo' was saved`,
       className: 'eui-textBreakWord',
       'data-test-subj': 'saveDashboardSuccess',

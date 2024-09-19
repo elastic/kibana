@@ -8,24 +8,25 @@
  */
 
 import {
-  EuiLink,
   EuiButton,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiButtonEmpty,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 
-import {
-  noItemsStrings,
-  getNewDashboardTitle,
-  dashboardUnsavedListingStrings,
-} from './_dashboard_listing_strings';
-import { pluginServices } from '../services/plugin_services';
-import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
+import { coreServices } from '../services/kibana_services';
+import { pluginServices } from '../services/plugin_services';
+import {
+  dashboardUnsavedListingStrings,
+  getNewDashboardTitle,
+  noItemsStrings,
+} from './_dashboard_listing_strings';
+import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { DashboardListingProps } from './types';
 
 export interface DashboardListingEmptyPromptProps {
@@ -46,7 +47,6 @@ export const DashboardListingEmptyPrompt = ({
   disableCreateDashboardButton,
 }: DashboardListingEmptyPromptProps) => {
   const {
-    application,
     dashboardBackup,
     dashboardCapabilities: { showWriteControls },
   } = pluginServices.getServices();
@@ -147,7 +147,7 @@ export const DashboardListingEmptyPrompt = ({
                   sampleDataInstallLink: (
                     <EuiLink
                       onClick={() =>
-                        application.navigateToApp('home', {
+                        coreServices.application.navigateToApp('home', {
                           path: '#/tutorial_directory/sampleData',
                         })
                       }

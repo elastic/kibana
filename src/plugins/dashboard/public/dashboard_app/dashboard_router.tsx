@@ -35,6 +35,7 @@ import { DashboardMountContext } from './hooks/dashboard_mount_context';
 import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
 import { DashboardListingPage } from './listing_page/dashboard_listing_page';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
+import { coreServices } from '../services/kibana_services';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -57,13 +58,8 @@ export async function mountApp({
   mountContext,
 }: DashboardMountProps) {
   const {
-    chrome: { setBadge, docTitle, setHelpExtension },
     dashboardCapabilities: { showWriteControls },
-    documentationLinks: { dashboardDocLink },
-    application: { navigateToApp },
-    settings: { uiSettings },
     data: dataStart,
-    notifications,
     embeddable,
   } = pluginServices.getServices();
 
@@ -72,8 +68,8 @@ export async function mountApp({
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
     createKbnUrlStateStorage({
       history,
-      useHash: uiSettings.get('state:storeInSessionStorage'),
-      ...withNotifyOnErrors(notifications.toasts),
+      useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
+      ...withNotifyOnErrors(coreServices.notifications.toasts),
     });
 
   const redirect = (redirectTo: RedirectToProps) => {
@@ -87,7 +83,11 @@ export async function mountApp({
     } else {
       path = createDashboardListingFilterUrl(redirectTo.filter);
     }
-    navigateToApp(DASHBOARD_APP_ID, { path: `#/${path}`, state, replace: redirectTo.useReplace });
+    coreServices.application.navigateToApp(DASHBOARD_APP_ID, {
+      path: `#/${path}`,
+      state,
+      replace: redirectTo.useReplace,
+    });
   };
 
   const getDashboardEmbedSettings = (
@@ -117,7 +117,7 @@ export async function mountApp({
   };
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
-    docTitle.change(getDashboardPageTitle());
+    coreServices.chrome.docTitle.change(getDashboardPageTitle());
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
@@ -168,18 +168,18 @@ export async function mountApp({
     </KibanaRenderContextProvider>
   );
 
-  setHelpExtension({
+  coreServices.chrome.setHelpExtension({
     appName: getDashboardPageTitle(),
     links: [
       {
         linkType: 'documentation',
-        href: `${dashboardDocLink}`,
+        href: `${coreServices.docLinks.links.dashboard.guide}`,
       },
     ],
   });
 
   if (!showWriteControls) {
-    setBadge({
+    coreServices.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),
       iconType: 'glasses',

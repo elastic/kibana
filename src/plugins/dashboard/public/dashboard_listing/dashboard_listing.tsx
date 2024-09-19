@@ -12,21 +12,16 @@ import React, { useMemo } from 'react';
 
 import { TableListView } from '@kbn/content-management-table-list-view';
 import {
-  type TableListViewKibanaDependencies,
   TableListViewKibanaProvider,
+  type TableListViewKibanaDependencies,
 } from '@kbn/content-management-table-list-view-table';
-
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
+import { coreServices } from '../services/kibana_services';
 import { pluginServices } from '../services/plugin_services';
-
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import {
-  DashboardListingProps,
-  DashboardSavedObjectUserContent,
-  TableListViewApplicationService,
-} from './types';
+import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
 
 export const DashboardListing = ({
   children,
@@ -36,21 +31,12 @@ export const DashboardListing = ({
   useSessionStorageIntegration,
 }: DashboardListingProps) => {
   const {
-    analytics,
-    application,
-    notifications,
-    overlays,
-    http,
-    i18n,
-    chrome: { theme },
     savedObjectsTagging,
-    coreContext: { executionContext },
-    userProfile,
     dashboardContentInsights: { contentInsightsClient },
     dashboardFavorites,
   } = pluginServices.getServices();
 
-  useExecutionContext(executionContext, {
+  useExecutionContext(coreServices.executionContext, {
     type: 'application',
     page: 'list',
   });
@@ -75,16 +61,7 @@ export const DashboardListing = ({
     <I18nProvider>
       <TableListViewKibanaProvider
         {...{
-          core: {
-            analytics,
-            application: application as TableListViewApplicationService,
-            notifications,
-            overlays,
-            http,
-            i18n,
-            theme,
-            userProfile,
-          },
+          core: coreServices,
           savedObjectsTagging: savedObjectsTaggingFakePlugin,
           FormattedRelative,
           favorites: dashboardFavorites,

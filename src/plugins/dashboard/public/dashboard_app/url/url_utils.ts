@@ -10,20 +10,20 @@
 import _ from 'lodash';
 import semverSatisfies from 'semver/functions/satisfies';
 
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import {
+  DashboardContainerInput,
   DashboardPanelMap,
   SharedDashboardState,
   convertSavedPanelsToPanelMap,
-  DashboardContainerInput,
 } from '../../../common';
-import { pluginServices } from '../../services/plugin_services';
-import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
-import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
 import { SavedDashboardPanel } from '../../../common/content_management';
+import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management/lib/load_dashboard_state';
+import { coreServices } from '../../services/kibana_services';
+import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.
@@ -51,7 +51,7 @@ function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | 
   }
 
   if (isPanelVersionTooOld(appStateInUrl.panels)) {
-    pluginServices.getServices().notifications.toasts.addWarning(getPanelTooOldErrorString());
+    coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());
     return undefined;
   }
 

@@ -11,22 +11,16 @@ import React from 'react';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { pluginServices } from '../../../services/plugin_services';
+import { coreServices } from '../../../services/kibana_services';
 import { DashboardSettings } from '../../component/settings/settings_flyout';
 import { DashboardContainer, DashboardContainerContext } from '../dashboard_container';
 
 export function showSettings(this: DashboardContainer) {
-  const {
-    analytics,
-    settings: { i18n, theme },
-    overlays,
-  } = pluginServices.getServices();
-
   // TODO Move this action into DashboardContainer.openOverlay
   this.dispatch.setHasOverlays(true);
 
   this.openOverlay(
-    overlays.openFlyout(
+    coreServices.overlays.openFlyout(
       toMountPoint(
         <DashboardContainerContext.Provider value={this}>
           <DashboardSettings
@@ -36,7 +30,7 @@ export function showSettings(this: DashboardContainer) {
             }}
           />
         </DashboardContainerContext.Provider>,
-        { analytics, i18n, theme }
+        { analytics: coreServices.analytics, i18n: coreServices.i18n, theme: coreServices.theme }
       ),
       {
         size: 's',

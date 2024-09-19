@@ -10,8 +10,10 @@
 import React from 'react';
 
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { pluginServices } from '../../services/plugin_services';
+
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
+import { coreServices } from '../../services/kibana_services';
+import { pluginServices } from '../../services/plugin_services';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
@@ -19,31 +21,14 @@ export const DashboardAppNoDataPage = ({
   onDataViewCreated: () => void;
 }) => {
   const {
-    application,
     data: { dataViews },
     dataViewEditor,
-    http: { basePath, get },
-    documentationLinks: { indexPatternsDocLink, kibanaGuideDocLink, esqlDocLink },
-    customBranding,
     noDataPage,
     share,
   } = pluginServices.getServices();
 
   const analyticsServices = {
-    coreStart: {
-      docLinks: {
-        links: {
-          kibana: { guide: kibanaGuideDocLink },
-          indexPatterns: { introduction: indexPatternsDocLink },
-          query: { queryESQL: esqlDocLink },
-        },
-      },
-      application,
-      http: { basePath, get },
-      customBranding: {
-        hasCustomBranding$: customBranding.hasCustomBranding$,
-      },
-    },
+    coreStart: coreServices,
     dataViews,
     dataViewEditor,
     noDataPage,

@@ -9,19 +9,20 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
+import { DashboardRedirect } from '../../dashboard_container/types';
+import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
+import { coreServices } from '../../services/kibana_services';
+import { pluginServices } from '../../services/plugin_services';
+import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
 } from '../no_data/dashboard_app_no_data';
-import { pluginServices } from '../../services/plugin_services';
-import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
-import { DashboardRedirect } from '../../dashboard_container/types';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
-import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -39,7 +40,6 @@ export const DashboardListingPage = ({
   const {
     data: { query },
     serverless,
-    chrome: { setBreadcrumbs },
     dashboardContentManagement: { findDashboards },
   } = pluginServices.getServices();
 
@@ -56,7 +56,7 @@ export const DashboardListingPage = ({
   }, []);
 
   useEffect(() => {
-    setBreadcrumbs([
+    coreServices.chrome.setBreadcrumbs([
       {
         text: getDashboardBreadcrumb(),
       },
@@ -67,7 +67,7 @@ export const DashboardListingPage = ({
       // reset any deeper context breadcrumbs to only keep the main "dashboard" part that comes from the navigation config
       serverless.setBreadcrumbs([]);
     }
-  }, [setBreadcrumbs, serverless]);
+  }, [serverless]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services

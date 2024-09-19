@@ -13,6 +13,7 @@ import { useDashboardListingTable } from './use_dashboard_listing_table';
 import { pluginServices } from '../../services/plugin_services';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardSavedObjectUserContent } from '../types';
+import { coreServices } from '../../services/kibana_services';
 const clearStateMock = jest.fn();
 const getDashboardUrl = jest.fn();
 const goToDashboard = jest.fn();
@@ -57,8 +58,8 @@ describe('useDashboardListingTable', () => {
     getPluginServices.dashboardBackup.clearState = clearStateMock;
     getPluginServices.dashboardCapabilities.showWriteControls = true;
     getPluginServices.dashboardContentManagement.deleteDashboards = deleteDashboards;
-    getPluginServices.settings.uiSettings.get = getUiSettingsMock;
-    getPluginServices.notifications.toasts.addError = jest.fn();
+    coreServices.uiSettings.get = getUiSettingsMock;
+    coreServices.notifications.toasts.addError = jest.fn();
   });
 
   test('should return the correct initial hasInitialFetchReturned state', () => {

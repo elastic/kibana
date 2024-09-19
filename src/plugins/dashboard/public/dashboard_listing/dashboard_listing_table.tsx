@@ -15,18 +15,13 @@ import {
   TableListViewKibanaProvider,
   TableListViewTable,
 } from '@kbn/content-management-table-list-view-table';
-
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
 import { pluginServices } from '../services/plugin_services';
-
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import {
-  DashboardListingProps,
-  DashboardSavedObjectUserContent,
-  TableListViewApplicationService,
-} from './types';
+import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import { coreServices } from '../services/kibana_services';
 
 export const DashboardListingTable = ({
   disableCreateDashboardButton,
@@ -38,20 +33,11 @@ export const DashboardListingTable = ({
   showCreateDashboardButton = true,
 }: DashboardListingProps) => {
   const {
-    analytics,
-    application,
-    notifications,
-    overlays,
-    http,
-    i18n,
     savedObjectsTagging,
-    coreContext: { executionContext },
-    chrome: { theme },
-    userProfile,
     dashboardContentInsights: { contentInsightsClient },
   } = pluginServices.getServices();
 
-  useExecutionContext(executionContext, {
+  useExecutionContext(coreServices.executionContext, {
     type: 'application',
     page: 'list',
   });
@@ -80,24 +66,10 @@ export const DashboardListingTable = ({
     [savedObjectsTagging]
   );
 
-  const core = useMemo(
-    () => ({
-      analytics,
-      application: application as TableListViewApplicationService,
-      notifications,
-      overlays,
-      http,
-      i18n,
-      theme,
-      userProfile,
-    }),
-    [application, notifications, overlays, http, analytics, i18n, theme, userProfile]
-  );
-
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
-        core={core}
+        core={coreServices}
         savedObjectsTagging={savedObjectsTaggingFakePlugin}
         FormattedRelative={FormattedRelative}
         contentInsightsClient={contentInsightsClient}

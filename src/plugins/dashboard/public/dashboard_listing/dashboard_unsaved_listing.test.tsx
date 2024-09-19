@@ -18,6 +18,7 @@ import { pluginServices } from '../services/plugin_services';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { coreServices } from '../services/kibana_services';
 
 const makeDefaultProps = (): DashboardUnsavedListingProps => ({
   goToDashboard: jest.fn(),
@@ -94,7 +95,7 @@ describe('Unsaved listing', () => {
     getDiscardButton().simulate('click');
     waitFor(() => {
       component.update();
-      expect(pluginServices.getServices().overlays.openConfirm).toHaveBeenCalled();
+      expect(coreServices.overlays.openConfirm).toHaveBeenCalled();
       expect(pluginServices.getServices().dashboardBackup.clearState).toHaveBeenCalledWith(
         'dashboardUnsavedOne'
       );

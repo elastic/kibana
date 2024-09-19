@@ -23,18 +23,15 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
+import { coreServices } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 export function DashboardEmptyScreen() {
   const {
-    settings: {
-      theme: { theme$ },
-    },
     usageCollection,
     data: { search },
-    http: { basePath },
     embeddable: { getStateTransfer },
     dashboardCapabilities: { showWriteControls },
     visualizations: { getAliases: getVisTypeAliases },
@@ -46,7 +43,7 @@ export function DashboardEmptyScreen() {
   );
 
   const dashboardContainer = useDashboardContainer();
-  const isDarkTheme = useObservable(theme$)?.darkMode;
+  const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
   const isEditMode =
     dashboardContainer.select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
   const embeddableAppContext = dashboardContainer.getAppContext();
@@ -81,7 +78,7 @@ export function DashboardEmptyScreen() {
   ]);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
-  const imageUrl = basePath.prepend(
+  const imageUrl = coreServices.http.basePath.prepend(
     `/plugins/dashboard/assets/${isDarkTheme ? 'dashboards_dark' : 'dashboards_light'}.svg`
   );
 

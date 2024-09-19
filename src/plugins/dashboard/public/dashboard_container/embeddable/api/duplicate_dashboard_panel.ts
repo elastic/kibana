@@ -23,6 +23,7 @@ import { dashboardClonePanelActionStrings } from '../../../dashboard_actions/_da
 import { pluginServices } from '../../../services/plugin_services';
 import { placeClonePanel } from '../../panel_placement';
 import { DashboardContainer } from '../dashboard_container';
+import { coreServices } from '../../../services/kibana_services';
 
 const duplicateLegacyInput = async (
   dashboard: DashboardContainer,
@@ -106,7 +107,6 @@ const duplicateReactEmbeddableInput = async (
 
 export async function duplicateDashboardPanel(this: DashboardContainer, idToDuplicate: string) {
   const {
-    notifications: { toasts },
     embeddable: { reactEmbeddableRegistryHasKey },
   } = pluginServices.getServices();
   const panelToClone = await this.getDashboardPanelFromId(idToDuplicate);
@@ -115,7 +115,7 @@ export async function duplicateDashboardPanel(this: DashboardContainer, idToDupl
     ? await duplicateReactEmbeddableInput(this, panelToClone, idToDuplicate)
     : await duplicateLegacyInput(this, panelToClone, idToDuplicate);
 
-  toasts.addSuccess({
+  coreServices.notifications.toasts.addSuccess({
     title: dashboardClonePanelActionStrings.getSuccessMessage(),
     'data-test-subj': 'addObjectToContainerSuccess',
   });

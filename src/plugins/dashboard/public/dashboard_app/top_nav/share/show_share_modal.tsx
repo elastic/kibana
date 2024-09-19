@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
+import moment from 'moment';
+import React, { ReactElement, useState } from 'react';
+
 import { EuiCheckboxGroup } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryState } from '@kbn/data-plugin/common';
@@ -14,15 +18,14 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import { omit } from 'lodash';
-import moment from 'moment';
-import React, { ReactElement, useState } from 'react';
+
 import { convertPanelMapToSavedPanels, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
-import { pluginServices } from '../../../services/plugin_services';
-import { dashboardUrlParams } from '../../dashboard_router';
-import { shareModalStrings } from '../../_dashboard_app_strings';
 import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
+import { coreServices } from '../../../services/kibana_services';
+import { pluginServices } from '../../../services/plugin_services';
+import { shareModalStrings } from '../../_dashboard_app_strings';
+import { dashboardUrlParams } from '../../dashboard_router';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -59,7 +62,6 @@ export function ShowShareModal({
         },
       },
     },
-    notifications,
     share: { toggleShareContextMenu },
   } = pluginServices.getServices();
 
@@ -238,6 +240,6 @@ export function ShowShareModal({
     snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,
-    toasts: notifications.toasts,
+    toasts: coreServices.notifications.toasts,
   });
 }

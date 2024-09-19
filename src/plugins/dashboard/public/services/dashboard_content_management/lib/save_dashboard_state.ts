@@ -15,10 +15,12 @@ import { isFilterPinned } from '@kbn/es-query';
 
 import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
 import { DashboardAttributes, DashboardCrudTypes } from '../../../../common/content_management';
+import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
 import { DashboardStartDependencies } from '../../../plugin';
+import { coreServices } from '../../kibana_services';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import {
   DashboardContentManagementRequiredServices,
@@ -26,7 +28,6 @@ import {
   SaveDashboardReturn,
 } from '../types';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
-import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -42,7 +43,6 @@ type SaveDashboardStateProps = SaveDashboardProps & {
   data: DashboardContentManagementRequiredServices['data'];
   contentManagement: DashboardStartDependencies['contentManagement'];
   embeddable: DashboardContentManagementRequiredServices['embeddable'];
-  notifications: DashboardContentManagementRequiredServices['notifications'];
   dashboardBackup: DashboardContentManagementRequiredServices['dashboardBackup'];
   initializerContext: DashboardContentManagementRequiredServices['initializerContext'];
   savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
@@ -59,7 +59,6 @@ export const saveDashboardState = async ({
   dashboardBackup,
   contentManagement,
   savedObjectsTagging,
-  notifications: { toasts },
 }: SaveDashboardStateProps): Promise<SaveDashboardReturn> => {
   const {
     search: dataSearchService,
@@ -212,7 +211,7 @@ export const saveDashboardState = async ({
     const newId = result.item.id;
 
     if (newId) {
-      toasts.addSuccess({
+      coreServices.notifications.toasts.addSuccess({
         title: dashboardSaveToastStrings.getSuccessString(currentState.title),
         className: 'eui-textBreakWord',
         'data-test-subj': 'saveDashboardSuccess',
@@ -230,7 +229,7 @@ export const saveDashboardState = async ({
     }
     return { id: newId, references: allReferences };
   } catch (error) {
-    toasts.addDanger({
+    coreServices.notifications.toasts.addDanger({
       title: dashboardSaveToastStrings.getFailureString(currentState.title, error.message),
       'data-test-subj': 'saveDashboardFailure',
     });

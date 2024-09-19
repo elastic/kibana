@@ -30,6 +30,7 @@ import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardItem } from '../../../common/content_management';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
+import { coreServices } from '../../services/kibana_services';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -93,14 +94,12 @@ export const useDashboardListingTable = ({
   const {
     dashboardBackup,
     dashboardCapabilities: { showWriteControls },
-    settings: { uiSettings },
     dashboardContentManagement: {
       findDashboards,
       deleteDashboards,
       updateDashboardMeta,
       checkForDuplicateDashboardTitle,
     },
-    notifications: { toasts },
     dashboardRecentlyAccessed,
   } = pluginServices.getServices();
 
@@ -114,8 +113,8 @@ export const useDashboardListingTable = ({
     dashboardBackup.getDashboardIdsWithUnsavedChanges()
   );
 
-  const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
-  const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
+  const listingLimit = coreServices.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = coreServices.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   const createItem = useCallback(() => {
     if (useSessionStorageIntegration && dashboardBackup.dashboardHasUnsavedEdits()) {
@@ -243,7 +242,7 @@ export const useDashboardListingTable = ({
         );
 
         const deleteDuration = window.performance.now() - deleteStartTime;
-        reportPerformanceMetricEvent(pluginServices.getServices().analytics, {
+        reportPerformanceMetricEvent(coreServices.analytics, {
           eventName: SAVED_OBJECT_DELETE_TIME,
           duration: deleteDuration,
           meta: {
@@ -252,14 +251,14 @@ export const useDashboardListingTable = ({
           },
         });
       } catch (error) {
-        toasts.addError(error, {
+        coreServices.notifications.toasts.addError(error, {
           title: dashboardListingErrorStrings.getErrorDeletingDashboardToast(),
         });
       }
 
       setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackup, deleteDashboards, toasts]
+    [dashboardBackup, deleteDashboards]
   );
 
   const editItem = useCallback(

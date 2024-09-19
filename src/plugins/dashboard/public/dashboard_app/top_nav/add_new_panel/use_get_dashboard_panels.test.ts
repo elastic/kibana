@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { type BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
-import { useGetDashboardPanels } from './use_get_dashboard_panels';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { Action, UiActionsService } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import {
+  VisGroups,
+  VisTypeAlias,
+  VisualizationsStart,
+  type BaseVisType,
+} from '@kbn/visualizations-plugin/public';
+import { renderHook } from '@testing-library/react-hooks';
+
 import { pluginServices } from '../../../services/plugin_services';
+import { useGetDashboardPanels } from './use_get_dashboard_panels';
 
 const mockApi = { addNewPanel: jest.fn() } as unknown as jest.Mocked<PresentationContainer>;
 
@@ -24,18 +30,16 @@ describe('Get dashboard panels hook', () => {
     createNewVisType: jest.fn(),
   };
 
-  type PluginServices = ReturnType<typeof pluginServices.getServices>;
-
   let compatibleTriggerActionsRequestSpy: jest.SpyInstance<
-    ReturnType<NonNullable<PluginServices['uiActions']['getTriggerCompatibleActions']>>
+    ReturnType<NonNullable<UiActionsService['getTriggerCompatibleActions']>>
   >;
 
   let dashboardVisualizationGroupGetterSpy: jest.SpyInstance<
-    ReturnType<PluginServices['visualizations']['getByGroup']>
+    ReturnType<VisualizationsStart['getByGroup']>
   >;
 
   let dashboardVisualizationAliasesGetterSpy: jest.SpyInstance<
-    ReturnType<PluginServices['visualizations']['getAliases']>
+    ReturnType<VisualizationsStart['getAliases']>
   >;
 
   beforeAll(() => {

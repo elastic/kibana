@@ -7,47 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import UseUnmount from 'react-use/lib/useUnmount';
 
 import {
-  withSuspense,
-  LazyLabsFlyout,
-  getContextProvider as getPresentationUtilContextProvider,
-} from '@kbn/presentation-util-plugin/public';
-import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import {
+  EuiBadge,
   EuiBreadcrumb,
   EuiHorizontalRule,
   EuiIcon,
-  EuiToolTipProps,
-  EuiPopover,
-  EuiBadge,
   EuiLink,
+  EuiPopover,
+  EuiToolTipProps,
 } from '@elastic/eui';
 import { MountPoint } from '@kbn/core/public';
-import { getManagedContentBadge } from '@kbn/managed-content-badge';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { Query } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import {
+  LazyLabsFlyout,
+  getContextProvider as getPresentationUtilContextProvider,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
+
+import { UI_SETTINGS } from '../../common';
+import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
+import {
+  dashboardManagedBadge,
+  getDashboardBreadcrumb,
   getDashboardTitle,
   leaveConfirmStrings,
-  getDashboardBreadcrumb,
   unsavedChangesBadgeStrings,
-  dashboardManagedBadge,
 } from '../dashboard_app/_dashboard_app_strings';
-import { UI_SETTINGS } from '../../common';
-import { pluginServices } from '../services/plugin_services';
+import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
+import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import { DashboardEmbedSettings } from '../dashboard_app/types';
-import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
-import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
-import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
-import './_dashboard_top_nav.scss';
+import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
-import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
+import { coreServices } from '../services/kibana_services';
+import { pluginServices } from '../services/plugin_services';
+import './_dashboard_top_nav.scss';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -81,21 +83,14 @@ export function InternalDashboardTopNav({
     data: {
       query: { filterManager },
     },
-    chrome: {
-      setBreadcrumbs,
-      setIsVisible: setChromeVisibility,
-      getIsVisible$: getChromeIsVisible$,
-      recentlyAccessed: chromeRecentlyAccessed,
-    },
     serverless,
-    settings: { uiSettings },
     navigation: { TopNavMenu },
     embeddable: { getStateTransfer },
     initializerContext: { allowByValueEmbeddables },
     dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
     dashboardRecentlyAccessed,
   } = pluginServices.getServices();
-  const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
+  const isLabsEnabled = coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
@@ -143,16 +138,18 @@ export function InternalDashboardTopNav({
    * Manage chrome visibility when dashboard is embedded.
    */
   useEffect(() => {
-    if (!embedSettings) setChromeVisibility(viewMode !== 'print');
-  }, [embedSettings, setChromeVisibility, viewMode]);
+    if (!embedSettings) coreServices.chrome.setIsVisible(viewMode !== 'print');
+  }, [embedSettings, viewMode]);
 
   /**
    * populate recently accessed, and set is chrome visible.
    */
   useEffect(() => {
-    const subscription = getChromeIsVisible$().subscribe((visible) => setIsChromeVisible(visible));
+    const subscription = coreServices.chrome
+      .getIsVisible$()
+      .subscribe((visible) => setIsChromeVisible(visible));
     if (lastSavedId && title) {
-      chromeRecentlyAccessed.add(
+      coreServices.chrome.recentlyAccessed.add(
         getFullEditPath(lastSavedId, viewMode === 'edit'),
         title,
         lastSavedId
@@ -164,15 +161,7 @@ export function InternalDashboardTopNav({
       );
     }
     return () => subscription.unsubscribe();
-  }, [
-    allowByValueEmbeddables,
-    chromeRecentlyAccessed,
-    getChromeIsVisible$,
-    lastSavedId,
-    viewMode,
-    title,
-    dashboardRecentlyAccessed,
-  ]);
+  }, [allowByValueEmbeddables, lastSavedId, viewMode, title, dashboardRecentlyAccessed]);
 
   /**
    * Set breadcrumbs to dashboard title when dashboard's title or view mode changes
@@ -207,7 +196,7 @@ export function InternalDashboardTopNav({
        * Dashboard embedded in other plugins (e.g. SecuritySolution)
        * will have custom leading breadcrumbs for back to their app.
        **/
-      setBreadcrumbs(
+      coreServices.chrome.setBreadcrumbs(
         customLeadingBreadCrumbs.concat([
           {
             text: getDashboardBreadcrumb(),
@@ -220,15 +209,7 @@ export function InternalDashboardTopNav({
         ])
       );
     }
-  }, [
-    setBreadcrumbs,
-    redirectTo,
-    dashboardTitle,
-    dashboardApi,
-    viewMode,
-    serverless,
-    customLeadingBreadCrumbs,
-  ]);
+  }, [redirectTo, dashboardTitle, dashboardApi, viewMode, serverless, customLeadingBreadCrumbs]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes
