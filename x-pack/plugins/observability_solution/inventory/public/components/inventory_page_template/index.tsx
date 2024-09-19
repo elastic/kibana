@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
+import { HeaderActionMenuItems } from './header_action_menu';
 
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
@@ -21,6 +22,8 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
         pageTitle: i18n.translate('xpack.inventory.inventoryPageHeaderLabel', {
           defaultMessage: 'Inventory',
         }),
+        rightSideItems: [<HeaderActionMenuItems />],
+        responsive: false,
       }}
     >
       {children}
