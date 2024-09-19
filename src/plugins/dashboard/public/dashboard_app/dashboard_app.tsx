@@ -80,16 +80,12 @@ export function DashboardApp({
    */
   const {
     screenshotMode: { isScreenshotMode, getScreenshotContext },
-    observabilityAIAssistant,
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
   useObservabilityAIAssistantContext({
-    observabilityAIAssistant: observabilityAIAssistant.start,
     dashboardApi,
-    search: dataService.search,
-    dataViews: dataService.dataViews,
   });
 
   useExecutionContext(coreServices.executionContext, {

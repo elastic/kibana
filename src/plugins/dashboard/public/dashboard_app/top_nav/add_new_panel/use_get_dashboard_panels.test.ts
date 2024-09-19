@@ -19,8 +19,7 @@ import {
 } from '@kbn/visualizations-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 
-import { visualizationsService } from '../../../services/kibana_services';
-import { pluginServices } from '../../../services/plugin_services';
+import { uiActionsService, visualizationsService } from '../../../services/kibana_services';
 import { useGetDashboardPanels } from './use_get_dashboard_panels';
 
 const mockApi = { addNewPanel: jest.fn() } as unknown as jest.Mocked<PresentationContainer>;
@@ -44,15 +43,11 @@ describe('Get dashboard panels hook', () => {
   >;
 
   beforeAll(() => {
-    const _pluginServices = pluginServices.getServices();
-
     compatibleTriggerActionsRequestSpy = jest.spyOn(
-      _pluginServices.uiActions,
+      uiActionsService,
       'getTriggerCompatibleActions'
     );
-
     dashboardVisualizationGroupGetterSpy = jest.spyOn(visualizationsService, 'getByGroup');
-
     dashboardVisualizationAliasesGetterSpy = jest.spyOn(visualizationsService, 'getAliases');
   });
 

@@ -9,30 +9,40 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public/plugin';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { SpacesApi } from '@kbn/spaces-plugin/public';
-import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import { DashboardStartDependencies } from '../plugin';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public/plugin';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { DashboardStartDependencies } from '../plugin';
 
+// export let dataViewsService: DataViewsPublicPluginStart;
+// export let initContextService: PluginInitializerContext;
 export let coreServices: CoreStart;
 export let dataService: DataPublicPluginStart;
 export let dataViewEditorService: DataViewEditorStart;
 export let embeddableService: EmbeddableStart;
 export let fieldFormatService: FieldFormatsStart;
-// export let initContextService: PluginInitializerContext;
 export let navigationService: NavigationPublicPluginStart;
+export let noDataPageService: NoDataPagePluginStart | undefined;
+export let observabilityAssistantService: ObservabilityAIAssistantPublicStart | undefined;
 export let presentationUtilService: PresentationUtilPluginStart;
+export let serverlessService: ServerlessPluginStart | undefined;
 export let shareService: SharePluginStart | undefined;
 export let spacesService: SpacesApi | undefined;
+export let uiActionsService: UiActionsPublicStart;
+export let urlForwardingService: UrlForwardingStart;
 export let visualizationsService: VisualizationsStart;
-// export let dataViewsService: DataViewsPublicPluginStart;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -43,9 +53,14 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   embeddableService = deps.embeddable;
   fieldFormatService = deps.fieldFormats;
   navigationService = deps.navigation;
+  noDataPageService = deps.noDataPage;
+  observabilityAssistantService = deps.observabilityAIAssistant;
   presentationUtilService = deps.presentationUtil;
+  serverlessService = deps.serverless;
   shareService = deps.share;
   spacesService = deps.spaces;
+  uiActionsService = deps.uiActions;
+  urlForwardingService = deps.urlForwarding;
   visualizationsService = deps.visualizations;
   // dataViewsService = deps.dataViews;
 

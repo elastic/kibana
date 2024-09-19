@@ -24,14 +24,9 @@ import { dashboardContentManagementServiceFactory } from './dashboard_content_ma
 import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service';
 import { dashboardRecentlyAccessedFactory } from './dashboard_recently_accessed/dashboard_recently_accessed';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context_service';
-import { noDataPageServiceFactory } from './no_data_page/no_data_page_service';
-import { observabilityAIAssistantServiceFactory } from './observability_ai_assistant/observability_ai_assistant_service';
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service';
 import { savedObjectsTaggingServiceFactory } from './saved_objects_tagging/saved_objects_tagging_service';
 import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode_service';
-import { serverlessServiceFactory } from './serverless/serverless_service';
-import { uiActionsServiceFactory } from './ui_actions/ui_actions_service';
-import { urlForwardingServiceFactory } from './url_forwarding/url_forwarding_service';
 import { usageCollectionServiceFactory } from './usage_collection/usage_collection_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
@@ -47,14 +42,9 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   savedObjectsTagging: new PluginServiceProvider(savedObjectsTaggingServiceFactory),
   screenshotMode: new PluginServiceProvider(screenshotModeServiceFactory),
-  urlForwarding: new PluginServiceProvider(urlForwardingServiceFactory),
   usageCollection: new PluginServiceProvider(usageCollectionServiceFactory),
   savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
   contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
-  serverless: new PluginServiceProvider(serverlessServiceFactory),
-  noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
-  uiActions: new PluginServiceProvider(uiActionsServiceFactory),
-  observabilityAIAssistant: new PluginServiceProvider(observabilityAIAssistantServiceFactory),
   dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedFactory),
   dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),
   dashboardFavorites: new PluginServiceProvider(dashboardFavoritesServiceFactory),

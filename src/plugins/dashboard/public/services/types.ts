@@ -20,13 +20,8 @@ import { DashboardContentManagementService } from './dashboard_content_managemen
 import { DashboardFavoritesService } from './dashboard_favorites/types';
 import { DashboardRecentlyAccessedService } from './dashboard_recently_accessed/types';
 import { DashboardInitializerContextService } from './initializer_context/types';
-import { NoDataPageService } from './no_data_page/types';
-import { ObservabilityAIAssistantService } from './observability_ai_assistant/types';
 import { DashboardSavedObjectsTaggingService } from './saved_objects_tagging/types';
 import { DashboardScreenshotModeService } from './screenshot_mode/types';
-import { DashboardServerlessService } from './serverless/types';
-import { DashboardUiActionsService } from './ui_actions/types';
-import { DashboardUrlForwardingService } from './url_forwarding/types';
 import { DashboardUsageCollectionService } from './usage_collection/types';
 
 export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardStartDependencies> & {
@@ -40,14 +35,9 @@ export interface DashboardServices {
   initializerContext: DashboardInitializerContextService;
   savedObjectsTagging: DashboardSavedObjectsTaggingService; // TODO: make this optional in follow up
   screenshotMode: DashboardScreenshotModeService;
-  urlForwarding: DashboardUrlForwardingService;
   usageCollection: DashboardUsageCollectionService; // TODO: make this optional in follow up
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
-  serverless: DashboardServerlessService; // TODO: make this optional in follow up
-  noDataPage: NoDataPageService;
-  uiActions: DashboardUiActionsService;
-  observabilityAIAssistant: ObservabilityAIAssistantService; // TODO: make this optional in follow up
   dashboardRecentlyAccessed: DashboardRecentlyAccessedService;
   dashboardContentInsights: DashboardContentInsightsService;
   dashboardFavorites: DashboardFavoritesService;

@@ -52,6 +52,7 @@ import {
   dataService,
   embeddableService,
   navigationService,
+  serverlessService,
 } from '../services/kibana_services';
 import { pluginServices } from '../services/plugin_services';
 import './_dashboard_top_nav.scss';
@@ -85,7 +86,6 @@ export function InternalDashboardTopNav({
    * Unpack dashboard services
    */
   const {
-    serverless,
     initializerContext: { allowByValueEmbeddables },
     dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
     dashboardRecentlyAccessed,
@@ -186,10 +186,10 @@ export function InternalDashboardTopNav({
       },
     ];
 
-    if (serverless?.setBreadcrumbs) {
+    if (serverlessService) {
       // set serverless breadcrumbs if available,
       // set only the dashboardTitleBreadcrumbs because the main breadcrumbs automatically come as part of the navigation config
-      serverless.setBreadcrumbs(dashboardTitleBreadcrumbs);
+      serverlessService.setBreadcrumbs(dashboardTitleBreadcrumbs);
     } else {
       /**
        * non-serverless regular breadcrumbs
@@ -209,7 +209,7 @@ export function InternalDashboardTopNav({
         ])
       );
     }
-  }, [redirectTo, dashboardTitle, dashboardApi, viewMode, serverless, customLeadingBreadCrumbs]);
+  }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes

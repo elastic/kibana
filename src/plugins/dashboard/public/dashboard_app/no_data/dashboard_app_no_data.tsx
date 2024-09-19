@@ -17,6 +17,7 @@ import {
   dataService,
   dataViewEditorService,
   embeddableService,
+  noDataPageService,
   shareService,
 } from '../../services/kibana_services';
 import { pluginServices } from '../../services/plugin_services';
@@ -26,13 +27,11 @@ export const DashboardAppNoDataPage = ({
 }: {
   onDataViewCreated: () => void;
 }) => {
-  const { noDataPage } = pluginServices.getServices();
-
   const analyticsServices = {
     coreStart: coreServices,
     dataViews: dataService.dataViews,
     dataViewEditor: dataViewEditorService,
-    noDataPage,
+    noDataPage: noDataPageService,
     share: shareService,
   };
 

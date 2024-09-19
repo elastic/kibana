@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useCallback, useMemo, useRef } from 'react';
+import { AsyncSubject, defer, from, lastValueFrom, map, type Subscription } from 'rxjs';
+
 import type { IconType } from '@elastic/eui';
 import { COMMON_EMBEDDABLE_GROUPING, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { VisGroups, type BaseVisType, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { useCallback, useMemo, useRef } from 'react';
-import { AsyncSubject, defer, from, lastValueFrom, map, type Subscription } from 'rxjs';
 
-import { visualizationsService } from '../../../services/kibana_services';
-import { pluginServices } from '../../../services/plugin_services';
+import { uiActionsService, visualizationsService } from '../../../services/kibana_services';
 import {
   getAddPanelActionMenuItemsGroup,
   type GroupedAddPanelActions,
@@ -46,8 +46,6 @@ const sortGroupPanelsByOrder = <T extends { order: number }>(panelGroups: T[]): 
 export const useGetDashboardPanels = ({ api, createNewVisType }: UseGetDashboardPanelsArgs) => {
   const panelsComputeResultCache = useRef(new AsyncSubject<GroupedAddPanelActions[]>());
   const panelsComputeSubscription = useRef<Subscription | null>(null);
-
-  const { uiActions } = pluginServices.getServices();
 
   const getSortedVisTypesByGroup = (group: VisGroups) =>
     visualizationsService
@@ -133,12 +131,12 @@ export const useGetDashboardPanels = ({ api, createNewVisType }: UseGetDashboard
     () =>
       defer(() => {
         return from(
-          uiActions?.getTriggerCompatibleActions?.(ADD_PANEL_TRIGGER, {
+          uiActionsService.getTriggerCompatibleActions?.(ADD_PANEL_TRIGGER, {
             embeddable: api,
           }) ?? []
         );
       }),
-    [api, uiActions]
+    [api]
   );
 
   const computeAvailablePanels = useCallback(
