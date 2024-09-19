@@ -7,7 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, from, map } from 'rxjs';
+import { from, map } from 'rxjs';
 import {
   AppMountParameters,
   APP_WRAPPER_CLASS,
@@ -17,7 +17,6 @@ import {
   Plugin,
   PluginInitializerContext,
   AppStatus,
-  AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
@@ -42,7 +41,6 @@ export class InventoryPlugin
     >
 {
   logger: Logger;
-  inventoryAppUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -92,6 +90,9 @@ export class InventoryPlugin
       category: DEFAULT_APP_CATEGORIES.observability,
       visibleIn: ['sideNav', 'globalSearch'],
       order: 8004,
+      status: isEntityCentricExperienceSettingEnabled
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
       deepLinks: [
         {
           id: 'inventory',
@@ -136,24 +137,12 @@ export class InventoryPlugin
           appWrapperElement.classList.remove(appWrapperClassName);
         };
       },
-      updater$: this.inventoryAppUpdater,
     });
 
     return {};
   }
 
   start(coreStart: CoreStart, pluginsStart: InventoryStartDependencies): InventoryPublicStart {
-    const isEntityCentricExperienceSettingEnabled = coreStart.uiSettings.get<boolean>(
-      'observability:entityCentricExperience',
-      true
-    );
-
-    this.inventoryAppUpdater.next(() => ({
-      status: isEntityCentricExperienceSettingEnabled
-        ? AppStatus.accessible
-        : AppStatus.inaccessible,
-    }));
-
     return {};
   }
 }
