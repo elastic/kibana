@@ -10,6 +10,7 @@ import type { DiffableEsqlFields } from '../../../../../../../common/api/detecti
 import { EsqlQueryReadOnly } from './fields/esql_query/esql_query';
 import { TypeReadOnly } from './fields/type/type';
 import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface EsqlRuleFieldReadOnlyProps {
   fieldName: keyof DiffableEsqlFields;
@@ -33,6 +34,6 @@ export function EsqlRuleFieldReadOnly({
     case 'type':
       return <TypeReadOnly type={finalDiffableRule.type} />;
     default:
-      return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
+      return assertUnreachable(fieldName);
   }
 }

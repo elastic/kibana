@@ -193,7 +193,7 @@ interface AnomalyThresholdProps {
   anomalyThreshold: number;
 }
 
-const AnomalyThreshold = ({ anomalyThreshold }: AnomalyThresholdProps) => (
+export const AnomalyThreshold = ({ anomalyThreshold }: AnomalyThresholdProps) => (
   <EuiText size="s" data-test-subj="anomalyThresholdPropertyValue">
     {anomalyThreshold}
   </EuiText>
