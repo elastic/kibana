@@ -26,7 +26,7 @@ import { TimeBounds } from '../types';
 import { SloTabId } from './slo_details';
 import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
-import { GoodBadEventsChart } from '../../slos/components/common/good_bad_events_chart';
+import { GoodBadEventsChart } from '../../../components/good_bad_events_chart/good_bad_events_chart';
 import { getDiscoverLink } from '../../../utils/slo/get_discover_link';
 
 export interface Props {
@@ -37,7 +37,7 @@ export interface Props {
 }
 
 export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props) {
-  const { discover } = useKibana().services;
+  const { discover, uiSettings } = useKibana().services;
 
   const { isLoading, data } = useGetPreviewData({
     range,
@@ -104,15 +104,16 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
             <EuiFlexItem grow={0}>
               <EuiLink
                 color="text"
-                href={getDiscoverLink(
+                href={getDiscoverLink({
                   slo,
-                  {
+                  timeRange: {
                     from: 'now-24h',
                     to: 'now',
                     mode: 'relative',
                   },
-                  discover
-                )}
+                  discover,
+                  uiSettings,
+                })}
                 data-test-subj="sloDetailDiscoverLink"
               >
                 <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
