@@ -4,7 +4,7 @@ info:
   title: Security Solution Entity Analytics API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -182,7 +182,7 @@ paths:
         - Security Solution Entity Analytics API
   /api/asset_criticality/list:
     get:
-      description: 'List asset criticality records, paging, sorting and filtering as needed.'
+      description: List asset criticality records, paging, sorting and filtering as needed.
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -276,7 +276,7 @@ paths:
       summary: List the Entity Store engines
       tags:
         - Security Solution Entity Analytics API
-  '/api/entity_store/engines/{entityType}':
+  /api/entity_store/engines/{entityType}:
     delete:
       operationId: DeleteEntityStore
       parameters:
@@ -324,7 +324,7 @@ paths:
       summary: Get the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
-  '/api/entity_store/engines/{entityType}/init':
+  /api/entity_store/engines/{entityType}/init:
     post:
       operationId: InitEntityStore
       parameters:
@@ -356,7 +356,7 @@ paths:
       summary: Initialize the Entity Store
       tags:
         - Security Solution Entity Analytics API
-  '/api/entity_store/engines/{entityType}/start':
+  /api/entity_store/engines/{entityType}/start:
     post:
       operationId: StartEntityStore
       parameters:
@@ -379,7 +379,7 @@ paths:
       summary: Start the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
-  '/api/entity_store/engines/{entityType}/stats':
+  /api/entity_store/engines/{entityType}/stats:
     post:
       operationId: GetEntityStoreStats
       parameters:
@@ -414,7 +414,7 @@ paths:
       summary: Get the Entity Store engine stats
       tags:
         - Security Solution Entity Analytics API
-  '/api/entity_store/engines/{entityType}/stop':
+  /api/entity_store/engines/{entityType}/stop:
     post:
       operationId: StopEntityStore
       parameters:
