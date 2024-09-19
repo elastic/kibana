@@ -53,7 +53,7 @@ const UsersLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
 export const SolutionEmptyPrompt: FC<Props> = ({ kibanaVersion, coreStart }) => {
   return (
     <KibanaPageTemplate.EmptyPrompt
-      data-test-subj="managementHome"
+      data-test-subj="managementHomeSolution"
       iconType="managementApp"
       title={
         <h1>
