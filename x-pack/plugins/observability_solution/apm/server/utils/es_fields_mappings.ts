@@ -112,6 +112,59 @@ export const spanMapping = (fields: Partial<Record<string, unknown[]>>): Span =>
   };
 };
 
+export const spanLinksDetailsMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  return {
+    trace: {
+      id: normalizeValue<string>(fields['trace.id']),
+    },
+    span: {
+      id: normalizeValue<string>(fields['span.id']),
+      name: normalizeValue<string>(fields['span.name']),
+      type: normalizeValue<string>(fields['span.type']),
+      subtype: normalizeValue<string>(fields['span.subtype']),
+      duration: {
+        us: normalizeValue<number>(fields['span.duration.us']),
+      },
+    },
+    transaction: {
+      id: normalizeValue<string>(fields['transaction.id']),
+      name: normalizeValue<string>(fields['transaction.name']),
+      duration: {
+        us: normalizeValue<string>(fields['transaction.duration.us']),
+      },
+    },
+    service: {
+      name: normalizeValue<string>(fields['service.name']),
+      environment: normalizeValue<string>(fields['service.environment']),
+    },
+    processor: {
+      event: normalizeValue<'span'>(fields['processor.event']),
+    },
+    agent: {
+      name: normalizeValue<AgentName>(fields['agent.name']),
+    },
+  };
+};
+
+export const linkedParentsOfSpanMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  return {
+    span: {
+      links: [
+        {
+          trace: {
+            // todo(milosz): confirm `span.links.trace.id` format
+            id: normalizeValue<string>(fields['span.links.trace.id']),
+          },
+          span: {
+            // todo(milosz): confirm `span.links.span.id` format
+            id: normalizeValue<string>(fields['span.links.span.id']),
+          },
+        },
+      ],
+    },
+  };
+};
+
 const normalizeValue = <T>(field: unknown[] | unknown): T => {
   return (Array.isArray(field) && field.length > 0 ? field[0] : field) as T;
 };
