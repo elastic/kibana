@@ -145,6 +145,16 @@ export class PerAlertActionScheduler<
           continue;
         }
 
+        // As the alert has neither scheduled actions and nor end time, the alert is not active or recovered.
+        // This happens when the alert is still in the task state but hasn't been reported by the rule type
+        // as it has been pushed above the max alerts limit by a new alert.
+        if (!alert.hasScheduledActions() && alert.getState().end === undefined) {
+          this.context.logger.warn(
+            `An alert (id:${alert.getId()}) has been skipped due to max alerts limit`
+          );
+          continue;
+        }
+
         const actionGroup =
           alert.getScheduledActionOptions()?.actionGroup ||
           this.context.ruleType.recoveryActionGroup.id;
