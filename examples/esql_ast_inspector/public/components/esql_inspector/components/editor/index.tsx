@@ -14,7 +14,7 @@ import { useEsqlInspector } from '../../context';
 import { useBehaviorSubject } from '../../../../hooks/use_behavior_subject';
 import { Annotation } from '../../../annotations';
 
-export const Editor: React.FC = (props) => {
+export const Editor: React.FC = () => {
   const state = useEsqlInspector();
   const src = useBehaviorSubject(state.src$);
   const highlight = useBehaviorSubject(state.highlight$);
@@ -80,7 +80,9 @@ export const Editor: React.FC = (props) => {
 
   if (limit) {
     const location = limit.location;
-    if (!location) return;
+
+    if (!location) return null;
+
     targetsBackdrop.push([
       location.min,
       location.max + 1,
@@ -111,13 +113,13 @@ export const Editor: React.FC = (props) => {
             size={'s'}
             color="text"
             onClick={() => {
-              const query = state.query$.getValue();
+              const value = state.query$.getValue();
 
-              if (!query) {
+              if (!value) {
                 return;
               }
 
-              state.src$.next(query.print());
+              state.src$.next(value.print());
             }}
           >
             Re-format
