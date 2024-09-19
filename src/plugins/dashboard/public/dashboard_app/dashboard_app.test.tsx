@@ -90,7 +90,10 @@ describe('Dashboard App', () => {
 
     // simulate minimizing a panel
     mockDashboard.expandedPanelId.next(undefined);
-    expect(historySpy).toHaveBeenCalledTimes(1);
-    expect(mockHistory.location.pathname).toBe('/create');
+    await waitFor(() => {
+      expect(mockDashboard.expandedPanelId.getValue()).toBe(undefined);
+      expect(historySpy).toHaveBeenCalledTimes(1);
+      expect(mockHistory.location.pathname).toBe('/create');
+    });
   });
 });
