@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Event, LLMSpanAttributes } from '@langtrase/trace-attributes';
-import { Span } from '@opentelemetry/api';
+import { Attributes, Span } from '@opentelemetry/api';
 import { FunctionDefinition } from 'openai/resources';
 import { ignoreElements, last, merge, OperatorFunction, share, tap } from 'rxjs';
 import { Message, StreamingChatResponseEventType } from '../../../../common';
@@ -21,6 +20,9 @@ export enum GenAIServiceProvider {
   Anthropic = 'Anthropic',
 }
 
+const EVENT_STREAM_START = 'stream.start';
+const EVENT_STREAM_OUTPUT = 'stream.output';
+
 export function withGenAIChatCompleteSpan<T extends ChatEvent>({
   span,
   model,
@@ -34,7 +36,7 @@ export function withGenAIChatCompleteSpan<T extends ChatEvent>({
   serviceProvider: GenAIServiceProvider;
   functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
 }): OperatorFunction<T, T> {
-  const attributes: LLMSpanAttributes = {
+  const attributes: Attributes = {
     ...getLangtraceSpanAttributes(),
     'langtrace.service.name': serviceProvider,
     'llm.api': '/chat/completions',
@@ -72,12 +74,12 @@ export function withGenAIChatCompleteSpan<T extends ChatEvent>({
   return (source$) => {
     const shared$ = source$.pipe(share());
 
-    span.addEvent(Event.STREAM_START);
+    span.addEvent(EVENT_STREAM_START);
 
     const passThrough$ = shared$.pipe(
       tap((value) => {
         if (value.type === StreamingChatResponseEventType.ChatCompletionChunk) {
-          span.addEvent(Event.STREAM_OUTPUT, {
+          span.addEvent(EVENT_STREAM_OUTPUT, {
             response: value.message.content,
           });
           return;

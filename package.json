@@ -993,7 +993,6 @@
     "@langchain/google-genai": "^0.0.23",
     "@langchain/langgraph": "0.0.34",
     "@langchain/openai": "^0.1.3",
-    "@langtrase/trace-attributes": "^3.0.8",
     "@launchdarkly/node-server-sdk": "^9.5.4",
     "@launchdarkly/openfeature-node-server": "^1.0.0",
     "@loaders.gl/core": "^3.4.7",
