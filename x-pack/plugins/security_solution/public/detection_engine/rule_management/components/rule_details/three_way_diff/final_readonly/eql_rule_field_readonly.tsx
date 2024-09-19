@@ -14,6 +14,7 @@ import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppr
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { EventCategoryOverrideReadOnly } from './fields/event_category_override/event_category_override';
 import { TimestampFieldReadOnly } from './fields/timestamp_field/timestamp_field';
+import { TiebreakerFieldReadOnly } from './fields/tiebreaker_field/tiebreaker_field';
 
 interface EqlRuleFieldReadOnlyProps {
   fieldName: keyof DiffableEqlFields;
@@ -44,6 +45,8 @@ export function EqlRuleFieldReadOnly({ fieldName, finalDiffableRule }: EqlRuleFi
           eventCategoryOverride={finalDiffableRule.event_category_override}
         />
       );
+    case 'tiebreaker_field':
+      return <TiebreakerFieldReadOnly tiebreakerField={finalDiffableRule.tiebreaker_field} />;
     case 'timestamp_field':
       return <TimestampFieldReadOnly timestampField={finalDiffableRule.timestamp_field} />;
     case 'type':

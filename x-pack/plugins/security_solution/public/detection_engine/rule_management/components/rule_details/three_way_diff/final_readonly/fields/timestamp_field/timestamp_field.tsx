@@ -31,10 +31,10 @@ export function TimestampFieldReadOnly({ timestampField }: TimestampFieldReadOnl
   );
 }
 
-interface EventCategoryOverrideProps {
+interface TimestampFieldProps {
   timestampField: TimestampFieldType;
 }
 
-function TimestampField({ timestampField }: EventCategoryOverrideProps) {
+function TimestampField({ timestampField }: TimestampFieldProps) {
   return <EuiText size="s">{timestampField}</EuiText>;
 }
