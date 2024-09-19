@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, MouseEventHandler } from 'react';
+import type { ComponentType, MouseEventHandler, ReactNode } from 'react';
 import type { Location } from 'history';
 import type { EuiSideNavItemType, EuiThemeSizes, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
@@ -246,6 +246,13 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    */
   isElasticInternalLink?: boolean;
 }
+
+export type PanelSelectedNode = Pick<
+  ChromeProjectNavigationNode,
+  'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink'
+> & {
+  title: string | ReactNode;
+};
 
 /** @public */
 export interface SideNavCompProps {

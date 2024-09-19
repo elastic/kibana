@@ -47,7 +47,7 @@ export interface Props {
 }
 
 const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContentProvider }) => {
-  const { activeNodes$ } = useNavigationService();
+  const { activeNodes$, selectedPanelNode, setSelectedPanelNode } = useNavigationService();
 
   const activeNodes = useObservable(activeNodes$, []);
   const navigationTree = useObservable(navigationTree$, { body: [] });
@@ -79,7 +79,12 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
   );
 
   return (
-    <PanelProvider activeNodes={activeNodes} contentProvider={panelContentProvider}>
+    <PanelProvider
+      activeNodes={activeNodes}
+      contentProvider={panelContentProvider}
+      selectedNode={selectedPanelNode}
+      setSelectedNode={setSelectedPanelNode}
+    >
       <NavigationContext.Provider value={contextValue}>
         {/* Main navigation content */}
         <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>

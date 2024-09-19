@@ -74,6 +74,10 @@ export class ProjectNavigationService {
   // The navigation tree for the Side nav UI that still contains layout information (body, footer, etc.)
   private navigationTreeUi$ = new BehaviorSubject<NavigationTreeDefinitionUI | null>(null);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
+  // Keep a reference to the nav node selected when the navigation panel is opened
+  private readonly panelSelectedNode$ = new BehaviorSubject<ChromeProjectNavigationNode | null>(
+    null
+  );
 
   private projectBreadcrumbs$ = new BehaviorSubject<{
     breadcrumbs: ChromeProjectBreadcrumb[];
@@ -187,6 +191,8 @@ export class ProjectNavigationService {
       getActiveSolutionNavDefinition$: this.getActiveSolutionNavDefinition$.bind(this),
       /** In stateful Kibana, get the id of the active solution navigation */
       getActiveSolutionNavId$: () => this.activeSolutionNavDefinitionId$.asObservable(),
+      getPanelSelectedNode$: () => this.panelSelectedNode$.asObservable(),
+      setPanelSelectedNode: this.setPanelSelectedNode.bind(this),
     };
   }
 
@@ -413,6 +419,34 @@ export class ProjectNavigationService {
         ...solutionNavs,
       });
     }
+  }
+
+  private setPanelSelectedNode = (_node: string | ChromeProjectNavigationNode | null) => {
+    const node = typeof _node === 'string' ? this.findNodeByPath(_node) : _node;
+    this.panelSelectedNode$.next(node);
+  };
+
+  private findNodeByPath(path: string): ChromeProjectNavigationNode | null {
+    const allNodes = this.navigationTree$.getValue();
+    if (!allNodes) return null;
+
+    const find = (nodes: ChromeProjectNavigationNode[]): ChromeProjectNavigationNode | null => {
+      // Recursively search for the node with the given path
+      for (const node of nodes) {
+        if (node.path === path) {
+          return node;
+        }
+        if (node.children) {
+          const found = find(node.children);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return null;
+    };
+
+    return find(allNodes);
   }
 
   private get http() {

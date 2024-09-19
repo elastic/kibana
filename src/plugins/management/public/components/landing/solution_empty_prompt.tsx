@@ -9,7 +9,7 @@
 import React, { type FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiHorizontalRule, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiLink } from '@elastic/eui';
 import { type CoreStart } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
@@ -84,7 +84,9 @@ export const SolutionEmptyPrompt: FC<Props> = ({ kibanaVersion, coreStart }) => 
               fill
               iconType="spaces"
               onClick={() => {
-                console.log('open panel!');
+                coreStart.chrome.setSideNavPanelSelectedNode(
+                  'project_settings_project_nav.management'
+                );
               }}
             >
               <FormattedMessage

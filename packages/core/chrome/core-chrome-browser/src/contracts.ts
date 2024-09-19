@@ -16,6 +16,7 @@ import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
+import type { PanelSelectedNode } from './project_navigation';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -190,4 +191,7 @@ export interface ChromeStart {
    * Get the id of the currently active project navigation or `null` otherwise.
    */
   getActiveSolutionNavId$(): Observable<string | null>;
+
+  getSideNavPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
+  setSideNavPanelSelectedNode(node: string | PanelSelectedNode | null): void;
 }

@@ -582,6 +582,8 @@ export class ChromeService {
         updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
       },
+      getSideNavPanelSelectedNode$: projectNavigation.getPanelSelectedNode$.bind(projectNavigation),
+      setSideNavPanelSelectedNode: projectNavigation.setPanelSelectedNode.bind(projectNavigation),
     };
   }
 
