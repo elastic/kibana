@@ -29,6 +29,9 @@ import { PLUGIN } from '../common/constants/plugin';
 import { IndexMapping } from './application/sections/home/index_list/details_page/index_mappings_embeddable';
 import { PublicApiService } from './services/public_api_service';
 import { IndexSettings } from './application/sections/home/index_list/details_page/index_settings_embeddable';
+import { UiMetricService } from './application/services';
+import { UIM_APP_NAME } from '../common/constants';
+import { setUiMetricService } from './application/services/api';
 
 export class IndexMgmtUIPlugin
   implements
@@ -40,6 +43,7 @@ export class IndexMgmtUIPlugin
     >
 {
   private extensionsService = new ExtensionsService();
+  private uiMetricService = new UiMetricService(UIM_APP_NAME);
   private kibanaVersion: SemVer;
   private config: {
     enableIndexActions: boolean;
@@ -58,6 +62,7 @@ export class IndexMgmtUIPlugin
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
     // For the selectors we should expose them through app dependencies and read them from there on each container component.
     setExtensionsService(this.extensionsService);
+    setUiMetricService(this.uiMetricService);
     this.kibanaVersion = new SemVer(ctx.env.packageInfo.version);
     const {
       ui: { enabled: isIndexManagementUiEnabled },
@@ -145,6 +150,7 @@ export class IndexMgmtUIPlugin
           },
           services: {
             extensionsService: this.extensionsService,
+            uiMetricService: this.uiMetricService,
           },
           config: this.config,
           history: deps.history,
@@ -183,6 +189,7 @@ export class IndexMgmtUIPlugin
           },
           services: {
             extensionsService: this.extensionsService,
+            uiMetricService: this.uiMetricService,
           },
           config: this.config,
           history: deps.history,
