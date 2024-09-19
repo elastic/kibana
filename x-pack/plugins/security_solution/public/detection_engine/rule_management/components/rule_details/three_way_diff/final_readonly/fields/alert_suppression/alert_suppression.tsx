@@ -11,6 +11,7 @@ import * as ruleDetailsI18n from '../../../../translations';
 import type {
   AlertSuppression,
   DiffableRuleTypes,
+  ThresholdAlertSuppression,
 } from '../../../../../../../../../common/api/detection_engine';
 import { AlertSuppressionLabel } from '../../../../../../../rule_creation_ui/components/description_step/alert_suppression_label';
 import {
@@ -20,7 +21,7 @@ import {
 } from '../../../../rule_definition_section';
 
 interface AlertSuppressionReadOnlyProps {
-  alertSuppression?: AlertSuppression;
+  alertSuppression?: AlertSuppression | ThresholdAlertSuppression;
   ruleType: DiffableRuleTypes;
 }
 
@@ -32,8 +33,10 @@ export function AlertSuppressionReadOnly({
     return null;
   }
 
-  const listItems = [
-    {
+  const listItems = [];
+
+  if ('group_by' in alertSuppression) {
+    listItems.push({
       title: (
         <AlertSuppressionLabel
           label={ruleDetailsI18n.SUPPRESS_ALERTS_BY_FIELD_LABEL}
@@ -41,8 +44,11 @@ export function AlertSuppressionReadOnly({
         />
       ),
       description: <SuppressAlertsByField fields={alertSuppression.group_by} />,
-    },
-    {
+    });
+  }
+
+  if ('duration' in alertSuppression) {
+    listItems.push({
       title: (
         <span data-test-subj="alertSuppressionDurationPropertyTitle">
           <AlertSuppressionLabel
@@ -52,10 +58,10 @@ export function AlertSuppressionReadOnly({
         </span>
       ),
       description: <SuppressAlertsDuration duration={alertSuppression.duration} />,
-    },
-  ];
+    });
+  }
 
-  if (alertSuppression.missing_fields_strategy) {
+  if ('missing_fields_strategy' in alertSuppression) {
     listItems.push({
       title: (
         <span data-test-subj="alertSuppressionMissingFieldPropertyTitle">
