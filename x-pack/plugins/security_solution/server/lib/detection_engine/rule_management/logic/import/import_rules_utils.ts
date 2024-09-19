@@ -112,7 +112,7 @@ export const importRules = async ({
 
               const exceptionBulkErrors = exceptionErrors.map((error) =>
                 createBulkErrorObject({
-                  ruleId: error.ruleId,
+                  ruleId: error.error.ruleId,
                   statusCode: 400,
                   message: error.error.message,
                 })

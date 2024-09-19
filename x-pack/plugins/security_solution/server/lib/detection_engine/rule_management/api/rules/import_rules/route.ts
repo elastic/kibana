@@ -23,6 +23,7 @@ import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
 import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
 import { PrebuiltRulesImportHelper } from '../../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
+import { importRules } from '../../../logic/import/import_rules_with_source';
 import { importRules as legacyImportRules } from '../../../logic/import/import_rules_utils';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../../logic/import/create_rules_stream_from_ndjson';
 import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/import_rules_utils';
@@ -155,12 +156,13 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           let importRuleResponse: ImportRuleResponse[] = [];
 
           if (prebuiltRulesCustomizationEnabled) {
-            importRuleResponse = await detectionRulesClient.importRules({
+            importRuleResponse = await importRules({
               ruleChunks: chunkParseObjects,
               rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
               overwriteRules: request.query.overwrite,
               allowMissingConnectorSecrets: !!actionConnectors.length,
               prebuiltRulesImportHelper,
+              detectionRulesClient,
               savedObjectsClient,
             });
           } else {
@@ -182,7 +184,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
               return false;
             }
           });
-          const importRules: ImportRulesResponse = {
+          const importedRules: ImportRulesResponse = {
             success: errorsResp.length === 0,
             success_count: successes.length,
             rules_count: rules.length,
@@ -196,7 +198,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             action_connectors_warnings: actionConnectorWarnings,
           };
 
-          return response.ok({ body: ImportRulesResponse.parse(importRules) });
+          return response.ok({ body: ImportRulesResponse.parse(importedRules) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

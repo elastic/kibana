@@ -16,10 +16,9 @@ import type {
   RuleToImport,
   RuleSource,
 } from '../../../../../../common/api/detection_engine';
+import type { RuleImportError } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesImportHelper } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
-import type { ImportRuleResponse } from '../../../routes/utils';
-import type { PromiseFromStreams } from '../import/import_rules_utils';
 
 export interface IDetectionRulesClient {
   createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
@@ -30,7 +29,7 @@ export interface IDetectionRulesClient {
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
   legacyImportRule: (args: LegacyImportRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
-  importRules: (args: ImportRulesArgs) => Promise<ImportRuleResponse[]>;
+  importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportError>>;
 }
 
 export interface CreateCustomRuleArgs {
@@ -70,8 +69,8 @@ export interface ImportRuleArgs {
 }
 
 export interface ImportRulesArgs {
-  ruleChunks: PromiseFromStreams[][];
-  rulesResponseAcc: ImportRuleResponse[];
+  rules: RuleToImport[];
+  detectionRulesClient: IDetectionRulesClient;
   overwriteRules: boolean;
   prebuiltRulesImportHelper: PrebuiltRulesImportHelper;
   allowMissingConnectorSecrets?: boolean;

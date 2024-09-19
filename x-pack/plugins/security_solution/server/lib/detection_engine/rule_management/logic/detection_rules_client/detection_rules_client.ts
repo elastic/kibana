@@ -13,8 +13,7 @@ import type { RuleResponse } from '../../../../../../common/api/detection_engine
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import type { ImportRuleResponse } from '../../../routes/utils';
-import { importRules } from '../import/import_rules_with_source';
+import type { RuleImportError } from '../import/errors';
 import type {
   CreateCustomRuleArgs,
   CreatePrebuiltRuleArgs,
@@ -34,6 +33,7 @@ import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
 import { importRuleWithSource } from './methods/import_rule_with_source';
+import { importRules } from './methods/import_rules';
 
 interface DetectionRulesClientParams {
   actionsClient: ActionsClient;
@@ -149,7 +149,7 @@ export const createDetectionRulesClient = ({
       });
     },
 
-    async importRules(args: ImportRulesArgs): Promise<ImportRuleResponse[]> {
+    async importRules(args: ImportRulesArgs): Promise<Array<RuleResponse | RuleImportError>> {
       return withSecuritySpan('DetectionRulesClient.importRules', async () => {
         return importRules({
           ...args,

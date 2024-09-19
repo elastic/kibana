@@ -12,7 +12,6 @@ import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { createBulkErrorObject } from '../../../../routes/utils';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import type { ImportRuleArgs } from '../detection_rules_client_interface';
@@ -21,6 +20,7 @@ import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
 import { validateMlAuth, toggleRuleEnabledOnUpdate } from '../utils';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 import { SERVER_APP_ID } from '../../../../../../../common';
+import { createRuleImportError } from '../../import/errors';
 
 interface ImportRuleOptions {
   actionsClient: ActionsClient;
@@ -53,9 +53,9 @@ export const importRuleWithSource = async ({
   });
 
   if (existingRule && !overwriteRules) {
-    throw createBulkErrorObject({
+    throw createRuleImportError({
       ruleId: existingRule.rule_id,
-      statusCode: 409,
+      type: 'conflict',
       message: `rule_id: "${existingRule.rule_id}" already exists`,
     });
   }
