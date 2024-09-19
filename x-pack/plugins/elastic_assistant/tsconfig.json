@@ -46,6 +46,9 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/security-plugin",
     "@kbn/apm-utils",
+    "@kbn/std",
+    "@kbn/zod",
+    "@kbn/inference-plugin"
   ],
   "exclude": [
     "target/**/*",

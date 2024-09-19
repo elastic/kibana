@@ -171,11 +171,11 @@ describe('MissingMonitoringDataRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',
         context: {
-          internalFullMessage: `We have not detected any monitoring data for node ${nodeName} in cluster: ${clusterName}. [View what monitoring data we do have for this node.](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid}))`,
+          internalFullMessage: `We have not detected any monitoring data for node ${nodeName} in cluster: ${clusterName}. [View what monitoring data we do have for this node.](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}'))`,
           internalShortMessage: `We have not detected any monitoring data for node ${nodeName} in cluster: ${clusterName}. Verify the node is up and running, then double check the monitoring settings.`,
           nodes: `node: ${nodeName}`,
           node: `node: ${nodeName}`,
-          action: `[View what monitoring data we do have for this node.](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid}))`,
+          action: `[View what monitoring data we do have for this node.](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}'))`,
           actionPlain:
             'Verify the node is up and running, then double check the monitoring settings.',
           clusterName,
@@ -287,11 +287,11 @@ describe('MissingMonitoringDataRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',
         context: {
-          internalFullMessage: `We have not detected any monitoring data for node ${nodeName} in cluster: ${clusterName}. [View what monitoring data we do have for this node.](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid},ccs:${ccs}))`,
+          internalFullMessage: `We have not detected any monitoring data for node ${nodeName} in cluster: ${clusterName}. [View what monitoring data we do have for this node.](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}',ccs:${ccs}))`,
           internalShortMessage: `We have not detected any monitoring data for node ${nodeName} in cluster: ${clusterName}. Verify the node is up and running, then double check the monitoring settings.`,
           nodes: `node: ${nodeName}`,
           node: `node: ${nodeName}`,
-          action: `[View what monitoring data we do have for this node.](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid},ccs:${ccs}))`,
+          action: `[View what monitoring data we do have for this node.](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}',ccs:${ccs}))`,
           actionPlain:
             'Verify the node is up and running, then double check the monitoring settings.',
           clusterName,

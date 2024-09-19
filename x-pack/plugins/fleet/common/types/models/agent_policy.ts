@@ -21,6 +21,7 @@ export interface NewAgentPolicy {
   id?: string;
   name: string;
   namespace: string;
+  space_ids?: string[];
   description?: string;
   is_default?: boolean;
   is_default_fleet_server?: boolean; // Optional when creating a policy
@@ -53,7 +54,7 @@ export interface GlobalDataTag {
 // SO definition for this type is declared in server/types/interfaces
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
-  space_id?: string | undefined;
+  space_ids?: string[] | undefined;
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
@@ -70,7 +71,7 @@ export interface FullAgentPolicyInputStream {
   id: string;
   data_stream: {
     dataset: string;
-    type: string;
+    type?: string;
   };
   [key: string]: any;
 }
@@ -117,6 +118,7 @@ export interface FullAgentPolicyMonitoring {
   enabled: boolean;
   metrics: boolean;
   logs: boolean;
+  traces: boolean;
 }
 
 export interface FullAgentPolicy {

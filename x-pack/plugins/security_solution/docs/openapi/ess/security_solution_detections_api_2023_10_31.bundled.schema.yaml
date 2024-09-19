@@ -317,7 +317,7 @@ paths:
         Apply a bulk action, such as bulk edit, duplicate, or delete, to
         multiple detection rules. The bulk action is applied to all rules that
         match the query or to the rules listed by their IDs.
-      operationId: PerformBulkAction
+      operationId: PerformRulesBulkAction
       parameters:
         - description: Enables dry run mode for the request call.
           in: query
@@ -474,6 +474,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
+      summary: Delete multiple detection rules
       tags:
         - Security Solution Detections API
         - Bulk API
@@ -2041,6 +2042,10 @@ components:
           $ref: '#/components/schemas/RuleFilterArray'
         index:
           $ref: '#/components/schemas/IndexPatternArray'
+        response_actions:
+          items:
+            $ref: '#/components/schemas/ResponseAction'
+          type: array
         tiebreaker_field:
           $ref: '#/components/schemas/TiebreakerField'
         timestamp_field:
@@ -2728,6 +2733,10 @@ components:
       properties:
         alert_suppression:
           $ref: '#/components/schemas/AlertSuppression'
+        response_actions:
+          items:
+            $ref: '#/components/schemas/ResponseAction'
+          type: array
     EsqlRulePatchProps:
       allOf:
         - type: object
@@ -3872,6 +3881,10 @@ components:
           $ref: '#/components/schemas/RuleFilterArray'
         index:
           $ref: '#/components/schemas/IndexPatternArray'
+        response_actions:
+          items:
+            $ref: '#/components/schemas/ResponseAction'
+          type: array
     NewTermsRulePatchFields:
       allOf:
         - type: object

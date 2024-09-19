@@ -8,16 +8,19 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const fleetAndAgents = getService('fleetAndAgents');
 
-  describe('Enrollment settings - get', async function () {
+  describe('Enrollment settings - get', function () {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     it('should respond with empty enrollment settings on empty cluster', async function () {
       const response = await supertest
@@ -39,7 +42,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('should respond with correct enrollment settings', async function () {
+    describe('should respond with correct enrollment settings', function () {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/fleet_server');
         // package verification error without force
@@ -67,12 +70,14 @@ export default function (providerContext: FtrProviderContext) {
                 is_default_fleet_server: true,
                 is_managed: false,
                 name: 'Fleet Server Policy',
+                space_ids: [],
               },
               {
                 id: 'fleet-server-policy-2',
                 is_default_fleet_server: false,
                 is_managed: false,
                 name: 'Fleet Server Policy 2',
+                space_ids: [],
               },
             ],
             has_active: true,
@@ -117,6 +122,7 @@ export default function (providerContext: FtrProviderContext) {
                 is_default_fleet_server: false,
                 is_managed: false,
                 name: 'Fleet Server Policy 2',
+                space_ids: [],
               },
             ],
             has_active: true,

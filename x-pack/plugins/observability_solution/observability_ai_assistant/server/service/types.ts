@@ -16,7 +16,8 @@ import type {
 import type {
   Message,
   ObservabilityAIAssistantScreenContextRequest,
-  UserInstructionOrPlainText,
+  InstructionOrPlainText,
+  AssistantScope,
 } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';
@@ -32,11 +33,11 @@ export type ChatFunction = (
   params: Parameters<ObservabilityAIAssistantClient['chat']>[1]
 ) => Observable<ChatEvent>;
 
-export type ChatFunctionWithoutConnector = (
+export type AutoAbortedChatFunction = (
   name: string,
   params: Omit<
     Parameters<ObservabilityAIAssistantClient['chat']>[1],
-    'connectorId' | 'simulateFunctionCalling' | 'signal'
+    'simulateFunctionCalling' | 'signal'
   >
 ) => Observable<ChatEvent>;
 
@@ -54,6 +55,8 @@ type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
     messages: Message[];
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     chat: FunctionCallChatFunction;
+    connectorId: string;
+    useSimulatedFunctionCalling: boolean;
   },
   signal: AbortSignal
 ) => Promise<TResponse>;
@@ -63,17 +66,20 @@ export interface FunctionHandler {
   respond: RespondFunction<any, FunctionResponse>;
 }
 
-export type RegisteredInstruction = UserInstructionOrPlainText | RegisterInstructionCallback;
+export type InstructionOrCallback = InstructionOrPlainText | RegisterInstructionCallback;
 
-type RegisterInstructionCallback = ({
+export interface InstructionOrCallbackWithScopes {
+  instruction: InstructionOrCallback;
+  scopes: AssistantScope[];
+}
+
+export type RegisterInstructionCallback = ({
   availableFunctionNames,
 }: {
   availableFunctionNames: string[];
-}) => UserInstructionOrPlainText | UserInstructionOrPlainText[] | undefined;
+}) => InstructionOrPlainText | InstructionOrPlainText[] | undefined;
 
-export type RegisterInstruction = (
-  ...instructions: Array<UserInstructionOrPlainText | RegisterInstructionCallback>
-) => void;
+export type RegisterInstruction = (...instruction: InstructionOrCallbackWithScopes[]) => void;
 
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,
@@ -81,9 +87,13 @@ export type RegisterFunction = <
   TArguments = FromSchema<TParameters>
 >(
   definition: FunctionDefinition<TParameters>,
-  respond: RespondFunction<TArguments, TResponse>
+  respond: RespondFunction<TArguments, TResponse>,
+  scopes: AssistantScope[]
 ) => void;
-export type FunctionHandlerRegistry = Map<string, FunctionHandler>;
+export type FunctionHandlerRegistry = Map<
+  string,
+  { handler: FunctionHandler; scopes: AssistantScope[] }
+>;
 
 export type RegistrationCallback = ({}: {
   signal: AbortSignal;

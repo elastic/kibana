@@ -43,16 +43,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the automated response actions in rule + alerts
-   */
-  responseActionsEnabled: true,
-
-  /**
-   * Enables the automated endpoint response action in rule + alerts
-   */
-  endpointResponseActionsEnabled: true,
-
-  /**
    * Enables the `upload` endpoint response action (v8.9)
    */
   responseActionUploadEnabled: true,
@@ -61,6 +51,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Automated Endpoint Process actions
    */
   automatedProcessActionsEnabled: true,
+
+  /**
+   * Temporary feature flag to enable the Response Actions in Rules UI - intermediate release
+   */
+  automatedResponseActionsForMoreRulesEnabled: false,
 
   /**
    * Enables the ability to send Response actions to SentinelOne and persist the results
@@ -82,21 +77,16 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneGetFileEnabled: true,
 
   /** Enables the `kill-process` response action for SentinelOne */
-  responseActionsSentinelOneKillProcessEnabled: false,
+  responseActionsSentinelOneKillProcessEnabled: true,
 
   /** Enable the `processes` response actions for SentinelOne */
-  responseActionsSentinelOneProcessesEnabled: false,
+  responseActionsSentinelOneProcessesEnabled: true,
 
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
    */
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-
-  /**
-   * Enables scan response action on Endpoint
-   */
-  responseActionScanEnabled: false,
 
   /**
    * Enables new notes
@@ -122,6 +112,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
    */
   assistantBedrockChat: true,
+
+  /**
+   * Enables the NaturalLanguageESQLTool and disables the ESQLKnowledgeBaseTool, introduced in `8.16.0`.
+   */
+  assistantNaturalLanguageESQLTool: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -180,7 +175,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
-  jamfDataInAnalyzerEnabled: false,
+  jamfDataInAnalyzerEnabled: true,
 
   /*
    * Disables discover esql tab within timeline
@@ -232,12 +227,17 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
-  filterProcessDescendantsForEventFiltersEnabled: false,
+  filterProcessDescendantsForEventFiltersEnabled: true,
 
   /**
    * Enables the new data ingestion hub
    */
   dataIngestionHubEnabled: false,
+
+  /**
+   * Enables the new Entity Store engine routes
+   */
+  entityStoreEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

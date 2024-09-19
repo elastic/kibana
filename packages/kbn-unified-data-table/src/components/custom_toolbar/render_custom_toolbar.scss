@@ -5,6 +5,7 @@
     block-size: $euiSizeXL;
     border: $euiBorderThin;
     border-radius: $euiBorderRadiusSmall;
+    transition: transform $euiAnimSpeedNormal ease-in-out;
 
     // making the icons larger than the default size
     & svg {
@@ -18,7 +19,6 @@
     }
 
     // add toolbar control animation
-    transition: transform $euiAnimSpeedNormal ease-in-out;
     &:hover {
       transform: translateY(-1px);
     }
@@ -55,11 +55,11 @@
       animation: none !important;
       transform: none !important;
     }
+  }
 
-    .unifiedDataTableToolbarControlIconButton + & {
-      border-inline-start: $euiBorderThin;
-      border-radius: 0;
-    }
+  .unifiedDataTableToolbarControlIconButton + .unifiedDataTableToolbarControlIconButton {
+    border-inline-start: $euiBorderThin;
+    border-radius: 0;
   }
 
   .unifiedDataTableToolbarBottom {

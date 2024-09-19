@@ -126,9 +126,11 @@
     "@kbn/react-hooks",
     "@kbn/server-route-repository-utils",
     "@kbn/core-analytics-browser",
-    "@kbn/apm-types"
+    "@kbn/apm-types",
+    "@kbn/entities-schema",
+    "@kbn/serverless",
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/router-utils",
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

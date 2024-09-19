@@ -37,7 +37,7 @@ import { login } from '@kbn/security-solution-plugin/public/management/cypress/t
 import type { ServerlessRoleName } from './roles';
 
 import { waitUntil } from '../tasks/wait_until';
-import { isServerless } from '../tasks/serverless';
+import { isCloudServerless, isServerless } from '../tasks/serverless';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -57,7 +57,7 @@ declare global {
 
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
 
-      login(role: ServerlessRoleName): void;
+      login(role: ServerlessRoleName, useCookiesForMKI?: boolean): void;
 
       waitUntil(fn: () => Cypress.Chainable): Cypress.Chainable | undefined;
     }
@@ -78,8 +78,15 @@ Cypress.Commands.add(
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
-Cypress.Commands.add('login', (role) => {
-  if (isServerless) {
+Cypress.Commands.add('login', (role, useCookiesForMKI = true) => {
+  // MKI does not support multiple logins throughout the test suite using cookies.
+  // Until a better alternative is found, we will prevent multiple logins in the MKI environment in test suites.
+  if (isCloudServerless && !useCookiesForMKI) {
+    return;
+  }
+
+  if (isServerless && !isCloudServerless) {
+    // Do not use login.with in MKI env, default to login which will route to proper login method
     return login.with(role, 'changeme');
   }
 

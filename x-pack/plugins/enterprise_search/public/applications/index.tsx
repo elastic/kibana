@@ -152,7 +152,12 @@ export const renderApp = (
   ReactDOM.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+          }}
+        >
           <CloudContext>
             <Provider store={store}>
               <Router history={params.history}>

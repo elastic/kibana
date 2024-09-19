@@ -1074,6 +1074,36 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSearchConnectorIndexPattern\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSimulatedFunctionCalling\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID",
         "type": "string",
         "tags": [],
@@ -1456,6 +1486,21 @@
         "description": [],
         "signature": [
           "\"observability:profilingElasticsearchPlugin\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
+        "description": [],
+        "signature": [
+          "\"observability:searchExcludedDataTiers\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

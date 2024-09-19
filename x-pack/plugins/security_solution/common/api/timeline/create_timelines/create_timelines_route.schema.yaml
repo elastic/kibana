@@ -18,11 +18,12 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: CreateTimelines
-      summary: Creates a new timeline.
+      summary: Create a Timeline or Timeline template
+      description: Create a new Timeline or Timeline template.
       tags:
         - access:securitySolution
       requestBody:
-        description: The required timeline fields used to create a new timeline along with optional fields that will be created if not provided.
+        description: The required Timeline fields used to create a new Timeline, along with optional fields that will be created if not provided.
         required: true
         content:
           application/json:
@@ -52,7 +53,7 @@ paths:
                   nullable: true
       responses:
         '200':
-          description: Indicates the timeline was successfully created.
+          description: Indicates the Timeline was successfully created.
           content:
             application/json:
               schema:
@@ -70,7 +71,7 @@ paths:
                           timeline:
                             $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
         '405':
-          description: Indicates that there was an error in the timeline creation.
+          description: Indicates that there was an error in the Timeline creation.
           content:
             application/json:
               schema:

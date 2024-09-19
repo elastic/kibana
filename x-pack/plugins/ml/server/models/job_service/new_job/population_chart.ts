@@ -75,7 +75,7 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
 function processSearchResults(resp: any, fields: string[]): ProcessedResults {
   const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
 
-  const tempResults: Record<DtrIndex, Result[]> = {};
+  const tempResults: Record<DtrIndex, Result[]> = Object.create(null);
   fields.forEach((f, i) => (tempResults[i] = []));
 
   aggregationsByTime.forEach((dataForTime: any) => {
@@ -188,7 +188,7 @@ function getPopulationSearchJsonFromConfig(
 
   json.body.query = query;
 
-  const aggs: any = {};
+  const aggs: any = Object.create(null);
 
   aggFieldNamePairs.forEach(({ agg, field, by }, i) => {
     if (field === EVENT_RATE_FIELD_ID) {

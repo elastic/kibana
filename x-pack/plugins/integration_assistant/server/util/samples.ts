@@ -24,7 +24,10 @@ interface Field {
   fields?: Field[];
 }
 
-export function modifySamples(state: EcsMappingState | CategorizationState | RelatedState) {
+// Given a graph state, it collects the rawSamples (array of JSON strings) and prefixes them with the packageName and dataStreamName, returning an array of prefixed JSON strings.
+export function prefixSamples(
+  state: EcsMappingState | CategorizationState | RelatedState
+): string[] {
   const modifiedSamples: string[] = [];
   const rawSamples = state.rawSamples;
   const packageName = state.packageName;
@@ -42,52 +45,6 @@ export function modifySamples(state: EcsMappingState | CategorizationState | Rel
   }
 
   return modifiedSamples;
-}
-
-function isEmptyValue(value: unknown): boolean {
-  return (
-    value === null ||
-    value === undefined ||
-    (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) ||
-    (Array.isArray(value) && value.length === 0)
-  );
-}
-
-function merge(target: Record<string, any>, source: Record<string, any>): Record<string, unknown> {
-  for (const [key, sourceValue] of Object.entries(source)) {
-    const targetValue = target[key];
-    if (Array.isArray(sourceValue)) {
-      // Directly assign arrays
-      target[key] = sourceValue;
-    } else if (
-      typeof sourceValue === 'object' &&
-      sourceValue !== null &&
-      !Array.isArray(targetValue)
-    ) {
-      if (typeof targetValue !== 'object' || isEmptyValue(targetValue)) {
-        target[key] = merge({}, sourceValue);
-      } else {
-        target[key] = merge(targetValue, sourceValue);
-      }
-    } else if (!(key in target) || (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))) {
-      target[key] = sourceValue;
-    }
-  }
-  return target;
-}
-
-export function mergeSamples(objects: any[]): string {
-  let result: Record<string, unknown> = {};
-
-  for (const obj of objects) {
-    let sample: Record<string, unknown> = obj;
-    if (typeof obj === 'string') {
-      sample = JSON.parse(obj);
-    }
-    result = merge(result, sample);
-  }
-
-  return JSON.stringify(result, null, 2);
 }
 
 export function formatSamples(samples: string[]): string {
@@ -203,5 +160,76 @@ export function generateFields(mergedDocs: string): string {
     .filter((key) => !ecsTopKeysSet.has(key))
     .map((key) => recursiveParse(doc[key], [key]));
 
-  return yaml.dump(fieldsStructure, { sortKeys: false });
+  return yaml.safeDump(fieldsStructure, { sortKeys: false });
+}
+
+export function merge(
+  target: Record<string, any>,
+  source: Record<string, any>
+): Record<string, unknown> {
+  const filteredTarget = filterOwnProperties(target);
+  for (const [key, sourceValue] of Object.entries(source)) {
+    if (!isBuiltInProperties(key, source)) {
+      const targetValue = filteredTarget[key];
+      if (Array.isArray(sourceValue)) {
+        // Directly assign arrays
+        filteredTarget[key] = sourceValue;
+      } else if (isObject(sourceValue) && !Array.isArray(targetValue)) {
+        if (!isObject(targetValue) || isEmptyValue(targetValue)) {
+          filteredTarget[key] = merge({}, sourceValue);
+        } else {
+          filteredTarget[key] = merge(targetValue, sourceValue);
+        }
+      } else if (
+        !(key in filteredTarget) ||
+        (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))
+      ) {
+        filteredTarget[key] = sourceValue;
+      }
+    }
+  }
+  return filteredTarget;
+}
+
+function isEmptyValue(value: unknown): boolean {
+  if (value == null) return true;
+  if (isObject(value)) {
+    if (Array.isArray(value)) return value.length === 0;
+    return value && Object.keys(value).length === 0;
+  }
+  return false;
+}
+
+function isObject(value: any): boolean {
+  return typeof value === 'object' && value !== null;
+}
+
+function isBuiltInProperties(key: string, obj: Record<string, any>): boolean {
+  return key === 'constructor' || !Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function filterOwnProperties(obj: Record<string, any>): Record<string, any> {
+  const ownProps: Record<string, any> = {};
+
+  for (const key of Object.getOwnPropertyNames(obj)) {
+    if (!isBuiltInProperties(key, obj)) {
+      ownProps[key] = (obj as any)[key];
+    }
+  }
+
+  return ownProps;
+}
+
+export function mergeSamples(objects: any[]): string {
+  let result: Record<string, unknown> = {};
+
+  for (const obj of objects) {
+    let sample: Record<string, unknown> = obj;
+    if (typeof obj === 'string') {
+      sample = JSON.parse(obj);
+    }
+    result = merge(result, sample);
+  }
+
+  return JSON.stringify(result, null, 2);
 }

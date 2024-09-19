@@ -34,5 +34,7 @@ export const useFetchDetectionRulesAlertsStatus = (tags: string[]) => {
         version: DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION,
         query: { tags },
       }),
+    // Disabling retry to prevent stuck on loading state when the request fails due to permissions
+    retry: false,
   });
 };

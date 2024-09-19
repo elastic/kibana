@@ -185,9 +185,9 @@ describe('CpuUsageRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'myNodeId',
         context: {
-          internalFullMessage: `CPU usage alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid}))`,
+          internalFullMessage: `CPU usage alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}'))`,
           internalShortMessage: `CPU usage alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify CPU level of node.`,
-          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid}))`,
+          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}'))`,
           actionPlain: 'Verify CPU level of node.',
           clusterName,
           count,
@@ -315,9 +315,9 @@ describe('CpuUsageRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'myNodeId',
         context: {
-          internalFullMessage: `CPU usage alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid},ccs:${ccs}))`,
+          internalFullMessage: `CPU usage alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}',ccs:${ccs}))`,
           internalShortMessage: `CPU usage alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify CPU level of node.`,
-          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid},ccs:testCluster))`,
+          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}',ccs:testCluster))`,
           actionPlain: 'Verify CPU level of node.',
           clusterName,
           count,

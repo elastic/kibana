@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Make sure none of the settings have been removed from ES API
       expectedSettings.forEach((setting) => {
         try {
-          expect(body.defaults.index.hasOwnProperty(setting)).to.eql(true);
+          expect(Object.hasOwn(body.defaults.index, setting)).to.eql(true);
         } catch {
           throw new Error(`Expected setting "${setting}" not found.`);
         }

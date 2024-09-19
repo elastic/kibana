@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -29,6 +30,8 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
+import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -39,7 +42,7 @@ import {
   useDebounceWithOptions,
   type MonacoMessage,
 } from './helpers';
-import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
+import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
 import {
   EDITOR_INITIAL_HEIGHT,
@@ -48,7 +51,6 @@ import {
   EDITOR_MIN_HEIGHT,
   textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
-import { getRateLimitedColumnsWithMetadata } from './ecs_metadata_helper';
 import type { TextBasedLanguagesEditorProps, TextBasedEditorDeps } from './types';
 
 import './overwrite.scss';
@@ -81,9 +83,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const { euiTheme } = useEuiTheme();
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application, core, fieldsMetadata } =
-    kibana.services;
+  const {
+    dataViews,
+    expressions,
+    indexManagementApiService,
+    application,
+    core,
+    fieldsMetadata,
+    uiSettings,
+  } = kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
+  const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
@@ -101,6 +111,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isLanguagePopoverOpen, setIsLanguagePopoverOpen] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -117,12 +128,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     errors: [],
     warnings: [],
   });
-  const [refetchHistoryItems, setRefetchHistoryItems] = useState(false);
-
-  // as the duration on the history component is being calculated from
-  // the isLoading property, if this property is not defined we want
-  // to hide the history component
-  const hideHistoryComponent = hideQueryHistory || isLoading == null;
+  const hideHistoryComponent = hideQueryHistory;
 
   const onQueryUpdate = useCallback(
     (value: string) => {
@@ -190,6 +196,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     setIsHistoryOpen(status);
   }, []);
 
+  const showSuggestionsIfEmptyQuery = useCallback(() => {
+    if (editorModel.current?.getValueLength() === 0) {
+      setImmediate(() => {
+        editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+      });
+    }
+  }, []);
+
   const openTimePickerPopover = useCallback(() => {
     const currentCursorPosition = editor1.current?.getPosition();
     const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
@@ -235,10 +249,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const containerRef = useRef<HTMLElement>(null);
 
   // When the editor is on full size mode, the user can resize the height of the editor.
-  const onMouseDownResizeHandler = useCallback(
+  const onMouseDownResizeHandler = useCallback<
+    React.ComponentProps<typeof ResizableButton>['onMouseDownResizeHandler']
+  >(
     (mouseDownEvent) => {
+      function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
+        return e && 'pageY' in e;
+      }
       const startSize = editorHeight;
-      const startPosition = mouseDownEvent.pageY;
+      const startPosition = isMouseEvent(mouseDownEvent)
+        ? mouseDownEvent?.pageY
+        : mouseDownEvent?.touches[0].pageY;
 
       function onMouseMove(mouseMoveEvent: MouseEvent) {
         const height = startSize - startPosition + mouseMoveEvent.pageY;
@@ -255,7 +276,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [editorHeight]
   );
 
-  const onKeyDownResizeHandler = useCallback(
+  const onKeyDownResizeHandler = useCallback<
+    React.ComponentProps<typeof ResizableButton>['onKeyDownResizeHandler']
+  >(
     (keyDownEvent) => {
       let height = editorHeight;
       if (
@@ -273,7 +296,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
-  }, []);
+    showSuggestionsIfEmptyQuery();
+  }, [showSuggestionsIfEmptyQuery]);
 
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
@@ -322,15 +346,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               undefined,
               abortController
             ).result;
-            const columns =
+            const columns: ESQLRealField[] =
               table?.columns.map((c) => {
-                // Casting unsupported as unknown to avoid plethora of warnings
-                // Remove when addressed https://github.com/elastic/kibana/issues/189666
-                if (!c.meta.esType || c.meta.esType === 'unsupported')
-                  return { name: c.name, type: 'unknown' };
-                return { name: c.name, type: c.meta.esType };
+                return {
+                  name: c.name,
+                  type: c.meta.esType as FieldType,
+                };
               }) || [];
-            return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
+
+            return columns;
           } catch (e) {
             // no action yet
           }
@@ -345,6 +369,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
+      getPreferences: async () => {
+        return {
+          histogramBarTarget,
+        };
+      },
+      // @ts-expect-error To prevent circular type import, type defined here is partial of full client
+      getFieldsMetadata: fieldsMetadata?.getClient(),
     };
     return callbacks;
   }, [
@@ -358,6 +389,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     expressions,
     abortController,
     indexManagementApiService,
+    histogramBarTarget,
     fieldsMetadata,
   ]);
 
@@ -416,19 +448,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
     };
     if (isQueryLoading || isLoading) {
+      validateQuery();
       addQueriesToCache({
         queryString: code,
         timeZone,
-      });
-      validateQuery();
-      setRefetchHistoryItems(false);
-    } else {
-      updateCachedQueries({
-        queryString: code,
         status: clientParserStatus,
       });
-
-      setRefetchHistoryItems(true);
     }
   }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code, timeZone]);
 
@@ -533,6 +558,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   onLayoutChangeRef.current = onLayoutChange;
 
   const codeEditorOptions: CodeEditorProps['options'] = {
+    hover: {
+      above: false,
+    },
     accessibilitySupport: 'off',
     autoIndent: 'none',
     automaticLayout: true,
@@ -681,6 +709,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
+
+                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
                   }}
                 />
               </div>
@@ -708,7 +738,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         setIsHistoryOpen={toggleHistory}
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
-        refetchHistoryItems={refetchHistoryItems}
         isHelpMenuOpen={isLanguagePopoverOpen}
         setIsHelpMenuOpen={setIsLanguagePopoverOpen}
       />

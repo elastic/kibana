@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import uniqBy from 'lodash/uniqBy';
@@ -30,7 +31,7 @@ import {
 import {
   areFieldAndVariableTypesCompatible,
   extractSingularType,
-  lookupColumn,
+  getColumnForASTNode,
   getCommandDefinition,
   getFunctionDefinition,
   isArrayType,
@@ -89,7 +90,7 @@ function validateFunctionLiteralArg(
   if (isLiteralItem(actualArg)) {
     if (
       actualArg.literalType === 'string' &&
-      argDef.literalOptions &&
+      argDef.acceptedValues &&
       isValidLiteralOption(actualArg, argDef)
     ) {
       messages.push(
@@ -98,7 +99,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             value: actualArg.value,
-            supportedOptions: argDef.literalOptions?.map((option) => `"${option}"`).join(', '),
+            supportedOptions: argDef.acceptedValues?.map((option) => `"${option}"`).join(', '),
           },
           locations: actualArg.location,
         })
@@ -111,7 +112,7 @@ function validateFunctionLiteralArg(
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: argDef.type,
+            argType: argDef.type as string,
             value: typeof actualArg.value === 'number' ? actualArg.value : String(actualArg.value),
             givenType: actualArg.literalType,
           },
@@ -139,7 +140,7 @@ function validateFunctionLiteralArg(
             messageId: 'wrongArgumentType',
             values: {
               name: astFunction.name,
-              argType: argDef.type,
+              argType: argDef.type as string,
               value: actualArg.name,
               givenType: 'duration',
             },
@@ -169,7 +170,7 @@ function validateInlineCastArg(
         messageId: 'wrongArgumentType',
         values: {
           name: astFunction.name,
-          argType: parameterDefinition.type,
+          argType: parameterDefinition.type as string,
           value: arg.text,
           givenType: arg.castType,
         },
@@ -198,15 +199,11 @@ function validateNestedFunctionArg(
     const argFn = getFunctionDefinition(actualArg.name)!;
     const fnDef = getFunctionDefinition(astFunction.name)!;
     // no nestying criteria should be enforced only for same type function
-    if (
-      'noNestingFunctions' in parameterDefinition &&
-      parameterDefinition.noNestingFunctions &&
-      fnDef.type === argFn.type
-    ) {
+    if (fnDef.type === 'agg' && argFn.type === 'agg') {
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
-          values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
+          values: { name: actualArg.text, argType: argFn.signatures[0].returnType as string },
           locations: actualArg.location,
         })
       );
@@ -219,9 +216,9 @@ function validateNestedFunctionArg(
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: parameterDefinition.type,
+            argType: parameterDefinition.type as string,
             value: actualArg.text,
-            givenType: argFn.signatures[0].returnType,
+            givenType: argFn.signatures[0].returnType as string,
           },
           locations: actualArg.location,
         })
@@ -295,13 +292,13 @@ function validateFunctionColumnArg(
   if (
     !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
   ) {
-    const columnHit = lookupColumn(actualArg, references);
+    const columnHit = getColumnForASTNode(actualArg, references);
     messages.push(
       getMessageFromId({
         messageId: 'wrongArgumentType',
         values: {
           name: astFunction.name,
-          argType: parameterDefinition.type,
+          argType: parameterDefinition.type as string,
           value: actualArg.name,
           givenType: columnHit!.type,
         },
@@ -464,7 +461,7 @@ function validateFunction(
           allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
           // use the nesting flag for now just for stats and metrics
           // TODO: revisit this part later on to make it more generic
-          parentCommand === 'stats' || parentCommand === 'metrics'
+          ['stats', 'inlinestats', 'metrics'].includes(parentCommand)
             ? isNested || !isAssignment(astFunction)
             : false
         );
@@ -534,14 +531,14 @@ function validateFunction(
         });
       });
 
-      const shouldCollapseMessages = isArrayType(argDef.type) && hasMultipleElements;
+      const shouldCollapseMessages = isArrayType(argDef.type as string) && hasMultipleElements;
       failingSignature.push(
         ...(shouldCollapseMessages
           ? collapseWrongArgumentTypeMessages(
               messagesFromAllArgElements,
               outerArg,
               astFunction.name,
-              argDef.type,
+              argDef.type as string,
               parentCommand,
               references
             )
@@ -873,18 +870,21 @@ function validateColumnForCommand(
     if (getColumnExists(column, references)) {
       const commandDef = getCommandDefinition(commandName);
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
-        ({ type, innerType }) => type === 'column' && innerType
+        ({ type, innerTypes }) => type === 'column' && innerTypes
       );
       // this should be guaranteed by the columnCheck above
-      const columnRef = lookupColumn(column, references)!;
+      const columnRef = getColumnForASTNode(column, references)!;
 
       if (columnParamsWithInnerTypes.length) {
-        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
-          if (innerType === 'string' && isStringType(columnRef.type)) return false;
-          return innerType !== 'any' && innerType !== columnRef.type;
+        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerTypes }) => {
+          if (innerTypes?.includes('string') && isStringType(columnRef.type)) return false;
+          return innerTypes && !innerTypes.includes('any') && !innerTypes.includes(columnRef.type);
         });
         if (hasSomeWrongInnerTypes) {
-          const supportedTypes = columnParamsWithInnerTypes.map(({ innerType }) => innerType);
+          const supportedTypes: string[] = columnParamsWithInnerTypes
+            .map(({ innerTypes }) => innerTypes)
+            .flat()
+            .filter((type) => type !== undefined) as string[];
 
           messages.push(
             getMessageFromId({
@@ -1010,7 +1010,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
             );
           }
           if (isColumnItem(arg)) {
-            if (command.name === 'stats') {
+            if (command.name === 'stats' || command.name === 'inlinestats') {
               messages.push(errors.unknownAggFunction(arg));
             } else {
               messages.push(...validateColumnForCommand(arg, command.name, references));
@@ -1076,15 +1076,17 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>) {
   const messages: ESQLMessage[] = [];
   for (const field of fields.values()) {
     if (field.type === 'unsupported') {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unsupportedFieldType',
-          values: {
-            field: field.name,
-          },
-          locations: { min: 1, max: 1 },
-        })
-      );
+      // Removed temporarily to supress all these warnings
+      // Issue to re-enable in a better way: https://github.com/elastic/kibana/issues/189666
+      // messages.push(
+      //   getMessageFromId({
+      //     messageId: 'unsupportedFieldType',
+      //     values: {
+      //       field: field.name,
+      //     },
+      //     locations: { min: 1, max: 1 },
+      //   })
+      // );
     }
   }
   return messages;
@@ -1094,6 +1096,8 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getFieldsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
+  getPreferences: [],
+  getFieldsMetadata: [],
 };
 
 /**

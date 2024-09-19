@@ -185,7 +185,7 @@ export const percentileRanksOperation: OperationDefinition<
         defaultMessage: 'Percentile ranks value',
       });
     const onChange = useCallback(
-      (value) => {
+      (value?: string) => {
         if (!isValidNumber(value, isInline) || Number(value) === currentColumn.params.value) {
           return;
         }
@@ -219,7 +219,7 @@ export const percentileRanksOperation: OperationDefinition<
     );
     const inputValueIsValid = isValidNumber(inputValue, isInline);
 
-    const handleInputChange: EuiFieldNumberProps['onChange'] = useCallback(
+    const handleInputChange = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
       (e) => {
         handleInputChangeWithoutValidation(e.currentTarget.value);
       },

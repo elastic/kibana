@@ -128,7 +128,8 @@ function validateConnectorTypeConfig(
 export async function executor(
   execOptions: WebhookConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, config, params, configurationUtilities, logger } = execOptions;
+  const { actionId, config, params, configurationUtilities, logger, connectorUsageCollector } =
+    execOptions;
   const { method, url, headers = {}, hasAuth, authType, ca, verificationMode } = config;
   const { body: data } = params;
 
@@ -159,6 +160,7 @@ export async function executor(
       data,
       configurationUtilities,
       sslOverrides,
+      connectorUsageCollector,
     })
   );
 

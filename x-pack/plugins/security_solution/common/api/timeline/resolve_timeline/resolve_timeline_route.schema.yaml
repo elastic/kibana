@@ -15,7 +15,7 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: ResolveTimeline
-      summary: Get an existing saved timeline or timeline template.
+      summary: Get an existing saved Timeline or Timeline template
       tags:
         - access:securitySolution
       parameters:
@@ -31,7 +31,7 @@ paths:
           description: The ID of the timeline to resolve
       responses:
         '200':
-          description: The (template) timeline has been found
+          description: The (template) Timeline has been found
           content:
             application/json:
               schema:
@@ -46,4 +46,4 @@ paths:
         '400':
           description: The request is missing parameters
         '404':
-          description: The (template) timeline was not found
+          description: The (template) Timeline was not found

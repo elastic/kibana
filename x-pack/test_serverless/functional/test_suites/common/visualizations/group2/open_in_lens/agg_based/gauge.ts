@@ -69,13 +69,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should not convert aggregation with not supported field type', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Unsupported field type');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Gauge - Unsupported field type')).to.eql(
+        false
+      );
     });
 
     it('should convert color ranges', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Color ranges');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Gauge - Color ranges');
       await lens.waitForVisualization('gaugeChart');
 
       expect(await lens.getLayerCount()).to.be(1);

@@ -23,6 +23,7 @@ import { escapeSearchQueryPhrase } from '../saved_object';
 import { auditLoggingService } from '../audit_logging';
 import { _joinFilters } from '../agents';
 import { appContextService } from '../app_context';
+import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 
 import { invalidateAPIKeys } from './security';
 
@@ -54,7 +55,7 @@ export async function listEnrollmentApiKeys(
       filters.push(kuery);
     }
 
-    const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     if (useSpaceAwareness && spaceId) {
       if (spaceId === DEFAULT_SPACE_ID) {
         // TODO use constant
@@ -217,7 +218,7 @@ export async function generateEnrollmentAPIKey(
   const id = uuidv4();
   const { name: providedKeyName, forceRecreate, agentPolicyId } = data;
   const logger = appContextService.getLogger();
-  logger.debug(`Creating enrollment API key ${data}`);
+  logger.debug(`Creating enrollment API key ${JSON.stringify(data)}`);
 
   const agentPolicy = await retrieveAgentPolicyId(soClient, agentPolicyId);
 
@@ -312,7 +313,7 @@ export async function generateEnrollmentAPIKey(
     api_key: apiKey,
     name,
     policy_id: agentPolicyId,
-    namespaces: agentPolicy?.space_id ? [agentPolicy?.space_id] : undefined,
+    namespaces: agentPolicy?.space_ids,
     created_at: new Date().toISOString(),
   };
 
@@ -359,7 +360,14 @@ function getQueryForExistingKeyNameOnPolicy(agentPolicyId: string, providedKeyNa
         },
         {
           bool: {
-            should: [{ query_string: { fields: ['name'], query: `(${providedKeyName}) *` } }],
+            should: [
+              {
+                query_string: {
+                  fields: ['name'],
+                  query: `(${providedKeyName.replace('!', '\\!')}) *`,
+                },
+              },
+            ],
             minimum_should_match: 1,
           },
         },

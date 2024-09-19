@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ParserRuleContext, TerminalNode } from 'antlr4';
@@ -61,6 +62,7 @@ import {
   InputNamedOrPositionalParamContext,
   InputParamContext,
   IndexPatternContext,
+  InlinestatsCommandContext,
 } from './antlr/esql_parser';
 import {
   createSource,
@@ -82,6 +84,7 @@ import {
   textExistsAndIsValid,
   createInlineCast,
   createUnknownItem,
+  createOrderExpression,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import {
@@ -95,6 +98,7 @@ import {
   ESQLUnnamedParamLiteral,
   ESQLPositionalParamLiteral,
   ESQLNamedParamLiteral,
+  ESQLOrderExpression,
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
@@ -594,7 +598,10 @@ export function collectAllFields(ctx: FieldsContext | undefined): ESQLAstField[]
   return ast;
 }
 
-export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | undefined) {
+export function visitByOption(
+  ctx: StatsCommandContext | InlinestatsCommandContext,
+  expr: FieldsContext | undefined
+) {
   if (!ctx.BY() || !expr) {
     return [];
   }
@@ -603,34 +610,43 @@ export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | un
   return [option];
 }
 
-export function visitOrderExpression(ctx: OrderExpressionContext[]) {
-  const ast: ESQLAstItem[] = [];
-  for (const orderCtx of ctx) {
-    const expression = collectBooleanExpression(orderCtx.booleanExpression());
-    if (orderCtx._ordering) {
-      const terminalNode =
-        orderCtx.getToken(esql_parser.ASC, 0) || orderCtx.getToken(esql_parser.DESC, 0);
-      const literal = createLiteral('string', terminalNode);
-      if (literal) {
-        expression.push(literal);
-      }
-    }
-    if (orderCtx.NULLS()) {
-      expression.push(createLiteral('string', orderCtx.NULLS()!)!);
-      if (orderCtx._nullOrdering && orderCtx._nullOrdering.text !== '<first missing>') {
-        const innerTerminalNode =
-          orderCtx.getToken(esql_parser.FIRST, 0) || orderCtx.getToken(esql_parser.LAST, 0);
-        const literal = createLiteral('string', innerTerminalNode);
-        if (literal) {
-          expression.push(literal);
-        }
-      }
-    }
+const visitOrderExpression = (ctx: OrderExpressionContext): ESQLOrderExpression | ESQLAstItem => {
+  const arg = collectBooleanExpression(ctx.booleanExpression())[0];
 
-    if (expression.length) {
-      ast.push(...expression);
-    }
+  let order: ESQLOrderExpression['order'] = '';
+  let nulls: ESQLOrderExpression['nulls'] = '';
+
+  const ordering = ctx._ordering?.text?.toUpperCase();
+
+  if (ordering) order = ordering as ESQLOrderExpression['order'];
+
+  const nullOrdering = ctx._nullOrdering?.text?.toUpperCase();
+
+  switch (nullOrdering) {
+    case 'LAST':
+      nulls = 'NULLS LAST';
+      break;
+    case 'FIRST':
+      nulls = 'NULLS FIRST';
+      break;
   }
+
+  if (!order && !nulls) {
+    return arg;
+  }
+
+  return createOrderExpression(ctx, arg, order, nulls);
+};
+
+export function visitOrderExpressions(
+  ctx: OrderExpressionContext[]
+): Array<ESQLOrderExpression | ESQLAstItem> {
+  const ast: Array<ESQLOrderExpression | ESQLAstItem> = [];
+
+  for (const orderCtx of ctx) {
+    ast.push(visitOrderExpression(orderCtx));
+  }
+
   return ast;
 }
 

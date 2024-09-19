@@ -29,9 +29,10 @@ export default function ({ getService }: FtrProviderContext) {
     let createSLOInput: CreateSLOInput;
 
     before(async () => {
+      await slo.createUser();
       await slo.deleteAllSLOs();
       await sloEsClient.deleteTestSourceData();
-      loadTestData(getService);
+      await loadTestData(getService);
     });
 
     beforeEach(() => {
@@ -48,7 +49,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('deletes new slo saved object and transforms', async () => {
-      const id = await slo.create(createSLOInput);
+      const response = await slo.create(createSLOInput);
+
+      expect(response.body).property('id');
+
+      const { id } = response.body;
 
       const savedObject = await kibanaServer.savedObjects.find({
         type: SO_SLO_TYPE,
@@ -86,11 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         // expect summary transform to be created
         expect(summaryTransform.body.transforms[0].id).eql(`slo-summary-${id}-1`);
 
-        await supertestAPI
-          .delete(`/api/observability/slos/${id}`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(204);
+        await slo.delete(id);
       });
 
       //   await retry.tryForTime(150 * 1000, async () => {
