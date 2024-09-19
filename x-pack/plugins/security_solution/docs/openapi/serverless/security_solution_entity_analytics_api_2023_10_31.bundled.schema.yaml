@@ -439,7 +439,7 @@ paths:
         - Security Solution Entity Analytics API
   /api/entity_store/entities/list:
     get:
-      description: 'List entities records, paging, sorting and filtering as needed.'
+      description: List entities records, paging, sorting and filtering as needed.
       operationId: ListEntities
       parameters:
         - in: query
