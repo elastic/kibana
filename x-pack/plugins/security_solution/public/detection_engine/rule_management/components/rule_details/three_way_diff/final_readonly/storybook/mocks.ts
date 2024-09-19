@@ -20,6 +20,7 @@ import type {
   DiffableRule,
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
+  DiffableThresholdFields,
   InlineKqlQuery,
   RuleEqlQuery,
   SavedKqlQuery,
@@ -294,6 +295,30 @@ export function mockNewTermsRule(
   return {
     ...commonDiffableRuleFields,
     ...newTermsDiffableRuleFields,
+    ...overrides,
+  };
+}
+
+export const thresholdDiffableRuleFields: DiffableThresholdFields = {
+  type: 'threshold',
+  kql_query: {
+    type: KqlQueryType.inline_query,
+    query: '*',
+    language: 'kuery',
+    filters: [],
+  },
+  threshold: {
+    field: ['user.name'],
+    value: 200,
+  },
+};
+
+export function mockThresholdRule(
+  overrides: Partial<DiffableCommonFields & DiffableThresholdFields>
+): DiffableRule {
+  return {
+    ...commonDiffableRuleFields,
+    ...thresholdDiffableRuleFields,
     ...overrides,
   };
 }

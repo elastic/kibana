@@ -179,7 +179,7 @@ interface ThresholdProps {
   threshold: ThresholdType;
 }
 
-const Threshold = ({ threshold }: ThresholdProps) => (
+export const Threshold = ({ threshold }: ThresholdProps) => (
   <div data-test-subj="thresholdPropertyValue">
     {isEmpty(threshold.field[0])
       ? `${descriptionStepI18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
