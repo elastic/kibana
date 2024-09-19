@@ -7,35 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { METRIC_TYPE } from '@kbn/analytics';
+import React, { useCallback } from 'react';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
-import { EditorMenu } from './editor_menu';
-import { pluginServices } from '../../services/plugin_services';
-import { ControlsToolbarButton } from './controls_toolbar_button';
-import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { dataService, embeddableService } from '../../services/kibana_services';
+import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
+import {
+  dataService,
+  embeddableService,
+  visualizationsService,
+} from '../../services/kibana_services';
+import { pluginServices } from '../../services/plugin_services';
+import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
+import { ControlsToolbarButton } from './controls_toolbar_button';
+import { EditorMenu } from './editor_menu';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
-  const {
-    usageCollection,
-    visualizations: { getAliases: getVisTypeAliases },
-  } = pluginServices.getServices();
+  const { usageCollection } = pluginServices.getServices();
   const { euiTheme } = useEuiTheme();
 
   const dashboardApi = useDashboardApi();
 
   const stateTransferService = embeddableService.getStateTransfer();
 
-  const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
+  const lensAlias = visualizationsService.getAliases().find(({ name }) => name === 'lens');
 
   const trackUiMetric = usageCollection.reportUiCounter?.bind(
     usageCollection,

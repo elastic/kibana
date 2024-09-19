@@ -15,7 +15,7 @@ import { buildMockDashboard } from '../../mocks';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardApi } from '../../dashboard_api/types';
-import { embeddableService } from '../../services/kibana_services';
+import { embeddableService, visualizationsService } from '../../services/kibana_services';
 
 jest.mock('../../services/plugin_services', () => {
   const module = jest.requireActual('../../services/plugin_services');
@@ -24,8 +24,8 @@ jest.mock('../../services/plugin_services', () => {
 
   jest.spyOn(embeddableService, 'getEmbeddableFactories').mockReturnValue(new Map().values());
   jest.spyOn(_pluginServices.uiActions, 'getTriggerCompatibleActions').mockResolvedValue([]);
-  jest.spyOn(_pluginServices.visualizations, 'getByGroup').mockReturnValue([]);
-  jest.spyOn(_pluginServices.visualizations, 'getAliases').mockReturnValue([]);
+  jest.spyOn(visualizationsService, 'getByGroup').mockReturnValue([]);
+  jest.spyOn(visualizationsService, 'getAliases').mockReturnValue([]);
 
   return {
     ...module,

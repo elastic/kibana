@@ -23,7 +23,12 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
-import { coreServices, dataService, embeddableService } from '../../../services/kibana_services';
+import {
+  coreServices,
+  dataService,
+  embeddableService,
+  visualizationsService,
+} from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
@@ -32,12 +37,11 @@ export function DashboardEmptyScreen() {
   const {
     usageCollection,
     dashboardCapabilities: { showWriteControls },
-    visualizations: { getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
 
   const lensAlias = useMemo(
-    () => getVisTypeAliases().find(({ name }) => name === 'lens'),
-    [getVisTypeAliases]
+    () => visualizationsService.getAliases().find(({ name }) => name === 'lens'),
+    []
   );
 
   const dashboardContainer = useDashboardContainer();

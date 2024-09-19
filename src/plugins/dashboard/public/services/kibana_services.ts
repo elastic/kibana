@@ -14,7 +14,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public/plugin';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-
+import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { DashboardStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
@@ -22,6 +22,7 @@ export let dataService: DataPublicPluginStart;
 export let embeddableService: EmbeddableStart;
 export let fieldFormatService: FieldFormatsStart;
 export let presentationUtilService: PresentationUtilPluginStart;
+export let visualizationsService: VisualizationsStart;
 // export let dataViewsService: DataViewsPublicPluginStart;
 
 const servicesReady$ = new BehaviorSubject(false);
@@ -32,6 +33,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   embeddableService = deps.embeddable;
   fieldFormatService = deps.fieldFormats;
   presentationUtilService = deps.presentationUtil;
+  visualizationsService = deps.visualizations;
   // dataViewsService = deps.dataViews;
 
   servicesReady$.next(true);

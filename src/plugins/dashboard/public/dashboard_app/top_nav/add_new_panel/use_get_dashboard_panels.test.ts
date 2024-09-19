@@ -19,6 +19,7 @@ import {
 } from '@kbn/visualizations-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 
+import { visualizationsService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { useGetDashboardPanels } from './use_get_dashboard_panels';
 
@@ -50,12 +51,9 @@ describe('Get dashboard panels hook', () => {
       'getTriggerCompatibleActions'
     );
 
-    dashboardVisualizationGroupGetterSpy = jest.spyOn(_pluginServices.visualizations, 'getByGroup');
+    dashboardVisualizationGroupGetterSpy = jest.spyOn(visualizationsService, 'getByGroup');
 
-    dashboardVisualizationAliasesGetterSpy = jest.spyOn(
-      _pluginServices.visualizations,
-      'getAliases'
-    );
+    dashboardVisualizationAliasesGetterSpy = jest.spyOn(visualizationsService, 'getAliases');
   });
 
   beforeEach(() => {

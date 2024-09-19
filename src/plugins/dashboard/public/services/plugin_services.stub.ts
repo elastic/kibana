@@ -16,16 +16,13 @@ import {
 import { DashboardServices } from './types';
 
 import { contentManagementServiceFactory } from './content_management/content_management_service.stub';
-import { customBrandingServiceFactory } from './custom_branding/custom_branding.stub';
 import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup.stub';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities.stub';
 import { dashboardContentInsightsServiceFactory } from './dashboard_content_insights/dashboard_content_insights.stub';
 import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management.stub';
 import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service.stub';
 import { dashboardRecentlyAccessedServiceFactory } from './dashboard_recently_accessed/dashboard_recently_accessed.stub';
-import { dataServiceFactory } from './data/data.stub';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
-import { embeddableServiceFactory } from './embeddable/embeddable.stub';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context.stub';
 import { navigationServiceFactory } from './navigation/navigation.stub';
 import { noDataPageServiceFactory } from './no_data_page/no_data_page_service.stub';
@@ -39,15 +36,12 @@ import { spacesServiceFactory } from './spaces/spaces.stub';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions_service.stub';
 import { urlForwardingServiceFactory } from './url_forwarding/url_fowarding.stub';
 import { usageCollectionServiceFactory } from './usage_collection/usage_collection.stub';
-import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory),
-  data: new PluginServiceProvider(dataServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
-  embeddable: new PluginServiceProvider(embeddableServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
   savedObjectsTagging: new PluginServiceProvider(savedObjectsTaggingServiceFactory),
@@ -56,8 +50,6 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   spaces: new PluginServiceProvider(spacesServiceFactory),
   urlForwarding: new PluginServiceProvider(urlForwardingServiceFactory),
   usageCollection: new PluginServiceProvider(usageCollectionServiceFactory),
-  visualizations: new PluginServiceProvider(visualizationsServiceFactory),
-  customBranding: new PluginServiceProvider(customBrandingServiceFactory),
   savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
   contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
   serverless: new PluginServiceProvider(serverlessServiceFactory),

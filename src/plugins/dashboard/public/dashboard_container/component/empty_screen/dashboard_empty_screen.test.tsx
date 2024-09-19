@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { buildMockDashboard } from '../../../mocks';
-import { DashboardEmptyScreen } from './dashboard_empty_screen';
+import { visualizationsService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardContainerContext } from '../../embeddable/dashboard_container';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { DashboardEmptyScreen } from './dashboard_empty_screen';
 
-pluginServices.getServices().visualizations.getAliases = jest
-  .fn()
-  .mockReturnValue([{ name: 'lens' }]);
+visualizationsService.getAliases = jest.fn().mockReturnValue([{ name: 'lens' }]);
 
 describe('DashboardEmptyScreen', () => {
   function mountComponent(viewMode: ViewMode) {

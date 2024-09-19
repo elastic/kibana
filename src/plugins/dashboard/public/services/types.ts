@@ -13,7 +13,6 @@ import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { DashboardStartDependencies } from '../plugin';
-import { DashboardCustomBrandingService } from './custom_branding/types';
 import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
 import { DashboardContentManagementService } from './dashboard_content_management/types';
 import { DashboardBackupServiceType } from './dashboard_backup/types';
@@ -26,7 +25,6 @@ import { DashboardShareService } from './share/types';
 import { DashboardSpacesService } from './spaces/types';
 import { DashboardUrlForwardingService } from './url_forwarding/types';
 import { DashboardUsageCollectionService } from './usage_collection/types';
-import { DashboardVisualizationsService } from './visualizations/types';
 import { DashboardServerlessService } from './serverless/types';
 import { NoDataPageService } from './no_data_page/types';
 import { DashboardUiActionsService } from './ui_actions/types';
@@ -52,8 +50,6 @@ export interface DashboardServices {
   spaces: DashboardSpacesService; // TODO: make this optional in follow up
   urlForwarding: DashboardUrlForwardingService;
   usageCollection: DashboardUsageCollectionService; // TODO: make this optional in follow up
-  visualizations: DashboardVisualizationsService;
-  customBranding: DashboardCustomBrandingService;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
   serverless: DashboardServerlessService; // TODO: make this optional in follow up
