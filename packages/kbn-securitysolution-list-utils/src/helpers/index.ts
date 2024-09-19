@@ -1053,6 +1053,12 @@ export const hasWrongOperatorWithWildcard = (
   });
 };
 
+const checkKeysInArray = (array, key1, key2) => {
+  return array.some((obj) => {
+    return (key1 in obj && key2 in obj) || (key1 in obj === false && key2 in obj === false);
+  });
+};
+
 /**
  * Event filters helper where given an exceptions list,
  * determine if both 'subject_name' and 'trusted' are
@@ -1061,16 +1067,29 @@ export const hasWrongOperatorWithWildcard = (
 export const hasPartialCodeSignatureEntry = (
   items: ExceptionsBuilderReturnExceptionItem[]
 ): boolean => {
+  const os = items[0]?.os_types[0];
   let name = false;
   let trusted = false;
+  let nestedName = false;
+  let nestedTrusted = false;
+
   items[0]?.entries.forEach((e) => {
-    if (e.type === 'nested') {
-      // check code_signature.ext
-    } else if (e.field === 'process.code_signature.subject_name') {
+    if (e.type === 'nested' && e.field === 'process.Ext.code_signature') {
+      e.entries.forEach((n) => {
+        if (n.field === 'subject_name') {
+          nestedName = true;
+        } else if (n.field === 'trusted') {
+          nestedTrusted = true;
+        }
+      });
+    } else if (
+      e.field === 'process.code_signature.subject_name' ||
+      (os === 'macos' && e.field === 'process.code_signature.team_id')
+    ) {
       name = true;
     } else if (e.field === 'process.code_signature.trusted') {
       trusted = true;
     }
   });
-  return name !== trusted;
+  return name !== trusted || nestedName !== nestedTrusted;
 };
