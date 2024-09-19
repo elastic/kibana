@@ -7,7 +7,7 @@
 
 import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
 import type {
@@ -1205,7 +1205,9 @@ class AgentPolicyService {
       });
     }
 
-    await soClient.delete(savedObjectType, id);
+    await soClient.delete(savedObjectType, id, {
+      force: true, // need to delete through multiple space
+    });
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
       spaceId: soClient.getCurrentNamespace(),
     });
@@ -1425,7 +1427,7 @@ class AgentPolicyService {
         },
       };
 
-      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, dump);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');
