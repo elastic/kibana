@@ -12,10 +12,7 @@
     "server/**/*",
     ".storybook/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-    ".storybook/**/*.js"
-  ],
+  "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
@@ -32,6 +29,7 @@
     "@kbn/licensing-plugin",
     "@kbn/inference-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/share-plugin",
     "@kbn/server-route-repository-client",
     "@kbn/react-kibana-context-render",
     "@kbn/es-types",

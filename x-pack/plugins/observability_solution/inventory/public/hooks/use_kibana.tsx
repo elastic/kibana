@@ -6,11 +6,12 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { InventoryStartDependencies } from '../types';
 import type { InventoryServices } from '../services/types';
 
 export interface InventoryKibanaContext {
+  appMountParameters: AppMountParameters;
   core: CoreStart;
   dependencies: { start: InventoryStartDependencies };
   services: InventoryServices;
