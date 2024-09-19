@@ -26,8 +26,11 @@ import { css } from '@emotion/react';
 import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { FiltersNotificationActionApi } from './filters_notification_action';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
+import { FiltersNotificationActionApi } from './filters_notification_action';
 
 export function FiltersNotificationPopover({ api }: { api: FiltersNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -57,7 +60,9 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     }
   }, [api, setDisableEditButton]);
 
-  const dataViews = useMemo(() => api.parentApi?.getAllDataViews(), [api]);
+  const dataViews = useStateFromPublishingSubject(
+    api.parentApi?.dataViews ? api.parentApi.dataViews : new BehaviorSubject<DataView[]>([])
+  );
 
   return (
     <EuiPopover
@@ -103,7 +108,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
             data-test-subj={'filtersNotificationModal__filterItems'}
           >
             <EuiFlexGroup wrap={true} gutterSize="xs">
-              <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
+              <FilterItems filters={filters} indexPatterns={dataViews ?? []} readOnly={true} />
             </EuiFlexGroup>
           </EuiFormRow>
         )}

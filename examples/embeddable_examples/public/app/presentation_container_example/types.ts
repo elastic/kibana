@@ -36,9 +36,7 @@ export type PageApi = PresentationContainer &
   PublishesViewMode &
   PublishesReload &
   PublishesTimeRange &
-  PublishesUnsavedChanges & {
-    getAllDataViews: () => DataView[];
-  };
+  PublishesUnsavedChanges;
 
 export interface LastSavedState {
   timeRange: TimeRange;
