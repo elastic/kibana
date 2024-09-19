@@ -10,6 +10,7 @@ import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EndpointList } from '.';
 import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
+import type { DeepPartial } from '@kbn/utility-types';
 
 import {
   mockEndpointDetailsApiResult,
@@ -57,6 +58,7 @@ import { getEndpointPrivilegesInitialStateMock } from '../../../../common/compon
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
 import { useGetAgentStatus as _useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
 import { agentStatusMocks } from '../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
+import { useBulkGetAgentPolicies } from '../../../services/policies/hooks';
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -84,6 +86,14 @@ jest.mock('../../../services/policies/ingest', () => {
 
 jest.mock('../../../hooks/agents/use_get_agent_status');
 const useGetAgentStatusMock = _useGetAgentStatus as jest.Mock;
+
+jest.mock('../../../services/policies/hooks', () => ({
+  ...jest.requireActual('../../../services/policies/hooks'),
+  useBulkGetAgentPolicies: jest.fn().mockReturnValue({}),
+}));
+const useBulkGetAgentPoliciesMock = useBulkGetAgentPolicies as unknown as jest.Mock<
+  DeepPartial<ReturnType<typeof useBulkGetAgentPolicies>>
+>;
 
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
 const timepickerRanges = [
@@ -211,9 +221,30 @@ describe('when on the endpoint list page', () => {
   });
 
   describe('when there are policies, but no hosts', () => {
-    let renderResult: ReturnType<AppContextTestRender['render']>;
+    const getOptionsTexts = async () => {
+      const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
+      const options = onboardingPolicySelect.querySelectorAll('[role=option]');
+
+      return [...options].map(({ textContent }) => textContent);
+    };
+
     beforeEach(async () => {
-      const policyData = mockPolicyResultList({ total: 3 }).items;
+      useBulkGetAgentPoliciesMock.mockReturnValue({
+        data: [
+          { id: 'policy-1', name: 'Agent Policy 1' },
+          { id: 'policy-2a', name: 'Agent Policy 2A' },
+          { id: 'policy-2b', name: 'Agent Policy 2B' },
+        ],
+        isLoading: false,
+      });
+
+      const policyData = [
+        { name: 'Package 1', policy_ids: ['policy-1'] },
+        { name: 'Package 2', policy_ids: ['policy-2a', 'policy-2b'] },
+        { name: 'Package 3', policy_ids: ['policy-3'] }, // no matching Agent Policy
+        { name: 'Package 4', policy_ids: [] }, // no assigned Agent Policy
+      ].map((overrides) => docGenerator.generatePolicyPackagePolicy({ overrides }));
+
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: [],
         endpointPackagePolicies: policyData,
@@ -223,8 +254,21 @@ describe('when on the endpoint list page', () => {
       jest.clearAllMocks();
     });
 
-    it('should show the no hosts empty state', async () => {
+    it('should show loading spinner while Agent Policies are loading', async () => {
+      useBulkGetAgentPoliciesMock.mockReturnValue({ isLoading: true });
       render();
+      expect(
+        await renderResult.findByTestId('management-empty-state-loading-spinner')
+      ).toBeInTheDocument();
+    });
+
+    it('should show the no hosts empty state without loading spinner', async () => {
+      render();
+
+      expect(
+        renderResult.queryByTestId('management-empty-state-loading-spinner')
+      ).not.toBeInTheDocument();
+
       const emptyHostsTable = await renderResult.findByTestId('emptyHostsTable');
       expect(emptyHostsTable).not.toBeNull();
     });
@@ -239,6 +283,36 @@ describe('when on the endpoint list page', () => {
       render();
       const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
       expect(onboardingPolicySelect).not.toBeNull();
+    });
+
+    it('should show discrete `package policy - agent policy` pairs', async () => {
+      render();
+      const optionsTexts = await getOptionsTexts();
+
+      expect(optionsTexts.length).toBe(4);
+      expect(optionsTexts[0]).toBe('Package 1 - Agent Policy 1');
+    });
+
+    it('should display the same package policy with multiple Agent Policies multiple times', async () => {
+      render();
+      const optionsTexts = await getOptionsTexts();
+
+      expect(optionsTexts[1]).toBe('Package 2 - Agent Policy 2A');
+      expect(optionsTexts[2]).toBe('Package 2 - Agent Policy 2B');
+    });
+
+    it('should not display a package policy without agent policy', async () => {
+      render();
+      const optionsTexts = await getOptionsTexts();
+
+      expect(optionsTexts.join()).not.toContain('Package 4');
+    });
+
+    it("should fallback to agent policy ID if it's not found", async () => {
+      render();
+      const optionsTexts = await getOptionsTexts();
+
+      expect(optionsTexts[3]).toBe('Package 3 - policy-3');
     });
   });
 

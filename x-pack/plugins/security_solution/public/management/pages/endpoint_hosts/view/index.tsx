@@ -69,6 +69,7 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { BackToPolicyListButton } from './components/back_to_policy_list_button';
+import { useBulkGetAgentPolicies } from '../../../services/policies/hooks';
 
 const MAX_PAGINATED_ITEM = 9999;
 
@@ -495,6 +496,27 @@ export const EndpointList = () => {
     policyItemsLoading,
   ]);
 
+  const referencedAgentPolicyIds: string[] = useMemo(
+    // Agent Policy IDs should be unique as one Agent Policy can have only one Defend integration
+    () => policyItems.flatMap((item) => item.policy_ids),
+    [policyItems]
+  );
+
+  const { data: referencedAgentPolicies, isLoading: isAgentPolicesLoading } =
+    useBulkGetAgentPolicies({
+      isEnabled: stateToDisplay === 'hostsEmptyState',
+      policyIds: referencedAgentPolicyIds,
+    });
+
+  const agentPolicyNameMap = useMemo(
+    () =>
+      referencedAgentPolicies?.reduce<Record<string, string>>((acc, policy) => {
+        acc[policy.id] = policy.name;
+        return acc;
+      }, {}) ?? {},
+    [referencedAgentPolicies]
+  );
+
   // Used for an auto-refresh super date picker version without any date/time selection
   const onTimeChange = useCallback(() => {}, []);
 
@@ -608,18 +630,18 @@ export const EndpointList = () => {
           </ManagementEmptyStateWrapper>
         );
       case 'hostsEmptyState':
-        const selectionOptions: EuiSelectableProps['options'] = policyItems
-          .filter((item) => item.policy_id)
-          .map((item) => {
-            return {
-              key: item.policy_id as string,
-              label: item.name,
-              checked: selectedPolicyId === item.policy_id ? 'on' : undefined,
-            };
-          });
+        const selectionOptions: EuiSelectableProps['options'] = policyItems.flatMap((policy) =>
+          // displaying Package Policy - Agent Policy pairs
+          policy.policy_ids.map((agentPolicyId) => ({
+            key: agentPolicyId,
+            label: `${policy.name} - ${agentPolicyNameMap[agentPolicyId] || agentPolicyId}`,
+            checked: selectedPolicyId === agentPolicyId ? 'on' : undefined,
+          }))
+        );
+
         return (
           <HostsEmptyState
-            loading={loading}
+            loading={loading || isAgentPolicesLoading}
             onActionClick={handleDeployEndpointsClick}
             actionDisabled={!selectedPolicyId}
             handleSelectableOnChange={handleSelectableOnChange}
@@ -650,6 +672,8 @@ export const EndpointList = () => {
     sorting,
     endpointPrivilegesLoading,
     policyItems,
+    agentPolicyNameMap,
+    isAgentPolicesLoading,
     handleDeployEndpointsClick,
     selectedPolicyId,
     handleSelectableOnChange,

@@ -284,7 +284,11 @@ const ManagementEmptyState = React.memo<{
       {loading ? (
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" className="essentialAnimation" />
+            <EuiLoadingSpinner
+              size="xl"
+              className="essentialAnimation"
+              data-test-subj="management-empty-state-loading-spinner"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
