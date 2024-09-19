@@ -13,10 +13,14 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
-    "@kbn/io-ts-utils",
     "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/i18n-react",
+    "@kbn/management-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-router",
+    "@kbn/ebt-tools",
+    "@kbn/share-plugin",
+    "@kbn/config-schema",
+    "@kbn/logging",
   ],
   "exclude": ["target/**/*"]
 }
