@@ -13,6 +13,7 @@ const investigationNoteSchema = z.object({
   id: z.string(),
   content: z.string(),
   createdAt: z.number(),
+  updatedAt: z.number(),
   createdBy: z.string(),
 });
 
