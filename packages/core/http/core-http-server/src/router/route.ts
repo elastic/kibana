@@ -112,31 +112,41 @@ export interface RouteConfigOptionsBody {
  */
 export type RouteAccess = 'public' | 'internal';
 
+type InputDeprecationLocation = 'query' | 'body';
+
+export interface RouteInputDeprecationRenamedDescription  {
+  type: 'renamed';
+  location: InputDeprecationLocation;
+  old: string;
+  new: string;
+}
+
+export interface RouteInputDeprecationRemovedDescription  {
+  type: 'removed';
+  location: InputDeprecationLocation;
+  path: string;
+}
+
+export type RouteInputDeprecationDescription =
+  | RouteInputDeprecationRenamedDescription
+  | RouteInputDeprecationRemovedDescription;
+
 /**
- * @remark When providing a deprecation description like: "Use Y instead" ensure
- *         that the string contains no dynamically computed parts.
- *
- * @remark this is limited to interfaces with well-defined interfaces, Re
+ * For now, this is only supports a small subset of possible deprecations.
+ * @public
  */
-export type RouteDeprecationDescription<O = unknown> = O extends unknown[]
-  ? // Unwrap arrays
-    RouteDeprecationDescription<O[number]>
-  : O extends Map<unknown, unknown>
-  ? // Map is not supported
-    never
-  : O extends object
-  ? {
-      [K in keyof RemoveIndexSignatures<O>]?: string | RouteDeprecationDescription<O[K]>;
-    }
-  : string;
+export type RouteInputDeprecationFactory = (factories: {
+  removed(path: string): RouteInputDeprecationRemovedDescription;
+  renamed(input: { oldPath: string; newPath: string }): RouteInputDeprecationRenamedDescription;
+}) => RouteInputDeprecationDescription[];
 
 /**
  * Declare route input deprecations.
+ * @public
  */
 export interface RouteInputDeprecation<P = unknown, Q = unknown, B = unknown> {
-  query?: RouteDeprecationDescription<P>;
-  params?: RouteDeprecationDescription<Q>;
-  body?: RouteDeprecationDescription<B>;
+  query?: RouteInputDeprecationFactory;
+  body?: RouteInputDeprecationFactory;
 }
 
 /**

@@ -519,6 +519,10 @@ export class Server {
         return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
+
+    coreSetup.http.registerOnPostAuth((req, res, toolkit) => {
+      return toolkit.next();
+    });
   }
 
   public setupCoreConfig() {

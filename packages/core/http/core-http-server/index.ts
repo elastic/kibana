@@ -108,8 +108,9 @@ export type {
   LazyValidator,
   RouteAccess,
   RouteDeprecation,
-  RouteDeprecationDescription,
+  RouteInputDeprecationDescription,
   RouteInputDeprecation,
+  RouteInputDeprecationFactory,
 } from './src/router';
 export {
   validBodyOutput,
