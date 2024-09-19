@@ -121,6 +121,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         alertSuppression: params.alert_suppression
           ? convertObjectKeysToCamelCase(params.alert_suppression)
           : undefined,
+        responseActions: params.response_actions?.map((rule) =>
+          transformRuleToAlertResponseAction(rule)
+        ),
       };
     }
     case 'esql': {
@@ -131,6 +134,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         alertSuppression: params.alert_suppression
           ? convertObjectKeysToCamelCase(params.alert_suppression)
           : undefined,
+        responseActions: params.response_actions?.map((rule) =>
+          transformRuleToAlertResponseAction(rule)
+        ),
       };
     }
     case 'threat_match': {
@@ -227,6 +233,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         alertSuppression: params.alert_suppression
           ? convertObjectKeysToCamelCase(params.alert_suppression)
           : undefined,
+        responseActions: params.response_actions?.map((rule) =>
+          transformRuleToAlertResponseAction(rule)
+        ),
       };
     }
     default: {

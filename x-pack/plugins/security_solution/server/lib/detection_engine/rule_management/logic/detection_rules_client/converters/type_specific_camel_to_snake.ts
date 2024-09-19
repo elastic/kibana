@@ -6,8 +6,8 @@
  */
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
-import type { TypeSpecificResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import { transformAlertToRuleResponseAction } from '../../../../../../../common/detection_engine/transform_actions';
+import type { TypeSpecificResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { convertObjectKeysToSnakeCase } from '../../../../../../utils/object_case_converters';
 import type { TypeSpecificRuleParams } from '../../../../rule_schema';
@@ -30,6 +30,7 @@ export const typeSpecificCamelToSnake = (
         alert_suppression: params.alertSuppression
           ? convertObjectKeysToSnakeCase(params.alertSuppression)
           : undefined,
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'esql': {
@@ -40,6 +41,7 @@ export const typeSpecificCamelToSnake = (
         alert_suppression: params.alertSuppression
           ? convertObjectKeysToSnakeCase(params.alertSuppression)
           : undefined,
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'threat_match': {
@@ -132,6 +134,7 @@ export const typeSpecificCamelToSnake = (
         alert_suppression: params.alertSuppression
           ? convertObjectKeysToSnakeCase(params.alertSuppression)
           : undefined,
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     default: {
