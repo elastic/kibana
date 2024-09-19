@@ -9,6 +9,8 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
+// FIXME:PT find usages of createInternalSoClient() and delete them. Use EndpontAppContextService instead
+
 export const createInternalSoClient = (
   savedObjectsServiceStart: SavedObjectsServiceStart
 ): SavedObjectsClientContract => {

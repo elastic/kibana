@@ -26,6 +26,8 @@ const RESTRICTED_METHODS: readonly SavedObjectsClientContractKeys[] = [
 
 export class InternalReadonlySoClientMethodNotAllowedError extends EndpointError {}
 
+// FIXME:PT find usages of createInternalReadonlySoClient() and delete them. Use EndpontAppContextService instead
+
 /**
  * Creates an internal (system user) Saved Objects client (permissions turned off) that can only perform READ
  * operations.
