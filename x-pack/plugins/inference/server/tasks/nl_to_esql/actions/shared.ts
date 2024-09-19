@@ -26,4 +26,5 @@ export const requestDocumentationSchema = {
       description: 'ES|QL functions you want to analyze before generating the query.',
     },
   },
+  required: ['commands', 'functions'] as const,
 } satisfies ToolSchema;

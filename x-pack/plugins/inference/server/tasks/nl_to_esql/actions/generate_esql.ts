@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable, map, merge, of, switchMap } from 'rxjs';
+import { Observable, map, merge, of, switchMap, tap, lastValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { ToolCall, ToolOptions } from '../../../../common/chat_complete/tools';
 import {
@@ -15,67 +15,43 @@ import {
   Message,
   MessageRole,
 } from '../../../../common';
-import { InferenceClient, withoutTokenCountEvents } from '../../..';
+import { InferenceClient, withoutTokenCountEvents, withoutChunkEvents } from '../../..';
 import { OutputCompleteEvent, OutputEventType } from '../../../../common/output';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
 import { EsqlDocumentBase } from '../doc_base';
 import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
-import type { FunctionCallingMode } from '../../../../common/chat_complete';
+import type { ActionsOptionsBase } from './types';
 
 export const generateEsqlTask = <TToolOptions extends ToolOptions>({
-  chatCompleteApi,
+  client,
   connectorId,
   systemMessage,
-  messages,
-  toolOptions: { tools, toolChoice },
-  docBase,
   functionCalling,
   logger,
-}: {
-  connectorId: string;
+  output$,
+}: ActionsOptionsBase & {
   systemMessage: string;
-  messages: Message[];
-  toolOptions: ToolOptions;
-  chatCompleteApi: InferenceClient['chatComplete'];
-  docBase: EsqlDocumentBase;
-  functionCalling?: FunctionCallingMode;
-  logger: Pick<Logger, 'debug'>;
 }) => {
-  return function askLlmToRespond({
-    documentationRequest: { commands, functions },
+  return async function generateEsql({
+    messages,
+    documentationRequest: { keywords, requestedDocumentation },
   }: {
-    documentationRequest: { commands?: string[]; functions?: string[] };
-  }): Observable<NlToEsqlTaskEvent<TToolOptions>> {
-    const keywords = [...(commands ?? []), ...(functions ?? [])];
-    const requestedDocumentation = docBase.getDocumentation(keywords);
-    const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
+    messages: Message[];
+    documentationRequest: { keywords: string[]; requestedDocumentation: Record<string, string> };
+  }) {
+    const fakeRequestDocsToolCall = createFakeTooCall(keywords);
 
-    return merge(
-      of<
-        OutputCompleteEvent<
-          'request_documentation',
-          { keywords: string[]; requestedDocumentation: Record<string, string> }
-        >
-      >({
-        type: OutputEventType.OutputComplete,
-        id: 'request_documentation',
-        output: {
-          keywords,
-          requestedDocumentation,
-        },
-        content: '',
-      }),
-      chatCompleteApi({
-        connectorId,
-        functionCalling,
-        system: `${systemMessage}
+    const result = await lastValueFrom(
+      client
+        .chatComplete({
+          connectorId,
+          functionCalling,
+          system: `${systemMessage}
 
           # Current task
 
-          Your current task is to respond to the user's question. If there is a tool
-          suitable for answering the user's question, use that tool, preferably
-          with a natural language reply included.
+          Your current task is to respond to the user's question.
 
           Format any ES|QL query as follows:
           \`\`\`esql
@@ -95,74 +71,47 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
           When converting queries from one language to ES|QL, make sure that the functions are available
           and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
         `,
-        messages: [
-          ...messages,
-          {
-            role: MessageRole.Assistant,
-            content: null,
-            toolCalls: [fakeRequestDocsToolCall],
-          },
-          {
-            role: MessageRole.Tool,
-            response: {
-              documentation: requestedDocumentation,
+          messages: [
+            ...messages,
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [fakeRequestDocsToolCall],
             },
-            toolCallId: fakeRequestDocsToolCall.toolCallId,
-          },
-        ],
-        toolChoice,
-        tools: {
-          ...tools,
-          request_documentation: {
-            description: 'Request additional ES|QL documentation if needed',
-            schema: requestDocumentationSchema,
-          },
-        },
-      }).pipe(
-        withoutTokenCountEvents(),
-        map((generateEvent) => {
-          if (isChatCompletionMessageEvent(generateEvent)) {
-            return {
-              ...generateEvent,
-              content: generateEvent.content
-                ? correctEsqlMistakes({ content: generateEvent.content, logger })
-                : generateEvent.content,
-            };
-          }
-
-          return generateEvent;
-        }),
-        switchMap((generateEvent) => {
-          if (isChatCompletionMessageEvent(generateEvent)) {
-            const onlyToolCall =
-              generateEvent.toolCalls.length === 1 ? generateEvent.toolCalls[0] : undefined;
-
-            if (onlyToolCall?.function.name === 'request_documentation') {
-              const args = onlyToolCall.function.arguments;
-
-              return askLlmToRespond({
-                documentationRequest: {
-                  commands: args.commands,
-                  functions: args.functions,
-                },
-              });
-            }
-          }
-
-          return of(generateEvent);
+            {
+              role: MessageRole.Tool,
+              response: {
+                documentation: requestedDocumentation,
+              },
+              toolCallId: fakeRequestDocsToolCall.toolCallId,
+            },
+          ],
         })
-      )
+        .pipe(
+          withoutTokenCountEvents(),
+          map((event) => {
+            if (isChatCompletionMessageEvent(event)) {
+              return {
+                ...event,
+                content: event.content
+                  ? correctEsqlMistakes({ content: event.content, logger })
+                  : event.content,
+              };
+            }
+            return event;
+          }),
+          tap((event) => {
+            output$.next(event);
+          }),
+          withoutChunkEvents()
+        )
     );
+
+    return { content: result.content };
   };
 };
 
-const correctEsqlMistakes = ({
-  content,
-  logger,
-}: {
-  content: string;
-  logger: Pick<Logger, 'debug'>;
-}) => {
+const correctEsqlMistakes = ({ content, logger }: { content: string; logger: Logger }) => {
   return content.replaceAll(INLINE_ESQL_QUERY_REGEX, (_match, query) => {
     const correction = correctCommonEsqlMistakes(query);
     if (correction.isCorrection) {
@@ -172,16 +121,12 @@ const correctEsqlMistakes = ({
   });
 };
 
-const createFakeTooCall = (
-  commands: string[] | undefined,
-  functions: string[] | undefined
-): ToolCall => {
+const createFakeTooCall = (keywords: string[]): ToolCall => {
   return {
     function: {
       name: 'request_documentation',
       arguments: {
-        commands,
-        functions,
+        keywords,
       },
     },
     toolCallId: generateFakeToolCallId(),
