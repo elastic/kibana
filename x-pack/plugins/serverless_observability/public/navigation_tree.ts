@@ -8,11 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { CoreStart } from '@kbn/core/public';
-import { entityCentricExperience } from '@kbn/observability-plugin/common/ui_settings_keys';
 
 export const navigationTree = (core?: CoreStart): NavigationTreeDefinition => {
   const isEntityCentricExperienceSettingEnabled = core?.uiSettings.get<boolean>(
-    entityCentricExperience,
+    'observability:entityCentricExperience',
     true
   );
 
@@ -74,6 +73,7 @@ export const navigationTree = (core?: CoreStart): NavigationTreeDefinition => {
           ...(isEntityCentricExperienceSettingEnabled
             ? [
                 {
+                  title: 'pepito',
                   link: 'inventory' as const,
                   getIsActive: ({
                     pathNameSerialized,
@@ -84,6 +84,8 @@ export const navigationTree = (core?: CoreStart): NavigationTreeDefinition => {
                   }) => {
                     return pathNameSerialized.startsWith(prepend('/app/observability/inventory'));
                   },
+                  withBadge: true,
+                  badgeOptions: { text: 'NEW' },
                 },
               ]
             : []),
@@ -161,6 +163,7 @@ export const navigationTree = (core?: CoreStart): NavigationTreeDefinition => {
                   const regex = /app\/apm\/.*service.*/;
                   return regex.test(pathNameSerialized);
                 },
+                withBadge: true,
               },
               {
                 link: 'apm:traces',

@@ -20,7 +20,6 @@ import {
 import type { Logger } from '@kbn/logging';
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { css } from '@emotion/css';
-import { entityCentricExperience } from '@kbn/observability-plugin/common/ui_settings_keys';
 import type {
   ConfigSchema,
   InventoryPublicSetup,
@@ -51,7 +50,7 @@ export class InventoryPlugin
   ): InventoryPublicSetup {
     const inventoryAPIClient = createCallInventoryAPI(coreSetup);
     const isEntityCentricExperienceSettingEnabled = coreSetup.uiSettings.get<boolean>(
-      entityCentricExperience,
+      'observability:entityCentricExperience',
       true
     );
 
