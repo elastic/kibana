@@ -10,7 +10,6 @@
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 import { DashboardStartDependencies } from '../plugin';
 import { DashboardBackupServiceType } from './dashboard_backup/types';
@@ -30,7 +29,6 @@ export interface DashboardServices {
 
   dashboardCapabilities: DashboardCapabilitiesService;
   initializerContext: DashboardInitializerContextService;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboardRecentlyAccessed: DashboardRecentlyAccessedService;
   dashboardContentInsights: DashboardContentInsightsService;

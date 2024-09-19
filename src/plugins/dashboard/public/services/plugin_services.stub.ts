@@ -23,14 +23,12 @@ import { dashboardContentManagementServiceFactory } from './dashboard_content_ma
 import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service.stub';
 import { dashboardRecentlyAccessedServiceFactory } from './dashboard_recently_accessed/dashboard_recently_accessed.stub';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context.stub';
-import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
-  savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
   contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
   dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedServiceFactory),
   dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),

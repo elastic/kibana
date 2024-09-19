@@ -24,7 +24,6 @@ import { dashboardContentManagementServiceFactory } from './dashboard_content_ma
 import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service';
 import { dashboardRecentlyAccessedFactory } from './dashboard_recently_accessed/dashboard_recently_accessed';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context_service';
-import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
@@ -35,7 +34,6 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
 
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
-  savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
   contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
   dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedFactory),
   dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),
