@@ -7,7 +7,8 @@
 
 import expect from 'expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { createEntry } from '../utils/create_entry';
+import { createEntry, createEntryForUser } from '../utils/create_entry';
+import { findEntries } from '../utils/find_entry';
 import {
   clearKnowledgeBase,
   deleteTinyElser,
@@ -17,9 +18,11 @@ import {
 import { removeServerGeneratedProperties } from '../utils/remove_server_generated_properties';
 import { MachineLearningProvider } from '../../../../../../functional/services/ml';
 import { documentEntry, indexEntry, globalDocumentEntry } from './mocks/entries';
+import { secOnly, secOnlySpace2, secOnlySpacesAll } from '../utils/auth/users';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
   const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
@@ -40,9 +43,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Create Entries', () => {
       // TODO: KB-RBAC: Added stubbed admin tests for when RBAC is enabled. Hopefully this helps :]
-      describe('Admin', () => {
+      describe('Admin User', () => {
         it('should create a new document entry for the current user', async () => {
-          const entry = await createEntry(supertest, log, documentEntry);
+          const entry = await createEntry({ supertest, log, entry: documentEntry });
 
           const expectedDocumentEntry = {
             ...documentEntry,
@@ -53,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should create a new index entry for the current user', async () => {
-          const entry = await createEntry(supertest, log, indexEntry);
+          const entry = await createEntry({ supertest, log, entry: indexEntry });
 
           const expectedIndexEntry = {
             ...indexEntry,
@@ -67,9 +70,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         // TODO: KB-RBAC: Action not currently allowed without RBAC
         it.skip('should create a new entry for another user', async () => {
-          const entry = await createEntry(supertest, log, {
-            ...documentEntry,
-            users: [{ name: 'george' }],
+          const entry = await createEntry({
+            supertest,
+            log,
+            entry: {
+              ...documentEntry,
+              users: [{ name: 'george' }],
+            },
           });
 
           const expectedDocumentEntry = {
@@ -81,13 +88,34 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should create a new global entry for all users', async () => {
-          const entry = await createEntry(supertest, log, globalDocumentEntry);
+          const entry = await createEntry({ supertest, log, entry: globalDocumentEntry });
 
           expect(removeServerGeneratedProperties(entry)).toEqual(globalDocumentEntry);
         });
 
         it('should create a new global entry for all users in another space', async () => {
-          const entry = await createEntry(supertest, log, globalDocumentEntry, 'space-x');
+          const entry = await createEntry({
+            supertest,
+            log,
+            entry: globalDocumentEntry,
+            space: 'space-x',
+          });
+
+          const expectedDocumentEntry = {
+            ...globalDocumentEntry,
+            namespace: 'space-x',
+          };
+
+          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
+        });
+
+        it('should not create a new entry in a space ', async () => {
+          const entry = await createEntry({
+            supertest,
+            log,
+            entry: globalDocumentEntry,
+            space: 'space-x',
+          });
 
           const expectedDocumentEntry = {
             ...globalDocumentEntry,
@@ -98,9 +126,9 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('User', () => {
+      describe('Non-Admin User', () => {
         it('should create a new document entry', async () => {
-          const entry = await createEntry(supertest, log, documentEntry);
+          const entry = await createEntry({ supertest, log, entry: documentEntry });
 
           const expectedDocumentEntry = {
             ...documentEntry,
@@ -111,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should create a new index entry', async () => {
-          const entry = await createEntry(supertest, log, indexEntry);
+          const entry = await createEntry({ supertest, log, entry: indexEntry });
 
           const expectedIndexEntry = {
             ...indexEntry,
@@ -124,9 +152,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not be able to create an entry for another user', async () => {
-          const entry = await createEntry(supertest, log, {
-            ...documentEntry,
-            users: [{ name: 'george' }],
+          const entry = await createEntry({
+            supertest,
+            log,
+            entry: {
+              ...documentEntry,
+              users: [{ name: 'george' }],
+            },
           });
 
           const expectedDocumentEntry = {
@@ -139,7 +171,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // TODO: KB-RBAC: Action not currently limited without RBAC
         it.skip('should not be able to create a global entry', async () => {
-          const entry = await createEntry(supertest, log, globalDocumentEntry);
+          const entry = await createEntry({ supertest, log, entry: globalDocumentEntry });
 
           const expectedDocumentEntry = {
             ...globalDocumentEntry,
@@ -149,6 +181,32 @@ export default ({ getService }: FtrProviderContext) => {
           expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
         });
       });
+    });
+
+    describe('Find Entries', () => {
+      describe('Admin User', () => {
+        // TODO: KB-RBAC: Action not currently allowed without RBAC
+        it.skip('should see all users entries for a given space', async () => {
+          const users = [secOnly, secOnlySpace2, secOnlySpacesAll];
+
+          await Promise.all(
+            users.map((user) =>
+              createEntryForUser({
+                supertestWithoutAuth,
+                log,
+                entry: documentEntry,
+                user,
+              })
+            )
+          );
+
+          const entries = await findEntries({ supertest, log });
+
+          expect(entries.total).toEqual(3);
+        });
+      });
+
+      describe('Non-Admin User', () => {});
     });
   });
 };

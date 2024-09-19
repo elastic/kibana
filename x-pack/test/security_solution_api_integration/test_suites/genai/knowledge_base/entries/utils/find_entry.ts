@@ -9,41 +9,41 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import {
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
-  KnowledgeBaseEntryCreateProps,
-  KnowledgeBaseEntryResponse,
+  FindKnowledgeBaseEntriesResponse,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
+  FindKnowledgeBaseEntriesRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import type User from './auth/types';
 
 import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
 
 /**
- * Creates a Knowledge Base Entry
+ * Finds Knowledge Base Entries
  * @param supertest The supertest deps
  * @param log The tooling logger
- * @param entry The entry to create
- * @param space The Kibana Space to create the entry in (optional)
+ * @param params Params for find API (optional)
+ * @param space The Kibana Space to find entries in (optional)
  */
-export const createEntry = async ({
+export const findEntries = async ({
   supertest,
   log,
-  entry,
+  params,
   space,
 }: {
   supertest: SuperTest.Agent;
   log: ToolingLog;
-  entry: KnowledgeBaseEntryCreateProps;
+  params?: FindKnowledgeBaseEntriesRequestQuery;
   space?: string;
-}): Promise<KnowledgeBaseEntryResponse> => {
-  const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL, space);
+}): Promise<FindKnowledgeBaseEntriesResponse> => {
+  const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND, space);
   const response = await supertest
-    .post(route)
+    .get(route)
     .set('kbn-xsrf', 'true')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .send(entry);
+    .send();
   if (response.status !== 200) {
     throw new Error(
-      `Unexpected non 200 ok when attempting to create entry: ${JSON.stringify(
+      `Unexpected non 200 ok when attempting to find entries: ${JSON.stringify(
         response.status
       )},${JSON.stringify(response, null, 4)}`
     );
@@ -53,36 +53,36 @@ export const createEntry = async ({
 };
 
 /**
- * Creates a Knowledge Base Entry for a given User
+ * Finds Knowledge Base Entries on behalf of a given User
  * @param supertest The supertest deps
  * @param log The tooling logger
- * @param entry The entry to create
- * @param user The user to create the entry on behalf of
- * @param space The Kibana Space to create the entry in (optional)
+ * @param user The user to perform search on behalf of
+ * @param params Params for find API (optional)
+ * @param space The Kibana Space to find entries in (optional)
  */
-export const createEntryForUser = async ({
+export const findEntriesForUser = async ({
   supertestWithoutAuth,
   log,
-  entry,
   user,
+  params,
   space,
 }: {
   supertestWithoutAuth: SuperTest.Agent;
   log: ToolingLog;
-  entry: KnowledgeBaseEntryCreateProps;
   user: User;
+  params?: FindKnowledgeBaseEntriesRequestQuery;
   space?: string;
-}): Promise<KnowledgeBaseEntryResponse> => {
-  const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL, space);
+}): Promise<FindKnowledgeBaseEntriesResponse> => {
+  const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND, space);
   const response = await supertestWithoutAuth
-    .post(route)
+    .get(route)
     .auth(user.username, user.password)
     .set('kbn-xsrf', 'true')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .send(entry);
+    .send();
   if (response.status !== 200) {
     throw new Error(
-      `Unexpected non 200 ok when attempting to create entry: ${JSON.stringify(
+      `Unexpected non 200 ok when attempting to find entries: ${JSON.stringify(
         response.status
       )},${JSON.stringify(response, null, 4)}`
     );
