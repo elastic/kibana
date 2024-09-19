@@ -375,7 +375,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         buttonContent={
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.advancedSettingsLabel"
-            defaultMessage="Advanced Configurations"
+            defaultMessage="Advanced configurations"
           />
         }
         initialIsOpen={isUpdate}
@@ -440,7 +440,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               label={
                 <FormattedMessage
                   id="xpack.ml.trainedModels.modelsList.startDeployment.adaptiveAllocationEnabledLabel"
-                  defaultMessage="Adaptive Resources (recommended)"
+                  defaultMessage="Adaptive resources (recommended)"
                 />
               }
               checked={!!config.adaptiveResources}

@@ -72,7 +72,7 @@ export class DeploymentParamsMapper {
       : this.hardwareVCPUBreakpoints;
   }
 
-  private getNumberOfThread(input: DeploymentParamsUI): number {
+  private getNumberOfThreads(input: DeploymentParamsUI): number {
     if (input.vCPUUsage === 'low') return 1;
     return input.optimized === 'optimizedForIngest' ? 1 : Math.max(...this.threadingParamsValues);
   }
@@ -84,7 +84,7 @@ export class DeploymentParamsMapper {
       Exclude<MlStartTrainedModelDeploymentRequestNew['adaptive_allocations'], undefined>,
       'min_number_of_allocations' | 'max_number_of_allocations'
     > {
-    const threadsPerAllocation = this.getNumberOfThread(params);
+    const threadsPerAllocation = this.getNumberOfThreads(params);
 
     const levelValues = this.vCpuBreakpoints[params.vCPUUsage];
 
@@ -119,7 +119,7 @@ export class DeploymentParamsMapper {
       model_id: this.modelId,
       deployment_id: resultInput.deploymentId,
       priority: resultInput.vCPUUsage === 'low' ? 'low' : 'normal',
-      threads_per_allocation: this.getNumberOfThread(resultInput),
+      threads_per_allocation: this.getNumberOfThreads(resultInput),
       ...(resultInput.adaptiveResources || !this.showNodeInfo
         ? {
             adaptive_allocations: {

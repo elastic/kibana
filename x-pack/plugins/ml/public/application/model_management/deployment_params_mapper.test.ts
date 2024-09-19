@@ -86,7 +86,7 @@ describe('DeploymentParamsMapper', () => {
       });
     });
 
-    describe('when autoscaling in disabled', () => {
+    describe('when autoscaling is disabled', () => {
       beforeEach(() => {
         mapper = new DeploymentParamsMapper(
           modelId,
@@ -357,7 +357,7 @@ describe('DeploymentParamsMapper', () => {
       });
     });
 
-    describe('when autoscaling in enabled', () => {
+    describe('when autoscaling is enabled', () => {
       beforeEach(() => {
         mapper = new DeploymentParamsMapper(
           modelId,
