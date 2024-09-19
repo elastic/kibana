@@ -211,11 +211,46 @@
           },
           {
             "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.inference",
+            "type": "Object",
+            "tags": [],
+            "label": "inference",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inference",
+                "scope": "server",
+                "docId": "kibInferencePluginApi",
+                "section": "def-server.InferenceServerStart",
+                "text": "InferenceServerStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.isEnabledKnowledgeBase",
             "type": "boolean",
             "tags": [],
             "label": "isEnabledKnowledgeBase",
             "description": [],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.connectorId",
+            "type": "string",
+            "tags": [],
+            "label": "connectorId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1820,6 +1855,26 @@
           },
           {
             "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginStartDependencies.inference",
+            "type": "Object",
+            "tags": [],
+            "label": "inference",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inference",
+                "scope": "server",
+                "docId": "kibInferencePluginApi",
+                "section": "def-server.InferenceServerStart",
+                "text": "InferenceServerStart"
+              }
+            ],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
             "id": "def-server.ElasticAssistantPluginStartDependencies.spaces",
             "type": "Object",
             "tags": [],
@@ -1952,6 +2007,28 @@
               "docId": "kibActionsPluginApi",
               "section": "def-server.PluginStartContract",
               "text": "PluginStartContract"
+            }
+          ],
+          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "elasticAssistant",
+          "id": "def-server.ElasticAssistantPluginStart.inference",
+          "type": "Object",
+          "tags": [],
+          "label": "inference",
+          "description": [
+            "\nInference plugin start contract."
+          ],
+          "signature": [
+            {
+              "pluginId": "inference",
+              "scope": "server",
+              "docId": "kibInferencePluginApi",
+              "section": "def-server.InferenceServerStart",
+              "text": "InferenceServerStart"
             }
           ],
           "path": "x-pack/plugins/elastic_assistant/server/types.ts",

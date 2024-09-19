@@ -2877,7 +2877,7 @@
         "\nSetup contract for the Spaces plugin."
       ],
       "signature": [
-        "{ hasOnlyDefaultSpace: boolean; }"
+        "{ hasOnlyDefaultSpace: boolean; isSolutionViewEnabled: boolean; }"
       ],
       "path": "x-pack/plugins/spaces/public/plugin.tsx",
       "deprecated": false,
@@ -2982,6 +2982,19 @@
               "section": "def-public.SpacesApiUi",
               "text": "SpacesApiUi"
             }
+          ],
+          "path": "x-pack/plugins/spaces/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "spaces",
+          "id": "def-public.SpacesApi.isSolutionViewEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isSolutionViewEnabled",
+          "description": [
+            "\nIndicates whether the solution view is enabled."
           ],
           "path": "x-pack/plugins/spaces/public/types.ts",
           "deprecated": false,

@@ -29,6 +29,8 @@ describe('WaterfallFlyout', () => {
         value: 'text/html',
       },
     ],
+    showTooltip: false,
+    networkItemTooltipProps: [],
   };
 
   const defaultProps = {

@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import * as t from 'io-ts';
 
-export interface EntityTypeDefinition {
-  type: string;
-  label: string;
-  icon: string;
-  count: number;
-}
+export const entityTypeRt = t.union([
+  t.literal('service'),
+  t.literal('host'),
+  t.literal('container'),
+]);
 
-export interface EntityDefinition {
-  type: string;
-  field: string;
-  filter?: string;
-  index: string[];
-}
+export type EntityType = t.TypeOf<typeof entityTypeRt>;
+
+export const MAX_NUMBER_OF_ENTITIES = 500;
