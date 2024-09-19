@@ -17,7 +17,7 @@ export async function getDataStreamsStats({
   dataStreams: string[];
 }): Promise<Record<string, { size: string; sizeBytes: number; totalDocs: number }>> {
   if (!dataStreams.length) {
-    return Promise.resolve({});
+    return {};
   }
 
   const matchingDataStreamsStats = dataStreamService.getStreamsStats(esClient, dataStreams);

@@ -70,10 +70,13 @@ const statsRoute = createDatasetQualityServerRoute({
 
     return {
       datasetUserPrivileges,
-      dataStreamsStats: dataStreams.map((dataStream) => ({
-        ...dataStream,
-        ...dataStreamsStats[dataStream.name],
-      })),
+      dataStreamsStats: dataStreams.map((dataStream: DataStreamStat) => {
+        dataStream.size = dataStreamsStats[dataStream.name].size;
+        dataStream.sizeBytes = dataStreamsStats[dataStream.name].sizeBytes;
+        dataStream.totalDocs = dataStreamsStats[dataStream.name].totalDocs;
+
+        return dataStream;
+      }),
     };
   },
 });
