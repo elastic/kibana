@@ -24,14 +24,14 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector } from '@kbn/search-connectors';
-
 import { MANAGE_API_KEYS_URL } from '../../../../../../common/constants';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../../routes';
+import { ConnectorViewLogic } from '../connector_view_logic';
+import { useValues } from 'kea';
 
 export interface GeneratedConfigFieldsProps {
   apiKey?: ApiKey;
@@ -82,6 +82,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   isGenerateLoading,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const { connector } = useValues(ConnectorViewLogic);
 
   const refreshButtonClick = () => {
     setIsModalVisible(true);

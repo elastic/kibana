@@ -36,6 +36,7 @@ import { ChooseConnectorSelectable } from './components/choose_connector_selecta
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 import { ManualConfiguration } from './components/manual_configuration';
 import { SelfManagePreference } from './create_connector';
+import { UNIVERSAL_LANGUAGE_VALUE } from '../../new_index/constants';
 
 interface StartStepProps {
   currentStep: number;
@@ -72,8 +73,9 @@ export const StartStep: React.FC<StartStepProps> = ({
     fullIndexNameIsValid,
     canConfigureConnector,
     selectedConnector,
+    generatedConfigData,
   } = useValues(NewConnectorLogic);
-  const { setRawName } = useActions(NewConnectorLogic);
+  const { setRawName, createConnector } = useActions(NewConnectorLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -305,16 +307,16 @@ export const StartStep: React.FC<StartStepProps> = ({
                 </p>
               </EuiText>
               <EuiSpacer size="m" />
-              {isNextStepEnabled ? (
+              {generatedConfigData ? (
                 <>
                   <GeneratedConfigFields
                     apiKey={{
-                      api_key: 'asd234fsdfsdfsd234',
-                      encoded: 'asdasd234fsdfsdf',
-                      id: 'string',
-                      name: 'my-api-key',
+                      api_key: generatedConfigData.apiKey.api_key,
+                      encoded: generatedConfigData.apiKey.encoded,
+                      id: generatedConfigData.apiKey.id,
+                      name: generatedConfigData.apiKey.name,
                     }}
-                    generateApiKey={() => {}}
+                    generateApiKey={() => {}} // TODO: bind
                     isGenerateLoading={false}
                   />
                   <EuiSpacer size="m" />
@@ -337,14 +339,18 @@ export const StartStep: React.FC<StartStepProps> = ({
                       iconType="sparkles"
                       isLoading={isGenerateLoading}
                       onClick={() => {
-                        onSubmit(fullIndexName);
-                        setNextStepEnabled(true);
-                        setTimeout(() => {
-                          window.scrollTo({
-                            behavior: 'smooth',
-                            top: window.innerHeight,
-                          });
-                        }, 100);
+                        // when it is successfull then set next step enabled in the logic file
+                        // and show response component
+                        createConnector({
+                          isSelfManaged: false,
+                        });
+
+                        // setTimeout(() => { // TODO: Move this to a function and call it
+                        //  window.scrollTo({
+                        //    behavior: 'smooth',
+                        //    top: window.innerHeight,
+                        //  });
+                        // }, 100);
                       }}
                     >
                       {i18n.translate(

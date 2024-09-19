@@ -53,7 +53,6 @@ export const CreateConnector: React.FC = () => {
   const [selfManagePreference, setSelfManagePreference] = useState<SelfManagePreference>('native');
   const { fetchConnector } = useActions(ConnectorViewLogic);
   const [syncing, setSyncing] = useState(false);
-  // const { connector } = useValues(ConnectorViewLogic);
 
   useEffect(() => {
     fetchConnector({ connectorId: 'eIwou5AB7hZjs4c7Qmm4' });
@@ -132,7 +131,6 @@ export const CreateConnector: React.FC = () => {
             'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
             { defaultMessage: 'Configuration' }
           )}
-          // connector={connector}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
           isNextStepEnabled={finishUpStepComplete}
@@ -187,7 +185,9 @@ export const CreateConnector: React.FC = () => {
           onNameChange={() => {
             // apiReset();
           }}
-          onSubmit={() => {}}
+          onSubmit={() => {
+            // call createConnector API
+          }}
           // onSubmit={(name) =>
           // createConnector({
           //  isNative,
