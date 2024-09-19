@@ -467,6 +467,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   warning: warningMessages.length > 0,
                   warningMessages,
                   userError: runResult.userError,
+                  ...(runResult.loggedRequests ? { loggedRequests: runResult.loggedRequests } : {}),
                 };
                 runState = runResult.state;
               }
@@ -571,7 +572,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           }
 
-          return { state: result.state };
+          return {
+            state: result.state,
+            ...(result.loggedRequests ? { loggedRequests: result.loggedRequests } : {}),
+          };
         });
       },
       alerts: {
