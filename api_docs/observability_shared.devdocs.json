@@ -4357,6 +4357,106 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.ServiceEntityLocatorDefinition",
+        "type": "Class",
+        "tags": [],
+        "label": "ServiceEntityLocatorDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.ServiceEntityLocatorDefinition",
+            "text": "ServiceEntityLocatorDefinition"
+          },
+          " implements ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorDefinition",
+            "text": "LocatorDefinition"
+          },
+          "<",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.ServiceEntityLocatorParams",
+            "text": "ServiceEntityLocatorParams"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_entity_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.ServiceEntityLocatorDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"SERVICE_ENTITY_LOCATOR\""
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_entity_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.ServiceEntityLocatorDefinition.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [],
+            "signature": [
+              "({ serviceName }: ",
+              {
+                "pluginId": "observabilityShared",
+                "scope": "common",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-common.ServiceEntityLocatorParams",
+                "text": "ServiceEntityLocatorParams"
+              },
+              ") => Promise<{ app: string; path: string; state: {}; }>"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_entity_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-common.ServiceEntityLocatorDefinition.getLocation.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ serviceName }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observabilityShared",
+                    "scope": "common",
+                    "docId": "kibObservabilitySharedPluginApi",
+                    "section": "def-common.ServiceEntityLocatorParams",
+                    "text": "ServiceEntityLocatorParams"
+                  }
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_entity_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.ServiceOverviewLocatorDefinition",
         "type": "Class",
         "tags": [],
@@ -4745,6 +4845,106 @@
                   }
                 ],
                 "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/transaction_details_by_name_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TransactionDetailsByTraceIdLocatorDefinition",
+        "type": "Class",
+        "tags": [],
+        "label": "TransactionDetailsByTraceIdLocatorDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.TransactionDetailsByTraceIdLocatorDefinition",
+            "text": "TransactionDetailsByTraceIdLocatorDefinition"
+          },
+          " implements ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorDefinition",
+            "text": "LocatorDefinition"
+          },
+          "<",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.TransactionDetailsByTraceIdLocatorParams",
+            "text": "TransactionDetailsByTraceIdLocatorParams"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/transaction_details_by_trace_id_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.TransactionDetailsByTraceIdLocatorDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR\""
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/transaction_details_by_trace_id_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.TransactionDetailsByTraceIdLocatorDefinition.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [],
+            "signature": [
+              "({ traceId }: ",
+              {
+                "pluginId": "observabilityShared",
+                "scope": "common",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-common.TransactionDetailsByTraceIdLocatorParams",
+                "text": "TransactionDetailsByTraceIdLocatorParams"
+              },
+              ") => Promise<{ app: string; path: string; state: {}; }>"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/transaction_details_by_trace_id_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-common.TransactionDetailsByTraceIdLocatorDefinition.getLocation.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ traceId }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observabilityShared",
+                    "scope": "common",
+                    "docId": "kibObservabilitySharedPluginApi",
+                    "section": "def-common.TransactionDetailsByTraceIdLocatorParams",
+                    "text": "TransactionDetailsByTraceIdLocatorParams"
+                  }
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/transaction_details_by_trace_id_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5587,6 +5787,48 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.ServiceEntityLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ServiceEntityLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.ServiceEntityLocatorParams",
+            "text": "ServiceEntityLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_entity_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.ServiceEntityLocatorParams.serviceName",
+            "type": "string",
+            "tags": [],
+            "label": "serviceName",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_entity_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.ServiceOverviewParams",
         "type": "Interface",
         "tags": [],
@@ -5897,6 +6139,48 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/transaction_details_by_name_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TransactionDetailsByTraceIdLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "TransactionDetailsByTraceIdLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.TransactionDetailsByTraceIdLocatorParams",
+            "text": "TransactionDetailsByTraceIdLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/transaction_details_by_trace_id_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.TransactionDetailsByTraceIdLocatorParams.traceId",
+            "type": "string",
+            "tags": [],
+            "label": "traceId",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/transaction_details_by_trace_id_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7328,6 +7612,21 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE_ENTITY_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_ENTITY_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"SERVICE_ENTITY_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_entity_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.SERVICE_ENVIRONMENT",
         "type": "string",
         "tags": [],
@@ -7472,6 +7771,36 @@
           "\"service.version\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ServiceEntityLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "ServiceEntityLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.ServiceEntityLocatorParams",
+            "text": "ServiceEntityLocatorParams"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_entity_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7910,6 +8239,21 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/transaction_details_by_trace_id_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.TRANSACTION_DOM_INTERACTIVE",
         "type": "string",
         "tags": [],
@@ -8114,6 +8458,36 @@
           ">"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/transaction_details_by_name_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TransactionDetailsByTraceIdLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "TransactionDetailsByTraceIdLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.TransactionDetailsByTraceIdLocatorParams",
+            "text": "TransactionDetailsByTraceIdLocatorParams"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/transaction_details_by_trace_id_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

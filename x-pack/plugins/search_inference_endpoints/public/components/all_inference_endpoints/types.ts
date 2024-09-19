@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DeploymentState, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { TaskTypes } from '../../types';
-export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
+export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [25, 50, 100];
 
 export enum ServiceProviderKeys {
   amazonbedrock = 'amazonbedrock',
@@ -56,8 +56,7 @@ export interface EuiBasicTableSortTypes {
 }
 
 export interface InferenceEndpointUI {
-  deployment: DeploymentState | undefined;
-  endpoint: InferenceAPIConfigResponse;
-  provider: string;
+  endpoint: string;
+  provider: InferenceAPIConfigResponse;
   type: string;
 }
