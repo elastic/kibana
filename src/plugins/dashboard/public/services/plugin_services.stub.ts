@@ -22,17 +22,13 @@ import { dashboardContentInsightsServiceFactory } from './dashboard_content_insi
 import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management.stub';
 import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service.stub';
 import { dashboardRecentlyAccessedServiceFactory } from './dashboard_recently_accessed/dashboard_recently_accessed.stub';
-import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context.stub';
-import { navigationServiceFactory } from './navigation/navigation.stub';
 import { noDataPageServiceFactory } from './no_data_page/no_data_page_service.stub';
 import { observabilityAIAssistantServiceStubFactory } from './observability_ai_assistant/observability_ai_assistant_service.stub';
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service.stub';
 import { savedObjectsTaggingServiceFactory } from './saved_objects_tagging/saved_objects_tagging.stub';
 import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode.stub';
 import { serverlessServiceFactory } from './serverless/serverless_service.stub';
-import { shareServiceFactory } from './share/share.stub';
-import { spacesServiceFactory } from './spaces/spaces.stub';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions_service.stub';
 import { urlForwardingServiceFactory } from './url_forwarding/url_fowarding.stub';
 import { usageCollectionServiceFactory } from './usage_collection/usage_collection.stub';
@@ -41,13 +37,9 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory),
-  dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
-  navigation: new PluginServiceProvider(navigationServiceFactory),
   savedObjectsTagging: new PluginServiceProvider(savedObjectsTaggingServiceFactory),
   screenshotMode: new PluginServiceProvider(screenshotModeServiceFactory),
-  share: new PluginServiceProvider(shareServiceFactory),
-  spaces: new PluginServiceProvider(spacesServiceFactory),
   urlForwarding: new PluginServiceProvider(urlForwardingServiceFactory),
   usageCollection: new PluginServiceProvider(usageCollectionServiceFactory),
   savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),

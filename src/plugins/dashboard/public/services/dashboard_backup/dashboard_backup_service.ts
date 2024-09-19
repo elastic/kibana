@@ -19,8 +19,7 @@ import type { DashboardContainerInput } from '../../../common';
 import { backupServiceStrings } from '../../dashboard_container/_dashboard_container_strings';
 import { UnsavedPanelState } from '../../dashboard_container/types';
 import type { DashboardStartDependencies } from '../../plugin';
-import { coreServices } from '../kibana_services';
-import { DashboardSpacesService } from '../spaces/types';
+import { coreServices, spacesService } from '../kibana_services';
 import type { DashboardBackupServiceType } from './types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
@@ -31,32 +30,26 @@ const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 // this key is named `panels` for BWC reasons, but actually contains the entire dashboard state
 const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
 
-interface DashboardBackupRequiredServices {
-  spaces: DashboardSpacesService;
-}
-
 export type DashboardBackupServiceFactory = KibanaPluginServiceFactory<
   DashboardBackupServiceType,
   DashboardStartDependencies,
-  DashboardBackupRequiredServices
+  {}
 >;
 
 class DashboardBackupService implements DashboardBackupServiceType {
   private activeSpaceId: string;
   private sessionStorage: Storage;
   private localStorage: Storage;
-  private spaces: DashboardSpacesService;
 
   private oldDashboardsWithUnsavedChanges: string[] = [];
 
-  constructor(requiredServices: DashboardBackupRequiredServices) {
-    ({ spaces: this.spaces } = requiredServices);
+  constructor() {
     this.sessionStorage = new Storage(sessionStorage);
     this.localStorage = new Storage(localStorage);
 
     this.activeSpaceId = 'default';
-    if (this.spaces.getActiveSpace$) {
-      firstValueFrom(this.spaces.getActiveSpace$()).then((space) => {
+    if (spacesService?.getActiveSpace$) {
+      firstValueFrom(spacesService.getActiveSpace$()).then((space) => {
         this.activeSpaceId = space.id;
       });
     }
@@ -193,5 +186,5 @@ export const dashboardBackupServiceFactory: DashboardBackupServiceFactory = (
   core,
   requiredServices
 ) => {
-  return new DashboardBackupService(requiredServices);
+  return new DashboardBackupService();
 };

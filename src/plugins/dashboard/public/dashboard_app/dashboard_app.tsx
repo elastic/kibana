@@ -29,7 +29,12 @@ import {
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { DashboardTopNav } from '../dashboard_top_nav';
-import { coreServices, dataService, embeddableService } from '../services/kibana_services';
+import {
+  coreServices,
+  dataService,
+  embeddableService,
+  shareService,
+} from '../services/kibana_services';
 import { pluginServices } from '../services/plugin_services';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
@@ -75,7 +80,6 @@ export function DashboardApp({
    */
   const {
     screenshotMode: { isScreenshotMode, getScreenshotContext },
-    share: { url },
     observabilityAIAssistant,
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
@@ -194,7 +198,7 @@ export function DashboardApp({
     return () => appStateSubscription.unsubscribe();
   }, [dashboardApi, kbnUrlStateStorage, savedDashboardId]);
 
-  const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
+  const locator = useMemo(() => shareService?.url.locators.get(DASHBOARD_APP_LOCATOR), []);
 
   return showNoDataPage ? (
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />

@@ -47,7 +47,12 @@ import { DashboardEmbedSettings } from '../dashboard_app/types';
 import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
-import { coreServices, dataService, embeddableService } from '../services/kibana_services';
+import {
+  coreServices,
+  dataService,
+  embeddableService,
+  navigationService,
+} from '../services/kibana_services';
 import { pluginServices } from '../services/plugin_services';
 import './_dashboard_top_nav.scss';
 
@@ -81,7 +86,6 @@ export function InternalDashboardTopNav({
    */
   const {
     serverless,
-    navigation: { TopNavMenu },
     initializerContext: { allowByValueEmbeddables },
     dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
     dashboardRecentlyAccessed,
@@ -378,7 +382,7 @@ export function InternalDashboardTopNav({
         ref={dashboardTitleRef}
         tabIndex={-1}
       >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
-      <TopNavMenu
+      <navigationService.ui.TopNavMenu
         {...visibilityProps}
         query={query as Query | undefined}
         badges={badges}

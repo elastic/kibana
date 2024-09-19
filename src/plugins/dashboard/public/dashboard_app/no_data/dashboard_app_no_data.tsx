@@ -12,7 +12,13 @@ import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
-import { coreServices, dataService, embeddableService } from '../../services/kibana_services';
+import {
+  coreServices,
+  dataService,
+  dataViewEditorService,
+  embeddableService,
+  shareService,
+} from '../../services/kibana_services';
 import { pluginServices } from '../../services/plugin_services';
 
 export const DashboardAppNoDataPage = ({
@@ -20,14 +26,14 @@ export const DashboardAppNoDataPage = ({
 }: {
   onDataViewCreated: () => void;
 }) => {
-  const { dataViewEditor, noDataPage, share } = pluginServices.getServices();
+  const { noDataPage } = pluginServices.getServices();
 
   const analyticsServices = {
     coreStart: coreServices,
     dataViews: dataService.dataViews,
-    dataViewEditor,
+    dataViewEditor: dataViewEditorService,
     noDataPage,
-    share: share.url ? { url: share.url } : undefined,
+    share: shareService,
   };
 
   const importPromise = import('@kbn/shared-ux-page-analytics-no-data');

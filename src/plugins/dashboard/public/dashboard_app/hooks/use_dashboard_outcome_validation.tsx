@@ -14,6 +14,7 @@ import { createDashboardEditUrl } from '../../dashboard_constants';
 import { useDashboardMountContext } from './dashboard_mount_context';
 import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
 import { DashboardCreationOptions } from '../..';
+import { spacesService } from '../../services/kibana_services';
 
 export const useDashboardOutcomeValidation = () => {
   const [aliasId, setAliasId] = useState<string>();
@@ -26,7 +27,7 @@ export const useDashboardOutcomeValidation = () => {
   /**
    * Unpack dashboard services
    */
-  const { screenshotMode, spaces } = pluginServices.getServices();
+  const { screenshotMode } = pluginServices.getServices();
 
   const validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'] = useCallback(
     ({ dashboardFound, resolveMeta, dashboardId }: LoadDashboardReturn) => {
@@ -44,7 +45,7 @@ export const useDashboardOutcomeValidation = () => {
           if (screenshotMode.isScreenshotMode()) {
             scopedHistory.replace(path); // redirect without the toast when in screenshot mode.
           } else {
-            spaces.redirectLegacyUrl?.({ path, aliasPurpose });
+            spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose });
           }
           return 'redirected'; // redirected. Stop loading dashboard.
         }
@@ -54,20 +55,20 @@ export const useDashboardOutcomeValidation = () => {
       }
       return 'valid';
     },
-    [scopedHistory, screenshotMode, spaces]
+    [scopedHistory, screenshotMode]
   );
 
   const getLegacyConflictWarning = useMemo(() => {
     if (savedObjectId && outcome === 'conflict' && aliasId) {
       return () =>
-        spaces.getLegacyUrlConflict?.({
+        spacesService?.ui.components.getLegacyUrlConflict({
           currentObjectId: savedObjectId,
           otherObjectId: aliasId,
           otherObjectPath: `#${createDashboardEditUrl(aliasId)}${scopedHistory.location.search}`,
         });
     }
     return null;
-  }, [aliasId, outcome, savedObjectId, scopedHistory, spaces]);
+  }, [aliasId, outcome, savedObjectId, scopedHistory]);
 
   return { validateOutcome, getLegacyConflictWarning };
 };

@@ -11,17 +11,26 @@ import { BehaviorSubject } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public/plugin';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { DashboardStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
 export let dataService: DataPublicPluginStart;
+export let dataViewEditorService: DataViewEditorStart;
 export let embeddableService: EmbeddableStart;
 export let fieldFormatService: FieldFormatsStart;
+// export let initContextService: PluginInitializerContext;
+export let navigationService: NavigationPublicPluginStart;
 export let presentationUtilService: PresentationUtilPluginStart;
+export let shareService: SharePluginStart | undefined;
+export let spacesService: SpacesApi | undefined;
 export let visualizationsService: VisualizationsStart;
 // export let dataViewsService: DataViewsPublicPluginStart;
 
@@ -30,9 +39,13 @@ const servicesReady$ = new BehaviorSubject(false);
 export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
   coreServices = kibanaCore;
   dataService = deps.data;
+  dataViewEditorService = deps.dataViewEditor;
   embeddableService = deps.embeddable;
   fieldFormatService = deps.fieldFormats;
+  navigationService = deps.navigation;
   presentationUtilService = deps.presentationUtil;
+  shareService = deps.share;
+  spacesService = deps.spaces;
   visualizationsService = deps.visualizations;
   // dataViewsService = deps.dataViews;
 

@@ -11,7 +11,7 @@ import { batch } from 'react-redux';
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';

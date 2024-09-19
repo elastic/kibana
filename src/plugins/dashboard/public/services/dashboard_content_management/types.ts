@@ -18,7 +18,6 @@ import { DashboardBackupServiceType } from '../dashboard_backup/types';
 import { DashboardInitializerContextService } from '../initializer_context/types';
 import { DashboardSavedObjectsTaggingService } from '../saved_objects_tagging/types';
 import { DashboardScreenshotModeService } from '../screenshot_mode/types';
-import { DashboardSpacesService } from '../spaces/types';
 import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import {
   FindDashboardsByIdResponse,
@@ -27,7 +26,6 @@ import {
 } from './lib/find_dashboards';
 
 export interface DashboardContentManagementRequiredServices {
-  spaces: DashboardSpacesService;
   dashboardBackup: DashboardBackupServiceType;
   screenshotMode: DashboardScreenshotModeService;
   initializerContext: DashboardInitializerContextService;
