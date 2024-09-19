@@ -7,20 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useLayoutEffect, useState } from 'react';
-
-/**
- * Hook that returns the browser window width
- */
-export const useWindowSize = (): number => {
-  const [width, setWidth] = useState(0);
-  useLayoutEffect(() => {
-    function updateSize() {
-      setWidth(window.innerWidth);
-    }
-    window.addEventListener('resize', updateSize);
-    updateSize();
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
-  return width;
-};
+declare namespace jsyaml {
+  function load<T = any>(str: string, opts?: jsyaml.LoadOptions): T;
+}
