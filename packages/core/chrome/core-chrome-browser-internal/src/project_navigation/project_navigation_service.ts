@@ -422,18 +422,18 @@ export class ProjectNavigationService {
   }
 
   private setPanelSelectedNode = (_node: string | ChromeProjectNavigationNode | null) => {
-    const node = typeof _node === 'string' ? this.findNodeByPath(_node) : _node;
+    const node = typeof _node === 'string' ? this.findNodeById(_node) : _node;
     this.panelSelectedNode$.next(node);
   };
 
-  private findNodeByPath(path: string): ChromeProjectNavigationNode | null {
+  private findNodeById(id: string): ChromeProjectNavigationNode | null {
     const allNodes = this.navigationTree$.getValue();
     if (!allNodes) return null;
 
     const find = (nodes: ChromeProjectNavigationNode[]): ChromeProjectNavigationNode | null => {
-      // Recursively search for the node with the given path
+      // Recursively search for the node with the given id
       for (const node of nodes) {
-        if (node.path === path) {
+        if (node.id === id) {
           return node;
         }
         if (node.children) {

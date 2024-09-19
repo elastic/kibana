@@ -195,7 +195,7 @@ export interface ChromeStart {
      * Set the selected nav node that opens the side nav panel.
      *
      * @param node The selected nav node that opens the side nav panel. If a string is provided,
-     * it will be used as the **path** of the selected nav node. If `null` is provided, the side nav panel
+     * it will be used as the **id** of the selected nav node. If `null` is provided, the side nav panel
      * will be closed.
      */
     setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
