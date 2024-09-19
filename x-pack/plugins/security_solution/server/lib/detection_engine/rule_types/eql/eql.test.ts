@@ -165,7 +165,7 @@ describe('eql_executor', () => {
     });
 
     it('should handle scheduleNotificationResponseActionsService call', async () => {
-      const result = await eqlExecutor({
+      const { result } = await eqlExecutor({
         inputIndex: DEFAULT_INDEX_PATTERN,
         runtimeMappings: {},
         completeRule: eqlCompleteRule,
