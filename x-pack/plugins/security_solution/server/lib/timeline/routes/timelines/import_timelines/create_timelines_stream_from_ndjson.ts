@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodError, ZodType } from 'zod';
+import type { ZodError, ZodType } from '@kbn/zod';
 import type { Transform } from 'stream';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { type Either, fold, left, right } from 'fp-ts/lib/Either';

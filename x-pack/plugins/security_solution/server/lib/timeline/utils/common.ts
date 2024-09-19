@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodError } from 'zod';
+import type { ZodError } from '@kbn/zod';
 import { stringifyZodError } from '@kbn/zod-helpers';
 
 import { set } from '@kbn/safer-lodash-set/fp';
