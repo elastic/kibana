@@ -29,9 +29,9 @@ describe('ruleTypeDiffAlgorithm', () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        merged_version: mockVersions.current_version,
+        merged_version: mockVersions.target_version,
         diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
-        merge_outcome: ThreeWayMergeOutcome.Current,
+        merge_outcome: ThreeWayMergeOutcome.Target,
         conflict: ThreeWayDiffConflict.NONE,
       })
     );
@@ -127,9 +127,9 @@ describe('ruleTypeDiffAlgorithm', () => {
         expect.objectContaining({
           has_base_version: false,
           base_version: undefined,
-          merged_version: mockVersions.current_version,
+          merged_version: mockVersions.target_version,
           diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Current,
+          merge_outcome: ThreeWayMergeOutcome.Target,
           conflict: ThreeWayDiffConflict.NONE,
         })
       );
