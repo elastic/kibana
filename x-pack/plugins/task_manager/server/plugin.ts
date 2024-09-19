@@ -404,6 +404,7 @@ export class TaskManagerPlugin
 
   public async stop() {
     if (this.kibanaDiscoveryService?.isStarted()) {
+      this.kibanaDiscoveryService.stop();
       try {
         await this.kibanaDiscoveryService.deleteCurrentNode();
       } catch (e) {

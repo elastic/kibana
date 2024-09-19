@@ -30,6 +30,8 @@ export class KibanaDiscoveryService {
   private started = false;
   private savedObjectsRepository: ISavedObjectsRepository;
   private logger: Logger;
+  private stopped = false;
+  private timer: NodeJS.Timeout | undefined;
 
   constructor({ config, currentNode, savedObjectsRepository, logger }: DiscoveryServiceParams) {
     this.activeNodesLookBack = config.active_nodes_lookback;
@@ -52,29 +54,35 @@ export class KibanaDiscoveryService {
   }
 
   private async scheduleUpsertCurrentNode() {
-    const lastSeenDate = new Date();
-    const lastSeen = lastSeenDate.toISOString();
-    try {
-      await this.upsertCurrentNode({ id: this.currentNode, lastSeen });
-      if (!this.started) {
-        this.logger.info('Kibana Discovery Service has been started');
-        this.started = true;
-      }
-    } catch (e) {
-      if (!this.started) {
-        this.logger.error(
-          `Kibana Discovery Service couldn't be started and will be retried in ${this.discoveryInterval}ms, error:${e.message}`
+    if (!this.stopped) {
+      const lastSeenDate = new Date();
+      const lastSeen = lastSeenDate.toISOString();
+      try {
+        await this.upsertCurrentNode({ id: this.currentNode, lastSeen });
+        if (!this.started) {
+          this.logger.info('Kibana Discovery Service has been started');
+          this.started = true;
+        }
+      } catch (e) {
+        if (!this.started) {
+          this.logger.error(
+            `Kibana Discovery Service couldn't be started and will be retried in ${this.discoveryInterval}ms, error:${e.message}`
+          );
+        } else {
+          this.logger.error(
+            `Kibana Discovery Service couldn't update this node's last_seen timestamp. id: ${this.currentNode}, last_seen: ${lastSeen}, error:${e.message}`
+          );
+        }
+      } finally {
+        this.timer = setTimeout(
+          async () => await this.scheduleUpsertCurrentNode(),
+          this.discoveryInterval - (Date.now() - lastSeenDate.getTime())
         );
-      } else {
-        this.logger.error(
-          `Kibana Discovery Service couldn't update this node's last_seen timestamp. id: ${this.currentNode}, last_seen: ${lastSeen}, error:${e.message}`
-        );
       }
-    } finally {
-      setTimeout(
-        async () => await this.scheduleUpsertCurrentNode(),
-        this.discoveryInterval - (Date.now() - lastSeenDate.getTime())
-      );
+    } else {
+      if (this.timer) {
+        clearTimeout(this.timer);
+      }
     }
   }
 
@@ -105,5 +113,9 @@ export class KibanaDiscoveryService {
   public async deleteCurrentNode() {
     await this.savedObjectsRepository.delete(BACKGROUND_TASK_NODE_SO_NAME, this.currentNode);
     this.logger.info('Removed this node from the Kibana Discovery Service');
+  }
+
+  public stop() {
+    this.stopped = true;
   }
 }

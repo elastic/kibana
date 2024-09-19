@@ -26,6 +26,7 @@ describe('KibanaDiscoveryService', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.spyOn(global, 'setTimeout');
+    jest.spyOn(global, 'clearTimeout');
     jest.setSystemTime(new Date(now));
   });
 
@@ -179,6 +180,47 @@ describe('KibanaDiscoveryService', () => {
       expect(logger.error).toHaveBeenCalledWith(
         "Kibana Discovery Service couldn't update this node's last_seen timestamp. id: current-node-id, last_seen: 2024-08-10T10:00:10.000Z, error:foo"
       );
+    });
+
+    it('does not schedule when Kibana is shutting down', async () => {
+      savedObjectsRepository.update.mockResolvedValueOnce(
+        {} as SavedObjectsUpdateResponse<unknown>
+      );
+
+      const kibanaDiscoveryService = new KibanaDiscoveryService({
+        savedObjectsRepository,
+        logger,
+        currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
+      });
+      await kibanaDiscoveryService.start();
+
+      expect(savedObjectsRepository.update).toHaveBeenCalledTimes(1);
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith('Kibana Discovery Service has been started');
+      expect(kibanaDiscoveryService.isStarted()).toBe(true);
+      expect(setTimeout).toHaveBeenCalledTimes(1);
+      expect(setTimeout).toHaveBeenNthCalledWith(
+        1,
+        expect.any(Function),
+        DEFAULT_DISCOVERY_INTERVAL_MS
+      );
+
+      kibanaDiscoveryService.stop();
+
+      await jest.advanceTimersByTimeAsync(15000);
+
+      expect(savedObjectsRepository.update).toHaveBeenCalledTimes(1);
+      expect(setTimeout).toHaveBeenCalledTimes(1);
+      expect(setTimeout).toHaveBeenNthCalledWith(
+        1,
+        expect.any(Function),
+        DEFAULT_DISCOVERY_INTERVAL_MS
+      );
+      expect(clearTimeout).toHaveBeenCalledTimes(1);
     });
   });
 
