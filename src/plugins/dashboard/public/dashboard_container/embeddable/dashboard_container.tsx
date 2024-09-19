@@ -316,7 +316,7 @@ export class DashboardContainer
     );
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
     this.embeddedExternally$ = new BehaviorSubject(
-      this.getState().explicitInput.isEmbeddedExternally
+      this.getState().componentState.isEmbeddedExternally
     );
     this.publishingSubscription.add(
       this.onStateChange(() => {
