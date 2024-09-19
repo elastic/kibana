@@ -24,12 +24,16 @@ import { DashboardApi } from '..';
 
 describe('Dashboard App', () => {
   const mockDashboard = buildMockDashboard();
-  const expandedPanelIdSpy = jest.spyOn(mockDashboard.expandedPanelId, 'next');
+  const expandedPanelIdSpy = jest.spyOn(mockDashboard.expandedPanelId, 'subscribe');
   let mockHistory: MemoryHistory;
   let historySpy: jest.SpyInstance;
-  beforeAll(() => {
+  let mockDashboardApiExpandedPanel: string | undefined;
+  const expandPanelSpyInRouter = jest.spyOn(mockDashboard, 'expandPanel');
+
+  beforeEach(() => {
     mockHistory = createMemoryHistory();
     historySpy = jest.spyOn(mockHistory, 'replace');
+
     /**
      * Mock the LazyDashboardRenderer component to avoid rendering the actual dashboard
      * and hitting errors that aren't relevant
@@ -39,22 +43,22 @@ describe('Dashboard App', () => {
       // we need overwrite the onApiAvailable prop to get the dashboard Api in the dashboard app
       .mockImplementation(({ onApiAvailable }: DashboardRendererProps) => {
         useEffect(() => {
+          // mock up similar to the onApiAvailable in DashboardApp
+          if (mockDashboardApiExpandedPanel) {
+            mockDashboard.expandPanel(mockDashboardApiExpandedPanel);
+          }
           onApiAvailable?.(mockDashboard as DashboardApi);
         }, [onApiAvailable]);
 
         return <div>Test renderer</div>;
       });
-  });
 
-  beforeEach(() => {
-    // reset the mock history calls per test
+    // reset the spies before each test
     historySpy.mockClear();
-    // reset the expanded panel id between tests
     expandedPanelIdSpy.mockClear();
   });
 
   it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
-    // default conditions with no expanded panel id and no urls being passed with expanded panel ID in the url
     render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} />);
 
     await waitFor(() => {
@@ -76,25 +80,12 @@ describe('Dashboard App', () => {
   });
 
   it('test that the expanded panel behavior subject and history is called when passed as a prop to the DashboardApp', async () => {
-    // this tests a user getting a url from another user that has an expanded panel on the dashboard
-    // test someone giving a url with an expanded panel id, as if it goes through the router
-    mockHistory.push('/create/456');
-
-    render(
-      <DashboardApp
-        savedDashboardId=""
-        redirectTo={jest.fn()}
-        history={mockHistory}
-        expandedPanelId="456"
-      />
-    );
+    render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} expandedPanelId="456" />);
 
     await waitFor(() => {
+      expect(expandPanelSpyInRouter).toHaveBeenCalled();
       expect(expandedPanelIdSpy).toHaveBeenCalledTimes(1);
-      // history replace should not be called until minimizing the panel
       expect(historySpy).toHaveBeenCalledTimes(0);
-      expect(mockDashboard.getExpandedPanelId());
-      expect(mockHistory.location.pathname).toBe('/create/456');
     });
 
     // simulate minimizing a panel
