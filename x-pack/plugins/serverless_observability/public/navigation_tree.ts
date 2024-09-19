@@ -136,7 +136,6 @@ export const navigationTree: NavigationTreeDefinition = {
                 const regex = /app\/apm\/.*service.*/;
                 return regex.test(pathNameSerialized);
               },
-              withBadge: true,
             },
             {
               link: 'apm:traces',
