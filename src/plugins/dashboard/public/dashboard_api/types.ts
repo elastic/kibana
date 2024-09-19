@@ -31,7 +31,7 @@ import {
 import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { DefaultEmbeddableApi, ErrorEmbeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { DashboardPanelMap } from '../../common';
+import { DashboardPanelMap, DashboardPanelState } from '../../common';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
 import { DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../dashboard_container/types';
 
@@ -60,6 +60,7 @@ export type DashboardApi = CanExpandPanels &
     getRuntimeStateForControlGroup: () => UnsavedPanelState | undefined;
     getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
     getSettings: () => DashboardStateFromSettingsFlyout;
+    getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
     hasOverlays$: PublishingSubject<boolean | undefined>;
     hasRunMigrations$: PublishingSubject<boolean | undefined>;
     hasUnsavedChanges$: PublishingSubject<boolean | undefined>;

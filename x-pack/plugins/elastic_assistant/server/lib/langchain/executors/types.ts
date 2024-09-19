@@ -14,6 +14,7 @@ import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
@@ -47,6 +48,7 @@ export interface AgentExecutorParams<T extends boolean> {
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
+  inference: InferenceServerStart;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements: Replacements;
   isStream?: T;

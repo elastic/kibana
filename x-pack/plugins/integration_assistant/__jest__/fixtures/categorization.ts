@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SamplesFormatName } from '../../common/api/model/common_attributes';
+import { SamplesFormatName } from '../../common';
 import type { Pipeline } from '../../common';
 
 export const categorizationInitialPipeline: Pipeline = {

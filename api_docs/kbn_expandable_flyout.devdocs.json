@@ -13,7 +13,7 @@
           "\nExpandable flyout UI React component.\nDisplays 3 sections (right, left, preview) depending on the panels in the context.\n\nThe behavior expects that the left and preview sections should only be displayed is a right section\nis already rendered."
         ],
         "signature": [
-          "{ ({ customStyles, registeredPanels, flyoutCustomProps, ...flyoutProps }: React.PropsWithChildren<",
+          "{ ({ ...props }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/expandable-flyout",
             "scope": "public",
@@ -32,7 +32,7 @@
             "id": "def-public.ExpandableFlyout.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  customStyles,\n  registeredPanels,\n  flyoutCustomProps,\n  ...flyoutProps\n}",
+            "label": "{ ...props }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -577,8 +577,8 @@
             "text": "ExpandableFlyoutProps"
           },
           " extends Omit<",
-          "EuiFlyoutProps",
-          "<\"div\">, \"onClose\">"
+          "EuiFlyoutResizableProps",
+          ", \"onClose\">"
         ],
         "path": "packages/kbn-expandable-flyout/src/index.tsx",
         "deprecated": false,
@@ -652,7 +652,24 @@
               "\nSet of properties that drive a settings menu"
             ],
             "signature": [
-              "{ hideSettings?: boolean | undefined; pushVsOverlay?: { disabled: boolean; tooltip: string; } | undefined; } | undefined"
+              "FlyoutCustomProps",
+              " | undefined"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "\nOptional data test subject string to be used on the EuiFlyoutResizable component"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-expandable-flyout/src/index.tsx",
             "deprecated": false,
