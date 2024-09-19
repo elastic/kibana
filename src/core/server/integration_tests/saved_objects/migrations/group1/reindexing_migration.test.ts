@@ -77,13 +77,6 @@ describe('reindexing migrations', () => {
       expect(logs).not.toMatch(`[${defaultKibanaIndex}] CREATE_NEW_TARGET`);
       expect(logs).not.toMatch(`[${defaultKibanaIndex}] CLEANUP_UNKNOWN_AND_EXCLUDED`);
       expect(logs).not.toMatch(`[${defaultKibanaIndex}] PREPARE_COMPATIBLE_MIGRATION`);
-      // TODO
-    });
-  });
-
-  describe('when an index contains SO types that have been moved to another index', () => {
-    it('executes the reindexing migration steps', () => {
-      // TODO
     });
   });
 

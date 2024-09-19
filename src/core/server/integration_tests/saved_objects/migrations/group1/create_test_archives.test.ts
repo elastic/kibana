@@ -17,7 +17,10 @@ import {
   createBaselineArchive,
 } from '../kibana_migrator_archive_utils';
 
-describe('migration tests toolkit', () => {
+/**
+ * Enable and execute this test ONLY IN YOUR DEV MACHINE, in order to build new test packages
+ */
+describe.skip('migration tests toolkit', () => {
   it('can create a 1k documents ZIP archive', async () => {
     await createBaselineArchive({
       esVersion: BASELINE_ELASTICSEARCH_VERSION,
