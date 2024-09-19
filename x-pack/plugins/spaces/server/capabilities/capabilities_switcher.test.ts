@@ -20,6 +20,8 @@ const features = [
     id: 'feature_1',
     name: 'Feature 1',
     app: [],
+    category: { id: 'enterpriseSearch' },
+    scope: ['spaces', 'security'],
   },
   {
     id: 'feature_2',
@@ -39,6 +41,7 @@ const features = [
         },
       },
     },
+    category: { id: 'observability' },
   },
   {
     id: 'feature_3',
@@ -58,6 +61,7 @@ const features = [
         },
       },
     },
+    category: { id: 'securitySolution' },
   },
   {
     // feature 4 intentionally delcares the same items as feature 3
@@ -78,6 +82,7 @@ const features = [
         },
       },
     },
+    category: { id: 'observability' },
   },
 ] as unknown as KibanaFeature[];
 
@@ -316,5 +321,82 @@ describe('capabilitiesSwitcher', () => {
     expectedCapabilities.feature_3.foo = false;
 
     expect(result).toEqual(expectedCapabilities);
+  });
+
+  describe('when the space has a solution set', () => {
+    it('does toggles capabilities of the solutions different from the space one even when the space has no disabled features', async () => {
+      const space: Space = {
+        id: 'space',
+        name: '',
+        disabledFeatures: [],
+      };
+
+      const capabilities = buildCapabilities();
+
+      const { switcher } = setup(space);
+      const request = httpServerMock.createKibanaRequest();
+
+      {
+        space.solution = 'es';
+
+        // It should disable observability and securitySolution features
+        // which correspond to feature_2 and feature_3
+        const result = await switcher(request, capabilities, false);
+
+        const expectedCapabilities = buildCapabilities();
+
+        expectedCapabilities.navLinks.feature2 = false;
+        expectedCapabilities.catalogue.feature2Entry = false;
+        expectedCapabilities.navLinks.feature3 = false;
+        expectedCapabilities.catalogue.feature3Entry = false;
+        expectedCapabilities.navLinks.feature3_app = false;
+        expectedCapabilities.management.kibana.indices = false;
+        expectedCapabilities.management.kibana.somethingElse = false;
+        expectedCapabilities.feature_2.bar = false;
+        expectedCapabilities.feature_2.foo = false;
+        expectedCapabilities.feature_3.bar = false;
+        expectedCapabilities.feature_3.foo = false;
+
+        expect(result).toEqual(expectedCapabilities);
+      }
+
+      {
+        space.solution = 'oblt';
+
+        // It should disable enterpriseSearch and securitySolution features
+        // which correspond to feature_1 and feature_3
+        const result = await switcher(request, capabilities, false);
+
+        const expectedCapabilities = buildCapabilities();
+
+        expectedCapabilities.feature_1.bar = false;
+        expectedCapabilities.feature_1.foo = false;
+        expectedCapabilities.feature_3.bar = false;
+        expectedCapabilities.feature_3.foo = false;
+
+        expect(result).toEqual(expectedCapabilities);
+      }
+
+      {
+        space.solution = 'security';
+
+        // It should disable enterpriseSearch and observability features
+        // which correspond to feature_1 and feature_2
+        const result = await switcher(request, capabilities, false);
+
+        const expectedCapabilities = buildCapabilities();
+
+        expectedCapabilities.navLinks.feature2 = false;
+        expectedCapabilities.catalogue.feature2Entry = false;
+        expectedCapabilities.navLinks.feature3 = false;
+        expectedCapabilities.management.kibana.somethingElse = false;
+        expectedCapabilities.feature_1.bar = false;
+        expectedCapabilities.feature_1.foo = false;
+        expectedCapabilities.feature_2.bar = false;
+        expectedCapabilities.feature_2.foo = false;
+
+        expect(result).toEqual(expectedCapabilities);
+      }
+    });
   });
 });

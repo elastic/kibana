@@ -11,14 +11,9 @@ import { BehaviorSubject } from 'rxjs';
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
-import { ControlWidth } from '../../../common';
 
-import {
-  ControlApiInitialization,
-  ControlStateManager,
-  DefaultControlApi,
-  DefaultControlState,
-} from './types';
+import type { ControlWidth, DefaultControlState } from '../../../common';
+import type { ControlApiInitialization, ControlStateManager, DefaultControlApi } from './types';
 
 export type ControlApi = ControlApiInitialization<DefaultControlApi>;
 
