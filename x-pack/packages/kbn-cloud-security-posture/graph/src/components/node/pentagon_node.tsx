@@ -8,6 +8,7 @@
 import React from 'react';
 import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 import styled from '@emotion/styled';
+import { Handle, Position } from '@xyflow/react';
 import {
   NodeContainer,
   NodeLabel,
@@ -15,8 +16,9 @@ import {
   NodeShapeSvg,
   NodeIcon,
   NodeButton,
-  NodeProps,
+  HandleStyleOverride,
 } from './styles';
+import { NodeProps } from '.';
 
 const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
   transform: translate(-50%, -51.5%);
@@ -64,6 +66,8 @@ export const PentagonNode: React.FC<NodeProps> = (props: NodeProps) => {
           y={`${(88 - NodeButton.ExpandButtonSize) / 2}px`}
         />
       )}
+      <Handle type="target" position={Position.Left} id="in" style={HandleStyleOverride} />
+      <Handle type="source" position={Position.Right} id="out" style={HandleStyleOverride} />
       <NodeLabel>{Boolean(label) ? label : id}</NodeLabel>
     </NodeContainer>
   );

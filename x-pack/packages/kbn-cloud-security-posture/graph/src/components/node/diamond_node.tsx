@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { Handle, Position } from '@xyflow/react';
+import { type NodeProps } from '.';
 import {
   NodeContainer,
   NodeLabel,
@@ -14,7 +16,7 @@ import {
   NodeShapeSvg,
   NodeIcon,
   NodeButton,
-  NodeProps,
+  HandleStyleOverride,
 } from './styles';
 
 export const DiamondNode: React.FC<NodeProps> = (props: NodeProps) => {
@@ -59,6 +61,8 @@ export const DiamondNode: React.FC<NodeProps> = (props: NodeProps) => {
           y={`${(98 - NodeButton.ExpandButtonSize) / 2 - 4}px`}
         />
       )}
+      <Handle type="target" position={Position.Left} id="in" style={HandleStyleOverride} />
+      <Handle type="source" position={Position.Right} id="out" style={HandleStyleOverride} />
       <NodeLabel>{Boolean(label) ? label : id}</NodeLabel>
     </NodeContainer>
   );

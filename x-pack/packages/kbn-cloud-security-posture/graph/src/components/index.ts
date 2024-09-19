@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-export { DiamondNode } from './node/diamond_node';
-export { EllipseNode } from './node/ellipse_node';
-export { HexagonNode } from './node/hexagon_node';
-export { PentagonNode } from './node/pentagon_node';
-export { RectangleNode } from './node/rectangle_node';
+export interface PositionXY {
+  x: number;
+  y: number;
+}
+
+export interface GraphMetadata {
+  nodes: { [key: string]: { edgesIn: number; edgesOut: number } };
+  edges: {
+    [key: string]: { source: string; target: string; edgesStacked: number; edges: string[] };
+  };
+}

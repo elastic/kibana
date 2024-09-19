@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import type { Node, NodeProps as xyNodeProps } from '@xyflow/react';
 import styled from '@emotion/styled';
 import {
   EuiText,
@@ -137,14 +136,7 @@ export const NodeButton = ({ x, y, onClick }: NodeButtonProps) => {
 
 NodeButton.ExpandButtonSize = ExpandButtonSize;
 
-export interface NodeData extends Record<string, unknown> {
-  id: string;
-  label?: string;
-  color?: 'primary' | 'danger' | 'warning';
-  shape: 'hexagon' | 'pentagon' | 'ellipse' | 'rectangle' | 'diamond';
-  icon?: string;
-  interactive: boolean;
-  expandButtonClick?: (e: React.MouseEvent<HTMLElement>, node: NodeProps) => void;
-}
-
-export type NodeProps = xyNodeProps<Node<NodeData>>;
+export const HandleStyleOverride: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+};

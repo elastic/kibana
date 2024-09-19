@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { Handle, Position } from '@xyflow/react';
 import {
   NodeContainer,
   NodeLabel,
@@ -14,8 +15,9 @@ import {
   NodeShapeSvg,
   NodeIcon,
   NodeButton,
-  NodeProps,
+  HandleStyleOverride,
 } from './styles';
+import { NodeProps } from '.';
 
 export const HexagonNode: React.FC<NodeProps> = (props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick } = props.data;
@@ -59,6 +61,8 @@ export const HexagonNode: React.FC<NodeProps> = (props: NodeProps) => {
           y={`${(96 - NodeButton.ExpandButtonSize) / 2 - 2}px`}
         />
       )}
+      <Handle type="target" position={Position.Left} id="in" style={HandleStyleOverride} />
+      <Handle type="source" position={Position.Right} id="out" style={HandleStyleOverride} />
       <NodeLabel>{Boolean(label) ? label : id}</NodeLabel>
     </NodeContainer>
   );

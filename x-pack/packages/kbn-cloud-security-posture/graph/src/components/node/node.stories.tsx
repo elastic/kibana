@@ -10,8 +10,14 @@ import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import { Story } from '@storybook/react';
-import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode } from '..';
-import { type NodeData } from './styles';
+import {
+  type NodeData,
+  HexagonNode,
+  PentagonNode,
+  EllipseNode,
+  RectangleNode,
+  DiamondNode,
+} from '.';
 
 import '@xyflow/react/dist/style.css';
 
