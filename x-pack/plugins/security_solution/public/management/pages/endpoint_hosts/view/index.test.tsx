@@ -199,7 +199,7 @@ describe('when on the endpoint list page', () => {
 
     render();
     const timelineFlyout = renderResult.queryByTestId('timeline-bottom-bar-title-button');
-    expect(timelineFlyout).toBeNull();
+    expect(timelineFlyout).not.toBeInTheDocument();
   });
 
   describe('when there are no endpoints or polices', () => {
@@ -216,7 +216,7 @@ describe('when on the endpoint list page', () => {
       });
       // Initially, there are no hosts or policies, so we prompt to add policies first.
       const table = await renderResult.findByTestId('emptyPolicyTable');
-      expect(table).not.toBeNull();
+      expect(table).toBeInTheDocument();
     });
   });
 
@@ -270,19 +270,19 @@ describe('when on the endpoint list page', () => {
       ).not.toBeInTheDocument();
 
       const emptyHostsTable = await renderResult.findByTestId('emptyHostsTable');
-      expect(emptyHostsTable).not.toBeNull();
+      expect(emptyHostsTable).toBeInTheDocument();
     });
 
     it('should display the onboarding steps', async () => {
       render();
       const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
-      expect(onboardingSteps).not.toBeNull();
+      expect(onboardingSteps).toBeInTheDocument();
     });
 
     it('should show policy selection', async () => {
       render();
       const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
-      expect(onboardingPolicySelect).not.toBeNull();
+      expect(onboardingPolicySelect).toBeInTheDocument();
     });
 
     it('should show discrete `package policy - agent policy` pairs', async () => {
@@ -467,7 +467,7 @@ describe('when on the endpoint list page', () => {
                 POLICY_STATUS_TO_HEALTH_COLOR[generatedPolicyStatuses[index]]
               }]`
             )
-          ).not.toBeNull();
+          ).toBeInTheDocument();
         });
       });
 
@@ -490,7 +490,7 @@ describe('when on the endpoint list page', () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink-link'))[0];
-        expect(firstPolicyName).not.toBeNull();
+        expect(firstPolicyName).toBeInTheDocument();
         expect(firstPolicyName.getAttribute('href')).toEqual(
           `${APP_PATH}${MANAGEMENT_PATH}/policy/${firstPolicyID}/settings`
         );
@@ -531,7 +531,7 @@ describe('when on the endpoint list page', () => {
 
         it('should show the flyout', async () => {
           return renderResult.findByTestId('endpointDetailsFlyout').then((flyout) => {
-            expect(flyout).not.toBeNull();
+            expect(flyout).toBeInTheDocument();
           });
         });
       });
@@ -544,7 +544,7 @@ describe('when on the endpoint list page', () => {
         const firstPolicyRevElement = (
           await renderResult.findAllByTestId('policyNameCellLink-revision')
         )[0];
-        expect(firstPolicyRevElement).not.toBeNull();
+        expect(firstPolicyRevElement).toBeInTheDocument();
         expect(firstPolicyRevElement.textContent).toEqual(`rev. ${firstPolicyRev}`);
       });
     });
@@ -674,14 +674,14 @@ describe('when on the endpoint list page', () => {
 
     it('should show the flyout and footer', async () => {
       render();
-      expect(renderResult.getByTestId('endpointDetailsFlyout')).not.toBeNull();
-      expect(renderResult.getByTestId('endpointDetailsFlyoutFooter')).not.toBeNull();
+      expect(renderResult.getByTestId('endpointDetailsFlyout')).toBeInTheDocument();
+      expect(renderResult.getByTestId('endpointDetailsFlyoutFooter')).toBeInTheDocument();
     });
 
     it('should display policy name value as a link', async () => {
       render();
       const policyDetailsLink = await renderResult.findByTestId('policyNameCellLink-link');
-      expect(policyDetailsLink).not.toBeNull();
+      expect(policyDetailsLink).toBeInTheDocument();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
         `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostInfo.metadata.Endpoint.policy.applied.id}/settings`
       );
@@ -692,7 +692,7 @@ describe('when on the endpoint list page', () => {
       const policyDetailsRevElement = await renderResult.findByTestId(
         'policyNameCellLink-revision'
       );
-      expect(policyDetailsRevElement).not.toBeNull();
+      expect(policyDetailsRevElement).toBeInTheDocument();
       expect(policyDetailsRevElement.textContent).toEqual(
         `rev. ${hostInfo.metadata.Endpoint.policy.applied.endpoint_policy_version}`
       );
@@ -758,7 +758,7 @@ describe('when on the endpoint list page', () => {
 
     it('should show the Take Action button', async () => {
       render();
-      expect(renderResult.getByTestId('endpointDetailsActionsButton')).not.toBeNull();
+      expect(renderResult.getByTestId('endpointDetailsActionsButton')).toBeInTheDocument();
     });
 
     describe('Activity Log tab', () => {
@@ -786,8 +786,10 @@ describe('when on the endpoint list page', () => {
 
           expect(detailsTab).toHaveAttribute('aria-selected', 'true');
           expect(activityLogTab).toHaveAttribute('aria-selected', 'false');
-          expect(renderResult.getByTestId('endpointDetailsFlyoutBody')).not.toBeNull();
-          expect(renderResult.queryByTestId('endpointActivityLogFlyoutBody')).toBeNull();
+          expect(renderResult.getByTestId('endpointDetailsFlyoutBody')).toBeInTheDocument();
+          expect(
+            renderResult.queryByTestId('endpointActivityLogFlyoutBody')
+          ).not.toBeInTheDocument();
         });
 
         it('should show the activity log content when selected', async () => {
@@ -800,8 +802,8 @@ describe('when on the endpoint list page', () => {
           await userEvent.click(activityLogTab);
           expect(detailsTab).toHaveAttribute('aria-selected', 'false');
           expect(activityLogTab).toHaveAttribute('aria-selected', 'true');
-          expect(renderResult.getByTestId('endpointActivityLogFlyoutBody')).not.toBeNull();
-          expect(renderResult.queryByTestId('endpointDetailsFlyoutBody')).toBeNull();
+          expect(renderResult.getByTestId('endpointActivityLogFlyoutBody')).toBeInTheDocument();
+          expect(renderResult.queryByTestId('endpointDetailsFlyoutBody')).not.toBeInTheDocument();
         });
       });
 
@@ -823,8 +825,8 @@ describe('when on the endpoint list page', () => {
           );
 
           expect(detailsTab).toHaveAttribute('aria-selected', 'true');
-          expect(activityLogTab).toBeNull();
-          expect(renderResult.findByTestId('endpointDetailsFlyoutBody')).not.toBeNull();
+          expect(activityLogTab).not.toBeInTheDocument();
+          expect(renderResult.getByTestId('endpointDetailsFlyoutBody')).toBeInTheDocument();
         });
 
         it('should show the overview tab when force loading actions history tab via URL', async () => {
@@ -850,8 +852,8 @@ describe('when on the endpoint list page', () => {
           );
 
           expect(detailsTab).toHaveAttribute('aria-selected', 'true');
-          expect(activityLogTab).toBeNull();
-          expect(renderResult.findByTestId('endpointDetailsFlyoutBody')).not.toBeNull();
+          expect(activityLogTab).not.toBeInTheDocument();
+          expect(renderResult.getByTestId('endpointDetailsFlyoutBody')).toBeInTheDocument();
         });
       });
     });
@@ -877,14 +879,14 @@ describe('when on the endpoint list page', () => {
 
       it('should hide the host details panel', async () => {
         const endpointDetailsFlyout = renderResult.queryByTestId('endpointDetailsFlyoutBody');
-        expect(endpointDetailsFlyout).toBeNull();
+        expect(endpointDetailsFlyout).not.toBeInTheDocument();
       });
 
       it('should display policy response sub-panel', async () => {
-        expect(await renderResult.findByTestId('flyoutSubHeaderBackButton')).not.toBeNull();
+        expect(await renderResult.findByTestId('flyoutSubHeaderBackButton')).toBeInTheDocument();
         expect(
           await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutBody')
-        ).not.toBeNull();
+        ).toBeInTheDocument();
       });
 
       it('should include the back to details link', async () => {
@@ -950,7 +952,7 @@ describe('when on the endpoint list page', () => {
       });
 
       it('should show the isolate form', () => {
-        expect(renderResult.getByTestId('host_isolation_comment')).not.toBeNull();
+        expect(renderResult.getByTestId('host_isolation_comment')).toBeInTheDocument();
       });
 
       it('should take you back to details when back link below the flyout header is clicked', async () => {
@@ -992,7 +994,7 @@ describe('when on the endpoint list page', () => {
 
       it('should isolate endpoint host when confirm is clicked', async () => {
         await confirmIsolateAndWaitForApiResponse();
-        expect(renderResult.getByTestId('hostIsolateSuccessMessage')).not.toBeNull();
+        expect(renderResult.getByTestId('hostIsolateSuccessMessage')).toBeInTheDocument();
       });
 
       it('should navigate to details when the Complete button on success message is clicked', async () => {
@@ -1016,7 +1018,7 @@ describe('when on the endpoint list page', () => {
         });
         await confirmIsolateAndWaitForApiResponse('failure');
 
-        expect(renderResult.getByText('oh oh. something went wrong')).not.toBeNull();
+        expect(renderResult.getByText('oh oh. something went wrong')).toBeInTheDocument();
       });
 
       it('should reset isolation state and show form again', async () => {
@@ -1024,7 +1026,7 @@ describe('when on the endpoint list page', () => {
         // (`show` is NOT `isolate`), then the state should be reset so that the form show up again the next
         // time `isolate host` is clicked
         await confirmIsolateAndWaitForApiResponse();
-        expect(renderResult.getByTestId('hostIsolateSuccessMessage')).not.toBeNull();
+        expect(renderResult.getByTestId('hostIsolateSuccessMessage')).toBeInTheDocument();
 
         // Close flyout
         const changeUrlAction = middlewareSpy.waitForAction('userChangedUrl');
@@ -1045,7 +1047,7 @@ describe('when on the endpoint list page', () => {
       });
 
       it('should NOT show the flyout footer', () => {
-        expect(renderResult.queryByTestId('endpointDetailsFlyoutFooter')).toBeNull();
+        expect(renderResult.queryByTestId('endpointDetailsFlyoutFooter')).not.toBeInTheDocument();
       });
     });
   });
@@ -1199,7 +1201,7 @@ describe('when on the endpoint list page', () => {
         reactTestingLibrary.fireEvent.click(endpointActionsButton);
       });
       const isolateLink = screen.queryByTestId('isolateLink');
-      expect(isolateLink).toBeNull();
+      expect(isolateLink).not.toBeInTheDocument();
     });
 
     it('navigates to the Security Solution Host Details page', async () => {
@@ -1248,7 +1250,7 @@ describe('when on the endpoint list page', () => {
       });
       render();
       const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
-      expect(banner).toBeNull();
+      expect(banner).not.toBeInTheDocument();
     });
 
     it('is not displayed when non-relevant transform is failing', () => {
@@ -1262,7 +1264,7 @@ describe('when on the endpoint list page', () => {
       });
       render();
       const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
-      expect(banner).toBeNull();
+      expect(banner).not.toBeInTheDocument();
     });
 
     it('is not displayed when no endpoint policy', () => {
@@ -1276,7 +1278,7 @@ describe('when on the endpoint list page', () => {
       });
       render();
       const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
-      expect(banner).toBeNull();
+      expect(banner).not.toBeInTheDocument();
     });
 
     it('is displayed when relevant transform state is failed state', async () => {
@@ -1342,7 +1344,7 @@ describe('when on the endpoint list page', () => {
         await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
       });
       const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
-      expect(onboardingSteps).not.toBeNull();
+      expect(onboardingSteps).toBeInTheDocument();
     });
     it('user has endpoint list READ and fleet All and can view entire onboarding screen', async () => {
       mockUserPrivileges.mockReturnValue({
@@ -1357,7 +1359,7 @@ describe('when on the endpoint list page', () => {
         await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
       });
       const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
-      expect(onboardingSteps).not.toBeNull();
+      expect(onboardingSteps).toBeInTheDocument();
     });
     it('user has endpoint list ALL/READ and fleet NONE and can view a modified onboarding screen with no actions link to fleet', async () => {
       mockUserPrivileges.mockReturnValue({
@@ -1372,11 +1374,11 @@ describe('when on the endpoint list page', () => {
         await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
       });
       const onboardingSteps = await renderResult.findByTestId('policyOnboardingInstructions');
-      expect(onboardingSteps).not.toBeNull();
+      expect(onboardingSteps).toBeInTheDocument();
       const noPrivilegesPage = await renderResult.findByTestId('noFleetAccess');
-      expect(noPrivilegesPage).not.toBeNull();
+      expect(noPrivilegesPage).toBeInTheDocument();
       const startButton = renderResult.queryByTestId('onboardingStartButton');
-      expect(startButton).toBeNull();
+      expect(startButton).not.toBeInTheDocument();
     });
   });
 
@@ -1475,7 +1477,7 @@ describe('when on the endpoint list page', () => {
       });
       await renderAndClickActionsButton();
       const isolateLink = await renderResult.findByTestId('isolateLink');
-      expect(isolateLink).not.toBeNull();
+      expect(isolateLink).toBeInTheDocument();
     });
     it('hides Isolate host option if canIsolateHost is NONE', async () => {
       mockUserPrivileges.mockReturnValue({
@@ -1487,7 +1489,7 @@ describe('when on the endpoint list page', () => {
       });
       await renderAndClickActionsButton();
       const isolateLink = screen.queryByTestId('isolateLink');
-      expect(isolateLink).toBeNull();
+      expect(isolateLink).not.toBeInTheDocument();
     });
     it('shows unisolate host option if canUnHostIsolate is READ/ALL', async () => {
       mockUserPrivileges.mockReturnValue({
@@ -1499,7 +1501,7 @@ describe('when on the endpoint list page', () => {
       });
       await renderAndClickActionsButton(1);
       const unisolateLink = await renderResult.findByTestId('unIsolateLink');
-      expect(unisolateLink).not.toBeNull();
+      expect(unisolateLink).toBeInTheDocument();
     });
     it('hides unisolate host option if canUnIsolateHost is NONE', async () => {
       mockUserPrivileges.mockReturnValue({
@@ -1511,7 +1513,7 @@ describe('when on the endpoint list page', () => {
       });
       await renderAndClickActionsButton(1);
       const unisolateLink = renderResult.queryByTestId('unIsolateLink');
-      expect(unisolateLink).toBeNull();
+      expect(unisolateLink).not.toBeInTheDocument();
     });
 
     it('shows the Responder option when at least one rbac privilege from host isolation, process operation and file operation, is set to TRUE', async () => {
@@ -1524,7 +1526,7 @@ describe('when on the endpoint list page', () => {
       });
       await renderAndClickActionsButton();
       const responderButton = await renderResult.findByTestId('console');
-      expect(responderButton).not.toBeNull();
+      expect(responderButton).toBeInTheDocument();
     });
 
     it('hides the Responder option when host isolation, process operation and file operations are ALL set to NONE', async () => {
@@ -1537,13 +1539,13 @@ describe('when on the endpoint list page', () => {
       });
       await renderAndClickActionsButton();
       const responderButton = renderResult.queryByTestId('console');
-      expect(responderButton).toBeNull();
+      expect(responderButton).not.toBeInTheDocument();
     });
     it('always shows the Host details link', async () => {
       mockUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
       await renderAndClickActionsButton();
       const hostLink = await renderResult.findByTestId('hostLink');
-      expect(hostLink).not.toBeNull();
+      expect(hostLink).toBeInTheDocument();
     });
     it('shows Agent Policy, View Agent Details and Reassign Policy Links when canReadFleetAgents,canWriteFleetAgents,canReadFleetAgentPolicies RBAC control is enabled', async () => {
       mockUserPrivileges.mockReturnValue({
@@ -1560,9 +1562,9 @@ describe('when on the endpoint list page', () => {
       const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
       const agentPolicyReassignLink = await renderResult.findByTestId('agentPolicyReassignLink');
-      expect(agentPolicyLink).not.toBeNull();
-      expect(agentDetailsLink).not.toBeNull();
-      expect(agentPolicyReassignLink).not.toBeNull();
+      expect(agentPolicyLink).toBeInTheDocument();
+      expect(agentDetailsLink).toBeInTheDocument();
+      expect(agentPolicyReassignLink).toBeInTheDocument();
     });
     it('hides Agent Policy, View Agent Details and Reassign Policy Links when canAccessFleet RBAC control is NOT enabled', async () => {
       mockUserPrivileges.mockReturnValue({
@@ -1576,9 +1578,9 @@ describe('when on the endpoint list page', () => {
       const agentPolicyLink = renderResult.queryByTestId('agentPolicyLink');
       const agentDetailsLink = renderResult.queryByTestId('agentDetailsLink');
       const agentPolicyReassignLink = renderResult.queryByTestId('agentPolicyReassignLink');
-      expect(agentPolicyLink).toBeNull();
-      expect(agentDetailsLink).toBeNull();
-      expect(agentPolicyReassignLink).toBeNull();
+      expect(agentPolicyLink).not.toBeInTheDocument();
+      expect(agentDetailsLink).not.toBeInTheDocument();
+      expect(agentPolicyReassignLink).not.toBeInTheDocument();
     });
   });
 });
