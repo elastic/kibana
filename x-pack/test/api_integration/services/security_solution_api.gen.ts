@@ -102,6 +102,7 @@ import {
   InitEntityStoreRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
+import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
 import {
@@ -115,7 +116,10 @@ import { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/
 import { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
-import { RulePreviewRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
+import {
+  RulePreviewRequestQueryInput,
+  RulePreviewRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
 import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
@@ -236,7 +240,9 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-      * Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+      * Create a clean draft Timeline or Timeline template for the current user.
+> info
+> If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
 
       */
     cleanDraftTimelines(props: CleanDraftTimelinesProps) {
@@ -289,6 +295,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Create a new Timeline or Timeline template.
+     */
     createTimelines(props: CreateTimelinesProps) {
       return supertest
         .post('/api/timeline')
@@ -333,6 +342,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Delete a note from a Timeline using the note ID.
+     */
     deleteNote(props: DeleteNoteProps) {
       return supertest
         .delete('/api/note')
@@ -352,6 +364,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Delete one or more Timelines or Timeline templates.
+     */
     deleteTimelines(props: DeleteTimelinesProps) {
       return supertest
         .delete('/api/timeline')
@@ -593,6 +608,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object)
         .query(props.query);
     },
+    /**
+     * Export Timelines as an NDJSON file.
+     */
     exportTimelines(props: ExportTimelinesProps) {
       return supertest
         .post('/api/timeline/_export')
@@ -664,6 +682,9 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
+     */
     getDraftTimelines(props: GetDraftTimelinesProps) {
       return supertest
         .get('/api/timeline/_draft')
@@ -703,7 +724,7 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Gets notes
+     * Get all notes for a given document.
      */
     getNotes(props: GetNotesProps) {
       return supertest
@@ -760,6 +781,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get the details of an existing saved Timeline or Timeline template.
+     */
     getTimeline(props: GetTimelineProps) {
       return supertest
         .get('/api/timeline')
@@ -768,6 +792,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a list of all saved Timelines or Timeline templates.
+     */
     getTimelines(props: GetTimelinesProps) {
       return supertest
         .get('/api/timelines')
@@ -790,6 +817,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Import Timelines.
+     */
     importTimelines(props: ImportTimelinesProps) {
       return supertest
         .post('/api/timeline/_import')
@@ -826,6 +856,9 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Install or update prepackaged Timelines.
+     */
     installPrepackedTimelines(props: InstallPrepackedTimelinesProps) {
       return supertest
         .post('/api/timeline/_prepackaged')
@@ -840,6 +873,17 @@ finalize it.
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * List entities records, paging, sorting and filtering as needed.
+     */
+    listEntities(props: ListEntitiesProps) {
+      return supertest
+        .get('/api/entity_store/entities/list')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
     },
     listEntityStoreEngines() {
       return supertest
@@ -860,7 +904,7 @@ finalize it.
         .send(props.body as object);
     },
     /**
-     * Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+     * Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
      */
     patchTimeline(props: PatchTimelineProps) {
       return supertest
@@ -882,6 +926,9 @@ finalize it.
         .send(props.body as object)
         .query(props.query);
     },
+    /**
+     * Favorite a Timeline or Timeline template for the current user.
+     */
     persistFavoriteRoute(props: PersistFavoriteRouteProps) {
       return supertest
         .patch('/api/timeline/_favorite')
@@ -890,6 +937,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Add a note to a Timeline or update an existing note.
+     */
     persistNoteRoute(props: PersistNoteRouteProps) {
       return supertest
         .patch('/api/note')
@@ -898,6 +948,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Pin an event to an existing Timeline.
+     */
     persistPinnedEventRoute(props: PersistPinnedEventRouteProps) {
       return supertest
         .patch('/api/pinned_event')
@@ -1008,7 +1061,8 @@ detection engine rules.
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
+        .send(props.body as object)
+        .query(props.query);
     },
     scheduleRiskEngineNow() {
       return supertest
@@ -1309,6 +1363,9 @@ export interface InitEntityStoreProps {
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
+export interface ListEntitiesProps {
+  query: ListEntitiesRequestQueryInput;
+}
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
 }
@@ -1341,6 +1398,7 @@ export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
 export interface RulePreviewProps {
+  query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
 }
 export interface SearchAlertsProps {
