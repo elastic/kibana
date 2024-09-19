@@ -25,6 +25,10 @@ export interface IndexManagementPluginStart {
   getIndexMappingComponent: (deps: {
     history: ScopedHistory<unknown>;
   }) => React.FC<IndexMappingProps>;
+  getIndexSettingsComponent: (deps: {
+    history: ScopedHistory<unknown>;
+  }) => React.FC<IndexSettingProps>;
+
 }
 
 export interface Index {
@@ -56,7 +60,9 @@ export interface IndexMappingProps {
   index?: Index;
   showAboutMappings?: boolean;
 }
-
+export interface IndexSettingProps {
+  indexName: string;
+}
 export interface SendRequestResponse<D = any, E = any> {
   data: D | null;
   error: E | null;

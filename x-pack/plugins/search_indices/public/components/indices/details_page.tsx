@@ -36,6 +36,7 @@ import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
 import { SearchIndicesDetailsMappingsTabs } from '../../routes';
 import { SearchIndexDetailsMappings } from './details_page_mappings';
+import { SearchIndexDetailsSettings } from './details_page_settings';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
@@ -67,9 +68,16 @@ export const SearchIndexDetailsPage = () => {
         content: <SearchIndexDetailsMappings index={index} />,
         'data-test-subj': `${SearchIndicesDetailsMappingsTabs.MAPPINGS}Tab`,
       },
+      {
+        id: SearchIndicesDetailsMappingsTabs.SETTINGS,
+        name: i18n.translate('xpack.searchIndices.settingsTabLabel', {
+          defaultMessage: 'Settings',
+        }),
+        content: <SearchIndexDetailsSettings indexName={indexName} />,
+        'data-test-subj': `${SearchIndicesDetailsMappingsTabs.SETTINGS}Tab`,
+      },
     ];
   }, [index, indexName]);
-
   const [selectedTab, setSelectedTab] = useState(SearchIndexDetailsTabs[0]);
 
   useEffect(() => {

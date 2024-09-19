@@ -28,6 +28,7 @@ import { ClientConfigType, SetupDependencies, StartDependencies } from './types'
 import { PLUGIN } from '../common/constants/plugin';
 import { IndexMapping } from './application/sections/home/index_list/details_page/index_mappings_embeddable';
 import { PublicApiService } from './services/public_api_service';
+import { IndexSettings } from './application/sections/home/index_list/details_page/index_settings_embeddable';
 
 export class IndexMgmtUIPlugin
   implements
@@ -157,6 +158,44 @@ export class IndexMgmtUIPlugin
         };
         return (props: any) => {
           return IndexMapping({ dependencies: appDependencies, core: coreStart, ...props });
+        };
+      },
+      getIndexSettingsComponent: (deps: { history: ScopedHistory<unknown> }) => {
+        const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
+          coreStart;
+        const { url } = share;
+        const appDependencies = {
+          core: {
+            fatalErrors,
+            getUrlForApp: application.getUrlForApp,
+            executionContext,
+            application,
+            http,
+          },
+          plugins: {
+            usageCollection,
+            isFleetEnabled: Boolean(fleet),
+            share,
+            cloud,
+            console,
+            ml,
+            licensing,
+          },
+          services: {
+            extensionsService: this.extensionsService,
+          },
+          config: this.config,
+          history: deps.history,
+          setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
+          uiSettings,
+          settings,
+          url,
+          docLinks,
+          kibanaVersion: this.kibanaVersion,
+          theme$: coreStart.theme.theme$,
+        };
+        return (props: any) => {
+          return IndexSettings({ dependencies: appDependencies, core: coreStart, ...props });
         };
       },
     };

@@ -11,4 +11,5 @@ export const SEARCH_INDICES_DETAILS_TABS_PATH = `${SEARCH_INDICES_DETAILS_PATH}/
 export enum SearchIndicesDetailsMappingsTabs {
   DATA = 'data',
   MAPPINGS = 'mappings',
+  SETTINGS = 'settings'
 }
