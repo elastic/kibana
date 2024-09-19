@@ -13,15 +13,15 @@ import { useSendIsolateEndpointRequest } from '../../../hooks/response_actions/u
 
 export const IsolateActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {
+    console.log('command: ', command);
     const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
       'responseActionsSentinelOneV1Enabled'
     );
     const isolateHostApi = useSendIsolateEndpointRequest();
 
     const actionRequestBody = useMemo(() => {
-      const endpointId = command.commandDefinition?.meta?.endpointId;
+      const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
       const comment = command.args.args?.comment?.[0];
-      const agentType = command.commandDefinition?.meta?.agentType;
 
       return endpointId
         ? {
@@ -30,12 +30,7 @@ export const IsolateActionResult = memo<ActionRequestComponentProps>(
             comment,
           }
         : undefined;
-    }, [
-      command.args.args?.comment,
-      command.commandDefinition?.meta?.agentType,
-      command.commandDefinition?.meta?.endpointId,
-      isSentinelOneV1Enabled,
-    ]);
+    }, [command.args.args?.comment, command.commandDefinition?.meta, isSentinelOneV1Enabled]);
 
     return useConsoleActionSubmitter({
       ResultComponent,
