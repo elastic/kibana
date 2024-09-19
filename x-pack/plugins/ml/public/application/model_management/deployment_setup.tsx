@@ -130,6 +130,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   deploymentsParams,
   disableAdaptiveResourcesControl,
   deploymentParamsMapper,
+  cloudInfo,
 }) => {
   const deploymentIdUpdated = useRef(false);
 
@@ -207,7 +208,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   const helperText = useMemo<string>(() => {
     const vcpuRange = deploymentParamsMapper.getVCPURange(config.vCPUUsage);
 
-    if (config.adaptiveResources) {
+    if (config.adaptiveResources && cloudInfo.isMlAutoscalingEnabled) {
       switch (config.vCPUUsage) {
         case 'low':
           return i18n.translate(
@@ -264,7 +265,12 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           );
       }
     }
-  }, [config, deploymentParamsMapper]);
+  }, [
+    cloudInfo.isMlAutoscalingEnabled,
+    config.adaptiveResources,
+    config.vCPUUsage,
+    deploymentParamsMapper,
+  ]);
 
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
