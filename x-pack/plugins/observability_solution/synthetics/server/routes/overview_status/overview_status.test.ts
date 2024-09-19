@@ -298,6 +298,7 @@ describe('current status route', () => {
               ],
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
+              "updated_at": undefined,
             },
           },
           "enabledMonitorQueryIds": Array [
@@ -342,6 +343,7 @@ describe('current status route', () => {
               ],
               "timestamp": "2022-09-15T16:08:16.724Z",
               "type": "browser",
+              "updated_at": undefined,
             },
             "id2-Asia/Pacific - Japan": Object {
               "configId": "id2",
@@ -377,6 +379,7 @@ describe('current status route', () => {
               ],
               "timestamp": "2022-09-15T16:09:16.724Z",
               "type": "browser",
+              "updated_at": undefined,
             },
           },
         }
@@ -560,6 +563,7 @@ describe('current status route', () => {
               ],
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
+              "updated_at": undefined,
             },
           },
           "enabledMonitorQueryIds": Array [
@@ -604,6 +608,7 @@ describe('current status route', () => {
               ],
               "timestamp": "2022-09-15T16:08:16.724Z",
               "type": "browser",
+              "updated_at": undefined,
             },
             "id2-Asia/Pacific - Japan": Object {
               "configId": "id2",
@@ -639,6 +644,7 @@ describe('current status route', () => {
               ],
               "timestamp": "2022-09-15T16:09:16.724Z",
               "type": "browser",
+              "updated_at": undefined,
             },
           },
         }
@@ -780,7 +786,37 @@ describe('current status route', () => {
             'project-monitor-id': 'id3',
             id4: 'id4',
           },
-          monitors: testMonitors as any,
+          monitors: [
+            ...testMonitors,
+            {
+              attributes: {
+                id: 'id4',
+                enabled: true,
+                type: 'browser',
+                name: 'test monitor 4',
+                project_id: 'project-id',
+                tags: ['tag-1', 'tag-2'],
+                schedule: {
+                  number: '1',
+                  unit: 'm',
+                },
+              },
+            },
+            {
+              attributes: {
+                id: 'project-monitor-id',
+                enabled: true,
+                type: 'browser',
+                name: 'test monitor 3',
+                project_id: 'project-id',
+                tags: ['tag-1', 'tag-2'],
+                schedule: {
+                  number: '1',
+                  unit: 'm',
+                },
+              },
+            },
+          ] as any,
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -820,6 +856,7 @@ describe('current status route', () => {
               ],
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
+              "updated_at": undefined,
             },
           },
           "enabledMonitorQueryIds": Array [
@@ -832,27 +869,75 @@ describe('current status route', () => {
           "pendingConfigs": Object {
             "id3-Asia/Pacific - Japan": Object {
               "configId": "id3",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
               "locationId": "Asia/Pacific - Japan",
+              "locationLabel": undefined,
               "monitorQueryId": "project-monitor-id",
+              "name": "test monitor 3",
+              "projectId": "project-id",
+              "schedule": "1",
               "status": "unknown",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "type": "browser",
+              "updated_at": undefined,
             },
             "id3-Europe - Germany": Object {
               "configId": "id3",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
               "locationId": "Europe - Germany",
+              "locationLabel": undefined,
               "monitorQueryId": "project-monitor-id",
+              "name": "test monitor 3",
+              "projectId": "project-id",
+              "schedule": "1",
               "status": "unknown",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "type": "browser",
+              "updated_at": undefined,
             },
             "id4-Asia/Pacific - Japan": Object {
               "configId": "id4",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
               "locationId": "Asia/Pacific - Japan",
+              "locationLabel": undefined,
               "monitorQueryId": "id4",
+              "name": "test monitor 4",
+              "projectId": "project-id",
+              "schedule": "1",
               "status": "unknown",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "type": "browser",
+              "updated_at": undefined,
             },
             "id4-Europe - Germany": Object {
               "configId": "id4",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
               "locationId": "Europe - Germany",
+              "locationLabel": undefined,
               "monitorQueryId": "id4",
+              "name": "test monitor 4",
+              "projectId": "project-id",
+              "schedule": "1",
               "status": "unknown",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "type": "browser",
+              "updated_at": undefined,
             },
           },
           "up": 2,
@@ -891,6 +976,7 @@ describe('current status route', () => {
               ],
               "timestamp": "2022-09-15T16:08:16.724Z",
               "type": "browser",
+              "updated_at": undefined,
             },
             "id2-Asia/Pacific - Japan": Object {
               "configId": "id2",
@@ -926,6 +1012,7 @@ describe('current status route', () => {
               ],
               "timestamp": "2022-09-15T16:09:16.724Z",
               "type": "browser",
+              "updated_at": undefined,
             },
           },
         }

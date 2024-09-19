@@ -246,7 +246,7 @@ export async function queryMonitorStatus({
         monitorQueryId: queryId,
         status: 'unknown',
         locationId: loc,
-        locationLabel: monitor.attributes[ConfigKey.LOCATIONS].find(
+        locationLabel: monitor.attributes[ConfigKey.LOCATIONS]?.find(
           (location) => location.id === loc
         )?.label!,
         name: monitor.attributes[ConfigKey.NAME],
