@@ -261,9 +261,8 @@ export class RiskEngineDataClient {
 
     await deleteSavedObjects({ savedObjectsClient: this.options.soClient }).catch(addError);
     const riskScoreErrors = await riskScoreDataClient.tearDown();
-    errors.concat(riskScoreErrors);
 
-    return errors;
+    return errors.concat(riskScoreErrors);
   }
 
   public async disableLegacyRiskEngine({ namespace }: { namespace: string }) {
