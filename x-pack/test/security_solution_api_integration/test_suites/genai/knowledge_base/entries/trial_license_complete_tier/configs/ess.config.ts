@@ -21,7 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           .get('kbnTestServer.serverArgs')
           // ssl: false as ML vocab API is broken with SSL enabled
           .filter(
-            (a) =>
+            (a: string) =>
               !(
                 a.startsWith('--elasticsearch.hosts=') ||
                 a.startsWith('--elasticsearch.ssl.certificateAuthorities=')
