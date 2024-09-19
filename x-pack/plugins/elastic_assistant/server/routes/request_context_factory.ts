@@ -79,6 +79,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         return appContextService.getRegisteredFeatures(pluginName);
       },
 
+      inference: startPlugins.inference,
+
       telemetry: core.analytics,
 
       // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
