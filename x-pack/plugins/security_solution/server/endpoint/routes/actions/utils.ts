@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { deepFreeze } from '@kbn/std';
 import { get } from 'lodash';
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+} from '../../../lib/telemetry/event_based/events';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { EndpointAuthorizationError } from '../../errors';
@@ -17,6 +22,7 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
+import type { ActionDetails } from '../../../../common/endpoint/types';
 
 type CommandsWithFileAccess = Readonly<
   Record<ResponseActionsApiCommandNames, Readonly<Record<ResponseActionAgentType, boolean>>>
@@ -132,4 +138,38 @@ export const ensureUserHasAuthzToFilesForAction = async (
   if (!hasAuthzToCommand) {
     throw new EndpointAuthorizationError();
   }
+};
+
+export const sendActionCreationTelemetry = (
+  reportEvent: AnalyticsServiceSetup['reportEvent'],
+  actionId: string,
+  data: ActionDetails,
+  command: ResponseActionsApiCommandNames,
+  isAutomated: boolean
+) => {
+  const telemetryEvent = {
+    responseActions: {
+      actionId,
+      agentType: data.agentType,
+      command,
+      endpointIds: data.agents,
+      isAutomated,
+    },
+  };
+  reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, telemetryEvent);
+};
+
+export const sendActionCreationErrorTelemetry = (
+  reportEvent: AnalyticsServiceSetup['reportEvent'],
+  agentType: ActionDetails['agentType'] | undefined,
+  command: ResponseActionsApiCommandNames,
+  err: Error
+) => {
+  reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
+    responseActions: {
+      agentType: agentType || 'endpoint',
+      command,
+      error: err,
+    },
+  });
 };

@@ -45,6 +45,6 @@ export interface ResponseActionAlerts {
 
 export type AlertsAction = Pick<
   ResponseActionsRequestBody,
-  'alert_ids' | 'endpoint_ids' | 'parameters'
+  'alert_ids' | 'endpoint_ids' | 'parameters' | 'agent_type'
 > &
   Pick<CommonResponseActionMethodOptions, 'error' | 'hosts'>;

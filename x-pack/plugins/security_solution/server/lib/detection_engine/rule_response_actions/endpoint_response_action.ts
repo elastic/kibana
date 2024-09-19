@@ -6,6 +6,10 @@
  */
 
 import { each } from 'lodash';
+import {
+  sendActionCreationErrorTelemetry,
+  sendActionCreationTelemetry,
+} from '../../../endpoint/routes/actions/utils';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type {
   RuleResponseEndpointAction,
@@ -40,6 +44,8 @@ export const endpointResponseAction = async (
 
   const automatedProcessActionsEnabled =
     endpointAppContextService.experimentalFeatures.automatedProcessActionsEnabled;
+  const isResponseActionsTelemetryEnabled =
+    endpointAppContextService.experimentalFeatures.responseActionsTelemetryEnabled;
 
   const processResponseActionClientError = (err: Error, endpointIds: string[]): Promise<void> => {
     errors.push(
@@ -57,7 +63,7 @@ export const endpointResponseAction = async (
         Promise.all(
           Object.values(getIsolateAlerts(alerts)).map(
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
+            ({ endpoint_ids, alert_ids, agent_type, parameters, error, hosts }: AlertsAction) => {
               logger.info(
                 `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
                   endpoint_ids
@@ -79,7 +85,26 @@ export const endpointResponseAction = async (
                     error,
                   }
                 )
+                .then((action) => {
+                  if (isResponseActionsTelemetryEnabled) {
+                    sendActionCreationTelemetry(
+                      endpointAppContextService.getTelemetryService().reportEvent,
+                      action.id,
+                      action,
+                      command,
+                      true
+                    );
+                  }
+                })
                 .catch((err) => {
+                  if (isResponseActionsTelemetryEnabled) {
+                    sendActionCreationErrorTelemetry(
+                      endpointAppContextService.getTelemetryService().reportEvent,
+                      agent_type,
+                      command,
+                      err
+                    );
+                  }
                   return processResponseActionClientError(err, endpoint_ids);
                 });
             }
@@ -103,7 +128,7 @@ export const endpointResponseAction = async (
             return each(
               actionPerAgent,
               // eslint-disable-next-line @typescript-eslint/naming-convention
-              ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
+              ({ endpoint_ids, alert_ids, agent_type, parameters, error, hosts }: AlertsAction) => {
                 logger.info(
                   `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
                     endpoint_ids
@@ -127,9 +152,29 @@ export const endpointResponseAction = async (
                     ruleName,
                     error,
                   }
-                ).catch((err) => {
-                  return processResponseActionClientError(err, endpoint_ids);
-                });
+                )
+                  .then((action) => {
+                    if (isResponseActionsTelemetryEnabled) {
+                      sendActionCreationTelemetry(
+                        endpointAppContextService.getTelemetryService().reportEvent,
+                        action.id,
+                        action,
+                        command,
+                        true
+                      );
+                    }
+                  })
+                  .catch((err) => {
+                    if (isResponseActionsTelemetryEnabled) {
+                      sendActionCreationErrorTelemetry(
+                        endpointAppContextService.getTelemetryService().reportEvent,
+                        agent_type,
+                        command,
+                        err
+                      );
+                    }
+                    return processResponseActionClientError(err, endpoint_ids);
+                  });
               }
             );
           });

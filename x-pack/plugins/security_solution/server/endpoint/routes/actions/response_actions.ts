@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import {
-  ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
-  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
-} from '../../../lib/telemetry/event_based/events';
 import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
@@ -70,6 +66,7 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
+import { sendActionCreationErrorTelemetry, sendActionCreationTelemetry } from './utils';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -341,6 +338,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       );
     }
 
+    const isResponseActionsTelemetryEnabled = experimentalFeatures.responseActionsTelemetryEnabled;
     const coreContext = await context.core;
     const user = coreContext.security.authc.getCurrentUser();
     const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -370,12 +368,13 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
           }
         : {};
 
-      if (experimentalFeatures.responseActionsTelemetryEnabled) {
+      if (isResponseActionsTelemetryEnabled) {
         sendActionCreationTelemetry(
           endpointContext.service.getTelemetryService().reportEvent,
           data.id,
           data,
-          command
+          command,
+          false
         );
       }
 
@@ -386,7 +385,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         },
       });
     } catch (err) {
-      if (experimentalFeatures.responseActionsTelemetryEnabled) {
+      if (isResponseActionsTelemetryEnabled) {
         sendActionCreationErrorTelemetry(
           endpointContext.service.getTelemetryService().reportEvent,
           req.body.agent_type,
@@ -441,44 +440,6 @@ async function handleActionCreation(
         501
       );
   }
-}
-
-function sendActionCreationTelemetry(
-  reportEvent: AnalyticsServiceSetup['reportEvent'],
-  actionId: string,
-  data: ActionDetails,
-  command: ResponseActionsApiCommandNames
-) {
-  let isAutomated = false;
-
-  if ((data.alertIds && data.alertIds.length) || data.createdBy === 'unknown') {
-    isAutomated = true;
-  }
-  const telemetryEvent = {
-    responseActions: {
-      actionId,
-      agentType: data.agentType,
-      command,
-      endpointIds: data.agents,
-      isAutomated,
-    },
-  };
-  reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, telemetryEvent);
-}
-
-function sendActionCreationErrorTelemetry(
-  reportEvent: AnalyticsServiceSetup['reportEvent'],
-  agentType: ActionDetails['agentType'] | undefined,
-  command: ResponseActionsApiCommandNames,
-  err: Error
-) {
-  reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
-    responseActions: {
-      agentType: agentType || 'endpoint',
-      command,
-      error: err,
-    },
-  });
 }
 
 function redirectHandler(
