@@ -50,7 +50,7 @@ export class ServerlessObservabilityPlugin
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
     const { serverless, management, security } = setupDeps;
-    const navigationTree$ = of(navigationTree(core));
+    const navigationTree$ = of(navigationTree);
     serverless.setProjectHome('/app/observability/landing');
     serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
