@@ -22,6 +22,12 @@ jest.mock('../../../../shared/enterprise_search_url', () => ({
   getEnterpriseSearchUrl: () => 'http://localhost:3002',
 }));
 
+jest.mock('../../../../shared/cloud_details/cloud_details', () => ({
+  useCloudDetails: () => ({
+    elasticsearchUrl: 'your_deployment_url',
+  }),
+}));
+
 describe('AnalyticsCollectionIntegrate', () => {
   const analyticsCollections: AnalyticsCollection = {
     events_datastream: 'analytics-events-example',
@@ -55,7 +61,7 @@ describe('AnalyticsCollectionIntegrate', () => {
       .toMatchInlineSnapshot(`
       "<script type=\\"text/javascript\\">
       window.elasticAnalytics.createTracker({
-        endpoint: \\"https://localhost:9200\\",
+        endpoint: \\"your_deployment_url\\",
         collectionName: \\"example\\",
         apiKey: \\"########\\",
         // Optional: sampling rate percentage: 0-1, 0 = no events, 1 = all events
