@@ -467,7 +467,7 @@ src/plugins/files_management @elastic/appex-sharedux
 src/plugins/files @elastic/appex-sharedux
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 x-pack/plugins/fleet @elastic/fleet
-packages/kbn-flot-charts @elastic/kibana-presentation @elastic/kibana-visualizations @elastic/stack-monitoring
+packages/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 packages/kbn-formatters @elastic/obs-ux-logs-team
 src/plugins/ftr_apis @elastic/kibana-core
