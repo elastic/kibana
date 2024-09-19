@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlStyle, ControlWidth } from './types';
+import { ControlLabelPosition, ControlWidth } from './types';
 
 export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'medium';
 export const DEFAULT_CONTROL_GROW: boolean = true;
-export const DEFAULT_CONTROL_STYLE: ControlStyle = 'oneLine';
+export const DEFAULT_CONTROL_LABEL_POSITION: ControlLabelPosition = 'oneLine';
 
 export const TIME_SLIDER_CONTROL = 'timeSlider';
 export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';

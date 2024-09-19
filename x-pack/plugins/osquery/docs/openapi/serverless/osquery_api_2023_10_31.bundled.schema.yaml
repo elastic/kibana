@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  description: 'Run live queries, manage packs and saved queries.'
+  description: Run live queries, manage packs and saved queries.
   title: Security Solution Osquery API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -50,7 +50,7 @@ paths:
       summary: Create a live query
       tags:
         - Security Solution Osquery API
-  '/api/osquery/live_queries/{id}':
+  /api/osquery/live_queries/{id}:
     get:
       description: Get the details of a live query using the query ID.
       operationId: OsqueryGetLiveQueryDetails
@@ -75,7 +75,7 @@ paths:
       summary: Get live query details
       tags:
         - Security Solution Osquery API
-  '/api/osquery/live_queries/{id}/results/{actionId}':
+  /api/osquery/live_queries/{id}/results/{actionId}:
     get:
       description: Get the results of a live query using the query action ID.
       operationId: OsqueryGetLiveQueryResults
@@ -144,7 +144,7 @@ paths:
       summary: Create a pack
       tags:
         - Security Solution Osquery API
-  '/api/osquery/packs/{id}':
+  /api/osquery/packs/{id}:
     delete:
       description: Delete a query pack using the pack ID.
       operationId: OsqueryDeletePacks
@@ -250,7 +250,7 @@ paths:
       summary: Create a saved query
       tags:
         - Security Solution Osquery API
-  '/api/osquery/saved_queries/{id}':
+  /api/osquery/saved_queries/{id}:
     delete:
       description: Delete a saved query using the query ID.
       operationId: OsqueryDeleteSavedQuery
@@ -637,5 +637,5 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: 'Run live queries, manage packs and saved queries.'
+  - description: Run live queries, manage packs and saved queries.
     name: Security Solution Osquery API

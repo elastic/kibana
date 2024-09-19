@@ -53,6 +53,11 @@ export const allowedExperimentalValues = Object.freeze({
   automatedProcessActionsEnabled: true,
 
   /**
+   * Temporary feature flag to enable the Response Actions in Rules UI - intermediate release
+   */
+  automatedResponseActionsForMoreRulesEnabled: false,
+
+  /**
    * Enables the ability to send Response actions to SentinelOne and persist the results
    * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
    * response actions in Response Console.
@@ -119,6 +124,11 @@ export const allowedExperimentalValues = Object.freeze({
   assistantBedrockChat: true,
 
   /**
+   * Enables the NaturalLanguageESQLTool and disables the ESQLKnowledgeBaseTool, introduced in `8.16.0`.
+   */
+  assistantNaturalLanguageESQLTool: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -137,6 +147,11 @@ export const allowedExperimentalValues = Object.freeze({
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
+
+  /**
+   * enables logging requests during rule preview
+   */
+  loggingRequestsEnabled: false,
 
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
