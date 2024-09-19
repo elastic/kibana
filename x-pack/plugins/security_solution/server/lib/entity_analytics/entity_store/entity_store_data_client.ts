@@ -9,6 +9,7 @@ import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@k
 import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import { createQueryFilterClauses } from '../../../utils/build_query';
 import type {
   HostEntityRecord,
@@ -26,7 +27,7 @@ import type {
 import { entityEngineDescriptorTypeName } from './saved_object';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { getEntitiesIndexName, getEntityDefinition } from './utils/utils';
-import { ENGINE_STATUS } from './constants';
+import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -44,8 +45,6 @@ interface SearchEntitiesParams {
   sortField: string;
   sortOrder: SortOrder;
 }
-
-const MAX_SEARCH_RESPONSE_SIZE = 10_000;
 
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
@@ -137,7 +136,7 @@ export class EntityStoreDataClient {
   }
 
   public async searchEntities(params: SearchEntitiesParams): Promise<{
-    records: Array<UserEntityRecord | HostEntityRecord>;
+    records: Entity[];
     total: number;
     inspect: InspectQuery;
   }> {
@@ -154,7 +153,7 @@ export class EntityStoreDataClient {
       },
     };
 
-    const response = await this.options.esClient.search<UserEntityRecord | HostEntityRecord>({
+    const response = await this.options.esClient.search<Entity>({
       index,
       query,
       size: Math.min(perPage, MAX_SEARCH_RESPONSE_SIZE),
@@ -166,7 +165,7 @@ export class EntityStoreDataClient {
 
     const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
 
-    const records = hits.hits.map((hit) => hit._source as UserEntityRecord | HostEntityRecord);
+    const records = hits.hits.map((hit) => hit._source as Entity);
 
     const inspect: InspectQuery = {
       dsl: [JSON.stringify({ index, body: query }, null, 2)],

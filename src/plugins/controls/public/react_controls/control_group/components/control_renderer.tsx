@@ -13,14 +13,11 @@ import { BehaviorSubject } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
 
+import type { DefaultControlState } from '../../../../common';
 import { getControlFactory } from '../../control_factory_registry';
-import { ControlGroupApi } from '../types';
+import type { ControlApiRegistration, DefaultControlApi } from '../../controls/types';
+import type { ControlGroupApi } from '../types';
 import { ControlPanel } from './control_panel';
-import {
-  ControlApiRegistration,
-  DefaultControlApi,
-  DefaultControlState,
-} from '../../controls/types';
 
 /**
  * Renders a component from the control registry into a Control Panel

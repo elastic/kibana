@@ -57,6 +57,8 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Delete Criticality Record
       tags:
         - Security Solution Entity Analytics API
@@ -88,6 +90,8 @@ paths:
           description: Invalid request
         '404':
           description: Criticality record not found
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get Criticality Record
       tags:
         - Security Solution Entity Analytics API
@@ -119,6 +123,8 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Upsert Criticality Record
       tags:
         - Security Solution Entity Analytics API
@@ -177,6 +183,8 @@ paths:
           description: Bulk upload successful
         '413':
           description: File too large
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Bulk Upsert Asset Criticality Records
       tags:
         - Security Solution Entity Analytics API
@@ -253,12 +261,14 @@ paths:
                   - per_page
                   - total
           description: Bulk upload successful
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: List Asset Criticality Records
       tags:
         - Security Solution Entity Analytics API
   /api/entity_store/engines:
     get:
-      operationId: ListEntityStoreEngines
+      operationId: ListEntityEngines
       responses:
         '200':
           content:
@@ -273,14 +283,16 @@ paths:
                       $ref: '#/components/schemas/EngineDescriptor'
                     type: array
           description: Successful response
-      summary: List the Entity Store engines
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
+      summary: List the Entity Engines
       tags:
         - Security Solution Entity Analytics API
   '/api/entity_store/engines/{entityType}':
     delete:
-      operationId: DeleteEntityStore
+      operationId: DeleteEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -302,13 +314,15 @@ paths:
                   deleted:
                     type: boolean
           description: Successful response
-      summary: Delete the Entity Store engine
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
+      summary: Delete the Entity Engine
       tags:
         - Security Solution Entity Analytics API
     get:
-      operationId: GetEntityStoreEngine
+      operationId: GetEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -321,14 +335,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/EngineDescriptor'
           description: Successful response
-      summary: Get the Entity Store engine
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
+      summary: Get an Entity Engine
       tags:
         - Security Solution Entity Analytics API
   '/api/entity_store/engines/{entityType}/init':
     post:
-      operationId: InitEntityStore
+      operationId: InitEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -353,14 +369,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/EngineDescriptor'
           description: Successful response
-      summary: Initialize the Entity Store
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
+      summary: Initialize an Entity Engine
       tags:
         - Security Solution Entity Analytics API
   '/api/entity_store/engines/{entityType}/start':
     post:
-      operationId: StartEntityStore
+      operationId: StartEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -376,14 +394,16 @@ paths:
                   started:
                     type: boolean
           description: Successful response
-      summary: Start the Entity Store engine
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
+      summary: Start an Entity Engine
       tags:
         - Security Solution Entity Analytics API
   '/api/entity_store/engines/{entityType}/stats':
     post:
-      operationId: GetEntityStoreStats
+      operationId: GetEntityEngineStats
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -411,14 +431,16 @@ paths:
                   type:
                     $ref: '#/components/schemas/EntityType'
           description: Successful response
-      summary: Get the Entity Store engine stats
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
+      summary: Get Entity Engine stats
       tags:
         - Security Solution Entity Analytics API
   '/api/entity_store/engines/{entityType}/stop':
     post:
-      operationId: StopEntityStore
+      operationId: StopEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -434,7 +456,9 @@ paths:
                   stopped:
                     type: boolean
           description: Successful response
-      summary: Stop the Entity Store engine
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
+      summary: Stop an Entity Engine
       tags:
         - Security Solution Entity Analytics API
   /api/entity_store/entities/list:
@@ -499,9 +523,7 @@ paths:
                     type: integer
                   records:
                     items:
-                      oneOf:
-                        - $ref: '#/components/schemas/UserEntityRecord'
-                        - $ref: '#/components/schemas/HostEntityRecord'
+                      $ref: '#/components/schemas/Entity'
                     type: array
                   total:
                     minimum: 0
@@ -512,6 +534,8 @@ paths:
                   - per_page
                   - total
           description: Entities returned successfully
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: List Entity Store Entities
       tags:
         - Security Solution Entity Analytics API
@@ -540,10 +564,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
           description: Unexpected error
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Schedule the risk engine to run as soon as possible
       tags:
         - Security Solution Entity Analytics API
 components:
+  callbacks: !<tag:yaml.org,2002:js/undefined> ''
+  examples: !<tag:yaml.org,2002:js/undefined> ''
+  headers: !<tag:yaml.org,2002:js/undefined> ''
+  links: !<tag:yaml.org,2002:js/undefined> ''
+  parameters: !<tag:yaml.org,2002:js/undefined> ''
+  requestBodies: !<tag:yaml.org,2002:js/undefined> ''
+  responses: !<tag:yaml.org,2002:js/undefined> ''
   schemas:
     AssetCriticalityBulkUploadErrorItem:
       type: object
@@ -627,12 +660,16 @@ components:
         - started
         - stopped
       type: string
+    Entity:
+      oneOf:
+        - $ref: '#/components/schemas/UserEntity'
+        - $ref: '#/components/schemas/HostEntity'
     EntityType:
       enum:
         - user
         - host
       type: string
-    HostEntityRecord:
+    HostEntity:
       type: object
       properties:
         entity:
@@ -755,7 +792,7 @@ components:
       required:
         - status_code
         - message
-    UserEntityRecord:
+    UserEntity:
       type: object
       properties:
         entity:
@@ -835,3 +872,4 @@ security:
 tags:
   - description: ''
     name: Security Solution Entity Analytics API
+externalDocs: !<tag:yaml.org,2002:js/undefined> ''
