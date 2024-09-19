@@ -15,13 +15,15 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: CleanDraftTimelines
-      summary: Retrieves a draft timeline or timeline template.
+      summary: Create a clean draft Timeline or Timeline template
       description: |
-        Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+        Create a clean draft Timeline or Timeline template for the current user.
+        > info
+        > If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
       tags:
         - access:securitySolution
       requestBody:
-        description: The type of timeline to create. Valid values are `default` and `template`.
+        description: The type of Timeline to create. Valid values are `default` and `template`.
         required: true
         content:
           application/json:
@@ -33,7 +35,7 @@ paths:
                   $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
       responses:
         '200':
-          description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
+          description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
           content:
             application/json:
               schema:
@@ -51,7 +53,7 @@ paths:
                           timeline:
                             $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
         '403':
-          description: Indicates that the user does not have the required permissions to create a draft timeline.
+          description: Indicates that the user does not have the required permissions to create a draft Timeline.
           content:
             application:json:
               schema:
@@ -62,7 +64,7 @@ paths:
                   status_code:
                     type: number
         '409':
-          description: Indicates that there is already a draft timeline with the given timelineId.
+          description: Indicates that there is already a draft Timeline with the given `timelineId`.
           content:
             application:json:
               schema:

@@ -26,6 +26,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
   WrapSuppressedHits,
+  CreateRuleAdditionalOptions,
 } from '../types';
 import {
   addToSearchAfterReturn,
@@ -66,6 +67,7 @@ interface EqlExecutorParams {
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
+  scheduleNotificationResponseActionsService: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }
 
 export const eqlExecutor = async ({
@@ -88,6 +90,7 @@ export const eqlExecutor = async ({
   alertWithSuppression,
   isAlertSuppressionActive,
   experimentalFeatures,
+  scheduleNotificationResponseActionsService,
 }: EqlExecutorParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
 
@@ -186,6 +189,14 @@ export const eqlExecutor = async ({
             : getMaxSignalsWarning();
 
         result.warningMessages.push(maxSignalsWarning);
+      }
+
+      if (scheduleNotificationResponseActionsService) {
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals,
+          signalsCount: result.createdSignalsCount,
+          responseActions: completeRule.ruleParams.responseActions,
+        });
       }
 
       return result;
