@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom } from 'rxjs';
 import { isEqual } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 
-import { set } from '@kbn/safer-lodash-set';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { set } from '@kbn/safer-lodash-set';
 
-import { DashboardSpacesService } from '../spaces/types';
-import type { DashboardStartDependencies } from '../../plugin';
-import type { DashboardBackupServiceType } from './types';
 import type { DashboardContainerInput } from '../../../common';
-import { DashboardNotificationsService } from '../notifications/types';
 import { backupServiceStrings } from '../../dashboard_container/_dashboard_container_strings';
 import { UnsavedPanelState } from '../../dashboard_container/types';
+import type { DashboardStartDependencies } from '../../plugin';
+import { coreServices } from '../kibana_services';
+import { DashboardSpacesService } from '../spaces/types';
+import type { DashboardBackupServiceType } from './types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
@@ -32,7 +32,6 @@ const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
 
 interface DashboardBackupRequiredServices {
-  notifications: DashboardNotificationsService;
   spaces: DashboardSpacesService;
 }
 
@@ -46,13 +45,12 @@ class DashboardBackupService implements DashboardBackupServiceType {
   private activeSpaceId: string;
   private sessionStorage: Storage;
   private localStorage: Storage;
-  private notifications: DashboardNotificationsService;
   private spaces: DashboardSpacesService;
 
   private oldDashboardsWithUnsavedChanges: string[] = [];
 
   constructor(requiredServices: DashboardBackupRequiredServices) {
-    ({ notifications: this.notifications, spaces: this.spaces } = requiredServices);
+    ({ spaces: this.spaces } = requiredServices);
     this.sessionStorage = new Storage(sessionStorage);
     this.localStorage = new Storage(localStorage);
 
@@ -72,7 +70,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
     try {
       this.localStorage.set(DASHBOARD_VIEWMODE_LOCAL_KEY, viewMode);
     } catch (e) {
-      this.notifications.toasts.addDanger({
+      coreServices.notifications.toasts.addDanger({
         title: backupServiceStrings.viewModeStorageError(e.message),
         'data-test-subj': 'dashboardViewmodeBackupFailure',
       });
@@ -99,7 +97,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
         });
       }
     } catch (e) {
-      this.notifications.toasts.addDanger({
+      coreServices.notifications.toasts.addDanger({
         title: backupServiceStrings.getPanelsClearError(e.message),
         'data-test-subj': 'dashboardPanelsClearFailure',
       });
@@ -117,7 +115,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
       return { dashboardState, panels };
     } catch (e) {
-      this.notifications.toasts.addDanger({
+      coreServices.notifications.toasts.addDanger({
         title: backupServiceStrings.getPanelsGetError(e.message),
         'data-test-subj': 'dashboardPanelsGetFailure',
       });
@@ -138,7 +136,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
       set(panelsStorage, [this.activeSpaceId, id], unsavedPanels);
       this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, panelsStorage, true);
     } catch (e) {
-      this.notifications.toasts.addDanger({
+      coreServices.notifications.toasts.addDanger({
         title: backupServiceStrings.getPanelsSetError(e.message),
         'data-test-subj': 'dashboardPanelsSetFailure',
       });
@@ -178,7 +176,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
       return this.oldDashboardsWithUnsavedChanges;
     } catch (e) {
-      this.notifications.toasts.addDanger({
+      coreServices.notifications.toasts.addDanger({
         title: backupServiceStrings.getPanelsGetError(e.message),
         'data-test-subj': 'dashboardPanelsGetFailure',
       });

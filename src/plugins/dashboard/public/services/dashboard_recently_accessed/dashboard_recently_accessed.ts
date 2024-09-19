@@ -10,24 +10,19 @@
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
-import { DashboardHTTPService } from '../http/types';
 import { DashboardStartDependencies } from '../../plugin';
 import { DashboardRecentlyAccessedService } from './types';
-
-interface DashboardRecentlyAccessedRequiredServices {
-  http: DashboardHTTPService;
-}
+import { coreServices } from '../kibana_services';
 
 export type DashboardBackupServiceFactory = KibanaPluginServiceFactory<
   DashboardRecentlyAccessedService,
   DashboardStartDependencies,
-  DashboardRecentlyAccessedRequiredServices
+  {}
 >;
 
-export const dashboardRecentlyAccessedFactory: DashboardBackupServiceFactory = (
-  core,
-  requiredServices
-) => {
-  const { http } = requiredServices;
-  return new RecentlyAccessedService().start({ http, key: 'dashboardRecentlyAccessed' });
+export const dashboardRecentlyAccessedFactory: DashboardBackupServiceFactory = () => {
+  return new RecentlyAccessedService().start({
+    http: coreServices.http,
+    key: 'dashboardRecentlyAccessed',
+  });
 };

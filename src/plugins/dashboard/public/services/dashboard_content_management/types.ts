@@ -18,7 +18,6 @@ import { DashboardBackupServiceType } from '../dashboard_backup/types';
 import { DashboardDataService } from '../data/types';
 import { DashboardEmbeddableService } from '../embeddable/types';
 import { DashboardInitializerContextService } from '../initializer_context/types';
-import { DashboardNotificationsService } from '../notifications/types';
 import { DashboardSavedObjectsTaggingService } from '../saved_objects_tagging/types';
 import { DashboardScreenshotModeService } from '../screenshot_mode/types';
 import { DashboardSpacesService } from '../spaces/types';
@@ -33,7 +32,6 @@ export interface DashboardContentManagementRequiredServices {
   data: DashboardDataService;
   spaces: DashboardSpacesService;
   embeddable: DashboardEmbeddableService;
-  notifications: DashboardNotificationsService;
   dashboardBackup: DashboardBackupServiceType;
   screenshotMode: DashboardScreenshotModeService;
   initializerContext: DashboardInitializerContextService;

@@ -48,15 +48,11 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
     'initializerContext',
     'dashboardBackup',
     'screenshotMode',
-    'notifications',
     'embeddable',
     'spaces',
     'data',
   ]),
-  dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory, [
-    'notifications',
-    'spaces',
-  ]),
+  dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory, ['spaces']),
 
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
@@ -78,7 +74,7 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
   uiActions: new PluginServiceProvider(uiActionsServiceFactory),
   observabilityAIAssistant: new PluginServiceProvider(observabilityAIAssistantServiceFactory),
-  dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedFactory, ['http']),
+  dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedFactory),
   dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),
   dashboardFavorites: new PluginServiceProvider(dashboardFavoritesServiceFactory),
 };

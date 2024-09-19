@@ -40,14 +40,8 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
   { startPlugins: { contentManagement } },
   requiredServices
 ) => {
-  const {
-    data,
-    embeddable,
-    notifications,
-    dashboardBackup,
-    initializerContext,
-    savedObjectsTagging,
-  } = requiredServices;
+  const { data, embeddable, dashboardBackup, initializerContext, savedObjectsTagging } =
+    requiredServices;
   return {
     loadDashboardState: ({ id }) =>
       loadDashboardState({
@@ -71,7 +65,6 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
         saveOptions,
         lastSavedId,
         currentState,
-        notifications,
         panelReferences,
         dashboardBackup,
         contentManagement,
