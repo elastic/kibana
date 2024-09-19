@@ -70,9 +70,6 @@ describe('mergeSourceMonitor', () => {
     const result = mapSavedObjectToMonitor({ monitor: { attributes: testMonitor } } as any);
 
     expect(result).toEqual({
-      __ui: {
-        is_tls_enabled: false,
-      },
       alert: {
         status: {
           enabled: true,
@@ -103,7 +100,6 @@ describe('mergeSourceMonitor', () => {
       name: 'Todos Lightweight',
       namespace: 'default',
       original_space: 'default',
-      project_id: 'test-projects',
       proxy_url: '',
       retest_on_failure: true,
       revision: 21,
