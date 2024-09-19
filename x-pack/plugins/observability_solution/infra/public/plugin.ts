@@ -280,9 +280,7 @@ export class Plugin implements InfraClientPluginClass {
       return [
         {
           id: 'inventory',
-          title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-            defaultMessage: 'Inventory',
-          }),
+          title: inventoryTitle,
           path: '/inventory',
           visibleIn,
         },
