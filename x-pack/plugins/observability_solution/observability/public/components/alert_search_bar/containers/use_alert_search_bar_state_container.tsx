@@ -24,7 +24,7 @@ import { useTimefilterService } from '../../../hooks/use_timefilter_service';
 
 import {
   useContainer,
-  defaultState as DEFAULT_STATE,
+  DEFAULT_STATE,
   AlertSearchBarStateContainer,
   AlertSearchBarContainerState,
 } from './state_container';

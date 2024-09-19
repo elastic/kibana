@@ -16,7 +16,7 @@ import { observabilityAlertFeatureIds } from '../../../../common/constants';
 import { TopAlert } from '../../..';
 import {
   AlertSearchBarContainerState,
-  defaultState as DEFAULT_STATE,
+  DEFAULT_STATE,
 } from '../../../components/alert_search_bar/containers/state_container';
 import type { Group } from '../../../../common/typings';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
