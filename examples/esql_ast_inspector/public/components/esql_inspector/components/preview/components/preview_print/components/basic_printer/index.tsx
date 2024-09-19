@@ -20,28 +20,24 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiRange,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { PrettyPrint } from '../../../../../../../pretty_print';
+import { PrettyPrintBasic } from '../../../../../../../pretty_print_basic';
 
-export interface WrappingPrinterProps {
+export interface BasicPrinterProps {
   src: string;
 }
 
-export const WrappingPrinter: React.FC<WrappingPrinterProps> = ({ src }) => {
+export const BasicPrinter: React.FC<BasicPrinterProps> = ({ src }) => {
   const [lowercase, setLowercase] = React.useState(false);
   const [multiline, setMultiline] = React.useState(false);
-  const [wrap, setWrap] = React.useState(80);
-  const [tab, setTab] = React.useState('  ');
   const [pipeTab, setPipeTab] = React.useState('  ');
-  const [indent, setIndent] = React.useState('');
 
   return (
     <EuiFlexGroup style={{ maxWidth: 1200 }} alignItems={'flexStart'}>
       <EuiFlexItem>
-        <PrettyPrint src={src} opts={{ lowercase, multiline, wrap, tab, pipeTab, indent }} />
+        <PrettyPrintBasic src={src} opts={{ multiline, pipeTab, lowercase }} />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ width: 300 }}>
         <EuiFlexGroup>
@@ -69,28 +65,11 @@ export const WrappingPrinter: React.FC<WrappingPrinterProps> = ({ src }) => {
 
         <EuiSpacer size="m" />
 
-        <EuiFormRow label="Line width">
-          <EuiRange
-            min={20}
-            max={150}
-            value={wrap}
-            onChange={(e) => setWrap(Number(e.currentTarget.value))}
-            showInput
-            aria-label="Wrapping line width"
-          />
-        </EuiFormRow>
-
-        <EuiFormRow label="Initial indentation" helpText="Indentation applied to all lines">
-          <EuiFieldText compressed value={indent} onChange={(e) => setIndent(e.target.value)} />
-        </EuiFormRow>
-
-        <EuiFormRow label="Tab" helpText="Tabbing for each new indentation level">
-          <EuiFieldText compressed value={tab} onChange={(e) => setTab(e.target.value)} />
-        </EuiFormRow>
-
-        <EuiFormRow label="Pipe tab" helpText="Tabbing before command pipe">
-          <EuiFieldText compressed value={pipeTab} onChange={(e) => setPipeTab(e.target.value)} />
-        </EuiFormRow>
+        {!!multiline && (
+          <EuiFormRow label="Pipe tab" helpText="Tabbing before command pipe">
+            <EuiFieldText compressed value={pipeTab} onChange={(e) => setPipeTab(e.target.value)} />
+          </EuiFormRow>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

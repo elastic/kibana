@@ -10,8 +10,8 @@ import * as React from 'react';
 import { EuiCode, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { useEsqlInspector } from '../../../../context';
 import { useBehaviorSubject } from '../../../../../../hooks/use_behavior_subject';
-import { PrettyPrintBasic } from '../../../../../pretty_print_basic';
 import { WrappingPrinter } from './components/wrapping_printer';
+import { BasicPrinter } from './components/basic_printer';
 
 export const PreviewPrint: React.FC = (props) => {
   const state = useEsqlInspector();
@@ -37,7 +37,7 @@ export const PreviewPrint: React.FC = (props) => {
           </p>
         </EuiText>
         <EuiSpacer />
-        <PrettyPrintBasic src={src} />
+        <BasicPrinter src={src} />
       </EuiPanel>
     </>
   );
