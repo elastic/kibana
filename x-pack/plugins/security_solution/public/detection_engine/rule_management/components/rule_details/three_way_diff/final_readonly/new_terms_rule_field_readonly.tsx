@@ -11,8 +11,9 @@ import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { KqlQueryReadOnly } from './fields/kql_query';
 import { TypeReadOnly } from './fields/type/type';
 import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
-// import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { NewTermsFieldsReadOnly } from './fields/new_terms_fields/new_terms_fields';
+import { HistoryWindowStartReadOnly } from './fields/history_window_start/history_window_start';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface NewTermsRuleFieldReadOnlyProps {
   fieldName: keyof DiffableNewTermsFields;
@@ -33,6 +34,10 @@ export function NewTermsRuleFieldReadOnly({
       );
     case 'data_source':
       return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;
+    case 'history_window_start':
+      return (
+        <HistoryWindowStartReadOnly historyWindowStart={finalDiffableRule.history_window_start} />
+      );
     case 'kql_query':
       return (
         <KqlQueryReadOnly
@@ -46,6 +51,6 @@ export function NewTermsRuleFieldReadOnly({
     case 'type':
       return <TypeReadOnly type={finalDiffableRule.type} />;
     default:
-    // return assertUnreachable(fieldName);
+      return assertUnreachable(fieldName);
   }
 }

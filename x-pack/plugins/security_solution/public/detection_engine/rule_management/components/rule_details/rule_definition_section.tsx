@@ -403,7 +403,7 @@ interface HistoryWindowSizeProps {
   historyWindowStart?: string;
 }
 
-const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps) => {
+export const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps) => {
   const size = historyWindowStart ? convertHistoryStartToSize(historyWindowStart) : '7d';
 
   return (
