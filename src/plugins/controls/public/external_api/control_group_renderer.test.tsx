@@ -15,7 +15,7 @@ import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-pub
 import { act, render, waitFor } from '@testing-library/react';
 
 import { ControlGroupRendererApi } from '.';
-import { CONTROL_GROUP_TYPE } from '../..';
+import { CONTROL_GROUP_TYPE } from '..';
 import { getControlGroupEmbeddableFactory } from '../control_group/get_control_group_factory';
 import { ControlGroupRenderer, ControlGroupRendererProps } from './control_group_renderer';
 

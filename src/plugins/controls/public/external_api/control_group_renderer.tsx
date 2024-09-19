@@ -16,12 +16,12 @@ import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useSearchApi, type ViewMode as ViewModeType } from '@kbn/presentation-publishing';
 
-import type { ControlGroupApi } from '../..';
+import type { ControlGroupApi } from '..';
 import {
   CONTROL_GROUP_TYPE,
   type ControlGroupRuntimeState,
   type ControlGroupSerializedState,
-} from '../../../common';
+} from '../../common';
 import {
   type ControlGroupStateBuilder,
   controlGroupStateBuilder,
