@@ -53,6 +53,7 @@ import type {
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 import type { LogStreamSerializedState } from './components/log_stream/types';
+import { hostsTitle, inventoryTitle, metricsExplorerTitle, metricsTitle } from './translations';
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
@@ -163,27 +164,18 @@ export class Plugin implements InfraClientPluginClass {
               ...(capabilities.infrastructure.show
                 ? [
                     {
-                      label: i18n.translate('xpack.infra.metrics.pluginTitle', {
-                        defaultMessage: 'Infrastructure',
-                      }),
+                      label: metricsTitle,
                       sortKey: 300,
                       entries: [
                         {
-                          label: i18n.translate(
-                            'xpack.infra.metrics.infrastructureInventoryTitle',
-                            {
-                              defaultMessage: 'Infrastructure Inventory',
-                            }
-                          ),
+                          label: inventoryTitle,
                           app: 'metrics',
                           path: '/inventory',
                         },
                         ...(this.config.featureFlags.metricsExplorerEnabled
                           ? [
                               {
-                                label: i18n.translate('xpack.infra.metrics.metricsExplorerTitle', {
-                                  defaultMessage: 'Metrics Explorer',
-                                }),
+                                label: metricsExplorerTitle,
                                 app: 'metrics',
                                 path: '/explorer',
                               },
@@ -192,9 +184,7 @@ export class Plugin implements InfraClientPluginClass {
                         ...(isInfrastructureHostsViewEnabled
                           ? [
                               {
-                                label: i18n.translate('xpack.infra.metrics.hostsTitle', {
-                                  defaultMessage: 'Hosts',
-                                }),
+                                label: hostsTitle,
                                 app: 'metrics',
                                 path: '/hosts',
                               },
