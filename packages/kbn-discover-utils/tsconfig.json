@@ -11,7 +11,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
@@ -26,6 +26,7 @@
     "@kbn/i18n",
     "@kbn/core-ui-settings-browser",
     "@kbn/ui-theme",
-    "@kbn/expressions-plugin"
+    "@kbn/expressions-plugin",
+    "@kbn/logs-data-access-plugin"
   ]
 }

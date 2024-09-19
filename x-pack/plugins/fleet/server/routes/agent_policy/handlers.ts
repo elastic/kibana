@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import pMap from 'p-map';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 
 import { isEmpty } from 'lodash';
 
@@ -191,6 +191,11 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
     const fleetContext = await context.fleet;
     const soClient = fleetContext.internalSoClient;
     const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
+    if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
+      throw new FleetUnauthorizedError(
+        'full query parameter require agent policies read permissions'
+      );
+    }
     let items = await agentPolicyService.getByIDs(soClient, ids, {
       withPackagePolicies,
       ignoreMissing,
@@ -585,7 +590,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         standalone: request.query.standalone === true,
       });
       if (fullAgentPolicy) {
-        const body = fullAgentPolicyToYaml(fullAgentPolicy, safeDump);
+        const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
         const headers: ResponseHeaders = {
           'content-type': 'text/x-yaml',
           'content-disposition': `attachment; filename="elastic-agent.yml"`,

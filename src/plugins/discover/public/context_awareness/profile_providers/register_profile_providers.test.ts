@@ -8,14 +8,20 @@
  */
 
 import { createEsqlDataSource } from '../../../common/data_sources';
+import { DiscoverStartPlugins } from '../../types';
 import { createContextAwarenessMocks } from '../__mocks__';
-import { exampleDataSourceProfileProvider } from './example_data_source_profile';
-import { exampleDocumentProfileProvider } from './example_document_profile';
-import { exampleRootProfileProvider } from './example_root_pofile';
+import { createExampleRootProfileProvider } from './example/example_root_pofile';
+import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
+import { createExampleDocumentProfileProvider } from './example/example_document_profile';
+
 import {
   registerProfileProviders,
   registerEnabledProfileProviders,
 } from './register_profile_providers';
+
+const exampleRootProfileProvider = createExampleRootProfileProvider();
+const exampleDataSourceProfileProvider = createExampleDataSourceProfileProvider();
+const exampleDocumentProfileProvider = createExampleDocumentProfileProvider();
 
 describe('registerEnabledProfileProviders', () => {
   it('should register all profile providers', async () => {
@@ -68,7 +74,8 @@ describe('registerProfileProviders', () => {
       createContextAwarenessMocks({
         shouldRegisterProviders: false,
       });
-    registerProfileProviders({
+    await registerProfileProviders({
+      plugins: {} as DiscoverStartPlugins,
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
@@ -93,13 +100,9 @@ describe('registerProfileProviders', () => {
         raw: {},
       },
     });
-    expect(rootProfileServiceMock.getProfile(rootContext)).toBe(exampleRootProfileProvider.profile);
-    expect(dataSourceProfileServiceMock.getProfile(dataSourceContext)).toBe(
-      exampleDataSourceProfileProvider.profile
-    );
-    expect(documentProfileServiceMock.getProfile(documentContext)).toBe(
-      exampleDocumentProfileProvider.profile
-    );
+    expect(rootContext.profileId).toBe(exampleRootProfileProvider.profileId);
+    expect(dataSourceContext.profileId).toBe(exampleDataSourceProfileProvider.profileId);
+    expect(documentContext.profileId).toBe(exampleDocumentProfileProvider.profileId);
   });
 
   it('should not register disabled experimental profile providers', async () => {
@@ -107,7 +110,8 @@ describe('registerProfileProviders', () => {
       createContextAwarenessMocks({
         shouldRegisterProviders: false,
       });
-    registerProfileProviders({
+    await registerProfileProviders({
+      plugins: {} as DiscoverStartPlugins,
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
@@ -128,14 +132,8 @@ describe('registerProfileProviders', () => {
         raw: {},
       },
     });
-    expect(rootProfileServiceMock.getProfile(rootContext)).not.toBe(
-      exampleRootProfileProvider.profile
-    );
-    expect(dataSourceProfileServiceMock.getProfile(dataSourceContext)).not.toBe(
-      exampleDataSourceProfileProvider.profile
-    );
-    expect(documentProfileServiceMock.getProfile(documentContext)).not.toBe(
-      exampleDocumentProfileProvider.profile
-    );
+    expect(rootContext.profileId).not.toBe(exampleRootProfileProvider.profileId);
+    expect(dataSourceContext.profileId).not.toBe(exampleDataSourceProfileProvider.profileId);
+    expect(documentContext.profileId).not.toBe(exampleDocumentProfileProvider.profileId);
   });
 });

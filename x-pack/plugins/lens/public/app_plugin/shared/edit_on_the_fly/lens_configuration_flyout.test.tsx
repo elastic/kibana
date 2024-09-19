@@ -125,11 +125,11 @@ const datasourceMap = mockDatasourceMap();
 const visualizationMap = mockVisualizationMap();
 
 describe('LensEditConfigurationFlyout', () => {
-  function renderConfigFlyout(
+  async function renderConfigFlyout(
     propsOverrides: Partial<EditConfigPanelProps> = {},
     query?: Query | AggregateQuery
   ) {
-    return renderWithReduxStore(
+    const { container, ...rest } = renderWithReduxStore(
       <LensEditConfigurationFlyout
         attributes={lensAttributes}
         updatePanelState={jest.fn()}
@@ -155,12 +155,13 @@ describe('LensEditConfigurationFlyout', () => {
         },
       }
     );
+    await waitFor(() => container.querySelector('lnsEditFlyoutBody'));
+    return { container, ...rest };
   }
 
   it('should display the header and the link to editor if necessary props are given', async () => {
     const navigateToLensEditorSpy = jest.fn();
-
-    renderConfigFlyout({
+    await renderConfigFlyout({
       displayFlyoutHeader: true,
       navigateToLensEditor: navigateToLensEditorSpy,
     });
@@ -170,7 +171,7 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should display the header title correctly for a newly created panel', async () => {
-    renderConfigFlyout({
+    await renderConfigFlyout({
       displayFlyoutHeader: true,
       isNewPanel: true,
     });
@@ -182,7 +183,7 @@ describe('LensEditConfigurationFlyout', () => {
   it('should call the closeFlyout callback if cancel button is clicked', async () => {
     const closeFlyoutSpy = jest.fn();
 
-    renderConfigFlyout({
+    await renderConfigFlyout({
       closeFlyout: closeFlyoutSpy,
     });
     expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
@@ -192,7 +193,7 @@ describe('LensEditConfigurationFlyout', () => {
 
   it('should call the updatePanelState callback if cancel button is clicked', async () => {
     const updatePanelStateSpy = jest.fn();
-    renderConfigFlyout({
+    await renderConfigFlyout({
       updatePanelState: updatePanelStateSpy,
     });
     expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
@@ -203,7 +204,7 @@ describe('LensEditConfigurationFlyout', () => {
   it('should call the updateByRefInput callback if cancel button is clicked and savedObjectId exists', async () => {
     const updateByRefInputSpy = jest.fn();
 
-    renderConfigFlyout({
+    await renderConfigFlyout({
       closeFlyout: jest.fn(),
       updateByRefInput: updateByRefInputSpy,
       savedObjectId: 'id',
@@ -216,7 +217,7 @@ describe('LensEditConfigurationFlyout', () => {
     const updateByRefInputSpy = jest.fn();
     const saveByRefSpy = jest.fn();
 
-    renderConfigFlyout({
+    await renderConfigFlyout({
       closeFlyout: jest.fn(),
       updateByRefInput: updateByRefInputSpy,
       savedObjectId: 'id',
@@ -230,7 +231,7 @@ describe('LensEditConfigurationFlyout', () => {
   it('should call the onApplyCb callback if apply button is clicked', async () => {
     const onApplyCbSpy = jest.fn();
 
-    renderConfigFlyout(
+    await renderConfigFlyout(
       {
         closeFlyout: jest.fn(),
         onApplyCb: onApplyCbSpy,
@@ -254,14 +255,14 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should not display the editor if canEditTextBasedQuery prop is false', async () => {
-    renderConfigFlyout({
+    await renderConfigFlyout({
       canEditTextBasedQuery: false,
     });
     expect(screen.queryByTestId('TextBasedLangEditor')).toBeNull();
   });
 
   it('should not display the editor if canEditTextBasedQuery prop is true but the query is not text based', async () => {
-    renderConfigFlyout({
+    await renderConfigFlyout({
       canEditTextBasedQuery: true,
       attributes: {
         ...lensAttributes,
@@ -278,14 +279,14 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should not display the suggestions if hidesSuggestions prop is true', async () => {
-    renderConfigFlyout({
+    await renderConfigFlyout({
       hidesSuggestions: true,
     });
     expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
   });
 
   it('should display the suggestions if canEditTextBasedQuery prop is true', async () => {
-    renderConfigFlyout(
+    await renderConfigFlyout(
       {
         canEditTextBasedQuery: true,
       },
@@ -298,7 +299,7 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should display the ES|QL results table if canEditTextBasedQuery prop is true', async () => {
-    renderConfigFlyout({
+    await renderConfigFlyout({
       canEditTextBasedQuery: true,
     });
     await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
@@ -317,7 +318,7 @@ describe('LensEditConfigurationFlyout', () => {
     // todo: replace testDatasource with formBased or textBased as it's the only ones accepted
     // @ts-ignore
     newProps.attributes.state.datasourceStates.testDatasource = 'state';
-    renderConfigFlyout(newProps);
+    await renderConfigFlyout(newProps);
     expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
   });
   it('save button should be disabled if expression cannot be generated', async () => {
@@ -337,7 +338,7 @@ describe('LensEditConfigurationFlyout', () => {
       },
     };
 
-    renderConfigFlyout(newProps);
+    await renderConfigFlyout(newProps);
     expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
   });
 });

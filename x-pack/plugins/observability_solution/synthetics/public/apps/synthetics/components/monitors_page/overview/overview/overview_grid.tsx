@@ -93,7 +93,7 @@ export const OverviewGrid = memo(() => {
   );
 
   useEffect(() => {
-    if (monitorsSortedByStatus.length && maxItem) {
+    if (monitorsSortedByStatus.length) {
       const batch: TrendRequest[] = [];
       const chunk = monitorsSortedByStatus.slice(0, (maxItem + 1) * ROW_COUNT);
       for (const item of chunk) {
@@ -199,7 +199,10 @@ export const OverviewGrid = memo(() => {
                             style={{ ...style }}
                           >
                             {listData[listIndex].map((_, idx) => (
-                              <EuiFlexItem key={listIndex * ROW_COUNT + idx}>
+                              <EuiFlexItem
+                                data-test-subj="syntheticsOverviewGridItem"
+                                key={listIndex * ROW_COUNT + idx}
+                              >
                                 <MetricItem
                                   monitor={monitorsSortedByStatus[listIndex * ROW_COUNT + idx]}
                                   onClick={setFlyoutConfigCallback}

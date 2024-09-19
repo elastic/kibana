@@ -39,12 +39,12 @@ if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; t
   node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --skip-warmup
 else
   # pipeline should use bare metal static worker
-  if [ -z "${JOURNEYS_GROUP}" ]; then
-    echo "--- Running performance tests, only the following groups: ${JOURNEYS_GROUP}"
-    node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --groups "${JOURNEYS_GROUP}"
-  else
+  if [[ -z "${JOURNEYS_GROUP+x}" ]]; then
     echo "--- Running performance tests"
     node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+  else
+    echo "--- Running performance tests: '$JOURNEYS_GROUP' group"
+    node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --group "$JOURNEYS_GROUP"
   fi
 fi
 

@@ -7,7 +7,7 @@
 
 import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
 import type {
@@ -18,6 +18,7 @@ import type {
   SavedObjectsClientContract,
   SavedObject,
   SavedObjectsUpdateResponse,
+  SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
@@ -538,6 +539,7 @@ class AgentPolicyService {
       fields?: string[];
       esClient?: ElasticsearchClient;
       withAgentCount?: boolean;
+      spaceId?: string;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -555,9 +557,10 @@ class AgentPolicyService {
       kuery,
       withPackagePolicies = false,
       fields,
+      spaceId,
     } = options;
 
-    const baseFindParams = {
+    const baseFindParams: SavedObjectsFindOptions = {
       type: savedObjectType,
       sortField,
       sortOrder,
@@ -565,6 +568,11 @@ class AgentPolicyService {
       perPage,
       ...(fields ? { fields } : {}),
     };
+
+    if (spaceId) {
+      baseFindParams.namespaces = [spaceId];
+    }
+
     const filter = kuery ? normalizeKuery(savedObjectType, kuery) : undefined;
     let agentPoliciesSO;
     try {
@@ -839,24 +847,22 @@ class AgentPolicyService {
 
   /**
    * Remove an output from all agent policies that are using it, and replace the output by the default ones.
-   * @param soClient
    * @param esClient
    * @param outputId
    */
-  public async removeOutputFromAll(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    outputId: string
-  ) {
+  public async removeOutputFromAll(esClient: ElasticsearchClient, outputId: string) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
-      await soClient.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['revision', 'data_output_id', 'monitoring_output_id'],
-        searchFields: ['data_output_id', 'monitoring_output_id'],
-        search: escapeSearchQueryPhrase(outputId),
-        perPage: SO_SEARCH_LIMIT,
-      })
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<AgentPolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['revision', 'data_output_id', 'monitoring_output_id'],
+          searchFields: ['data_output_id', 'monitoring_output_id'],
+          search: escapeSearchQueryPhrase(outputId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
     ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
 
     if (agentPolicies.length > 0) {
@@ -869,6 +875,9 @@ class AgentPolicyService {
       await pMap(
         agentPolicies,
         async (agentPolicy) => {
+          const soClient = appContextService.getInternalUserSOClientForSpaceId(
+            agentPolicy.space_ids?.[0]
+          );
           const existingAgentPolicy = await this.get(soClient, agentPolicy.id, true);
 
           if (!existingAgentPolicy) {
@@ -888,10 +897,14 @@ class AgentPolicyService {
       );
       await pMap(
         agentPolicies,
-        (agentPolicy) =>
-          this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
+        (agentPolicy) => {
+          const soClient = appContextService.getInternalUserSOClientForSpaceId(
+            agentPolicy.space_ids?.[0]
+          );
+          return this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
             skipValidation: true,
-          }),
+          });
+        },
         {
           concurrency: 50,
         }
@@ -903,28 +916,35 @@ class AgentPolicyService {
    * Remove a Fleet Server from all agent policies that are using it, to use the default one instead.
    */
   public async removeFleetServerHostFromAll(
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     fleetServerHostId: string
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
-      await soClient.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['revision', 'fleet_server_host_id'],
-        searchFields: ['fleet_server_host_id'],
-        search: escapeSearchQueryPhrase(fleetServerHostId),
-        perPage: SO_SEARCH_LIMIT,
-      })
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<AgentPolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['revision', 'fleet_server_host_id'],
+          searchFields: ['fleet_server_host_id'],
+          search: escapeSearchQueryPhrase(fleetServerHostId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
     ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
 
     if (agentPolicies.length > 0) {
       await pMap(
         agentPolicies,
         (agentPolicy) =>
-          this.update(soClient, esClient, agentPolicy.id, {
-            fleet_server_host_id: null,
-          }),
+          this.update(
+            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
+            esClient,
+            agentPolicy.id,
+            {
+              fleet_server_host_id: null,
+            }
+          ),
         {
           concurrency: 50,
         }
@@ -1185,7 +1205,9 @@ class AgentPolicyService {
       });
     }
 
-    await soClient.delete(savedObjectType, id);
+    await soClient.delete(savedObjectType, id, {
+      force: true, // need to delete through multiple space
+    });
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
       spaceId: soClient.getCurrentNamespace(),
     });
@@ -1405,7 +1427,7 @@ class AgentPolicyService {
         },
       };
 
-      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, dump);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');
@@ -1445,35 +1467,36 @@ class AgentPolicyService {
    * @param esClient
    * @param downloadSourceId
    */
-  public async removeDefaultSourceFromAll(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    downloadSourceId: string
-  ) {
+  public async removeDefaultSourceFromAll(esClient: ElasticsearchClient, downloadSourceId: string) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
-      await soClient.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['revision', 'download_source_id'],
-        searchFields: ['download_source_id'],
-        search: escapeSearchQueryPhrase(downloadSourceId),
-        perPage: SO_SEARCH_LIMIT,
-      })
-    ).saved_objects.map((so) => ({
-      id: so.id,
-      ...so.attributes,
-    }));
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<AgentPolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['revision', 'download_source_id'],
+          searchFields: ['download_source_id'],
+          search: escapeSearchQueryPhrase(downloadSourceId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
+    ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
 
     if (agentPolicies.length > 0) {
       await pMap(
         agentPolicies,
         (agentPolicy) =>
-          this.update(soClient, esClient, agentPolicy.id, {
-            download_source_id:
-              agentPolicy.download_source_id === downloadSourceId
-                ? null
-                : agentPolicy.download_source_id,
-          }),
+          this.update(
+            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
+            esClient,
+            agentPolicy.id,
+            {
+              download_source_id:
+                agentPolicy.download_source_id === downloadSourceId
+                  ? null
+                  : agentPolicy.download_source_id,
+            }
+          ),
         {
           concurrency: 50,
         }
