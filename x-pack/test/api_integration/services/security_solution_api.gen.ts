@@ -236,7 +236,9 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-      * Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+      * Create a clean draft Timeline or Timeline template for the current user.
+> info
+> If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
 
       */
     cleanDraftTimelines(props: CleanDraftTimelinesProps) {
@@ -299,6 +301,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Create a new Timeline or Timeline template.
+     */
     createTimelines(props: CreateTimelinesProps) {
       return supertest
         .post('/api/timeline')
@@ -343,6 +348,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Delete a note from a Timeline using the note ID.
+     */
     deleteNote(props: DeleteNoteProps) {
       return supertest
         .delete('/api/note')
@@ -362,6 +370,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Delete one or more Timelines or Timeline templates.
+     */
     deleteTimelines(props: DeleteTimelinesProps) {
       return supertest
         .delete('/api/timeline')
@@ -603,6 +614,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object)
         .query(props.query);
     },
+    /**
+     * Export Timelines as an NDJSON file.
+     */
     exportTimelines(props: ExportTimelinesProps) {
       return supertest
         .post('/api/timeline/_export')
@@ -674,6 +688,9 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
+     */
     getDraftTimelines(props: GetDraftTimelinesProps) {
       return supertest
         .get('/api/timeline/_draft')
@@ -713,7 +730,7 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Gets notes
+     * Get all notes for a given document.
      */
     getNotes(props: GetNotesProps) {
       return supertest
@@ -770,6 +787,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get the details of an existing saved Timeline or Timeline template.
+     */
     getTimeline(props: GetTimelineProps) {
       return supertest
         .get('/api/timeline')
@@ -778,6 +798,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a list of all saved Timelines or Timeline templates.
+     */
     getTimelines(props: GetTimelinesProps) {
       return supertest
         .get('/api/timelines')
@@ -800,6 +823,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Import Timelines.
+     */
     importTimelines(props: ImportTimelinesProps) {
       return supertest
         .post('/api/timeline/_import')
@@ -836,6 +862,9 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Install or update prepackaged Timelines.
+     */
     installPrepackedTimelines(props: InstallPrepackedTimelinesProps) {
       return supertest
         .post('/api/timeline/_prepackaged')
@@ -870,7 +899,7 @@ finalize it.
         .send(props.body as object);
     },
     /**
-     * Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+     * Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
      */
     patchTimeline(props: PatchTimelineProps) {
       return supertest
@@ -892,6 +921,9 @@ finalize it.
         .send(props.body as object)
         .query(props.query);
     },
+    /**
+     * Favorite a Timeline or Timeline template for the current user.
+     */
     persistFavoriteRoute(props: PersistFavoriteRouteProps) {
       return supertest
         .patch('/api/timeline/_favorite')
@@ -900,6 +932,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Add a note to a Timeline or update an existing note.
+     */
     persistNoteRoute(props: PersistNoteRouteProps) {
       return supertest
         .patch('/api/note')
@@ -908,6 +943,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Pin an event to an existing Timeline.
+     */
     persistPinnedEventRoute(props: PersistPinnedEventRouteProps) {
       return supertest
         .patch('/api/pinned_event')

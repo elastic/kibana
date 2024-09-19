@@ -30,7 +30,7 @@ const allFunctions = aggregationFunctionDefinitions
   .concat(scalarFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
-export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
+export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 
 export const getAddDateHistogramSnippet = (histogramBarTarget = 50) => {
   return `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`;
@@ -140,8 +140,6 @@ export const buildFieldsDefinitionsWithMetadata = (
   options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
 ): SuggestionRawDefinition[] => {
   return fields.map((field) => {
-    const description = field.metadata?.description;
-
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
     return {
       label: field.name,
@@ -151,16 +149,8 @@ export const buildFieldsDefinitionsWithMetadata = (
         (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
-      documentation: description
-        ? {
-            value: `
----
-
-${description}`,
-          }
-        : undefined,
-      // If there is a description, it is a field from ECS, so it should be sorted to the top
-      sortText: description ? '1D' : 'D',
+      // If detected to be an ECS field, push it up to the top of the list
+      sortText: field.isEcs ? '1D' : 'D',
       command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   });
@@ -442,13 +432,13 @@ export function getCompatibleLiterals(
 }
 
 export const TIME_SYSTEM_DESCRIPTIONS = {
-  '?t_start': i18n.translate(
+  '?_tstart': i18n.translate(
     'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
     {
       defaultMessage: 'The start time from the date picker',
     }
   ),
-  '?t_end': i18n.translate(
+  '?_tend': i18n.translate(
     'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
     {
       defaultMessage: 'The end time from the date picker',
