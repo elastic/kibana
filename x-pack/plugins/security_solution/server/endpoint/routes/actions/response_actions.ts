@@ -449,13 +449,18 @@ function sendActionCreationTelemetry(
   data: ActionDetails,
   command: ResponseActionsApiCommandNames
 ) {
+  let isAutomated = false;
+
+  if ((data.alertIds && data.alertIds.length) || data.createdBy === 'unknown') {
+    isAutomated = true;
+  }
   const telemetryEvent = {
     responseActions: {
       actionId,
       agentType: data.agentType,
       command,
       endpointIds: data.agents,
-      isAutomated: data.createdBy === 'unknown',
+      isAutomated,
     },
   };
   reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, telemetryEvent);
