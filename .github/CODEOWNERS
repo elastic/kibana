@@ -183,6 +183,12 @@ packages/core/execution-context/core-execution-context-server-mocks @elastic/kib
 packages/core/fatal-errors/core-fatal-errors-browser @elastic/kibana-core
 packages/core/fatal-errors/core-fatal-errors-browser-internal @elastic/kibana-core
 packages/core/fatal-errors/core-fatal-errors-browser-mocks @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-browser @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-browser-internal @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-browser-mocks @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-server @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-server-internal @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-server-mocks @elastic/kibana-core
 test/plugin_functional/plugins/core_history_block @elastic/kibana-core
 packages/core/http/core-http-browser @elastic/kibana-core
 packages/core/http/core-http-browser-internal @elastic/kibana-core
@@ -453,6 +459,7 @@ examples/expressions_explorer @elastic/kibana-visualizations
 src/plugins/expressions @elastic/kibana-visualizations
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 examples/feature_control_examples @elastic/kibana-security
+examples/feature_flags_example @elastic/kibana-core
 x-pack/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 x-pack/plugins/features @elastic/kibana-core
 x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
@@ -461,7 +468,7 @@ src/plugins/field_formats @elastic/kibana-data-discovery
 packages/kbn-field-types @elastic/kibana-data-discovery
 packages/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/plugins/fields_metadata @elastic/obs-ux-logs-team
-x-pack/plugins/file_upload @elastic/kibana-gis @elastic/ml-ui
+x-pack/plugins/file_upload @elastic/kibana-presentation @elastic/ml-ui
 examples/files_example @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
 src/plugins/files @elastic/appex-sharedux
@@ -583,11 +590,11 @@ packages/kbn-management/settings/types @elastic/kibana-management
 packages/kbn-management/settings/utilities @elastic/kibana-management
 packages/kbn-management/storybook/config @elastic/kibana-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
-packages/kbn-mapbox-gl @elastic/kibana-gis
-x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
-src/plugins/maps_ems @elastic/kibana-gis
-x-pack/plugins/maps @elastic/kibana-gis
-x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
+packages/kbn-mapbox-gl @elastic/kibana-presentation
+x-pack/examples/third_party_maps_source_example @elastic/kibana-presentation
+src/plugins/maps_ems @elastic/kibana-presentation
+x-pack/plugins/maps @elastic/kibana-presentation
+x-pack/packages/maps/vector_tile_utils @elastic/kibana-presentation
 x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
@@ -1759,7 +1766,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
 # Ent. Search design
-/x-pack/plugins/enterprise_search/**/*.scss @elastic/ent-search-design
+/x-pack/plugins/enterprise_search/**/*.scss @elastic/search-design
 
 # Security design
 /x-pack/plugins/endpoint/**/*.scss @elastic/security-design

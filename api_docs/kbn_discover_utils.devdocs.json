@@ -516,9 +516,9 @@
         "label": "createLogsContextService",
         "description": [],
         "signature": [
-          "(_deps?: ",
+          "({ logsDataAccessPlugin, }: ",
           "LogsContextServiceDeps",
-          ") => { isLogsIndexPattern: (indexPattern: unknown) => boolean; }"
+          ") => Promise<{ isLogsIndexPattern: (indexPattern: unknown) => boolean; }>"
         ],
         "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
         "deprecated": false,
@@ -529,7 +529,7 @@
             "id": "def-common.createLogsContextService.$1",
             "type": "Object",
             "tags": [],
-            "label": "_deps",
+            "label": "{\n  logsDataAccessPlugin,\n}",
             "description": [],
             "signature": [
               "LogsContextServiceDeps"
