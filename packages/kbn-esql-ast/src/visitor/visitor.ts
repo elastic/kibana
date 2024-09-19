@@ -46,25 +46,41 @@ export class Visitor<
   ): ESQLProperNode | null => {
     return new Visitor()
       .on('visitExpression', (ctx): ESQLProperNode | null => {
-        for (const node of ctx.arguments()) {
-          const { location } = node;
-          if (!location) continue;
-          const isInside = location.min <= pos && location.max >= pos;
-          if (isInside) return ctx.visitExpression(node, undefined);
-          const isBefore = location.min > pos;
-          if (isBefore) return ctx.visitExpression(node, undefined) || node;
+        const node = ctx.node;
+        const location = node.location;
+        if (!location) return null;
+        const isBefore = location.min > pos;
+        let isFirstChild = true;
+        for (const child of ctx.arguments()) {
+          const { location: childLocation } = child;
+          if (!childLocation) continue;
+          if (isFirstChild) {
+            isFirstChild = false;
+            if (isBefore) {
+              const isChildAtOffset =
+                ctx.node.location && ctx.node.location.min < childLocation.min;
+              if (isChildAtOffset) return node;
+              return ctx.visitExpression(child, undefined) || child;
+            }
+          }
+          const isInsideChild = childLocation.min <= pos && childLocation.max >= pos;
+          if (isInsideChild) return ctx.visitExpression(child, undefined);
+          const isBeforeChild = childLocation.min > pos;
+          if (isBeforeChild) {
+            return ctx.visitExpression(child, undefined) || child;
+          }
         }
         return null;
       })
       .on('visitCommand', (ctx): ESQLProperNode | null => {
-        for (const node of ctx.arguments()) {
-          const { location } = node;
-          if (!location) continue;
-          const isInside = location.min <= pos && location.max >= pos;
-          if (isInside) return ctx.visitExpression(node);
-          const isBefore = location.min > pos;
-          if (isBefore) {
-            return ctx.visitExpression(node) || node;
+        for (const child of ctx.arguments()) {
+          const { location: childLocation } = child;
+          if (!childLocation) continue;
+          const isInsideChild = childLocation.min <= pos && childLocation.max >= pos;
+          if (isInsideChild) return ctx.visitExpression(child);
+          const isBeforeChild = childLocation.min > pos;
+          if (isBeforeChild) {
+            return ctx.visitExpression(child) || child;
           }
         }
         return null;

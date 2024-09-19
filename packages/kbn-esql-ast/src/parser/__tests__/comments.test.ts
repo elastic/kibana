@@ -407,6 +407,40 @@ FROM index`;
         ],
       });
     });
+
+    it('to a function', () => {
+      const text = `
+        ROW
+        // fn comment
+        fn(0)`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[0]).toMatchObject({
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'function',
+            name: 'fn',
+            args: [
+              {
+                type: 'literal',
+                value: 0,
+              },
+            ],
+            formatting: {
+              top: [
+                {
+                  type: 'comment',
+                  subtype: 'single-line',
+                  text: ' fn comment',
+                },
+              ],
+            },
+          },
+        ],
+      });
+    });
   });
 
   describe('can attach "left" comment(s)', () => {
