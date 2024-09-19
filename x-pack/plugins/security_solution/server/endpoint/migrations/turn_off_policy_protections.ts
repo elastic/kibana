@@ -9,9 +9,12 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { merge } from 'lodash';
 import {
+  checkIfPopupMessagesContainCustomNotifications,
   ensureOnlyEventCollectionIsAllowed,
   isPolicySetToEventCollectionOnly,
+  resetCustomNotifications,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { PolicyData } from '../../../common/endpoint/types';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
@@ -24,42 +27,25 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
   productFeaturesService: ProductFeaturesService,
   logger: Logger
 ): Promise<void> => {
-  const log = logger.get('endpoint', 'policyProtections');
+  const log = logger.get('endpoint', 'policyProtectionsComplianceChecks');
 
   const isProtectionUpdatesFeatureEnabled = productFeaturesService.isEnabled(
     ProductFeatureSecurityKey.endpointProtectionUpdates
   );
-
   const isPolicyProtectionsEnabled = productFeaturesService.isEnabled(
     ProductFeatureSecurityKey.endpointPolicyProtections
   );
+  const isCustomNotificationEnabled = productFeaturesService.isEnabled(
+    ProductFeatureSecurityKey.endpointCustomNotification
+  );
 
-  if (isPolicyProtectionsEnabled) {
-    log.info(
-      `App feature [${ProductFeatureSecurityKey.endpointPolicyProtections}] is enabled. Nothing to do!`
-    );
-  }
-
-  if (isProtectionUpdatesFeatureEnabled) {
-    log.info(
-      `App feature [${ProductFeatureSecurityKey.endpointProtectionUpdates}] is enabled. Nothing to do!`
-    );
-  }
-
-  if (isPolicyProtectionsEnabled && isProtectionUpdatesFeatureEnabled) {
+  if (
+    isPolicyProtectionsEnabled &&
+    isProtectionUpdatesFeatureEnabled &&
+    isCustomNotificationEnabled
+  ) {
+    log.info('All relevant features are enabled. Nothing to do!');
     return;
-  }
-
-  if (!isPolicyProtectionsEnabled) {
-    log.info(
-      `App feature [${ProductFeatureSecurityKey.endpointPolicyProtections}] is disabled. Checking endpoint integration policies for compliance`
-    );
-  }
-
-  if (!isProtectionUpdatesFeatureEnabled) {
-    log.info(
-      `App feature [${ProductFeatureSecurityKey.endpointProtectionUpdates}] is disabled. Checking endpoint integration policies for compliance`
-    );
   }
 
   const { packagePolicy, internalSoClient, endpointPolicyKuery } = fleetServices;
@@ -67,19 +53,17 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
   const messages: string[] = [];
   const perPage = 1000;
   let hasMoreData = true;
-  let total = 0;
   let page = 1;
 
-  do {
-    const currentPage = page++;
-    const { items, total: totalPolicies } = await packagePolicy.list(internalSoClient, {
-      page: currentPage,
+  while (hasMoreData) {
+    const { items, total } = await packagePolicy.list(internalSoClient, {
+      page,
       kuery: endpointPolicyKuery,
       perPage,
     });
 
-    total = totalPolicies;
-    hasMoreData = currentPage * perPage < total;
+    hasMoreData = page * perPage < total;
+    page++;
 
     for (const item of items) {
       const integrationPolicy = item as PolicyData;
@@ -87,33 +71,40 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
       const { message, isOnlyCollectingEvents } = isPolicySetToEventCollectionOnly(policySettings);
       const shouldDowngradeProtectionUpdates =
         !isProtectionUpdatesFeatureEnabled && policySettings.global_manifest_version !== 'latest';
+      const shouldDowngradeCustomNotifications =
+        !isCustomNotificationEnabled &&
+        checkIfPopupMessagesContainCustomNotifications(policySettings);
 
-      if (!isPolicyProtectionsEnabled && !isOnlyCollectingEvents) {
-        messages.push(
-          `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to disable protections. Trigger: [${message}]`
-        );
-
+      if (
+        (!isPolicyProtectionsEnabled && !isOnlyCollectingEvents) ||
+        shouldDowngradeProtectionUpdates ||
+        shouldDowngradeCustomNotifications
+      ) {
+        if (!isPolicyProtectionsEnabled && !isOnlyCollectingEvents) {
+          messages.push(
+            `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to disable protections. Trigger: [${message}]`
+          );
+        }
         if (shouldDowngradeProtectionUpdates) {
           messages.push(
             `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to downgrade protection updates.`
           );
         }
+        if (shouldDowngradeCustomNotifications) {
+          messages.push(
+            `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to reset custom notifications.`
+          );
+        }
 
-        integrationPolicy.inputs[0].config.policy.value = {
-          ...ensureOnlyEventCollectionIsAllowed(policySettings),
-          ...(shouldDowngradeProtectionUpdates ? { global_manifest_version: 'latest' } : {}),
-        };
-
-        updates.push({
-          ...getPolicyDataForUpdate(integrationPolicy),
-          id: integrationPolicy.id,
-        });
-      } else if (shouldDowngradeProtectionUpdates) {
-        messages.push(
-          `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to downgrade protection updates.`
+        integrationPolicy.inputs[0].config.policy.value = merge(
+          {},
+          policySettings,
+          !isPolicyProtectionsEnabled && !isOnlyCollectingEvents
+            ? ensureOnlyEventCollectionIsAllowed(policySettings)
+            : {},
+          shouldDowngradeProtectionUpdates ? { global_manifest_version: 'latest' } : {},
+          shouldDowngradeCustomNotifications ? resetCustomNotifications() : {}
         );
-
-        integrationPolicy.inputs[0].config.policy.value.global_manifest_version = 'latest';
 
         updates.push({
           ...getPolicyDataForUpdate(integrationPolicy),
@@ -121,22 +112,17 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
         });
       }
     }
-  } while (hasMoreData);
+  }
 
   if (updates.length > 0) {
     log.info(`Found ${updates.length} policies that need updates:\n${messages.join('\n')}`);
-
     const bulkUpdateResponse = await fleetServices.packagePolicy.bulkUpdate(
       internalSoClient,
       esClient,
       updates,
-      {
-        user: { username: 'elastic' } as AuthenticatedUser,
-      }
+      { user: { username: 'elastic' } as AuthenticatedUser }
     );
-
     log.debug(() => `Bulk update response:\n${JSON.stringify(bulkUpdateResponse, null, 2)}`);
-
     if (bulkUpdateResponse.failedPolicies.length > 0) {
       log.error(
         `Done. ${bulkUpdateResponse.failedPolicies.length} out of ${
@@ -144,9 +130,9 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
         } failed to update:\n${JSON.stringify(bulkUpdateResponse.failedPolicies, null, 2)}`
       );
     } else {
-      log.info(`Done. All updates applied successfully`);
+      log.info('Done. All updates applied successfully');
     }
   } else {
-    log.info(`Done. Checked ${total} policies and no updates needed`);
+    log.info(`Done. Checked ${page * perPage} policies and no updates needed`);
   }
 };
