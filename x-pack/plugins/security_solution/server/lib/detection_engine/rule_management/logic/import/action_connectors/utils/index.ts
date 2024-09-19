@@ -5,10 +5,7 @@
  * 2.0.
  */
 import { pick } from 'lodash';
-import type {
-  SavedObjectsImportFailure,
-  SavedObjectsImportSuccess,
-} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BulkError } from '../../../../../routes/utils';
@@ -130,44 +127,4 @@ export const checkIfActionsHaveMissingConnectors = (
     return handleActionsHaveNoConnectors(missingActionConnector, missingActionRules);
   }
   return null;
-};
-
-export const mapActionIdToNewDestinationId = (
-  connectorsImportResult: SavedObjectsImportSuccess[]
-) => {
-  return connectorsImportResult.reduce(
-    (acc: { [actionId: string]: string }, { destinationId, id }) => {
-      acc[id] = destinationId || id;
-      return acc;
-    },
-    {}
-  );
-};
-
-export const swapNonDefaultSpaceIdWithDestinationId = (
-  rule: RuleToImport,
-  actionIdDestinationIdLookup: { [actionId: string]: string }
-) => {
-  return rule.actions?.map((action) => {
-    const destinationId = actionIdDestinationIdLookup[action.id];
-    return { ...action, id: destinationId };
-  });
-};
-/*
-// When a connector is exported from one namespace and imported to another, it does not result in an error, but instead a new object is created with
-// new destination id and id will have the old  origin id, so in order to be able to use the newly generated Connectors id, this util is used to swap the old id with the
-// new destination Id
-*/
-export const updateRuleActionsWithMigratedResults = (
-  rules: Array<RuleToImport | Error>,
-  connectorsImportResult: SavedObjectsImportSuccess[]
-): Array<RuleToImport | Error> => {
-  const actionIdDestinationIdLookup = mapActionIdToNewDestinationId(connectorsImportResult);
-  return rules.map((rule) => {
-    if (rule instanceof Error) return rule;
-    return {
-      ...rule,
-      actions: swapNonDefaultSpaceIdWithDestinationId(rule, actionIdDestinationIdLookup),
-    };
-  });
 };

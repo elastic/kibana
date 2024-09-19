@@ -115,32 +115,31 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
             getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
 
-          const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
-            parsedObjectsWithoutDuplicateErrors,
-            actionSOClient,
-            actionsClient
-          );
-
           // import actions-connectors
           const {
             successCount: actionConnectorSuccessCount,
             success: actionConnectorSuccess,
             warnings: actionConnectorWarnings,
             errors: actionConnectorErrors,
-            rulesWithMigratedActions,
           } = await importRuleActionConnectors({
             actionConnectors,
             actionsClient,
             actionsImporter,
-            rules: migratedParsedObjectsWithoutDuplicateErrors,
+            rules: parsedObjectsWithoutDuplicateErrors,
             overwrite: request.query.overwrite_action_connectors,
           });
+
+          const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
+            parsedObjectsWithoutDuplicateErrors,
+            actionSOClient,
+            actionsClient
+          );
 
           // rulesWithMigratedActions: Is returned only in case connectors were exported from different namespace and the
           // original rules actions' ids were replaced with new destinationIds
           const parsedRules = actionConnectorErrors.length
             ? []
-            : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
+            : migratedParsedObjectsWithoutDuplicateErrors;
 
           const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
 
