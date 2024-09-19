@@ -45,6 +45,7 @@ export const createMockClients = () => {
       getAIAssistantAnonymizationFieldsDataClient: dataClientMock.create(),
       getSpaceId: jest.fn(),
       getCurrentUser: jest.fn(),
+      inference: jest.fn(),
     },
     savedObjectsClient: core.savedObjects.client,
 
@@ -130,6 +131,7 @@ const createElasticAssistantRequestContextMock = (
     getCurrentUser: jest.fn(),
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn(),
+    inference: { getClient: jest.fn() },
     core: clients.core,
     telemetry: clients.elasticAssistant.telemetry,
   };

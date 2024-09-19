@@ -41,7 +41,8 @@
       "globalSearch",
       "observabilityAIAssistant",
       "aiops",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "logsDataAccess"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
     "extraPublicDirs": ["common"]
