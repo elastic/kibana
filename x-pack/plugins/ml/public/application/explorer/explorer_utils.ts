@@ -52,6 +52,7 @@ import {
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlResultsService } from '../services/results_service';
 import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
+import { useMlKibana } from '../contexts/kibana';
 import type { MlApi } from '../services/ml_api_service';
 
 export interface ExplorerJob {
@@ -248,6 +249,15 @@ export function getInfluencers(mlJobService: MlJobService, selectedJobs: any[]):
     }
   });
   return influencers;
+}
+
+export function useDateFormatTz(): string {
+  const { services } = useMlKibana();
+  const { uiSettings } = services;
+  // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
+  const tzConfig = uiSettings.get('dateFormat:tz');
+  const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
+  return dateFormatTz;
 }
 
 export function getDateFormatTz(uiSettings: IUiSettingsClient): string {
@@ -475,7 +485,7 @@ export async function loadAnomaliesTableData(
   fieldName: string,
   tableInterval: string,
   tableSeverity: number,
-  influencersFilterQuery: InfluencersFilterQuery
+  influencersFilterQuery?: InfluencersFilterQuery
 ): Promise<AnomaliesTableData> {
   const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);

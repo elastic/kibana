@@ -6,7 +6,6 @@ info:
 paths: {}
 components:
   schemas:
-
     EntityType:
       type: string
       enum:
@@ -31,7 +30,21 @@ components:
         - installing
         - started
         - stopped
-    
+
     IndexPattern:
       type: string
-        
+
+    InspectQuery:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            type: string
+        dsl:
+          type: array
+          items:
+            type: string
+      required:
+        - dsl
+        - response

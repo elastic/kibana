@@ -19,6 +19,7 @@ import type {
   ObservabilityAIAssistantScreenContext,
   PendingMessage,
   AdHocInstruction,
+  AssistantScope,
 } from '../common/types';
 import type { TelemetryEventTypeWithPayload } from './analytics';
 import type { ObservabilityAIAssistantAPIClient } from './api';
@@ -52,6 +53,7 @@ export interface ObservabilityAIAssistantChatService {
       functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       functionCall?: string;
       signal: AbortSignal;
+      scope: AssistantScope;
     }
   ) => Observable<ChatCompletionChunkEvent>;
   complete: (options: {
@@ -67,8 +69,13 @@ export interface ObservabilityAIAssistantChatService {
         };
     signal: AbortSignal;
     instructions?: AdHocInstruction[];
+    scope: AssistantScope;
   }) => Observable<StreamingChatResponseEventWithoutError>;
-  getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
+  getFunctions: (options?: {
+    contexts?: string[];
+    filter?: string;
+    scope: AssistantScope;
+  }) => FunctionDefinition[];
   hasFunction: (name: string) => boolean;
   getSystemMessage: () => Message;
   hasRenderFunction: (name: string) => boolean;
@@ -76,7 +83,8 @@ export interface ObservabilityAIAssistantChatService {
     name: string,
     args: string | undefined,
     response: { data?: string; content?: string },
-    onActionClick: ChatActionClickHandler
+    onActionClick: ChatActionClickHandler,
+    scope?: AssistantScope
   ) => React.ReactNode;
 }
 
@@ -94,6 +102,7 @@ export interface ObservabilityAIAssistantService {
   getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
   conversations: ObservabilityAIAssistantConversationService;
   navigate: (callback: () => void) => Promise<Observable<MessageAddEvent>>;
+  scope: AssistantScope;
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {

@@ -121,6 +121,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
   'typings/*',
+  'typings/**/*',
 ];
 
 /**

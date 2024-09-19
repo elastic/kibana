@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, partition } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -379,8 +379,17 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             );
 
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);
+            const [ignoreFieldsRegexes, ignoreFieldsStandard] = partition(
+              [...ignoreFields, ...legacySignalFields],
+              (field: string) => field.startsWith('/') && field.endsWith('/')
+            );
+            const ignoreFieldsObject: Record<string, boolean> = {};
+            ignoreFieldsStandard.forEach((field) => {
+              ignoreFieldsObject[field] = true;
+            });
             const wrapHits = wrapHitsFactory({
-              ignoreFields: [...ignoreFields, ...legacySignalFields],
+              ignoreFields: ignoreFieldsObject,
+              ignoreFieldsRegexes,
               mergeStrategy,
               completeRule,
               spaceId,
