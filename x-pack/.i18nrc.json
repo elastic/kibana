@@ -31,7 +31,7 @@
     "xpack.dashboard": "plugins/dashboard_enhanced",
     "xpack.dataQuality": "plugins/data_quality",
     "xpack.datasetQuality": "plugins/observability_solution/dataset_quality",
-    "xpack.dataUsage": "plugins/observability_solution/data_usage",
+    "xpack.dataUsage": "plugins/data_usage",
     "xpack.discover": "plugins/discover_enhanced",
     "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
     "xpack.elasticAssistant": "packages/kbn-elastic-assistant",
