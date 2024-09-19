@@ -7,7 +7,15 @@
  */
 
 import * as React from 'react';
-import { EuiFieldText, EuiFormRow, EuiIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import { ESQLSource } from '@kbn/esql-ast';
 import { ESQLAstBaseItem } from '@kbn/esql-ast/src/types';
 import { useEsqlInspector } from '../../../../../../context';
@@ -33,6 +41,7 @@ export interface SourceProps {
 export const Source: React.FC<SourceProps> = ({ node, index }) => {
   const state = useEsqlInspector();
   const query = useBehaviorSubject(state.queryLastValid$);
+  const focusedNode = useBehaviorSubject(state.focusedNode$);
 
   if (!query) {
     return null;
@@ -41,29 +50,60 @@ export const Source: React.FC<SourceProps> = ({ node, index }) => {
   const comment = getFirstComment(node);
 
   return (
-    <EuiFormRow
-      fullWidth
-      helpText={getFirstComment(node)}
-      label={
-        comment ? (
-          <EuiToolTip content={comment}>
-            <span>
-              Source {index} <EuiIcon type="editorComment" color="subdued" />
-            </span>
-          </EuiToolTip>
-        ) : (
-          <>Source {index}</>
-        )
-      }
-    >
-      <EuiFieldText
-        fullWidth
-        value={node.name}
-        onChange={(e) => {
-          node.name = e.target.value;
-          state.reprint();
+    <>
+      <EuiSpacer size={'m'} />
+      <div
+        onMouseEnter={() => {
+          state.focusedNode$.next(node);
         }}
-      />
-    </EuiFormRow>
+        style={{
+          background: focusedNode === node ? 'rgb(190, 237, 224)' : 'transparent',
+          padding: 8,
+          margin: -8,
+          borderRadius: 8,
+          position: 'relative',
+        }}
+      >
+        <EuiFormRow
+          fullWidth
+          helpText={getFirstComment(node)}
+          label={
+            comment ? (
+              <EuiToolTip content={comment}>
+                <span>
+                  Source {index} <EuiIcon type="editorComment" color="subdued" />
+                </span>
+              </EuiToolTip>
+            ) : (
+              <>Source {index}</>
+            )
+          }
+        >
+          <EuiFieldText
+            fullWidth
+            value={node.name}
+            onChange={(e) => {
+              node.name = e.target.value;
+              state.reprint();
+            }}
+          />
+        </EuiFormRow>
+        <div style={{ position: 'absolute', right: 0, top: 0 }}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label="Remove"
+              onClick={() => {
+                if (!query) return;
+                const from = state.from$.getValue();
+                if (!from) return;
+                from.args = from.args.filter((c) => c !== node);
+                state.reprint();
+              }}
+            />
+          </EuiFlexItem>
+        </div>
+      </div>
+    </>
   );
 };

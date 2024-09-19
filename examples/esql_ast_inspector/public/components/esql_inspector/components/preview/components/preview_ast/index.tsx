@@ -7,7 +7,8 @@
  */
 
 import * as React from 'react';
-import { EuiCode } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useEsqlInspector } from '../../../../context';
 import { useBehaviorSubject } from '../../../../../../hooks/use_behavior_subject';
 
@@ -20,10 +21,15 @@ export const PreviewAst: React.FC = (props) => {
   }
 
   return (
-    <EuiCode>
-      <pre style={{ padding: '0 8px', fontSize: 10 }}>
-        <code>{JSON.stringify(query.ast, null, 2)}</code>
-      </pre>
-    </EuiCode>
+    <>
+      <EuiSpacer size="l" />
+      <EuiPanel paddingSize="xs" hasShadow={false} hasBorder style={{ height: 600 }}>
+        <CodeEditor
+          allowFullScreen={true}
+          languageId={'json'}
+          value={JSON.stringify(query.ast, null, 2)}
+        />
+      </EuiPanel>
+    </>
   );
 };

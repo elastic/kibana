@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { EuiDataGrid, EuiPanel } from '@elastic/eui';
+import { EuiDataGrid, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { createParser } from '@kbn/esql-ast';
 import { useEsqlInspector } from '../../../../context';
 import { useBehaviorSubject } from '../../../../../../hooks/use_behavior_subject';
@@ -63,7 +63,8 @@ export const PreviewTokens: React.FC = (props) => {
 
   return (
     <>
-      <EuiPanel paddingSize="xs" style={{ marginTop: 8 }}>
+      <EuiSpacer size="l" />
+      <EuiPanel paddingSize="xs" hasShadow={false} hasBorder style={{ height: 600 }}>
         <EuiDataGrid
           aria-label="Container constrained data grid demo"
           columns={columns}

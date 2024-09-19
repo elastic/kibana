@@ -19,17 +19,23 @@ export const Annotations: React.FC<AnnotationsProps> = (props) => {
   const annotationNodes: React.ReactNode[] = [];
 
   let pos = 0;
-  for (const annotation of annotations) {
-    if (typeof annotation === 'number') {
-      const text = value.slice(pos, pos + annotation);
-      pos += annotation;
+
+  for (const [start, end, render] of annotations) {
+    if (start > pos) {
+      const text = value.slice(pos, start);
+
       annotationNodes.push(<span>{text}</span>);
-    } else {
-      const [length, render] = annotation;
-      const text = value.slice(pos, pos + length);
-      pos += length;
-      annotationNodes.push(render(text));
     }
+
+    const text = value.slice(start, end);
+
+    pos = end;
+    annotationNodes.push(render(text));
+  }
+
+  if (pos < value.length) {
+    const text = value.slice(pos);
+    annotationNodes.push(<span>{text}</span>);
   }
 
   return React.createElement('span', {}, ...annotationNodes);

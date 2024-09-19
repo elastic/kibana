@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-
-export type Annotation = [
-  start: number,
-  end: number,
-  annotation: (text: string) => React.ReactNode
-];
+export { PrettyPrint, type PrettyPrintProps } from './pretty_print';

@@ -31,7 +31,7 @@ const Demo: React.FC<FlexibleInputProps> = (props) => {
 };
 
 const src = `FROM index, index2
-  | WHERE language = "esql"
+  | WHERE language == "esql"
   | LIMIT 10
 `;
 

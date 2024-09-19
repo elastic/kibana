@@ -7,7 +7,15 @@
  */
 
 import * as React from 'react';
-import { EuiFieldText, EuiFormRow, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiTitle,
+} from '@elastic/eui';
 import { Builder } from '@kbn/esql-ast';
 import { useEsqlInspector } from '../../../../../../context';
 import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_subject';
@@ -15,9 +23,36 @@ import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_s
 export const LimitCommand: React.FC = () => {
   const state = useEsqlInspector();
   const limit = useBehaviorSubject(state.limit$);
+  const focusedNode = useBehaviorSubject(state.focusedNode$);
 
   if (!limit) {
-    return null;
+    return (
+      <EuiPanel hasShadow={false} hasBorder style={{ maxWidth: 360 }}>
+        <EuiFormRow fullWidth>
+          <EuiButton
+            fullWidth
+            size={'s'}
+            color="text"
+            onClick={() => {
+              const query = state.query$.getValue();
+              if (!query) return;
+              const literal = Builder.expression.literal.numeric({
+                value: 10,
+                literalType: 'integer',
+              });
+              const command = Builder.command({
+                name: 'limit',
+                args: [literal],
+              });
+              query.ast.commands.push(command);
+              state.reprint();
+            }}
+          >
+            Add limit
+          </EuiButton>
+        </EuiFormRow>
+      </EuiPanel>
+    );
   }
 
   const value = +(limit.args[0] as any)?.value;
@@ -28,35 +63,62 @@ export const LimitCommand: React.FC = () => {
 
   return (
     <EuiPanel hasShadow={false} hasBorder style={{ maxWidth: 360 }}>
-      <EuiTitle size="xxs">
-        <h3>Limit</h3>
-      </EuiTitle>
       <div
-        css={{
-          paddingTop: 16,
+        onMouseEnter={() => {
+          state.focusedNode$.next(limit);
+        }}
+        style={{
+          background: focusedNode === limit ? 'rgb(190, 237, 224)' : 'transparent',
+          padding: 8,
+          margin: -8,
+          borderRadius: 8,
+          position: 'relative',
         }}
       >
-        <EuiFormRow fullWidth>
-          <EuiFieldText
-            fullWidth
-            value={value}
-            onChange={(e) => {
-              const newValue = +e.target.value;
+        <EuiTitle size="xxs">
+          <h3>Limit</h3>
+        </EuiTitle>
+        <div
+          css={{
+            paddingTop: 16,
+          }}
+        >
+          <EuiFormRow fullWidth>
+            <EuiFieldText
+              fullWidth
+              value={value}
+              onChange={(e) => {
+                const newValue = +e.target.value;
 
-              if (newValue !== newValue) {
-                return;
-              }
+                if (newValue !== newValue) {
+                  return;
+                }
 
-              const literal = Builder.expression.literal.numeric({
-                value: newValue,
-                literalType: 'integer',
-              });
+                const literal = Builder.expression.literal.numeric({
+                  value: newValue,
+                  literalType: 'integer',
+                });
 
-              limit.args[0] = literal;
-              state.reprint();
-            }}
-          />
-        </EuiFormRow>
+                limit.args[0] = literal;
+                state.reprint();
+              }}
+            />
+          </EuiFormRow>
+        </div>
+        <div style={{ position: 'absolute', right: 0, top: 0 }}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label="Remove"
+              onClick={() => {
+                const query = state.query$.getValue();
+                if (!query) return;
+                query.ast.commands = query.ast.commands.filter((c) => c !== limit);
+                state.reprint();
+              }}
+            />
+          </EuiFlexItem>
+        </div>
       </div>
     </EuiPanel>
   );

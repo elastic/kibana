@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-
-export type Annotation = [
-  start: number,
-  end: number,
-  annotation: (text: string) => React.ReactNode
-];
+export { context, useEsqlInspector } from './context';
+export { EsqlInspectorState } from './esql_inspector_state';
+export { EsqlInspector, type EsqlInspectorProps } from './esql_inspector';
