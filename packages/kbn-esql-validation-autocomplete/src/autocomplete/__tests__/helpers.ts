@@ -17,7 +17,7 @@ import { groupingFunctionDefinitions } from '../../definitions/grouping';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
-import { TIME_SYSTEM_PARAMS, getSafeInsertText } from '../factories';
+import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
 import { getFunctionSignatures } from '../../definitions/helpers';
 import { ESQLRealField } from '../../validation/types';
 import {
@@ -348,3 +348,17 @@ export const setup = async (caret = '/') => {
     assertSuggestions,
   };
 };
+
+/**
+ * Attaches the trigger command to an expected suggestion to make
+ * sure the suggestions menu will be opened when the suggestion is accepted.
+ */
+export const attachTriggerCommand = (
+  s: string | PartialSuggestionWithText
+): PartialSuggestionWithText =>
+  typeof s === 'string'
+    ? {
+        text: s,
+        command: TRIGGER_SUGGESTION_COMMAND,
+      }
+    : { ...s, command: TRIGGER_SUGGESTION_COMMAND };
