@@ -110,7 +110,15 @@ export const importRules = async ({
                 existingLists,
               });
 
-              importRuleResponse = [...importRuleResponse, ...exceptionErrors];
+              const exceptionBulkErrors = exceptionErrors.map((error) =>
+                createBulkErrorObject({
+                  ruleId: error.ruleId,
+                  statusCode: 400,
+                  message: error.error.message,
+                })
+              );
+
+              importRuleResponse = [...importRuleResponse, ...exceptionBulkErrors];
 
               const importedRule = await detectionRulesClient.legacyImportRule({
                 ruleToImport: {
