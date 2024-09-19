@@ -58,7 +58,7 @@ export const SolutionEmptyPrompt: FC<Props> = ({ kibanaVersion, coreStart }) => 
       title={
         <h1>
           <FormattedMessage
-            id="management.landing.header"
+            id="management.landing.solution.header"
             defaultMessage="Stack Management {version}"
             values={{ version: kibanaVersion }}
           />
@@ -68,7 +68,7 @@ export const SolutionEmptyPrompt: FC<Props> = ({ kibanaVersion, coreStart }) => 
         <>
           <p>
             <FormattedMessage
-              id="management.landing.subhead"
+              id="management.landing.solution.subhead"
               defaultMessage="Manage your {indicesLink}, {dataViewsLink}, {ingestPipelinesLink}, {usersLink}, and more."
               values={{
                 indicesLink: <IndicesLink coreStart={coreStart} />,
@@ -88,7 +88,7 @@ export const SolutionEmptyPrompt: FC<Props> = ({ kibanaVersion, coreStart }) => 
               }}
             >
               <FormattedMessage
-                id="management.landing.viewAllPagesButton"
+                id="management.landing.solution.viewAllPagesButton"
                 defaultMessage="View all pages"
               />
             </EuiButton>
