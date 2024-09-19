@@ -29,6 +29,7 @@ export const getPushedTelemetryData = async ({
     perPage: 0,
     filter: pushFilter,
     type: CASE_USER_ACTION_SAVED_OBJECT,
+    namespaces: ['*'],
     aggs: { ...getMaxBucketOnCaseAggregationQuery(CASE_USER_ACTION_SAVED_OBJECT) },
   });
 
