@@ -25,11 +25,12 @@ import { DashboardApi } from '..';
 describe('Dashboard App', () => {
   const mockDashboard = buildMockDashboard();
   let mockHistory: MemoryHistory;
+  // this is in url_utils dashboardApi expandedPanel subscription
   let historySpy: jest.SpyInstance;
-  let mockDashboardApiExpandedPanel: string | undefined;
-  const expandPanelSpyInRouter = jest.spyOn(mockDashboard, 'expandPanel');
+  // this is in the dashboard app for the renderer when provided an expanded panel id
+  const expandPanelSpy = jest.spyOn(mockDashboard, 'expandPanel');
 
-  beforeEach(() => {
+  beforeAll(() => {
     mockHistory = createMemoryHistory();
     historySpy = jest.spyOn(mockHistory, 'replace');
 
@@ -42,17 +43,16 @@ describe('Dashboard App', () => {
       // we need overwrite the onApiAvailable prop to get the dashboard Api in the dashboard app
       .mockImplementation(({ onApiAvailable }: DashboardRendererProps) => {
         useEffect(() => {
-          // mock up similar to the onApiAvailable in DashboardApp
-          if (mockDashboardApiExpandedPanel) {
-            mockDashboard.expandPanel(mockDashboardApiExpandedPanel);
-          }
           onApiAvailable?.(mockDashboard as DashboardApi);
         }, [onApiAvailable]);
 
         return <div>Test renderer</div>;
       });
+  });
 
+  beforeEach(() => {
     // reset the spies before each test
+    expandPanelSpy.mockClear();
     historySpy.mockClear();
   });
 
@@ -60,7 +60,7 @@ describe('Dashboard App', () => {
     render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} />);
 
     await waitFor(() => {
-      expect(expandPanelSpyInRouter).not.toHaveBeenCalled();
+      expect(expandPanelSpy).not.toHaveBeenCalled();
       // this value should be undefined by default
       expect(mockDashboard.expandedPanelId.getValue()).toBe(undefined);
       // history should not be called
@@ -82,7 +82,7 @@ describe('Dashboard App', () => {
     render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} expandedPanelId="456" />);
 
     await waitFor(() => {
-      expect(expandPanelSpyInRouter).toHaveBeenCalled();
+      expect(expandPanelSpy).toHaveBeenCalledTimes(1);
       expect(historySpy).toHaveBeenCalledTimes(0);
     });
 
