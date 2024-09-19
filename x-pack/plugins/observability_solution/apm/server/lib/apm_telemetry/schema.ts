@@ -441,6 +441,12 @@ const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agen
           'Total number of services utilizing the opentelemetry/webjs agent within the last day',
       },
     },
+    'ios/swift': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the ios/swift agent within the last day',
+      },
+    },
   },
   agents: {
     'android/java': agentSchema,
