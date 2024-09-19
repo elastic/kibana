@@ -15,6 +15,9 @@ import {
   EuiIconTip,
   EuiCodeBlock,
   EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -45,7 +48,8 @@ export const OtelKubernetesPanel: React.FC = () => {
   }
 
   const addRepoCommand = `helm repo add open-telemetry 'https://open-telemetry.github.io/opentelemetry-helm-charts' --force-update`;
-
+  const valuesFile =
+    'https://raw.githubusercontent.com/elastic/opentelemetry-dev/main/docs/ingest/dev-docs/elastic-otel-collector/operator/onprem_kube_stack_values.yaml';
   const installStackCommand = data
     ? `kubectl create namespace opentelemetry-operator-system
 kubectl create secret generic elastic-secret-otel \\
@@ -55,7 +59,7 @@ kubectl create secret generic elastic-secret-otel \\
 helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace opentelemetry-operator-system \\
   --create-namespace \\
-  --values 'https://raw.githubusercontent.com/elastic/opentelemetry-dev/main/docs/ingest/dev-docs/elastic-otel-collector/operator/onprem_kube_stack_values.yaml?token=GHSAT0AAAAAACR6STPQWQLOQA6I5ASIQ3WWZXALL7Q'`
+  --values '${valuesFile}'`
     : undefined;
 
   return (
@@ -75,7 +79,10 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                   {addRepoCommand}
                 </EuiCodeBlock>
                 <EuiSpacer />
-                <CopyToClipboardButton textToCopy={addRepoCommand} />
+                <CopyToClipboardButton
+                  textToCopy={addRepoCommand}
+                  data-test-subj="observabilityOnboardingOtelKubernetesPanelAddRepositoryCopyToClipboard"
+                />
               </>
             ),
           },
@@ -113,7 +120,28 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                   {installStackCommand}
                 </EuiCodeBlock>
                 <EuiSpacer />
-                <CopyToClipboardButton textToCopy={installStackCommand} />
+                <EuiFlexGroup alignItems="center" justifyContent="flexStart">
+                  <EuiFlexItem grow={false}>
+                    <CopyToClipboardButton
+                      textToCopy={installStackCommand}
+                      data-test-subj="observabilityOnboardingOtelKubernetesPanelInstallStackCopyToClipboard"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="download"
+                      href={valuesFile}
+                      download
+                      flush="left"
+                      data-test-subj="observabilityOnboardingOtelKubernetesPanelDownloadValuesFileButton"
+                    >
+                      {i18n.translate(
+                        'xpack.observability_onboarding.otelKubernetesPanel.downloadValuesFileButtonEmptyLabel',
+                        { defaultMessage: 'Download values file' }
+                      )}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </>
             ) : (
               <EuiSkeletonText lines={6} />
@@ -182,6 +210,7 @@ spec:
                 <CopyToClipboardButton
                   textToCopy={`annotations:
     instrumentation.opentelemetry.io/inject-${idSelected}: "true"`}
+                  data-test-subj={`observabilityOnboardingOtelKubernetesInstrumentApplicationCopyToClipboard-${idSelected}`}
                 />
                 <EuiSpacer />
                 <p>
