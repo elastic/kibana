@@ -1453,7 +1453,6 @@
     "@kbn/serverless-storybook-config": "link:packages/serverless/storybook/config",
     "@kbn/some-dev-log": "link:packages/kbn-some-dev-log",
     "@kbn/sort-package-json": "link:packages/kbn-sort-package-json",
-    "@kbn/spec-to-console": "link:packages/kbn-spec-to-console",
     "@kbn/stdio-dev-helpers": "link:packages/kbn-stdio-dev-helpers",
     "@kbn/storybook": "link:packages/kbn-storybook",
     "@kbn/synthetics-e2e": "link:x-pack/plugins/observability_solution/synthetics/e2e",

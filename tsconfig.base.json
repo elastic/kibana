@@ -1760,8 +1760,6 @@
       "@kbn/spaces-plugin/*": ["x-pack/plugins/spaces/*"],
       "@kbn/spaces-test-plugin": ["x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin"],
       "@kbn/spaces-test-plugin/*": ["x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin/*"],
-      "@kbn/spec-to-console": ["packages/kbn-spec-to-console"],
-      "@kbn/spec-to-console/*": ["packages/kbn-spec-to-console/*"],
       "@kbn/sse-utils": ["packages/kbn-sse-utils"],
       "@kbn/sse-utils/*": ["packages/kbn-sse-utils/*"],
       "@kbn/sse-utils-client": ["packages/kbn-sse-utils-client"],

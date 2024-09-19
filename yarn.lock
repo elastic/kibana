@@ -6798,10 +6798,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/spec-to-console@link:packages/kbn-spec-to-console":
-  version "0.0.0"
-  uid ""
-
 "@kbn/sse-utils-client@link:packages/kbn-sse-utils-client":
   version "0.0.0"
   uid ""

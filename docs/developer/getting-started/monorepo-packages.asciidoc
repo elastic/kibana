@@ -83,7 +83,6 @@ yarn kbn watch
 - @kbn/securitysolution-utils
 - @kbn/server-http-tools
 - @kbn/server-route-repository
-- @kbn/spec-to-console
 - @kbn/std
 - @kbn/storybook
 - @kbn/telemetry-utils
