@@ -149,6 +149,7 @@ describe('when on the endpoint list page', () => {
   const { act, screen, fireEvent } = reactTestingLibrary;
 
   let render: () => ReturnType<AppContextTestRender['render']>;
+  let renderResult: reactTestingLibrary.RenderResult;
   let history: AppContextTestRender['history'];
   let store: AppContextTestRender['store'];
   let coreStart: AppContextTestRender['coreStart'];
@@ -170,7 +171,7 @@ describe('when on the endpoint list page', () => {
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
-    render = () => mockedContext.render(<EndpointList />);
+    render = () => (renderResult = mockedContext.render(<EndpointList />));
     reactTestingLibrary.act(() => {
       history.push(`${MANAGEMENT_PATH}/endpoints`);
     });
@@ -186,7 +187,7 @@ describe('when on the endpoint list page', () => {
       endpointsResults: [],
     });
 
-    const renderResult = render();
+    render();
     const timelineFlyout = renderResult.queryByTestId('timeline-bottom-bar-title-button');
     expect(timelineFlyout).toBeNull();
   });
@@ -199,7 +200,7 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should show the empty state when there are no hosts or polices', async () => {
-      const renderResult = render();
+      render();
       await reactTestingLibrary.act(async () => {
         await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
       });
@@ -217,27 +218,25 @@ describe('when on the endpoint list page', () => {
         endpointsResults: [],
         endpointPackagePolicies: policyData,
       });
-
-      renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
-      });
     });
     afterEach(() => {
       jest.clearAllMocks();
     });
 
     it('should show the no hosts empty state', async () => {
+      render();
       const emptyHostsTable = await renderResult.findByTestId('emptyHostsTable');
       expect(emptyHostsTable).not.toBeNull();
     });
 
     it('should display the onboarding steps', async () => {
+      render();
       const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
       expect(onboardingSteps).not.toBeNull();
     });
 
     it('should show policy selection', async () => {
+      render();
       const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
       expect(onboardingPolicySelect).not.toBeNull();
     });
@@ -349,7 +348,7 @@ describe('when on the endpoint list page', () => {
       });
 
       it('should display rows in the table', async () => {
-        const renderResult = render();
+        render();
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
@@ -357,7 +356,7 @@ describe('when on the endpoint list page', () => {
         expect(rows).toHaveLength(6);
       });
       it('should show total', async () => {
-        const renderResult = render();
+        render();
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
@@ -365,7 +364,7 @@ describe('when on the endpoint list page', () => {
         expect(total.textContent).toEqual('Showing 5 endpoints');
       });
       it('should agent status', async () => {
-        const renderResult = render();
+        render();
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
@@ -380,7 +379,7 @@ describe('when on the endpoint list page', () => {
       });
 
       it('should display correct policy status', async () => {
-        const renderResult = render();
+        render();
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
@@ -399,7 +398,7 @@ describe('when on the endpoint list page', () => {
       });
 
       it('should display policy out-of-date warning when changes pending', async () => {
-        const renderResult = render();
+        render();
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
@@ -412,7 +411,7 @@ describe('when on the endpoint list page', () => {
       });
 
       it('should display policy name as a link', async () => {
-        const renderResult = render();
+        render();
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
@@ -425,7 +424,6 @@ describe('when on the endpoint list page', () => {
 
       describe('when the user clicks the first hostname in the table', () => {
         const endpointDetails: HostInfo = mockEndpointDetailsApiResult();
-        let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
           mockUseGetEndpointDetails.mockReturnValue({
             data: {
@@ -447,7 +445,7 @@ describe('when on the endpoint list page', () => {
               },
             },
           });
-          renderResult = render();
+          render();
           await reactTestingLibrary.act(async () => {
             await middlewareSpy.waitForAction('serverReturnedEndpointList');
           });
@@ -465,7 +463,7 @@ describe('when on the endpoint list page', () => {
       });
 
       it('should show revision number', async () => {
-        const renderResult = render();
+        render();
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
@@ -502,7 +500,7 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should update data after some time', async () => {
-      let renderResult = render();
+      render();
       await reactTestingLibrary.act(async () => {
         await middlewareSpy.waitForAction('serverReturnedEndpointList');
       });
@@ -518,7 +516,7 @@ describe('when on the endpoint list page', () => {
         await middlewareSpy.waitForAction('serverReturnedEndpointList');
       });
 
-      renderResult = render();
+      render();
 
       const updatedTotal = await renderResult.findAllByTestId('endpointListTableTotal');
       expect(updatedTotal[0].textContent).toEqual('1 Host');
@@ -601,13 +599,13 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should show the flyout and footer', async () => {
-      const renderResult = render();
+      render();
       expect(renderResult.getByTestId('endpointDetailsFlyout')).not.toBeNull();
       expect(renderResult.getByTestId('endpointDetailsFlyoutFooter')).not.toBeNull();
     });
 
     it('should display policy name value as a link', async () => {
-      const renderResult = render();
+      render();
       const policyDetailsLink = await renderResult.findByTestId('policyNameCellLink-link');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
@@ -616,7 +614,7 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should display policy revision number', async () => {
-      const renderResult = render();
+      render();
       const policyDetailsRevElement = await renderResult.findByTestId(
         'policyNameCellLink-revision'
       );
@@ -627,7 +625,7 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should update the URL when policy name link is clicked', async () => {
-      const renderResult = render();
+      render();
       const policyDetailsLink = await renderResult.findByTestId('policyNameCellLink-link');
       const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
       reactTestingLibrary.act(() => {
@@ -640,7 +638,7 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should update the URL when policy status link is clicked', async () => {
-      const renderResult = render();
+      render();
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
       reactTestingLibrary.act(() => {
@@ -654,7 +652,7 @@ describe('when on the endpoint list page', () => {
 
     it('should display Success overall policy status', async () => {
       getMockUseEndpointDetails(HostPolicyResponseActionStatus.success);
-      const renderResult = render();
+      render();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(renderResult.getByTestId('policyStatusValue-success')).toBeTruthy();
       expect(policyStatusBadge.textContent).toEqual('Success');
@@ -662,7 +660,7 @@ describe('when on the endpoint list page', () => {
 
     it('should display Warning overall policy status', async () => {
       getMockUseEndpointDetails(HostPolicyResponseActionStatus.warning);
-      const renderResult = render();
+      render();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusBadge.textContent).toEqual('Warning');
       expect(renderResult.getByTestId('policyStatusValue-warning')).toBeTruthy();
@@ -670,7 +668,7 @@ describe('when on the endpoint list page', () => {
 
     it('should display Failed overall policy status', async () => {
       getMockUseEndpointDetails(HostPolicyResponseActionStatus.failure);
-      const renderResult = render();
+      render();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusBadge.textContent).toEqual('Failed');
       expect(renderResult.getByTestId('policyStatusValue-failure')).toBeTruthy();
@@ -678,14 +676,14 @@ describe('when on the endpoint list page', () => {
 
     it('should display Unknown overall policy status', async () => {
       getMockUseEndpointDetails('' as HostPolicyResponseActionStatus);
-      const renderResult = render();
+      render();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusBadge.textContent).toEqual('Unknown');
       expect(renderResult.getByTestId('policyStatusValue-')).toBeTruthy();
     });
 
     it('should show the Take Action button', async () => {
-      const renderResult = render();
+      render();
       expect(renderResult.getByTestId('endpointDetailsActionsButton')).not.toBeNull();
     });
 
@@ -705,8 +703,8 @@ describe('when on the endpoint list page', () => {
       });
 
       describe('when `canReadActionsLogManagement` is TRUE', () => {
-        it('should start with the activity log tab as unselected', async () => {
-          const renderResult = await render();
+        it('should start with the activity log tab as unselected', () => {
+          render();
           const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
           const activityLogTab = renderResult.getByTestId(
             'endpoint-details-flyout-tab-activity_log'
@@ -719,7 +717,7 @@ describe('when on the endpoint list page', () => {
         });
 
         it('should show the activity log content when selected', async () => {
-          const renderResult = await render();
+          render();
           const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
           const activityLogTab = renderResult.getByTestId(
             'endpoint-details-flyout-tab-activity_log'
@@ -734,7 +732,7 @@ describe('when on the endpoint list page', () => {
       });
 
       describe('when `canReadActionsLogManagement` is FALSE', () => {
-        it('should not show the response actions history tab', async () => {
+        it('should not show the response actions history tab', () => {
           mockUserPrivileges.mockReturnValue({
             ...mockInitialUserPrivilegesState(),
             endpointPrivileges: {
@@ -744,7 +742,7 @@ describe('when on the endpoint list page', () => {
               canAccessFleet: true,
             },
           });
-          const renderResult = await render();
+          render();
           const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
           const activityLogTab = renderResult.queryByTestId(
             'endpoint-details-flyout-tab-activity_log'
@@ -769,7 +767,7 @@ describe('when on the endpoint list page', () => {
             history.push(`${MANAGEMENT_PATH}/endpoints?selected_endpoint=1&show=activity_log`);
           });
 
-          const renderResult = await render();
+          render();
           await middlewareSpy.waitForAction('serverFinishedInitialization');
 
           const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
@@ -785,7 +783,6 @@ describe('when on the endpoint list page', () => {
     });
 
     describe('when showing host Policy Response panel', () => {
-      let renderResult: ReturnType<typeof render>;
       beforeEach(async () => {
         coreStart.http.post.mockImplementation(async (requestOptions) => {
           if (requestOptions.path === HOST_METADATA_LIST_ROUTE) {
@@ -793,7 +790,7 @@ describe('when on the endpoint list page', () => {
           }
           throw new Error(`POST to '${requestOptions.path}' does not have a mock response!`);
         });
-        renderResult = await render();
+        render();
         const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
@@ -862,14 +859,13 @@ describe('when on the endpoint list page', () => {
       };
 
       let isolateApiMock: ReturnType<typeof hostIsolationHttpMocks>;
-      let renderResult: ReturnType<AppContextTestRender['render']>;
 
       beforeEach(async () => {
         getKibanaServicesMock.mockReturnValue(coreStart);
         reactTestingLibrary.act(() => {
           history.push(`${MANAGEMENT_PATH}/endpoints?selected_endpoint=1&show=isolate`);
         });
-        renderResult = render();
+        render();
         await middlewareSpy.waitForAction('serverFinishedInitialization');
 
         // Need to reset `http.post` and adjust it so that the mock for http host
@@ -985,7 +981,6 @@ describe('when on the endpoint list page', () => {
     let hostInfo: HostInfo[];
     let agentId: string;
     let agentPolicyId: string;
-    let renderResult: ReturnType<AppContextTestRender['render']>;
     let endpointActionsButton: HTMLElement;
 
     // 2nd endpoint only has isolation capabilities
@@ -1069,7 +1064,7 @@ describe('when on the endpoint list page', () => {
         history.push(`${MANAGEMENT_PATH}/endpoints`);
       });
 
-      renderResult = render();
+      render();
       await middlewareSpy.waitForAction('serverReturnedEndpointList');
       await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
 
@@ -1268,7 +1263,7 @@ describe('when on the endpoint list page', () => {
           canAccessFleet: true,
         }),
       });
-      const renderResult = render();
+      render();
       await reactTestingLibrary.act(async () => {
         await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
       });
@@ -1283,7 +1278,7 @@ describe('when on the endpoint list page', () => {
           canAccessFleet: true,
         }),
       });
-      const renderResult = render();
+      render();
       await reactTestingLibrary.act(async () => {
         await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
       });
@@ -1298,7 +1293,7 @@ describe('when on the endpoint list page', () => {
           canAccessFleet: false,
         }),
       });
-      const renderResult = render();
+      render();
       await reactTestingLibrary.act(async () => {
         await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
       });
@@ -1312,14 +1307,12 @@ describe('when on the endpoint list page', () => {
   });
 
   describe('endpoint list take action with RBAC controls', () => {
-    let renderResult: ReturnType<AppContextTestRender['render']>;
-
     const renderAndClickActionsButton = async (tableRow: number = 0) => {
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/endpoints`);
       });
 
-      renderResult = render();
+      render();
       await middlewareSpy.waitForAction('serverReturnedEndpointList');
       await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
 
