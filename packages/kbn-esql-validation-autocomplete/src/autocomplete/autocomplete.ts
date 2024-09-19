@@ -193,10 +193,6 @@ export async function suggest(
   }
 
   if (astContext.type === 'expression') {
-    if (astContext.command.name === 'sort') {
-      return await suggestForSortCmd(innerText, getFieldsByType);
-    }
-
     // suggest next possible argument, or option
     // otherwise a variable
     return getExpressionSuggestionsByType(
@@ -564,6 +560,12 @@ async function getExpressionSuggestionsByType(
 
   const references = { fields: fieldsMap, variables: anyVariables };
 
+  if (command.name === 'sort') {
+    return await suggestForSortCmd(innerText, getFieldsByType, (col) =>
+      Boolean(getColumnByName(col, references))
+    );
+  }
+
   const suggestions: SuggestionRawDefinition[] = [];
 
   // in this flow there's a clear plan here from argument definitions so try to follow it
@@ -612,59 +614,33 @@ async function getExpressionSuggestionsByType(
           }
         );
 
-        /**
-         * @TODO — this string scanning is crude and can't support all cases
-         * Checking for a partial word and computing the replacement range should
-         * really be done using the AST node, but we'll have to refactor further upstream
-         * to make that available. This is a quick fix to support the most common case.
-         */
-        const lastWord = findFinalWord(innerText);
-        if (lastWord !== '') {
-          // ... | <COMMAND> <word><suggest>
-
-          const rangeToReplace = {
-            start: innerText.length - lastWord.length + 1,
-            end: innerText.length + 1,
-          };
-
-          // check if lastWord is an existing field
-          const column = getColumnByName(lastWord, references);
-          if (column) {
-            if (['grok', 'dissect'].includes(command.name)) {
-              return [];
-            }
-            // now we know that the user has already entered a column,
-            // so suggest comma and pipe
+        const fieldFragmentSuggestions = await handleFragment(
+          innerText,
+          (fragment) => Boolean(getColumnByName(fragment, references)),
+          (fragment: string, rangeToReplace?: { start: number; end: number }) => {
+            // SORT fie<suggest>
+            return fieldSuggestions.map((suggestion) => ({
+              ...suggestion,
+              command: TRIGGER_SUGGESTION_COMMAND,
+              rangeToReplace,
+            }));
+          },
+          (fragment: string, rangeToReplace: { start: number; end: number }) => {
+            // SORT field<suggest>
             return [
               { ...pipeCompleteItem, text: ' | ' },
               { ...commaCompleteItem, text: ', ' },
             ].map<SuggestionRawDefinition>((s) => ({
               ...s,
-              filterText: lastWord,
-              text: lastWord + s.text,
+              filterText: fragment,
+              text: fragment + s.text,
               command: TRIGGER_SUGGESTION_COMMAND,
               rangeToReplace,
             }));
-          } else {
-            suggestions.push(
-              ...fieldSuggestions.map((suggestion) => ({
-                ...suggestion,
-                text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
-                command: TRIGGER_SUGGESTION_COMMAND,
-                rangeToReplace,
-              }))
-            );
           }
-        } else {
-          // ... | <COMMAND> <suggest>
-          suggestions.push(
-            ...fieldSuggestions.map((suggestion) => ({
-              ...suggestion,
-              text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
-              command: TRIGGER_SUGGESTION_COMMAND,
-            }))
-          );
-        }
+        );
+
+        suggestions.push(...fieldFragmentSuggestions);
       }
     }
     if (argDef.type === 'function' || argDef.type === 'any') {
@@ -1839,6 +1815,64 @@ async function getOptionArgsSuggestions(
   return suggestions;
 }
 
+/**
+ * This function handles the logic to suggest completions
+ * for a given fragment of text in a generic way. A good example is
+ * a field name.
+ *
+ * When typing a field name, there are three scenarios
+ *
+ * 1. user hasn't begun typing
+ * KEEP /
+ *
+ * 2. user is typing a partial field name
+ * KEEP fie/
+ *
+ * 3. user has typed a complete field name
+ * KEEP field/
+ *
+ * This function provides a framework for handling all three scenarios in a clean way.
+ *
+ * @param innerText - the query text before the current cursor position
+ * @param isFragmentComplete — return true if the fragment is complete
+ * @param getSuggestionsForIncomplete — gets suggestions for an incomplete fragment
+ * @param getSuggestionsForComplete - gets suggestions for a complete fragment
+ * @returns
+ */
+function handleFragment(
+  innerText: string,
+  isFragmentComplete: (fragment: string) => boolean,
+  getSuggestionsForIncomplete: (
+    fragment: string,
+    rangeToReplace?: { start: number; end: number }
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>,
+  getSuggestionsForComplete: (
+    fragment: string,
+    rangeToReplace: { start: number; end: number }
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>
+): SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]> {
+  /**
+   * @TODO — this string manipulation is crude and can't support all cases
+   * Checking for a partial word and computing the replacement range should
+   * really be done using the AST node, but we'll have to refactor further upstream
+   * to make that available. This is a quick fix to support the most common case.
+   */
+  const fragment = findFinalWord(innerText);
+  if (!fragment) {
+    return getSuggestionsForIncomplete('');
+  } else {
+    const rangeToReplace = {
+      start: innerText.length - fragment.length + 1,
+      end: innerText.length + 1,
+    };
+    if (isFragmentComplete(fragment)) {
+      return getSuggestionsForComplete(fragment, rangeToReplace);
+    } else {
+      return getSuggestionsForIncomplete(fragment, rangeToReplace);
+    }
+  }
+}
+
 const sortModifierSuggestions = {
   ASC: {
     label: 'ASC',
@@ -1874,8 +1908,12 @@ const sortModifierSuggestions = {
   } as SuggestionRawDefinition,
 };
 
-export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetFieldsByTypeFn) => {
-  const { pos, order, nulls } = getSortPos(innerText);
+export const suggestForSortCmd = async (
+  innerText: string,
+  getFieldsByType: GetFieldsByTypeFn,
+  columnExists: (column: string) => boolean
+): Promise<SuggestionRawDefinition[]> => {
+  const { pos, nulls } = getSortPos(innerText);
 
   switch (pos) {
     case 'space2': {
@@ -1890,13 +1928,7 @@ export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetF
       ];
     }
     case 'order': {
-      const suggestions: SuggestionRawDefinition[] = [];
-      for (const modifier of Object.values(sortModifierSuggestions)) {
-        if (modifier.label.startsWith(order)) {
-          suggestions.push(modifier);
-        }
-      }
-      return suggestions;
+      return Object.values(sortModifierSuggestions);
     }
     case 'space3': {
       return [
@@ -1910,19 +1942,13 @@ export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetF
     case 'nulls': {
       const end = innerText.length + 1;
       const start = end - nulls.length;
-      const suggestions: SuggestionRawDefinition[] = [];
-      for (const modifier of Object.values(sortModifierSuggestions)) {
-        if (modifier.label.startsWith(nulls)) {
-          suggestions.push({
-            ...modifier,
-            rangeToReplace: {
-              start,
-              end,
-            },
-          });
-        }
-      }
-      return suggestions;
+      return Object.values(sortModifierSuggestions).map((modifier) => ({
+        ...modifier,
+        rangeToReplace: {
+          start,
+          end,
+        },
+      }));
     }
     case 'space4': {
       return [
@@ -1933,8 +1959,43 @@ export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetF
     }
   }
 
-  return (await getFieldsByType('any', [], {
-    advanceCursor: true,
+  const fieldSuggestions = await getFieldsByType('any', [], {
     openSuggestions: true,
-  })) as SuggestionRawDefinition[];
+  });
+
+  return await handleFragment(
+    innerText,
+    columnExists,
+    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+      // SORT fie<suggest>
+      return fieldSuggestions.map((suggestion) => ({
+        ...suggestion,
+        command: TRIGGER_SUGGESTION_COMMAND,
+        rangeToReplace,
+      }));
+    },
+    (fragment: string, rangeToReplace: { start: number; end: number }) => {
+      // SORT field<suggest>
+      return [
+        { ...pipeCompleteItem, text: ' | ' },
+        { ...commaCompleteItem, text: ', ' },
+        { ...sortModifierSuggestions.ASC, text: ' ' + sortModifierSuggestions.ASC.text },
+        { ...sortModifierSuggestions.DESC, text: ' ' + sortModifierSuggestions.DESC.text },
+        {
+          ...sortModifierSuggestions.NULLS_FIRST,
+          text: ' ' + sortModifierSuggestions.NULLS_FIRST.text,
+        },
+        {
+          ...sortModifierSuggestions.NULLS_LAST,
+          text: ' ' + sortModifierSuggestions.NULLS_LAST.text,
+        },
+      ].map<SuggestionRawDefinition>((s) => ({
+        ...s,
+        filterText: fragment,
+        text: fragment + s.text,
+        command: TRIGGER_SUGGESTION_COMMAND,
+        rangeToReplace,
+      }));
+    }
+  );
 };
