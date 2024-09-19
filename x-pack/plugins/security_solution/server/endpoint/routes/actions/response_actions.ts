@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import {
@@ -59,7 +59,10 @@ import type {
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
 } from '../../../../common/endpoint/types';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -325,15 +328,12 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   return async (context, req, res) => {
     logger.debug(() => `response action [${command}]:\n${stringify(req.body)}`);
 
+    const experimentalFeatures = endpointContext.experimentalFeatures;
+
     // Note:  because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
     //        `agent_type` is included in the schema independent of the feature flag
-    if (
-      (req.body.agent_type === 'sentinel_one' &&
-        !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
-      (req.body.agent_type === 'crowdstrike' &&
-        !endpointContext.experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled)
-    ) {
+    if (isThirdPartyFeatureDisabled(req.body.agent_type, experimentalFeatures)) {
       return errorHandler(
         logger,
         res,
@@ -358,80 +358,26 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     );
 
     try {
-      let action: ActionDetails;
-
-      switch (command) {
-        case 'isolate':
-          action = await responseActionsClient.isolate(req.body);
-          break;
-
-        case 'unisolate':
-          action = await responseActionsClient.release(req.body);
-          break;
-
-        case 'running-processes':
-          action = await responseActionsClient.runningProcesses(req.body);
-          break;
-
-        case 'execute':
-          action = await responseActionsClient.execute(req.body as ExecuteActionRequestBody);
-          break;
-
-        case 'suspend-process':
-          action = await responseActionsClient.suspendProcess(
-            req.body as SuspendProcessRequestBody
-          );
-          break;
-
-        case 'kill-process':
-          action = await responseActionsClient.killProcess(req.body as KillProcessRequestBody);
-          break;
-
-        case 'get-file':
-          action = await responseActionsClient.getFile(
-            req.body as ResponseActionGetFileRequestBody
-          );
-          break;
-
-        case 'upload':
-          action = await responseActionsClient.upload(req.body as UploadActionApiRequestBody);
-          break;
-
-        case 'scan':
-          action = await responseActionsClient.scan(req.body as ScanActionRequestBody);
-          break;
-
-        default:
-          throw new CustomHttpRequestError(
-            `No handler found for response action command: [${command}]`,
-            501
-          );
-      }
-
+      const action: ActionDetails = await handleActionCreation(
+        command,
+        req.body,
+        responseActionsClient
+      );
       const { action: actionId, ...data } = action;
-
-      if (endpointContext.experimentalFeatures.responseActionsTelemetryEnabled) {
-        const telemetryEvent = {
-          responseActions: {
-            actionId,
-            agentType: data.agentType,
-            command,
-            endpointIds: data.agents,
-            isAutomated: data.createdBy === 'unknown',
-          },
-        };
-
-        endpointContext.service
-          .getTelemetryService()
-          .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, telemetryEvent);
-      }
-
-      // `action` is deprecated, but still returned in order to ensure backwards compatibility
       const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
         ? {
             action: actionId ?? data.id ?? '',
           }
         : {};
+
+      if (experimentalFeatures.responseActionsTelemetryEnabled) {
+        sendActionCreationTelemetry(
+          endpointContext.service.getTelemetryService().reportEvent,
+          data.id,
+          data,
+          command
+        );
+      }
 
       return res.ok({
         body: {
@@ -440,21 +386,94 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         },
       });
     } catch (err) {
-      if (endpointContext.experimentalFeatures.responseActionsTelemetryEnabled) {
-        endpointContext.service
-          .getTelemetryService()
-          .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
-            responseActions: {
-              agentType: req.body.agent_type || 'endpoint',
-              command,
-              error: err,
-            },
-          });
+      if (experimentalFeatures.responseActionsTelemetryEnabled) {
+        sendActionCreationErrorTelemetry(
+          endpointContext.service.getTelemetryService().reportEvent,
+          req.body.agent_type,
+          command,
+          err
+        );
       }
 
       return errorHandler(logger, res, err);
     }
   };
+}
+
+function isThirdPartyFeatureDisabled(
+  agentType: ResponseActionAgentType | undefined,
+  experimentalFeatures: EndpointAppContext['experimentalFeatures']
+): boolean {
+  return (
+    (agentType === 'sentinel_one' && !experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
+    (agentType === 'crowdstrike' &&
+      !experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled)
+  );
+}
+
+async function handleActionCreation(
+  command: ResponseActionsApiCommandNames,
+  body: ResponseActionsRequestBody,
+  responseActionsClient: ResponseActionsClient
+): Promise<ActionDetails> {
+  switch (command) {
+    case 'isolate':
+      return responseActionsClient.isolate(body);
+    case 'unisolate':
+      return responseActionsClient.release(body);
+    case 'running-processes':
+      return responseActionsClient.runningProcesses(body);
+    case 'execute':
+      return responseActionsClient.execute(body as ExecuteActionRequestBody);
+    case 'suspend-process':
+      return responseActionsClient.suspendProcess(body as SuspendProcessRequestBody);
+    case 'kill-process':
+      return responseActionsClient.killProcess(body as KillProcessRequestBody);
+    case 'get-file':
+      return responseActionsClient.getFile(body as ResponseActionGetFileRequestBody);
+    case 'upload':
+      return responseActionsClient.upload(body as UploadActionApiRequestBody);
+    case 'scan':
+      return responseActionsClient.scan(body as ScanActionRequestBody);
+    default:
+      throw new CustomHttpRequestError(
+        `No handler found for response action command: [${command}]`,
+        501
+      );
+  }
+}
+
+function sendActionCreationTelemetry(
+  reportEvent: AnalyticsServiceSetup['reportEvent'],
+  actionId: string,
+  data: ActionDetails,
+  command: ResponseActionsApiCommandNames
+) {
+  const telemetryEvent = {
+    responseActions: {
+      actionId,
+      agentType: data.agentType,
+      command,
+      endpointIds: data.agents,
+      isAutomated: data.createdBy === 'unknown',
+    },
+  };
+  reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, telemetryEvent);
+}
+
+function sendActionCreationErrorTelemetry(
+  reportEvent: AnalyticsServiceSetup['reportEvent'],
+  agentType: ActionDetails['agentType'] | undefined,
+  command: ResponseActionsApiCommandNames,
+  err: Error
+) {
+  reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
+    responseActions: {
+      agentType: agentType || 'endpoint',
+      command,
+      error: err,
+    },
+  });
 }
 
 function redirectHandler(
