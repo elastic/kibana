@@ -30,6 +30,7 @@ export const HOST_ENTITY_DEFINITION: EntityDefinition = entityDefinitionSchema.p
     interval: '1m',
   },
   version: '1.0.0',
+  managed: true,
 });
 
 export const USER_ENTITY_DEFINITION: EntityDefinition = entityDefinitionSchema.parse({
@@ -53,4 +54,5 @@ export const USER_ENTITY_DEFINITION: EntityDefinition = entityDefinitionSchema.p
     interval: '1m',
   },
   version: '1.0.0',
+  managed: true,
 });
