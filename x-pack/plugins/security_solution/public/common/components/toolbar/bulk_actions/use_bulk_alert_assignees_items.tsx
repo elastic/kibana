@@ -19,6 +19,7 @@ import { isEmpty } from 'lodash/fp';
 import { useLicense } from '../../../hooks/use_license';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { ASSIGNEES_PANEL_WIDTH } from '../../assignees/constants';
+import type { BulkAlertAssigneesPanelComponentProps } from './alert_bulk_assignees';
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import * as i18n from './translations';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
@@ -45,7 +46,9 @@ export const useBulkAlertAssigneesItems = ({
   const { hasIndexWrite } = useAlertsPrivileges();
   const setAlertAssignees = useSetAlertAssignees();
 
-  const handleOnAlertAssigneesSubmit = useCallback(
+  const handleOnAlertAssigneesSubmit = useCallback<
+    BulkAlertAssigneesPanelComponentProps['onSubmit']
+  >(
     async (assignees, ids, onSuccess, setIsLoading) => {
       if (setAlertAssignees) {
         await setAlertAssignees(assignees, ids, onSuccess, setIsLoading);

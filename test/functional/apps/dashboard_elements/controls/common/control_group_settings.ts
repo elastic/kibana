@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -25,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.switchToEditMode();
     });
 
-    describe('filtering settings', async () => {
+    describe('filtering settings', () => {
       const firstOptionsListId = 'bcb81550-0843-44ea-9020-6c1ebf3228ac';
       let beforeCount: number;
 
@@ -55,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         beforeRange = await getRange();
       });
 
-      describe('do not apply global filters', async () => {
+      describe('do not apply global filters', () => {
         it('- filter pills', async () => {
           await filterBar.addFilter({ field: 'animal.keyword', operation: 'is', value: 'cat' });
           await dashboardControls.optionsListOpenPopover(firstOptionsListId);
@@ -105,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('control group settings flyout closes', async () => {
+    describe('control group settings flyout closes', () => {
       it('when navigating away from dashboard', async () => {
         await dashboard.switchToEditMode();
         await dashboardControls.openControlGroupSettingsFlyout();

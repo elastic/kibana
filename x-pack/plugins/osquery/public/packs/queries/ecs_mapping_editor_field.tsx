@@ -139,7 +139,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
   const { ecsMappingArray: watchedEcsMapping } = watch();
   const handleChange = useCallback(
-    (newSelectedOptions) => {
+    (newSelectedOptions: any) => {
       setSelected(newSelectedOptions);
       ECSField.onChange(newSelectedOptions[0]?.label ?? '');
     },
@@ -148,7 +148,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
 
   // TODO: Create own component for this.
   const renderOption = useCallback(
-    (option, searchValue, contentClassName) => (
+    (option: any, searchValue: any, contentClassName: any) => (
       <EuiFlexGroup
         className={`${contentClassName} euiSuggestItem euiSuggestItem--truncate`}
         alignItems="center"
@@ -386,7 +386,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
 
   const renderOsqueryOption = useCallback(
-    (option, searchValue, contentClassName) => (
+    (option: any, searchValue: any, contentClassName: any) => (
       <EuiFlexGroup
         className={`${contentClassName} euiSuggestItem euiSuggestItem--truncate`}
         alignItems="center"
@@ -411,7 +411,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   );
 
   const handleKeyChange = useCallback(
-    (newSelectedOptions) => {
+    (newSelectedOptions: any) => {
       setSelected(newSelectedOptions);
       resultField.onChange(
         isArray(newSelectedOptions)
@@ -438,7 +438,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   }, [ecsMappingArray, index, isLastItem, resultTypeField.value]);
 
   const onTypeChange = useCallback(
-    (newType) => {
+    (newType: any) => {
       if (newType !== resultTypeField.value) {
         resultTypeField.onChange(newType);
         resultField.onChange(newType === 'value' && isSingleSelection === false ? [] : '');

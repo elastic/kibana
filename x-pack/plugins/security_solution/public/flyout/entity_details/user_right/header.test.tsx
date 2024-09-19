@@ -9,12 +9,8 @@ import { ManagedUserDatasetKey } from '../../../../common/search_strategy/securi
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import {
-  managedUserDetails,
-  mockManagedUserData,
-} from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
 import { UserPanelHeader } from './header';
-import { mockObservedUser } from './mocks';
+import { managedUserDetails, mockManagedUserData, mockObservedUser } from './mocks';
 
 const mockProps = {
   userName: 'test',

@@ -55,6 +55,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
@@ -65,7 +66,12 @@ import {
 } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-
+import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+} from '../common/constants';
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
@@ -78,12 +84,10 @@ import {
 } from './services/security';
 
 import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   OUTPUT_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   PLUGIN_ID,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
@@ -130,6 +134,8 @@ import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
 import { registerIntegrationFieldsExtractor } from './services/register_integration_fields_extractor';
+import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/managed_package_policies';
+import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -180,6 +186,7 @@ export interface FleetAppContext {
   auditLogger?: AuditLogger;
   uninstallTokenService: UninstallTokenServiceInterface;
   unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
+  taskManagerStart?: TaskManagerStartContract;
 }
 
 export type FleetSetupContract = void;
@@ -187,6 +194,8 @@ export type FleetSetupContract = void;
 const allSavedObjectTypes = [
   OUTPUT_SAVED_OBJECT_TYPE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
@@ -314,6 +323,7 @@ export class FleetPlugin
         id: `fleetv2`,
         name: 'Fleet',
         category: DEFAULT_APP_CATEGORIES.management,
+        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [PLUGIN_ID],
         catalogue: ['fleet'],
         privilegesTooltip: i18n.translate('xpack.fleet.serverPlugin.privilegesTooltip', {
@@ -476,6 +486,7 @@ export class FleetPlugin
         id: 'fleet', // for BWC
         name: 'Integrations',
         category: DEFAULT_APP_CATEGORIES.management,
+        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
         privileges: {
@@ -596,6 +607,10 @@ export class FleetPlugin
     registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);
+    // Register task
+    registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
+    registerDeployAgentPoliciesTask(deps.taskManager);
+
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
       core,
@@ -653,6 +668,7 @@ export class FleetPlugin
       messageSigningService,
       uninstallTokenService,
       unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
+      taskManagerStart: plugins.taskManager,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});

@@ -14,14 +14,14 @@ pageLoadAssetSize:
   cloudChat: 19894
   cloudDataMigration: 19170
   cloudDefend: 18697
-  cloudExperiments: 59358
+  cloudExperiments: 109746
   cloudFullStory: 18493
   cloudLinks: 55984
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
   controls: 60000
-  core: 435325
+  core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
   dashboard: 52967
@@ -55,7 +55,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 23121
   expressionMetric: 22238
   expressionMetricVis: 23121
-  expressionPartitionVis: 29700
+  expressionPartitionVis: 44888
   expressionRepeatImage: 22341
   expressionRevealImage: 25675
   expressions: 140958
@@ -68,7 +68,7 @@ pageLoadAssetSize:
   files: 22673
   filesManagement: 18683
   fileUpload: 25664
-  fleet: 174609
+  fleet: 190461
   globalSearch: 29696
   globalSearchBar: 50403
   globalSearchProviders: 25554
@@ -86,6 +86,7 @@ pageLoadAssetSize:
   inspector: 148711
   integrationAssistant: 19524
   interactiveSetup: 80000
+  inventory: 27430
   investigate: 17970
   investigateApp: 91898
   kibanaOverview: 56279
@@ -118,7 +119,7 @@ pageLoadAssetSize:
   observabilityAiAssistantManagement: 19279
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
-  observabilityShared: 72039
+  observabilityShared: 80000
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 55463
@@ -139,6 +140,7 @@ pageLoadAssetSize:
   searchAssistant: 19831
   searchConnectors: 30000
   searchHomepage: 19831
+  searchIndices: 20519
   searchInferenceEndpoints: 20470
   searchNotebooks: 18942
   searchPlayground: 19325
@@ -157,7 +159,7 @@ pageLoadAssetSize:
   spaces: 57868
   stackAlerts: 58316
   stackConnectors: 67227
-  synthetics: 40958
+  synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586
   threatIntelligence: 44299

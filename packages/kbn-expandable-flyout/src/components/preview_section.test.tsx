@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -15,26 +16,32 @@ import {
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
 import { TestProvider } from '../test/provider';
-import { State } from '../state';
+import { initialUiState, State } from '../store/state';
 
 describe('PreviewSection', () => {
-  const context = {
-    right: {},
-    left: {},
-    preview: [
-      {
-        id: 'key',
+  const context: State = {
+    panels: {
+      byId: {
+        flyout: {
+          right: undefined,
+          left: undefined,
+          preview: [
+            {
+              id: 'key',
+            },
+          ],
+        },
       },
-    ],
-  } as unknown as State;
+    },
+    ui: initialUiState,
+  };
 
   const component = <div>{'component'}</div>;
-  const left = 500;
 
   it('should render back button and close button in header', () => {
     const { getByTestId } = render(
       <TestProvider state={context}>
-        <PreviewSection component={component} leftPosition={left} />
+        <PreviewSection component={component} banner={undefined} showExpanded={false} />
       </TestProvider>
     );
 
@@ -52,7 +59,7 @@ describe('PreviewSection', () => {
 
     const { getByTestId, getByText } = render(
       <TestProvider state={context}>
-        <PreviewSection component={component} leftPosition={left} banner={banner} />
+        <PreviewSection component={component} banner={banner} showExpanded={false} />
       </TestProvider>
     );
 

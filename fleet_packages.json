@@ -34,7 +34,7 @@
   },
   {
     "name": "endpoint",
-    "version": "8.15.0"
+    "version": "8.15.1"
   },
   {
     "name": "fleet_server",
@@ -56,6 +56,6 @@
   },
   {
     "name": "security_detection_engine",
-    "version": "8.15.3"
+    "version": "8.15.4"
   }
 ]

@@ -36,6 +36,7 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
         tagsToRemove: this.actionParams?.tagsToRemove,
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
+        spaceId: this.actionParams.spaceId,
       }
     );
   }
@@ -61,8 +62,8 @@ export async function updateTagsBatch(
     total?: number;
     kuery?: string;
     retryCount?: number;
-  },
-  spaceId?: string
+    spaceId?: string;
+  }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
   const hostedAgentError = `Cannot modify tags on a hosted agent`;
@@ -150,7 +151,8 @@ export async function updateTagsBatch(
   const versionConflictCount = res.version_conflicts ?? 0;
   const versionConflictIds = isLastRetry ? getUuidArray(versionConflictCount) : [];
 
-  const namespaces = spaceId ? { namespaces: [spaceId] } : {};
+  const spaceId = options.spaceId;
+  const namespaces = spaceId ? [spaceId] : [];
 
   // creating an action doc so that update tags  shows up in activity
   // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
@@ -160,7 +162,7 @@ export async function updateTagsBatch(
     agents: updatedIds
       .concat(failures.map((failure) => failure.id))
       .concat(isLastRetry ? versionConflictIds : []),
-    ...namespaces,
+    namespaces,
     created_at: new Date().toISOString(),
     type: 'UPDATE_TAGS',
     total: options.total ?? res.total,
@@ -180,7 +182,7 @@ export async function updateTagsBatch(
       updatedIds.map((id) => ({
         agentId: id,
         actionId,
-        ...namespaces,
+        namespaces,
       }))
     );
     appContextService.getLogger().debug(`action updated result wrote on ${updatedCount} agents`);

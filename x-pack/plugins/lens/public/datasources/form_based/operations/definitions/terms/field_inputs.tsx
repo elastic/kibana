@@ -16,7 +16,7 @@ import {
 } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { IndexPattern } from '../../../../../types';
-import { FieldSelect } from '../../../dimension_panel/field_select';
+import { FieldChoiceWithOperationType, FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
 import { supportedTypes } from './constants';
@@ -72,7 +72,7 @@ export function FieldInputs({
   });
 
   const onFieldSelectChange = useCallback(
-    (choice, index = 0) => {
+    (choice: FieldChoiceWithOperationType, index = 0) => {
       const fields = [...localValues];
 
       if (indexPattern.getFieldByName(choice.field)) {

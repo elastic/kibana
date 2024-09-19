@@ -16,6 +16,7 @@ import {
   setOverviewGroupByAction,
   setOverviewPageStateAction,
   toggleErrorPopoverOpen,
+  trendStatsBatch,
 } from './actions';
 import { enableMonitorAlertAction } from '../monitor_list/actions';
 import { ConfigKey } from '../../components/monitor_add_edit/types';
@@ -31,6 +32,7 @@ const initialState: MonitorOverviewState = {
     sortOrder: 'asc',
     sortField: 'status',
   },
+  trendStats: {},
   groupBy: { field: 'none', order: 'asc' },
   flyoutConfig: null,
   loading: false,
@@ -93,6 +95,30 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     })
     .addCase(toggleErrorPopoverOpen, (state, action) => {
       state.isErrorPopoverOpen = action.payload;
+    })
+    .addCase(trendStatsBatch.get, (state, action) => {
+      for (const { configId, locationId } of action.payload) {
+        if (!state.trendStats[configId + locationId]) {
+          state.trendStats[configId + locationId] = 'loading';
+        }
+      }
+    })
+    .addCase(trendStatsBatch.fail, (state, action) => {
+      for (const { configId, locationId } of action.payload) {
+        if (state.trendStats[configId + locationId] === 'loading') {
+          state.trendStats[configId + locationId] = null;
+        }
+      }
+    })
+    .addCase(trendStatsBatch.success, (state, action) => {
+      for (const key of Object.keys(action.payload.trendStats)) {
+        state.trendStats[key] = action.payload.trendStats[key];
+      }
+      for (const { configId, locationId } of action.payload.batch) {
+        if (!action.payload.trendStats[configId + locationId]) {
+          state.trendStats[configId + locationId] = null;
+        }
+      }
     });
 });
 

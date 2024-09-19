@@ -161,33 +161,6 @@
         "ref_id": "main-elasticsearch"
       }
     ],
-    "enterprise_search": [
-      {
-        "elasticsearch_cluster_ref_id": "main-elasticsearch",
-        "region": "gcp-us-west2",
-        "plan": {
-          "cluster_topology": [
-            {
-              "node_type": {
-                "connector": true,
-                "appserver": true,
-                "worker": true
-              },
-              "instance_configuration_id": "gcp.enterprisesearch.1",
-              "zone_count": 1,
-              "size": {
-                "resource": "memory",
-                "value": 2048
-              }
-            }
-          ],
-          "enterprise_search": {
-            "version": null
-          }
-        },
-        "ref_id": "main-enterprise_search"
-      }
-    ],
     "kibana": [
       {
         "elasticsearch_cluster_ref_id": "main-elasticsearch",

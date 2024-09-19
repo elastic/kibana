@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { binaryExpressionGroup } from '../ast/helpers';
 import { ESQLAstCommand } from '../types';
 import { ESQLAstExpressionNode, ESQLAstQueryNode, Visitor } from '../visitor';
 import { LeafPrinter } from './leaf_printer';
@@ -131,14 +133,16 @@ export class BasicPrettyPrinter {
       : word.toUpperCase();
   }
 
-  protected readonly visitor = new Visitor()
+  protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx) => {
       return '<EXPRESSION>';
     })
+
     .on('visitSourceExpression', (ctx) => LeafPrinter.source(ctx.node))
     .on('visitColumnExpression', (ctx) => LeafPrinter.column(ctx.node))
     .on('visitLiteralExpression', (ctx) => LeafPrinter.literal(ctx.node))
     .on('visitTimeIntervalLiteralExpression', (ctx) => LeafPrinter.timeInterval(ctx.node))
+
     .on('visitInlineCastExpression', (ctx) => {
       const value = ctx.value();
       const wrapInBrackets =
@@ -154,6 +158,7 @@ export class BasicPrettyPrinter {
 
       return `${valueFormatted}::${ctx.node.castType}`;
     })
+
     .on('visitListLiteralExpression', (ctx) => {
       let elements = '';
 
@@ -163,6 +168,7 @@ export class BasicPrettyPrinter {
 
       return `[${elements}]`;
     })
+
     .on('visitFunctionCallExpression', (ctx) => {
       const opts = this.opts;
       const node = ctx.node;
@@ -183,7 +189,25 @@ export class BasicPrettyPrinter {
         case 'binary-expression': {
           operator = this.keyword(operator);
 
-          return `${ctx.visitArgument(0)} ${operator} ${ctx.visitArgument(1)}`;
+          const group = binaryExpressionGroup(ctx.node);
+          const [left, right] = ctx.arguments();
+          const groupLeft = binaryExpressionGroup(left);
+          const groupRight = binaryExpressionGroup(right);
+
+          let leftFormatted = ctx.visitArgument(0);
+          let rightFormatted = ctx.visitArgument(1);
+
+          if (groupLeft && groupLeft < group) {
+            leftFormatted = `(${leftFormatted})`;
+          }
+
+          if (groupRight && groupRight < group) {
+            rightFormatted = `(${rightFormatted})`;
+          }
+
+          const formatted = `${leftFormatted} ${operator} ${rightFormatted}`;
+
+          return formatted;
         }
         default: {
           if (opts.lowercaseFunctions) {
@@ -200,9 +224,26 @@ export class BasicPrettyPrinter {
         }
       }
     })
+
     .on('visitRenameExpression', (ctx) => {
       return `${ctx.visitArgument(0)} ${this.keyword('AS')} ${ctx.visitArgument(1)}`;
     })
+
+    .on('visitOrderExpression', (ctx) => {
+      const node = ctx.node;
+      let text = ctx.visitArgument(0);
+
+      if (node.order) {
+        text += ` ${node.order}`;
+      }
+
+      if (node.nulls) {
+        text += ` ${node.nulls}`;
+      }
+
+      return text;
+    })
+
     .on('visitCommandOption', (ctx) => {
       const opts = this.opts;
       const option = opts.lowercaseOptions ? ctx.node.name : ctx.node.name.toUpperCase();
@@ -218,6 +259,7 @@ export class BasicPrettyPrinter {
 
       return optionFormatted;
     })
+
     .on('visitCommand', (ctx) => {
       const opts = this.opts;
       const cmd = opts.lowercaseCommands ? ctx.node.name : ctx.node.name.toUpperCase();
@@ -239,6 +281,7 @@ export class BasicPrettyPrinter {
 
       return cmdFormatted;
     })
+
     .on('visitQuery', (ctx) => {
       const opts = this.opts;
       const cmdSeparator = opts.multiline ? `\n${opts.pipeTab ?? '  '}| ` : ' | ';
@@ -253,14 +296,14 @@ export class BasicPrettyPrinter {
     });
 
   public print(query: ESQLAstQueryNode) {
-    return this.visitor.visitQuery(query);
+    return this.visitor.visitQuery(query, undefined);
   }
 
   public printCommand(command: ESQLAstCommand) {
-    return this.visitor.visitCommand(command);
+    return this.visitor.visitCommand(command, undefined);
   }
 
   public printExpression(expression: ESQLAstExpressionNode) {
-    return this.visitor.visitExpression(expression);
+    return this.visitor.visitExpression(expression, undefined);
   }
 }

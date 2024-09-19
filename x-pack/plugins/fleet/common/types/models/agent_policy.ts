@@ -71,7 +71,7 @@ export interface FullAgentPolicyInputStream {
   id: string;
   data_stream: {
     dataset: string;
-    type: string;
+    type?: string;
   };
   [key: string]: any;
 }
@@ -118,6 +118,7 @@ export interface FullAgentPolicyMonitoring {
   enabled: boolean;
   metrics: boolean;
   logs: boolean;
+  traces: boolean;
 }
 
 export interface FullAgentPolicy {

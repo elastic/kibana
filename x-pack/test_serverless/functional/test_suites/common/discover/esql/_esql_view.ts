@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover esql view', async function () {
+  describe('discover esql view', function () {
     // see details: https://github.com/elastic/kibana/issues/188816
     this.tags(['failsOnMKI']);
 
@@ -50,10 +50,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    after(async () => {
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     describe('ES|QL in Discover', () => {
@@ -114,11 +118,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
       });
 
-      it('should render the histogram for indices with no @timestamp field when the ?t_start, ?t_end params are in the query', async function () {
+      it('should render the histogram for indices with no @timestamp field when the ?_tstart, ?_tend params are in the query', async function () {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?t_start and timestamp <= ?t_end`;
+        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?_tstart and timestamp <= ?_tend`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -200,6 +204,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dataGrid.getHeaders()).to.eql([
           'Select column',
           'Control column',
+          'Access to degraded docs',
+          'Access to available stacktraces',
           'Numberbytes',
           'machine.ram_range',
         ]);
@@ -453,7 +459,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first cell contains the highest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
@@ -468,7 +474,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first cell contains the same highest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         await browser.refresh();
@@ -479,7 +485,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first cell contains the same highest value after reload', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         await PageObjects.discover.clickNewSearchButton();
@@ -497,7 +503,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           async () => {
             const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
             const text = await cell.getVisibleText();
-            return text === '483';
+            return text === '17,966';
           }
         );
 

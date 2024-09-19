@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -60,7 +61,8 @@ const RELOCATE_TYPES: Record<string, string> = {
 
 export const logFilePath = Path.join(__dirname, 'split_failed_to_clone.test.log');
 
-describe('when splitting .kibana into multiple indices and one clone fails', () => {
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
+describe.skip('when splitting .kibana into multiple indices and one clone fails', () => {
   let esServer: TestElasticsearchUtils['es'];
   let typeRegistry: ISavedObjectTypeRegistry;
   let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;

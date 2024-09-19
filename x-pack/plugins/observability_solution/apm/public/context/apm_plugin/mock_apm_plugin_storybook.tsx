@@ -120,13 +120,53 @@ const mockCore = {
     get: (key: string) => uiSettings[key],
     get$: (key: string) => of(mockCore.uiSettings.get(key)),
   },
+  unifiedSearch: {
+    autocomplete: {
+      hasQuerySuggestions: () => Promise.resolve(false),
+      getQuerySuggestions: () => [],
+      getValueSuggestions: () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve([]);
+          }, 300);
+        }),
+    },
+  },
+  data: {
+    query: {
+      queryString: { getQuery: jest.fn(), setQuery: jest.fn(), clearQuery: jest.fn() },
+      timefilter: {
+        timefilter: {
+          setTime: jest.fn(),
+          setRefreshInterval: jest.fn(),
+        },
+      },
+    },
+  },
+  dataViews: {
+    create: jest.fn(),
+  },
+};
+
+const mockUnifiedSearchBar = {
+  ui: {
+    SearchBar: () => <div />,
+  },
 };
 
 const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
+  unifiedSearch: mockUnifiedSearchBar,
   observabilityAIAssistant: {
     service: { setScreenContext: () => noop },
+  },
+  share: {
+    url: {
+      locators: {
+        get: jest.fn(),
+      },
+    },
   },
 } as unknown as ApmPluginContextValue;
 
@@ -147,7 +187,7 @@ export function MockApmPluginStorybook({
     contextMock.core as unknown as Partial<CoreStart>
   );
 
-  const history2 = createMemoryHistory({
+  const history = createMemoryHistory({
     initialEntries: [routePath || '/services/?rangeFrom=now-15m&rangeTo=now'],
   });
 
@@ -157,7 +197,7 @@ export function MockApmPluginStorybook({
         <KibanaReactContext.Provider>
           <ApmPluginContext.Provider value={contextMock}>
             <APMServiceContext.Provider value={serviceContextValue}>
-              <RouterProvider router={apmRouter as any} history={history2}>
+              <RouterProvider router={apmRouter as any} history={history}>
                 <MockTimeRangeContextProvider>
                   <ApmTimeRangeMetadataContextProvider>
                     {children}

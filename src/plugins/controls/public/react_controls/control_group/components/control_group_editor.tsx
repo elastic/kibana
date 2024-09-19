@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -20,31 +21,18 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIconTip,
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { ControlStyle, ParentIgnoreSettings } from '../../..';
 
-import { ControlStateManager } from '../../controls/types';
+import type { ControlStyle, ParentIgnoreSettings } from '../../../../common';
+import { CONTROL_LAYOUT_OPTIONS } from '../../controls/data_controls/editor_constants';
+import type { ControlStateManager } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlGroupApi, ControlGroupEditorState } from '../types';
-
-const CONTROL_LAYOUT_OPTIONS = [
-  {
-    id: `oneLine`,
-    'data-test-subj': 'control-editor-layout-oneLine',
-    label: ControlGroupStrings.management.labelPosition.getInlineTitle(),
-  },
-  {
-    id: `twoLine`,
-    'data-test-subj': 'control-editor-layout-twoLine',
-    label: ControlGroupStrings.management.labelPosition.getAboveTitle(),
-  },
-];
+import type { ControlGroupApi, ControlGroupEditorState } from '../types';
+import { ControlSettingTooltipLabel } from './control_setting_tooltip_label';
 
 interface Props {
   onCancel: () => void;
@@ -231,17 +219,3 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
     </>
   );
 };
-
-const ControlSettingTooltipLabel = ({ label, tooltip }: { label: string; tooltip: string }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-    <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-      css={css`
-        margin-top: 0px !important;
-      `}
-    >
-      <EuiIconTip content={tooltip} position="right" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);

@@ -68,7 +68,7 @@ export const useIndicators = ({
   const { inspectorAdapters } = useInspector();
 
   const onChangeItemsPerPage = useCallback(
-    (pageSize) =>
+    (pageSize: any) =>
       setPagination((currentPagination) => ({
         ...currentPagination,
         pageSize,
@@ -78,7 +78,7 @@ export const useIndicators = ({
   );
 
   const onChangePage = useCallback(
-    (pageIndex) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
+    (pageIndex: any) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
     []
   );
 

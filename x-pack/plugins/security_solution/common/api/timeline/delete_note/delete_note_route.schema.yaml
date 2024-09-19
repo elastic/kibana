@@ -15,11 +15,12 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: DeleteNote
-      summary: Deletes a note from a timeline.
+      summary: Delete a note
+      description: Delete a note from a Timeline using the note ID.
       tags:
         - access:securitySolution
       requestBody:
-        description: The id of the note to delete.
+        description: The ID of the note to delete.
         required: true
         content:
           application/json:

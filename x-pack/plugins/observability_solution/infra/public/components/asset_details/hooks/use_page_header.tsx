@@ -14,7 +14,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
 import { capitalize, isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -23,10 +23,9 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
 import { CreateAlertRuleButton } from '../../shared/alerts/links/create_alert_rule_button';
 import { LinkToNodeDetails } from '../links';
-import { ContentTabIds, type LinkOptions, type RouteState, type Tab, type TabIds } from '../types';
+import { ContentTabIds, type LinkOptions, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
-import { getApmField } from '../utils';
 
 type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
@@ -143,7 +142,6 @@ const useFeatureFlagTabs = () => {
 
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
-  const { asset } = useAssetDetailsRenderPropsContext();
   const { isTabEnabled } = useFeatureFlagTabs();
 
   const onTabClick = useCallback(
@@ -153,37 +151,9 @@ const useTabs = (tabs: Tab[]) => {
     [showTab]
   );
 
-  const apmTracesMenuItemLinkProps = useLinkProps({
-    app: 'apm',
-    hash: 'traces',
-    search: {
-      kuery: `${getApmField(asset.type)}:"${asset.id}"`,
-    },
-  });
-
-  const getTabToApmTraces = useCallback(
-    (name: string) => ({
-      ...apmTracesMenuItemLinkProps,
-      'data-test-subj': 'infraAssetDetailsApmServicesLinkTab',
-      label: (
-        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="popout" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{name}</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    }),
-    [apmTracesMenuItemLinkProps]
-  );
-
   const tabEntries: TabItem[] = useMemo(
     () =>
       tabs.filter(isTabEnabled).map(({ name, ...tab }) => {
-        if (tab.id === ContentTabIds.LINK_TO_APM) {
-          return getTabToApmTraces(name);
-        }
-
         return {
           ...tab,
           'data-test-subj': `infraAssetDetails${capitalize(tab.id)}Tab`,
@@ -192,7 +162,7 @@ const useTabs = (tabs: Tab[]) => {
           label: name,
         };
       }),
-    [activeTabId, isTabEnabled, getTabToApmTraces, onTabClick, tabs]
+    [activeTabId, isTabEnabled, onTabClick, tabs]
   );
 
   return { tabEntries };

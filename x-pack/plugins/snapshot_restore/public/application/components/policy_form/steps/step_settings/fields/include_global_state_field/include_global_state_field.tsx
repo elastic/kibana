@@ -64,7 +64,7 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
       }
       fullWidth
     >
-      <EuiFormRow hasEmptyLabelSpace fullWidth>
+      <EuiFormRow fullWidth>
         <EuiSwitch
           data-test-subj="globalStateToggle"
           label={

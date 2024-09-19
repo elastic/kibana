@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -43,7 +44,7 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
   });
 
   const accordionTitle = (
-    <EuiTitle size="xs">
+    <EuiTitle size="xxs">
       <p>{contentLabel}</p>
     </EuiTitle>
   );
@@ -80,7 +81,7 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
         <EuiFlexItem grow={false}>{logLevelAndTimestamp}</EuiFlexItem>
       </EuiFlexGroup>
       <HoverActionPopover value={value} field={field} anchorPosition="downCenter" display="block">
-        <EuiCodeBlock overflowHeight={100} paddingSize="m" isCopyable language="txt" fontSize="m">
+        <EuiCodeBlock overflowHeight={100} paddingSize="s" isCopyable language="txt" fontSize="s">
           {value}
         </EuiCodeBlock>
       </HoverActionPopover>

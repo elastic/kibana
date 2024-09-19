@@ -37,7 +37,8 @@ export const useDeployIntegration = ({
       connector == null ||
       integrationSettings == null ||
       notifications?.toasts == null ||
-      result?.pipeline == null
+      result?.pipeline == null ||
+      result?.samplesFormat == null
     ) {
       return;
     }
@@ -46,12 +47,6 @@ export const useDeployIntegration = ({
 
     (async () => {
       try {
-        if (integrationSettings.samplesFormat == null) {
-          throw new Error(
-            'Logic error: samplesFormat is required and cannot be null or undefined when creating integration.'
-          );
-        }
-
         const parameters: BuildIntegrationRequestBody = {
           integration: {
             title: integrationSettings.title ?? '',
@@ -64,10 +59,10 @@ export const useDeployIntegration = ({
                 description: integrationSettings.dataStreamDescription ?? '',
                 name: integrationSettings.dataStreamName ?? '',
                 inputTypes: integrationSettings.inputTypes ?? [],
-                rawSamples: integrationSettings.logsSampleParsed ?? [],
+                rawSamples: integrationSettings.logSamples ?? [],
                 docs: result.docs ?? [],
+                samplesFormat: result.samplesFormat ?? { name: 'json' },
                 pipeline: result.pipeline,
-                samplesFormat: integrationSettings.samplesFormat,
               },
             ],
           },
@@ -123,6 +118,7 @@ export const useDeployIntegration = ({
     notifications?.toasts,
     result?.docs,
     result?.pipeline,
+    result?.samplesFormat,
     telemetry,
   ]);
 

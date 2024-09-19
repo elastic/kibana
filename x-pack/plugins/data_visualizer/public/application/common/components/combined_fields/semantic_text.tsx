@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
 import useDebounce from 'react-use/lib/useDebounce';
 import type {
-  InferenceModelConfigContainer,
+  InferenceInferenceEndpointInfo,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createSemanticTextCombinedField, getFieldNames, getNameCollisionMsg } from './utils';
@@ -61,14 +61,14 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
 
   useEffect(() => {
     http
-      .fetch<InferenceModelConfigContainer[]>('/internal/data_visualizer/inference_services', {
+      .fetch<InferenceInferenceEndpointInfo[]>('/internal/data_visualizer/inference_services', {
         method: 'GET',
         version: '1',
       })
       .then((response) => {
         const inferenceServiceOptions = response.map((service) => ({
-          value: service.model_id,
-          text: service.model_id,
+          value: service.inference_id,
+          text: service.inference_id,
         }));
         setInferenceServices(inferenceServiceOptions);
         setSelectedInference(inferenceServiceOptions[0]?.value ?? undefined);

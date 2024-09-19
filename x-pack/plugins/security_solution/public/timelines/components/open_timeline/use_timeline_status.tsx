@@ -79,7 +79,7 @@ export const useTimelineStatus = ({
   );
 
   const onFilterClicked = useCallback(
-    (tabId) => {
+    (tabId: TemplateTimelineType) => {
       if (selectedTab === tabId) {
         setSelectedTab(null);
       } else {

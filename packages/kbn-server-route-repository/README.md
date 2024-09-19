@@ -5,6 +5,7 @@ Utility functions for creating a typed server route repository, and a typed clie
 ## Overview
 
 There are three main functions that make up this package:
+
 1. `createServerRouteFactory`
 2. `registerRoutes`
 3. `createRepositoryClient`
@@ -22,6 +23,7 @@ By exporting the type of the repository from the server to the browser (make sur
 In the server side, we'll start by creating the route factory, to make things easier it is recommended to keep this in its own file and export it.
 
 > server/create_my_plugin_server_route.ts
+
 ```javascript
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import {
@@ -40,17 +42,18 @@ The two generic arguments are optional, this example shows a "default" setup whi
 Next, let's create a minimal route.
 
 > server/my_route.ts
+
 ```javascript
 import { createMyPluginServerRoute } from './create_my_plugin_server_route';
 
 export const myRoute = createMyPluginServerRoute({
-    endpoint: 'GET /internal/my_plugin/route',
-    handler: async (resources) => {
-        const { request, context, response, logger } = resources;
-        return response.ok({
-            body: 'Hello, my route!',
-        });
-    },
+  endpoint: 'GET /internal/my_plugin/route',
+  handler: async (resources) => {
+    const { request, context, response, logger } = resources;
+    return response.ok({
+      body: 'Hello, my route!',
+    });
+  },
 });
 ```
 
@@ -87,13 +90,12 @@ We also export the type of the repository, we'll need this for the client which 
 The client can be created either in `setup` or `start`.
 
 > browser/plugin.ts
+
 ```javascript
-import { isHttpFetchError } from '@kbn/core-http-browser';
-import { DefaultClientOptions } from '@kbn/server-route-repository-utils';
-import { createRepositoryClient } from '@kbn/server-route-repository-client';
+import { createRepositoryClient, isHttpFetchError, DefaultClientOptions } from '@kbn/server-route-repository-client';
 import type { MyPluginRouteRepository } from '../server/plugin';
 
-export type MyPluginRepositoryClient = 
+export type MyPluginRepositoryClient =
   ReturnType<typeof createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions>>;
 
 class MyPlugin implements Plugin {
@@ -118,10 +120,10 @@ class MyPlugin implements Plugin {
 This example prints 'Hello, my route!' and the type of the response is **inferred** to this.
 
 We pass in the type of the repository that we (_type_) imported from the server. The second generic parameter for `createRepositoryClient` is optional.  
-We also export the type of the client itself so we can use it to type the client as we pass it around.  
+We also export the type of the client itself so we can use it to type the client as we pass it around.
 
 When using the client's `fetch` function, the first argument is the route to call and this is auto completed to only the available routes.
-The second argument is optional in this case but allows you to send in any extra options. 
+The second argument is optional in this case but allows you to send in any extra options.
 
 The client translates the endpoint and the options (including request parameters) to the right Core HTTP request.
 
@@ -161,19 +163,20 @@ The `params` object is added to the route resources.
 `path`, `query` and `body` are validated before your handler is called and the types are **inferred** inside of the handler.
 
 When calling this endpoint, it will look like this:
+
 ```javascript
 client('POST /internal/my_plugin/route/{my_path_param}', {
-    params: {
-        path: {
-            my_path_param: 'some_path_value',
-        },
-        query: {
-            my_query_param: 'some_query_value',
-        },
-        body: {
-            my_body_param: 'some_body_value',
-        },
+  params: {
+    path: {
+      my_path_param: 'some_path_value',
     },
+    query: {
+      my_query_param: 'some_query_value',
+    },
+    body: {
+      my_body_param: 'some_body_value',
+    },
+  },
 }).then(console.log);
 ```
 
@@ -215,9 +218,9 @@ const myRoute = createMyPluginServerRoute({
 
     const result = coinFlip();
     if (result === 'heads') {
-        throw teapot();
+      throw teapot();
     } else {
-        return 'Hello, my route!';
+      return 'Hello, my route!';
     }
   },
 });
@@ -237,7 +240,7 @@ export interface MyPluginRouteDependencies {
     myDependency: MyDependency;
 }
 
-export const createMyPluginServerRoute = 
+export const createMyPluginServerRoute =
   createServerRouteFactory<DefaultRouteHandlerResources & MyPluginRouteDependencies>();
 ```
 
@@ -246,14 +249,16 @@ If you don't want your route to have access to the default resources, you could 
 Then we use the same type when calling `registerRoutes`
 
 ```javascript
-registerRoutes<MyPluginRouteDependencies>({
+registerRoutes <
+  MyPluginRouteDependencies >
+  {
     core,
     logger,
     repository,
     dependencies: {
-        myDependency: new MyDependency(),
+      myDependency: new MyDependency(),
     },
-});
+  };
 ```
 
 This way, when creating a route, you will have `myDependency` available in the route resources.
@@ -262,13 +267,13 @@ This way, when creating a route, you will have `myDependency` available in the r
 import { createMyPluginServerRoute } from './create_my_plugin_server_route';
 
 export const myRoute = createMyPluginServerRoute({
-    endpoint: 'GET /internal/my_plugin/route',
-    handler: async (resources) => {
-        const { request, context, response, logger, myDependency } = resources;
-        return response.ok({
-            body: myDependency.sayHello(),
-        });
-    },
+  endpoint: 'GET /internal/my_plugin/route',
+  handler: async (resources) => {
+    const { request, context, response, logger, myDependency } = resources;
+    return response.ok({
+      body: myDependency.sayHello(),
+    });
+  },
 });
 ```
 
@@ -297,21 +302,22 @@ export const createMyPluginServerRoute = createServerRouteFactory<
 If you don't want your route to have access to the options provided by Core HTTP, you could pass in only `MyPluginRouteCreateOptions`.
 
 You can then specify this option when creating the route.
+
 ```javascript
 import { createMyPluginServerRoute } from './create_my_plugin_server_route';
 
 export const myRoute = createMyPluginServerRoute({
-    options: {
-        access: 'internal',
-    },
-    isDangerous: true,
-    endpoint: 'GET /internal/my_plugin/route',
-    handler: async (resources) => {
-        const { request, context, response, logger } = resources;
-        return response.ok({
-            body: 'Hello, my route!',
-        });
-    },
+  options: {
+    access: 'internal',
+  },
+  isDangerous: true,
+  endpoint: 'GET /internal/my_plugin/route',
+  handler: async (resources) => {
+    const { request, context, response, logger } = resources;
+    return response.ok({
+      body: 'Hello, my route!',
+    });
+  },
 });
 ```
 
@@ -348,3 +354,37 @@ class MyPlugin implements Plugin {
 ```
 
 If you don't want your route to have access to the options provided by Core HTTP, you could pass in only `MyPluginClientOptions`.
+
+## Streaming
+
+@kbn/server-route-repository supports streaming events as well. It uses server-sent events (SSE) for this. To use it, simply return an Observable in the route handler:
+
+```javascript
+import { createMyPluginServerRoute } from './create_my_plugin_server_route';
+import { ServerSentEvent } from '@kbn/sse-utils';
+
+export const myRoute = createMyPluginServerRoute({
+    endpoint: 'GET /internal/my_plugin/streaming_route',
+    handler: async (resources) => {
+        const { request, context, response, logger } = resources;
+        return of({
+          type: 'my_event' as const,
+          data: {
+            myData: {}
+          }
+        })
+    },
+});
+```
+
+This will create a Node.js response stream where events are emitted as soon as the Observable emits them. Errors are automatically serialized, deserialized and thrown. See @kbn/sse-utils for more details.
+
+To parse the event stream in the browser, use the `stream` method on the repository client. It returns a typed Observable:
+
+```javascript
+myPluginRepositoryClient.stream('GET /internal/my_plugin/streaming_route').subscribe({
+  next: (value /*:{ type: 'my_event', data: { myData: {} }}*/) => {
+    console.log(value);
+  },
+});
+```
