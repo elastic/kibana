@@ -10,6 +10,7 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { IncomingMessage } from 'http';
 import type { Panel } from '../../../../common/types';
 import { _legacyBuildProcessorFunction } from '../build_processor_function';
 import { processors } from '../response_processors/series';
@@ -26,6 +27,25 @@ export function handleResponseBody(
   fieldFormatService: FieldFormatsRegistry
 ) {
   return async (resp: any) => {
+    if (resp.pipe) {
+      let body = '';
+      const rawResponse = resp as IncomingMessage;
+      const streamPromise = new Promise<unknown>((resolve, reject) => {
+        rawResponse.on('data', (chunk) => {
+          body += chunk.toString(); // Append incoming data chunks
+        });
+
+        rawResponse.on('end', () => {
+          resolve(JSON.parse(body));
+        });
+
+        rawResponse.on('error', (e) => {
+          reject(e);
+        });
+      });
+
+      resp = ((await streamPromise) as Record<string, unknown>).response;
+    }
     if (resp.error) {
       throw JSON.stringify(resp);
     }
