@@ -12,62 +12,86 @@ import { setup, getFieldNamesByType, attachTriggerCommand } from './helpers';
 describe('autocomplete.suggest', () => {
   describe('SORT ( <column> [ ASC / DESC ] [ NULLS FIST / NULLS LAST ] )+', () => {
     describe('SORT <column> ...', () => {
-      test.only('suggests column on first character', async () => {
+      test('suggests column', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions(
           'from a | sort /',
-          [...getFieldNamesByType('any')].map((field) => `${field} `).map(attachTriggerCommand)
+          [...getFieldNamesByType('any')].map(attachTriggerCommand)
         );
         await assertSuggestions(
           'from a | sort keyw/',
-          [...getFieldNamesByType('any')].map((field) => `${field} `).map(attachTriggerCommand)
+          [...getFieldNamesByType('any')].map(attachTriggerCommand)
         );
-        // await assertSuggestions(
-        //   'from a | sort keywordField/',
-        //   [
-        //     {
-        //       filterText: 'keywordField',
-        //       text: 'keywordField, ',
-        //     },
-        //     {
-        //       filterText: 'keywordField',
-        //       text: 'keywordField | ',
-        //     },
-        //     {
-        //       filterText: 'keywordField',
-        //       text: 'keywordField ASC ',
-        //     },
-        //     {
-        //       filterText: 'keywordField',
-        //       text: 'keywordField DESC ',
-        //     },
-        //     {
-        //       filterText: 'keywordField',
-        //       text: 'keywordField NULLS FIRST ',
-        //     },
-        //     {
-        //       filterText: 'keywordField',
-        //       text: 'keywordField NULLS LAST ',
-        //     },
-        //   ].map(attachTriggerCommand)
-        // );
-        // await assertSuggestions(
-        //   'from a | sort column, /',
-        //   [...getFieldNamesByType('any')].map((field) => `${field} `).map(attachTriggerCommand)
-        // );
+        await assertSuggestions(
+          'from a | sort keywordField/',
+          [
+            {
+              filterText: 'keywordField',
+              text: 'keywordField, ',
+            },
+            {
+              filterText: 'keywordField',
+              text: 'keywordField | ',
+            },
+            {
+              filterText: 'keywordField',
+              text: 'keywordField ASC',
+            },
+            {
+              filterText: 'keywordField',
+              text: 'keywordField DESC',
+            },
+            {
+              filterText: 'keywordField',
+              text: 'keywordField NULLS FIRST',
+            },
+            {
+              filterText: 'keywordField',
+              text: 'keywordField NULLS LAST',
+            },
+          ].map(attachTriggerCommand)
+        );
       });
-
-      test('partial columns', async () => {
+      it('suggests subsequent column after comma', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions(
-          'from a | sort /',
-          [...getFieldNamesByType('any')].map((field) => `${field} `).map(attachTriggerCommand)
+          'from a | sort keywordField, /',
+          [...getFieldNamesByType('any')].map(attachTriggerCommand)
         );
         await assertSuggestions(
-          'from a | sort column, /',
-          [...getFieldNamesByType('any')].map((field) => `${field} `).map(attachTriggerCommand)
+          'from a | sort keywordField, doubl/',
+          [...getFieldNamesByType('any')].map(attachTriggerCommand)
+        );
+        await assertSuggestions(
+          'from a | sort keywordField, doubleField/',
+          [
+            {
+              filterText: 'doubleField',
+              text: 'doubleField, ',
+            },
+            {
+              filterText: 'doubleField',
+              text: 'doubleField | ',
+            },
+            {
+              filterText: 'doubleField',
+              text: 'doubleField ASC',
+            },
+            {
+              filterText: 'doubleField',
+              text: 'doubleField DESC',
+            },
+            {
+              filterText: 'doubleField',
+              text: 'doubleField NULLS FIRST',
+            },
+            {
+              filterText: 'doubleField',
+              text: 'doubleField NULLS LAST',
+            },
+          ].map(attachTriggerCommand)
         );
       });
     });
@@ -78,33 +102,55 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions(
           'from a | sort stringField /',
-          ['ASC ', 'DESC ', 'NULLS FIRST ', 'NULLS LAST ', ', ', '| '].map(attachTriggerCommand)
+          ['ASC', 'DESC', 'NULLS FIRST', 'NULLS LAST', ', ', '| '].map(attachTriggerCommand)
         );
       });
 
       test('when user starts to type ASC modifier', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | sort stringField A/', ['ASC ']);
+        await assertSuggestions(
+          'from a | sort stringField A/',
+          ['ASC', 'DESC', 'NULLS FIRST', 'NULLS LAST'].map(attachTriggerCommand)
+        );
+        await assertSuggestions(
+          'from a | sort stringField ASC/',
+          ['ASC NULLS FIRST', 'ASC NULLS LAST', 'ASC, ', 'ASC | '].map(attachTriggerCommand)
+        );
+        await assertSuggestions(
+          'from a | sort stringField asc/',
+          ['asc NULLS FIRST', 'asc NULLS LAST', 'asc, ', 'asc | '].map(attachTriggerCommand)
+        );
       });
 
       test('when user starts to type DESC modifier', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | sort stringField d/', ['DESC ']);
-        await assertSuggestions('from a | sort stringField des/', ['DESC ']);
-        await assertSuggestions('from a | sort stringField DES/', ['DESC ']);
+        await assertSuggestions(
+          'from a | sort stringField D/',
+          ['ASC', 'DESC', 'NULLS FIRST', 'NULLS LAST'].map(attachTriggerCommand)
+        );
+        await assertSuggestions(
+          'from a | sort stringField DESC/',
+          ['DESC NULLS FIRST', 'DESC NULLS LAST', 'DESC, ', 'DESC | '].map(attachTriggerCommand)
+        );
+        await assertSuggestions('from a | sort stringField desc/', [
+          'desc NULLS FIRST',
+          'desc NULLS LAST',
+          'desc, ',
+          'desc | ',
+        ]);
       });
     });
 
-    describe('... [ NULLS FIST / NULLS LAST ]', () => {
-      test('suggests command on first character', async () => {
+    describe('... [ NULLS FIRST / NULLS LAST ]', () => {
+      test('suggests nulls modifier after order modifier + space', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | sort stringField ASC /', [
-          'NULLS FIRST ',
-          'NULLS LAST ',
-          ',',
+          'NULLS FIRST',
+          'NULLS LAST',
+          ', ',
           '| ',
         ]);
       });
@@ -113,15 +159,29 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
 
         // @TODO check for replacement range
-        await assertSuggestions('from a | sort stringField N/', ['NULLS FIRST ', 'NULLS LAST ']);
-        await assertSuggestions('from a | sort stringField null/', ['NULLS FIRST ', 'NULLS LAST ']);
+        await assertSuggestions('from a | sort stringField N/', [
+          'ASC',
+          'DESC',
+          'NULLS FIRST',
+          'NULLS LAST',
+        ]);
+        await assertSuggestions('from a | sort stringField null/', [
+          'ASC',
+          'DESC',
+          'NULLS FIRST',
+          'NULLS LAST',
+        ]);
         await assertSuggestions('from a | sort stringField nulls/', [
-          'NULLS FIRST ',
-          'NULLS LAST ',
+          'ASC',
+          'DESC',
+          'NULLS FIRST',
+          'NULLS LAST',
         ]);
         await assertSuggestions('from a | sort stringField nulls /', [
-          'NULLS FIRST ',
-          'NULLS LAST ',
+          'ASC',
+          'DESC',
+          'NULLS FIRST',
+          'NULLS LAST',
         ]);
       });
 
@@ -130,11 +190,11 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions(
           'from a | sort stringField NULLS F/',
-          ['NULLS FIRST '].map(attachTriggerCommand)
+          ['ASC', 'DESC', 'NULLS LAST', 'NULLS FIRST'].map(attachTriggerCommand)
         );
         await assertSuggestions(
           'from a | sort stringField NULLS FI/',
-          ['NULLS FIRST '].map(attachTriggerCommand)
+          ['ASC', 'DESC', 'NULLS LAST', 'NULLS FIRST'].map(attachTriggerCommand)
         );
       });
 
@@ -143,18 +203,21 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions(
           'from a | sort stringField NULLS L/',
-          ['NULLS LAST '].map(attachTriggerCommand)
+          ['ASC', 'DESC', 'NULLS LAST', 'NULLS FIRST'].map(attachTriggerCommand)
         );
         await assertSuggestions(
           'from a | sort stringField NULLS LAS/',
-          ['NULLS LAST '].map(attachTriggerCommand)
+          ['ASC', 'DESC', 'NULLS LAST', 'NULLS FIRST'].map(attachTriggerCommand)
         );
       });
 
       test('after nulls are entered, suggests comma or pipe', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | sort stringField NULLS LAST /', [',', '| ']);
+        await assertSuggestions(
+          'from a | sort stringField NULLS LAST /',
+          [', ', '| '].map(attachTriggerCommand)
+        );
       });
     });
   });

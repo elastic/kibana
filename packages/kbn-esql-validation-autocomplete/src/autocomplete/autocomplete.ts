@@ -617,7 +617,7 @@ async function getExpressionSuggestionsByType(
         const fieldFragmentSuggestions = await handleFragment(
           innerText,
           (fragment) => Boolean(getColumnByName(fragment, references)),
-          (fragment: string, rangeToReplace?: { start: number; end: number }) => {
+          (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
             // SORT fie<suggest>
             return fieldSuggestions.map((suggestion) => ({
               ...suggestion,
@@ -1876,7 +1876,7 @@ function handleFragment(
 const sortModifierSuggestions = {
   ASC: {
     label: 'ASC',
-    text: 'ASC ',
+    text: 'ASC',
     detail: '',
     kind: 'Keyword',
     sortText: '1-ASC',
@@ -1884,7 +1884,7 @@ const sortModifierSuggestions = {
   } as SuggestionRawDefinition,
   DESC: {
     label: 'DESC',
-    text: 'DESC ',
+    text: 'DESC',
     detail: '',
     kind: 'Keyword',
     sortText: '1-DESC',
@@ -1892,7 +1892,7 @@ const sortModifierSuggestions = {
   } as SuggestionRawDefinition,
   NULLS_FIRST: {
     label: 'NULLS FIRST',
-    text: 'NULLS FIRST ',
+    text: 'NULLS FIRST',
     detail: '',
     kind: 'Keyword',
     sortText: '2-NULLS FIRST',
@@ -1900,7 +1900,7 @@ const sortModifierSuggestions = {
   } as SuggestionRawDefinition,
   NULLS_LAST: {
     label: 'NULLS LAST',
-    text: 'NULLS LAST ',
+    text: 'NULLS LAST',
     detail: '',
     kind: 'Keyword',
     sortText: '2-NULLS LAST',
@@ -1913,7 +1913,9 @@ export const suggestForSortCmd = async (
   getFieldsByType: GetFieldsByTypeFn,
   columnExists: (column: string) => boolean
 ): Promise<SuggestionRawDefinition[]> => {
-  const { pos, nulls } = getSortPos(innerText);
+  const prependSpace = (s: SuggestionRawDefinition) => ({ ...s, text: ' ' + s.text });
+
+  const { pos } = getSortPos(innerText);
 
   switch (pos) {
     case 'space2': {
@@ -1922,39 +1924,73 @@ export const suggestForSortCmd = async (
         sortModifierSuggestions.DESC,
         sortModifierSuggestions.NULLS_FIRST,
         sortModifierSuggestions.NULLS_LAST,
-        ...getFinalSuggestions({
-          comma: true,
-        }),
+        pipeCompleteItem,
+        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
       ];
     }
     case 'order': {
-      return Object.values(sortModifierSuggestions);
+      return handleFragment(
+        innerText,
+        (fragment) => ['ASC', 'DESC'].some((completeWord) => noCaseCompare(completeWord, fragment)),
+        (_fragment, rangeToReplace) => {
+          return Object.values(sortModifierSuggestions).map((suggestion) => ({
+            ...suggestion,
+            rangeToReplace,
+          }));
+        },
+        (fragment, rangeToReplace) => {
+          return [
+            { ...pipeCompleteItem, text: ' | ' },
+            { ...commaCompleteItem, text: ', ' },
+            prependSpace(sortModifierSuggestions.NULLS_FIRST),
+            prependSpace(sortModifierSuggestions.NULLS_LAST),
+          ].map((suggestion) => ({
+            ...suggestion,
+            filterText: fragment,
+            text: fragment + suggestion.text,
+            rangeToReplace,
+            command: TRIGGER_SUGGESTION_COMMAND,
+          }));
+        }
+      );
     }
     case 'space3': {
       return [
         sortModifierSuggestions.NULLS_FIRST,
         sortModifierSuggestions.NULLS_LAST,
-        ...getFinalSuggestions({
-          comma: true,
-        }),
+        pipeCompleteItem,
+        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
       ];
     }
     case 'nulls': {
-      const end = innerText.length + 1;
-      const start = end - nulls.length;
-      return Object.values(sortModifierSuggestions).map((modifier) => ({
-        ...modifier,
-        rangeToReplace: {
-          start,
-          end,
+      return handleFragment(
+        innerText,
+        (fragment) =>
+          ['FIRST', 'LAST'].some((completeWord) => noCaseCompare(completeWord, fragment)),
+        (_fragment, rangeToReplace) => {
+          return Object.values(sortModifierSuggestions).map((suggestion) => ({
+            ...suggestion,
+            rangeToReplace,
+          }));
         },
-      }));
+        (fragment, rangeToReplace) => {
+          return [
+            { ...pipeCompleteItem, text: ' | ' },
+            { ...commaCompleteItem, text: ', ' },
+          ].map((suggestion) => ({
+            ...suggestion,
+            filterText: fragment,
+            text: fragment + suggestion.text,
+            rangeToReplace,
+            command: TRIGGER_SUGGESTION_COMMAND,
+          }));
+        }
+      );
     }
     case 'space4': {
       return [
-        ...getFinalSuggestions({
-          comma: true,
-        }),
+        pipeCompleteItem,
+        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
       ];
     }
   }
@@ -1979,16 +2015,10 @@ export const suggestForSortCmd = async (
       return [
         { ...pipeCompleteItem, text: ' | ' },
         { ...commaCompleteItem, text: ', ' },
-        { ...sortModifierSuggestions.ASC, text: ' ' + sortModifierSuggestions.ASC.text },
-        { ...sortModifierSuggestions.DESC, text: ' ' + sortModifierSuggestions.DESC.text },
-        {
-          ...sortModifierSuggestions.NULLS_FIRST,
-          text: ' ' + sortModifierSuggestions.NULLS_FIRST.text,
-        },
-        {
-          ...sortModifierSuggestions.NULLS_LAST,
-          text: ' ' + sortModifierSuggestions.NULLS_LAST.text,
-        },
+        prependSpace(sortModifierSuggestions.ASC),
+        prependSpace(sortModifierSuggestions.DESC),
+        prependSpace(sortModifierSuggestions.NULLS_FIRST),
+        prependSpace(sortModifierSuggestions.NULLS_LAST),
       ].map<SuggestionRawDefinition>((s) => ({
         ...s,
         filterText: fragment,
