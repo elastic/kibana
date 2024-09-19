@@ -58,9 +58,9 @@ export const OverviewPendingStatusMetaDataCodec = t.intersection([
     configId: t.string,
     status: t.string,
     locationId: t.string,
+    locationLabel: t.string,
   }),
   t.partial({
-    locationLabel: t.string,
     timestamp: t.string,
     ping: OverviewPingCodec,
     name: t.string,

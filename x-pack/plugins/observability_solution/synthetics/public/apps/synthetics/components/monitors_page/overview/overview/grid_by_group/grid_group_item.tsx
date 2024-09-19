@@ -23,7 +23,7 @@ import { useKey } from 'react-use';
 import { FlyoutParamProps } from '../types';
 import { OverviewLoader } from '../overview_loader';
 import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
-import { OverviewStatusMetaData } from '../../types';
+import { OverviewPendingStatusMetaData, OverviewStatusMetaData } from '../../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { MetricItem } from '../metric_item';
 
@@ -39,7 +39,7 @@ export const GroupGridItem = ({
   setFlyoutConfigCallback,
 }: {
   loaded: boolean;
-  groupMonitors: OverviewStatusMetaData[];
+  groupMonitors: Array<OverviewStatusMetaData | OverviewPendingStatusMetaData>;
   groupLabel: string;
   fullScreenGroup: string;
   setFullScreenGroup: (group: string) => void;

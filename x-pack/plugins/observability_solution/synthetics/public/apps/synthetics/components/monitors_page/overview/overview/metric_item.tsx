@@ -23,7 +23,10 @@ import {
 } from '../../../../state';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
-import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
+import {
+  OverviewPendingStatusMetaData,
+  OverviewStatusMetaData,
+} from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
 import {
   hideTestNowFlyoutAction,
@@ -60,7 +63,7 @@ export const MetricItem = ({
   onClick,
   style,
 }: {
-  monitor: OverviewStatusMetaData;
+  monitor: OverviewStatusMetaData | OverviewPendingStatusMetaData;
   style?: React.CSSProperties;
   onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
