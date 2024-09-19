@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import classnames from 'classnames';
 import type { OnboardingCardId } from '../../constants';
+import type { CheckCompleteResult } from '../../types';
 import { CARD_COMPLETE_BADGE, EXPAND_CARD_BUTTON_LABEL } from './translations';
 import { useCardPanelStyles } from './onboarding_card_panel.styles';
 
@@ -28,10 +29,20 @@ interface OnboardingCardPanelProps {
   isExpanded: boolean;
   isComplete: boolean;
   onToggleExpanded: () => void;
+  checkCompleteResult?: CheckCompleteResult;
 }
 
 export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPanelProps>>(
-  ({ id, title, icon, isExpanded, isComplete, onToggleExpanded, children }) => {
+  ({
+    id,
+    title,
+    icon,
+    isExpanded,
+    isComplete,
+    onToggleExpanded,
+    checkCompleteResult,
+    children,
+  }) => {
     const styles = useCardPanelStyles();
     const cardPanelClassName = classnames(styles, {
       'onboardingCardPanel-expanded': isExpanded,
@@ -65,13 +76,21 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
               <h3>{title}</h3>
             </EuiTitle>
           </EuiFlexItem>
+
+          {checkCompleteResult?.additionalBadges?.map((additionalBadge, index) => (
+            <EuiFlexItem grow={false} key={index}>
+              {additionalBadge}
+            </EuiFlexItem>
+          )) ?? null}
+
           {isComplete && (
             <EuiFlexItem grow={false}>
               <EuiBadge className="onboardingCardHeaderCompleteBadge">
-                {CARD_COMPLETE_BADGE}
+                {checkCompleteResult?.completeBadgeText || CARD_COMPLETE_BADGE}
               </EuiBadge>
             </EuiFlexItem>
           )}
+
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               color="primary"

@@ -43,13 +43,6 @@ export const ONBOARDING_HEADER_VIDEO_MODAL_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ONBOARDING_HEADER_VIDEO_MODAL_BUTTON = i18n.translate(
-  'xpack.securitySolution.onboarding.header.card.videoModal.button',
-  {
-    defaultMessage: 'Head to steps',
-  }
-);
-
 export const ONBOARDING_HEADER_VIDEO_MODAL_BUTTON_CLOSE = i18n.translate(
   'xpack.securitySolution.onboarding.header.card.videoModal.buttonClose',
   {

@@ -6,8 +6,22 @@
  */
 
 import type { OnboardingCardCheckComplete } from '../../../../types';
+import { getDummyAdditionalBadge } from './integrations_header_badges';
 
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async () => {
   // implement this function
-  return new Promise((resolve) => setTimeout(() => resolve(true), 3000));
+  return new Promise((resolve) =>
+    setTimeout(
+      () =>
+        resolve({
+          isComplete: true,
+          completeBadgeText: '3 integrations installed',
+          additionalBadges: [getDummyAdditionalBadge()],
+          metadata: {
+            integrationsInstalled: 3,
+          },
+        }),
+      2000
+    )
+  );
 };

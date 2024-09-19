@@ -11,7 +11,31 @@ import type { LicenseType } from '@kbn/licensing-plugin/public';
 import type { OnboardingCardId } from './constants';
 import type { RequiredCapabilities } from '../common/lib/capabilities';
 
-export type SetComplete = (complete: boolean) => void;
+export interface CheckCompleteResult {
+  /**
+   * Optional custom badge text replacement for the card complete badge in the card header.
+   */
+  completeBadgeText?: string;
+  /**
+   * Optional badges to prepend to the card complete badge in the card header, regardless of completion status.
+   */
+  additionalBadges?: React.ReactNode[];
+  /**
+   * Optional metadata to be passed to the card component.
+   */
+  metadata?: Record<string, unknown>;
+}
+/**
+ * The result of a card completion auto check.
+ * - `true` if the card is complete.
+ * - `false` if the card is not complete.
+ * - `{ isComplete: true, completeBadgeText: ReactNode }` if the card is complete and has a custom complete badge text.
+ * - `{ isComplete: false, additionalBadges: ReactNode[] }` if the card is complete and has to show additional badges on the header.
+ * - `{ isComplete: false, metadata: {showWarningCallOut: true} }` if the card is not complete and passes some metadata to the card component.
+ */
+export type CheckCompleteResponse = boolean | ({ isComplete: boolean } & CheckCompleteResult);
+
+export type SetComplete = (isComplete: boolean) => void;
 export type IsCardComplete = (cardId: OnboardingCardId) => boolean;
 export type SetExpandedCardId = (
   cardId: OnboardingCardId | null,
@@ -19,12 +43,26 @@ export type SetExpandedCardId = (
 ) => void;
 
 export type OnboardingCardComponent = React.ComponentType<{
+  /**
+   * Function to set the current card completion status.
+   */
   setComplete: SetComplete;
+  /**
+   * Function to check if a specific card is complete.
+   */
   isCardComplete: IsCardComplete;
+  /**
+   * Function to expand a specific card ID and scroll to it.
+   */
   setExpandedCardId: SetExpandedCardId;
+  /**
+   * Metadata passed from the card checkComplete function.
+   * It will be `undefined` until the first checkComplete call finishes.
+   */
+  checkCompleteMetadata?: Record<string, unknown>;
 }>;
 
-export type OnboardingCardCheckComplete = () => Promise<boolean>;
+export type OnboardingCardCheckComplete = () => Promise<CheckCompleteResponse>;
 
 export interface OnboardingCardConfig {
   id: OnboardingCardId;

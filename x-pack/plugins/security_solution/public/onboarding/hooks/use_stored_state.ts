@@ -19,7 +19,7 @@ const LocalStorageKey = {
  * Wrapper hook for useLocalStorage, but always returns the default value when not defined instead of `undefined`.
  */
 const useDefinedLocalStorage = <T>(key: string, defaultValue: T) => {
-  const [value, setValue] = useLocalStorage<T>(key);
+  const [value, setValue] = useLocalStorage<T>(key, defaultValue);
   return [value ?? defaultValue, setValue] as const;
 };
 
@@ -43,9 +43,3 @@ export const useStoredExpandedCardId = (spaceId: string) =>
     `${LocalStorageKey.expandedCard}.${spaceId}`,
     null
   );
-
-/**
- * Stores either the video card has been visited or not, per space
- */
-export const useStoredHasVideoVisited = (spaceId: string) =>
-  useDefinedLocalStorage<boolean>(`${LocalStorageKey.videoVisited}.${spaceId}`, false);

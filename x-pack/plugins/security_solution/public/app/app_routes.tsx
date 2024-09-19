@@ -10,7 +10,12 @@ import type { RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import type { Capabilities } from '@kbn/core/public';
-import { CASES_FEATURE_ID, CASES_PATH, ONBOARDING_PATH, SERVER_APP_ID } from '../../common/constants';
+import {
+  CASES_FEATURE_ID,
+  CASES_PATH,
+  ONBOARDING_PATH,
+  SERVER_APP_ID,
+} from '../../common/constants';
 import { NotFoundPage } from './404';
 import type { StartServices } from '../types';
 

@@ -8,15 +8,19 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
-import { CardCallout } from '../common/card_callout';
+import { CardCallOut } from '../common/card_callout';
+import { CardLinkButton } from '../common/card_link_button';
 import dashboardsImageSrc from './images/dashboards.png';
 import * as i18n from './translations';
 
-export const DashboardsCard: OnboardingCardComponent = ({ isCardComplete, setExpandedCardId }) => {
+export const DashboardsCard: OnboardingCardComponent = ({
+  isCardComplete,
+  setComplete,
+  setExpandedCardId,
+}) => {
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
@@ -44,7 +48,7 @@ export const DashboardsCard: OnboardingCardComponent = ({ isCardComplete, setExp
           {!isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
-              <CardCallout
+              <CardCallOut
                 color="primary"
                 icon="iInCircle"
                 text={i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_TEXT}
@@ -63,13 +67,18 @@ export const DashboardsCard: OnboardingCardComponent = ({ isCardComplete, setExp
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SecuritySolutionLinkButton
+          <CardLinkButton
+            onClick={() => {
+              setComplete(true);
+            }}
+            linkId="goToDashboardsButton"
+            cardId={OnboardingCardId.dashboards}
             deepLinkId={SecurityPageName.dashboards}
             fill
             isDisabled={!isIntegrationsCardComplete}
           >
             {i18n.DASHBOARDS_CARD_GO_TO_DASHBOARDS_BUTTON}
-          </SecuritySolutionLinkButton>
+          </CardLinkButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </OnboardingCardContentImagePanel>

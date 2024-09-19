@@ -77,6 +77,9 @@ export class Client {
     this.kbnClient = options.kbnClient;
     this.log = options.log;
   }
+  /**
+   * Create a new list.
+   */
   async createList(props: CreateListProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateList`);
     return this.kbnClient
@@ -90,6 +93,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Create `.lists` and `.items` data streams in the relevant space.
+   */
   async createListIndex() {
     this.log.info(`${new Date().toISOString()} Calling API CreateListIndex`);
     return this.kbnClient
@@ -102,6 +108,14 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Create a list item and associate it with the specified list.
+
+All list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+> info
+> Before creating a list item, you must create a list.
+
+    */
   async createListItem(props: CreateListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateListItem`);
     return this.kbnClient
@@ -115,6 +129,12 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Delete a list using the list ID.
+> info
+> When you delete a list, all of its list items are also deleted.
+
+    */
   async deleteList(props: DeleteListProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteList`);
     return this.kbnClient
@@ -129,6 +149,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Delete the `.lists` and `.items` data streams.
+   */
   async deleteListIndex() {
     this.log.info(`${new Date().toISOString()} Calling API DeleteListIndex`);
     return this.kbnClient
@@ -141,6 +164,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Delete a list item using its `id`, or its `list_id` and `value` fields.
+   */
   async deleteListItem(props: DeleteListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteListItem`);
     return this.kbnClient
@@ -156,7 +182,7 @@ export class Client {
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Exports list item values from the specified list
+   * Export list item values from the specified list.
    */
   async exportListItems(props: ExportListItemsProps) {
     this.log.info(`${new Date().toISOString()} Calling API ExportListItems`);
@@ -172,6 +198,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get all list items in the specified list.
+   */
   async findListItems(props: FindListItemsProps) {
     this.log.info(`${new Date().toISOString()} Calling API FindListItems`);
     return this.kbnClient
@@ -186,6 +215,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a paginated subset of lists. By default, the first page is returned, with 20 results per page.
+   */
   async findLists(props: FindListsProps) {
     this.log.info(`${new Date().toISOString()} Calling API FindLists`);
     return this.kbnClient
@@ -201,7 +233,7 @@ export class Client {
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Imports a list of items from a `.txt` or `.csv` file. The maximum file size is 9 million bytes.
+    * Import list items from a TXT or CSV file. The maximum file size is 9 million bytes.
 
 You can import items to a new or existing list.
 
@@ -220,6 +252,9 @@ You can import items to a new or existing list.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Update specific fields of an existing list using the list ID.
+   */
   async patchList(props: PatchListProps) {
     this.log.info(`${new Date().toISOString()} Calling API PatchList`);
     return this.kbnClient
@@ -233,6 +268,9 @@ You can import items to a new or existing list.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Update specific fields of an existing list item using the list item ID.
+   */
   async patchListItem(props: PatchListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API PatchListItem`);
     return this.kbnClient
@@ -246,6 +284,9 @@ You can import items to a new or existing list.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the details of a list using the list ID.
+   */
   async readList(props: ReadListProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadList`);
     return this.kbnClient
@@ -260,6 +301,9 @@ You can import items to a new or existing list.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Verify that `.lists` and `.items` data streams exist.
+   */
   async readListIndex() {
     this.log.info(`${new Date().toISOString()} Calling API ReadListIndex`);
     return this.kbnClient
@@ -272,6 +316,9 @@ You can import items to a new or existing list.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the details of a list item.
+   */
   async readListItem(props: ReadListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadListItem`);
     return this.kbnClient
@@ -298,6 +345,12 @@ You can import items to a new or existing list.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Update a list using the list ID. The original list is replaced, and all unspecified fields are deleted.
+> info
+> You cannot modify the `id` value.
+
+    */
   async updateList(props: UpdateListProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateList`);
     return this.kbnClient
@@ -311,6 +364,12 @@ You can import items to a new or existing list.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Update a list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
+> info
+> You cannot modify the `id` value.
+
+    */
   async updateListItem(props: UpdateListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateListItem`);
     return this.kbnClient
