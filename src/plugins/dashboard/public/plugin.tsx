@@ -60,7 +60,6 @@ import type {
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
 import { registerDashboardPanelPlacementSetting } from './dashboard_container/panel_placement';
 import {
   type DashboardAppLocator,
@@ -237,14 +236,6 @@ export class DashboardPlugin
           return query;
         });
       },
-    });
-
-    core.getStartServices().then(([, deps]) => {
-      const dashboardContainerFactory = new DashboardContainerFactoryDefinition(deps.embeddable);
-      embeddable.registerEmbeddableFactory(
-        dashboardContainerFactory.type,
-        dashboardContainerFactory
-      );
     });
 
     this.stopUrlTracking = () => {

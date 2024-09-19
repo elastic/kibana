@@ -20,11 +20,9 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
 import {
-  DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
   DashboardCreationOptions,
 } from '../embeddable/dashboard_container_factory';
@@ -61,6 +59,10 @@ export function DashboardRenderer({
 
   const id = useMemo(() => uuidv4(), []);
 
+  const dashboardFactory = useMemo(() => {
+    return new DashboardContainerFactoryDefinition(embeddable);
+  }, [embeddable])
+
   useEffect(() => {
     /* In case the locator prop changes, we need to reassign the value in the container */
     if (dashboardContainer) dashboardContainer.locator = locator;
@@ -93,12 +95,7 @@ export function DashboardRenderer({
     (async () => {
       const creationOptions = await getCreationOptions?.();
 
-      const dashboardFactory = embeddable.getEmbeddableFactory(
-        DASHBOARD_CONTAINER_TYPE
-      ) as DashboardContainerFactory & {
-        create: DashboardContainerFactoryDefinition['create'];
-      };
-      const container = await dashboardFactory?.create(
+      const container = await dashboardFactory.create(
         { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
         undefined,
         creationOptions,
