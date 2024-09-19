@@ -488,11 +488,11 @@ resolving issues if any deprecated features are enabled.
 To access the assistant, go to **Stack Management** > **Upgrade Assistant**.
 
 [discrete]
-.Uptime is deprecated in 8.15.0 and will be removed in a future version. (8.15)
+.Uptime is deprecated in 8.15.0. (8.15)
 [%collapsible]
 ====
 *Details* +
-The Uptime app is already hidden from Kibana when there is no recent Heartbeat data, and will be completely removed in early 2026. You should migrate to Synthetics as an alternative. For more details, refer to the {observability-guide}/uptime-intro.html[Uptime documentation].
+The Uptime app is already hidden from Kibana when there is no recent Heartbeat data. Migrate to Synthetics as an alternative. For more details, refer to the {observability-guide}/uptime-intro.html[Uptime documentation].
 ====
 
 [discrete]
