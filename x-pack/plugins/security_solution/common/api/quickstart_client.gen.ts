@@ -99,6 +99,7 @@ import type {
   GetRuleExecutionResultsResponse,
 } from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import type {
+  RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
   RulePreviewResponse,
 } from './detection_engine/rule_preview/rule_preview.gen';
@@ -269,7 +270,14 @@ import type {
   StopEntityStoreRequestParamsInput,
   StopEntityStoreResponse,
 } from './entity_analytics/entity_store/engine/stop.gen';
+<<<<<<< ea-66-api-delete-risk-engine-installation-data
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
+=======
+import type {
+  ListEntitiesRequestQueryInput,
+  ListEntitiesResponse,
+} from './entity_analytics/entity_store/entities/list_entities.gen';
+>>>>>>> main
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
@@ -1490,6 +1498,23 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * List entities records, paging, sorting and filtering as needed.
+   */
+  async listEntities(props: ListEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListEntities`);
+    return this.kbnClient
+      .request<ListEntitiesResponse>({
+        path: '/api/entity_store/entities/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async listEntityStoreEngines() {
     this.log.info(`${new Date().toISOString()} Calling API ListEntityStoreEngines`);
     return this.kbnClient
@@ -1758,6 +1783,7 @@ detection engine rules.
         },
         method: 'POST',
         body: props.body,
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2120,6 +2146,9 @@ export interface InstallPrepackedTimelinesProps {
 export interface InternalUploadAssetCriticalityRecordsProps {
   attachment: FormData;
 }
+export interface ListEntitiesProps {
+  query: ListEntitiesRequestQueryInput;
+}
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
 }
@@ -2152,6 +2181,7 @@ export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
 export interface RulePreviewProps {
+  query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
 }
 export interface SearchAlertsProps {

@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { LIST_ENTITIES_URL } from '../../../common/entity_analytics/entity_store/constants';
 import type { UploadAssetCriticalityRecordsResponse } from '../../../common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type { DisableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
@@ -45,6 +46,8 @@ import {
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import type { ReadRiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
+import type { ListEntitiesResponse } from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
+import { type ListEntitiesRequestQuery } from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;
@@ -67,6 +70,30 @@ export const useEntityAnalyticsRoutes = () => {
         version: '1',
         method: 'POST',
         body: JSON.stringify(params),
+        signal,
+      });
+
+    /**
+     * Fetches entities from the Entity Store
+     */
+    const fetchEntitiesList = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: FetchEntitiesListParams;
+    }) =>
+      http.fetch<ListEntitiesResponse>(LIST_ENTITIES_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          entities_types: params.entitiesTypes,
+          sort_field: params.sortField,
+          sort_order: params.sortOrder,
+          page: params.page,
+          per_page: params.perPage,
+          filterQuery: params.filterQuery,
+        },
         signal,
       });
 
@@ -275,9 +302,15 @@ export const useEntityAnalyticsRoutes = () => {
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
+<<<<<<< ea-66-api-delete-risk-engine-installation-data
       cleanUpRiskEngine,
+=======
+      fetchEntitiesList,
+>>>>>>> main
     };
   }, [http]);
 };
 
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;
+
+export type FetchEntitiesListParams = SnakeToCamelCase<ListEntitiesRequestQuery>;

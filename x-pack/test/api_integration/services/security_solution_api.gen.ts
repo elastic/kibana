@@ -102,6 +102,7 @@ import {
   InitEntityStoreRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
+import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
 import {
@@ -115,7 +116,10 @@ import { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/
 import { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
-import { RulePreviewRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
+import {
+  RulePreviewRequestQueryInput,
+  RulePreviewRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
 import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
@@ -880,6 +884,17 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * List entities records, paging, sorting and filtering as needed.
+     */
+    listEntities(props: ListEntitiesProps) {
+      return supertest
+        .get('/api/entity_store/entities/list')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
     listEntityStoreEngines() {
       return supertest
         .get('/api/entity_store/engines')
@@ -1056,7 +1071,8 @@ detection engine rules.
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
+        .send(props.body as object)
+        .query(props.query);
     },
     scheduleRiskEngineNow() {
       return supertest
@@ -1357,6 +1373,9 @@ export interface InitEntityStoreProps {
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
+export interface ListEntitiesProps {
+  query: ListEntitiesRequestQueryInput;
+}
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
 }
@@ -1389,6 +1408,7 @@ export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
 export interface RulePreviewProps {
+  query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
 }
 export interface SearchAlertsProps {
