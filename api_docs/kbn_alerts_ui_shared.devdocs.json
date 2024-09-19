@@ -3117,13 +3117,19 @@
           " extends Pick<",
           {
             "pluginId": "controls",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibControlsPluginApi",
-            "section": "def-public.ControlGroupRuntimeState",
+            "section": "def-common.ControlGroupRuntimeState",
             "text": "ControlGroupRuntimeState"
           },
           "<",
-          "DefaultControlState",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
           ">, \"chainingSystem\">"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
@@ -3490,7 +3496,7 @@
                     "text": "ControlGroupRendererProps"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_group/external_api/control_group_renderer_lazy.tsx",
+                "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer_lazy.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5848,13 +5854,7 @@
         "description": [],
         "signature": [
           "Omit<",
-          {
-            "pluginId": "controls",
-            "scope": "public",
-            "docId": "kibControlsPluginApi",
-            "section": "def-public.OptionsListControlState",
-            "text": "OptionsListControlState"
-          },
+          "OptionsListControlState",
           ", \"dataViewId\"> & { persist?: boolean | undefined; }"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
@@ -5888,21 +5888,27 @@
           "<",
           {
             "pluginId": "controls",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibControlsPluginApi",
-            "section": "def-public.ControlGroupSerializedState",
+            "section": "def-common.ControlGroupSerializedState",
             "text": "ControlGroupSerializedState"
           },
           ", ",
           {
             "pluginId": "controls",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibControlsPluginApi",
-            "section": "def-public.ControlGroupRuntimeState",
+            "section": "def-common.ControlGroupRuntimeState",
             "text": "ControlGroupRuntimeState"
           },
           "<",
-          "DefaultControlState",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
           ">> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
@@ -5930,13 +5936,19 @@
           "<",
           {
             "pluginId": "controls",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibControlsPluginApi",
-            "section": "def-public.ControlPanelState",
+            "section": "def-common.ControlPanelState",
             "text": "ControlPanelState"
           },
           "<",
-          "DefaultControlState",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
           ">> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
@@ -5964,13 +5976,19 @@
           "<",
           {
             "pluginId": "controls",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibControlsPluginApi",
-            "section": "def-public.ControlGroupRuntimeState",
+            "section": "def-common.ControlGroupRuntimeState",
             "text": "ControlGroupRuntimeState"
           },
           "<",
-          "DefaultControlState",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
           ">>, \"unsavedChanges\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
@@ -6054,7 +6072,13 @@
             "text": "PublishingSubject"
           },
           "<",
-          "ControlStyle",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlStyle",
+            "text": "ControlStyle"
+          },
           ">; asyncResetUnsavedChanges: () => Promise<void>; controlFetch$: (controlUuid: string) => ",
           "Observable",
           "<",
@@ -6068,9 +6092,21 @@
             "text": "ControlStateTransform"
           },
           "<",
-          "DefaultControlState",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
           "> | undefined; onSave?: (() => void) | undefined; } | undefined) => void; untilInitialized: () => Promise<void>; getEditorConfig: () => ",
-          "ControlGroupEditorConfig",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupEditorConfig",
+            "text": "ControlGroupEditorConfig"
+          },
           " | undefined; getLastSavedControlState: (controlUuid: string) => object; setChainingSystem: (chainingSystem: ",
           {
             "pluginId": "controls",
@@ -6082,25 +6118,37 @@
           ") => void; } & { reload: () => void; updateInput: (input: Partial<",
           {
             "pluginId": "controls",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibControlsPluginApi",
-            "section": "def-public.ControlGroupRuntimeState",
+            "section": "def-common.ControlGroupRuntimeState",
             "text": "ControlGroupRuntimeState"
           },
           "<",
-          "DefaultControlState",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
           ">>) => void; getInput$: () => ",
           "BehaviorSubject",
           "<",
           {
             "pluginId": "controls",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibControlsPluginApi",
-            "section": "def-public.ControlGroupRuntimeState",
+            "section": "def-common.ControlGroupRuntimeState",
             "text": "ControlGroupRuntimeState"
           },
           "<",
-          "DefaultControlState",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
           ">>; }"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
@@ -6117,14 +6165,8 @@
         "description": [],
         "signature": [
           "{ [x: string]: Pick<",
-          {
-            "pluginId": "controls",
-            "scope": "public",
-            "docId": "kibControlsPluginApi",
-            "section": "def-public.OptionsListControlState",
-            "text": "OptionsListControlState"
-          },
-          ", \"selectedOptions\" | \"title\" | \"fieldName\" | \"existsSelected\" | \"exclude\">; }"
+          "OptionsListControlState",
+          ", \"selectedOptions\" | \"title\" | \"fieldName\" | \"exclude\" | \"existsSelected\">; }"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
         "deprecated": false,
