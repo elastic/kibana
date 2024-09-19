@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   AgentClient,
   AgentPolicyServiceInterface,
@@ -16,6 +16,7 @@ import type {
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { createInternalSoClient } from '../../utils/create_internal_so_client';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
+import type { SavedObjectsClientFactory } from '../saved_objects';
 
 export interface EndpointFleetServicesFactoryInterface {
   asInternalUser(): EndpointInternalFleetServicesInterface;
@@ -23,11 +24,8 @@ export interface EndpointFleetServicesFactoryInterface {
 
 export class EndpointFleetServicesFactory implements EndpointFleetServicesFactoryInterface {
   constructor(
-    private readonly fleetDependencies: Pick<
-      FleetStartContract,
-      'agentService' | 'packageService' | 'packagePolicyService' | 'agentPolicyService'
-    >,
-    private savedObjectsStart: SavedObjectsServiceStart
+    private readonly fleetDependencies: FleetStartContract,
+    public readonly savedObjects: SavedObjectsClientFactory
   ) {}
 
   asInternalUser(): EndpointInternalFleetServicesInterface {
@@ -44,11 +42,13 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     return {
       agent: agentService.asInternalUser,
       agentPolicy,
+
       packages: packageService.asInternalUser,
       packagePolicy,
 
       endpointPolicyKuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "endpoint"`,
 
+      // FIXME:PT remove this property
       get internalReadonlySoClient() {
         if (!internalReadonlySoClient) {
           internalReadonlySoClient = createInternalReadonlySoClient(this.savedObjectsStart);
@@ -57,6 +57,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
         return internalReadonlySoClient;
       },
 
+      // FIXME:PT remove this property
       get internalSoClient() {
         if (!internalSoClient) {
           internalSoClient = createInternalSoClient(this.savedObjectsStart);
