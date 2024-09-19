@@ -883,7 +883,6 @@ packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
-packages/kbn-spec-to-console @elastic/kibana-management
 packages/kbn-sse-utils @elastic/obs-knowledge-team
 packages/kbn-sse-utils-client @elastic/obs-knowledge-team
 packages/kbn-sse-utils-server @elastic/obs-knowledge-team
