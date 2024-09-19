@@ -26,7 +26,6 @@ import {
   getMarkdownTable,
   getMarkdownTableHeader,
   getResultEmoji,
-  getSameFamilyBadge,
   getStatsRollupMarkdownComment,
   getSummaryMarkdownComment,
   getSummaryTableMarkdownComment,
@@ -36,9 +35,10 @@ import {
 } from './markdown';
 import { mockPartitionedFieldMetadata } from '../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
 import { mockAllowedValues } from '../mock/allowed_values/mock_allowed_values';
-import { EcsBasedFieldMetadata, PartitionedFieldMetadata, UnallowedValueCount } from '../types';
+import { PartitionedFieldMetadata, UnallowedValueCount } from '../types';
 import {
   eventCategory,
+  hostNameWithTextMapping,
   mockIncompatibleMappings,
   sourceIpWithTextMapping,
 } from '../mock/enriched_field_metadata/mock_enriched_field_metadata';
@@ -50,7 +50,6 @@ import {
   INDEX_MAPPING_TYPE_ACTUAL,
   MAPPINGS_THAT_CONFLICT_WITH_ECS,
   PAGES_MAY_NOT_DISPLAY_EVENTS,
-  SAME_FAMILY_BADGE_LABEL,
 } from '../translations';
 import { EcsVersion } from '@elastic/ecs';
 
@@ -302,10 +301,6 @@ describe('getSummaryTableMarkdownComment', () => {
 });
 
 describe('escapeNewlines', () => {
-  test('it returns undefined when `content` is undefined', () => {
-    expect(escapeNewlines(undefined)).toBeUndefined();
-  });
-
   test("it returns the content unmodified when there's nothing to escape", () => {
     const content = "there's nothing to escape in this content";
     expect(escapeNewlines(content)).toEqual(content);
@@ -395,51 +390,11 @@ describe('getIndexInvalidValues', () => {
   });
 });
 
-describe('getSameFamilyBadge', () => {
-  test('it returns the expected badge text when the field is in the same family', () => {
-    const inSameFamily = {
-      ...eventCategory,
-      isInSameFamily: true,
-    };
-
-    expect(getSameFamilyBadge(inSameFamily)).toEqual(`\`${SAME_FAMILY_BADGE_LABEL}\``);
-  });
-
-  test('it returns an empty string when the field is NOT the same family', () => {
-    const notInSameFamily = {
-      ...eventCategory,
-      isInSameFamily: false,
-    };
-
-    expect(getSameFamilyBadge(notInSameFamily)).toEqual('');
-  });
-});
-
 describe('getIncompatibleMappingsMarkdownTableRows', () => {
-  test('it returns the expected table rows when the field is in the same family', () => {
-    const eventCategoryWithWildcard: EcsBasedFieldMetadata = {
-      ...eventCategory, // `event.category` is a `keyword` per the ECS spec
-      indexFieldType: 'wildcard', // this index has a mapping of `wildcard` instead of `keyword`
-      isInSameFamily: true, // `wildcard` and `keyword` are in the same family
-    };
-
+  test('it returns the expected table rows', () => {
     expect(
-      getIncompatibleMappingsMarkdownTableRows([eventCategoryWithWildcard, sourceIpWithTextMapping])
-    ).toEqual(
-      '| event.category | `keyword` | `wildcard` `same family` |\n| source.ip | `ip` | `text`  |'
-    );
-  });
-
-  test('it returns the expected table rows when the field is NOT in the same family', () => {
-    const eventCategoryWithText: EcsBasedFieldMetadata = {
-      ...eventCategory, // `event.category` is a `keyword` per the ECS spec
-      indexFieldType: 'text', // this index has a mapping of `text` instead of `keyword`
-      isInSameFamily: false, // `text` and `keyword` are NOT in the same family
-    };
-
-    expect(
-      getIncompatibleMappingsMarkdownTableRows([eventCategoryWithText, sourceIpWithTextMapping])
-    ).toEqual('| event.category | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |');
+      getIncompatibleMappingsMarkdownTableRows([hostNameWithTextMapping, sourceIpWithTextMapping])
+    ).toEqual('| host.name | `keyword` | `text` |\n| source.ip | `ip` | `text` |');
   });
 });
 
@@ -492,7 +447,7 @@ describe('getMarkdownTable', () => {
         title: INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE(indexName),
       })
     ).toEqual(
-      '#### Incompatible field mappings - auditbeat-custom-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |\n'
+      '#### Incompatible field mappings - auditbeat-custom-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text` |\n| source.ip | `ip` | `text` |\n'
     );
   });
 
@@ -559,10 +514,6 @@ describe('getIncompatibleMappings', () => {
         type: 'ip',
       },
     ]);
-  });
-
-  test('it filters-out ECS complaint fields', () => {
-    expect(getIncompatibleMappings(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
   });
 });
 
@@ -720,10 +671,6 @@ describe('getIncompatibleValues', () => {
       },
     ]);
   });
-
-  test('it filters-out ECS complaint fields', () => {
-    expect(getIncompatibleValues(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
-  });
 });
 
 describe('getIncompatibleFieldsMarkdownTablesComment', () => {
@@ -738,7 +685,7 @@ describe('getIncompatibleFieldsMarkdownTablesComment', () => {
         indexName: 'auditbeat-custom-index-1',
       })
     ).toEqual(
-      '\n#### Incompatible field mappings - auditbeat-custom-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |\n\n#### Incompatible field values - auditbeat-custom-index-1\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2), `theory` (1) |\n\n'
+      '\n#### Incompatible field mappings - auditbeat-custom-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text` |\n| source.ip | `ip` | `text` |\n\n#### Incompatible field values - auditbeat-custom-index-1\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2), `theory` (1) |\n\n'
     );
   });
 
@@ -772,7 +719,7 @@ describe('getAllIncompatibleMarkdownComments', () => {
       '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 | `unmanaged` | 27.7KB |\n\n',
       '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
       `#### 3 incompatible fields\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${EcsVersion}.\n\n${DETECTION_ENGINE_RULES_MAY_NOT_MATCH}\n${PAGES_MAY_NOT_DISPLAY_EVENTS}\n${MAPPINGS_THAT_CONFLICT_WITH_ECS}\n`,
-      '\n#### Incompatible field mappings - auditbeat-custom-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |\n\n#### Incompatible field values - auditbeat-custom-index-1\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2), `theory` (1) |\n\n',
+      '\n#### Incompatible field mappings - auditbeat-custom-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text` |\n| source.ip | `ip` | `text` |\n\n#### Incompatible field values - auditbeat-custom-index-1\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2), `theory` (1) |\n\n',
     ]);
   });
 
@@ -863,7 +810,15 @@ describe('getSummaryMarkdownComment', () => {
 
 describe('getTabCountsMarkdownComment', () => {
   test('it returns a comment with the expected counts', () => {
-    expect(getTabCountsMarkdownComment(mockPartitionedFieldMetadata)).toBe(
+    expect(
+      getTabCountsMarkdownComment({
+        incompatible: 3,
+        sameFamily: 0,
+        custom: 4,
+        ecsCompliant: 2,
+        all: 9,
+      })
+    ).toBe(
       '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n'
     );
   });

@@ -10,11 +10,16 @@ import { EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { CompareFieldsTable } from '../compare_fields_table';
-import { getCommonTableColumns } from '../compare_fields_table/get_common_table_columns';
-import { EmptyPromptBody } from '../../empty_prompt_body';
-import { EmptyPromptTitle } from '../../empty_prompt_title';
-import * as i18n from '../../translations';
+import { EmptyPromptBody } from '../../../empty_prompt_body';
+import { EmptyPromptTitle } from '../../../empty_prompt_title';
 import type { PartitionedFieldMetadata } from '../../../../../../../types';
+import { getAllTableColumns } from './utils/get_all_table_columns';
+import {
+  ALL_CALLOUT,
+  ALL_EMPTY,
+  ALL_EMPTY_TITLE,
+  ALL_FIELDS_TABLE_TITLE,
+} from '../../../translations';
 
 interface Props {
   indexName: string;
@@ -22,21 +27,21 @@ interface Props {
 }
 
 const AllTabComponent: React.FC<Props> = ({ indexName, partitionedFieldMetadata }) => {
-  const body = useMemo(() => <EmptyPromptBody body={i18n.ALL_EMPTY} />, []);
-  const title = useMemo(() => <EmptyPromptTitle title={i18n.ALL_EMPTY_TITLE} />, []);
+  const body = useMemo(() => <EmptyPromptBody body={ALL_EMPTY} />, []);
+  const title = useMemo(() => <EmptyPromptTitle title={ALL_EMPTY_TITLE} />, []);
 
   return (
     <div data-test-subj="allTabContent">
       {partitionedFieldMetadata.all.length > 0 ? (
         <>
           <EuiCallOut size="s">
-            <p>{i18n.ALL_CALLOUT(EcsVersion)}</p>
+            <p>{ALL_CALLOUT(EcsVersion)}</p>
           </EuiCallOut>
           <EuiSpacer />
           <CompareFieldsTable
             enrichedFieldMetadata={partitionedFieldMetadata.all}
-            getTableColumns={getCommonTableColumns}
-            title={i18n.ALL_FIELDS_TABLE_TITLE(indexName)}
+            getTableColumns={getAllTableColumns}
+            title={ALL_FIELDS_TABLE_TITLE(indexName)}
           />
         </>
       ) : (

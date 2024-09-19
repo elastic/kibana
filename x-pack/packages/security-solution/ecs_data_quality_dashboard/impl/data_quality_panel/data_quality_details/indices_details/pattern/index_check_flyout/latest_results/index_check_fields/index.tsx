@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonGroup, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { useIndicesCheckContext } from '../../../../../../contexts/indices_check_context';
 import { IlmPhase, PatternRollup } from '../../../../../../types';
-import { INCOMPATIBLE_TAB_ID } from './constants';
 import { getTabs } from './utils/get_tabs';
-import { useDataQualityContext } from '../../../../../../data_quality_context';
 import { EMPTY_METADATA } from '../../../../../../constants';
+import { INCOMPATIBLE_TAB_ID } from '../../constants';
 
 const StyledTabFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -48,15 +47,12 @@ const IndexCheckFieldsComponent: React.FC<Props> = ({
   ilmPhase,
   docsCount,
 }) => {
-  const { formatBytes, formatNumber } = useDataQualityContext();
   const { checkState } = useIndicesCheckContext();
   const partitionedFieldMetadata = checkState[indexName]?.partitionedFieldMetadata ?? null;
 
   const tabs = useMemo(
     () =>
       getTabs({
-        formatBytes,
-        formatNumber,
         docsCount,
         ilmPhase,
         indexName,
@@ -65,8 +61,6 @@ const IndexCheckFieldsComponent: React.FC<Props> = ({
         stats: patternRollup?.stats ?? null,
       }),
     [
-      formatBytes,
-      formatNumber,
       docsCount,
       ilmPhase,
       indexName,
@@ -78,26 +72,30 @@ const IndexCheckFieldsComponent: React.FC<Props> = ({
 
   const [selectedTabId, setSelectedTabId] = useState<string>(INCOMPATIBLE_TAB_ID);
 
-  const tabSelections = tabs.map((tab) => ({
-    id: tab.id,
-    label: (
-      <StyledTabFlexGroup
-        responsive={false}
-        justifyContent="center"
-        gutterSize="s"
-        alignItems="center"
-        title={tab.name}
-      >
-        <StyledTabFlexItem>{tab.name}</StyledTabFlexItem>
-        {tab.append}
-      </StyledTabFlexGroup>
-    ),
-    textProps: false as false,
-  }));
+  const tabSelections = useMemo(
+    () =>
+      tabs.map((tab) => ({
+        id: tab.id,
+        label: (
+          <StyledTabFlexGroup
+            responsive={false}
+            justifyContent="center"
+            gutterSize="s"
+            alignItems="center"
+            title={tab.name}
+          >
+            <StyledTabFlexItem>{tab.name}</StyledTabFlexItem>
+            {tab.append}
+          </StyledTabFlexGroup>
+        ),
+        textProps: false as false,
+      })),
+    [tabs]
+  );
 
-  const handleSelectedTabId = (optionId: string) => {
+  const handleSelectedTabId = useCallback((optionId: string) => {
     setSelectedTabId(optionId);
-  };
+  }, []);
 
   return (
     <div data-test-subj="indexCheckFields">

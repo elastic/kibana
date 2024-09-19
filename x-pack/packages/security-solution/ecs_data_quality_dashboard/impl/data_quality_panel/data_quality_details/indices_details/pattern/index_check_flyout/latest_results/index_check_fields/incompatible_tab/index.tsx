@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import {
@@ -13,14 +13,12 @@ import {
   getIncompatibleMappings,
   getIncompatibleValues,
 } from '../../../../../../../utils/markdown';
-import { IncompatibleCallout } from './incompatible_callout';
+import { IncompatibleCallout } from '../../../incompatible_callout';
 import { CompareFieldsTable } from '../compare_fields_table';
-import { getIncompatibleMappingsTableColumns } from '../compare_fields_table/get_incompatible_mappings_table_columns';
-import { getIncompatibleValuesTableColumns } from '../compare_fields_table/helpers';
-import { EmptyPromptBody } from '../../empty_prompt_body';
-import { EmptyPromptTitle } from '../../empty_prompt_title';
-import { showInvalidCallout } from './helpers';
-import * as i18n from '../../translations';
+import {
+  getIncompatibleMappingsTableColumns,
+  getIncompatibleValuesTableColumns,
+} from './utils/get_incompatible_table_columns';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../../../../../types';
 import { useDataQualityContext } from '../../../../../../../data_quality_context';
 import { StickyActions } from '../sticky_actions';
@@ -28,11 +26,10 @@ import {
   INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE,
   INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE,
 } from '../../../../../../../translations';
+import { CheckSuccessEmptyPrompt } from '../../../check_success_empty_prompt';
 
 interface Props {
   docsCount: number;
-  formatBytes: (value: number | undefined) => string;
-  formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata;
@@ -42,16 +39,12 @@ interface Props {
 
 const IncompatibleTabComponent: React.FC<Props> = ({
   docsCount,
-  formatBytes,
-  formatNumber,
   ilmPhase,
   indexName,
   partitionedFieldMetadata,
   patternDocsCount,
   sizeInBytes,
 }) => {
-  const body = useMemo(() => <EmptyPromptBody body={i18n.INCOMPATIBLE_EMPTY} />, []);
-  const title = useMemo(() => <EmptyPromptTitle title={i18n.INCOMPATIBLE_EMPTY_TITLE} />, []);
   const incompatibleMappings = useMemo(
     () => getIncompatibleMappings(partitionedFieldMetadata.incompatible),
     [partitionedFieldMetadata.incompatible]
@@ -61,7 +54,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
     [partitionedFieldMetadata.incompatible]
   );
 
-  const { isILMAvailable } = useDataQualityContext();
+  const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
 
   const markdownComment: string = useMemo(
     () =>
@@ -91,7 +84,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
 
   return (
     <div data-test-subj="incompatibleTabContent">
-      {showInvalidCallout(partitionedFieldMetadata.incompatible) ? (
+      {partitionedFieldMetadata.incompatible.length > 0 ? (
         <>
           <IncompatibleCallout />
 
@@ -133,13 +126,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
           />
         </>
       ) : (
-        <EuiEmptyPrompt
-          body={body}
-          iconType="check"
-          iconColor="success"
-          title={title}
-          titleSize="s"
-        />
+        <CheckSuccessEmptyPrompt />
       )}
     </div>
   );

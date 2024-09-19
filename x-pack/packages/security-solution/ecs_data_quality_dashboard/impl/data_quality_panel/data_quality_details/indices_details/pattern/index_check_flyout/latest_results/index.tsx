@@ -13,13 +13,20 @@ import { getDocsCount, getSizeInBytes } from '../../../../../utils/stats';
 import { getIlmPhase } from '../../../../../utils/get_ilm_phase';
 import { ErrorEmptyPrompt } from '../../error_empty_prompt';
 import { LoadingEmptyPrompt } from '../../loading_empty_prompt';
-import * as i18n from './translations';
 import type { MeteringStatsIndex, PatternRollup } from '../../../../../types';
 import { useIndicesCheckContext } from '../../../../../contexts/indices_check_context';
 import { IndexCheckFields } from './index_check_fields';
 import { IndexStatsPanel } from './index_stats_panel';
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import { getIndexPropertiesContainerId } from './utils/get_index_properties_container_id';
+import {
+  CHECKING_INDEX,
+  ERROR_GENERIC_CHECK_TITLE,
+  ERROR_LOADING_MAPPINGS_TITLE,
+  ERROR_LOADING_UNALLOWED_VALUES_TITLE,
+  LOADING_MAPPINGS,
+  LOADING_UNALLOWED_VALUES,
+} from '../translations';
 
 export interface Props {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
@@ -56,19 +63,19 @@ const LatestResultsComponent: React.FC<Props> = ({
   const isCheckComplete = indexCheckState?.isCheckComplete ?? false;
 
   if (mappingsError != null) {
-    return <ErrorEmptyPrompt title={i18n.ERROR_LOADING_MAPPINGS_TITLE} />;
+    return <ErrorEmptyPrompt title={ERROR_LOADING_MAPPINGS_TITLE} />;
   } else if (unallowedValuesError != null) {
-    return <ErrorEmptyPrompt title={i18n.ERROR_LOADING_UNALLOWED_VALUES_TITLE} />;
+    return <ErrorEmptyPrompt title={ERROR_LOADING_UNALLOWED_VALUES_TITLE} />;
   } else if (genericCheckError != null) {
-    return <ErrorEmptyPrompt title={i18n.ERROR_GENERIC_CHECK_TITLE} />;
+    return <ErrorEmptyPrompt title={ERROR_GENERIC_CHECK_TITLE} />;
   }
 
   if (isLoadingMappings) {
-    return <LoadingEmptyPrompt loading={i18n.LOADING_MAPPINGS} />;
+    return <LoadingEmptyPrompt loading={LOADING_MAPPINGS} />;
   } else if (isLoadingUnallowedValues) {
-    return <LoadingEmptyPrompt loading={i18n.LOADING_UNALLOWED_VALUES} />;
+    return <LoadingEmptyPrompt loading={LOADING_UNALLOWED_VALUES} />;
   } else if (isChecking) {
-    return <LoadingEmptyPrompt loading={i18n.CHECKING_INDEX} />;
+    return <LoadingEmptyPrompt loading={CHECKING_INDEX} />;
   }
 
   return isCheckComplete ? (

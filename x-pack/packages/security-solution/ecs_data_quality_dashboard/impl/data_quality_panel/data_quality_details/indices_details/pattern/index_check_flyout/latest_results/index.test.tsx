@@ -15,9 +15,9 @@ import {
   TestDataQualityProviders,
   TestExternalProviders,
 } from '../../../../../mock/test_providers/test_providers';
-import { LOADING_MAPPINGS, LOADING_UNALLOWED_VALUES } from './translations';
 import { LatestResults, Props } from '.';
 import { getCheckState } from '../../../../../stub/get_check_state';
+import { LOADING_MAPPINGS, LOADING_UNALLOWED_VALUES } from '../translations';
 
 const indexName = 'auditbeat-custom-index-1';
 const defaultBytesFormat = '0,0.[0]b';

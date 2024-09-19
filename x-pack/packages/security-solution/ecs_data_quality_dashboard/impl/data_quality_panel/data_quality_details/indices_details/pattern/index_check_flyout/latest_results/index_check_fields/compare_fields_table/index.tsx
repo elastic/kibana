@@ -9,13 +9,13 @@ import type { EuiTableFieldDataColumnType, Search } from '@elastic/eui';
 import { EuiInMemoryTable, EuiTitle, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import * as i18n from './translations';
 import type { EnrichedFieldMetadata } from '../../../../../../../types';
+import { SEARCH_FIELDS } from '../../../translations';
 
 const search: Search = {
   box: {
     incremental: true,
-    placeholder: i18n.SEARCH_FIELDS,
+    placeholder: SEARCH_FIELDS,
     schema: true,
   },
 };

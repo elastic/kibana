@@ -35,10 +35,10 @@ import type {
   TelemetryEvents,
 } from '../../types';
 import {
-  getIncompatibleMappingsFields,
-  getIncompatibleValuesFields,
-  getSameFamilyFields,
-} from '../../data_quality_details/indices_details/pattern/index_check_flyout/latest_results/index_check_fields/incompatible_tab/helpers';
+  getEscapedIncompatibleMappingsFields,
+  getEscapedIncompatibleValuesFields,
+  getEscapedSameFamilyFields,
+} from './utils/metadata';
 import { UseResultsRollupReturnValue } from './types';
 import { useIsMounted } from '../use_is_mounted';
 import { getDocsCount, getIndexIncompatible, getSizeInBytes } from '../../utils/stats';
@@ -208,13 +208,13 @@ export const useResultsRollup = ({
             numberOfIndices: 1,
             numberOfIndicesChecked: 1,
             numberOfSameFamily: getTotalPatternSameFamily(results),
-            sameFamilyFields: getSameFamilyFields(partitionedFieldMetadata.sameFamily),
+            sameFamilyFields: getEscapedSameFamilyFields(partitionedFieldMetadata.sameFamily),
             sizeInBytes: getSizeInBytes({ stats, indexName }),
             timeConsumedMs: requestTime,
-            unallowedMappingFields: getIncompatibleMappingsFields(
+            unallowedMappingFields: getEscapedIncompatibleMappingsFields(
               partitionedFieldMetadata.incompatible
             ),
-            unallowedValueFields: getIncompatibleValuesFields(
+            unallowedValueFields: getEscapedIncompatibleValuesFields(
               partitionedFieldMetadata.incompatible
             ),
           };

@@ -10,20 +10,17 @@ import React, { useMemo } from 'react';
 
 import { CustomCallout } from './custom_callout';
 import { CompareFieldsTable } from '../compare_fields_table';
-import { getCustomTableColumns } from '../compare_fields_table/helpers';
-import { EmptyPromptBody } from '../../empty_prompt_body';
-import { EmptyPromptTitle } from '../../empty_prompt_title';
+import { EmptyPromptBody } from '../../../empty_prompt_body';
+import { EmptyPromptTitle } from '../../../empty_prompt_title';
 import { getAllCustomMarkdownComments } from './utils/markdown';
-import * as i18n from '../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../../../../../types';
 import { useDataQualityContext } from '../../../../../../../data_quality_context';
 import { StickyActions } from '../sticky_actions';
-import { showCustomCallout } from './utils/show_custom_callout';
+import { getCustomTableColumns } from './utils/get_custom_table_columns';
+import { CUSTOM_EMPTY, CUSTOM_EMPTY_TITLE, CUSTOM_FIELDS_TABLE_TITLE } from '../../../translations';
 
 interface Props {
   docsCount: number;
-  formatBytes: (value: number | undefined) => string;
-  formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata;
@@ -33,15 +30,13 @@ interface Props {
 
 const CustomTabComponent: React.FC<Props> = ({
   docsCount,
-  formatBytes,
-  formatNumber,
   ilmPhase,
   indexName,
   partitionedFieldMetadata,
   patternDocsCount,
   sizeInBytes,
 }) => {
-  const { isILMAvailable } = useDataQualityContext();
+  const { formatBytes, formatNumber, isILMAvailable } = useDataQualityContext();
   const markdownComment: string = useMemo(
     () =>
       getAllCustomMarkdownComments({
@@ -68,21 +63,21 @@ const CustomTabComponent: React.FC<Props> = ({
     ]
   );
 
-  const body = useMemo(() => <EmptyPromptBody body={i18n.CUSTOM_EMPTY} />, []);
-  const title = useMemo(() => <EmptyPromptTitle title={i18n.CUSTOM_EMPTY_TITLE} />, []);
+  const body = useMemo(() => <EmptyPromptBody body={CUSTOM_EMPTY} />, []);
+  const title = useMemo(() => <EmptyPromptTitle title={CUSTOM_EMPTY_TITLE} />, []);
 
   return (
     <div data-test-subj="customTabContent">
-      {showCustomCallout(partitionedFieldMetadata.custom) ? (
+      {partitionedFieldMetadata.custom.length > 0 ? (
         <>
-          <CustomCallout customFieldMetadata={partitionedFieldMetadata.custom} />
+          <CustomCallout fieldCount={partitionedFieldMetadata.custom.length} />
 
           <EuiSpacer />
 
           <CompareFieldsTable
             enrichedFieldMetadata={partitionedFieldMetadata.custom}
             getTableColumns={getCustomTableColumns}
-            title={i18n.CUSTOM_FIELDS_TABLE_TITLE(indexName)}
+            title={CUSTOM_FIELDS_TABLE_TITLE(indexName)}
           />
 
           <EuiSpacer size="m" />

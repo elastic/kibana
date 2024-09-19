@@ -9,19 +9,15 @@ import { EcsVersion } from '@elastic/ecs';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { ECS_IS_A_PERMISSIVE_SCHEMA } from '../../../translations';
-import {
-  hostNameKeyword,
-  someField,
-} from '../../../../../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { TestExternalProviders } from '../../../../../../../../mock/test_providers/test_providers';
+import { ECS_IS_A_PERMISSIVE_SCHEMA } from '../../../../translations';
 import { CustomCallout } from '.';
 
 describe('CustomCallout', () => {
   beforeEach(() => {
     render(
       <TestExternalProviders>
-        <CustomCallout customFieldMetadata={[hostNameKeyword, someField]} />
+        <CustomCallout fieldCount={2} />
       </TestExternalProviders>
     );
   });
