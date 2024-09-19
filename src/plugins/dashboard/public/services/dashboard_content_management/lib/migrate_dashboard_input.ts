@@ -12,8 +12,7 @@ import {
   runEmbeddableFactoryMigrations,
 } from '@kbn/embeddable-plugin/public';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
-import { type DashboardEmbeddableService } from '../../embeddable/types';
-import { pluginServices } from '../../plugin_services';
+import { embeddableService } from '../../kibana_services';
 import { SavedDashboardInput } from '../types';
 
 /**
@@ -22,25 +21,19 @@ import { SavedDashboardInput } from '../types';
  * This prevents the reset button from un-migrating the panels on the Dashboard. This also means that the migrations may
  * get skipped at Embeddable create time - unless states with older versions are saved in the URL or session storage.
  */
-export const migrateDashboardInput = (
-  dashboardInput: SavedDashboardInput,
-  embeddable: DashboardEmbeddableService
-) => {
-  const {
-    embeddable: { reactEmbeddableRegistryHasKey },
-  } = pluginServices.getServices();
+export const migrateDashboardInput = (dashboardInput: SavedDashboardInput) => {
   let anyMigrationRun = false;
   if (!dashboardInput) return dashboardInput;
 
   const migratedPanels: DashboardContainerInput['panels'] = {};
   for (const [id, panel] of Object.entries(dashboardInput.panels)) {
     // if the panel type is registered in the new embeddable system, we do not need to run migrations for it.
-    if (reactEmbeddableRegistryHasKey(panel.type)) {
+    if (embeddableService.reactEmbeddableRegistryHasKey(panel.type)) {
       migratedPanels[id] = panel;
       continue;
     }
 
-    const factory = embeddable.getEmbeddableFactory(panel.type);
+    const factory = embeddableService.getEmbeddableFactory(panel.type);
     if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
     // run last saved migrations for by value panels only.
     if (!panel.explicitInput.savedObjectId) {

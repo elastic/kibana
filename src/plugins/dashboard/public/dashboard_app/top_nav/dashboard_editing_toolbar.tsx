@@ -22,19 +22,18 @@ import { pluginServices } from '../../services/plugin_services';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { dataService } from '../../services/kibana_services';
+import { dataService, embeddableService } from '../../services/kibana_services';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const {
     usageCollection,
-    embeddable: { getStateTransfer },
     visualizations: { getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
   const { euiTheme } = useEuiTheme();
 
   const dashboardApi = useDashboardApi();
 
-  const stateTransferService = getStateTransfer();
+  const stateTransferService = embeddableService.getStateTransfer();
 
   const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
 

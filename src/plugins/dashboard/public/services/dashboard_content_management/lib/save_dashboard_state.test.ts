@@ -9,13 +9,13 @@
 
 import { DashboardContainerInput } from '../../../../common';
 import { getSampleDashboardInput } from '../../../mocks';
-import { coreServices, dataService } from '../../kibana_services';
+import { coreServices, dataService, embeddableService } from '../../kibana_services';
 import { pluginServices } from '../../plugin_services';
 import { registry } from '../../plugin_services.stub';
 import { saveDashboardState } from './save_dashboard_state';
 
 pluginServices.setRegistry(registry.start({}));
-const { embeddable, dashboardBackup, contentManagement, initializerContext, savedObjectsTagging } =
+const { dashboardBackup, contentManagement, initializerContext, savedObjectsTagging } =
   pluginServices.getServices();
 
 contentManagement.client.create = jest.fn().mockImplementation(({ options }) => {
@@ -35,7 +35,7 @@ contentManagement.client.update = jest.fn().mockImplementation(({ id }) => {
 
 const allServices = {
   data: dataService,
-  embeddable,
+  embeddable: embeddableService,
   dashboardBackup,
   contentManagement,
   initializerContext,
@@ -44,7 +44,7 @@ const allServices = {
 allServices.data.query.timefilter.timefilter.getTime = jest
   .fn()
   .mockReturnValue({ from: 'then', to: 'now' });
-embeddable.extract = jest
+allServices.embeddable.extract = jest
   .fn()
   .mockImplementation((attributes) => ({ state: attributes, references: [] }));
 

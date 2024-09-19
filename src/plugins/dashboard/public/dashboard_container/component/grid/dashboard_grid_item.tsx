@@ -15,8 +15,7 @@ import { css } from '@emotion/react';
 import { EmbeddablePanel, ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
-import { presentationUtilService } from '../../../services/kibana_services';
-import { pluginServices } from '../../../services/plugin_services';
+import { embeddableService, presentationUtilService } from '../../../services/kibana_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
@@ -96,10 +95,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       : undefined;
 
     const renderedEmbeddable = useMemo(() => {
-      const {
-        embeddable: { reactEmbeddableRegistryHasKey },
-      } = pluginServices.getServices();
-
       const panelProps = {
         showBadges: true,
         showBorder: useMargins,
@@ -108,7 +103,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       };
 
       // render React embeddable
-      if (reactEmbeddableRegistryHasKey(type)) {
+      if (embeddableService.reactEmbeddableRegistryHasKey(type)) {
         return (
           <ReactEmbeddableRenderer
             type={type}

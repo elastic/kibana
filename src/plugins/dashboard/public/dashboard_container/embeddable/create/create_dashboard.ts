@@ -33,7 +33,7 @@ import {
   LoadDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
-import { dataService } from '../../../services/kibana_services';
+import { dataService, embeddableService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
@@ -145,7 +145,6 @@ export const initializeDashboard = async ({
   const {
     dashboardBackup,
     dashboardCapabilities: { showWriteControls },
-    embeddable: { reactEmbeddableRegistryHasKey },
     dashboardContentInsights,
   } = pluginServices.getServices();
 
@@ -217,7 +216,7 @@ export const initializeDashboard = async ({
     const overridePanels: DashboardPanelMap = {};
 
     for (const panel of Object.values(overrideInput?.panels)) {
-      if (reactEmbeddableRegistryHasKey(panel.type)) {
+      if (embeddableService.reactEmbeddableRegistryHasKey(panel.type)) {
         overridePanels[panel.explicitInput.id] = {
           ...panel,
 
@@ -362,7 +361,7 @@ export const initializeDashboard = async ({
         // maintain hide panel titles setting.
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
-      if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+      if (embeddableService.reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
         panelToUpdate.explicitInput = { id: panelToUpdate.explicitInput.id };
         runtimePanelsToRestore[incomingEmbeddable.embeddableId] = nextRuntimeState;
       } else {
@@ -398,7 +397,7 @@ export const initializeDashboard = async ({
             }
           );
           const newPanelState: DashboardPanelState = (() => {
-            if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+            if (embeddableService.reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
               runtimePanelsToRestore[embeddableId] = incomingEmbeddable.input;
               return {
                 explicitInput: { id: embeddableId },

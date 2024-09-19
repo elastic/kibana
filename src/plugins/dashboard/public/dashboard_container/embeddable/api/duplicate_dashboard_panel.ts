@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { filter, map, max } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+
 import { isReferenceOrValueEmbeddable, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import {
@@ -16,14 +19,12 @@ import {
   getPanelTitle,
   stateHasTitles,
 } from '@kbn/presentation-publishing';
-import { filter, map, max } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
+
 import { DashboardPanelState, prefixReferencesFromPanel } from '../../../../common';
 import { dashboardClonePanelActionStrings } from '../../../dashboard_actions/_dashboard_actions_strings';
-import { pluginServices } from '../../../services/plugin_services';
+import { coreServices, embeddableService } from '../../../services/kibana_services';
 import { placeClonePanel } from '../../panel_placement';
 import { DashboardContainer } from '../dashboard_container';
-import { coreServices } from '../../../services/kibana_services';
 
 const duplicateLegacyInput = async (
   dashboard: DashboardContainer,
@@ -106,12 +107,9 @@ const duplicateReactEmbeddableInput = async (
 };
 
 export async function duplicateDashboardPanel(this: DashboardContainer, idToDuplicate: string) {
-  const {
-    embeddable: { reactEmbeddableRegistryHasKey },
-  } = pluginServices.getServices();
   const panelToClone = await this.getDashboardPanelFromId(idToDuplicate);
 
-  const duplicatedPanelState = reactEmbeddableRegistryHasKey(panelToClone.type)
+  const duplicatedPanelState = embeddableService.reactEmbeddableRegistryHasKey(panelToClone.type)
     ? await duplicateReactEmbeddableInput(this, panelToClone, idToDuplicate)
     : await duplicateLegacyInput(this, panelToClone, idToDuplicate);
 

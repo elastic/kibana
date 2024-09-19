@@ -15,7 +15,6 @@ import { DashboardContainerInput } from '../../../common';
 import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content_management';
 import { DashboardStartDependencies } from '../../plugin';
 import { DashboardBackupServiceType } from '../dashboard_backup/types';
-import { DashboardEmbeddableService } from '../embeddable/types';
 import { DashboardInitializerContextService } from '../initializer_context/types';
 import { DashboardSavedObjectsTaggingService } from '../saved_objects_tagging/types';
 import { DashboardScreenshotModeService } from '../screenshot_mode/types';
@@ -29,7 +28,6 @@ import {
 
 export interface DashboardContentManagementRequiredServices {
   spaces: DashboardSpacesService;
-  embeddable: DashboardEmbeddableService;
   dashboardBackup: DashboardBackupServiceType;
   screenshotMode: DashboardScreenshotModeService;
   initializerContext: DashboardInitializerContextService;
@@ -53,7 +51,6 @@ export interface DashboardContentManagementService {
 export interface LoadDashboardFromSavedObjectProps {
   id?: string;
   contentManagement: DashboardStartDependencies['contentManagement'];
-  embeddable: DashboardContentManagementRequiredServices['embeddable'];
   savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
 }
 

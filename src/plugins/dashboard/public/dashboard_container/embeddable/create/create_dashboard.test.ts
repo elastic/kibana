@@ -20,7 +20,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import { getSampleDashboardPanel, mockControlGroupApi } from '../../../mocks';
-import { dataService } from '../../../services/kibana_services';
+import { dataService, embeddableService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { createDashboard } from './create_dashboard';
@@ -194,7 +194,7 @@ test('pulls state from override input which overrides all other state sources', 
 });
 
 test('pulls panels from override input', async () => {
-  pluginServices.getServices().embeddable.reactEmbeddableRegistryHasKey = jest
+  embeddableService.reactEmbeddableRegistryHasKey = jest
     .fn()
     .mockImplementation((type: string) => type === 'reactEmbeddable');
   pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
@@ -305,9 +305,7 @@ test('applies time range and refresh interval from initial input to query servic
 test('applies time range from query service to initial input if time restore is on but there is an explicit time range in the URL', async () => {
   const urlTimeRange = { from: new Date().toISOString(), to: new Date().toISOString() };
   const savedTimeRange = { from: 'now - 7 days', to: 'now' };
-  pluginServices.getServices().data.query.timefilter.timefilter.getTime = jest
-    .fn()
-    .mockReturnValue(urlTimeRange);
+  dataService.query.timefilter.timefilter.getTime = jest.fn().mockReturnValue(urlTimeRange);
   const kbnUrlStateStorage = createKbnUrlStateStorage();
   kbnUrlStateStorage.get = jest.fn().mockReturnValue({ time: urlTimeRange });
 
@@ -327,9 +325,7 @@ test('applies time range from query service to initial input if time restore is 
 
 test('applies time range from query service to initial input if time restore is off', async () => {
   const timeRange = { from: new Date().toISOString(), to: new Date().toISOString() };
-  pluginServices.getServices().data.query.timefilter.timefilter.getTime = jest
-    .fn()
-    .mockReturnValue(timeRange);
+  dataService.query.timefilter.timefilter.getTime = jest.fn().mockReturnValue(timeRange);
   const dashboard = await createDashboard({
     useUnifiedSearchIntegration: true,
     unifiedSearchSettings: {
@@ -385,9 +381,7 @@ test('creates new embeddable with incoming embeddable if id does not match exist
     create: jest.fn().mockReturnValue({ destroy: jest.fn() }),
     getDefaultInput: jest.fn().mockResolvedValue({}),
   };
-  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-    .fn()
-    .mockReturnValue(mockContactCardFactory);
+  embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(mockContactCardFactory);
 
   const dashboard = await createDashboard({
     getIncomingEmbeddable: () => incomingEmbeddable,
@@ -446,9 +440,7 @@ test('creates new embeddable with specified size if size is provided', async () 
     create: jest.fn().mockReturnValue({ destroy: jest.fn() }),
     getDefaultInput: jest.fn().mockResolvedValue({}),
   };
-  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-    .fn()
-    .mockReturnValue(mockContactCardFactory);
+  embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(mockContactCardFactory);
 
   const dashboard = await createDashboard({
     getIncomingEmbeddable: () => incomingEmbeddable,
@@ -505,9 +497,7 @@ test('searchSessionId is updated prior to child embeddable parent subscription e
       },
     }),
   };
-  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-    .fn()
-    .mockReturnValue(embeddableFactory);
+  embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(embeddableFactory);
   let sessionCount = 0;
   dataService.search.session.start = () => {
     sessionCount++;

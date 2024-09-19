@@ -35,7 +35,7 @@ import { DashboardMountContext } from './hooks/dashboard_mount_context';
 import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
 import { DashboardListingPage } from './listing_page/dashboard_listing_page';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
-import { coreServices, dataService } from '../services/kibana_services';
+import { coreServices, dataService, embeddableService } from '../services/kibana_services';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -59,7 +59,6 @@ export async function mountApp({
 }: DashboardMountProps) {
   const {
     dashboardCapabilities: { showWriteControls },
-    embeddable,
   } = pluginServices.getServices();
 
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
@@ -135,7 +134,7 @@ export async function mountApp({
   };
 
   const hasEmbeddableIncoming = Boolean(
-    embeddable.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false)
+    embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false)
   );
   if (!hasEmbeddableIncoming) {
     dataService.dataViews.clearCache();

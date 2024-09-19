@@ -27,6 +27,7 @@ import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_c
 import { pluginServices } from '../services/plugin_services';
 import { CopyToDashboardAPI } from './copy_to_dashboard_action';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
+import { embeddableService } from '../services/kibana_services';
 
 interface CopyToDashboardModalProps {
   api: CopyToDashboardAPI;
@@ -37,10 +38,9 @@ const DashboardPicker = withSuspense(LazyDashboardPicker);
 
 export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalProps) {
   const {
-    embeddable: { getStateTransfer },
     dashboardCapabilities: { createNew: canCreateNew, showWriteControls: canEditExisting },
   } = pluginServices.getServices();
-  const stateTransfer = getStateTransfer();
+  const stateTransfer = embeddableService.getStateTransfer();
 
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing'>('existing');
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(

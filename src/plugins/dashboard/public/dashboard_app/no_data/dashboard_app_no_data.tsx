@@ -12,7 +12,7 @@ import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
-import { coreServices, dataService } from '../../services/kibana_services';
+import { coreServices, dataService, embeddableService } from '../../services/kibana_services';
 import { pluginServices } from '../../services/plugin_services';
 
 export const DashboardAppNoDataPage = ({
@@ -54,14 +54,14 @@ export const DashboardAppNoDataPage = ({
 };
 
 export const isDashboardAppInNoDataState = async () => {
-  const { embeddable, dashboardContentManagement, dashboardBackup } = pluginServices.getServices();
+  const { dashboardContentManagement, dashboardBackup } = pluginServices.getServices();
 
   const hasUserDataView = await dataService.dataViews.hasData.hasUserDataView().catch(() => false);
 
   if (hasUserDataView) return false;
 
   // consider has data if there is an incoming embeddable
-  const hasIncomingEmbeddable = embeddable
+  const hasIncomingEmbeddable = embeddableService
     .getStateTransfer()
     .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false);
   if (hasIncomingEmbeddable) return false;

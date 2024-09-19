@@ -15,15 +15,14 @@ import { buildMockDashboard } from '../../mocks';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardApi } from '../../dashboard_api/types';
+import { embeddableService } from '../../services/kibana_services';
 
 jest.mock('../../services/plugin_services', () => {
   const module = jest.requireActual('../../services/plugin_services');
 
   const _pluginServices = (module.pluginServices as typeof pluginServices).getServices();
 
-  jest
-    .spyOn(_pluginServices.embeddable, 'getEmbeddableFactories')
-    .mockReturnValue(new Map().values());
+  jest.spyOn(embeddableService, 'getEmbeddableFactories').mockReturnValue(new Map().values());
   jest.spyOn(_pluginServices.uiActions, 'getTriggerCompatibleActions').mockResolvedValue([]);
   jest.spyOn(_pluginServices.visualizations, 'getByGroup').mockReturnValue([]);
   jest.spyOn(_pluginServices.visualizations, 'getAliases').mockReturnValue([]);

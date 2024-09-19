@@ -29,7 +29,7 @@ import {
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { DashboardTopNav } from '../dashboard_top_nav';
-import { coreServices, dataService } from '../services/kibana_services';
+import { coreServices, dataService, embeddableService } from '../services/kibana_services';
 import { pluginServices } from '../services/plugin_services';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
@@ -75,7 +75,6 @@ export function DashboardApp({
    */
   const {
     screenshotMode: { isScreenshotMode, getScreenshotContext },
-    embeddable: { getStateTransfer },
     share: { url },
     observabilityAIAssistant,
   } = pluginServices.getServices();
@@ -143,7 +142,7 @@ export function DashboardApp({
 
     return Promise.resolve<DashboardCreationOptions>({
       getIncomingEmbeddable: () =>
-        getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
+        embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
 
       // integrations
       useControlGroupIntegration: true,
@@ -174,7 +173,6 @@ export function DashboardApp({
     validateOutcome,
     getScopedHistory,
     isScreenshotMode,
-    getStateTransfer,
     kbnUrlStateStorage,
     getScreenshotContext,
   ]);

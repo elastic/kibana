@@ -32,7 +32,7 @@ import {
   SaveDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
-import { coreServices, dataService } from '../../../services/kibana_services';
+import { coreServices, dataService, embeddableService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
@@ -42,9 +42,6 @@ import { DashboardSaveModal } from './overlays/save_modal';
 const serializeAllPanelState = async (
   dashboard: DashboardContainer
 ): Promise<{ panels: DashboardContainerInput['panels']; references: Reference[] }> => {
-  const {
-    embeddable: { reactEmbeddableRegistryHasKey },
-  } = pluginServices.getServices();
   const references: Reference[] = [];
   const panels = cloneDeep(dashboard.getInput().panels);
 
@@ -52,7 +49,7 @@ const serializeAllPanelState = async (
     Promise<{ uuid: string; serialized: SerializedPanelState<object> }>
   > = [];
   for (const [uuid, panel] of Object.entries(panels)) {
-    if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
+    if (!embeddableService.reactEmbeddableRegistryHasKey(panel.type)) continue;
     const api = dashboard.children$.value[uuid];
 
     if (api && apiHasSerializableState(api)) {

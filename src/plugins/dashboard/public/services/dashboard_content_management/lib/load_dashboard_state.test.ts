@@ -12,14 +12,14 @@ import { pluginServices } from '../../plugin_services';
 import { getSampleDashboardInput } from '../../../mocks';
 import { loadDashboardState } from './load_dashboard_state';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
-import { dataService } from '../../kibana_services';
+import { dataService, embeddableService } from '../../kibana_services';
 
 pluginServices.setRegistry(registry.start({}));
-const { embeddable, contentManagement, savedObjectsTagging } = pluginServices.getServices();
+const { contentManagement, savedObjectsTagging } = pluginServices.getServices();
 
 const allServices = {
   data: dataService,
-  embeddable,
+  embeddable: embeddableService,
   contentManagement,
   savedObjectsTagging,
 };

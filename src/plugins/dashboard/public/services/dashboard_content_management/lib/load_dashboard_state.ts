@@ -23,7 +23,7 @@ import {
 } from '../../../../common';
 import { DashboardCrudTypes } from '../../../../common/content_management';
 import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
-import { dataService } from '../../kibana_services';
+import { dataService, embeddableService } from '../../kibana_services';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 import { convertNumberToDashboardVersion } from './dashboard_versioning';
@@ -40,7 +40,6 @@ export function migrateLegacyQuery(query: Query | { [key: string]: any } | strin
 
 export const loadDashboardState = async ({
   id,
-  embeddable,
   contentManagement,
   savedObjectsTagging,
 }: LoadDashboardFromSavedObjectProps): Promise<LoadDashboardReturn> => {
@@ -116,7 +115,7 @@ export const loadDashboardState = async ({
     return injectReferences(
       { references, attributes: rawAttributes },
       {
-        embeddablePersistableStateService: embeddable,
+        embeddablePersistableStateService: embeddableService,
       }
     );
   })();
@@ -170,30 +169,27 @@ export const loadDashboardState = async ({
   const options: DashboardOptions = optionsJSON ? JSON.parse(optionsJSON) : undefined;
   const panels = convertSavedPanelsToPanelMap(panelsJSON ? JSON.parse(panelsJSON) : []);
 
-  const { dashboardInput, anyMigrationRun } = migrateDashboardInput(
-    {
-      ...DEFAULT_DASHBOARD_INPUT,
-      ...options,
+  const { dashboardInput, anyMigrationRun } = migrateDashboardInput({
+    ...DEFAULT_DASHBOARD_INPUT,
+    ...options,
 
-      id: embeddableId,
-      refreshInterval,
-      timeRestore,
-      description,
-      timeRange,
-      filters,
-      panels,
-      query,
-      title,
+    id: embeddableId,
+    refreshInterval,
+    timeRestore,
+    description,
+    timeRange,
+    filters,
+    panels,
+    query,
+    title,
 
-      viewMode: ViewMode.VIEW, // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
-      tags: savedObjectsTagging.getTagIdsFromReferences?.(references) ?? [],
+    viewMode: ViewMode.VIEW, // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
+    tags: savedObjectsTagging.getTagIdsFromReferences?.(references) ?? [],
 
-      controlGroupInput: attributes.controlGroupInput,
+    controlGroupInput: attributes.controlGroupInput,
 
-      version: convertNumberToDashboardVersion(version),
-    },
-    embeddable
-  );
+    version: convertNumberToDashboardVersion(version),
+  });
 
   return {
     managed,

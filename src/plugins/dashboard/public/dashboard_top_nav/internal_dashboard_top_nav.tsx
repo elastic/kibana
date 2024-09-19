@@ -47,7 +47,7 @@ import { DashboardEmbedSettings } from '../dashboard_app/types';
 import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
-import { coreServices, dataService } from '../services/kibana_services';
+import { coreServices, dataService, embeddableService } from '../services/kibana_services';
 import { pluginServices } from '../services/plugin_services';
 import './_dashboard_top_nav.scss';
 
@@ -82,7 +82,6 @@ export function InternalDashboardTopNav({
   const {
     serverless,
     navigation: { TopNavMenu },
-    embeddable: { getStateTransfer },
     initializerContext: { allowByValueEmbeddables },
     dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
     dashboardRecentlyAccessed,
@@ -213,7 +212,11 @@ export function InternalDashboardTopNav({
    */
   useEffect(() => {
     onAppLeave((actions) => {
-      if (viewMode === 'edit' && hasUnsavedChanges && !getStateTransfer().isTransferInProgress) {
+      if (
+        viewMode === 'edit' &&
+        hasUnsavedChanges &&
+        !embeddableService.getStateTransfer().isTransferInProgress
+      ) {
         return actions.confirm(
           leaveConfirmStrings.getLeaveSubtitle(),
           leaveConfirmStrings.getLeaveTitle()
@@ -225,7 +228,7 @@ export function InternalDashboardTopNav({
       // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
       onAppLeave((actions) => actions.default());
     };
-  }, [onAppLeave, getStateTransfer, hasUnsavedChanges, viewMode]);
+  }, [onAppLeave, hasUnsavedChanges, viewMode]);
 
   const visibilityProps = useMemo(() => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>

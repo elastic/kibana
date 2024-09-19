@@ -20,7 +20,7 @@ import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
 import { DashboardStartDependencies } from '../../../plugin';
-import { coreServices, dataService } from '../../kibana_services';
+import { coreServices, dataService, embeddableService } from '../../kibana_services';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import {
   DashboardContentManagementRequiredServices,
@@ -41,7 +41,6 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
 
 type SaveDashboardStateProps = SaveDashboardProps & {
   contentManagement: DashboardStartDependencies['contentManagement'];
-  embeddable: DashboardContentManagementRequiredServices['embeddable'];
   dashboardBackup: DashboardContentManagementRequiredServices['dashboardBackup'];
   initializerContext: DashboardContentManagementRequiredServices['initializerContext'];
   savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
@@ -49,7 +48,6 @@ type SaveDashboardStateProps = SaveDashboardProps & {
 
 export const saveDashboardState = async ({
   controlGroupReferences,
-  embeddable,
   lastSavedId,
   saveOptions,
   currentState,
@@ -162,7 +160,7 @@ export const saveDashboardState = async ({
       attributes: rawDashboardAttributes,
       references: searchSourceReferences,
     },
-    { embeddablePersistableStateService: embeddable }
+    { embeddablePersistableStateService: embeddableService }
   );
 
   const references = savedObjectsTagging.updateTagsReferences

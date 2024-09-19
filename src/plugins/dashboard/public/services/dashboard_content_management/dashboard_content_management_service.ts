@@ -39,12 +39,11 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
   { startPlugins: { contentManagement } },
   requiredServices
 ) => {
-  const { embeddable, dashboardBackup, initializerContext, savedObjectsTagging } = requiredServices;
+  const { dashboardBackup, initializerContext, savedObjectsTagging } = requiredServices;
   return {
     loadDashboardState: ({ id }) =>
       loadDashboardState({
         id,
-        embeddable,
         contentManagement,
         savedObjectsTagging,
       }),
@@ -57,7 +56,6 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
     }) =>
       saveDashboardState({
         controlGroupReferences,
-        embeddable,
         saveOptions,
         lastSavedId,
         currentState,
@@ -85,6 +83,6 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
       checkForDuplicateDashboardTitle(props, contentManagement),
     deleteDashboards: (ids) => deleteDashboards(ids, contentManagement),
     updateDashboardMeta: (props) =>
-      updateDashboardMeta(props, { contentManagement, savedObjectsTagging, embeddable }),
+      updateDashboardMeta(props, { contentManagement, savedObjectsTagging }),
   };
 };

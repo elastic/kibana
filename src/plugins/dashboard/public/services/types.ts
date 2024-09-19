@@ -18,7 +18,6 @@ import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
 import { DashboardContentManagementService } from './dashboard_content_management/types';
 import { DashboardBackupServiceType } from './dashboard_backup/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
-import { DashboardEmbeddableService } from './embeddable/types';
 import { DashboardInitializerContextService } from './initializer_context/types';
 import { DashboardNavigationService } from './navigation/types';
 import { DashboardSavedObjectsTaggingService } from './saved_objects_tagging/types';
@@ -45,7 +44,6 @@ export interface DashboardServices {
 
   dashboardCapabilities: DashboardCapabilitiesService;
   dataViewEditor: DashboardDataViewEditorService; // this service is used only for the no data state
-  embeddable: DashboardEmbeddableService;
   initializerContext: DashboardInitializerContextService;
   navigation: DashboardNavigationService;
   savedObjectsTagging: DashboardSavedObjectsTaggingService; // TODO: make this optional in follow up

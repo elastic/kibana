@@ -17,11 +17,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
+import { DashboardApi } from '../../dashboard_api/types';
+import { embeddableService } from '../../services/kibana_services';
+import { pluginServices } from '../../services/plugin_services';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
 import {
   DashboardContainerFactory,
@@ -30,8 +33,6 @@ import {
 } from '../embeddable/dashboard_container_factory';
 import { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
-import { DashboardApi } from '../../dashboard_api/types';
-import { pluginServices } from '../../services/plugin_services';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
@@ -57,7 +58,7 @@ export function DashboardRenderer({
   const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
   const [dashboardMissing, setDashboardMissing] = useState(false);
 
-  const { embeddable, screenshotMode } = pluginServices.getServices();
+  const { screenshotMode } = pluginServices.getServices();
 
   const id = useMemo(() => uuidv4(), []);
 
@@ -93,7 +94,7 @@ export function DashboardRenderer({
     (async () => {
       const creationOptions = await getCreationOptions?.();
 
-      const dashboardFactory = embeddable.getEmbeddableFactory(
+      const dashboardFactory = embeddableService.getEmbeddableFactory(
         DASHBOARD_CONTAINER_TYPE
       ) as DashboardContainerFactory & {
         create: DashboardContainerFactoryDefinition['create'];

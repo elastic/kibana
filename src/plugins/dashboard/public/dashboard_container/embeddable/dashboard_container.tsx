@@ -85,7 +85,7 @@ import {
 } from '../../dashboard_constants';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
 import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
-import { coreServices, dataService } from '../../services/kibana_services';
+import { coreServices, dataService, embeddableService } from '../../services/kibana_services';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
@@ -250,17 +250,14 @@ export class DashboardContainer
       });
     }
 
-    const {
-      usageCollection,
-      embeddable: { getEmbeddableFactory },
-    } = pluginServices.getServices();
+    const { usageCollection } = pluginServices.getServices();
 
     super(
       {
         ...initialInput,
       },
       { embeddableLoaded: {} },
-      getEmbeddableFactory,
+      embeddableService.getEmbeddableFactory,
       parent,
       { untilContainerInitialized }
     );
@@ -578,10 +575,6 @@ export class DashboardContainer
     panelPackage: PanelPackage,
     displaySuccessMessage?: boolean
   ) {
-    const {
-      embeddable: { getEmbeddableFactory, reactEmbeddableRegistryHasKey },
-    } = pluginServices.getServices();
-
     const onSuccess = (id?: string, title?: string) => {
       if (!displaySuccessMessage) return;
       coreServices.notifications.toasts.addSuccess({
@@ -595,10 +588,10 @@ export class DashboardContainer
     if (this.trackPanelAddMetric) {
       this.trackPanelAddMetric(METRIC_TYPE.CLICK, panelPackage.panelType);
     }
-    if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
+    if (embeddableService.reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
       const newId = v4();
 
-      const getCustomPlacementSettingFunc = await getDashboardPanelPlacementSetting(
+      const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(
         panelPackage.panelType
       );
 
@@ -638,7 +631,7 @@ export class DashboardContainer
       return await this.untilReactEmbeddableLoaded<ApiType>(newId);
     }
 
-    const embeddableFactory = getEmbeddableFactory(panelPackage.panelType);
+    const embeddableFactory = embeddableService.getEmbeddableFactory(panelPackage.panelType);
     if (!embeddableFactory) {
       throw new EmbeddableFactoryNotFoundError(panelPackage.panelType);
     }
@@ -676,11 +669,8 @@ export class DashboardContainer
   }
 
   public getDashboardPanelFromId = async (panelId: string) => {
-    const {
-      embeddable: { reactEmbeddableRegistryHasKey },
-    } = pluginServices.getServices();
     const panel = this.getInput().panels[panelId];
-    if (reactEmbeddableRegistryHasKey(panel.type)) {
+    if (embeddableService.reactEmbeddableRegistryHasKey(panel.type)) {
       const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
       const serialized = apiHasSerializableState(child)
@@ -858,13 +848,10 @@ export class DashboardContainer
   };
 
   public async getPanelTitles(): Promise<string[]> {
-    const {
-      embeddable: { reactEmbeddableRegistryHasKey },
-    } = pluginServices.getServices();
     const titles: string[] = [];
     for (const [id, panel] of Object.entries(this.getInput().panels)) {
       const title = await (async () => {
-        if (reactEmbeddableRegistryHasKey(panel.type)) {
+        if (embeddableService.reactEmbeddableRegistryHasKey(panel.type)) {
           const child = this.children$.value[id];
           return apiPublishesPanelTitle(child) ? getPanelTitle(child) : '';
         }
@@ -985,12 +972,9 @@ export class DashboardContainer
   };
 
   public removePanel(id: string) {
-    const {
-      embeddable: { reactEmbeddableRegistryHasKey },
-    } = pluginServices.getServices();
     const type = this.getInput().panels[id]?.type;
     this.removeEmbeddable(id);
-    if (reactEmbeddableRegistryHasKey(type)) {
+    if (embeddableService.reactEmbeddableRegistryHasKey(type)) {
       const { [id]: childToRemove, ...otherChildren } = this.children$.value;
       this.children$.next(otherChildren);
     }
