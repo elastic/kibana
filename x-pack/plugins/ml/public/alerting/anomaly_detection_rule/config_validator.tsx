@@ -32,7 +32,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
   ({ jobConfigs = [], alertInterval, alertParams, alertNotifyWhen, maxNumberOfBuckets }) => {
     if (jobConfigs.length === 0) return null;
 
-    const alertIntervalInSeconds = parseInterval(alertInterval)!.asSeconds();
+    const alertIntervalInSeconds = parseInterval(alertInterval)?.asSeconds();
 
     const lookbackIntervalInSeconds =
       !!alertParams.lookbackInterval && parseInterval(alertParams.lookbackInterval)?.asSeconds();
