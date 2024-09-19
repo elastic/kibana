@@ -131,7 +131,7 @@ paths:
                   type: string
               required:
                 - note
-        description: 'The note to add or update, along with additional metadata.'
+        description: The note to add or update, along with additional metadata.
         required: true
       responses:
         '200':
@@ -185,7 +185,7 @@ paths:
               required:
                 - eventId
                 - timelineId
-        description: 'The pinned event to add or update, along with additional metadata.'
+        description: The pinned event to add or update, along with additional metadata.
         required: true
       responses:
         '200':
@@ -321,7 +321,7 @@ paths:
                 - timelineId
                 - version
                 - timeline
-        description: 'The Timeline updates, along with the Timeline ID and version.'
+        description: The Timeline updates, along with the Timeline ID and version.
         required: true
       responses:
         '200':
