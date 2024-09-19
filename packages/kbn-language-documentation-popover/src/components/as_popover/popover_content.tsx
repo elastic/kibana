@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -22,18 +21,10 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
-import { elementToString } from '../utils/element_to_string';
+import { getFilteredGroups } from '../../utils/get_filtered_groups';
+import type { LanguageDocumentationSections } from '../../types';
 
 import './documentation.scss';
-
-export interface LanguageDocumentationSections {
-  groups: Array<{
-    label: string;
-    description?: string;
-    items: Array<{ label: string; description?: JSX.Element }>;
-  }>;
-  initialSection: JSX.Element;
-}
 
 interface DocumentationProps {
   language: string;
@@ -61,29 +52,9 @@ function DocumentationContent({
 
   const [searchText, setSearchText] = useState('');
 
-  const normalizedSearchText = searchText.trim().toLocaleLowerCase();
-
-  const filteredGroups = sections?.groups
-    .map((group) => {
-      const items = group.items.filter((helpItem) => {
-        return (
-          !normalizedSearchText ||
-          helpItem.label.toLocaleLowerCase().includes(normalizedSearchText) ||
-          // Converting the JSX element to a string first
-          (searchInDescription &&
-            elementToString(helpItem.description)
-              ?.toLocaleLowerCase()
-              .includes(normalizedSearchText))
-        );
-      });
-      return { ...group, items };
-    })
-    .filter((group) => {
-      if (group.items.length > 0 || !normalizedSearchText) {
-        return true;
-      }
-      return group.label.toLocaleLowerCase().includes(normalizedSearchText);
-    });
+  const filteredGroups = useMemo(() => {
+    return getFilteredGroups(searchText, searchInDescription, sections);
+  }, [sections, searchText, searchInDescription]);
 
   return (
     <>
@@ -158,12 +129,12 @@ function DocumentationContent({
                       </h6>
                     </EuiTitle>
 
-                    {helpGroup.items.length ? (
+                    {helpGroup.options.length ? (
                       <>
                         <EuiSpacer size="s" />
 
                         <EuiListGroup gutterSize="none">
-                          {helpGroup.items.map((helpItem) => {
+                          {helpGroup.options.map((helpItem) => {
                             return (
                               <EuiListGroupItem
                                 key={helpItem.label}
