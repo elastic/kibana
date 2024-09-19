@@ -16,7 +16,6 @@ import { FINAL_SUMMARY_FILTER } from '../../common/constants/client_defaults';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
-  OverviewPendingStatusMetaData,
   OverviewPing,
   OverviewStatus,
   OverviewStatusMetaData,
@@ -153,7 +152,7 @@ export async function queryMonitorStatus({
   const upConfigs: Record<string, OverviewStatusMetaData> = {};
   const downConfigs: Record<string, OverviewStatusMetaData> = {};
   const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
-  const pendingConfigs: Record<string, OverviewPendingStatusMetaData> = {};
+  const pendingConfigs: Record<string, OverviewStatusMetaData> = {};
 
   const queries: MsearchMultisearchBody[] = times(pageCount).map((i) => {
     const idsToQuery = (monitorQueryIds as string[]).slice(i * idSize, i * idSize + idSize);
@@ -247,6 +246,9 @@ export async function queryMonitorStatus({
         monitorQueryId: queryId,
         status: 'unknown',
         locationId: loc,
+        locationLabel: monitor.attributes[ConfigKey.LOCATIONS].find(
+          (location) => location.id === loc
+        )?.label!,
         name: monitor.attributes[ConfigKey.NAME],
         schedule: monitor.attributes[ConfigKey.SCHEDULE].number,
         tags: monitor.attributes[ConfigKey.TAGS],

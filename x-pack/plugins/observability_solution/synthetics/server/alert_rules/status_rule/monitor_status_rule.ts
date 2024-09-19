@@ -20,10 +20,10 @@ import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_fi
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
 import {
+  AlertOverviewStatus,
   SyntheticsCommonState,
   SyntheticsMonitorStatusAlertState,
 } from '../../../common/runtime_types/alert_rules/common';
-import { OverviewStatus } from '../../../common/runtime_types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { StatusRulePramsSchema, StatusRuleParams } from '../../../common/rules/status_rule';
 import {
@@ -105,7 +105,7 @@ export const registerSyntheticsStatusCheckRule = (
       );
 
       const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
-        ruleState.meta?.downConfigs as OverviewStatus['downConfigs']
+        ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']
       );
 
       Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {

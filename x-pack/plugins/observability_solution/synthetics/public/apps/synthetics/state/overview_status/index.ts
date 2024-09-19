@@ -11,7 +11,6 @@ import { enableMonitorAlertAction } from '../monitor_list/actions';
 import { isStatusEnabled } from '../../../../../common/runtime_types/monitor_management/alert_config';
 import {
   ConfigKey,
-  OverviewPendingStatusMetaData,
   OverviewStatusMetaData,
   OverviewStatusState,
 } from '../../../../../common/runtime_types';
@@ -26,8 +25,8 @@ export interface OverviewStatusStateReducer {
   loading: boolean;
   loaded: boolean;
   status: OverviewStatusState | null;
-  allConfigs?: Array<OverviewStatusMetaData | OverviewPendingStatusMetaData>;
-  disabledConfigs?: Array<OverviewStatusMetaData | OverviewPendingStatusMetaData>;
+  allConfigs?: OverviewStatusMetaData[];
+  disabledConfigs?: OverviewStatusMetaData[];
   sortedByStatus?: OverviewStatusMetaData[];
   error: IHttpSerializedFetchError | null;
 }

@@ -7,13 +7,10 @@
 
 import { useMemo, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  OverviewPendingStatusMetaData,
-  OverviewStatusMetaData,
-} from '../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { selectServiceLocationsState, getServiceLocations } from '../state';
 
-export function useLocationName(monitor: OverviewStatusMetaData | OverviewPendingStatusMetaData) {
+export function useLocationName(monitor: OverviewStatusMetaData) {
   const dispatch = useDispatch();
   const { locationsLoaded, locations } = useSelector(selectServiceLocationsState);
   useEffect(() => {

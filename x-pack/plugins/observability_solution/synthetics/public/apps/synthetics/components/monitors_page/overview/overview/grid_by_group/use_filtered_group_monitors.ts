@@ -9,15 +9,12 @@ import { useSelector } from 'react-redux';
 import { selectServiceLocationsState } from '../../../../../state';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { getConfigStatusByLocation, useGetUrlParams } from '../../../../../hooks';
-import {
-  OverviewPendingStatusMetaData,
-  OverviewStatusMetaData,
-} from '../../../../../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
 export const useFilteredGroupMonitors = ({
   groupMonitors,
 }: {
-  groupMonitors: Array<OverviewStatusMetaData | OverviewPendingStatusMetaData>;
+  groupMonitors: OverviewStatusMetaData[];
 }) => {
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
   const { statusFilter } = useGetUrlParams();

@@ -37,8 +37,6 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     status: t.string,
     locationId: t.string,
     locationLabel: t.string,
-    timestamp: t.string,
-    ping: OverviewPingCodec,
     name: t.string,
     schedule: t.string,
     isEnabled: t.boolean,
@@ -49,28 +47,8 @@ export const OverviewStatusMetaDataCodec = t.intersection([
   t.partial({
     projectId: t.string,
     updated_at: t.string,
-  }),
-]);
-
-export const OverviewPendingStatusMetaDataCodec = t.intersection([
-  t.interface({
-    monitorQueryId: t.string,
-    configId: t.string,
-    status: t.string,
-    locationId: t.string,
-    locationLabel: t.string,
-  }),
-  t.partial({
-    timestamp: t.string,
     ping: OverviewPingCodec,
-    name: t.string,
-    schedule: t.string,
-    isEnabled: t.boolean,
-    tags: t.array(t.string),
-    isStatusAlertEnabled: t.boolean,
-    type: t.string,
-    projectId: t.string,
-    updated_at: t.string,
+    timestamp: t.string,
   }),
 ]);
 
@@ -84,7 +62,7 @@ export const OverviewStatusCodec = t.interface({
   disabledCount: t.number,
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
-  pendingConfigs: t.record(t.string, OverviewPendingStatusMetaDataCodec),
+  pendingConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   enabledMonitorQueryIds: t.array(t.string),
   disabledMonitorQueryIds: t.array(t.string),
   allIds: t.array(t.string),
@@ -94,4 +72,3 @@ export type OverviewPing = t.TypeOf<typeof OverviewPingCodec>;
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusState = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusMetaData = t.TypeOf<typeof OverviewStatusMetaDataCodec>;
-export type OverviewPendingStatusMetaData = t.TypeOf<typeof OverviewPendingStatusMetaDataCodec>;
