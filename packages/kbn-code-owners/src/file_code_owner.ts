@@ -21,6 +21,10 @@ export interface PathWithOwners {
   teams: string;
   ignorePattern: Ignore;
 }
+const existOrThrow = (targetFile: string) => {
+  if (existsSync(targetFile) === false)
+    throw createFailError(`Unable to determine code owners: file ${targetFile} Not Found`);
+};
 
 /**
  * Get the .github/CODEOWNERS entries, prepared for path matching.
@@ -30,9 +34,7 @@ export interface PathWithOwners {
  */
 export function getPathsWithOwnersReversed(): PathWithOwners[] {
   const codeownersPath = joinPath(REPO_ROOT, '.github', 'CODEOWNERS');
-  if (existsSync(codeownersPath) === false) {
-    throw createFailError(`Unable to determine code owners: file ${codeownersPath} not found`);
-  }
+  existOrThrow(codeownersPath);
   const codeownersContent = readFileSync(codeownersPath, { encoding: 'utf8', flag: 'r' });
   const codeownersLines = codeownersContent.split(/\r?\n/);
   const codeowners = codeownersLines
@@ -80,6 +82,7 @@ export async function runGetOwnersForFileCli() {
     async ({ flags, log }) => {
       const targetFile = flags.file as string;
       if (!targetFile) throw createFlagError(`Missing --flag argument`);
+      existOrThrow(targetFile); // This call is duplicated in getPathsWithOwnersReversed(), so this is a short circuit
       const result = getCodeOwnersForFile(targetFile);
       if (result) log.success(result);
       else log.error(`Ownership of file [${targetFile}] is UNKNOWN`);
