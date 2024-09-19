@@ -21,13 +21,14 @@ import { NewSearchIndexPage } from '../new_index/new_search_index_page';
 
 import { Connectors } from './connectors';
 import { CreateConnector } from './create_connector';
-import { SelectConnector } from './select_connector/select_connector';
+// import { SelectConnector } from './select_connector/select_connector';
 
 export const ConnectorsRouter: React.FC = () => {
   return (
     <Routes>
       <Route path={NEW_INDEX_SELECT_CONNECTOR_PATH}>
-        <SelectConnector />
+        {/* <SelectConnector /> */}
+        <CreateConnector />
       </Route>
       <Route path={NEW_CONNECTOR_PATH}>
         <NewSearchIndexPage type="connector" />

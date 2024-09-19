@@ -15,6 +15,10 @@ import {
 } from '../../../api/connector/add_connector_api_logic';
 
 import {
+  GenerateConnectorNamesApiLogic,
+  GenerateConnectorNamesApiLogicActions,
+} from '../../../api/connector/generate_connector_names_api_logic';
+import {
   IndexExistsApiLogic,
   IndexExistsApiParams,
   IndexExistsApiResponse,
@@ -31,6 +35,7 @@ export interface NewConnectorValues {
   fullIndexName: string;
   fullIndexNameExists: boolean;
   fullIndexNameIsValid: boolean;
+  generatedName: string;
   language: LanguageForOptimization;
   languageSelectValue: string;
   rawName: string;
@@ -40,18 +45,25 @@ type NewConnectorActions = Pick<
   Actions<IndexExistsApiParams, IndexExistsApiResponse>,
   'makeRequest'
 > & {
+  conncetorNameGenerated: GenerateConnectorNamesApiLogicActions['apiSuccess'];
+  generateConnectorName: GenerateConnectorNamesApiLogicActions['makeRequest'];
+} & {
   connectorCreated: Actions<AddConnectorApiLogicArgs, AddConnectorApiLogicResponse>['apiSuccess'];
+  setGeneratedName(name: string): { name: string };
   setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
 };
 
 export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnectorActions>>({
   actions: {
+    setGeneratedName: (name) => ({ name }),
     setLanguageSelectValue: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
   },
   connect: {
     actions: [
+      GenerateConnectorNamesApiLogic,
+      ['makeRequest as generateConnectorName', 'apiSuccess as connectorNameGenerated'],
       AddConnectorApiLogic,
       ['apiSuccess as connectorCreated'],
       IndexExistsApiLogic,
@@ -59,8 +71,21 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
     ],
     values: [IndexExistsApiLogic, ['data']],
   },
+  listeners: ({ actions }) => ({
+    connectorNameGenerated: ({ connectorName }) => {
+      actions.setGeneratedName(connectorName);
+    },
+  }),
   path: ['enterprise_search', 'content', 'new_search_index'],
   reducers: {
+    generatedName: [
+      '',
+      {
+        setGeneratedName: (_: NewConnectorValues['generatedName'], { name }: { name: string }) =>
+          name,
+        setRawName: () => '',
+      },
+    ],
     languageSelectValue: [
       UNIVERSAL_LANGUAGE_VALUE,
       {
@@ -77,7 +102,10 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
     ],
   },
   selectors: ({ selectors }) => ({
-    fullIndexName: [() => [selectors.rawName], (name: string) => name],
+    fullIndexName: [
+      () => [selectors.rawName, selectors.generatedName],
+      (name: string, generatedName: string) => (name ? name : generatedName),
+    ],
     fullIndexNameExists: [
       () => [selectors.data, selectors.fullIndexName],
       (data: IndexExistsApiResponse | undefined, fullIndexName: string) =>

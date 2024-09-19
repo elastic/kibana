@@ -26,7 +26,6 @@ interface ChooseConnectorSelectableProps {
   connectorSelected: ConnectorDefinition;
   selfManaged: boolean;
   setConnectorSelected: Function;
-  setSelfManaged: Function;
 }
 interface OptionData {
   secondaryContent?: string;
@@ -36,12 +35,10 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   setConnectorSelected,
   connectorSelected,
   selfManaged,
-  setSelfManaged,
   allConnectors,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
-  const [isSearching, setIsSearching] = useState(true);
   const [selectableOptions, selectableSetOptions] = useState<
     Array<EuiSelectableOption<OptionData>>
   >([]);
@@ -50,7 +47,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
       const append: JSX.Element[] = [];
       if (connector.isTechPreview) {
         append.push(
-          <EuiBadge iconType="beaker" color="hollow">
+          <EuiBadge key={key + '-preview'} iconType="beaker" color="hollow">
             {i18n.translate(
               'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.thechPreviewBadgeLabel',
               { defaultMessage: 'Tech preview' }
@@ -60,7 +57,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
       }
       if (connector.isBeta) {
         append.push(
-          <EuiBadge iconType={'beta'} color="hollow">
+          <EuiBadge key={key + '-beta'} iconType={'beta'} color="hollow">
             {i18n.translate(
               'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.BetaBadgeLabel',
               {
@@ -72,7 +69,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
       }
       if (!selfManaged && !connector.isNative) {
         append.push(
-          <EuiBadge iconType={'warning'} color="warning">
+          <EuiBadge key={key + '-self'} iconType={'warning'} color="warning">
             {i18n.translate(
               'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.OnlySelfManagedBadgeLabel',
               {
@@ -97,6 +94,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   useEffect(() => {
     selectableSetOptions(initialOptions);
   }, [selfManaged]);
+  const [searchValue, setSearchValue] = useState('');
 
   return (
     <EuiFlexItem
@@ -104,7 +102,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         position: relative;
       `}
     >
-      {connectorSelected.iconPath && (
+      {connectorSelected.iconPath && ( // TODO this is a hack, that shouldn't be merged like this.
         <EuiIcon
           type={connectorSelected.iconPath}
           size="l"
@@ -124,33 +122,31 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         )}
         css={css`
           .euiFormControlLayoutIcons--left {
-            display: ${connectorSelected.iconPath ? 'none' : ''};
+            display: ${connectorSelected.iconPath
+              ? 'none'
+              : ''}; // TODO this is a hack, that shouldn't be merged like this.
           }
           .euiFieldSearch {
             padding-left: 45px;
           }
         `}
         options={selectableOptions}
-        onChange={(newOptions, event, changedOption) => {
+        onChange={(newOptions, _, changedOption) => {
+          console.log('newOptions', newOptions);
+          console.log('changedOption', changedOption);
+
           selectableSetOptions(newOptions);
           setIsOpen(false);
           if (changedOption.checked === 'on') {
             const keySelected = Number(changedOption.key);
             setConnectorSelected(allConnectors[keySelected]);
-            setIsSearching(false);
-
-            if (!allConnectors[keySelected].isNative && !selfManaged) {
-              setSelfManaged(true);
-            }
+            setSearchValue(allConnectors[keySelected].name);
           } else {
             setConnectorSelected({ name: '' });
+            setSearchValue('');
           }
         }}
         listProps={{
-          css: {
-            '.euiSelectableListItem': { alignItems: 'center' },
-            '.euiSelectableList__list': { maxBlockSize: 240 },
-          },
           isVirtualized: true,
           rowHeight: Number(euiTheme.base * 3),
           showIcons: false,
@@ -162,20 +158,17 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
           isClearable: true,
           onChange: (value) => {
             if (value !== connectorSelected.name) {
-              setConnectorSelected({ name: value });
-              setIsSearching(true);
+              setSearchValue(value);
             }
           },
-          onClick: () => setIsOpen(true),
-          onFocus: () => setIsOpen(true),
-          onKeyDown: (event) => {
-            if (event.key === 'Tab') return setIsOpen(false);
-            if (event.key !== 'Escape') return setIsOpen(true);
-          },
-          placeholder: 'Choose a data source',
-          value: connectorSelected.name,
+          onFocus: () => setIsOpen(true), // TODO useCallback
+          onClick: () => setIsOpen(true), // TODO useCallback
+          placeholder: i18n.translate(
+            'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.placeholder.text',
+            { defaultMessage: 'Choose a data source' }
+          ),
+          value: searchValue,
         }}
-        isPreFiltered={isSearching ? false : { highlightSearch: false }} // Shows the full list when not actively typing to search
       >
         {(list, search) => (
           <EuiInputPopover

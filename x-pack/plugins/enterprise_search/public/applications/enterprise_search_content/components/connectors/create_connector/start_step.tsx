@@ -37,6 +37,7 @@ import { NewConnectorLogic } from '../../new_index/method_connector/new_connecto
 import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 import { ManualConfiguration } from './components/manual_configuration';
+import { CreateConnectorLogic } from './create_connector_logic';
 
 interface StartStepProps {
   allConnectors: ConnectorDefinition[];
@@ -81,12 +82,13 @@ export const StartStep: React.FC<StartStepProps> = ({
     selfManaged ? selfManagedRadioButtonId : elasticManagedRadioButtonId
   );
   const { isGenerateLoading } = useValues(DeploymentLogic);
+  const { setNewConnectorServiceType } = useActions(CreateConnectorLogic);
 
   // FORM
 
   const { fullIndexName, fullIndexNameExists, fullIndexNameIsValid, rawName } =
     useValues(NewConnectorLogic);
-  const { setRawName } = useActions(NewConnectorLogic);
+  const { setRawName, generateConnectorName } = useActions(NewConnectorLogic);
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
     if (onNameChange) {
@@ -94,10 +96,18 @@ export const StartStep: React.FC<StartStepProps> = ({
     }
   };
 
+  const selectNewConnector = (connector: ConnectorDefinition) => {
+    if (rawName === '') {
+      generateConnectorName({ connectorType: connector.serviceType });
+    }
+    setNewConnectorServiceType(connector.serviceType);
+    setConnectorSelected(connector);
+  };
   const formInvalid = !!error || fullIndexNameExists || !fullIndexNameIsValid;
 
   const formError = () => {
     if (fullIndexNameExists) {
+      // TODO: connector with same name is allowed.
       return i18n.translate(
         'xpack.enterpriseSearch.content.newConnector.newConnectorTemplate.alreadyExists.error',
         {
@@ -109,6 +119,7 @@ export const StartStep: React.FC<StartStepProps> = ({
       );
     }
     if (!fullIndexNameIsValid) {
+      // TODO: make sure to use name stripping logic
       return i18n.translate(
         'xpack.enterpriseSearch.content.newConnector.newConnectorTemplate.isInvalid.error',
         {
@@ -130,14 +141,17 @@ export const StartStep: React.FC<StartStepProps> = ({
   }, [selfManaged]);
 
   useEffect(() => {
-    // console.log('connectorSelected', connectorSelected);
     if (connectorSelected && connectorSelected.name !== '') {
-      const name =
-        connectorSelected.name
-          .toLocaleLowerCase()
-          .replace(/[^\w-]/g, '')
-          .replace(/ /g, '-') + '-aa3f';
-      setConnectorName(name);
+      // TODO: self managed should be calculated by the logic
+      if (!connectorSelected.isNative && !selfManaged) {
+        setSelfManaged(true);
+      }
+      // const name = // TODO: replace with logic
+      //  connectorSelected.name
+      //    .toLocaleLowerCase()
+      //    .replace(/[^\w-]/g, '')
+      //    .replace(/ /g, '-') + '-aa3f';
+      // setConnectorName(name);
     }
   }, [connectorSelected]);
 
@@ -162,10 +176,9 @@ export const StartStep: React.FC<StartStepProps> = ({
                 >
                   <ChooseConnectorSelectable
                     selfManaged={selfManaged}
-                    setConnectorSelected={setConnectorSelected}
+                    setConnectorSelected={selectNewConnector}
                     connectorSelected={connectorSelected}
                     allConnectors={allConnectors}
-                    setSelfManaged={setSelfManaged}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -183,7 +196,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     data-test-subj="enterpriseSearchStartStepFieldText"
                     fullWidth
                     name="first"
-                    value={rawName}
+                    value={fullIndexName}
                     onChange={handleNameChange}
                   />
                 </EuiFormRow>

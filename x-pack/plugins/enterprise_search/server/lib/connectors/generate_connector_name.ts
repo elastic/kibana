@@ -23,7 +23,7 @@ export const generateConnectorName = async (
     throw new Error('Connector type is required');
   }
   for (let i = 0; i < 20; i++) {
-    const connectorName = `${prefix}-${uuidv4().split('-')[1]}`;
+    const connectorName = `${prefix}-${uuidv4().split('-')[1].slice(0, 4)}`;
     const indexName = `connector-${connectorName}`;
 
     const result = await indexOrAliasExists(client, indexName);

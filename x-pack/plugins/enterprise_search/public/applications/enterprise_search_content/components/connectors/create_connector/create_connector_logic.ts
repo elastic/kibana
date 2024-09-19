@@ -27,22 +27,29 @@ type GenerateConfigApiActions = Actions<GenerateConfigApiArgs, {}>;
 export interface CreateConnectorLogicValues {
   generateConfigurationError: HttpError;
   generateConfigurationStatus: Status;
+  generatedConnectorName: string;
   generatedData: {
     apiKey: APIKeyResponse['apiKey'];
     connectorId: Connector['id'];
     indexName: string;
   };
   isGenerateLoading: boolean;
+  newConnectorServiceType: Connector['service_type'];
 }
 export interface CreateConnectorLogicActions {
   createConnector: AddConnectorApiLogicActions['makeRequest'];
   generateConfiguration: GenerateConfigApiActions['makeRequest'];
   generateConfigurationSuccess: GenerateConfigApiActions['apiSuccess'];
+  setNewConnectorServiceType: (serviceType: string) => { serviceType: string };
 }
 
 export const CreateConnectorLogic = kea<
   MakeLogicType<CreateConnectorLogicValues, CreateConnectorLogicActions>
 >({
+  actions: {
+    createConnector: true,
+    setNewConnectorServiceType: (serviceType: string) => ({ serviceType }),
+  },
   connect: {
     actions: [
       GenerateConfigApiLogic,
@@ -63,6 +70,18 @@ export const CreateConnectorLogic = kea<
     apiSuccess: async ({ id }) => {
       actions.generateConfiguration({ connectorId: id });
     },
+  }),
+  reducers: () => ({
+    newConnectorServiceType: [
+      '',
+      {
+        createConnector: () => '',
+        setNewConnectorServiceType: (
+          _: CreateConnectorLogicValues['newConnectorServiceType'],
+          { serviceType }: { serviceType: string }
+        ) => serviceType,
+      },
+    ],
   }),
   selectors: {
     isGenerateLoading: [
