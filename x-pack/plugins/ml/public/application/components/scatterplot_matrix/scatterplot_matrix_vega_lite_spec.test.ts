@@ -16,6 +16,7 @@ import { LEGEND_TYPES } from '../vega_chart/common';
 
 import {
   getColorSpec,
+  getEscapedVegaFieldName,
   getScatterplotMatrixVegaLiteSpec,
   COLOR_RANGE_NOMINAL,
   COLOR_RANGE_OUTLIER,
@@ -72,6 +73,45 @@ describe('getColorSpec()', () => {
       },
       value: COLOR_BLUR,
     });
+  });
+});
+
+describe('getEscapedVegaFieldName()', () => {
+  it('should escape dots in field names', () => {
+    const fieldName = 'field.name';
+    const escapedFieldName = getEscapedVegaFieldName(fieldName);
+    expect(escapedFieldName).toBe('field\\.name');
+  });
+
+  it('should escape brackets in field names', () => {
+    const fieldName = 'field[name]';
+    const escapedFieldName = getEscapedVegaFieldName(fieldName);
+    expect(escapedFieldName).toBe('field\\[name\\]');
+  });
+
+  it('should escape both dots and brackets in field names', () => {
+    const fieldName = 'field.name[0]';
+    const escapedFieldName = getEscapedVegaFieldName(fieldName);
+    expect(escapedFieldName).toBe('field\\.name\\[0\\]');
+  });
+
+  it('should return the same string if there are no special characters', () => {
+    const fieldName = 'fieldname';
+    const escapedFieldName = getEscapedVegaFieldName(fieldName);
+    expect(escapedFieldName).toBe('fieldname');
+  });
+
+  it('should prepend a string if provided', () => {
+    const fieldName = 'field.name';
+    const prependString = 'prefix_';
+    const escapedFieldName = getEscapedVegaFieldName(fieldName, prependString);
+    expect(escapedFieldName).toBe('prefix_field\\.name');
+  });
+
+  it('should escape backslashes in field names', () => {
+    const fieldName = 'fieldname\\withbackslash';
+    const escapedFieldName = getEscapedVegaFieldName(fieldName);
+    expect(escapedFieldName).toBe('fieldname\\\\withbackslash');
   });
 });
 

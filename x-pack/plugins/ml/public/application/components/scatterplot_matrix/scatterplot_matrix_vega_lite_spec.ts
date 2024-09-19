@@ -249,11 +249,11 @@ const getVegaSpecLayer = (
   };
 };
 
-// Escapes the characters .[] in field names with double backslashes
+// Escapes the characters .[]\ in field names with double backslashes
 // since VEGA treats dots/brackets in field names as nested values.
 // See https://vega.github.io/vega-lite/docs/field.html for details.
-function getEscapedVegaFieldName(fieldName: string, prependString: string = '') {
-  return `${prependString}${fieldName.replace(/([\.|\[|\]])/g, '\\$1')}`;
+export function getEscapedVegaFieldName(fieldName: string, prependString: string = '') {
+  return `${prependString}${fieldName.replace(/([\.|\[|\]|\\])/g, '\\$1')}`;
 }
 
 type VegaValue = Record<string, string | number>;
