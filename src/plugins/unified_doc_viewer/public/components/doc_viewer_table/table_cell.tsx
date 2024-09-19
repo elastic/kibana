@@ -83,7 +83,7 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
           rawValue={flattenedValue}
           ignoreReason={ignoredReason}
           isDetails={isDetails}
-          isHighLighted={Boolean(
+          isHighlighted={Boolean(
             searchTermMatch && [TermMatch.value, TermMatch.both].includes(searchTermMatch)
           )}
         />
