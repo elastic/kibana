@@ -3999,6 +3999,10 @@
                 "path": "x-pack/plugins/triggers_actions_ui/server/routes/config.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/plugins/inference/server/routes/connectors.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/get_searchable_types.ts"
               },
@@ -4441,10 +4445,6 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/snapshot_repositories/register_fetch_route.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/plugins/inference/server/routes/connectors.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -6689,6 +6689,10 @@
                 "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/plugins/inference/server/routes/chat_complete.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/find.ts"
               },
@@ -7059,10 +7063,6 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/templates/register_add_policy_route.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/plugins/inference/server/routes/chat_complete.ts"
               },
               {
                 "plugin": "ingestPipelines",

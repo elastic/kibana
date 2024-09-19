@@ -24,6 +24,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
 export function createCoreStartMock({ basePath = '' } = {}) {
   const mock = {
@@ -33,6 +34,7 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     customBranding: customBrandingServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createStartContract(),
+    featureFlags: coreFeatureFlagsMock.createStart(),
     http: httpServiceMock.createStartContract({ basePath }),
     i18n: i18nServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
