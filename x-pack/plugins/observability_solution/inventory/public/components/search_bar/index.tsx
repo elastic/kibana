@@ -7,6 +7,7 @@
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntityTypesControls } from './entity_types_controls';
+import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
 
 export function SearchBar() {
   const {
@@ -17,13 +18,14 @@ export function SearchBar() {
 
   const { SearchBar: UnifiedSearchBar } = unifiedSearch.ui;
 
+  const { dataView } = useAdHocInventoryDataView();
+
   return (
-    <div>
-      <UnifiedSearchBar
-        appName="Inventory"
-        showDatePicker={false}
-        renderQueryInputAppend={EntityTypesControls}
-      />
-    </div>
+    <UnifiedSearchBar
+      appName="Inventory"
+      showDatePicker={false}
+      indexPatterns={dataView ? [dataView] : undefined}
+      renderQueryInputAppend={EntityTypesControls}
+    />
   );
 }

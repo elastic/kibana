@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
-import { MAX_NUMBER_OF_ENTITIES, type EntityType } from '../../../common/entities';
+import {
+  ENTITIES_LATEST_ALIAS,
+  MAX_NUMBER_OF_ENTITIES,
+  type EntityType,
+} from '../../../common/entities';
 import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
@@ -16,11 +19,6 @@ import {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '../../../common/es_fields/entities';
-
-const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
-  type: '*',
-  dataset: ENTITY_LATEST,
-});
 
 const BUILTIN_SERVICES_FROM_ECS_DATA = 'builtin_services_from_ecs_data';
 const BUILTIN_HOSTS_FROM_ECS_DATA = 'builtin_hosts_from_ecs_data';

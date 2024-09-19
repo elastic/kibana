@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 
 export const entityTypeRt = t.union([
   t.literal('service'),
@@ -15,3 +16,8 @@ export const entityTypeRt = t.union([
 export type EntityType = t.TypeOf<typeof entityTypeRt>;
 
 export const MAX_NUMBER_OF_ENTITIES = 500;
+
+export const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
+  type: '*',
+  dataset: ENTITY_LATEST,
+});
