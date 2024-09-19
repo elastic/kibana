@@ -186,7 +186,7 @@ export const OverviewGrid = memo(() => {
                             gutterSize="m"
                             style={{ ...style }}
                           >
-                            {listData[listIndex].map((_, idx) => (
+                            {listData[listIndex].map((_p, idx) => (
                               <EuiFlexItem
                                 data-test-subj="syntheticsOverviewGridItem"
                                 key={listIndex * ROW_COUNT + idx}
