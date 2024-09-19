@@ -12,6 +12,7 @@ import type { Datatable } from '../expression_types/specs';
 
 export class TablesAdapter extends EventEmitter {
   private _tables: { [key: string]: Datatable } = {};
+  public allowCsvExport: boolean = false;
 
   public logDatatable(name: string, datatable: Datatable): void {
     this._tables[name] = datatable;
