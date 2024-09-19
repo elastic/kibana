@@ -61,6 +61,13 @@ export const OverviewPendingStatusMetaDataCodec = t.intersection([
   t.partial({
     timestamp: t.string,
     ping: OverviewPingCodec,
+    name: t.string,
+    schedule: t.string,
+    isEnabled: t.boolean,
+    tags: t.array(t.string),
+    isStatusAlertEnabled: t.boolean,
+    type: t.string,
+    projectId: t.string,
   }),
 ]);
 

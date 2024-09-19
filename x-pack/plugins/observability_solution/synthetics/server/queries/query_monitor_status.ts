@@ -239,12 +239,20 @@ export async function queryMonitorStatus({
 
   // identify the remaining monitors without data, to determine pending monitors
   for (const [queryId, locs] of monitorsWithoutData) {
+    const monitor = monitors.find((m) => m.attributes[ConfigKey.MONITOR_QUERY_ID] === queryId)!;
     locs.forEach((loc) => {
       pendingConfigs[`${monitorQueryIdToConfigIdMap[queryId]}-${loc}`] = {
         configId: `${monitorQueryIdToConfigIdMap[queryId]}`,
         monitorQueryId: queryId,
         status: 'unknown',
         locationId: loc,
+        name: monitor.attributes[ConfigKey.NAME],
+        schedule: monitor.attributes[ConfigKey.SCHEDULE].number,
+        tags: monitor.attributes[ConfigKey.TAGS],
+        isEnabled: monitor.attributes[ConfigKey.ENABLED],
+        type: monitor.attributes[ConfigKey.MONITOR_TYPE],
+        projectId: monitor.attributes[ConfigKey.PROJECT_ID],
+        isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
       };
     });
   }

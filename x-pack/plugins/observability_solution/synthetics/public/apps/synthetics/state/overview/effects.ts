@@ -7,7 +7,7 @@
 
 import { call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
 import { OverviewStatusStateReducer, selectOverviewStatus } from '../overview_status';
-import type { TrendTable } from '../../../../../common/types';
+import type { OverviewTrend, TrendTable } from '../../../../../common/types';
 import { selectOverviewTrends } from './selectors';
 import { refreshOverviewTrends, trendStatsBatch } from './actions';
 import { fetchOverviewTrendStats as trendsApi } from './api';
@@ -49,7 +49,7 @@ export function* refreshTrends(): Generator<unknown, void, any> {
         (key: string) =>
           existingTrends[key] !== null &&
           existingTrends[key] !== 'loading' &&
-          overviewState.data.monitors.some(
+          monitorConfigs.some(
             ({ configId }) => configId === (existingTrends[key] as OverviewTrend)!.configId
           )
       )
@@ -58,8 +58,7 @@ export function* refreshTrends(): Generator<unknown, void, any> {
         return {
           configId: trend.configId,
           locationId: trend.locationId,
-          schedule: overviewState.data.monitors.find(({ configId }) => configId === trend.configId)!
-            .schedule,
+          schedule: monitorConfigs.find(({ configId }) => configId === trend.configId)!.schedule,
         };
       });
     if (chunk.length) {
