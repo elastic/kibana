@@ -49,6 +49,7 @@ WORKDIR ${KBN_DIR}
 # Node and NVM setup
 COPY .node-version /tmp/
 
+# Mac will have permissions issues if Node and NVM are installed as root
 USER vscode
 
 RUN mkdir -p $NVM_DIR && \
