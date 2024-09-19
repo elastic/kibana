@@ -35,7 +35,6 @@ import type {
   CommandVisitorInput,
   ESQLAstExpressionNode,
   ESQLAstQueryNode,
-  ExpressionVisitorInput,
   ExpressionVisitorOutput,
   UndefinedToVoid,
   VisitorAstNode,
