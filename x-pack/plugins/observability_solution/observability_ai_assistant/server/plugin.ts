@@ -35,7 +35,6 @@ import {
 import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
-import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
 
 export class ObservabilityAIAssistantPlugin
@@ -54,7 +53,6 @@ export class ObservabilityAIAssistantPlugin
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get<ObservabilityAIAssistantConfig>();
-    initLangtrace();
   }
   public setup(
     core: CoreSetup<

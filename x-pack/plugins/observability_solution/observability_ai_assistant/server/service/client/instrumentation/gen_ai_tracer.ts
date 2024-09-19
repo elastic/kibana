@@ -9,17 +9,22 @@ import { LLMSpanAttributes } from '@langtrase/trace-attributes';
 import { Context, Span, SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
 import { finalize, Observable, tap } from 'rxjs';
 import { getLangtraceSpanAttributes } from './get_langtrace_span_attributes';
-import { getLangtraceTracer } from './get_langtrace_tracer';
+import { getOTelTracer } from './get_otel_tracer';
 
-type SpanCallback<T> = ({}: { span: Span; tracer: LangTracer }) => Observable<T>;
+type SpanCallback<T> = ({}: { span: Span; tracer: GenAITracer }) => Observable<T>;
 
 interface Options {
   attributes?: Partial<LLMSpanAttributes>;
   kind?: SpanKind;
 }
 
-export class LangTracer {
-  private tracer = getLangtraceTracer();
+/**
+ * A wrapper around an OpenTelemetry tracer that automatically populates standard
+ * gen-ai attributes. Currently we follow langtrase conventions for attributes, not
+ * OpenTelemetry semantic conventions.
+ */
+export class GenAITracer {
+  private tracer = getOTelTracer();
 
   constructor(private context: Context) {}
 
@@ -50,7 +55,7 @@ export class LangTracer {
 
     const nextContext = trace.setSpan(this.context, span);
 
-    const nextTracer = new LangTracer(nextContext);
+    const nextTracer = new GenAITracer(nextContext);
 
     return callback!({ span, tracer: nextTracer }).pipe(
       tap({

@@ -15,13 +15,13 @@ import { concatenateChatCompletionChunks } from '../../../../common/utils/concat
 import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
 import { getLangtraceSpanAttributes } from '../instrumentation/get_langtrace_span_attributes';
 
-export enum LangtraceServiceProvider {
+export enum GenAIServiceProvider {
   OpenAI = 'OpenAI',
   Azure = 'Azure',
   Anthropic = 'Anthropic',
 }
 
-export function withLangtraceChatCompleteSpan<T extends ChatEvent>({
+export function withGenAIChatCompleteSpan<T extends ChatEvent>({
   span,
   model,
   messages,
@@ -31,7 +31,7 @@ export function withLangtraceChatCompleteSpan<T extends ChatEvent>({
   span: Span;
   model: string;
   messages: Message[];
-  serviceProvider: LangtraceServiceProvider;
+  serviceProvider: GenAIServiceProvider;
   functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
 }): OperatorFunction<T, T> {
   const attributes: LLMSpanAttributes = {

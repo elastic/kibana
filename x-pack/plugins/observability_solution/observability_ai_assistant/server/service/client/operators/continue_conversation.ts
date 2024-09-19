@@ -37,7 +37,7 @@ import type { AutoAbortedChatFunction } from '../../types';
 import { createServerSideFunctionResponseError } from '../../util/create_server_side_function_response_error';
 import { getSystemMessageFromInstructions } from '../../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../../util/replace_system_message';
-import { LangTracer } from '../instrumentation/lang_tracer';
+import { GenAITracer } from '../instrumentation/gen_ai_tracer';
 import { catchFunctionNotFoundError } from './catch_function_not_found_error';
 import { extractMessages } from './extract_messages';
 import { hideTokenCountEvents } from './hide_token_count_events';
@@ -63,7 +63,7 @@ function executeFunctionAndCatchError({
   chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   logger: Logger;
-  tracer: LangTracer;
+  tracer: GenAITracer;
   connectorId: string;
   useSimulatedFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
@@ -200,7 +200,7 @@ export function continueConversation({
     | {
         except: string[];
       };
-  tracer: LangTracer;
+  tracer: GenAITracer;
   connectorId: string;
   scope: AssistantScope;
   useSimulatedFunctionCalling: boolean;

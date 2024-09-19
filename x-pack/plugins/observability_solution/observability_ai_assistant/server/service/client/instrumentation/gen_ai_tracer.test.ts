@@ -11,10 +11,10 @@ import {
   ReadableSpan,
 } from '@opentelemetry/sdk-trace-base';
 import { context } from '@opentelemetry/api';
-import { LangTracer } from './lang_tracer';
+import { GenAITracer } from './gen_ai_tracer';
 import { lastValueFrom, of, throwError } from 'rxjs';
 
-describe('langTracer', () => {
+describe('genAiTracer', () => {
   const provider = new BasicTracerProvider();
   const memoryExporter = new InMemorySpanExporter();
   provider.addSpanProcessor(new SimpleSpanProcessor(memoryExporter));
@@ -25,10 +25,10 @@ describe('langTracer', () => {
   });
 
   describe('when creating a span against an observable', () => {
-    let tracer: LangTracer;
+    let tracer: GenAITracer;
 
     beforeEach(() => {
-      tracer = new LangTracer(context.active());
+      tracer = new GenAITracer(context.active());
     });
 
     it('calls the callback with the created span', async () => {
@@ -82,7 +82,7 @@ describe('langTracer', () => {
 
   describe('when creating a child span', () => {
     it('sets the first span as the parent of the second span', async () => {
-      const tracer = new LangTracer(context.active());
+      const tracer = new GenAITracer(context.active());
 
       const value = await lastValueFrom(
         tracer.startActiveSpan('parent', ({ span, tracer: nextTracer }) => {

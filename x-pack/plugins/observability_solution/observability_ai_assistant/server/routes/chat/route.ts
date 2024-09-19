@@ -14,7 +14,7 @@ import { AssistantScope } from '../../../common/types';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
-import { LangTracer } from '../../service/client/instrumentation/lang_tracer';
+import { GenAITracer } from '../../service/client/instrumentation/gen_ai_tracer';
 import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoOpenAIStream } from '../../service/util/observable_into_openai_stream';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
@@ -165,7 +165,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
           }
         : {}),
       simulateFunctionCalling,
-      tracer: new LangTracer(otelContext.active()),
+      tracer: new GenAITracer(otelContext.active()),
     });
 
     return observableIntoStream(response$.pipe(flushBuffer(isCloudEnabled)));
@@ -202,7 +202,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
               connectorId,
               simulateFunctionCalling,
               signal,
-              tracer: new LangTracer(otelContext.active()),
+              tracer: new GenAITracer(otelContext.active()),
             })
             .pipe(withoutTokenCountEvents()),
         context,
