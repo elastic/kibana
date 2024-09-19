@@ -148,9 +148,6 @@ For information about granting access to embedded dashboards, refer to <<kibana-
 
 . Click *Copy embed code*.
 
-//* To automatically log in anonymous users when you have multiple authentication providers enabled, select *Public URL*.
-//+
-//NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to embed. For more information, refer to <<anonymous-authentication,Anonymous authentication>>.
 
 
 
