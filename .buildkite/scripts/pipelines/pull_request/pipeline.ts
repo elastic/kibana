@@ -303,20 +303,26 @@ const getPerfPipeline = (filename: string, groups: string) => {
       );
     }
 
-    if (
-      GITHUB_PR_LABELS.includes('ci:perf-check:start') ||
-      GITHUB_PR_LABELS.includes('ci:perf-check:dashboard') ||
-      GITHUB_PR_LABELS.includes('ci:perf-check:so-crud')
-    ) {
-      const journeyGroups = GITHUB_PR_LABELS.split(',')
+    if (GITHUB_PR_LABELS.includes('ci:perf-check:')) {
+      // expected labels
+      // ('ci:perf-check:kibanaStartAndLoad');
+      // ('ci:perf-check:crud');
+      // ('ci:perf-check:dashboard');
+      // ('ci:perf-check:discover');
+      // ('ci:perf-check:esql');
+      // ('ci:perf-check:maps');
+      // ('ci:perf-check:ml');
+      const journeysGroups = GITHUB_PR_LABELS.split(',')
         .map((label) => label.trim())
         .filter((label) => label.startsWith('ci:perf-check:'))
-        .map((label) => label.replace('ci:perf-check:', ''))
-        .join(',');
-      pipeline.push(
-        getPerfPipeline(
-          '.buildkite/pipelines/pull_request/single_user_performance_check.yml',
-          journeyGroups
+        .map((label) => label.replace('ci:perf-check:', ''));
+
+      journeysGroups.forEach((group) =>
+        pipeline.push(
+          getPerfPipeline(
+            '.buildkite/pipelines/pull_request/single_user_performance_check.yml',
+            group
+          )
         )
       );
     }
