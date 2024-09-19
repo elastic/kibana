@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public';
 
@@ -29,7 +28,6 @@ export interface DashboardServices {
 
   dashboardCapabilities: DashboardCapabilitiesService;
   initializerContext: DashboardInitializerContextService;
-  contentManagement: ContentManagementPublicStart;
   dashboardRecentlyAccessed: DashboardRecentlyAccessedService;
   dashboardContentInsights: DashboardContentInsightsService;
   dashboardFavorites: DashboardFavoritesService;

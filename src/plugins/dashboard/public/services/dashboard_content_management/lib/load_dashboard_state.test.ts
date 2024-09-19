@@ -7,20 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { getSampleDashboardInput } from '../../../mocks';
-import { pluginServices } from '../../plugin_services';
-import { registry } from '../../plugin_services.stub';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import { loadDashboardState } from './load_dashboard_state';
 
-pluginServices.setRegistry(registry.start({}));
-const { contentManagement } = pluginServices.getServices();
-
-const allServices = {
-  contentManagement,
-};
-
 describe('Load dashboard state', () => {
+  const contentManagementServiceMock = contentManagementMock.createStartContract();
+
   it('should return cached result if available', async () => {
     dashboardContentManagementCache.fetchDashboard = jest.fn().mockImplementation((id: string) => {
       return {
@@ -37,17 +31,17 @@ describe('Load dashboard state', () => {
         meta: {},
       };
     });
+    contentManagementServiceMock.client.get = jest.fn();
     dashboardContentManagementCache.addDashboard = jest.fn();
-    contentManagement.client.get = jest.fn();
 
     const { id } = getSampleDashboardInput();
     const result = await loadDashboardState({
       id,
-      ...allServices,
+      contentManagement: contentManagementServiceMock,
     });
     expect(dashboardContentManagementCache.fetchDashboard).toBeCalled();
     expect(dashboardContentManagementCache.addDashboard).not.toBeCalled();
-    expect(contentManagement.client.get).not.toBeCalled();
+    expect(contentManagementServiceMock.client.get).not.toBeCalled();
     expect(result).toMatchObject({
       dashboardId: id,
       dashboardFound: true,
@@ -60,7 +54,7 @@ describe('Load dashboard state', () => {
   it('should not add to cache for alias redirect result', async () => {
     dashboardContentManagementCache.fetchDashboard = jest.fn().mockImplementation(() => undefined);
     dashboardContentManagementCache.addDashboard = jest.fn();
-    contentManagement.client.get = jest.fn().mockImplementation(({ id }) => {
+    contentManagementServiceMock.client.get = jest.fn().mockImplementation(({ id }) => {
       return Promise.resolve({
         item: { id },
         meta: {
@@ -71,7 +65,7 @@ describe('Load dashboard state', () => {
     const { id } = getSampleDashboardInput();
     await loadDashboardState({
       id,
-      ...allServices,
+      contentManagement: contentManagementServiceMock,
     });
     expect(dashboardContentManagementCache.fetchDashboard).toBeCalled();
     expect(dashboardContentManagementCache.addDashboard).not.toBeCalled();
