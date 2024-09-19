@@ -56,11 +56,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(isOpen).to.be(true);
         }
 
-        // TODO: here navigate to some link inside the panel (note: this is a smoke test file not full coverage)
-
         await solutionNavigation.sidenav.closePanel('apm', { button: 'link' });
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('apm');
+          expect(isOpen).to.be(false);
+        }
+
+        // open Infrastructure panel using the icon button and navigate to some link inside the panel
+        await solutionNavigation.sidenav.openPanel('metrics', { button: 'icon' });
+        {
+          const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
+          expect(isOpen).to.be(true);
+        }
+        await solutionNavigation.sidenav.clickPanelLink('metrics:inventory');
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Inventory' });
+
+        {
+          const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
           expect(isOpen).to.be(false);
         }
 

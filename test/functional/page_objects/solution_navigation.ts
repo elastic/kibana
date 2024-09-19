@@ -130,6 +130,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           });
         }
       },
+      async clickPanelLink(deepLinkId: string) {
+        await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
+      },
       async expectSectionExists(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectSectionExists', sectionId);
         await testSubjects.existOrFail(getSectionIdTestSubj(sectionId), { timeout: TIMEOUT_CHECK });
