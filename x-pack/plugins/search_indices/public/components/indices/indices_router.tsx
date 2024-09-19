@@ -9,7 +9,7 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
 import { useKibana } from '../../hooks/use_kibana';
 import {
-  SearchIndicesDetailsMappingsTabs,
+  SearchIndexDetailsTabs,
   SEARCH_INDICES_DETAILS_PATH,
   SEARCH_INDICES_DETAILS_TABS_PATH,
 } from '../../routes';
@@ -25,7 +25,7 @@ export const SearchIndicesRouter: React.FC = () => {
             <Redirect
               exact
               from={`${SEARCH_INDICES_DETAILS_PATH}/`}
-              to={`${SEARCH_INDICES_DETAILS_PATH}/${SearchIndicesDetailsMappingsTabs.DATA}`}
+              to={`${SEARCH_INDICES_DETAILS_PATH}/${SearchIndexDetailsTabs.DATA}`}
             />
           </Routes>
         </Route>

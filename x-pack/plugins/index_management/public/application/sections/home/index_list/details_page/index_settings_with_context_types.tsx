@@ -6,9 +6,9 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import type { IndexSettingProps } from '@kbn/index-management-shared-types';
 import { AppDependencies } from '../../../../app_context';
 import { ExtensionsService } from '../../../../../services/extensions_service';
-import type { IndexSettingProps } from '@kbn/index-management-shared-types';
 
 export type IndexSettingWithContextProps = {
   core: CoreStart;
