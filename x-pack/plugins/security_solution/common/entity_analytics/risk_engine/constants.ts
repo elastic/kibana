@@ -12,11 +12,11 @@ export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable` as const;
 export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable` as const;
 export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges` as const;
 export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings` as const;
-export const RISK_ENGINE_CLEANUP_URL = `/api/risk_score/engine/dangerously_delete_data` as const;
 
 // Public Risk Score routes
 export const PUBLIC_RISK_ENGINE_URL = `${PUBLIC_RISK_SCORE_URL}/engine` as const;
 export const RISK_ENGINE_SCHEDULE_NOW_URL = `${RISK_ENGINE_URL}/schedule_now` as const;
+export const RISK_ENGINE_CLEANUP_URL = `${PUBLIC_RISK_ENGINE_URL}/dangerously_delete_data` as const;
 
 export const MAX_SPACES_COUNT = 1;
 

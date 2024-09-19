@@ -252,7 +252,7 @@ export class RiskEngineDataClient {
   public async tearDown({ taskManager, riskScoreDataClient }: TearDownParams) {
     const errors: Error[] = [];
     const addError = (e: Error) => errors.push(e);
-  
+
     await removeRiskScoringTask({
       namespace: this.options.namespace,
       taskManager,

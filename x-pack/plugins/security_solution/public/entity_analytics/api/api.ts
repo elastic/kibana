@@ -253,7 +253,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Deletes Risk engine installation and associated data
      */
 
-    const CleanUpRiskEngine = () =>
+    const cleanUpRiskEngine = () =>
       http.fetch(RISK_ENGINE_CLEANUP_URL, {
         version: '1',
         method: 'DELETE',
@@ -275,7 +275,7 @@ export const useEntityAnalyticsRoutes = () => {
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
-      CleanUpRiskEngine,
+      cleanUpRiskEngine,
     };
   }, [http]);
 };
