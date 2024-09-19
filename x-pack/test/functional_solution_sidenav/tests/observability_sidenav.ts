@@ -64,17 +64,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(isOpen).to.be(false);
         }
 
-        // -----------------------------------------------------------------------------------------
-        // NOTE: those tests below will now break after the navigation changes. Please update them.
-
-        // check the AI & ML subsection
-        await solutionNavigation.sidenav.openSection('observability_project_nav.aiMl'); // open AI & ML subsection
-        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'ml:anomalyDetection' });
-        await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:anomalyDetection' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Anomaly Detection' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'ml:anomalyDetection',
-        });
+        // check the AI Assistant
+        await solutionNavigation.sidenav.clickLink({ navId: 'observabilityAIAssistant' }); // click on AI Assistant link
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
 
         // navigate to a different section
         await solutionNavigation.sidenav.openSection('project_settings_project_nav');
