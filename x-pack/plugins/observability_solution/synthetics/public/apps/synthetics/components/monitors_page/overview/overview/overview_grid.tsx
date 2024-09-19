@@ -67,7 +67,6 @@ export const OverviewGrid = memo(() => {
   const trendData = useSelector(selectOverviewTrends);
   const { perPage } = pageState;
 
-  const [_, setPage] = useState(1);
   const [maxItem, setMaxItem] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -140,7 +139,7 @@ export const OverviewGrid = memo(() => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <SortFields onSortChange={() => setPage(1)} />
+          <SortFields />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <GroupFields />
@@ -157,9 +156,7 @@ export const OverviewGrid = memo(() => {
                     listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
                   }
                   itemCount={listItems.length}
-                  loadMoreItems={(_start: number, stop: number) =>
-                    setMaxItem(Math.max(maxItem, stop))
-                  }
+                  loadMoreItems={(_: number, stop: number) => setMaxItem(Math.max(maxItem, stop))}
                   minimumBatchSize={MIN_BATCH_SIZE}
                   threshold={LIST_THRESHOLD}
                 >
@@ -186,7 +183,7 @@ export const OverviewGrid = memo(() => {
                             gutterSize="m"
                             style={{ ...style }}
                           >
-                            {listData[listIndex].map((_p, idx) => (
+                            {listData[listIndex].map((_, idx) => (
                               <EuiFlexItem
                                 data-test-subj="syntheticsOverviewGridItem"
                                 key={listIndex * ROW_COUNT + idx}
@@ -201,7 +198,7 @@ export const OverviewGrid = memo(() => {
                               // Adds empty items to fill out row
                               Array.from({
                                 length: ROW_COUNT - listData[listIndex].length,
-                              }).map((_i, idx) => <EuiFlexItem key={idx} />)}
+                              }).map((_, idx) => <EuiFlexItem key={idx} />)}
                           </EuiFlexGroup>
                         );
                       }}
