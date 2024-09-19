@@ -58,9 +58,9 @@ export interface NavigationKibanaDependencies {
       };
       sideNav: {
         getIsCollapsed$: () => Observable<boolean>;
+        getPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
+        setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
       };
-      getSideNavPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
-      setSideNavPanelSelectedNode(node: string | PanelSelectedNode | null): void;
     };
     http: {
       basePath: BasePathService;

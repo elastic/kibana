@@ -84,7 +84,7 @@ export const SolutionEmptyPrompt: FC<Props> = ({ kibanaVersion, coreStart }) => 
               fill
               iconType="spaces"
               onClick={() => {
-                coreStart.chrome.setSideNavPanelSelectedNode(
+                coreStart.chrome.sideNav.setPanelSelectedNode(
                   'project_settings_project_nav.management'
                 );
               }}

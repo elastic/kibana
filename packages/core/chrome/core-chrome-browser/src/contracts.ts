@@ -185,13 +185,24 @@ export interface ChromeStart {
      * @param isCollapsed The collapsed state of the side nav.
      */
     setIsCollapsed(isCollapsed: boolean): void;
+
+    /**
+     * Get an observable of the selected nav node that opens the side nav panel.
+     */
+    getPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
+
+    /**
+     * Set the selected nav node that opens the side nav panel.
+     *
+     * @param node The selected nav node that opens the side nav panel. If a string is provided,
+     * it will be used as the **path** of the selected nav node. If `null` is provided, the side nav panel
+     * will be closed.
+     */
+    setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
   };
 
   /**
    * Get the id of the currently active project navigation or `null` otherwise.
    */
   getActiveSolutionNavId$(): Observable<string | null>;
-
-  getSideNavPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
-  setSideNavPanelSelectedNode(node: string | PanelSelectedNode | null): void;
 }

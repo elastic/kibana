@@ -568,6 +568,8 @@ export class ChromeService {
       sideNav: {
         getIsCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
         setIsCollapsed: setIsSideNavCollapsed,
+        getPanelSelectedNode$: projectNavigation.getPanelSelectedNode$.bind(projectNavigation),
+        setPanelSelectedNode: projectNavigation.setPanelSelectedNode.bind(projectNavigation),
       },
       getActiveSolutionNavId$: () => projectNavigation.getActiveSolutionNavId$(),
       project: {
@@ -582,8 +584,6 @@ export class ChromeService {
         updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
       },
-      getSideNavPanelSelectedNode$: projectNavigation.getPanelSelectedNode$.bind(projectNavigation),
-      setSideNavPanelSelectedNode: projectNavigation.setPanelSelectedNode.bind(projectNavigation),
     };
   }
 
