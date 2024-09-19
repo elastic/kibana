@@ -7,7 +7,7 @@
 {kib} supports several ways to explore the data displayed in a dashboard more in depth:
 
 * The **query bar**, using KQL expressions by default.
-* The **time range**, that allows you to display data only for the period that you want to focus on. You can set a global time range for the entire dashboard, or specify a custom time range for each panel.
+* The **Time range**, that allows you to display data only for the period that you want to focus on. You can set a global time range for the entire dashboard, or specify a custom time range for each panel.
 * **Controls**, that dashboard creators can add to help viewers filter on specific values.
 * **Filter pills**, that you can add and combine by clicking on specific parts of the dashboard visualizations, or by defining conditions manually from the filter editor. The filter editor is a good alternative if you're not comfortable with using KQL expressions in the main query bar.
 * View the data of a panel and the requests used to build it.
@@ -50,7 +50,7 @@ image::images/dashboard-global-time-range.png[Time range menu with multiple time
 
 When a custom time range is active for a single panel, it is indicated in the panel's header.
 
-To edit it, click the filter. You can then adjust and apply the updated **time range**.
+To edit it, click the filter. You can then adjust and apply the updated **Time range**.
 
 [float]
 === Use available controls
@@ -121,7 +121,7 @@ image::images/dashboard_timeSliderControl_8.7.0.gif[Time slider control]
 Use filter pills to focus in on the specific data you want.
 
 [role="screenshot"]
-image::images/dashboard_filter_pills_8.15.0.png[Filter pills, width=60%]
+image::images/dashboard_filter_pills_8.15.0.png[Filter pills, width=50%]
 
 [float]
 ==== Add pills by interacting with visualizations
