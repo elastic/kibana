@@ -51,10 +51,10 @@ describe('DiscoverEBTContextManager', () => {
       discoverEBTContextManager.enable();
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
-      expect(discoverEBTContextManager.getProfilesContext()?.dscProfiles).toBe(dscProfiles);
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles2);
-      expect(discoverEBTContextManager.getProfilesContext()?.dscProfiles).toBe(dscProfiles2);
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles2);
     });
 
     it('should not update the profiles if profile list did not change', () => {
@@ -64,10 +64,10 @@ describe('DiscoverEBTContextManager', () => {
       discoverEBTContextManager.enable();
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
-      expect(discoverEBTContextManager.getProfilesContext()?.dscProfiles).toBe(dscProfiles);
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles2);
-      expect(discoverEBTContextManager.getProfilesContext()?.dscProfiles).toBe(dscProfiles);
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
     });
 
     it('should not update the profiles if not enabled yet', () => {
@@ -75,7 +75,7 @@ describe('DiscoverEBTContextManager', () => {
       discoverEBTContextManager.register({ core: coreSetupMock });
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
-      expect(discoverEBTContextManager.getProfilesContext()).toEqual({ dscProfiles: [] });
+      expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
     });
 
     it('should not update the profiles after resetting unless enabled again', () => {
@@ -83,14 +83,14 @@ describe('DiscoverEBTContextManager', () => {
       discoverEBTContextManager.register({ core: coreSetupMock });
       discoverEBTContextManager.enable();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
-      expect(discoverEBTContextManager.getProfilesContext()).toEqual({ dscProfiles });
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
       discoverEBTContextManager.reset();
-      expect(discoverEBTContextManager.getProfilesContext()).toEqual({ dscProfiles: [] });
+      expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
-      expect(discoverEBTContextManager.getProfilesContext()).toEqual({ dscProfiles: [] });
+      expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
       discoverEBTContextManager.enable();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
-      expect(discoverEBTContextManager.getProfilesContext()).toEqual({ dscProfiles });
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
     });
   });
 });

@@ -18,18 +18,19 @@ export type DiscoverEBTContextForProfiles = BehaviorSubject<DiscoverEBTContextFo
 
 export class DiscoverEBTContextManager {
   private isEnabled: boolean = false;
-  private ebtContextForProfiles$: DiscoverEBTContextForProfiles | undefined;
+  private profilesContext$: DiscoverEBTContextForProfiles | undefined; // Discover Context Awareness Profiles
 
   constructor() {}
 
+  // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
   public register({ core }: { core: CoreSetup }) {
-    const ebtContextForProfiles$ = new BehaviorSubject<DiscoverEBTContextForProfilesProps>({
+    const profilesContext$ = new BehaviorSubject<DiscoverEBTContextForProfilesProps>({
       dscProfiles: [],
     });
 
     core.analytics.registerContextProvider({
       name: 'dsc_profiles',
-      context$: ebtContextForProfiles$,
+      context$: profilesContext$,
       schema: {
         dscProfiles: {
           type: 'array',
@@ -44,7 +45,9 @@ export class DiscoverEBTContextManager {
       },
     });
 
-    this.ebtContextForProfiles$ = ebtContextForProfiles$;
+    this.profilesContext$ = profilesContext$;
+
+    // If we decide to extend EBT context with more properties, we can do it here
   }
 
   public enable() {
@@ -54,17 +57,17 @@ export class DiscoverEBTContextManager {
   public updateProfilesContextWith(dscProfiles: DiscoverEBTContextForProfilesProps['dscProfiles']) {
     if (
       this.isEnabled &&
-      this.ebtContextForProfiles$ &&
-      !isEqual(this.ebtContextForProfiles$.getValue().dscProfiles, dscProfiles)
+      this.profilesContext$ &&
+      !isEqual(this.profilesContext$.getValue().dscProfiles, dscProfiles)
     ) {
-      this.ebtContextForProfiles$.next({
+      this.profilesContext$.next({
         dscProfiles,
       });
     }
   }
 
   public getProfilesContext() {
-    return this.ebtContextForProfiles$?.getValue();
+    return this.profilesContext$?.getValue()?.dscProfiles;
   }
 
   public reset() {
