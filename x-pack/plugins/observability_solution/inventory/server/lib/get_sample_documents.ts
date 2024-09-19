@@ -7,6 +7,7 @@
 
 import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 
 export function getSampleDocuments({
   esClient,
@@ -14,12 +15,14 @@ export function getSampleDocuments({
   end,
   indexPatterns,
   count,
+  dslFilter,
 }: {
   esClient: ObservabilityElasticsearchClient;
   start: number;
   end: number;
   indexPatterns: string[];
   count: number;
+  dslFilter?: QueryDslQueryContainer[];
 }) {
   return esClient
     .search('get_sample_documents', {
@@ -40,7 +43,7 @@ export function getSampleDocuments({
                 },
               },
             ],
-            must: [...rangeQuery(start, end)],
+            must: [...rangeQuery(start, end), ...(dslFilter ?? [])],
           },
         },
         sort: {

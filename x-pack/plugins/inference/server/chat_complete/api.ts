@@ -48,7 +48,7 @@ export function createChatCompleteApi({
           );
         }
 
-        logger.debug(() => `Sending request: ${JSON.stringify(last(messages))}`);
+        logger.debug(() => `Sending request, last message is: ${JSON.stringify(last(messages))}`);
         logger.trace(() => JSON.stringify({ messages, toolChoice, tools, system }));
 
         return inferenceAdapter.chatComplete({

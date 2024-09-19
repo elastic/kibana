@@ -38,10 +38,12 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   tools,
   toolChoice,
   logger,
+  system,
   ...rest
 }: {
   client: Pick<InferenceClient, 'output' | 'chatComplete'>;
   connectorId: string;
+  system?: string;
   logger: Pick<Logger, 'debug'>;
 } & TToolOptions &
   ({ input: string } | { messages: Message[] })): Observable<NlToEsqlTaskEvent<TToolOptions>> {
@@ -159,7 +161,8 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
 
           When converting queries from one language to ES|QL, make sure that the functions are available
           and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
-`,
+
+          ${system ? `## Additional instructions\n\n${system}` : ''}`,
               messages: messages.concat([
                 {
                   role: MessageRole.Assistant,

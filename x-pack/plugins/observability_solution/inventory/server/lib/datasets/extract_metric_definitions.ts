@@ -6,17 +6,28 @@
  */
 
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { i18n } from '@kbn/i18n';
-import { withoutOutputUpdateEvents, type InferenceClient } from '@kbn/inference-plugin/server';
+import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
+import {
+  ChatCompletionEventType,
+  ChatCompletionMessageEvent,
+} from '@kbn/inference-plugin/common/chat_complete';
+import {
+  naturalLanguageToEsql,
+  withoutOutputUpdateEvents,
+  type InferenceClient,
+} from '@kbn/inference-plugin/server';
+import { excludeFrozenQuery } from '@kbn/observability-utils-common/es/queries/exclude_frozen_query';
+import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
 import {
   ObservabilityElasticsearchClient,
   createObservabilityEsClient,
 } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import moment from 'moment';
-import { Observable, lastValueFrom } from 'rxjs';
-import { excludeFrozenQuery } from '@kbn/observability-utils-common/es/queries/exclude_frozen_query';
-import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
-import { Metric, MetricDefinition } from '../../../common/metrics';
+import { Observable, filter, lastValueFrom } from 'rxjs';
+import { Entity } from '../../../common/entities';
+import { MetricDefinition } from '../../../common/metrics';
 import { sortAndTruncateAnalyzedFields } from '../../../common/utils/sort_and_truncate_analyzed_fields';
 import { mergeSampleDocumentsWithFieldCaps } from '../../util/merge_sample_documents_with_field_caps';
 import { getSampleDocuments } from '../get_sample_documents';
@@ -70,9 +81,8 @@ async function getKeywordAndNumericalFields({
 
 interface ExtractMetricDefinitionResult {
   description?: string;
-  labels: string[];
   constants: Array<{ field: string; value: unknown }>;
-  metrics: MetricDefinition[];
+  metrics: Array<Pick<MetricDefinition, 'displayName' | 'filter' | 'expression'>>;
 }
 
 export type ExtractMetricDefinitionProcess = StepProcess<
@@ -81,8 +91,8 @@ export type ExtractMetricDefinitionProcess = StepProcess<
     fetching_sample_documents: { label: string };
     extracting_constant_keywords: { label: string };
     describe_dataset: { label: string };
-    extracting_labels: { label: string };
-    extracting_metric_definitions: { label: string };
+    generating_esql_queries: { label: string };
+    generating_metric_suggestions: { label: string };
   },
   ExtractMetricDefinitionResult
 >;
@@ -93,12 +103,16 @@ export function extractMetricDefinitions({
   esClient,
   logger,
   connectorId,
+  entity,
+  dslFilter,
 }: {
   indexPatterns: string[];
   inferenceClient: InferenceClient;
   esClient: IScopedClusterClient;
   logger: Logger;
   connectorId: string;
+  entity: Pick<Entity, 'type' | 'displayName'>;
+  dslFilter: QueryDslQueryContainer[];
 }): Observable<ExtractMetricDefinitionProcess> {
   return runSteps(
     {
@@ -134,19 +148,19 @@ export function extractMetricDefinitions({
           }
         ),
       },
-      extracting_labels: {
+      generating_esql_queries: {
         label: i18n.translate(
-          'xpack.inventory.datasets.extractMetricDefinitionStep.extractingLabels',
+          'xpack.inventory.datasets.extractMetricDefinitionStep.generatingEsqlQueries',
           {
-            defaultMessage: 'Extracting labels',
+            defaultMessage: 'Generating ES|QL queries',
           }
         ),
       },
-      extracting_metric_definitions: {
+      generating_metric_suggestions: {
         label: i18n.translate(
-          'xpack.inventory.datasets.extractMetricDefinitionStep.extractingMetricDefinitions',
+          'xpack.inventory.datasets.extractMetricDefinitionStep.generatingMetricSuggestions',
           {
-            defaultMessage: 'Extracting metric definitions',
+            defaultMessage: 'Generating metric suggestions',
           }
         ),
       },
@@ -177,6 +191,7 @@ export function extractMetricDefinitions({
             start,
             end,
             indexPatterns,
+            dslFilter,
           })
         ),
       ]);
@@ -199,7 +214,10 @@ export function extractMetricDefinitions({
         })
       );
 
-      const truncatedDocumentAnalysis = sortAndTruncateAnalyzedFields(documentAnalysis);
+      const truncatedDocumentAnalysisWithoutEmptyFields = sortAndTruncateAnalyzedFields({
+        ...documentAnalysis,
+        fields: documentAnalysis.fields.filter((field) => !field.empty),
+      });
 
       const system = `You are a helpful assistant for Elastic Observability.
               Your goal is to help users understand their data. You are a
@@ -248,7 +266,7 @@ export function extractMetricDefinitions({
                 
             ## Document analysis
             
-            ${JSON.stringify(truncatedDocumentAnalysis)}
+            ${JSON.stringify(truncatedDocumentAnalysisWithoutEmptyFields)}
             `,
             })
             .pipe(withoutOutputUpdateEvents())
@@ -259,82 +277,68 @@ export function extractMetricDefinitions({
         return outputCompleteEvent.content;
       });
 
-      const labels = await step('extracting_labels', async () => {
-        const completeEvent = await lastValueFrom(
-          inferenceClient
-            .output('extracting_labels', {
-              connectorId,
-              system,
-              input: `Your current task is to extract labels for this dataset.
-          These labels can then be used for grouping or filtering. For
-          instance, "service.environment" might be a good label (for filtering),
-          and "host.name" might be a good label (for filtering and grouping).
-
-          DO NOT include constant keywords as labels, they're already presented
-          to the user.
-          
-          ## Dataset name
-
-          The dataset's name is ${indexPatterns.join(', ')}
-
-          ### Dataset description
-          
-          ${description ?? 'N/A'}
-
-          ${constantKeywordsInstruction}
-              
-          ## Document analysis
-          
-          ${JSON.stringify(truncatedDocumentAnalysis)}
-
-          `,
-              schema: {
-                type: 'object',
-                properties: {
-                  labels: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                    },
-                  },
-                },
-                required: ['labels'],
-              } as const,
-            })
-            .pipe(withoutOutputUpdateEvents())
-        );
-
-        return completeEvent.output.labels;
-      });
-
-      return step(
-        'extracting_metric_definitions',
-        async (): Promise<ExtractMetricDefinitionResult> => {
-          const output = await lastValueFrom(
-            inferenceClient
-              .output('extract_metric_definitions', {
-                connectorId,
-                system,
-                input: `Your current task is to extract metric
-              definitions for this dataset. These metric definitions
-              can then be used by the user in Kibana to visualize and
-              analyze their data. Keep the following things in mind:
+      const esqlQueries = await step('generating_esql_queries', async () => {
+        const esqlOutput = await lastValueFrom(
+          naturalLanguageToEsql({
+            client: inferenceClient,
+            connectorId,
+            system: `Your current task is to generate ES|QL queries
+              that can be used by the user to monitor this ${entity.type}.
+              These metric definitions can then be used by the user in
+              Kibana to visualize and analyze their data. Keep the 
+              things in mind:
 
               - This is mostly about timeseries data.
-              - Constant keywords are not useful as grouping fields or
-              a filter, because it will not change the displayed data.
               - This will be used in the UI to populate a list of metrics that
               the user can visualize.
               - The user is mostly interested in monitoring their software
               systems.
-              - List between 5 and 20 metric definitions.
 
-              Some example metrics:
+              First, decide what metrics are useful. For example, you might
+              want to generate cpu/memory metrics for an infrastructure
+              entity, or RED (rate, error, duration) metrics, or service-
+              specific metrics like queue length or ingest delay. Another
+              type of metric that is useful is one that filters on specific
+              messages. For example,  \`WHERE message LIKE "?HTTP probe
+              failed?"\`).
 
-              - Health metrics
-              - Throughput, latency, failure rate (RED)
-              - Queue metrics
-              - CPU/memory metrics
+              # Critical instructions:
+              - ONLY generate useful metrics. Make sure that any metric that
+              you generate A) works, and B) has value to the user. If you're
+              using some of the examples above, consider whether this really
+              makes sense for the monitored entity.
+              - ONLY use fields that are mentioned in this prompt. Any other
+              fields are NOT available and will result in an error.
+              - DO NOT attempt to parse a log message using things like 
+              GROK, DISSECT, RLIKE etc.
+              - DO NOT specify grouping fields. These will be added on the
+              fly. DO NOT USE \`STATS ... BY\`, only use \`STATS\`.
+              - Try to create a _single_ column in STATS ... BY.
+              - DO NOT filter on the current ${entity.type}. That will happen
+              automatically.
+
+              EXTREMELY IMPORTANT: After each query, you MUST reflect on
+              whether the query makes sense and verify that the fields that
+              are used are available in the dataset. ONLY fields mentioned
+              in this prompt are available.
+
+              Format it as follows:
+
+              ## <Metric display name>
+
+              \`\`\`esql
+              ...<esql query>
+              \`\`\`
+
+              Description: <description>
+              Usefulness: <usefulness>
+              Validity: <validity>`,
+            input: `Generate metric descriptions based on the following
+              information:
+              # Entity
+
+              The monitored entity is ${entity.displayName} which is 
+              a ${entity.type}.
 
               ## Dataset name
 
@@ -343,98 +347,195 @@ export function extractMetricDefinitions({
               ### Dataset description
               
               ${description ?? 'N/A'}
-
-              ${constantKeywordsInstruction}
-
-              ## Labels
-
-              ${labels.map((label) => `- ${label}`).join('\n')}
                   
-              ## Document analysis
+              ## Available fields
               
-              ${JSON.stringify(truncatedDocumentAnalysis)}
-              
+              ${documentAnalysis.fields
+                .filter(
+                  (field) => !field.empty && (field.cardinality ?? Number.POSITIVE_INFINITY) > 1
+                )
+                .map((field) => `- ${field.name} (${field.types.join(', ')})`)
+                .join('\n')}
+
               `,
+            logger,
+          }).pipe(
+            filter((event): event is ChatCompletionMessageEvent => {
+              return event.type === ChatCompletionEventType.ChatCompletionMessage;
+            })
+          )
+        );
+
+        return esqlOutput.content.replaceAll(/INLINE_ESQL_QUERY_REGEX/g, (match, query) => {
+          const correctionResult = correctCommonEsqlMistakes(query);
+          return '```esql\n' + correctionResult.output + '\n```';
+        });
+      });
+
+      return step(
+        'generating_metric_suggestions',
+        async (): Promise<ExtractMetricDefinitionResult> => {
+          const output = await lastValueFrom(
+            inferenceClient
+              .output('generate_metric_suggestions', {
+                connectorId,
+                system: `Your current task is to generate metric definitions.
+            These metric definitions have a display name which will be
+            used in the UI to display the metric definition as a
+            suggestion to the user. It can then be used to visualize or
+            filter data. You have previously generated ES|QL queries.
+            Your job is to extract a structural definition from these
+            example queries. Remove any grouping fields in STATS .. BY
+            commands, they will not be used. If the metric depends on
+            the grouping, figure out if you can convert it to a filter
+            or do not use it at all.
+
+            Here are some examples:
+
+            \`\`\`esql
+            FROM ${indexPatterns.join(',')} 
+            | WHERE log.level == "error"
+            \`\`\`
+            
+            becomes:
+            {
+              "displayName": "Errors",
+              "filter": "log.level:\"error\""
+            }
+
+            \`\`\`esql
+            FROM ${indexPatterns.join(',')} 
+            | STATS transaction_duration = AVG(transaction.duration.us), failure_rate = AVG(event.outcome == "success", 1, 0)
+            \`\`\`
+
+            becomes:
+            [
+              {
+                "displayName": "Transaction duration",
+                "expression": "AVG(transaction.duration.us)"
+              },
+              {
+                "displayName": "Failure rate",
+                "expression": "AVG(CASE(event.outcome == \"success\", 1, 0))"
+              }
+            ]
+
+            \`\`\`esql
+            FROM ${indexPatterns.join(',')}
+            | WHERE service.name == "konnectivity-agent"
+            | EVAL is_failure = CASE(status_code >= 500, 1, 0)
+            | STATS total_requests = COUNT(*), total_failures = SUM(is_failure) BY bucket = BUCKET(@timestamp, 1 hour)
+            | EVAL failure_rate = total_failures / total_requests
+            | SORT bucket
+            \`\`\`
+
+            becomes:
+            [
+              {
+                "displayName": "Failure rate",
+                "expression": "AVG(CASE(status_code >= 500, 1, NULL))"
+              }
+            ]
+
+            \`\`\`esql
+            FROM ${indexPatterns.join(',')}
+              | COUNT(CASE(event.outcome == "success", 1, NULL))
+            \`\`\`
+
+            becomes:
+            [
+              {
+                "displayName": "Failed events",
+                "filter": "event.outcome:\"success\""
+              }
+            ]
+
+            IT IS ABSOLUTELY CRITICAL that for the \`filter\` property,
+            you convert an ES|QL \`WHERE\` command to KQL, the Kibana
+            Query Language. Conversion examples:
+
+            - \`| WHERE service.name == "opbeans-java"\` becomes
+              \`service.name:"opbeans-java"\`
+            - \`| WHERE service.environment IN ("production", "dev")\`
+              becomes \`service.environment:("production" OR "dev")
+            - \`| WHERE cloud.region != "us-west-1a"\` becomes
+              \`NOT (cloud.region:"us-west-1a)\`
+            - \`| WHERE cloud.region IS NULL\` becomes
+              \`NOT (cloud.region:*)\`
+            _ \`| WHERE agent.name == "java" OR agent.name == "go"\`
+              becomes \`(agent.name:"java" OR agent.name:"go")\`
+            - \`| WHERE first_name LIKE "b?joe"\` becomes \`first_name:b*joe\`
+
+            NOTE: KQL does not support regex (RLIKE). Try to convert
+            these to wildcard patterns.
+
+            The following characters must be escaped: \():<>"*`,
+                input: `Convert these ES|QL queries into metric
+            definitions, based on the following information:
+            
+            # Entity
+
+            The monitored entity is ${entity.displayName} which is 
+            a ${entity.type}.
+
+             ## Dataset name
+
+            The dataset's name is ${indexPatterns.join(', ')}
+
+            ### Dataset description
+            
+            ${description ?? 'N/A'}
+
+            ${constantKeywordsInstruction}
+                
+            ## Document analysis
+            
+            ${JSON.stringify(truncatedDocumentAnalysisWithoutEmptyFields)}
+
+            # ES|QL output
+
+            This output was previously generated. Convert these examples
+            into metric definitions.
+
+            ${esqlQueries}
+          
+          `,
                 schema: {
                   type: 'object',
                   properties: {
-                    metrics: {
+                    definitions: {
                       type: 'array',
                       items: {
                         type: 'object',
                         properties: {
-                          label: {
+                          displayName: {
                             type: 'string',
-                            description: 'A label for the metric',
-                          },
-                          type: {
-                            type: 'string',
-                            description: 'The type of metric. The user can change this later',
-                            enum: [
-                              'count',
-                              'count_distinct',
-                              'sum',
-                              'avg',
-                              'weighted_avg',
-                              'min',
-                              'max',
-                              'percentile',
-                            ],
-                          },
-                          field: {
-                            type: 'string',
-                            description:
-                              'The field that should be used, required for every metric type except "count"',
-                          },
-                          by: {
-                            type: 'string',
-                            description:
-                              'Required for weighted_avg metrics, defines the weighing field',
-                          },
-                          grouping: {
-                            type: 'string',
-                            description: 'Group data by a specific field',
-                          },
-                          percentile: {
-                            type: 'number',
-                            description: 'Required for percentile metrics, an integer from 0-100',
                           },
                           kqlFilter: {
                             type: 'string',
-                            description:
-                              'A KQL filter to always apply for this metric. Mostly useful for count',
                           },
-                          format: {
-                            type: 'object',
-                            properties: {
-                              type: {
-                                type: 'string',
-                                description: 'How to format the value. Defaults to number',
-                                enum: ['number', 'currency', 'duration', 'percentage', 'bytes'],
-                              },
-                            },
+                          expression: {
+                            type: 'string',
                           },
                         },
-                        required: ['label', 'type'],
+                        required: ['displayName'],
                       },
                     },
                   },
-                  required: ['metrics'],
+                  required: ['definitions'],
                 } as const,
               })
               .pipe(withoutOutputUpdateEvents())
           );
 
           return {
-            description,
-            labels,
             constants: actualConstantFields,
-            metrics: output.output.metrics.map((metric): MetricDefinition => {
-              return {
-                filter: metric.kqlFilter,
-                metric: metric as Metric,
-              };
-            }),
+            description,
+            metrics: output.output.definitions.map((definition) => ({
+              displayName: definition.displayName,
+              expression: definition.expression,
+              filter: definition.kqlFilter,
+            })),
           };
         }
       );

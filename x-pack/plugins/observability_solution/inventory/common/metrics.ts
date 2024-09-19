@@ -45,7 +45,7 @@ type MinMetric = MetricEntityBase<'min', { field: string }>;
 type MaxMetric = MetricEntityBase<'max', { field: string }>;
 type PercentileMetric = MetricEntityBase<'percentile', { field: string; percentile: number }>;
 
-export interface MetricDefinition {
+export interface LegacyMetricDefinition {
   filter?: string;
   metric: Metric;
 }
@@ -59,3 +59,14 @@ export type Metric =
   | MaxMetric
   | MinMetric
   | PercentileMetric;
+
+export interface MetricDefinition {
+  id: string;
+  displayName: string;
+  properties: Record<string, unknown>;
+  filter?: string;
+  expression?: string;
+}
+
+export type MetricDefinitionCreate = MetricDefinition;
+export type MetricDefinitionUpdate = Omit<MetricDefinition, 'id'>;

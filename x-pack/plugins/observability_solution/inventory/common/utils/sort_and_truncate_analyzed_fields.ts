@@ -29,7 +29,8 @@ export function sortAndTruncateAnalyzedFields(analysis: DocumentAnalysis) {
 
         if (
           field.values.length &&
-          (field.types.includes('keyword') || field.types.includes('text'))
+          (field.types.includes('keyword') || field.types.includes('text')) &&
+          field.values.length <= 10
         ) {
           return `${name} (${truncateList(
             field.values.map((value) => '`' + value + '`'),

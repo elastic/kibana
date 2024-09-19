@@ -11,8 +11,8 @@ import { FromToolSchema, ToolSchema } from '../chat_complete/tool_schema';
 import { Message } from '../chat_complete';
 
 export enum OutputEventType {
-  OutputUpdate = 'output',
-  OutputComplete = 'complete',
+  OutputUpdate = 'outputUpdate',
+  OutputComplete = 'outputComplete',
 }
 
 type Output = Record<string, any> | undefined | unknown;
