@@ -38,7 +38,6 @@ import {
   PACKAGE_TEMPLATE_SUFFIX,
   USER_SETTINGS_TEMPLATE_SUFFIX,
   STACK_COMPONENT_TEMPLATES,
-  CUSTOM_TEMPLATE_SUFFIX,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -422,7 +421,7 @@ export function buildComponentTemplates(params: {
 
   // Stub custom template
   if (type) {
-    const customTemplateName = `${type}${CUSTOM_TEMPLATE_SUFFIX}`;
+    const customTemplateName = `${type}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
     templatesMap[customTemplateName] = {
       template: {
         settings: {},

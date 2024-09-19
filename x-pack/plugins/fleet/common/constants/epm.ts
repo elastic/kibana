@@ -48,7 +48,6 @@ export const GLOBAL_DATA_TAG_EXCLUDED_INPUTS = new Set<string>([
 
 export const PACKAGE_TEMPLATE_SUFFIX = '@package';
 export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
-export const CUSTOM_TEMPLATE_SUFFIX = '@custom';
 
 export const DATASET_VAR_NAME = 'data_stream.dataset';
 
