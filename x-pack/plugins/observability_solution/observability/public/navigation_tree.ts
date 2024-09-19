@@ -182,6 +182,12 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                   },
                   {
                     link: 'ml:memoryUsage',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.machineLearning.memoryUsage',
+                      {
+                        defaultMessage: 'Memory usage',
+                      }
+                    ),
                   },
                 ],
               },
@@ -245,6 +251,12 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                 children: [
                   {
                     link: 'ml:nodesOverview',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.model_management.trainedModels',
+                      {
+                        defaultMessage: 'Trained models',
+                      }
+                    ),
                   },
                 ],
               },
@@ -267,7 +279,7 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                   {
                     link: 'ml:indexDataVisualizer',
                     title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_visualizer.file_data_visualizer',
+                      'xpack.observability.obltNav.ml.data_visualizer.data_view_data_visualizer',
                       {
                         defaultMessage: 'Data view data visualizer',
                       }
@@ -275,6 +287,12 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                   },
                   {
                     link: 'ml:dataDrift',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.data_visualizer.data_drift',
+                      {
+                        defaultMessage: 'Data drift',
+                      }
+                    ),
                   },
                 ],
               },
@@ -287,12 +305,30 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                 children: [
                   {
                     link: 'ml:logRateAnalysis',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.aiops_labs.log_rate_analysis',
+                      {
+                        defaultMessage: 'Log rate analysis',
+                      }
+                    ),
                   },
                   {
                     link: 'ml:logPatternAnalysis',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.aiops_labs.log_pattern_analysis',
+                      {
+                        defaultMessage: 'Log pattern analysis',
+                      }
+                    ),
                   },
                   {
                     link: 'ml:changePointDetections',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.aiops_labs.change_point_detection',
+                      {
+                        defaultMessage: 'Change point detection',
+                      }
+                    ),
                   },
                 ],
               },
