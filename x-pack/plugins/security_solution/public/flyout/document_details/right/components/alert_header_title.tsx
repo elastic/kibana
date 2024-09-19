@@ -23,8 +23,9 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { FLYOUT_ALERT_HEADER_TITLE_TEST_ID, ALERT_SUMMARY_PANEL_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
 
+// minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
-  minWidth: 300,
+  minWidth: 280,
 };
 
 /**

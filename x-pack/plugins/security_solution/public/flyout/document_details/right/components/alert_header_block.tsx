@@ -29,7 +29,7 @@ export interface AlertHeaderBlockProps {
  */
 export const AlertHeaderBlock: VFC<AlertHeaderBlockProps> = memo(
   ({ title, children, 'data-test-subj': dataTestSubj }) => (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+    <EuiPanel hasShadow={false} hasBorder paddingSize="s">
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs" data-test-subj={dataTestSubj}>
