@@ -33,21 +33,29 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 
-import { DataControlFieldRegistry } from '../../../types';
-import { ControlWidth, DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+  type ControlWidth,
+  type DefaultDataControlState,
+} from '../../../../common';
+import { dataViewsService } from '../../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
-import { ControlGroupApi } from '../../control_group/types';
+import type { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditorStrings } from './data_control_constants';
 import { getDataControlFieldRegistry } from './data_control_editor_utils';
-import { DataControlFactory, DefaultDataControlState, isDataControlFactory } from './types';
-import { CONTROL_WIDTH_OPTIONS } from '../../../control_group/editor/editor_constants';
+import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
+import {
+  isDataControlFactory,
+  type DataControlFactory,
+  type DataControlFieldRegistry,
+} from './types';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -59,9 +67,6 @@ export interface ControlEditorProps<
   controlGroupApi: ControlGroupApi; // controls must always have a parent API
   onCancel: (newState: Partial<State>) => void;
   onSave: (newState: Partial<State>, type: string) => void;
-  services: {
-    dataViews: DataViewsPublicPluginStart;
-  };
 }
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
@@ -143,8 +148,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   onSave,
   onCancel,
   controlGroupApi,
-  /** TODO: These should not be props */
-  services: { dataViews: dataViewService },
 }: ControlEditorProps<State>) => {
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
@@ -155,16 +158,14 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
   const editorConfig = useMemo(() => controlGroupApi.getEditorConfig(), [controlGroupApi]);
 
-  // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
     loading: dataViewListLoading,
     value: dataViewListItems = [],
     error: dataViewListError,
   } = useAsync(async () => {
-    return dataViewService.getIdsWithTitle();
+    return dataViewsService.getIdsWithTitle();
   });
 
-  // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
     loading: dataViewLoading,
     value: { selectedDataView, fieldRegistry } = {
@@ -177,7 +178,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       return;
     }
 
-    const dataView = await dataViewService.get(editorState.dataViewId);
+    const dataView = await dataViewsService.get(editorState.dataViewId);
     const registry = await getDataControlFieldRegistry(dataView);
     return {
       selectedDataView: dataView,
