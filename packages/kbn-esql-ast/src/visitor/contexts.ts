@@ -26,6 +26,7 @@ import type {
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLiteral,
+  ESQLOrderExpression,
   ESQLSingleAstItem,
   ESQLSource,
   ESQLTimeInterval,
@@ -543,3 +544,8 @@ export class RenameExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLAstRenameExpression> {}
+
+export class OrderExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLOrderExpression> {}
