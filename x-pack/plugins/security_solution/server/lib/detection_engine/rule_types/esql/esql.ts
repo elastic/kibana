@@ -28,7 +28,7 @@ import { rowToDocument } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
-import type { RunOpts, SignalSource } from '../types';
+import type { RunOpts, SignalSource, CreateRuleAdditionalOptions } from '../types';
 import { logEsqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 
@@ -65,6 +65,7 @@ export const esqlExecutor = async ({
   spaceId,
   experimentalFeatures,
   licensing,
+  scheduleNotificationResponseActionsService,
 }: {
   runOpts: RunOpts<EsqlRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -73,6 +74,7 @@ export const esqlExecutor = async ({
   version: string;
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }) => {
   const loggedRequests: RulePreviewLoggedRequest[] = [];
   const ruleParams = completeRule.ruleParams;
@@ -241,6 +243,14 @@ export const esqlExecutor = async ({
             result.warningMessages.push(getMaxSignalsWarning());
             break;
           }
+        }
+
+        if (scheduleNotificationResponseActionsService) {
+          scheduleNotificationResponseActionsService({
+            signals: result.createdSignals,
+            signalsCount: result.createdSignalsCount,
+            responseActions: completeRule.ruleParams.responseActions,
+          });
         }
 
         // no more results will be found

@@ -168,15 +168,15 @@ export interface CreateRuleOptions {
 
 export interface ScheduleNotificationActions {
   signals: unknown[];
-  responseActions: RuleResponseAction[];
+  signalsCount: number;
+  responseActions: RuleResponseAction[] | undefined;
 }
-export interface CreateQueryRuleAdditionalOptions {
+
+export interface CreateRuleAdditionalOptions {
   scheduleNotificationResponseActionsService?: (params: ScheduleNotificationActions) => void;
 }
 
-export interface CreateQueryRuleOptions
-  extends CreateRuleOptions,
-    CreateQueryRuleAdditionalOptions {
+export interface CreateQueryRuleOptions extends CreateRuleOptions, CreateRuleAdditionalOptions {
   id: typeof QUERY_RULE_TYPE_ID | typeof SAVED_QUERY_RULE_TYPE_ID;
   name: 'Custom Query Rule' | 'Saved Query Rule';
 }

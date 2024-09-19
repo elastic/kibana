@@ -26,6 +26,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
   WrapSuppressedHits,
+  CreateRuleAdditionalOptions,
 } from '../types';
 import {
   addToSearchAfterReturn,
@@ -70,6 +71,7 @@ interface EqlExecutorParams {
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
   state?: Record<string, unknown>;
+  scheduleNotificationResponseActionsService: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }
 
 export const eqlExecutor = async ({
@@ -93,6 +95,7 @@ export const eqlExecutor = async ({
   isAlertSuppressionActive,
   experimentalFeatures,
   state,
+  scheduleNotificationResponseActionsService,
 }: EqlExecutorParams): Promise<{
   result: SearchAfterAndBulkCreateReturnType;
   loggedRequests?: RulePreviewLoggedRequest[];
@@ -101,6 +104,7 @@ export const eqlExecutor = async ({
   const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
 
+  // eslint-disable-next-line complexity
   return withSecuritySpan('eqlExecutor', async () => {
     const result = createSearchAfterReturnType();
 
@@ -209,6 +213,13 @@ export const eqlExecutor = async ({
         result.warningMessages.push(maxSignalsWarning);
       }
 
+      if (scheduleNotificationResponseActionsService) {
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals,
+          signalsCount: result.createdSignalsCount,
+          responseActions: completeRule.ruleParams.responseActions,
+        });
+      }
       return { result, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
     } catch (error) {
       if (
