@@ -19,7 +19,6 @@
 
 .kbnQueryBar__textarea {
   z-index: $euiZContentMenu;
-  resize: none !important; // When in the group, it will autosize
   height: $euiFormControlHeight;
   // Unlike most inputs within layout control groups, the text area still needs a border
   // for multi-line content. These adjusts help it sit above the control groups
