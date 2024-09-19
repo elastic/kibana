@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import type { ControlStyle, ParentIgnoreSettings } from '../../../../common';
+import type { ControlLabelPosition, ParentIgnoreSettings } from '../../../../common';
 import { CONTROL_LAYOUT_OPTIONS } from '../../controls/data_controls/editor_constants';
 import type { ControlStateManager } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
@@ -86,7 +86,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
               idSelected={selectedLabelPosition}
               legend={ControlGroupStrings.management.labelPosition.getLabelPositionLegend()}
               onChange={(newPosition: string) => {
-                stateManager.labelPosition.next(newPosition as ControlStyle);
+                stateManager.labelPosition.next(newPosition as ControlLabelPosition);
               }}
             />
           </EuiFormRow>
