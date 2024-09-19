@@ -1,4 +1,5 @@
-{ "default":  {
+{
+  "default": {
     "anomalies": [
       {
         "time": 1486018800000,
@@ -44,9 +45,11 @@
         "metricDescriptionSort": 82.83851409101328,
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
-          "influencers": [
-            "mockInfluencer"
-          ]
+        "influencers": [
+          {
+            "mockInfluencerField": "mockInfluencerValue"
+          }
+        ]
       },
       {
         "time": 1486018800000,
@@ -92,12 +95,16 @@
         "metricDescriptionSort": 38.82201810127708,
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
-          "influencers": [
-            "mockInfluencer"
-          ]
+        "influencers": [
+          {
+            "mockInfluencerField": "mockInfluencerValue"
+          }
+        ]
       }
     ],
-    "jobIds": ["it-ops-count-by-mlcategory-one"],
+    "jobIds": [
+      "it-ops-count-by-mlcategory-one"
+    ],
     "interval": "day",
     "examplesByJobId": {
       "it-ops-count-by-mlcategory-one": {
@@ -161,7 +168,9 @@
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
         "influencers": [
-          "mockInfluencer"
+          {
+            "mockInfluencerField": "mockInfluencerValue"
+          }
         ]
       },
       {
@@ -208,7 +217,9 @@
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
         "influencers": [
-          "mockInfluencer"
+          {
+            "mockInfluencerField": "mockInfluencerValue"
+          }
         ]
       }
     ],
@@ -496,7 +507,9 @@
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
         "influencers": [
-          "mockInfluencer"
+          {
+            "mockInfluencerField": "mockInfluencerValue"
+          }
         ]
       },
       {
@@ -541,7 +554,9 @@
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
         "influencers": [
-          "mockInfluencer"
+          {
+            "mockInfluencerField": "mockInfluencerValue"
+          }
         ]
       }
     ],
