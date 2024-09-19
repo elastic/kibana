@@ -1,0 +1,240 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<CodeEditor /> hint element should be tabable 1`] = `
+<div
+  aria-label="Code Editor"
+  class="kibanaCodeEditor__keyboardHint"
+  data-test-subj="codeEditorHint"
+  id="1234"
+  role="button"
+  tabindex="0"
+/>
+`;
+
+exports[`<CodeEditor /> is rendered 1`] = `
+<CodeEditor
+  height={250}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  languageId="loglang"
+  onChange={[Function]}
+  value="
+[Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
+[Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
+[Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
+"
+>
+  <div
+    className="kibanaCodeEditor"
+  >
+    <EuiToolTip
+      content={
+        <React.Fragment>
+          <p>
+            <FormattedMessage
+              defaultMessage="Press {key} to start editing."
+              id="kibana-react.kibanaCodeEditor.startEditing"
+              values={
+                Object {
+                  "key": <strong>
+                    Enter
+                  </strong>,
+                }
+              }
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              defaultMessage="Press {key} to stop editing."
+              id="kibana-react.kibanaCodeEditor.stopEditing"
+              values={
+                Object {
+                  "key": <strong>
+                    Esc
+                  </strong>,
+                }
+              }
+            />
+          </p>
+        </React.Fragment>
+      }
+      delay="regular"
+      display="block"
+      position="top"
+    >
+      <span
+        className="euiToolTipAnchor euiToolTipAnchor--displayBlock"
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <div
+          aria-label="Code Editor"
+          className="kibanaCodeEditor__keyboardHint"
+          data-test-subj="codeEditorHint"
+          id="1234"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          role="button"
+          tabIndex={0}
+        />
+      </span>
+    </EuiToolTip>
+    <mockMonacoEditor
+      editorDidMount={[Function]}
+      editorWillMount={[Function]}
+      height={250}
+      language="loglang"
+      onChange={[Function]}
+      options={
+        Object {
+          "fontFamily": "Roboto Mono",
+          "fontSize": 12,
+          "lineHeight": 21,
+          "matchBrackets": "never",
+          "minimap": Object {
+            "enabled": false,
+          },
+          "renderLineHighlight": "none",
+          "scrollBeyondLastLine": false,
+          "scrollbar": Object {
+            "useShadows": false,
+          },
+          "wordBasedSuggestions": false,
+          "wordWrap": "on",
+          "wrappingIndent": "indent",
+        }
+      }
+      theme="euiColors"
+      value="
+[Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
+[Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
+[Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
+"
+    >
+      <div>
+        <textarea
+          data-test-subj="monacoEditorTextarea"
+          onKeyDown={[Function]}
+        />
+      </div>
+    </mockMonacoEditor>
+    <ResizeDetector
+      handleHeight={true}
+      handleWidth={true}
+      nodeType="div"
+      onResize={[Function]}
+      querySelector={null}
+      refreshMode="debounce"
+      refreshRate={1000}
+      skipOnMount={false}
+      targetDomEl={null}
+    >
+      <ChildWrapper>
+        <div />
+      </ChildWrapper>
+    </ResizeDetector>
+  </div>
+</CodeEditor>
+`;

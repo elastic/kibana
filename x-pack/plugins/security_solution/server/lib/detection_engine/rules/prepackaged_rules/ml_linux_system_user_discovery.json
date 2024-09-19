@@ -1,0 +1,44 @@
+{
+  "anomaly_threshold": 75,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Looks for commands related to system user or owner discovery from an unusual user context. This can be due to uncommon troubleshooting activity or due to a compromised account. A compromised account may be used to engage in system owner or user discovery in order to identify currently active or primary users of a system. This may be a precursor to additional discovery, credential dumping or privilege elevation activity.",
+  "false_positives": [
+    "Uncommon user command activity can be due to an engineer logging onto a server instance in order to perform manual troubleshooting or reconfiguration."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "linux_system_user_discovery",
+  "name": "Unusual Linux System Owner or User Discovery Activity",
+  "risk_score": 21,
+  "rule_id": "59756272-1998-4b8c-be14-e287035c4d10",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "ML"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1033",
+          "name": "System Owner/User Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1033/"
+        }
+      ]
+    }
+  ],
+  "type": "machine_learning",
+  "version": 2
+}

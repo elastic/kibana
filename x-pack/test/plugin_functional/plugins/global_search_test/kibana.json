@@ -1,0 +1,10 @@
+{
+  "id": "globalSearchTest",
+  "owner": { "name": "Core", "githubTeam": "kibana-core" },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "global_search_test"],
+  "requiredPlugins": ["globalSearch"],
+  "server": false,
+  "ui": true
+}

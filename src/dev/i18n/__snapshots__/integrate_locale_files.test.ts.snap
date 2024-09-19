@@ -1,0 +1,171 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dev/i18n/integrate_locale_files integrateLocaleFiles splits locale file by plugins and writes them into the right folders 1`] = `
+Array [
+  "src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1/translations/fr.json",
+  "{
+  \\"formats\\": {
+    \\"number\\": {
+      \\"currency\\": {
+        \\"style\\": \\"currency\\"
+      },
+      \\"percent\\": {
+        \\"style\\": \\"percent\\"
+      }
+    },
+    \\"date\\": {
+      \\"short\\": {
+        \\"month\\": \\"numeric\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"2-digit\\"
+      },
+      \\"medium\\": {
+        \\"month\\": \\"short\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      },
+      \\"long\\": {
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      },
+      \\"full\\": {
+        \\"weekday\\": \\"long\\",
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      }
+    },
+    \\"time\\": {
+      \\"short\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\"
+      },
+      \\"medium\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\"
+      },
+      \\"long\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
+      },
+      \\"full\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
+      }
+    }
+  },
+  \\"messages\\": {
+    \\"plugin-1.message-id-1\\": \\"Translated text 1\\",
+    \\"plugin-1.message-id-2\\": \\"Translated text 2\\"
+  }
+}
+",
+]
+`;
+
+exports[`dev/i18n/integrate_locale_files integrateLocaleFiles splits locale file by plugins and writes them into the right folders 2`] = `
+Array [
+  "src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2/translations/fr.json",
+  "{
+  \\"formats\\": {
+    \\"number\\": {
+      \\"currency\\": {
+        \\"style\\": \\"currency\\"
+      },
+      \\"percent\\": {
+        \\"style\\": \\"percent\\"
+      }
+    },
+    \\"date\\": {
+      \\"short\\": {
+        \\"month\\": \\"numeric\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"2-digit\\"
+      },
+      \\"medium\\": {
+        \\"month\\": \\"short\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      },
+      \\"long\\": {
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      },
+      \\"full\\": {
+        \\"weekday\\": \\"long\\",
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      }
+    },
+    \\"time\\": {
+      \\"short\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\"
+      },
+      \\"medium\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\"
+      },
+      \\"long\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
+      },
+      \\"full\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
+      }
+    }
+  },
+  \\"messages\\": {
+    \\"plugin-2.message-id\\": \\"Translated text\\"
+  }
+}
+",
+]
+`;
+
+exports[`dev/i18n/integrate_locale_files integrateLocaleFiles splits locale file by plugins and writes them into the right folders 3`] = `
+Array [
+  "src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1/translations",
+  "src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2/translations",
+]
+`;
+
+exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id, missing id or the incompatible ones 1`] = `
+"
+1 missing translation(s):
+plugin-1.message-id-2"
+`;
+
+exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id, missing id or the incompatible ones 2`] = `
+"
+1 unused translation(s):
+plugin-1.message-id-3"
+`;
+
+exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id, missing id or the incompatible ones 3`] = `
+"
+1 unused translation(s):
+plugin-2.message
+1 missing translation(s):
+plugin-2.message-id"
+`;
+
+exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id, missing id or the incompatible ones 4`] = `
+"
+Incompatible translation: some properties are missing in \\"values\\" object (\\"plugin-1.message-id-2\\"): [value].
+"
+`;

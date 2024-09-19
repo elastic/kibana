@@ -1,0 +1,259 @@
+{
+  "id": "newsfeed",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "newsfeed",
+        "id": "def-public.FetchResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "FetchResult",
+        "description": [],
+        "path": "src/plugins/newsfeed/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.FetchResult.kibanaVersion",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.FetchResult.hasNew",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasNew",
+            "description": [],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.FetchResult.feedItems",
+            "type": "Array",
+            "tags": [],
+            "label": "feedItems",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "newsfeed",
+                "scope": "public",
+                "docId": "kibNewsfeedPluginApi",
+                "section": "def-public.NewsfeedItem",
+                "text": "NewsfeedItem"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.FetchResult.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | null"
+            ],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "newsfeed",
+        "id": "def-public.NewsfeedItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "NewsfeedItem",
+        "description": [],
+        "path": "src/plugins/newsfeed/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.NewsfeedItem.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.NewsfeedItem.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.NewsfeedItem.linkText",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "linkText",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.NewsfeedItem.linkUrl",
+            "type": "string",
+            "tags": [],
+            "label": "linkUrl",
+            "description": [],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.NewsfeedItem.badge",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "badge",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.NewsfeedItem.publishOn",
+            "type": "Object",
+            "tags": [],
+            "label": "publishOn",
+            "description": [],
+            "signature": [
+              "moment.Moment"
+            ],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.NewsfeedItem.expireOn",
+            "type": "Object",
+            "tags": [],
+            "label": "expireOn",
+            "description": [],
+            "signature": [
+              "moment.Moment"
+            ],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.NewsfeedItem.hash",
+            "type": "string",
+            "tags": [],
+            "label": "hash",
+            "description": [],
+            "path": "src/plugins/newsfeed/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "newsfeed",
+        "id": "def-public.NewsfeedApiEndpoint",
+        "type": "Enum",
+        "tags": [],
+        "label": "NewsfeedApiEndpoint",
+        "description": [],
+        "path": "src/plugins/newsfeed/public/lib/api.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "newsfeed",
+      "id": "def-public.NewsfeedPublicPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "NewsfeedPublicPluginSetup",
+      "description": [],
+      "signature": [
+        "{}"
+      ],
+      "path": "src/plugins/newsfeed/public/plugin.tsx",
+      "deprecated": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "newsfeed",
+      "id": "def-public.NewsfeedPublicPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "NewsfeedPublicPluginStart",
+      "description": [],
+      "signature": [
+        "{ createNewsFeed$: (endpoint: ",
+        {
+          "pluginId": "newsfeed",
+          "scope": "public",
+          "docId": "kibNewsfeedPluginApi",
+          "section": "def-public.NewsfeedApiEndpoint",
+          "text": "NewsfeedApiEndpoint"
+        },
+        ") => ",
+        "Observable",
+        "<void | ",
+        {
+          "pluginId": "newsfeed",
+          "scope": "public",
+          "docId": "kibNewsfeedPluginApi",
+          "section": "def-public.FetchResult",
+          "text": "FetchResult"
+        },
+        " | null>; }"
+      ],
+      "path": "src/plugins/newsfeed/public/plugin.tsx",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

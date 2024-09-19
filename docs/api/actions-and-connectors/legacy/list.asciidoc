@@ -1,0 +1,69 @@
+[[actions-and-connectors-legacy-api-list]]
+==== Legacy List connector types API
+++++
+<titleabbrev>Legacy List all connector types</titleabbrev>
+++++
+
+deprecated::[7.13.0,Use <<list-connector-types-api>> instead.]
+
+Retrieves a list of all connector types.
+
+[[actions-and-connectors-legacy-api-list-request]]
+===== Request
+
+`GET <kibana host>:<port>/api/actions/list_action_types`
+
+`GET <kibana host>:<port>/s/<space_id>/api/actions/list_action_types`
+
+[[actions-and-connectors-legacy-api-list-path-params]]
+===== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[actions-and-connectors-legacy-api-list-codes]]
+===== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-legacy-api-list-example]]
+===== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/actions/list_action_types
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+[
+  {
+    "id": ".email", <1>
+    "name": "Email", <2>
+    "minimumLicenseRequired": "gold", <3>
+    "enabled": false, <4>
+    "enabledInConfig": true, <5>
+    "enabledInLicense": false <6>
+  },
+  {
+    "id": ".index",
+    "name": "Index",
+    "minimumLicenseRequired": "basic",
+    "enabled": true,
+    "enabledInConfig": true,
+    "enabledInLicense": true
+  }
+]
+--------------------------------------------------
+
+
+<1> `id` - The unique ID of the connector type.
+<2> `name` - The name of the connector type.
+<3> `minimumLicenseRequired` - The license required to use the connector type.
+<4> `enabled` - Specifies if the connector type is enabled or disabled in {kib}.
+<5> `enabledInConfig` - Specifies if the connector type is enabled or enabled in the {kib} .yml file.
+<6> `enabledInLicense` - Specifies if the connector type is enabled or disabled in the license.

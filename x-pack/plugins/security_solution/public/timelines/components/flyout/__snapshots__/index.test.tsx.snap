@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Flyout rendering it renders correctly against snapshot 1`] = `
+<Flyout
+  onAppLeave={[MockFunction]}
+  timelineId="test"
+/>
+`;

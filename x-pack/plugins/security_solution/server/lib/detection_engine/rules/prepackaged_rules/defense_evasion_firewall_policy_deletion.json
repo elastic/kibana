@@ -1,0 +1,60 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the deletion of a firewall policy in Azure. An adversary may delete a firewall policy in an attempt to evade defenses and/or to eliminate barriers in carrying out their initiative.",
+  "false_positives": [
+    "Firewall policy deletions may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Firewall policy deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Firewall Policy Deletion",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.NETWORK/FIREWALLPOLICIES/DELETE\" and event.outcome:(Success or success)\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/firewall-manager/policy-overview"
+  ],
+  "risk_score": 21,
+  "rule_id": "e02bd3ea-72c6-4181-ac2b-0f83d17ad969",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Network Security"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

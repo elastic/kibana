@@ -1,0 +1,9 @@
+{
+  "xpack.graph.explore": {
+    "data_autocomplete_rules": {
+      "query": {},
+      "vertices": [{}],
+      "connections": {}
+    }
+  }
+}

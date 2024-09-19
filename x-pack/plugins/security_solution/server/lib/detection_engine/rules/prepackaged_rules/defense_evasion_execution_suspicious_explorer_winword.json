@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies an instance of a Windows trusted program that is known to be vulnerable to DLL Search Order Hijacking starting after being renamed or from a non-standard path. This is uncommon behavior and may indicate an attempt to evade defenses via side loading a malicious DLL within the memory space of one of those processes.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Potential DLL SideLoading via Trusted Microsoft Programs",
+  "query": "process where event.type == \"start\" and\n  process.pe.original_file_name in (\"WinWord.exe\", \"EXPLORER.EXE\", \"w3wp.exe\", \"DISM.EXE\") and\n  not (process.name : (\"winword.exe\", \"explorer.exe\", \"w3wp.exe\", \"Dism.exe\") or\n         process.executable : (\"?:\\\\Windows\\\\explorer.exe\",\n                               \"?:\\\\Program Files\\\\Microsoft Office\\\\root\\\\Office*\\\\WINWORD.EXE\",\n                               \"?:\\\\Program Files?(x86)\\\\Microsoft Office\\\\root\\\\Office*\\\\WINWORD.EXE\",\n                               \"?:\\\\Windows\\\\System32\\\\Dism.exe\",\n                               \"?:\\\\Windows\\\\SysWOW64\\\\Dism.exe\",\n                               \"?:\\\\Windows\\\\System32\\\\inetsrv\\\\w3wp.exe\")\n         )\n",
+  "risk_score": 73,
+  "rule_id": "1160dcdb-0a0a-4a79-91d8-9b84616edebd",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 5
+}

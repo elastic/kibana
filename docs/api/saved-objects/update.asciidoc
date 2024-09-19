@@ -1,0 +1,76 @@
+[[saved-objects-api-update]]
+=== Update object API
+++++
+<titleabbrev>Update object</titleabbrev>
+++++
+
+experimental[] Update the attributes for existing {kib} saved objects.
+
+[[saved-objects-api-update-request]]
+==== Request
+
+`PUT <kibana host>:<port>/api/saved_objects/<type>/<id>`
+
+`PUT <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
+
+[[saved-objects-api-update-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
+
+`id`::
+  (Required, string) The object ID to update.
+
+[[saved-objects-api-update-request-body]]
+==== Request body
+
+`attributes`::
+  (Required, object) The data to persist.
++
+WARNING: When you update, attributes are not validated, which allows you to pass arbitrary and ill-formed data into the API and break {kib}. Make sure any data that you send to the API is properly formed.
+
+`references`::
+  (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. To refer to the other saved object, use `name` in the attributes, but never the `id`, which automatically updates during migrations or import/export.
+
+`upsert`::
+  (Optional, object) If specified, will create the document with the given upsert attributes if it doesn't exist. 
+
+[[saved-objects-api-update-errors-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[saved-objects-api-update-example]]
+==== Example
+
+Update an existing index pattern object,`my-pattern`, with a different title:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X PUT api/saved_objects/index-pattern/my-pattern
+{
+  "attributes": {
+    "title": "some-other-pattern-*"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "my-pattern",
+  "type": "index-pattern",
+  "version": 2,
+  "attributes": {
+    "title": "some-other-pattern-*"
+  }
+}
+--------------------------------------------------

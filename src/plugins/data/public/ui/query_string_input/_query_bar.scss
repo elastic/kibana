@@ -1,0 +1,132 @@
+.kbnQueryBar__wrap {
+  max-width: 100%;
+  z-index: $euiZContentMenu;
+}
+
+// Uses the append style, but no bordering
+.kqlQueryBar__languageSwitcherButton {
+  border-right: none !important;
+  border-left: $euiFormInputGroupBorder;
+}
+
+.kbnQueryBar__textareaWrap {
+  overflow: visible !important; // Override EUI form control
+  display: flex;
+  flex: 1 1 100%;
+  position: relative;
+
+  @include kbnThemeStyle('v8') {
+    background-color: $euiFormBackgroundColor;
+    border-radius: $euiFormControlBorderRadius;
+
+    &.kbnQueryBar__textareaWrap--hasPrepend {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+    &.kbnQueryBar__textareaWrap--hasAppend {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+}
+
+.kbnQueryBar__textarea {
+  z-index: $euiZContentMenu;
+  resize: none !important; // When in the group, it will autosize
+  height: $euiFormControlHeight - 2px;
+  // Unlike most inputs within layout control groups, the text area still needs a border
+  // for multi-line content. These adjusts help it sit above the control groups
+  // shadow to line up correctly.
+  padding: $euiSizeS;
+  box-shadow: 0 0 0 1px $euiFormBorderColor;
+
+  @include kbnThemeStyle('v7') {
+    padding-top: $euiSizeS + 2px;
+  }
+
+  @include kbnThemeStyle('v8') {
+    padding-bottom: $euiSizeS + 1px;
+    // Firefox adds margin to textarea
+    margin: 0;
+
+    &.kbnQueryBar__textarea--hasPrepend {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+    &.kbnQueryBar__textarea--hasAppend {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+
+  &:not(.kbnQueryBar__textarea--autoHeight):not(:invalid) {
+    @include euiYScrollWithShadows;
+  }
+
+  &:not(.kbnQueryBar__textarea--autoHeight) {
+    white-space: nowrap;
+    overflow-y: hidden;
+    overflow-x: hidden;
+  }
+
+  // When focused, let it scroll
+  &.kbnQueryBar__textarea--autoHeight {
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: normal;
+    box-shadow: 0 0 0 1px $euiFormBorderColor;
+  }
+
+  @include euiFormControlWithIcon($isIconOptional: true);
+  ~ .euiFormControlLayoutIcons {
+    // By default form control layout icon is vertically centered, but our textarea
+    // can expand to be multi-line, so we position it with padding that matches
+    // the parent textarea padding
+    z-index: $euiZContentMenu + 1;
+    top: $euiSizeS + 3px;
+    bottom: unset;
+  }
+}
+
+.kbnQueryBar__datePickerWrapper {
+  .euiDatePopoverButton-isInvalid {
+    background-image: euiFormControlGradient($euiColorDanger);
+
+    // @todo Remove when EUI issue is resolved.
+    // @see https://github.com/elastic/eui/issues/4612
+    &:focus {
+      color: $euiTextColor;
+      background-color: $euiFormBackgroundColor;
+      background-image: euiFormControlGradient($euiColorPrimary);
+    }
+  }
+}
+
+@include euiBreakpoint('xs', 's') {
+  .kbnQueryBar--withDatePicker {
+    > :first-child {
+      // Change the order of the query bar and date picker so that the date picker is top and the query bar still aligns with filters
+      order: 1;
+      // EUI Flexbox adds too much margin between responded items, this just moves it up
+      margin-top: $euiSizeS * -1;
+    }
+  }
+}
+
+// IE specific fix for the datepicker to not collapse
+@include euiBreakpoint('m', 'l', 'xl') {
+  .kbnQueryBar__datePickerWrapper {
+    max-width: 40vw;
+    // sass-lint:disable-block no-important
+    flex-grow: 0 !important;
+    flex-basis: auto !important;
+
+    &.kbnQueryBar__datePickerWrapper-isHidden {
+      // sass-lint:disable-block no-important
+      margin-right: -$euiSizeXS !important;
+      width: 0;
+      overflow: hidden;
+      max-width: 0;
+    }
+  }
+}

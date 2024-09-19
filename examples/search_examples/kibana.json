@@ -1,0 +1,20 @@
+{
+  "id": "searchExamples",
+  "kibanaVersion": "kibana",
+  "version": "0.0.1",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Example plugin of how to use data plugin search services",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation", "data", "developerExamples", "kibanaUtils", "share"],
+  "optionalPlugins": [],
+  "requiredBundles": ["kibanaReact"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Examples for using the data plugin search service. Includes examples for searching using the high level search source, or low-level search services, as well as integrating with search sessions."
+}

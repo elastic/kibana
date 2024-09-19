@@ -1,0 +1,24 @@
+[role="xpack"]
+[[metrics]]
+=== Metrics
+
+The *Metrics* overview provides agent-specific metrics,
+which lets you perform more in-depth root cause analysis investigations within the APM app.
+
+If you're experiencing a problem with your service, you can use this page to attempt to find the underlying cause.
+For example, you might be able to correlate a high number of errors with a long transaction duration, high CPU usage, or a memory leak.
+
+[role="screenshot"]
+image::apm/images/apm-metrics.png[Example view of the Metrics overview in APM app in Kibana]
+
+If you're using the Java Agent, you can view metrics for each JVM.
+
+[role="screenshot"]
+image::apm/images/jvm-metrics-overview.png[Example view of the Metrics overview for the Java Agent]
+
+Breaking down metrics by JVM makes it much easier to analyze the provided metrics:
+CPU usage, memory usage, heap or non-heap memory,
+thread count, garbage collection rate, and garbage collection time spent per minute.
+
+[role="screenshot"]
+image::apm/images/jvm-metrics.png[Example view of the Metrics overview for the Java Agent]

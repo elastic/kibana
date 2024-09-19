@@ -1,0 +1,15 @@
+{
+  "id": "timelines",
+  "owner": {
+    "name": "Security solution",
+    "githubTeam": "security-solution"
+  },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "timelines"],
+  "extraPublicDirs": ["common"],
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["alerting", "cases", "data", "dataEnhanced", "kibanaReact", "kibanaUtils"],
+  "optionalPlugins": []
+}

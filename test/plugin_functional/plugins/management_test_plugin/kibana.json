@@ -1,0 +1,13 @@
+{
+  "id": "managementTestPlugin",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["management_test_plugin"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["management"]
+}

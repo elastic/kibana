@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FlyoutService FlyoutRef#close() can be called multiple times on the same FlyoutRef 1`] = `
+Array [
+  Array [
+    <div />,
+  ],
+]
+`;
+
+exports[`FlyoutService openFlyout() renders a flyout to the DOM 1`] = `
+Array [
+  Array [
+    <mockConstructor>
+      <EuiFlyout
+        onClose={[Function]}
+      >
+        <MountWrapper
+          className="kbnOverlayMountWrapper"
+          mount={[Function]}
+        />
+      </EuiFlyout>
+    </mockConstructor>,
+    <div />,
+  ],
+]
+`;
+
+exports[`FlyoutService openFlyout() renders a flyout to the DOM 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content</span></div></div>"`;
+
+exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 1`] = `
+Array [
+  Array [
+    <mockConstructor>
+      <EuiFlyout
+        onClose={[Function]}
+      >
+        <MountWrapper
+          className="kbnOverlayMountWrapper"
+          mount={[Function]}
+        />
+      </EuiFlyout>
+    </mockConstructor>,
+    <div />,
+  ],
+  Array [
+    <mockConstructor>
+      <EuiFlyout
+        onClose={[Function]}
+      >
+        <MountWrapper
+          className="kbnOverlayMountWrapper"
+          mount={[Function]}
+        />
+      </EuiFlyout>
+    </mockConstructor>,
+    <div />,
+  ],
+]
+`;
+
+exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content 2</span></div></div>"`;

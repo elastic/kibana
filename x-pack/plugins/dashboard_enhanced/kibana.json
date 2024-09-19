@@ -1,0 +1,13 @@
+{
+  "id": "dashboardEnhanced",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "dashboardEnhanced"],
+  "requiredPlugins": ["dashboard", "data", "embeddable", "share", "uiActionsEnhanced"],
+  "requiredBundles": ["embeddable", "embeddableEnhanced", "kibanaReact", "kibanaUtils"]
+}

@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a transport rule creation in Microsoft 365. Exchange Online mail transport rules should be set to not forward email to domains outside of your organization as a best practice. An adversary may create transport rules to exfiltrate data.",
+  "false_positives": [
+    "A new transport rule may be created by a system or network administrator. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "from": "now-30m",
+  "index": [
+    "filebeat-*",
+    "logs-o365*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Microsoft 365 Exchange Transport Rule Creation",
+  "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:\"New-TransportRule\" and event.outcome:success\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/powershell/module/exchange/new-transportrule?view=exchange-ps",
+    "https://docs.microsoft.com/en-us/exchange/security-and-compliance/mail-flow-rules/mail-flow-rules"
+  ],
+  "risk_score": 47,
+  "rule_id": "ff4dd44a-0ac6-44c4-8609-3f81bc820f02",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Microsoft 365",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0010",
+        "name": "Exfiltration",
+        "reference": "https://attack.mitre.org/tactics/TA0010/"
+      },
+      "technique": [
+        {
+          "id": "T1537",
+          "name": "Transfer Data to Cloud Account",
+          "reference": "https://attack.mitre.org/techniques/T1537/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

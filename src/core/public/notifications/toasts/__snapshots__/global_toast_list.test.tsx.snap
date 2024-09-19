@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders matching snapshot 1`] = `
+<EuiGlobalToastList
+  aria-label="Notification message list"
+  data-test-subj="globalToastList"
+  dismissToast={[Function]}
+  side="right"
+  toastLifeTimeMs={Infinity}
+  toasts={Array []}
+/>
+`;

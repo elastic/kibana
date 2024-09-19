@@ -1,0 +1,15 @@
+{
+  "id": "uiActionsExplorer",
+  "kibanaVersion": "kibana",
+  "version": "0.0.1",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Example plugin of how to use uiActions plugin services",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["uiActions", "uiActionsExamples", "developerExamples"],
+  "optionalPlugins": [],
+  "requiredBundles": ["kibanaReact"]
+}

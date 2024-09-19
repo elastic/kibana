@@ -1,0 +1,12 @@
+{
+  "id": "corePluginHelpmenu",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["core_plugin_helpmenu"],
+  "server": false,
+  "ui": true
+}

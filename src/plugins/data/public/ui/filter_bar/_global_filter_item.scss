@@ -1,0 +1,90 @@
+/**
+ * 1.  Allow wrapping of long filter items
+ */
+
+.globalFilterItem {
+  line-height: $euiSize;
+  border: none;
+  color: $euiTextColor;
+  padding-top: $euiSizeM / 2;
+  padding-bottom: $euiSizeM / 2;
+  white-space: normal; /* 1 */
+
+  .euiBadge__childButton {
+    flex-shrink: 1; /* 1 */
+  }
+
+  .euiBadge__iconButton:focus {
+    background-color: transparentize($euiColorPrimary, .9);
+  }
+
+  &:not(.globalFilterItem-isDisabled) {
+    @include euiFormControlDefaultShadow;
+    box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColor; // Make the actual border more visible
+  }
+
+  &:focus-within {
+    animation: none !important; // Remove focus ring animation otherwise it overrides simulated border via box-shadow
+  }
+}
+
+.globalFilterItem-isDisabled {
+  color: $euiColorDarkShade;
+  background-color: transparentize($euiColorLightShade, .5);
+  text-decoration: line-through;
+  font-weight: $euiFontWeightRegular;
+  font-style: italic;
+}
+
+.globalFilterItem-isError, .globalFilterItem-isWarning {
+  .globalFilterLabel__value {
+    font-weight: $euiFontWeightBold;
+  }
+}
+
+.globalFilterItem-isError {
+  .globalFilterLabel__value {
+    color: makeHighContrastColor($euiColorDangerText, $euiColorLightShade);
+  }
+}
+
+.globalFilterItem-isWarning {
+  .globalFilterLabel__value {
+    color: makeHighContrastColor($euiColorWarningText, $euiColorLightShade);
+  }
+}
+
+.globalFilterItem-isPinned {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: $euiSizeXS;
+    background-color: $kbnGlobalFilterItemBorderColor;
+    border-top-left-radius: $euiBorderRadius / 2;
+    border-bottom-left-radius: $euiBorderRadius / 2;
+  }
+}
+
+.globalFilterItem-isExcluded {
+  &:not(.globalFilterItem-isDisabled) {
+    box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColorExcluded;
+
+    &::before {
+      background-color: $kbnGlobalFilterItemPinnedColorExcluded;
+    }
+  }
+}
+
+.globalFilterItem__editorForm {
+  padding: $euiSizeM;
+}
+
+.globalFilterItem__popover,
+.globalFilterItem__popoverAnchor {
+  display: block;
+}

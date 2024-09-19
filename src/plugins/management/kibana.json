@@ -1,0 +1,12 @@
+{
+  "id": "management",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "optionalPlugins": ["home", "share"],
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "home"],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  }
+}

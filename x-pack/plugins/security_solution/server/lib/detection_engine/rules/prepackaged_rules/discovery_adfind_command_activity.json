@@ -1,0 +1,79 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule detects the Active Directory query tool, AdFind.exe. AdFind has legitimate purposes, but it is frequently leveraged by threat actors to perform post-exploitation Active Directory reconnaissance. The AdFind tool has been observed in Trickbot, Ryuk, Maze, and FIN6 campaigns. For Winlogbeat, this rule requires Sysmon.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "AdFind Command Activity",
+  "note": "## Triage and analysis\n\n`AdFind.exe` is a legitimate domain query tool. Rule alerts should be investigated to identify if the user has a role that would explain using this tool and that it is being run from an expected directory and endpoint. Leverage the exception workflow in the Kibana Security App or Elasticsearch API to tune this rule to your environment.",
+  "query": "process where event.type in (\"start\", \"process_started\") and \n  (process.name : \"AdFind.exe\" or process.pe.original_file_name == \"AdFind.exe\") and \n  process.args : (\"objectcategory=computer\", \"(objectcategory=computer)\", \n                  \"objectcategory=person\", \"(objectcategory=person)\",\n                  \"objectcategory=subnet\", \"(objectcategory=subnet)\",\n                  \"objectcategory=group\", \"(objectcategory=group)\", \n                  \"objectcategory=organizationalunit\", \"(objectcategory=organizationalunit)\",\n                  \"objectcategory=attributeschema\", \"(objectcategory=attributeschema)\",\n                  \"domainlist\", \"dcmodes\", \"adinfo\", \"dclist\", \"computers_pwnotreqd\", \"trustdmp\")\n",
+  "references": [
+    "http://www.joeware.net/freetools/tools/adfind/",
+    "https://thedfirreport.com/2020/05/08/adfind-recon/",
+    "https://www.fireeye.com/blog/threat-research/2020/05/tactics-techniques-procedures-associated-with-maze-ransomware-incidents.html",
+    "https://www.cybereason.com/blog/dropping-anchor-from-a-trickbot-infection-to-the-discovery-of-the-anchor-malware",
+    "https://www.fireeye.com/blog/threat-research/2019/04/pick-six-intercepting-a-fin6-intrusion.html",
+    "https://usa.visa.com/dam/VCOM/global/support-legal/documents/fin6-cybercrime-group-expands-threat-To-ecommerce-merchants.pdf"
+  ],
+  "risk_score": 21,
+  "rule_id": "eda499b8-a073-4e35-9733-22ec71f57f3a",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1069",
+          "name": "Permission Groups Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1069/",
+          "subtechnique": [
+            {
+              "id": "T1069.002",
+              "name": "Domain Groups",
+              "reference": "https://attack.mitre.org/techniques/T1069/002/"
+            }
+          ]
+        },
+        {
+          "id": "T1087",
+          "name": "Account Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1087/",
+          "subtechnique": [
+            {
+              "id": "T1087.002",
+              "name": "Domain Account",
+              "reference": "https://attack.mitre.org/techniques/T1087/002/"
+            }
+          ]
+        },
+        {
+          "id": "T1482",
+          "name": "Domain Trust Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1482/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 4
+}

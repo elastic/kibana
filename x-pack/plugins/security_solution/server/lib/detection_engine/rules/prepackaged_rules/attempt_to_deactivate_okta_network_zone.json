@@ -1,0 +1,37 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects attempts to deactivate an Okta network zone. Okta network zones can be configured to limit or restrict access to a network based on IP addresses or geolocations. An adversary may attempt to modify, delete, or deactivate an Okta network zone in order to remove or weaken an organization's security controls.",
+  "false_positives": [
+    "Consider adding exceptions to this rule to filter false positives if your organization's Okta network zones are regularly modified."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-okta*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Attempt to Deactivate an Okta Network Zone",
+  "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:okta.system and event.action:zone.deactivate\n",
+  "references": [
+    "https://help.okta.com/en/prod/Content/Topics/Security/network/network-zones.htm",
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 47,
+  "rule_id": "8a5c1e5f-ad63-481e-b53a-ef959230f7f1",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Identity",
+    "Okta",
+    "Continuous Monitoring",
+    "SecOps",
+    "Network Security"
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

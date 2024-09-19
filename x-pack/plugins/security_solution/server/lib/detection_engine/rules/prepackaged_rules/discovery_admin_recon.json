@@ -1,0 +1,51 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies instances of lower privilege accounts enumerating Administrator accounts or groups using built-in Windows tools.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Enumeration of Administrator Accounts",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (((process.name : \"net.exe\" or process.pe.original_file_name == \"net.exe\") or\n    ((process.name : \"net1.exe\" or process.pe.original_file_name == \"net1.exe\") and\n        not process.parent.name : \"net.exe\")) and\n   process.args : (\"group\", \"user\", \"localgroup\") and\n   process.args : (\"admin\", \"Domain Admins\", \"Remote Desktop Users\", \"Enterprise Admins\", \"Organization Management\") and\n   not process.args : \"/add\")\n\n   or\n\n  ((process.name : \"wmic.exe\" or process.pe.original_file_name == \"wmic.exe\") and\n     process.args : (\"group\", \"useraccount\"))\n",
+  "risk_score": 21,
+  "rule_id": "871ea072-1b71-4def-b016-6278b505138d",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1069",
+          "name": "Permission Groups Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1069/"
+        },
+        {
+          "id": "T1087",
+          "name": "Account Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1087/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

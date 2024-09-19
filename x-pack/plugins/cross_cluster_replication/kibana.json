@@ -1,0 +1,22 @@
+{
+  "id": "crossClusterReplication",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": [
+    "home",
+    "licensing",
+    "licenseApiGuard",
+    "management",
+    "remoteClusters",
+    "indexManagement",
+    "features"
+  ],
+  "optionalPlugins": ["usageCollection"],
+  "configPath": ["xpack", "ccr"],
+  "requiredBundles": ["kibanaReact", "esUiShared", "data"]
+}

@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies changes to the Safari configuration using the built-in defaults command. Adversaries may attempt to enable or disable certain Safari settings, such as enabling JavaScript from Apple Events to ease in the hijacking of the users browser.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Modification of Safari Settings via Defaults Command",
+  "query": "event.category:process and event.type:start and\n  process.name:defaults and process.args:\n    (com.apple.Safari and write and not\n      (\n      UniversalSearchEnabled or\n      SuppressSearchSuggestions or\n      WebKitTabToLinksPreferenceKey or\n      ShowFullURLInSmartSearchField or\n      com.apple.Safari.ContentPageGroupIdentifier.WebKit2TabsToLinks\n      )\n    )\n",
+  "references": [
+    "https://objectivebythesea.com/v2/talks/OBTS_v2_Zohar.pdf"
+  ],
+  "risk_score": 47,
+  "rule_id": "6482255d-f468-45ea-a5b3-d3a7de1331ae",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

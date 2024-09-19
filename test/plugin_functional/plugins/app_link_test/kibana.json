@@ -1,0 +1,12 @@
+{
+  "id": "appLinkTest",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredBundles": ["kibanaReact"]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "licenseManagement",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": ["home", "licensing", "management", "features"],
+  "optionalPlugins": ["telemetry"],
+  "configPath": ["xpack", "license_management"],
+  "extraPublicDirs": ["common/constants"],
+  "requiredBundles": ["telemetryManagementSection", "esUiShared", "kibanaReact"]
+}

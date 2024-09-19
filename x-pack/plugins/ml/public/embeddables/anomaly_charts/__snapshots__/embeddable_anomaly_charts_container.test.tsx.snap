@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmbeddableAnomalyChartsContainer should render explorer charts with a valid embeddable input 1`] = `
+Object {
+  "chartsData": Object {
+    "chartsPerRow": 2,
+    "errorMessages": undefined,
+    "seriesToPlot": Array [],
+    "timeFieldName": "@timestamp",
+    "tooManyBuckets": false,
+  },
+  "id": "test-explorer-charts-embeddable",
+  "mlLocator": undefined,
+  "onSelectEntity": [Function],
+  "setSeverity": [Function],
+  "severity": Object {
+    "color": "#fe5050",
+    "display": "critical",
+    "val": 75,
+  },
+  "showCharts": true,
+  "showSelectedInterval": false,
+  "timeBuckets": TimeBuckets {
+    "_timeBucketsConfig": Object {
+      "dateFormat": undefined,
+      "dateFormat:scaled": undefined,
+      "histogram:barTarget": undefined,
+      "histogram:maxBars": undefined,
+    },
+    "barTarget": undefined,
+    "maxBars": undefined,
+  },
+  "timefilter": Object {
+    "calculateBounds": [MockFunction],
+    "createFilter": [MockFunction],
+    "createRelativeFilter": [MockFunction],
+    "disableAutoRefreshSelector": [MockFunction],
+    "disableTimeRangeSelector": [MockFunction],
+    "enableAutoRefreshSelector": [MockFunction],
+    "enableTimeRangeSelector": [MockFunction],
+    "getAbsoluteTime": [MockFunction],
+    "getActiveBounds": [MockFunction],
+    "getAutoRefreshFetch$": [MockFunction],
+    "getBounds": [MockFunction],
+    "getEnabledUpdated$": [MockFunction],
+    "getFetch$": [MockFunction],
+    "getRefreshInterval": [MockFunction],
+    "getRefreshIntervalDefaults": [MockFunction],
+    "getRefreshIntervalUpdate$": [MockFunction],
+    "getTime": [MockFunction],
+    "getTimeDefaults": [MockFunction],
+    "getTimeUpdate$": [MockFunction],
+    "isAutoRefreshSelectorEnabled": [MockFunction],
+    "isTimeRangeSelectorEnabled": [MockFunction],
+    "isTimeTouched": [MockFunction],
+    "setRefreshInterval": [MockFunction],
+    "setTime": [MockFunction],
+  },
+}
+`;

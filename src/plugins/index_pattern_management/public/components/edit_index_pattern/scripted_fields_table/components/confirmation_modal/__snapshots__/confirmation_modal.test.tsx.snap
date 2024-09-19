@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DeleteScritpedFieldConfirmationModal should render normally 1`] = `
+<EuiConfirmModal
+  cancelButtonText="Cancel"
+  confirmButtonText="Delete"
+  defaultFocusedButton="confirm"
+  onCancel={[Function]}
+  onConfirm={[Function]}
+  title="Delete scripted field ''?"
+/>
+`;

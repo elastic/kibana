@@ -1,0 +1,58 @@
+.lnsIndexPatternDimensionEditor {
+  height: 100%;
+}
+
+.lnsIndexPatternDimensionEditor__header {
+  position: sticky;
+  top: 0;
+  background: $euiColorEmptyShade;
+  z-index: $euiZLevel1; // Raise it above the elements that are after it in DOM order
+  padding: 0 $euiSize;
+}
+
+.lnsIndexPatternDimensionEditor-isFullscreen {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+
+  .lnsIndexPatternDimensionEditor__section {
+    height: 100%;
+  }
+}
+
+.lnsIndexPatternDimensionEditor__section--padded {
+  padding: $euiSize;
+}
+
+.lnsIndexPatternDimensionEditor__section--shaded {
+  background-color: $euiColorLightestShade;
+  border-bottom: $euiBorderThin;
+}
+
+.lnsIndexPatternDimensionEditor__columns {
+  column-count: 2;
+  column-gap: $euiSizeXL;
+}
+
+// overrides the .euiListGroupItem display flex.
+// The parent container has a column-count property that only works properly with block elements.
+.lnsIndexPatternDimensionEditor__operation {
+  display: block;
+}
+
+.lnsIndexPatternDimensionEditor__operation .euiListGroupItem__label {
+  width: 100%;
+}
+
+.lnsIndexPatternDimensionEditor__operation > button {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.lnsIndexPatternDimensionEditor__warning {
+  @include kbnThemeStyle('v7') {
+    border: none;
+  }
+}

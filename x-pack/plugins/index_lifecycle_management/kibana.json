@@ -1,0 +1,14 @@
+{
+  "id": "indexLifecycleManagement",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": ["licensing", "management", "features", "share"],
+  "optionalPlugins": ["cloud", "usageCollection", "indexManagement", "home"],
+  "configPath": ["xpack", "ilm"],
+  "requiredBundles": ["indexManagement", "kibanaReact", "esUiShared", "home"]
+}

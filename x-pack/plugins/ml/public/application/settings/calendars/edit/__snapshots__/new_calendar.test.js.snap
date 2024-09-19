@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NewCalendar Renders new calendar form 1`] = `
+<Fragment>
+  <NavigationMenu
+    tabId="settings"
+  />
+  <EuiPage
+    className="mlCalendarEditForm"
+    data-test-subj="mlPageCalendarEdit"
+  >
+    <EuiPageBody>
+      <EuiPageContent
+        className="mlCalendarEditForm__content"
+        horizontalPosition="center"
+        verticalPosition="center"
+      >
+        <CalendarForm
+          calendarId=""
+          canCreateCalendar={true}
+          canDeleteCalendar={true}
+          description=""
+          eventsList={Array []}
+          groupIds={Array []}
+          isEdit={false}
+          isGlobalCalendar={false}
+          isNewCalendarIdValid={true}
+          jobIds={Array []}
+          loading={true}
+          onCalendarIdChange={[Function]}
+          onCreate={[Function]}
+          onCreateGroupOption={[Function]}
+          onDescriptionChange={[Function]}
+          onEdit={[Function]}
+          onEventDelete={[Function]}
+          onGlobalCalendarChange={[Function]}
+          onGroupSelection={[Function]}
+          onJobSelection={[Function]}
+          saving={false}
+          selectedGroupOptions={Array []}
+          selectedJobOptions={Array []}
+          showImportModal={[Function]}
+          showNewEventModal={[Function]}
+        />
+      </EuiPageContent>
+    </EuiPageBody>
+  </EuiPage>
+  <HelpMenu
+    docLink={[MockFunction]}
+  />
+</Fragment>
+`;

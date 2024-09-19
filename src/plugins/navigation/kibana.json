@@ -1,0 +1,12 @@
+{
+  "id": "navigation",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["data"],
+  "requiredBundles": ["kibanaReact"]
+}

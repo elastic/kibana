@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LineToolTipContent renders correctly against snapshot 1`] = `
+<EuiFlexGroup
+  gutterSize="none"
+  justifyContent="center"
+>
+  <EuiFlexItem>
+    <Styled(EuiBadge)
+      color="hollow"
+    >
+      <Styled(EuiFlexGroup)
+        direction="column"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          Source
+        </EuiFlexItem>
+      </Styled(EuiFlexGroup)>
+    </Styled(EuiBadge)>
+  </EuiFlexItem>
+  <SourceDestinationArrows
+    contextId="contextId"
+    destinationBytes={
+      Array [
+        "testPropValue",
+      ]
+    }
+    eventId="map-line-tooltip-contextId"
+    sourceBytes={
+      Array [
+        "testPropValue",
+      ]
+    }
+  />
+  <EuiFlexItem>
+    <Styled(EuiBadge)
+      color="hollow"
+    >
+      <Styled(EuiFlexGroup)>
+        <EuiFlexItem
+          grow={false}
+        >
+          Destination
+        </EuiFlexItem>
+      </Styled(EuiFlexGroup)>
+    </Styled(EuiBadge)>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`LineToolTipContent renders correctly against snapshot when rendering client & server 1`] = `
+<EuiFlexGroup
+  gutterSize="none"
+  justifyContent="center"
+>
+  <EuiFlexItem>
+    <Styled(EuiBadge)
+      color="hollow"
+    >
+      <Styled(EuiFlexGroup)
+        direction="column"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          Client
+        </EuiFlexItem>
+      </Styled(EuiFlexGroup)>
+    </Styled(EuiBadge)>
+  </EuiFlexItem>
+  <SourceDestinationArrows
+    contextId="contextId"
+    destinationBytes={
+      Array [
+        "testPropValue",
+      ]
+    }
+    eventId="map-line-tooltip-contextId"
+    sourceBytes={
+      Array [
+        "testPropValue",
+      ]
+    }
+  />
+  <EuiFlexItem>
+    <Styled(EuiBadge)
+      color="hollow"
+    >
+      <Styled(EuiFlexGroup)>
+        <EuiFlexItem
+          grow={false}
+        >
+          Server
+        </EuiFlexItem>
+      </Styled(EuiFlexGroup)>
+    </Styled(EuiBadge)>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

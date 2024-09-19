@@ -1,0 +1,13 @@
+{
+  "id": "actionsSimulators",
+  "owner": {
+    "name": "Alerting Services",
+    "githubTeam": "kibana-alerting-services"
+  },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack"],
+  "requiredPlugins": ["actions", "features", "encryptedSavedObjects"],
+  "server": true,
+  "ui": false
+}

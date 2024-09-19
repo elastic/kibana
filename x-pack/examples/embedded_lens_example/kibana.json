@@ -1,0 +1,20 @@
+{
+  "id": "embeddedLensExample",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["embedded_lens_example"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "lens",
+    "data",
+    "embeddable",
+    "developerExamples"
+  ],
+  "optionalPlugins": [],
+  "requiredBundles": [],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  }
+}

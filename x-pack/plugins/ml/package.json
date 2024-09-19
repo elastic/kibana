@@ -1,0 +1,12 @@
+{
+  "author": "Elastic",
+  "name": "ml",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Elastic-License",
+  "scripts": {
+    "build:apiDocScripts": "cd server/routes/apidoc_scripts && ../../../../../../node_modules/.bin/tsc",
+    "generateHeader": "node server/routes/apidoc_scripts/target/header_generator.js",
+    "apiDocs": "yarn build:apiDocScripts && yarn generateHeader && cd ./server/routes/ && ../../../../../node_modules/.bin/apidoc --parse-workers apischema=./apidoc_scripts/target/schema_worker.js --parse-parsers apischema=./apidoc_scripts/target/schema_parser.js --parse-filters apiversion=./apidoc_scripts/target/version_filter.js -i . -o ../routes_doc && ../../../../../node_modules/.bin/apidoc-markdown -p ../routes_doc -o ../routes_doc/ML_API.mdx --header ./apidoc_scripts/header.md --template ./apidoc_scripts/template.md"
+  }
+}

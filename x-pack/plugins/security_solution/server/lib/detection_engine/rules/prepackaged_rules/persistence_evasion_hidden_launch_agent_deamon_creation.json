@@ -1,0 +1,78 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation of a hidden launch agent or daemon. An adversary may establish persistence by installing a new launch agent or daemon which executes at login.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Creation of Hidden Launch Agent or Daemon",
+  "query": "file where event.type != \"deletion\" and\n  file.path : \n  (\n    \"/System/Library/LaunchAgents/.*.plist\",\n    \"/Library/LaunchAgents/.*.plist\",\n    \"/Users/*/Library/LaunchAgents/.*.plist\",\n    \"/System/Library/LaunchDaemons/.*.plist\",\n    \"/Library/LaunchDaemons/.*.plist\"\n  )\n",
+  "references": [
+    "https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "092b068f-84ac-485d-8a55-7dd9e006715f",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Persistence",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/",
+          "subtechnique": [
+            {
+              "id": "T1543.001",
+              "name": "Launch Agent",
+              "reference": "https://attack.mitre.org/techniques/T1543/001/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1564",
+          "name": "Hide Artifacts",
+          "reference": "https://attack.mitre.org/techniques/T1564/",
+          "subtechnique": [
+            {
+              "id": "T1564.001",
+              "name": "Hidden Files and Directories",
+              "reference": "https://attack.mitre.org/techniques/T1564/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

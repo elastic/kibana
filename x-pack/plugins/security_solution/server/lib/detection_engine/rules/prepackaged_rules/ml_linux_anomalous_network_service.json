@@ -1,0 +1,30 @@
+{
+  "anomaly_threshold": 50,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies unusual listening ports on Linux instances that can indicate execution of unauthorized services, backdoors, or persistence mechanisms.",
+  "false_positives": [
+    "A newly installed program or one that rarely uses the network could trigger this alert."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "linux_anomalous_network_service",
+  "name": "Unusual Linux Network Service",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "52afbdc5-db15-596e-bc35-f5707f820c4b",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 4
+}

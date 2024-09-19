@@ -1,0 +1,16 @@
+title: New agent policy
+type: object
+properties:
+  name:
+    type: string
+  namespace:
+    type: string
+  description:
+    type: string
+  monitoring_enabled:
+    type: array
+    items:
+      type: string
+      enum:
+        - metrics
+        - logs

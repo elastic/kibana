@@ -1,0 +1,16 @@
+{
+  "id": "enterpriseSearch",
+  "version": "kibana",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": ["features", "spaces", "security", "licensing", "data", "charts", "infra"],
+  "configPath": ["enterpriseSearch"],
+  "optionalPlugins": ["usageCollection", "home", "cloud"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["home", "kibanaReact"],
+  "owner": {
+    "name": "Enterprise Search",
+    "githubTeam": "enterprise-search-frontend"
+  },
+  "description": "Adds dashboards for discovering and managing Enterprise Search products."
+}

@@ -1,0 +1,13 @@
+{
+  "id": "dataSearchPlugin",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["data_search_test_plugin"],
+  "server": true,
+  "ui": false,
+  "requiredPlugins": ["data"]
+}

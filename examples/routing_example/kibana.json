@@ -1,0 +1,14 @@
+{
+  "id": "routingExample",
+  "kibanaVersion": "kibana",
+  "version": "0.0.1",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "description": "A simple example of how to use core's routing services",
+  "requiredPlugins": ["developerExamples"],
+  "optionalPlugins": []
+}

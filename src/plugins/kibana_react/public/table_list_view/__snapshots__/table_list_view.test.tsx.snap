@@ -1,0 +1,163 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TableListView render custom empty prompt 1`] = `
+<KibanaPageTemplate
+  data-test-subj="testLandingPage"
+  isEmptyState={true}
+  pageBodyProps={
+    Object {
+      "aria-labelledby": undefined,
+    }
+  }
+>
+  <EuiEmptyPrompt />
+</KibanaPageTemplate>
+`;
+
+exports[`TableListView render default empty prompt 1`] = `
+<KibanaPageTemplate
+  data-test-subj="testLandingPage"
+  isEmptyState={true}
+  pageBodyProps={
+    Object {
+      "aria-labelledby": undefined,
+    }
+  }
+>
+  <EuiEmptyPrompt
+    title={
+      <h1>
+        <FormattedMessage
+          defaultMessage="No {entityNamePlural} available."
+          id="kibana-react.tableListView.listing.noAvailableItemsMessage"
+          values={
+            Object {
+              "entityNamePlural": "tests",
+            }
+          }
+        />
+      </h1>
+    }
+  />
+</KibanaPageTemplate>
+`;
+
+exports[`TableListView render default empty prompt with create action when createItem supplied 1`] = `
+<KibanaPageTemplate
+  data-test-subj="testLandingPage"
+  isEmptyState={true}
+  pageBodyProps={
+    Object {
+      "aria-labelledby": undefined,
+    }
+  }
+>
+  <EuiEmptyPrompt
+    actions={
+      <EuiButton
+        data-test-subj="newItemButton"
+        fill={true}
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Create {entityName}"
+          id="kibana-react.tableListView.listing.createNewItemButtonLabel"
+          values={
+            Object {
+              "entityName": "test",
+            }
+          }
+        />
+      </EuiButton>
+    }
+    title={
+      <h1>
+        <FormattedMessage
+          defaultMessage="No {entityNamePlural} available."
+          id="kibana-react.tableListView.listing.noAvailableItemsMessage"
+          values={
+            Object {
+              "entityNamePlural": "tests",
+            }
+          }
+        />
+      </h1>
+    }
+  />
+</KibanaPageTemplate>
+`;
+
+exports[`TableListView render list view 1`] = `
+<KibanaPageTemplate
+  data-test-subj="testLandingPage"
+  pageBodyProps={
+    Object {
+      "aria-labelledby": undefined,
+    }
+  }
+  pageHeader={
+    Object {
+      "data-test-subj": "top-nav",
+      "pageTitle": <span>
+        test title
+      </span>,
+      "rightSideItems": Array [
+        undefined,
+      ],
+    }
+  }
+>
+  <EuiInMemoryTable
+    columns={Array []}
+    data-test-subj="itemsInMemTable"
+    itemId="id"
+    items={
+      Array [
+        Object {},
+      ]
+    }
+    loading={false}
+    message={
+      <FormattedMessage
+        defaultMessage="No {entityNamePlural} matched your search."
+        id="kibana-react.tableListView.listing.noMatchedItemsMessage"
+        values={
+          Object {
+            "entityNamePlural": "tests",
+          }
+        }
+      />
+    }
+    pagination={
+      Object {
+        "initialPageIndex": 0,
+        "initialPageSize": 5,
+        "pageSizeOptions": Array [
+          10,
+          20,
+          5,
+          50,
+        ],
+      }
+    }
+    responsive={true}
+    rowHeader="name"
+    search={
+      Object {
+        "box": Object {
+          "data-test-subj": "tableListSearchBox",
+          "incremental": true,
+        },
+        "defaultQuery": "",
+        "filters": Array [],
+        "onChange": [Function],
+        "toolsLeft": undefined,
+      }
+    }
+    sorting={true}
+    tableCaption="test caption"
+    tableLayout="fixed"
+  />
+</KibanaPageTemplate>
+`;

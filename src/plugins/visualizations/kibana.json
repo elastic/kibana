@@ -1,0 +1,22 @@
+{
+  "id": "visualizations",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "expressions",
+    "uiActions",
+    "embeddable",
+    "inspector",
+    "savedObjects"
+  ],
+  "optionalPlugins": ["usageCollection"],
+  "requiredBundles": ["kibanaUtils", "discover"],
+  "extraPublicDirs": ["common/constants", "common/prepare_log_table", "common/expression_functions"],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  },
+  "description": "Contains the shared architecture among all the legacy visualizations, e.g. the visualization type registry or the visualization embeddable."
+}

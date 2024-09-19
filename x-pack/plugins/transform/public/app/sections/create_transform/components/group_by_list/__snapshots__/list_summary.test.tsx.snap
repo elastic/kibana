@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: <GroupByListSummary /> Minimal initialization 1`] = `
+<Fragment>
+  <EuiPanel
+    paddingSize="s"
+  >
+    <GroupByLabelSummary
+      item={
+        Object {
+          "agg": "terms",
+          "aggName": "the-group-by-agg-name",
+          "dropDownName": "the-group-by-drop-down-name",
+          "field": "the-group-by-field",
+        }
+      }
+      optionsDataId="the-options-data-id"
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;

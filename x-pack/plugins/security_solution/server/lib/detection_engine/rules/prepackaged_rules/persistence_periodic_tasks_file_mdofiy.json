@@ -1,0 +1,57 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation or modification of the default configuration for periodic tasks. Adversaries may abuse periodic tasks to execute malicious code or maintain persistence.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Potential Persistence via Periodic Tasks",
+  "query": "event.category:\"file\" and not event.type:\"deletion\" and\n file.path:(/private/etc/periodic/* or /private/etc/defaults/periodic.conf or /private/etc/periodic.conf)\n",
+  "references": [
+    "https://opensource.apple.com/source/crontabs/crontabs-13/private/etc/defaults/periodic.conf.auto.html",
+    "https://www.oreilly.com/library/view/mac-os-x/0596003706/re328.html",
+    "https://github.com/D00MFist/PersistentJXA/blob/master/PeriodicPersist.js"
+  ],
+  "risk_score": 21,
+  "rule_id": "48ec9452-e1fd-4513-a376-10a1a26d2c83",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1053",
+          "name": "Scheduled Task/Job",
+          "reference": "https://attack.mitre.org/techniques/T1053/",
+          "subtechnique": [
+            {
+              "id": "T1053.003",
+              "name": "Cron",
+              "reference": "https://attack.mitre.org/techniques/T1053/003/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

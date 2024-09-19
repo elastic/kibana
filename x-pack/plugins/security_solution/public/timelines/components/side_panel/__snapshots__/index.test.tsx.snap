@@ -1,0 +1,2626 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set 1`] = `
+<DetailsPanel
+  browserFields={Object {}}
+  docValueFields={Array []}
+  handleOnPanelClosed={[MockFunction]}
+  isFlyoutView={false}
+  tabType="query"
+  timelineId="test"
+/>
+`;
+
+exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if no expanded detail has been set in the reducer 1`] = `
+<DetailsPanel
+  browserFields={Object {}}
+  docValueFields={Array []}
+  handleOnPanelClosed={[MockFunction]}
+  isFlyoutView={false}
+  tabType="query"
+  timelineId="test"
+/>
+`;
+
+exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should render the Details Panel when the panelView is set and the associated params are set 1`] = `
+.c0 {
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+  margin-top: 8px;
+}
+
+<DetailsPanel
+  browserFields={Object {}}
+  docValueFields={Array []}
+  handleOnPanelClosed={[MockFunction]}
+  isFlyoutView={false}
+  tabType="query"
+  timelineId="test"
+>
+  <EventDetailsPanelComponent
+    browserFields={Object {}}
+    docValueFields={Array []}
+    expandedEvent={
+      Object {
+        "ecsData": Object {
+          "_id": "1",
+          "destination": Object {
+            "ip": Array [
+              "192.168.0.3",
+            ],
+            "port": Array [
+              6343,
+            ],
+          },
+          "event": Object {
+            "action": Array [
+              "Action",
+            ],
+            "category": Array [
+              "Access",
+            ],
+            "id": Array [
+              "1",
+            ],
+            "module": Array [
+              "nginx",
+            ],
+            "severity": Array [
+              3,
+            ],
+          },
+          "geo": Object {
+            "country_iso_code": Array [
+              "xx",
+            ],
+            "region_name": Array [
+              "xx",
+            ],
+          },
+          "host": Object {
+            "ip": Array [
+              "192.168.0.1",
+            ],
+            "name": Array [
+              "apache",
+            ],
+          },
+          "signal": Object {
+            "rule": Object {
+              "created_at": Array [
+                "2020-01-10T21:11:45.839Z",
+              ],
+              "created_by": Array [
+                "elastic",
+              ],
+              "description": Array [
+                "24/7",
+              ],
+              "enabled": Array [
+                true,
+              ],
+              "false_positives": Array [
+                "test-1",
+              ],
+              "filters": Array [],
+              "from": Array [
+                "now-300s",
+              ],
+              "id": Array [
+                "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+              ],
+              "immutable": Array [
+                false,
+              ],
+              "index": Array [
+                "auditbeat-*",
+              ],
+              "interval": Array [
+                "5m",
+              ],
+              "language": Array [
+                "kuery",
+              ],
+              "max_signals": Array [
+                100,
+              ],
+              "note": Array [
+                "# this is some markdown documentation",
+              ],
+              "output_index": Array [
+                ".siem-signals-default",
+              ],
+              "query": Array [
+                "user.name: root or user.name: admin",
+              ],
+              "references": Array [
+                "www.test.co",
+              ],
+              "risk_score": Array [
+                "21",
+              ],
+              "rule_id": Array [
+                "rule-id-1",
+              ],
+              "saved_id": Array [
+                "Garrett's IP",
+              ],
+              "severity": Array [
+                "low",
+              ],
+              "tags": Array [],
+              "threat": Array [],
+              "timeline_id": Array [
+                "1234-2136-11ea-9864-ebc8cc1cb8c2",
+              ],
+              "timeline_title": Array [
+                "Untitled timeline",
+              ],
+              "to": Array [
+                "now",
+              ],
+              "type": Array [
+                "saved_query",
+              ],
+              "updated_at": Array [
+                "2020-01-10T21:11:45.839Z",
+              ],
+              "updated_by": Array [
+                "elastic",
+              ],
+              "version": Array [
+                "1",
+              ],
+            },
+          },
+          "source": Object {
+            "ip": Array [
+              "192.168.0.1",
+            ],
+            "port": Array [
+              80,
+            ],
+          },
+          "timestamp": "2018-11-05T19:03:25.937Z",
+          "user": Object {
+            "id": Array [
+              "1",
+            ],
+            "name": Array [
+              "john.dee",
+            ],
+          },
+        },
+        "eventId": "my-id",
+        "indexName": "my-index",
+      }
+    }
+    handleOnEventClosed={[Function]}
+    isDraggable={false}
+    isFlyoutView={false}
+    tabType="query"
+    timelineId="test"
+  >
+    <ExpandableEventTitle
+      handleOnEventClosed={[Function]}
+      isAlert={false}
+      loading={true}
+      ruleName=""
+    >
+      <Styled(EuiFlexGroup)
+        gutterSize="none"
+        justifyContent="spaceBetween"
+        wrap={true}
+      >
+        <EuiFlexGroup
+          className="c0"
+          gutterSize="none"
+          justifyContent="spaceBetween"
+          wrap={true}
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap c0"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <EuiButtonIcon
+                  aria-label="close"
+                  iconType="cross"
+                  onClick={[Function]}
+                >
+                  <button
+                    aria-label="close"
+                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <EuiIcon
+                      aria-hidden="true"
+                      className="euiButtonIcon__icon"
+                      color="inherit"
+                      size="m"
+                      type="cross"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="cross"
+                        size="m"
+                      />
+                    </EuiIcon>
+                  </button>
+                </EuiButtonIcon>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </Styled(EuiFlexGroup)>
+    </ExpandableEventTitle>
+    <EuiSpacer
+      size="m"
+    >
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </EuiSpacer>
+    <ExpandableEvent
+      browserFields={Object {}}
+      detailsData={null}
+      event={
+        Object {
+          "ecsData": Object {
+            "_id": "1",
+            "destination": Object {
+              "ip": Array [
+                "192.168.0.3",
+              ],
+              "port": Array [
+                6343,
+              ],
+            },
+            "event": Object {
+              "action": Array [
+                "Action",
+              ],
+              "category": Array [
+                "Access",
+              ],
+              "id": Array [
+                "1",
+              ],
+              "module": Array [
+                "nginx",
+              ],
+              "severity": Array [
+                3,
+              ],
+            },
+            "geo": Object {
+              "country_iso_code": Array [
+                "xx",
+              ],
+              "region_name": Array [
+                "xx",
+              ],
+            },
+            "host": Object {
+              "ip": Array [
+                "192.168.0.1",
+              ],
+              "name": Array [
+                "apache",
+              ],
+            },
+            "signal": Object {
+              "rule": Object {
+                "created_at": Array [
+                  "2020-01-10T21:11:45.839Z",
+                ],
+                "created_by": Array [
+                  "elastic",
+                ],
+                "description": Array [
+                  "24/7",
+                ],
+                "enabled": Array [
+                  true,
+                ],
+                "false_positives": Array [
+                  "test-1",
+                ],
+                "filters": Array [],
+                "from": Array [
+                  "now-300s",
+                ],
+                "id": Array [
+                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                ],
+                "immutable": Array [
+                  false,
+                ],
+                "index": Array [
+                  "auditbeat-*",
+                ],
+                "interval": Array [
+                  "5m",
+                ],
+                "language": Array [
+                  "kuery",
+                ],
+                "max_signals": Array [
+                  100,
+                ],
+                "note": Array [
+                  "# this is some markdown documentation",
+                ],
+                "output_index": Array [
+                  ".siem-signals-default",
+                ],
+                "query": Array [
+                  "user.name: root or user.name: admin",
+                ],
+                "references": Array [
+                  "www.test.co",
+                ],
+                "risk_score": Array [
+                  "21",
+                ],
+                "rule_id": Array [
+                  "rule-id-1",
+                ],
+                "saved_id": Array [
+                  "Garrett's IP",
+                ],
+                "severity": Array [
+                  "low",
+                ],
+                "tags": Array [],
+                "threat": Array [],
+                "timeline_id": Array [
+                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                ],
+                "timeline_title": Array [
+                  "Untitled timeline",
+                ],
+                "to": Array [
+                  "now",
+                ],
+                "type": Array [
+                  "saved_query",
+                ],
+                "updated_at": Array [
+                  "2020-01-10T21:11:45.839Z",
+                ],
+                "updated_by": Array [
+                  "elastic",
+                ],
+                "version": Array [
+                  "1",
+                ],
+              },
+            },
+            "source": Object {
+              "ip": Array [
+                "192.168.0.1",
+              ],
+              "port": Array [
+                80,
+              ],
+            },
+            "timestamp": "2018-11-05T19:03:25.937Z",
+            "user": Object {
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "john.dee",
+              ],
+            },
+          },
+          "eventId": "my-id",
+          "indexName": "my-index",
+        }
+      }
+      hostRisk={null}
+      isAlert={false}
+      isDraggable={false}
+      loading={true}
+      timelineId="test"
+      timelineTabType="query"
+    >
+      <EuiLoadingContent
+        lines={10}
+      >
+        <span
+          className="euiLoadingContent"
+        >
+          <span
+            className="euiLoadingContent__singleLine"
+            key="0"
+          >
+            <span
+              className="euiLoadingContent__singleLineBackground"
+            />
+          </span>
+          <span
+            className="euiLoadingContent__singleLine"
+            key="1"
+          >
+            <span
+              className="euiLoadingContent__singleLineBackground"
+            />
+          </span>
+          <span
+            className="euiLoadingContent__singleLine"
+            key="2"
+          >
+            <span
+              className="euiLoadingContent__singleLineBackground"
+            />
+          </span>
+          <span
+            className="euiLoadingContent__singleLine"
+            key="3"
+          >
+            <span
+              className="euiLoadingContent__singleLineBackground"
+            />
+          </span>
+          <span
+            className="euiLoadingContent__singleLine"
+            key="4"
+          >
+            <span
+              className="euiLoadingContent__singleLineBackground"
+            />
+          </span>
+          <span
+            className="euiLoadingContent__singleLine"
+            key="5"
+          >
+            <span
+              className="euiLoadingContent__singleLineBackground"
+            />
+          </span>
+          <span
+            className="euiLoadingContent__singleLine"
+            key="6"
+          >
+            <span
+              className="euiLoadingContent__singleLineBackground"
+            />
+          </span>
+          <span
+            className="euiLoadingContent__singleLine"
+            key="7"
+          >
+            <span
+              className="euiLoadingContent__singleLineBackground"
+            />
+          </span>
+          <span
+            className="euiLoadingContent__singleLine"
+            key="8"
+          >
+            <span
+              className="euiLoadingContent__singleLineBackground"
+            />
+          </span>
+          <span
+            className="euiLoadingContent__singleLine"
+            key="9"
+          >
+            <span
+              className="euiLoadingContent__singleLineBackground"
+            />
+          </span>
+        </span>
+      </EuiLoadingContent>
+    </ExpandableEvent>
+  </EventDetailsPanelComponent>
+</DetailsPanel>
+`;
+
+exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should render the Event Details view in the Details Panel when the panelView is eventDetail and the eventId is set 1`] = `null`;
+
+exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should render the Event Details view of the Details Panel in the flyout when the panelView is eventDetail and the eventId is set 1`] = `
+Array [
+  .c0 {
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+  margin-top: 8px;
+}
+
+.c1 .euiFlyoutBody__overflow {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  overflow: hidden;
+}
+
+.c1 .euiFlyoutBody__overflow .euiFlyoutBody__overflowContent {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  overflow: hidden;
+  padding: 0 16px 16px;
+}
+
+<EuiFlyout
+    data-test-subj="timeline:details-panel:flyout"
+    onClose={[Function]}
+    ownFocus={false}
+    size="m"
+  >
+    <div
+      data-eui="EuiFlyout"
+      data-test-subj="timeline:details-panel:flyout"
+      role="dialog"
+    >
+      <button
+        data-test-subj="euiFlyoutCloseButton"
+        onClick={[Function]}
+        type="button"
+      />
+      <EventDetailsPanelComponent
+        browserFields={Object {}}
+        docValueFields={Array []}
+        expandedEvent={
+          Object {
+            "ecsData": Object {
+              "_id": "1",
+              "destination": Object {
+                "ip": Array [
+                  "192.168.0.3",
+                ],
+                "port": Array [
+                  6343,
+                ],
+              },
+              "event": Object {
+                "action": Array [
+                  "Action",
+                ],
+                "category": Array [
+                  "Access",
+                ],
+                "id": Array [
+                  "1",
+                ],
+                "module": Array [
+                  "nginx",
+                ],
+                "severity": Array [
+                  3,
+                ],
+              },
+              "geo": Object {
+                "country_iso_code": Array [
+                  "xx",
+                ],
+                "region_name": Array [
+                  "xx",
+                ],
+              },
+              "host": Object {
+                "ip": Array [
+                  "192.168.0.1",
+                ],
+                "name": Array [
+                  "apache",
+                ],
+              },
+              "signal": Object {
+                "rule": Object {
+                  "created_at": Array [
+                    "2020-01-10T21:11:45.839Z",
+                  ],
+                  "created_by": Array [
+                    "elastic",
+                  ],
+                  "description": Array [
+                    "24/7",
+                  ],
+                  "enabled": Array [
+                    true,
+                  ],
+                  "false_positives": Array [
+                    "test-1",
+                  ],
+                  "filters": Array [],
+                  "from": Array [
+                    "now-300s",
+                  ],
+                  "id": Array [
+                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                  ],
+                  "immutable": Array [
+                    false,
+                  ],
+                  "index": Array [
+                    "auditbeat-*",
+                  ],
+                  "interval": Array [
+                    "5m",
+                  ],
+                  "language": Array [
+                    "kuery",
+                  ],
+                  "max_signals": Array [
+                    100,
+                  ],
+                  "note": Array [
+                    "# this is some markdown documentation",
+                  ],
+                  "output_index": Array [
+                    ".siem-signals-default",
+                  ],
+                  "query": Array [
+                    "user.name: root or user.name: admin",
+                  ],
+                  "references": Array [
+                    "www.test.co",
+                  ],
+                  "risk_score": Array [
+                    "21",
+                  ],
+                  "rule_id": Array [
+                    "rule-id-1",
+                  ],
+                  "saved_id": Array [
+                    "Garrett's IP",
+                  ],
+                  "severity": Array [
+                    "low",
+                  ],
+                  "tags": Array [],
+                  "threat": Array [],
+                  "timeline_id": Array [
+                    "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                  ],
+                  "timeline_title": Array [
+                    "Untitled timeline",
+                  ],
+                  "to": Array [
+                    "now",
+                  ],
+                  "type": Array [
+                    "saved_query",
+                  ],
+                  "updated_at": Array [
+                    "2020-01-10T21:11:45.839Z",
+                  ],
+                  "updated_by": Array [
+                    "elastic",
+                  ],
+                  "version": Array [
+                    "1",
+                  ],
+                },
+              },
+              "source": Object {
+                "ip": Array [
+                  "192.168.0.1",
+                ],
+                "port": Array [
+                  80,
+                ],
+              },
+              "timestamp": "2018-11-05T19:03:25.937Z",
+              "user": Object {
+                "id": Array [
+                  "1",
+                ],
+                "name": Array [
+                  "john.dee",
+                ],
+              },
+            },
+            "eventId": "my-id",
+            "indexName": "my-index",
+          }
+        }
+        handleOnEventClosed={[Function]}
+        isDraggable={false}
+        isFlyoutView={true}
+        tabType="query"
+        timelineId="test"
+      >
+        <EuiFlyoutHeader
+          hasBorder={false}
+        >
+          <div
+            className="euiFlyoutHeader"
+          >
+            <ExpandableEventTitle
+              isAlert={false}
+              loading={true}
+              ruleName=""
+            >
+              <Styled(EuiFlexGroup)
+                gutterSize="none"
+                justifyContent="spaceBetween"
+                wrap={true}
+              >
+                <EuiFlexGroup
+                  className="c0"
+                  gutterSize="none"
+                  justifyContent="spaceBetween"
+                  wrap={true}
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap c0"
+                  >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      />
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </Styled(EuiFlexGroup)>
+            </ExpandableEventTitle>
+          </div>
+        </EuiFlyoutHeader>
+        <Styled(EuiFlyoutBody)>
+          <EuiFlyoutBody
+            className="c1"
+          >
+            <div
+              className="euiFlyoutBody c1"
+            >
+              <div
+                className="euiFlyoutBody__overflow"
+                tabIndex={0}
+              >
+                <div
+                  className="euiFlyoutBody__overflowContent"
+                >
+                  <ExpandableEvent
+                    browserFields={Object {}}
+                    detailsData={null}
+                    event={
+                      Object {
+                        "ecsData": Object {
+                          "_id": "1",
+                          "destination": Object {
+                            "ip": Array [
+                              "192.168.0.3",
+                            ],
+                            "port": Array [
+                              6343,
+                            ],
+                          },
+                          "event": Object {
+                            "action": Array [
+                              "Action",
+                            ],
+                            "category": Array [
+                              "Access",
+                            ],
+                            "id": Array [
+                              "1",
+                            ],
+                            "module": Array [
+                              "nginx",
+                            ],
+                            "severity": Array [
+                              3,
+                            ],
+                          },
+                          "geo": Object {
+                            "country_iso_code": Array [
+                              "xx",
+                            ],
+                            "region_name": Array [
+                              "xx",
+                            ],
+                          },
+                          "host": Object {
+                            "ip": Array [
+                              "192.168.0.1",
+                            ],
+                            "name": Array [
+                              "apache",
+                            ],
+                          },
+                          "signal": Object {
+                            "rule": Object {
+                              "created_at": Array [
+                                "2020-01-10T21:11:45.839Z",
+                              ],
+                              "created_by": Array [
+                                "elastic",
+                              ],
+                              "description": Array [
+                                "24/7",
+                              ],
+                              "enabled": Array [
+                                true,
+                              ],
+                              "false_positives": Array [
+                                "test-1",
+                              ],
+                              "filters": Array [],
+                              "from": Array [
+                                "now-300s",
+                              ],
+                              "id": Array [
+                                "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                              ],
+                              "immutable": Array [
+                                false,
+                              ],
+                              "index": Array [
+                                "auditbeat-*",
+                              ],
+                              "interval": Array [
+                                "5m",
+                              ],
+                              "language": Array [
+                                "kuery",
+                              ],
+                              "max_signals": Array [
+                                100,
+                              ],
+                              "note": Array [
+                                "# this is some markdown documentation",
+                              ],
+                              "output_index": Array [
+                                ".siem-signals-default",
+                              ],
+                              "query": Array [
+                                "user.name: root or user.name: admin",
+                              ],
+                              "references": Array [
+                                "www.test.co",
+                              ],
+                              "risk_score": Array [
+                                "21",
+                              ],
+                              "rule_id": Array [
+                                "rule-id-1",
+                              ],
+                              "saved_id": Array [
+                                "Garrett's IP",
+                              ],
+                              "severity": Array [
+                                "low",
+                              ],
+                              "tags": Array [],
+                              "threat": Array [],
+                              "timeline_id": Array [
+                                "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                              ],
+                              "timeline_title": Array [
+                                "Untitled timeline",
+                              ],
+                              "to": Array [
+                                "now",
+                              ],
+                              "type": Array [
+                                "saved_query",
+                              ],
+                              "updated_at": Array [
+                                "2020-01-10T21:11:45.839Z",
+                              ],
+                              "updated_by": Array [
+                                "elastic",
+                              ],
+                              "version": Array [
+                                "1",
+                              ],
+                            },
+                          },
+                          "source": Object {
+                            "ip": Array [
+                              "192.168.0.1",
+                            ],
+                            "port": Array [
+                              80,
+                            ],
+                          },
+                          "timestamp": "2018-11-05T19:03:25.937Z",
+                          "user": Object {
+                            "id": Array [
+                              "1",
+                            ],
+                            "name": Array [
+                              "john.dee",
+                            ],
+                          },
+                        },
+                        "eventId": "my-id",
+                        "indexName": "my-index",
+                      }
+                    }
+                    hostRisk={null}
+                    isAlert={false}
+                    isDraggable={false}
+                    loading={true}
+                    timelineId="test"
+                    timelineTabType="flyout"
+                  >
+                    <EuiLoadingContent
+                      lines={10}
+                    >
+                      <span
+                        className="euiLoadingContent"
+                      >
+                        <span
+                          className="euiLoadingContent__singleLine"
+                          key="0"
+                        >
+                          <span
+                            className="euiLoadingContent__singleLineBackground"
+                          />
+                        </span>
+                        <span
+                          className="euiLoadingContent__singleLine"
+                          key="1"
+                        >
+                          <span
+                            className="euiLoadingContent__singleLineBackground"
+                          />
+                        </span>
+                        <span
+                          className="euiLoadingContent__singleLine"
+                          key="2"
+                        >
+                          <span
+                            className="euiLoadingContent__singleLineBackground"
+                          />
+                        </span>
+                        <span
+                          className="euiLoadingContent__singleLine"
+                          key="3"
+                        >
+                          <span
+                            className="euiLoadingContent__singleLineBackground"
+                          />
+                        </span>
+                        <span
+                          className="euiLoadingContent__singleLine"
+                          key="4"
+                        >
+                          <span
+                            className="euiLoadingContent__singleLineBackground"
+                          />
+                        </span>
+                        <span
+                          className="euiLoadingContent__singleLine"
+                          key="5"
+                        >
+                          <span
+                            className="euiLoadingContent__singleLineBackground"
+                          />
+                        </span>
+                        <span
+                          className="euiLoadingContent__singleLine"
+                          key="6"
+                        >
+                          <span
+                            className="euiLoadingContent__singleLineBackground"
+                          />
+                        </span>
+                        <span
+                          className="euiLoadingContent__singleLine"
+                          key="7"
+                        >
+                          <span
+                            className="euiLoadingContent__singleLineBackground"
+                          />
+                        </span>
+                        <span
+                          className="euiLoadingContent__singleLine"
+                          key="8"
+                        >
+                          <span
+                            className="euiLoadingContent__singleLineBackground"
+                          />
+                        </span>
+                        <span
+                          className="euiLoadingContent__singleLine"
+                          key="9"
+                        >
+                          <span
+                            className="euiLoadingContent__singleLineBackground"
+                          />
+                        </span>
+                      </span>
+                    </EuiLoadingContent>
+                  </ExpandableEvent>
+                </div>
+              </div>
+            </div>
+          </EuiFlyoutBody>
+        </Styled(EuiFlyoutBody)>
+        <Memo()
+          detailsData={null}
+          expandedEvent={
+            Object {
+              "ecsData": Object {
+                "_id": "1",
+                "destination": Object {
+                  "ip": Array [
+                    "192.168.0.3",
+                  ],
+                  "port": Array [
+                    6343,
+                  ],
+                },
+                "event": Object {
+                  "action": Array [
+                    "Action",
+                  ],
+                  "category": Array [
+                    "Access",
+                  ],
+                  "id": Array [
+                    "1",
+                  ],
+                  "module": Array [
+                    "nginx",
+                  ],
+                  "severity": Array [
+                    3,
+                  ],
+                },
+                "geo": Object {
+                  "country_iso_code": Array [
+                    "xx",
+                  ],
+                  "region_name": Array [
+                    "xx",
+                  ],
+                },
+                "host": Object {
+                  "ip": Array [
+                    "192.168.0.1",
+                  ],
+                  "name": Array [
+                    "apache",
+                  ],
+                },
+                "signal": Object {
+                  "rule": Object {
+                    "created_at": Array [
+                      "2020-01-10T21:11:45.839Z",
+                    ],
+                    "created_by": Array [
+                      "elastic",
+                    ],
+                    "description": Array [
+                      "24/7",
+                    ],
+                    "enabled": Array [
+                      true,
+                    ],
+                    "false_positives": Array [
+                      "test-1",
+                    ],
+                    "filters": Array [],
+                    "from": Array [
+                      "now-300s",
+                    ],
+                    "id": Array [
+                      "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                    ],
+                    "immutable": Array [
+                      false,
+                    ],
+                    "index": Array [
+                      "auditbeat-*",
+                    ],
+                    "interval": Array [
+                      "5m",
+                    ],
+                    "language": Array [
+                      "kuery",
+                    ],
+                    "max_signals": Array [
+                      100,
+                    ],
+                    "note": Array [
+                      "# this is some markdown documentation",
+                    ],
+                    "output_index": Array [
+                      ".siem-signals-default",
+                    ],
+                    "query": Array [
+                      "user.name: root or user.name: admin",
+                    ],
+                    "references": Array [
+                      "www.test.co",
+                    ],
+                    "risk_score": Array [
+                      "21",
+                    ],
+                    "rule_id": Array [
+                      "rule-id-1",
+                    ],
+                    "saved_id": Array [
+                      "Garrett's IP",
+                    ],
+                    "severity": Array [
+                      "low",
+                    ],
+                    "tags": Array [],
+                    "threat": Array [],
+                    "timeline_id": Array [
+                      "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                    ],
+                    "timeline_title": Array [
+                      "Untitled timeline",
+                    ],
+                    "to": Array [
+                      "now",
+                    ],
+                    "type": Array [
+                      "saved_query",
+                    ],
+                    "updated_at": Array [
+                      "2020-01-10T21:11:45.839Z",
+                    ],
+                    "updated_by": Array [
+                      "elastic",
+                    ],
+                    "version": Array [
+                      "1",
+                    ],
+                  },
+                },
+                "source": Object {
+                  "ip": Array [
+                    "192.168.0.1",
+                  ],
+                  "port": Array [
+                    80,
+                  ],
+                },
+                "timestamp": "2018-11-05T19:03:25.937Z",
+                "user": Object {
+                  "id": Array [
+                    "1",
+                  ],
+                  "name": Array [
+                    "john.dee",
+                  ],
+                },
+              },
+              "eventId": "my-id",
+              "indexName": "my-index",
+            }
+          }
+          handleOnEventClosed={[Function]}
+          isHostIsolationPanelOpen={false}
+          loadingEventDetails={true}
+          onAddIsolationStatusClick={[Function]}
+          timelineId="test"
+        >
+          <EuiFlyoutFooter>
+            <div
+              className="euiFlyoutFooter"
+            >
+              <EuiFlexGroup
+                justifyContent="flexEnd"
+              >
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <Connect(Component)
+                        detailsData={null}
+                        ecsData={
+                          Object {
+                            "_id": "1",
+                            "destination": Object {
+                              "ip": Array [
+                                "192.168.0.3",
+                              ],
+                              "port": Array [
+                                6343,
+                              ],
+                            },
+                            "event": Object {
+                              "action": Array [
+                                "Action",
+                              ],
+                              "category": Array [
+                                "Access",
+                              ],
+                              "id": Array [
+                                "1",
+                              ],
+                              "module": Array [
+                                "nginx",
+                              ],
+                              "severity": Array [
+                                3,
+                              ],
+                            },
+                            "geo": Object {
+                              "country_iso_code": Array [
+                                "xx",
+                              ],
+                              "region_name": Array [
+                                "xx",
+                              ],
+                            },
+                            "host": Object {
+                              "ip": Array [
+                                "192.168.0.1",
+                              ],
+                              "name": Array [
+                                "apache",
+                              ],
+                            },
+                            "signal": Object {
+                              "rule": Object {
+                                "created_at": Array [
+                                  "2020-01-10T21:11:45.839Z",
+                                ],
+                                "created_by": Array [
+                                  "elastic",
+                                ],
+                                "description": Array [
+                                  "24/7",
+                                ],
+                                "enabled": Array [
+                                  true,
+                                ],
+                                "false_positives": Array [
+                                  "test-1",
+                                ],
+                                "filters": Array [],
+                                "from": Array [
+                                  "now-300s",
+                                ],
+                                "id": Array [
+                                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                                ],
+                                "immutable": Array [
+                                  false,
+                                ],
+                                "index": Array [
+                                  "auditbeat-*",
+                                ],
+                                "interval": Array [
+                                  "5m",
+                                ],
+                                "language": Array [
+                                  "kuery",
+                                ],
+                                "max_signals": Array [
+                                  100,
+                                ],
+                                "note": Array [
+                                  "# this is some markdown documentation",
+                                ],
+                                "output_index": Array [
+                                  ".siem-signals-default",
+                                ],
+                                "query": Array [
+                                  "user.name: root or user.name: admin",
+                                ],
+                                "references": Array [
+                                  "www.test.co",
+                                ],
+                                "risk_score": Array [
+                                  "21",
+                                ],
+                                "rule_id": Array [
+                                  "rule-id-1",
+                                ],
+                                "saved_id": Array [
+                                  "Garrett's IP",
+                                ],
+                                "severity": Array [
+                                  "low",
+                                ],
+                                "tags": Array [],
+                                "threat": Array [],
+                                "timeline_id": Array [
+                                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                                ],
+                                "timeline_title": Array [
+                                  "Untitled timeline",
+                                ],
+                                "to": Array [
+                                  "now",
+                                ],
+                                "type": Array [
+                                  "saved_query",
+                                ],
+                                "updated_at": Array [
+                                  "2020-01-10T21:11:45.839Z",
+                                ],
+                                "updated_by": Array [
+                                  "elastic",
+                                ],
+                                "version": Array [
+                                  "1",
+                                ],
+                              },
+                            },
+                            "source": Object {
+                              "ip": Array [
+                                "192.168.0.1",
+                              ],
+                              "port": Array [
+                                80,
+                              ],
+                            },
+                            "timestamp": "2018-11-05T19:03:25.937Z",
+                            "user": Object {
+                              "id": Array [
+                                "1",
+                              ],
+                              "name": Array [
+                                "john.dee",
+                              ],
+                            },
+                          }
+                        }
+                        handleOnEventClosed={[Function]}
+                        indexName="my-index"
+                        isHostIsolationPanelOpen={false}
+                        loadingEventDetails={true}
+                        onAddEventFilterClick={[Function]}
+                        onAddExceptionTypeClick={[Function]}
+                        onAddIsolationStatusClick={[Function]}
+                        timelineId="test"
+                      >
+                        <Memo()
+                          detailsData={null}
+                          dispatch={[Function]}
+                          ecsData={
+                            Object {
+                              "_id": "1",
+                              "destination": Object {
+                                "ip": Array [
+                                  "192.168.0.3",
+                                ],
+                                "port": Array [
+                                  6343,
+                                ],
+                              },
+                              "event": Object {
+                                "action": Array [
+                                  "Action",
+                                ],
+                                "category": Array [
+                                  "Access",
+                                ],
+                                "id": Array [
+                                  "1",
+                                ],
+                                "module": Array [
+                                  "nginx",
+                                ],
+                                "severity": Array [
+                                  3,
+                                ],
+                              },
+                              "geo": Object {
+                                "country_iso_code": Array [
+                                  "xx",
+                                ],
+                                "region_name": Array [
+                                  "xx",
+                                ],
+                              },
+                              "host": Object {
+                                "ip": Array [
+                                  "192.168.0.1",
+                                ],
+                                "name": Array [
+                                  "apache",
+                                ],
+                              },
+                              "signal": Object {
+                                "rule": Object {
+                                  "created_at": Array [
+                                    "2020-01-10T21:11:45.839Z",
+                                  ],
+                                  "created_by": Array [
+                                    "elastic",
+                                  ],
+                                  "description": Array [
+                                    "24/7",
+                                  ],
+                                  "enabled": Array [
+                                    true,
+                                  ],
+                                  "false_positives": Array [
+                                    "test-1",
+                                  ],
+                                  "filters": Array [],
+                                  "from": Array [
+                                    "now-300s",
+                                  ],
+                                  "id": Array [
+                                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                                  ],
+                                  "immutable": Array [
+                                    false,
+                                  ],
+                                  "index": Array [
+                                    "auditbeat-*",
+                                  ],
+                                  "interval": Array [
+                                    "5m",
+                                  ],
+                                  "language": Array [
+                                    "kuery",
+                                  ],
+                                  "max_signals": Array [
+                                    100,
+                                  ],
+                                  "note": Array [
+                                    "# this is some markdown documentation",
+                                  ],
+                                  "output_index": Array [
+                                    ".siem-signals-default",
+                                  ],
+                                  "query": Array [
+                                    "user.name: root or user.name: admin",
+                                  ],
+                                  "references": Array [
+                                    "www.test.co",
+                                  ],
+                                  "risk_score": Array [
+                                    "21",
+                                  ],
+                                  "rule_id": Array [
+                                    "rule-id-1",
+                                  ],
+                                  "saved_id": Array [
+                                    "Garrett's IP",
+                                  ],
+                                  "severity": Array [
+                                    "low",
+                                  ],
+                                  "tags": Array [],
+                                  "threat": Array [],
+                                  "timeline_id": Array [
+                                    "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                                  ],
+                                  "timeline_title": Array [
+                                    "Untitled timeline",
+                                  ],
+                                  "to": Array [
+                                    "now",
+                                  ],
+                                  "type": Array [
+                                    "saved_query",
+                                  ],
+                                  "updated_at": Array [
+                                    "2020-01-10T21:11:45.839Z",
+                                  ],
+                                  "updated_by": Array [
+                                    "elastic",
+                                  ],
+                                  "version": Array [
+                                    "1",
+                                  ],
+                                },
+                              },
+                              "source": Object {
+                                "ip": Array [
+                                  "192.168.0.1",
+                                ],
+                                "port": Array [
+                                  80,
+                                ],
+                              },
+                              "timestamp": "2018-11-05T19:03:25.937Z",
+                              "user": Object {
+                                "id": Array [
+                                  "1",
+                                ],
+                                "name": Array [
+                                  "john.dee",
+                                ],
+                              },
+                            }
+                          }
+                          globalQuery={Array []}
+                          handleOnEventClosed={[Function]}
+                          indexName="my-index"
+                          isHostIsolationPanelOpen={false}
+                          loadingEventDetails={true}
+                          onAddEventFilterClick={[Function]}
+                          onAddExceptionTypeClick={[Function]}
+                          onAddIsolationStatusClick={[Function]}
+                          timelineId="test"
+                          timelineQuery={
+                            Object {
+                              "id": "",
+                              "inspect": null,
+                              "isInspected": false,
+                              "loading": false,
+                              "refetch": null,
+                              "selectedInspectIndex": 0,
+                            }
+                          }
+                        />
+                      </Connect(Component)>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </EuiFlyoutFooter>
+        </Memo()>
+      </EventDetailsPanelComponent>
+    </div>
+  </EuiFlyout>,
+  .c0 {
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+  margin-top: 8px;
+}
+
+.c1 .euiFlyoutBody__overflow {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  overflow: hidden;
+}
+
+.c1 .euiFlyoutBody__overflow .euiFlyoutBody__overflowContent {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  overflow: hidden;
+  padding: 0 16px 16px;
+}
+
+<div
+    data-eui="EuiFlyout"
+    data-test-subj="timeline:details-panel:flyout"
+    role="dialog"
+  >
+    <button
+      data-test-subj="euiFlyoutCloseButton"
+      onClick={[Function]}
+      type="button"
+    />
+    <EventDetailsPanelComponent
+      browserFields={Object {}}
+      docValueFields={Array []}
+      expandedEvent={
+        Object {
+          "ecsData": Object {
+            "_id": "1",
+            "destination": Object {
+              "ip": Array [
+                "192.168.0.3",
+              ],
+              "port": Array [
+                6343,
+              ],
+            },
+            "event": Object {
+              "action": Array [
+                "Action",
+              ],
+              "category": Array [
+                "Access",
+              ],
+              "id": Array [
+                "1",
+              ],
+              "module": Array [
+                "nginx",
+              ],
+              "severity": Array [
+                3,
+              ],
+            },
+            "geo": Object {
+              "country_iso_code": Array [
+                "xx",
+              ],
+              "region_name": Array [
+                "xx",
+              ],
+            },
+            "host": Object {
+              "ip": Array [
+                "192.168.0.1",
+              ],
+              "name": Array [
+                "apache",
+              ],
+            },
+            "signal": Object {
+              "rule": Object {
+                "created_at": Array [
+                  "2020-01-10T21:11:45.839Z",
+                ],
+                "created_by": Array [
+                  "elastic",
+                ],
+                "description": Array [
+                  "24/7",
+                ],
+                "enabled": Array [
+                  true,
+                ],
+                "false_positives": Array [
+                  "test-1",
+                ],
+                "filters": Array [],
+                "from": Array [
+                  "now-300s",
+                ],
+                "id": Array [
+                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                ],
+                "immutable": Array [
+                  false,
+                ],
+                "index": Array [
+                  "auditbeat-*",
+                ],
+                "interval": Array [
+                  "5m",
+                ],
+                "language": Array [
+                  "kuery",
+                ],
+                "max_signals": Array [
+                  100,
+                ],
+                "note": Array [
+                  "# this is some markdown documentation",
+                ],
+                "output_index": Array [
+                  ".siem-signals-default",
+                ],
+                "query": Array [
+                  "user.name: root or user.name: admin",
+                ],
+                "references": Array [
+                  "www.test.co",
+                ],
+                "risk_score": Array [
+                  "21",
+                ],
+                "rule_id": Array [
+                  "rule-id-1",
+                ],
+                "saved_id": Array [
+                  "Garrett's IP",
+                ],
+                "severity": Array [
+                  "low",
+                ],
+                "tags": Array [],
+                "threat": Array [],
+                "timeline_id": Array [
+                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                ],
+                "timeline_title": Array [
+                  "Untitled timeline",
+                ],
+                "to": Array [
+                  "now",
+                ],
+                "type": Array [
+                  "saved_query",
+                ],
+                "updated_at": Array [
+                  "2020-01-10T21:11:45.839Z",
+                ],
+                "updated_by": Array [
+                  "elastic",
+                ],
+                "version": Array [
+                  "1",
+                ],
+              },
+            },
+            "source": Object {
+              "ip": Array [
+                "192.168.0.1",
+              ],
+              "port": Array [
+                80,
+              ],
+            },
+            "timestamp": "2018-11-05T19:03:25.937Z",
+            "user": Object {
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "john.dee",
+              ],
+            },
+          },
+          "eventId": "my-id",
+          "indexName": "my-index",
+        }
+      }
+      handleOnEventClosed={[Function]}
+      isDraggable={false}
+      isFlyoutView={true}
+      tabType="query"
+      timelineId="test"
+    >
+      <EuiFlyoutHeader
+        hasBorder={false}
+      >
+        <div
+          className="euiFlyoutHeader"
+        >
+          <ExpandableEventTitle
+            isAlert={false}
+            loading={true}
+            ruleName=""
+          >
+            <Styled(EuiFlexGroup)
+              gutterSize="none"
+              justifyContent="spaceBetween"
+              wrap={true}
+            >
+              <EuiFlexGroup
+                className="c0"
+                gutterSize="none"
+                justifyContent="spaceBetween"
+                wrap={true}
+              >
+                <div
+                  className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap c0"
+                >
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    />
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </Styled(EuiFlexGroup)>
+          </ExpandableEventTitle>
+        </div>
+      </EuiFlyoutHeader>
+      <Styled(EuiFlyoutBody)>
+        <EuiFlyoutBody
+          className="c1"
+        >
+          <div
+            className="euiFlyoutBody c1"
+          >
+            <div
+              className="euiFlyoutBody__overflow"
+              tabIndex={0}
+            >
+              <div
+                className="euiFlyoutBody__overflowContent"
+              >
+                <ExpandableEvent
+                  browserFields={Object {}}
+                  detailsData={null}
+                  event={
+                    Object {
+                      "ecsData": Object {
+                        "_id": "1",
+                        "destination": Object {
+                          "ip": Array [
+                            "192.168.0.3",
+                          ],
+                          "port": Array [
+                            6343,
+                          ],
+                        },
+                        "event": Object {
+                          "action": Array [
+                            "Action",
+                          ],
+                          "category": Array [
+                            "Access",
+                          ],
+                          "id": Array [
+                            "1",
+                          ],
+                          "module": Array [
+                            "nginx",
+                          ],
+                          "severity": Array [
+                            3,
+                          ],
+                        },
+                        "geo": Object {
+                          "country_iso_code": Array [
+                            "xx",
+                          ],
+                          "region_name": Array [
+                            "xx",
+                          ],
+                        },
+                        "host": Object {
+                          "ip": Array [
+                            "192.168.0.1",
+                          ],
+                          "name": Array [
+                            "apache",
+                          ],
+                        },
+                        "signal": Object {
+                          "rule": Object {
+                            "created_at": Array [
+                              "2020-01-10T21:11:45.839Z",
+                            ],
+                            "created_by": Array [
+                              "elastic",
+                            ],
+                            "description": Array [
+                              "24/7",
+                            ],
+                            "enabled": Array [
+                              true,
+                            ],
+                            "false_positives": Array [
+                              "test-1",
+                            ],
+                            "filters": Array [],
+                            "from": Array [
+                              "now-300s",
+                            ],
+                            "id": Array [
+                              "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                            ],
+                            "immutable": Array [
+                              false,
+                            ],
+                            "index": Array [
+                              "auditbeat-*",
+                            ],
+                            "interval": Array [
+                              "5m",
+                            ],
+                            "language": Array [
+                              "kuery",
+                            ],
+                            "max_signals": Array [
+                              100,
+                            ],
+                            "note": Array [
+                              "# this is some markdown documentation",
+                            ],
+                            "output_index": Array [
+                              ".siem-signals-default",
+                            ],
+                            "query": Array [
+                              "user.name: root or user.name: admin",
+                            ],
+                            "references": Array [
+                              "www.test.co",
+                            ],
+                            "risk_score": Array [
+                              "21",
+                            ],
+                            "rule_id": Array [
+                              "rule-id-1",
+                            ],
+                            "saved_id": Array [
+                              "Garrett's IP",
+                            ],
+                            "severity": Array [
+                              "low",
+                            ],
+                            "tags": Array [],
+                            "threat": Array [],
+                            "timeline_id": Array [
+                              "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                            ],
+                            "timeline_title": Array [
+                              "Untitled timeline",
+                            ],
+                            "to": Array [
+                              "now",
+                            ],
+                            "type": Array [
+                              "saved_query",
+                            ],
+                            "updated_at": Array [
+                              "2020-01-10T21:11:45.839Z",
+                            ],
+                            "updated_by": Array [
+                              "elastic",
+                            ],
+                            "version": Array [
+                              "1",
+                            ],
+                          },
+                        },
+                        "source": Object {
+                          "ip": Array [
+                            "192.168.0.1",
+                          ],
+                          "port": Array [
+                            80,
+                          ],
+                        },
+                        "timestamp": "2018-11-05T19:03:25.937Z",
+                        "user": Object {
+                          "id": Array [
+                            "1",
+                          ],
+                          "name": Array [
+                            "john.dee",
+                          ],
+                        },
+                      },
+                      "eventId": "my-id",
+                      "indexName": "my-index",
+                    }
+                  }
+                  hostRisk={null}
+                  isAlert={false}
+                  isDraggable={false}
+                  loading={true}
+                  timelineId="test"
+                  timelineTabType="flyout"
+                >
+                  <EuiLoadingContent
+                    lines={10}
+                  >
+                    <span
+                      className="euiLoadingContent"
+                    >
+                      <span
+                        className="euiLoadingContent__singleLine"
+                        key="0"
+                      >
+                        <span
+                          className="euiLoadingContent__singleLineBackground"
+                        />
+                      </span>
+                      <span
+                        className="euiLoadingContent__singleLine"
+                        key="1"
+                      >
+                        <span
+                          className="euiLoadingContent__singleLineBackground"
+                        />
+                      </span>
+                      <span
+                        className="euiLoadingContent__singleLine"
+                        key="2"
+                      >
+                        <span
+                          className="euiLoadingContent__singleLineBackground"
+                        />
+                      </span>
+                      <span
+                        className="euiLoadingContent__singleLine"
+                        key="3"
+                      >
+                        <span
+                          className="euiLoadingContent__singleLineBackground"
+                        />
+                      </span>
+                      <span
+                        className="euiLoadingContent__singleLine"
+                        key="4"
+                      >
+                        <span
+                          className="euiLoadingContent__singleLineBackground"
+                        />
+                      </span>
+                      <span
+                        className="euiLoadingContent__singleLine"
+                        key="5"
+                      >
+                        <span
+                          className="euiLoadingContent__singleLineBackground"
+                        />
+                      </span>
+                      <span
+                        className="euiLoadingContent__singleLine"
+                        key="6"
+                      >
+                        <span
+                          className="euiLoadingContent__singleLineBackground"
+                        />
+                      </span>
+                      <span
+                        className="euiLoadingContent__singleLine"
+                        key="7"
+                      >
+                        <span
+                          className="euiLoadingContent__singleLineBackground"
+                        />
+                      </span>
+                      <span
+                        className="euiLoadingContent__singleLine"
+                        key="8"
+                      >
+                        <span
+                          className="euiLoadingContent__singleLineBackground"
+                        />
+                      </span>
+                      <span
+                        className="euiLoadingContent__singleLine"
+                        key="9"
+                      >
+                        <span
+                          className="euiLoadingContent__singleLineBackground"
+                        />
+                      </span>
+                    </span>
+                  </EuiLoadingContent>
+                </ExpandableEvent>
+              </div>
+            </div>
+          </div>
+        </EuiFlyoutBody>
+      </Styled(EuiFlyoutBody)>
+      <Memo()
+        detailsData={null}
+        expandedEvent={
+          Object {
+            "ecsData": Object {
+              "_id": "1",
+              "destination": Object {
+                "ip": Array [
+                  "192.168.0.3",
+                ],
+                "port": Array [
+                  6343,
+                ],
+              },
+              "event": Object {
+                "action": Array [
+                  "Action",
+                ],
+                "category": Array [
+                  "Access",
+                ],
+                "id": Array [
+                  "1",
+                ],
+                "module": Array [
+                  "nginx",
+                ],
+                "severity": Array [
+                  3,
+                ],
+              },
+              "geo": Object {
+                "country_iso_code": Array [
+                  "xx",
+                ],
+                "region_name": Array [
+                  "xx",
+                ],
+              },
+              "host": Object {
+                "ip": Array [
+                  "192.168.0.1",
+                ],
+                "name": Array [
+                  "apache",
+                ],
+              },
+              "signal": Object {
+                "rule": Object {
+                  "created_at": Array [
+                    "2020-01-10T21:11:45.839Z",
+                  ],
+                  "created_by": Array [
+                    "elastic",
+                  ],
+                  "description": Array [
+                    "24/7",
+                  ],
+                  "enabled": Array [
+                    true,
+                  ],
+                  "false_positives": Array [
+                    "test-1",
+                  ],
+                  "filters": Array [],
+                  "from": Array [
+                    "now-300s",
+                  ],
+                  "id": Array [
+                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                  ],
+                  "immutable": Array [
+                    false,
+                  ],
+                  "index": Array [
+                    "auditbeat-*",
+                  ],
+                  "interval": Array [
+                    "5m",
+                  ],
+                  "language": Array [
+                    "kuery",
+                  ],
+                  "max_signals": Array [
+                    100,
+                  ],
+                  "note": Array [
+                    "# this is some markdown documentation",
+                  ],
+                  "output_index": Array [
+                    ".siem-signals-default",
+                  ],
+                  "query": Array [
+                    "user.name: root or user.name: admin",
+                  ],
+                  "references": Array [
+                    "www.test.co",
+                  ],
+                  "risk_score": Array [
+                    "21",
+                  ],
+                  "rule_id": Array [
+                    "rule-id-1",
+                  ],
+                  "saved_id": Array [
+                    "Garrett's IP",
+                  ],
+                  "severity": Array [
+                    "low",
+                  ],
+                  "tags": Array [],
+                  "threat": Array [],
+                  "timeline_id": Array [
+                    "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                  ],
+                  "timeline_title": Array [
+                    "Untitled timeline",
+                  ],
+                  "to": Array [
+                    "now",
+                  ],
+                  "type": Array [
+                    "saved_query",
+                  ],
+                  "updated_at": Array [
+                    "2020-01-10T21:11:45.839Z",
+                  ],
+                  "updated_by": Array [
+                    "elastic",
+                  ],
+                  "version": Array [
+                    "1",
+                  ],
+                },
+              },
+              "source": Object {
+                "ip": Array [
+                  "192.168.0.1",
+                ],
+                "port": Array [
+                  80,
+                ],
+              },
+              "timestamp": "2018-11-05T19:03:25.937Z",
+              "user": Object {
+                "id": Array [
+                  "1",
+                ],
+                "name": Array [
+                  "john.dee",
+                ],
+              },
+            },
+            "eventId": "my-id",
+            "indexName": "my-index",
+          }
+        }
+        handleOnEventClosed={[Function]}
+        isHostIsolationPanelOpen={false}
+        loadingEventDetails={true}
+        onAddIsolationStatusClick={[Function]}
+        timelineId="test"
+      >
+        <EuiFlyoutFooter>
+          <div
+            className="euiFlyoutFooter"
+          >
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <Connect(Component)
+                      detailsData={null}
+                      ecsData={
+                        Object {
+                          "_id": "1",
+                          "destination": Object {
+                            "ip": Array [
+                              "192.168.0.3",
+                            ],
+                            "port": Array [
+                              6343,
+                            ],
+                          },
+                          "event": Object {
+                            "action": Array [
+                              "Action",
+                            ],
+                            "category": Array [
+                              "Access",
+                            ],
+                            "id": Array [
+                              "1",
+                            ],
+                            "module": Array [
+                              "nginx",
+                            ],
+                            "severity": Array [
+                              3,
+                            ],
+                          },
+                          "geo": Object {
+                            "country_iso_code": Array [
+                              "xx",
+                            ],
+                            "region_name": Array [
+                              "xx",
+                            ],
+                          },
+                          "host": Object {
+                            "ip": Array [
+                              "192.168.0.1",
+                            ],
+                            "name": Array [
+                              "apache",
+                            ],
+                          },
+                          "signal": Object {
+                            "rule": Object {
+                              "created_at": Array [
+                                "2020-01-10T21:11:45.839Z",
+                              ],
+                              "created_by": Array [
+                                "elastic",
+                              ],
+                              "description": Array [
+                                "24/7",
+                              ],
+                              "enabled": Array [
+                                true,
+                              ],
+                              "false_positives": Array [
+                                "test-1",
+                              ],
+                              "filters": Array [],
+                              "from": Array [
+                                "now-300s",
+                              ],
+                              "id": Array [
+                                "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                              ],
+                              "immutable": Array [
+                                false,
+                              ],
+                              "index": Array [
+                                "auditbeat-*",
+                              ],
+                              "interval": Array [
+                                "5m",
+                              ],
+                              "language": Array [
+                                "kuery",
+                              ],
+                              "max_signals": Array [
+                                100,
+                              ],
+                              "note": Array [
+                                "# this is some markdown documentation",
+                              ],
+                              "output_index": Array [
+                                ".siem-signals-default",
+                              ],
+                              "query": Array [
+                                "user.name: root or user.name: admin",
+                              ],
+                              "references": Array [
+                                "www.test.co",
+                              ],
+                              "risk_score": Array [
+                                "21",
+                              ],
+                              "rule_id": Array [
+                                "rule-id-1",
+                              ],
+                              "saved_id": Array [
+                                "Garrett's IP",
+                              ],
+                              "severity": Array [
+                                "low",
+                              ],
+                              "tags": Array [],
+                              "threat": Array [],
+                              "timeline_id": Array [
+                                "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                              ],
+                              "timeline_title": Array [
+                                "Untitled timeline",
+                              ],
+                              "to": Array [
+                                "now",
+                              ],
+                              "type": Array [
+                                "saved_query",
+                              ],
+                              "updated_at": Array [
+                                "2020-01-10T21:11:45.839Z",
+                              ],
+                              "updated_by": Array [
+                                "elastic",
+                              ],
+                              "version": Array [
+                                "1",
+                              ],
+                            },
+                          },
+                          "source": Object {
+                            "ip": Array [
+                              "192.168.0.1",
+                            ],
+                            "port": Array [
+                              80,
+                            ],
+                          },
+                          "timestamp": "2018-11-05T19:03:25.937Z",
+                          "user": Object {
+                            "id": Array [
+                              "1",
+                            ],
+                            "name": Array [
+                              "john.dee",
+                            ],
+                          },
+                        }
+                      }
+                      handleOnEventClosed={[Function]}
+                      indexName="my-index"
+                      isHostIsolationPanelOpen={false}
+                      loadingEventDetails={true}
+                      onAddEventFilterClick={[Function]}
+                      onAddExceptionTypeClick={[Function]}
+                      onAddIsolationStatusClick={[Function]}
+                      timelineId="test"
+                    >
+                      <Memo()
+                        detailsData={null}
+                        dispatch={[Function]}
+                        ecsData={
+                          Object {
+                            "_id": "1",
+                            "destination": Object {
+                              "ip": Array [
+                                "192.168.0.3",
+                              ],
+                              "port": Array [
+                                6343,
+                              ],
+                            },
+                            "event": Object {
+                              "action": Array [
+                                "Action",
+                              ],
+                              "category": Array [
+                                "Access",
+                              ],
+                              "id": Array [
+                                "1",
+                              ],
+                              "module": Array [
+                                "nginx",
+                              ],
+                              "severity": Array [
+                                3,
+                              ],
+                            },
+                            "geo": Object {
+                              "country_iso_code": Array [
+                                "xx",
+                              ],
+                              "region_name": Array [
+                                "xx",
+                              ],
+                            },
+                            "host": Object {
+                              "ip": Array [
+                                "192.168.0.1",
+                              ],
+                              "name": Array [
+                                "apache",
+                              ],
+                            },
+                            "signal": Object {
+                              "rule": Object {
+                                "created_at": Array [
+                                  "2020-01-10T21:11:45.839Z",
+                                ],
+                                "created_by": Array [
+                                  "elastic",
+                                ],
+                                "description": Array [
+                                  "24/7",
+                                ],
+                                "enabled": Array [
+                                  true,
+                                ],
+                                "false_positives": Array [
+                                  "test-1",
+                                ],
+                                "filters": Array [],
+                                "from": Array [
+                                  "now-300s",
+                                ],
+                                "id": Array [
+                                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                                ],
+                                "immutable": Array [
+                                  false,
+                                ],
+                                "index": Array [
+                                  "auditbeat-*",
+                                ],
+                                "interval": Array [
+                                  "5m",
+                                ],
+                                "language": Array [
+                                  "kuery",
+                                ],
+                                "max_signals": Array [
+                                  100,
+                                ],
+                                "note": Array [
+                                  "# this is some markdown documentation",
+                                ],
+                                "output_index": Array [
+                                  ".siem-signals-default",
+                                ],
+                                "query": Array [
+                                  "user.name: root or user.name: admin",
+                                ],
+                                "references": Array [
+                                  "www.test.co",
+                                ],
+                                "risk_score": Array [
+                                  "21",
+                                ],
+                                "rule_id": Array [
+                                  "rule-id-1",
+                                ],
+                                "saved_id": Array [
+                                  "Garrett's IP",
+                                ],
+                                "severity": Array [
+                                  "low",
+                                ],
+                                "tags": Array [],
+                                "threat": Array [],
+                                "timeline_id": Array [
+                                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                                ],
+                                "timeline_title": Array [
+                                  "Untitled timeline",
+                                ],
+                                "to": Array [
+                                  "now",
+                                ],
+                                "type": Array [
+                                  "saved_query",
+                                ],
+                                "updated_at": Array [
+                                  "2020-01-10T21:11:45.839Z",
+                                ],
+                                "updated_by": Array [
+                                  "elastic",
+                                ],
+                                "version": Array [
+                                  "1",
+                                ],
+                              },
+                            },
+                            "source": Object {
+                              "ip": Array [
+                                "192.168.0.1",
+                              ],
+                              "port": Array [
+                                80,
+                              ],
+                            },
+                            "timestamp": "2018-11-05T19:03:25.937Z",
+                            "user": Object {
+                              "id": Array [
+                                "1",
+                              ],
+                              "name": Array [
+                                "john.dee",
+                              ],
+                            },
+                          }
+                        }
+                        globalQuery={Array []}
+                        handleOnEventClosed={[Function]}
+                        indexName="my-index"
+                        isHostIsolationPanelOpen={false}
+                        loadingEventDetails={true}
+                        onAddEventFilterClick={[Function]}
+                        onAddExceptionTypeClick={[Function]}
+                        onAddIsolationStatusClick={[Function]}
+                        timelineId="test"
+                        timelineQuery={
+                          Object {
+                            "id": "",
+                            "inspect": null,
+                            "isInspected": false,
+                            "loading": false,
+                            "refetch": null,
+                            "selectedInspectIndex": 0,
+                          }
+                        }
+                      />
+                    </Connect(Component)>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiFlyoutFooter>
+      </Memo()>
+    </EventDetailsPanelComponent>
+  </div>,
+]
+`;
+
+exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set 1`] = `null`;
+
+exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set 1`] = `null`;

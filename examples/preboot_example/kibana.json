@@ -1,0 +1,16 @@
+{
+  "id": "prebootExample",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "description": "The example of the `preboot` plugin.",
+  "version": "8.0.0",
+  "configPath": ["prebootExample"],
+  "type": "preboot",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [],
+  "requiredBundles": []
+}

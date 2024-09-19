@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies use of the Windows file system utility (fsutil.exe ) to gather information about attached peripheral devices and components connected to a computer system.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Peripheral Device Discovery",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"fsutil.exe\" or process.pe.original_file_name == \"fsutil.exe\") and \n  process.args : \"fsinfo\" and process.args : \"drives\"\n",
+  "risk_score": 21,
+  "rule_id": "0c7ca5c2-728d-4ad9-b1c5-bbba83ecb1f4",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1120",
+          "name": "Peripheral Device Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1120/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

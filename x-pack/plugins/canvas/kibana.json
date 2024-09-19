@@ -1,0 +1,44 @@
+{
+  "id": "canvas",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "Adds Canvas application to Kibana",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "canvas"],
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "bfetch",
+    "charts",
+    "data",
+    "embeddable",
+    "expressionError",
+    "expressionImage",
+    "expressionMetric",
+    "expressionRepeatImage",
+    "expressionRevealImage",
+    "expressionShape",
+    "expressions",
+    "features",
+    "inspector",
+    "presentationUtil",
+    "uiActions",
+    "share"
+  ],
+  "optionalPlugins": ["home", "reporting", "spaces", "usageCollection"],
+  "requiredBundles": [
+    "discover",
+    "home",
+    "kibanaLegacy",
+    "kibanaReact",
+    "kibanaUtils",
+    "lens",
+    "maps",
+    "savedObjects",
+    "visualizations",
+    "fieldFormats"
+  ]
+}

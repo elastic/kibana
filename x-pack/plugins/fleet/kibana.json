@@ -1,0 +1,15 @@
+{
+  "id": "fleet",
+  "owner": {
+    "name": "Fleet",
+    "githubTeam": "fleet"
+  },
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "fleet"],
+  "requiredPlugins": ["licensing", "data", "encryptedSavedObjects", "navigation", "customIntegrations"],
+  "optionalPlugins": ["security", "features", "cloud", "usageCollection", "home", "globalSearch"],
+  "extraPublicDirs": ["common"],
+  "requiredBundles": ["kibanaReact", "esUiShared", "home", "infra", "kibanaUtils"]
+}

@@ -1,0 +1,33 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects when Okta ThreatInsight identifies a request from a malicious IP address. Investigating requests from IP addresses identified as malicious by Okta ThreatInsight can help security teams monitor for and respond to credential based attacks against their organization, such as brute force and password spraying attacks.",
+  "index": [
+    "filebeat-*",
+    "logs-okta*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Threat Detected by Okta ThreatInsight",
+  "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:okta.system and event.action:security.threat.detected\n",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 47,
+  "rule_id": "6885d2ae-e008-4762-b98a-e8e1cd3a81e9",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Identity",
+    "Okta",
+    "Continuous Monitoring",
+    "SecOps",
+    "Monitoring"
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 6
+}

@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary can use the Background Intelligent Transfer Service (BITS) SetNotifyCmdLine method to execute a program that runs after a job finishes transferring data or after a job enters a specified state in order to persist on a system.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Persistence via BITS Job Notify Cmdline",
+  "query": "process where event.type == \"start\" and\n  process.parent.name : \"svchost.exe\" and process.parent.args : \"BITS\" and\n  not process.executable :\n              (\"?:\\\\Windows\\\\System32\\\\WerFaultSecure.exe\",\n               \"?:\\\\Windows\\\\System32\\\\WerFault.exe\",\n               \"?:\\\\Windows\\\\System32\\\\wermgr.exe\",\n               \"?:\\\\WINDOWS\\\\system32\\\\directxdatabaseupdater.exe\")\n",
+  "references": [
+    "https://pentestlab.blog/2019/10/30/persistence-bits-jobs/",
+    "https://docs.microsoft.com/en-us/windows/win32/api/bits1_5/nf-bits1_5-ibackgroundcopyjob2-setnotifycmdline",
+    "https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/bitsadmin-setnotifycmdline",
+    "https://www.elastic.co/blog/hunting-for-persistence-using-elastic-security-part-2"
+  ],
+  "risk_score": 47,
+  "rule_id": "c3b915e0-22f3-4bf7-991d-b643513c722f",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1197",
+          "name": "BITS Jobs",
+          "reference": "https://attack.mitre.org/techniques/T1197/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

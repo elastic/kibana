@@ -1,0 +1,14 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target"
+  },
+  "include": [
+    "schema_worker.ts",
+    "schema_parser.ts",
+    "schema_extractor.ts",
+    "version_filter.ts",
+    "types.ts",
+    "header_generator.ts"
+  ]
+}

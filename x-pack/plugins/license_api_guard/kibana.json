@@ -1,0 +1,12 @@
+{
+  "id": "licenseApiGuard",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "configPath": ["xpack", "licenseApiGuard"],
+  "server": true,
+  "ui": false
+}

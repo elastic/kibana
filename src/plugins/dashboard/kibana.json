@@ -1,0 +1,25 @@
+{
+  "id": "dashboard",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "Adds the Dashboard app to Kibana",
+  "version": "kibana",
+  "requiredPlugins": [
+    "data",
+    "embeddable",
+    "inspector",
+    "navigation",
+    "savedObjects",
+    "share",
+    "uiActions",
+    "urlForwarding",
+    "presentationUtil",
+    "visualizations"
+  ],
+  "optionalPlugins": ["home", "spaces", "savedObjectsTaggingOss", "usageCollection"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["home", "kibanaReact", "kibanaUtils", "presentationUtil"]
+}

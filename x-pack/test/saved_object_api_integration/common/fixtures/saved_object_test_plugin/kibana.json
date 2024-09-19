@@ -1,0 +1,7 @@
+{
+  "id": "savedObjectTestPlugin",
+  "owner": { "name": "Platform Security", "githubTeam": "kibana-security" },
+  "version": "kibana",
+  "server": true,
+  "ui": false
+}

@@ -1,0 +1,89 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when a script interpreter or signed binary is launched via a non-standard working directory. An attacker may use this technique to evade defenses.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious Execution from a Mounted Device",
+  "query": "process where event.type == \"start\" and process.executable : \"C:\\\\*\" and\n  (process.working_directory : \"?:\\\\\" and not process.working_directory: \"C:\\\\\") and\n  process.parent.name : \"explorer.exe\" and\n  process.name : (\"rundll32.exe\", \"mshta.exe\", \"powershell.exe\", \"pwsh.exe\", \"cmd.exe\", \"regsvr32.exe\",\n                  \"cscript.exe\", \"wscript.exe\")\n",
+  "references": [
+    "https://www.microsoft.com/security/blog/2021/05/27/new-sophisticated-email-based-attack-from-nobelium/",
+    "https://www.volexity.com/blog/2021/05/27/suspected-apt29-operation-launches-election-fraud-themed-phishing-campaigns/"
+  ],
+  "risk_score": 47,
+  "rule_id": "8a1d4831-3ce6-4859-9891-28931fa6101d",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.011",
+              "name": "Rundll32",
+              "reference": "https://attack.mitre.org/techniques/T1218/011/"
+            },
+            {
+              "id": "T1218.005",
+              "name": "Mshta",
+              "reference": "https://attack.mitre.org/techniques/T1218/005/"
+            },
+            {
+              "id": "T1218.010",
+              "name": "Regsvr32",
+              "reference": "https://attack.mitre.org/techniques/T1218/010/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.001",
+              "name": "PowerShell",
+              "reference": "https://attack.mitre.org/techniques/T1059/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

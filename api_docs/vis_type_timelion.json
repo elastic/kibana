@@ -1,0 +1,62 @@
+{
+  "id": "visTypeTimelion",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "visTypeTimelion",
+      "id": "def-public.VisTypeTimelionPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "VisTypeTimelionPluginStart",
+      "description": [],
+      "path": "src/plugins/vis_types/timelion/public/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "visTypeTimelion",
+          "id": "def-public.VisTypeTimelionPluginStart.getArgValueSuggestions",
+          "type": "Function",
+          "tags": [],
+          "label": "getArgValueSuggestions",
+          "description": [],
+          "signature": [
+            "() => { hasDynamicSuggestionsForArgument: (functionName: string, argName: string) => any; getDynamicSuggestionsForArgument: (functionName: string, argName: string, functionArgs: ",
+            "TimelionExpressionArgument",
+            "[], partialInput?: string) => Promise<any>; getStaticSuggestionsForInput: (partialInput?: string, staticSuggestions?: ",
+            "TimelionFunctionArgsSuggestion",
+            "[] | undefined) => ",
+            "TimelionFunctionArgsSuggestion",
+            "[]; }"
+          ],
+          "path": "src/plugins/vis_types/timelion/public/plugin.ts",
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "telemetryManagementSection",
+  "owner": {
+    "name": "Kibana Telemetry",
+    "githubTeam": "kibana-telemetry"
+  },
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredBundles": ["usageCollection"],
+  "optionalPlugins": ["usageCollection"],
+  "requiredPlugins": [
+    "advancedSettings",
+    "telemetry"
+  ]
+}

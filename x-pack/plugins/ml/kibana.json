@@ -1,0 +1,54 @@
+{
+  "id": "ml",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "xpack",
+    "ml"
+  ],
+  "requiredPlugins": [
+    "data",
+    "cloud",
+    "features",
+    "dataVisualizer",
+    "licensing",
+    "share",
+    "embeddable",
+    "uiActions",
+    "kibanaLegacy",
+    "discover",
+    "triggersActionsUi",
+    "fieldFormats"
+  ],
+  "optionalPlugins": [
+    "alerting",
+    "home",
+    "security",
+    "spaces",
+    "management",
+    "licenseManagement",
+    "maps",
+    "usageCollection"
+  ],
+  "server": true,
+  "ui": true,
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaUtils",
+    "kibanaReact",
+    "dashboard",
+    "savedObjects",
+    "home",
+    "maps",
+    "usageCollection",
+    "fieldFormats"
+  ],
+  "extraPublicDirs": [
+    "common"
+  ],
+  "owner": {
+    "name": "Machine Learning UI",
+    "githubTeam": "ml-ui"
+  },
+  "description": "This plugin provides access to the machine learning features provided by Elastic."
+}

@@ -1,0 +1,53 @@
+{
+  "id": "visTypeVega",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "visTypeVega",
+      "id": "def-server.VisTypeVegaPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "VisTypeVegaPluginStart",
+      "description": [],
+      "path": "src/plugins/vis_types/vega/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    },
+    "setup": {
+      "parentPluginId": "visTypeVega",
+      "id": "def-server.VisTypeVegaPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "VisTypeVegaPluginSetup",
+      "description": [],
+      "path": "src/plugins/vis_types/vega/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

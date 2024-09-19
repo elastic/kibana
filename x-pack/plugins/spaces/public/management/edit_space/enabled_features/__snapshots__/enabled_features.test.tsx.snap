@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EnabledFeatures renders as expected 1`] = `
+<SectionPanel
+  data-test-subj="enabled-features-panel"
+  title="Features"
+>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiTitle
+        size="xs"
+      >
+        <h3>
+          <FormattedMessage
+            defaultMessage="Set feature visibility"
+            id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
+            values={Object {}}
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiText
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Hidden features are removed from the user interface, but not disabled. To secure access to features, {manageRolesLink}."
+            id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
+            values={
+              Object {
+                "manageRolesLink": <FormattedMessage
+                  defaultMessage="manage security roles"
+                  id="xpack.spaces.management.enabledSpaceFeatures.manageRolesLinkText"
+                  values={Object {}}
+                />,
+              }
+            }
+          />
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <FeatureTable
+        features={
+          Array [
+            Object {
+              "app": Array [],
+              "category": Object {
+                "euiIconType": "logoKibana",
+                "id": "kibana",
+                "label": "Analytics",
+                "order": 1000,
+              },
+              "id": "feature-1",
+              "name": "Feature 1",
+              "privileges": null,
+            },
+            Object {
+              "app": Array [],
+              "category": Object {
+                "euiIconType": "logoKibana",
+                "id": "kibana",
+                "label": "Analytics",
+                "order": 1000,
+              },
+              "id": "feature-2",
+              "name": "Feature 2",
+              "privileges": null,
+            },
+          ]
+        }
+        onChange={[MockFunction]}
+        space={
+          Object {
+            "disabledFeatures": Array [
+              "feature-1",
+              "feature-2",
+            ],
+            "id": "my-space",
+            "name": "my space",
+          }
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</SectionPanel>
+`;

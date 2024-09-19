@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies execution via MSSQL xp_cmdshell stored procedure. Malicious users may attempt to elevate their privileges by using xp_cmdshell, which is disabled by default, thus, it's important to review the context of it's use.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Execution via MSSQL xp_cmdshell Stored Procedure",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"cmd.exe\" and process.parent.name : \"sqlservr.exe\"\n",
+  "risk_score": 73,
+  "rule_id": "4ed493fc-d637-4a36-80ff-ac84937e5461",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 4
+}

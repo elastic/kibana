@@ -1,0 +1,14 @@
+{
+  "id": "searchprofiler",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "searchprofiler"],
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": ["devTools", "home", "licensing"],
+  "requiredBundles": ["esUiShared"]
+}

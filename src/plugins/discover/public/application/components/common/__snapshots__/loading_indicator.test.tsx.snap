@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Loading indicator renders correctly 1`] = `
+<LoadingIndicator>
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceAround"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiLoadingSpinner
+            size="l"
+          >
+            <span
+              className="euiLoadingSpinner euiLoadingSpinner--large"
+            />
+          </EuiLoadingSpinner>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</LoadingIndicator>
+`;

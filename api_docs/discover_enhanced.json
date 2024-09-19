@@ -1,0 +1,865 @@
+{
+  "id": "discoverEnhanced",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "discoverEnhanced",
+        "id": "def-public.DiscoverEnhancedPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "DiscoverEnhancedPlugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "discoverEnhanced",
+            "scope": "public",
+            "docId": "kibDiscoverEnhancedPluginApi",
+            "section": "def-public.DiscoverEnhancedPlugin",
+            "text": "DiscoverEnhancedPlugin"
+          },
+          " implements ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
+          "<void, void, ",
+          {
+            "pluginId": "discoverEnhanced",
+            "scope": "public",
+            "docId": "kibDiscoverEnhancedPluginApi",
+            "section": "def-public.DiscoverEnhancedSetupDependencies",
+            "text": "DiscoverEnhancedSetupDependencies"
+          },
+          ", ",
+          {
+            "pluginId": "discoverEnhanced",
+            "scope": "public",
+            "docId": "kibDiscoverEnhancedPluginApi",
+            "section": "def-public.DiscoverEnhancedStartDependencies",
+            "text": "DiscoverEnhancedStartDependencies"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedPlugin.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discoverEnhanced",
+                "scope": "common",
+                "docId": "kibDiscoverEnhancedPluginApi",
+                "section": "def-common.Config",
+                "text": "Config"
+              }
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.DiscoverEnhancedPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<object>"
+                ],
+                "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<",
+              {
+                "pluginId": "discoverEnhanced",
+                "scope": "public",
+                "docId": "kibDiscoverEnhancedPluginApi",
+                "section": "def-public.DiscoverEnhancedStartDependencies",
+                "text": "DiscoverEnhancedStartDependencies"
+              },
+              ", unknown>, { uiActions, share }: ",
+              {
+                "pluginId": "discoverEnhanced",
+                "scope": "public",
+                "docId": "kibDiscoverEnhancedPluginApi",
+                "section": "def-public.DiscoverEnhancedSetupDependencies",
+                "text": "DiscoverEnhancedSetupDependencies"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.DiscoverEnhancedPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<",
+                  {
+                    "pluginId": "discoverEnhanced",
+                    "scope": "public",
+                    "docId": "kibDiscoverEnhancedPluginApi",
+                    "section": "def-public.DiscoverEnhancedStartDependencies",
+                    "text": "DiscoverEnhancedStartDependencies"
+                  },
+                  ", unknown>"
+                ],
+                "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.DiscoverEnhancedPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ uiActions, share }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "discoverEnhanced",
+                    "scope": "public",
+                    "docId": "kibDiscoverEnhancedPluginApi",
+                    "section": "def-public.DiscoverEnhancedSetupDependencies",
+                    "text": "DiscoverEnhancedSetupDependencies"
+                  }
+                ],
+                "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              },
+              ", plugins: ",
+              {
+                "pluginId": "discoverEnhanced",
+                "scope": "public",
+                "docId": "kibDiscoverEnhancedPluginApi",
+                "section": "def-public.DiscoverEnhancedStartDependencies",
+                "text": "DiscoverEnhancedStartDependencies"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.DiscoverEnhancedPlugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.DiscoverEnhancedPlugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "discoverEnhanced",
+                    "scope": "public",
+                    "docId": "kibDiscoverEnhancedPluginApi",
+                    "section": "def-public.DiscoverEnhancedStartDependencies",
+                    "text": "DiscoverEnhancedStartDependencies"
+                  }
+                ],
+                "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discoverEnhanced",
+        "id": "def-public.ExploreDataChartAction",
+        "type": "Class",
+        "tags": [],
+        "label": "ExploreDataChartAction",
+        "description": [
+          "\nThis is \"Explore underlying data\" action which appears in popup context\nmenu when user clicks a value in visualization or brushes a time range."
+        ],
+        "signature": [
+          {
+            "pluginId": "discoverEnhanced",
+            "scope": "public",
+            "docId": "kibDiscoverEnhancedPluginApi",
+            "section": "def-public.ExploreDataChartAction",
+            "text": "ExploreDataChartAction"
+          },
+          " extends ",
+          "AbstractExploreDataAction",
+          "<",
+          "ExploreDataChartActionContext",
+          "> implements ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.Action",
+            "text": "Action"
+          },
+          "<",
+          "ExploreDataChartActionContext",
+          ">"
+        ],
+        "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataChartAction.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"ACTION_EXPLORE_DATA_CHART\""
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataChartAction.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"ACTION_EXPLORE_DATA_CHART\""
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataChartAction.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "200"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataChartAction.isCompatible",
+            "type": "Function",
+            "tags": [],
+            "label": "isCompatible",
+            "description": [],
+            "signature": [
+              "(context: ",
+              "ExploreDataChartActionContext",
+              ") => Promise<boolean>"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.ExploreDataChartAction.isCompatible.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "ExploreDataChartActionContext"
+                ],
+                "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataChartAction.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [],
+            "signature": [
+              "(context: ",
+              "ExploreDataChartActionContext",
+              ") => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.ExploreDataChartAction.getLocation.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "ExploreDataChartActionContext"
+                ],
+                "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discoverEnhanced",
+        "id": "def-public.ExploreDataContextMenuAction",
+        "type": "Class",
+        "tags": [],
+        "label": "ExploreDataContextMenuAction",
+        "description": [
+          "\nThis is \"Explore underlying data\" action which appears in the context\nmenu of a dashboard panel."
+        ],
+        "signature": [
+          {
+            "pluginId": "discoverEnhanced",
+            "scope": "public",
+            "docId": "kibDiscoverEnhancedPluginApi",
+            "section": "def-public.ExploreDataContextMenuAction",
+            "text": "ExploreDataContextMenuAction"
+          },
+          " extends ",
+          "AbstractExploreDataAction",
+          "<EmbeddableQueryContext> implements ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.Action",
+            "text": "Action"
+          },
+          "<EmbeddableQueryContext>"
+        ],
+        "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataContextMenuAction.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"ACTION_EXPLORE_DATA\""
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataContextMenuAction.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"ACTION_EXPLORE_DATA\""
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataContextMenuAction.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "200"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataContextMenuAction.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [],
+            "signature": [
+              "(context: EmbeddableQueryContext) => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.ExploreDataContextMenuAction.getLocation.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "EmbeddableQueryContext"
+                ],
+                "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "discoverEnhanced",
+        "id": "def-public.DiscoverEnhancedSetupDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverEnhancedSetupDependencies",
+        "description": [],
+        "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedSetupDependencies.discover",
+            "type": "Object",
+            "tags": [],
+            "label": "discover",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverSetup",
+                "text": "DiscoverSetup"
+              }
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedSetupDependencies.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableSetup",
+                "text": "EmbeddableSetup"
+              }
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedSetupDependencies.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.SharePluginSetup",
+                "text": "SharePluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedSetupDependencies.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              "{ readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>>(definition: A) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<",
+              "ActionContext",
+              "<A>>; readonly registerTrigger: (trigger: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
+                "text": "Trigger"
+              },
+              ") => void; readonly unregisterAction: (actionId: string) => void; }"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discoverEnhanced",
+        "id": "def-public.DiscoverEnhancedStartDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverEnhancedStartDependencies",
+        "description": [],
+        "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedStartDependencies.discover",
+            "type": "Object",
+            "tags": [],
+            "label": "discover",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverStart",
+                "text": "DiscoverStart"
+              }
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedStartDependencies.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableStart",
+                "text": "EmbeddableStart"
+              }
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedStartDependencies.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.SharePluginStart",
+                "text": "SharePluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedStartDependencies.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              "{ readonly clear: () => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>>(definition: A) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<",
+              "ActionContext",
+              "<A>>; readonly registerTrigger: (trigger: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
+                "text": "Trigger"
+              },
+              ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
+              "TriggerContract",
+              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: <T extends ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>>(id: string) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<",
+              "ActionContext",
+              "<T>>; readonly getTriggerActions: (triggerId: string) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly fork: () => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsService",
+                "text": "UiActionsService"
+              },
+              "; }"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "discoverEnhanced",
+        "id": "def-common.Config",
+        "type": "Interface",
+        "tags": [],
+        "label": "Config",
+        "description": [],
+        "path": "x-pack/plugins/discover_enhanced/common/config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-common.Config.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ exploreDataInChart: { enabled: boolean; }; exploreDataInContextMenu: { enabled: boolean; }; }"
+            ],
+            "path": "x-pack/plugins/discover_enhanced/common/config.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

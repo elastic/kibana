@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a suspicious AutoIt process execution. Malware written as an AutoIt script tends to rename the AutoIt executable to avoid detection.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Renamed AutoIt Scripts Interpreter",
+  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n  process.pe.original_file_name : \"AutoIt*.exe\" and not process.name : \"AutoIt*.exe\"\n",
+  "risk_score": 47,
+  "rule_id": "2e1e835d-01e5-48ca-b9fc-7a61f7f11902",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 4
+}

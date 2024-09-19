@@ -1,0 +1,43 @@
+{
+  "elasticsearch": {
+    "cluster": ["manage"],
+    "indices": [
+      {
+        "names": [".lists*", ".items*"],
+        "privileges": ["all"]
+      },
+      {
+        "names": [
+          "apm-*-transaction*",
+          "traces-apm*",
+          "auditbeat-*",
+          "endgame-*",
+          "filebeat-*",
+          "logs-*",
+          "packetbeat-*",
+          "winlogbeat-*",
+          "metrics-endpoint.metadata_current_*",
+          ".fleet-agents*",
+          ".fleet-actions*"
+        ],
+        "privileges": ["all"]
+      },
+      {
+        "names": [".siem-signals-*"],
+        "privileges": ["all"]
+      }
+    ]
+  },
+  "kibana": [
+    {
+      "feature": {
+        "ml": ["all"],
+        "siem": ["all", "read_alerts", "crud_alerts"],
+        "securitySolutionCases": ["all"],
+        "actions": ["all"],
+        "builtInAlerts": ["all"]
+      },
+      "spaces": ["*"]
+    }
+  ]
+}

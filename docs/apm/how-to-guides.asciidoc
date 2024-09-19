@@ -1,0 +1,32 @@
+[role="xpack"]
+[[apm-how-to]]
+== How-to guides
+
+Learn how to perform common APM app tasks.
+
+
+* <<agent-configuration>>
+* <<apm-alerts>>
+* <<custom-links>>
+* <<filters>>
+* <<correlations>>
+* <<machine-learning-integration>>
+* <<advanced-queries>>
+* <<transactions-annotations>>
+
+
+include::agent-configuration.asciidoc[]
+
+include::apm-alerts.asciidoc[]
+
+include::custom-links.asciidoc[]
+
+include::filters.asciidoc[]
+
+include::correlations.asciidoc[]
+
+include::machine-learning.asciidoc[]
+
+include::advanced-queries.asciidoc[]
+
+include::deployment-annotations.asciidoc[]

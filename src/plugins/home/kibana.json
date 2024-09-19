@@ -1,0 +1,13 @@
+{
+  "id": "home",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data", "share", "urlForwarding"],
+  "optionalPlugins": ["usageCollection", "telemetry", "customIntegrations"],
+  "requiredBundles": ["kibanaReact"]
+}

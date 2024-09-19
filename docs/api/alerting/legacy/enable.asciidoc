@@ -1,0 +1,41 @@
+[[alerts-api-enable]]
+=== Legacy enable alert API
+++++
+<titleabbrev>Legacy enable alert</titleabbrev>
+++++
+
+deprecated::[7.13.0,Use <<enable-rule-api>> instead.]
+
+Enable an alert.
+
+[[alerts-api-enable-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/alerts/alert/<id>/_enable`
+
+`POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/_enable`
+
+[[alerts-api-enable-path-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the alert that you want to enable.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[alerts-api-enable-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+==== Example
+
+Enable an alert with ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/alerts/alert/41893910-6bca-11eb-9e0d-85d233e3ee35/_enable
+--------------------------------------------------
+// KIBANA

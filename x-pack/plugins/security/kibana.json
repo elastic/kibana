@@ -1,0 +1,21 @@
+{
+  "id": "security",
+  "owner": {
+    "name": "Platform Security",
+    "githubTeam": "kibana-security"
+  },
+  "description": "This plugin provides authentication and authorization features, and exposes functionality to understand the capabilities of the currently authenticated user.",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "security"],
+  "requiredPlugins": ["data", "features", "licensing", "taskManager"],
+  "optionalPlugins": ["home", "management", "usageCollection", "spaces", "share"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": [
+    "home",
+    "kibanaReact",
+    "spaces",
+    "esUiShared"
+  ]
+}

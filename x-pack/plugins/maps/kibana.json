@@ -1,0 +1,47 @@
+{
+  "id": "maps",
+  "owner": {
+    "name": "GIS",
+    "githubTeam": "kibana-gis"
+  },
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "maps"],
+  "requiredPlugins": [
+    "licensing",
+    "features",
+    "inspector",
+    "data",
+    "fileUpload",
+    "uiActions",
+    "navigation",
+    "expressions",
+    "visualizations",
+    "dashboard",
+    "embeddable",
+    "mapsEms",
+    "savedObjects",
+    "share",
+    "presentationUtil"
+  ],
+  "optionalPlugins": [
+    "home",
+    "savedObjectsTagging",
+    "charts",
+    "security",
+    "spaces",
+    "usageCollection"
+  ],
+  "ui": true,
+  "server": true,
+  "extraPublicDirs": [
+    "common"
+  ],
+  "requiredBundles": [
+    "kibanaReact",
+    "kibanaUtils",
+    "usageCollection",
+    "home",
+    "mapsEms"
+  ]
+}

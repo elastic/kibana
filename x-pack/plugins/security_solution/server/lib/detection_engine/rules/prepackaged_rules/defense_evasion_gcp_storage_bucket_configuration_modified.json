@@ -1,0 +1,35 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when the configuration is modified for a storage bucket in Google Cloud Platform (GCP). An adversary may modify the configuration of a storage bucket in order to weaken the security controls of their target's environment.",
+  "false_positives": [
+    "Storage bucket configuration may be modified by system administrators. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-gcp*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "GCP Storage Bucket Configuration Modification",
+  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:\"storage.buckets.update\" and event.outcome:success\n",
+  "references": [
+    "https://cloud.google.com/storage/docs/key-terms#buckets"
+  ],
+  "risk_score": 47,
+  "rule_id": "97359fd8-757d-4b1d-9af1-ef29e4a8680e",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "GCP",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

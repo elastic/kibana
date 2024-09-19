@@ -1,0 +1,67 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies an Identity and Access Management (IAM) custom role creation in Google Cloud Platform (GCP). Custom roles are user-defined, and allow for the bundling of one or more supported permissions to meet specific needs. Custom roles will not be updated automatically and could lead to privilege creep if not carefully scrutinized.",
+  "false_positives": [
+    "Custom role creations may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Role creations from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-gcp*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "GCP IAM Custom Role Creation",
+  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:google.iam.admin.v*.CreateRole and event.outcome:success\n",
+  "references": [
+    "https://cloud.google.com/iam/docs/understanding-custom-roles"
+  ],
+  "risk_score": 47,
+  "rule_id": "aa8007f0-d1df-49ef-8520-407857594827",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "GCP",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

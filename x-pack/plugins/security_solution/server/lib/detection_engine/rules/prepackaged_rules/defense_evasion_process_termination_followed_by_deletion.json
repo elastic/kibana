@@ -1,0 +1,43 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a process termination event quickly followed by the deletion of its executable file. Malware tools and other non-native files dropped or created on a system by an adversary may leave traces to indicate to what occurred. Removal of these files can occur during an intrusion, or as part of a post-intrusion process to minimize the adversary's footprint.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Process Termination followed by Deletion",
+  "query": "sequence by host.id with maxspan=5s\n   [process where event.type == \"end\" and \n    process.code_signature.trusted == false and\n    not process.executable : (\"C:\\\\Windows\\\\SoftwareDistribution\\\\*.exe\", \"C:\\\\Windows\\\\WinSxS\\\\*.exe\")\n   ] by process.executable\n   [file where event.type == \"deletion\" and file.extension : (\"exe\", \"scr\", \"com\")] by file.path\n",
+  "risk_score": 47,
+  "rule_id": "09443c92-46b3-45a4-8f25-383b028b258d",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 2
+}

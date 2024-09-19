@@ -1,0 +1,3016 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Ready for collection observable converts observable to promise 1`] = `
+Object {
+  "fetch": [Function],
+  "isReady": [Function],
+  "schema": Object {
+    "PNG": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "_all": Object {
+      "type": "long",
+    },
+    "available": Object {
+      "type": "boolean",
+    },
+    "browser_type": Object {
+      "type": "keyword",
+    },
+    "csv": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "csv_searchsource": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "enabled": Object {
+      "type": "boolean",
+    },
+    "last7Days": Object {
+      "PNG": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "PNGV2": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "_all": Object {
+        "type": "long",
+      },
+      "csv": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "csv_searchsource": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "csv_searchsource_immediate": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "output_size": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "printable_pdf": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "printable_pdf_v2": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "status": Object {
+        "completed": Object {
+          "type": "long",
+        },
+        "completed_with_warnings": Object {
+          "type": "long",
+        },
+        "failed": Object {
+          "type": "long",
+        },
+        "pending": Object {
+          "type": "long",
+        },
+        "processing": Object {
+          "type": "long",
+        },
+      },
+      "statuses": Object {
+        "completed": Object {
+          "PNG": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+        },
+        "completed_with_warnings": Object {
+          "PNG": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+        },
+        "failed": Object {
+          "PNG": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+        },
+        "pending": Object {
+          "PNG": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+        },
+        "processing": Object {
+          "PNG": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+        },
+      },
+    },
+    "output_size": Object {
+      "1.0": Object {
+        "type": "long",
+      },
+      "25.0": Object {
+        "type": "long",
+      },
+      "5.0": Object {
+        "type": "long",
+      },
+      "50.0": Object {
+        "type": "long",
+      },
+      "75.0": Object {
+        "type": "long",
+      },
+      "95.0": Object {
+        "type": "long",
+      },
+      "99.0": Object {
+        "type": "long",
+      },
+    },
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "status": Object {
+      "completed": Object {
+        "type": "long",
+      },
+      "completed_with_warnings": Object {
+        "type": "long",
+      },
+      "failed": Object {
+        "type": "long",
+      },
+      "pending": Object {
+        "type": "long",
+      },
+      "processing": Object {
+        "type": "long",
+      },
+    },
+    "statuses": Object {
+      "completed": Object {
+        "PNG": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+      },
+      "completed_with_warnings": Object {
+        "PNG": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+      },
+      "failed": Object {
+        "PNG": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+      },
+      "pending": Object {
+        "PNG": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+      },
+      "processing": Object {
+        "PNG": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+      },
+    },
+  },
+  "type": "reporting",
+}
+`;
+
+exports[`data modeling usage data with meta.isDeprecated jobTypes 1`] = `
+Object {
+  "PNG": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "PNGV2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "_all": 9,
+  "available": true,
+  "browser_type": undefined,
+  "csv": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 4,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 4,
+  },
+  "csv_searchsource": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 5,
+  },
+  "csv_searchsource_immediate": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "_all": 9,
+    "csv": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 4,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "output_size": undefined,
+      "total": 4,
+    },
+    "csv_searchsource": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "output_size": undefined,
+      "total": 5,
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "output_size": undefined,
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 9,
+      "failed": 0,
+    },
+    "statuses": Object {
+      "completed": Object {
+        "csv": Object {
+          "search": 4,
+        },
+        "csv_searchsource": Object {
+          "search": 5,
+        },
+      },
+    },
+  },
+  "output_size": undefined,
+  "printable_pdf": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "printable_pdf_v2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "status": Object {
+    "completed": 9,
+    "failed": 0,
+  },
+  "statuses": Object {
+    "completed": Object {
+      "csv": Object {
+        "search": 4,
+      },
+      "csv_searchsource": Object {
+        "search": 5,
+      },
+    },
+  },
+}
+`;
+
+exports[`data modeling with empty data 1`] = `
+Object {
+  "PNG": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "PNGV2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "_all": 0,
+  "available": true,
+  "browser_type": undefined,
+  "csv": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "csv_searchsource": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "csv_searchsource_immediate": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "_all": 0,
+    "csv": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "csv_searchsource": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "output_size": undefined,
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 0,
+      "failed": 0,
+    },
+    "statuses": Object {},
+  },
+  "output_size": undefined,
+  "printable_pdf": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "printable_pdf_v2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "status": Object {
+    "completed": 0,
+    "failed": 0,
+  },
+  "statuses": Object {},
+}
+`;
+
+exports[`data modeling with sparse data 1`] = `
+Object {
+  "PNG": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 1,
+  },
+  "PNGV2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "_all": 4,
+  "available": true,
+  "browser_type": undefined,
+  "csv": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 1,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 1,
+  },
+  "csv_searchsource": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "csv_searchsource_immediate": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "output_size": undefined,
+      "total": 1,
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "_all": 4,
+    "csv": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 1,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "output_size": undefined,
+      "total": 1,
+    },
+    "csv_searchsource": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "output_size": undefined,
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": 1,
+        "dashboard": 1,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 2,
+        "print": 0,
+      },
+      "output_size": undefined,
+      "total": 2,
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 4,
+      "failed": 0,
+    },
+    "statuses": Object {
+      "completed": Object {
+        "PNG": Object {
+          "dashboard": 1,
+        },
+        "csv": Object {},
+        "printable_pdf": Object {
+          "canvas workpad": 1,
+          "dashboard": 1,
+        },
+      },
+    },
+  },
+  "output_size": undefined,
+  "printable_pdf": Object {
+    "app": Object {
+      "canvas workpad": 1,
+      "dashboard": 1,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 2,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 2,
+  },
+  "printable_pdf_v2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "status": Object {
+    "completed": 4,
+    "failed": 0,
+  },
+  "statuses": Object {
+    "completed": Object {
+      "PNG": Object {
+        "dashboard": 1,
+      },
+      "csv": Object {},
+      "printable_pdf": Object {
+        "canvas workpad": 1,
+        "dashboard": 1,
+      },
+    },
+  },
+}
+`;
+
+exports[`data modeling with usage data from the reporting/archived_reports es archive 1`] = `
+Object {
+  "PNG": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 1,
+  },
+  "PNGV2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "_all": 11,
+  "available": true,
+  "browser_type": undefined,
+  "csv": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 1,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 1,
+  },
+  "csv_searchsource": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 3,
+  },
+  "csv_searchsource_immediate": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "_all": 0,
+    "csv": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "csv_searchsource": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "output_size": undefined,
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 0,
+      "failed": 0,
+    },
+    "statuses": Object {},
+  },
+  "output_size": undefined,
+  "printable_pdf": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 6,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 5,
+      "print": 1,
+    },
+    "output_size": undefined,
+    "total": 6,
+  },
+  "printable_pdf_v2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "status": Object {
+    "completed": 6,
+    "completed_with_warnings": 2,
+    "failed": 2,
+    "pending": 1,
+  },
+  "statuses": Object {
+    "completed": Object {
+      "csv": Object {
+        "search": 1,
+      },
+      "csv_searchsource": Object {
+        "search": 3,
+      },
+      "printable_pdf": Object {
+        "dashboard": 2,
+      },
+    },
+    "completed_with_warnings": Object {
+      "PNG": Object {
+        "dashboard": 1,
+      },
+      "printable_pdf": Object {
+        "dashboard": 1,
+      },
+    },
+    "failed": Object {
+      "printable_pdf": Object {
+        "dashboard": 2,
+      },
+    },
+    "pending": Object {
+      "printable_pdf": Object {
+        "dashboard": 1,
+      },
+    },
+  },
+}
+`;

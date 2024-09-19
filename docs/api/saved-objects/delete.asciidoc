@@ -1,0 +1,52 @@
+[[saved-objects-api-delete]]
+=== Delete object API
+++++
+<titleabbrev>Delete object</titleabbrev>
+++++
+
+experimental[] Remove {kib} saved objects.
+
+WARNING: Once you delete a saved object, _it cannot be recovered_.
+
+[[saved-objects-api-delete-request]]
+==== Request
+
+`DELETE <kibana host>:<port>/api/saved_objects/<type>/<id>`
+
+`DELETE <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
+
+[[saved-objects-api-delete-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
+
+`id`::
+  (Required, string) The object ID that you want to remove.
+
+[[saved-objects-api-delete-query-params]]
+==== Query parameters
+
+`force`::
+  (Optional, boolean) When true, forces an object to be deleted if it exists in multiple namespaces.
++
+TIP: Use this if you attempted to delete an object and received an HTTP 400 error with the following message: _"Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway"_
+
+[[saved-objects-api-delete-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+==== Example
+
+Delete an index pattern object with the `my-pattern` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X DELETE api/saved_objects/index-pattern/my-pattern
+--------------------------------------------------
+// KIBANA

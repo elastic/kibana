@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "main": "../target_node/common/index.js",
+  "types": "../target_types/common/index.d.ts"
+}

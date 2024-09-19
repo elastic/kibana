@@ -1,0 +1,63 @@
+{
+  "elements": [
+    {
+      "data": {
+        "source": "todo-app",
+        "target": "task-service",
+        "id": "todo-app~task-service",
+        "sourceData": {
+          "id": "todo-app",
+          "service.name": "todo-app",
+          "agent.name": "rum-js"
+        },
+        "targetData": {
+          "id": "task-service",
+          "service.name": "task-service",
+          "agent.name": "nodejs"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "task-service",
+        "target": ">elasticsearch",
+        "id": "task-service~>elasticsearch",
+        "sourceData": {
+          "id": "task-service",
+          "service.name": "task-service",
+          "agent.name": "nodejs"
+        },
+        "targetData": {
+          "span.subtype": "elasticsearch",
+          "span.destination.service.resource": "elasticsearch",
+          "span.type": "db",
+          "id": ">elasticsearch",
+          "label": "elasticsearch"
+        }
+      }
+    },
+    {
+      "data": {
+        "id": "todo-app",
+        "service.name": "todo-app",
+        "agent.name": "rum-js"
+      }
+    },
+    {
+      "data": {
+        "id": "task-service",
+        "service.name": "task-service",
+        "agent.name": "nodejs"
+      }
+    },
+    {
+      "data": {
+        "span.subtype": "elasticsearch",
+        "span.destination.service.resource": "elasticsearch",
+        "span.type": "db",
+        "id": ">elasticsearch",
+        "label": "elasticsearch"
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "corePluginB",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "configPath": ["core_plugin_b"],
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["corePluginA"],
+  "optionalPlugins": ["corePluginC"]
+}

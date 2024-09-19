@@ -1,0 +1,11 @@
+{
+  "id": "kibanaReact",
+  "version": "kibana",
+  "ui": true,
+  "server": false,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "extraPublicDirs": ["common"]
+}

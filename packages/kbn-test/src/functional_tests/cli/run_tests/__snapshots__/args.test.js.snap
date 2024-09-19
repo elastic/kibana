@@ -1,0 +1,304 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`display help for run tests CLI displays as expected 1`] = `
+"Run Functional Tests
+
+Usage:
+  node scripts/functional_tests --help
+  node scripts/functional_tests [--config <file1> [--config <file2> ...]]
+  node scripts/functional_tests [options] [-- --<other args>]
+
+Options:
+  --help                         Display this menu and exit. 
+  --config <file>                Pass in a config. Can pass in multiple configs. 
+  --esFrom <snapshot|source>     Build Elasticsearch from source or run from snapshot. Default: $TEST_ES_FROM or snapshot
+  --kibana-install-dir <dir>     Run Kibana from existing install directory instead of from source. 
+  --bail                         Stop the test run at the first failure. 
+  --grep <pattern>               Pattern to select which tests to run. 
+  --updateBaselines              Replace baseline screenshots with whatever is generated from the test. 
+  --updateSnapshots              Replace inline and file snapshots with whatever is generated from the test. 
+  --u                            Replace both baseline screenshots and snapshots 
+  --include <file>               Files that must included to be run, can be included multiple times. 
+  --exclude <file>               Files that must NOT be included to be run, can be included multiple times. 
+  --include-tag <tag>            Tags that suites must include to be run, can be included multiple times. 
+  --exclude-tag <tag>            Tags that suites must NOT include to be run, can be included multiple times. 
+  --assert-none-excluded         Exit with 1/0 based on if any test is excluded with the current set of tags. 
+  --verbose                      Log everything. 
+  --debug                        Run in debug mode. 
+  --quiet                        Only log errors. 
+  --silent                       Log nothing."
+`;
+
+exports[`process options for run tests CLI accepts boolean value for updateBaselines 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "updateBaselines": true,
+}
+`;
+
+exports[`process options for run tests CLI accepts boolean value for updateSnapshots 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "updateSnapshots": true,
+}
+`;
+
+exports[`process options for run tests CLI accepts debug option 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "debug": true,
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+}
+`;
+
+exports[`process options for run tests CLI accepts empty config value if default passed 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "config": "",
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+}
+`;
+
+exports[`process options for run tests CLI accepts extra server options 1`] = `
+Object {
+  "_": Object {
+    "server.foo": "bar",
+  },
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": Object {
+    "server.foo": "bar",
+  },
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+}
+`;
+
+exports[`process options for run tests CLI accepts quiet option 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "quiet": true,
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+}
+`;
+
+exports[`process options for run tests CLI accepts silent option 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "silent": true,
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+}
+`;
+
+exports[`process options for run tests CLI accepts source value for $TEST_ES_FROM 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "source",
+  "extraKbnOpts": undefined,
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+}
+`;
+
+exports[`process options for run tests CLI accepts source value for esFrom 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "source",
+  "extraKbnOpts": undefined,
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+}
+`;
+
+exports[`process options for run tests CLI accepts string value for kibana-install-dir 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "installDir": "foo",
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+}
+`;
+
+exports[`process options for run tests CLI accepts value for grep 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "grep": "management",
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+}
+`;
+
+exports[`process options for run tests CLI accepts verbose option 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "verbose": true,
+}
+`;
+
+exports[`process options for run tests CLI prioritizes source flag over $TEST_ES_FROM 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "suiteFiles": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+}
+`;

@@ -1,0 +1,14 @@
+{
+  "id": "runtimeFields",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "requiredPlugins": [],
+  "optionalPlugins": [],
+  "configPath": ["xpack", "runtime_fields"],
+  "requiredBundles": ["kibanaReact", "esUiShared"]
+}

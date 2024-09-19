@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when a firewall rule is modified in Google Cloud Platform (GCP). Virtual Private Cloud (VPC) firewall rules can be configured to allow or deny connections to or from virtual machine (VM) instances. An adversary may modify a firewall rule in order to weaken their target's security controls.",
+  "false_positives": [
+    "Firewall rules may be modified by system administrators. Verify that the firewall configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-gcp*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "GCP Firewall Rule Modification",
+  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:v*.compute.firewalls.patch\n",
+  "references": [
+    "https://cloud.google.com/vpc/docs/firewalls"
+  ],
+  "risk_score": 47,
+  "rule_id": "2783d84f-5091-4d7d-9319-9fceda8fa71b",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "GCP",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

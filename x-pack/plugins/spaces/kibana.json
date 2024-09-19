@@ -1,0 +1,26 @@
+{
+  "id": "spaces",
+  "owner": {
+    "name": "Platform Security",
+    "githubTeam": "kibana-security"
+  },
+  "description": "This plugin provides the Spaces feature, which allows saved objects to be organized into meaningful categories.",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "spaces"],
+  "requiredPlugins": ["features", "licensing"],
+  "optionalPlugins": [
+    "advancedSettings",
+    "home",
+    "management",
+    "usageCollection"
+  ],
+  "server": true,
+  "ui": true,
+  "extraPublicDirs": ["common"],
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaReact",
+    "home"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "configPath": ["xpack", "lists"],
+  "extraPublicDirs": ["common"],
+  "id": "lists",
+  "owner": {
+    "name": "Security detections response",
+    "githubTeam": "security-detections-response"
+  },
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [],
+  "optionalPlugins": ["spaces", "security"],
+  "requiredBundles": [],
+  "server": true,
+  "ui": true,
+  "version": "8.0.0"
+}

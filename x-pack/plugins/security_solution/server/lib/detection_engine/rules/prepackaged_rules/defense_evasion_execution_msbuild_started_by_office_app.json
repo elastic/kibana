@@ -1,0 +1,61 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An instance of MSBuild, the Microsoft Build Engine, was started by Excel or Word. This is unusual behavior for the Build Engine and could have been caused by an Excel or Word document executing a malicious script payload.",
+  "false_positives": [
+    "The Build Engine is commonly used by Windows developers but use by non-engineers is unusual. It is quite unusual for this program to be started by an Office application like Word or Excel."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Microsoft Build Engine Started by an Office Application",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"MSBuild.exe\" and\n  process.parent.name : (\"eqnedt32.exe\",\n                         \"excel.exe\",\n                         \"fltldr.exe\",\n                         \"msaccess.exe\",\n                         \"mspub.exe\",\n                         \"outlook.exe\",\n                         \"powerpnt.exe\",\n                         \"winword.exe\" )\n",
+  "references": [
+    "https://blog.talosintelligence.com/2020/02/building-bypass-with-msbuild.html"
+  ],
+  "risk_score": 73,
+  "rule_id": "c5dc3223-13a2-44a2-946c-e9dc0aa0449c",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1127",
+          "name": "Trusted Developer Utilities Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1127/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 8
+}

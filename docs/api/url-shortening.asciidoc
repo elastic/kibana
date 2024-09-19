@@ -1,0 +1,62 @@
+[[url-shortening-api]]
+== Shorten URL API
+++++
+<titleabbrev>Shorten URL</titleabbrev>
+++++
+
+experimental[] Convert a {kib} URL into a token. {kib} URLs contain the state of the application, which makes them long and cumbersome.
+Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the {kib} URL.
+
+Short URLs are designed to make sharing {kib} URLs easier.
+
+[float]
+[[url-shortening-api-request]]
+=== Request
+
+`POST <kibana host>:<port>/api/shorten_url`
+
+[float]
+[[url-shortening-api-request-body]]
+=== Request body
+
+`url`::
+  (Required, string) The {kib} URL that you want to shorten, relative to `/app/kibana`.
+
+[float]
+[[url-shortening-api-response-body]]
+=== Response body
+
+urlId:: A top-level property that contains the shortened URL token for the provided request body.
+
+[float]
+[[url-shortening-api-codes]]
+=== Response code
+
+`200`::
+  Indicates a successful call.
+
+[float]
+[[url-shortening-api-example]]
+=== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/shorten_url
+{
+  "url": "/app/kibana#/dashboard?_g=()&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),panels:!((embeddableConfig:(),gridData:(h:15,i:'1',w:24,x:0,y:0),id:'8f4d0c00-4c86-11e8-b3d7-01146121b73d',panelIndex:'1',type:visualization,version:'7.0.0-alpha1')),query:(language:lucene,query:''),timeRestore:!f,title:'New%20Dashboard',viewMode:edit)"
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "urlId": "f73b295ff92718b26bc94edac766d8e3"
+}
+--------------------------------------------------
+
+For easy sharing, construct the shortened {kib} URL:
+
+`http://localhost:5601/goto/f73b295ff92718b26bc94edac766d8e3`

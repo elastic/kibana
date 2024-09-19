@@ -1,0 +1,14 @@
+{
+  "id": "embeddable",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Adds embeddables service to Kibana",
+  "requiredPlugins": ["inspector", "uiActions"],
+  "extraPublicDirs": ["common"],
+  "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils"]
+}

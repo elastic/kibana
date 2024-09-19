@@ -1,0 +1,45 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies MsBuild.exe making outbound network connections. This may indicate adversarial activity as MsBuild is often leveraged by adversaries to execute code and evade detection.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "MsBuild Making Network Connections",
+  "query": "sequence by process.entity_id\n  [process where process.name : \"MSBuild.exe\" and event.type == \"start\"]\n  [network where process.name : \"MSBuild.exe\" and\n     not cidrmatch(destination.ip, \"127.0.0.1\", \"::1\")]\n",
+  "risk_score": 47,
+  "rule_id": "0e79980b-4250-4a50-a509-69294c14e84b",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1127",
+          "name": "Trusted Developer Utilities Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1127/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 7
+}

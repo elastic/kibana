@@ -1,0 +1,11 @@
+{
+  "id": "newsfeed",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["screenshotMode"]
+}

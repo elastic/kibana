@@ -1,0 +1,20 @@
+.import-summary-list.euiDescriptionList {
+  // adding overrides for title and desciption
+  // these have to be overridden here as they are not
+  // accessable as overrides in the EuiDescriptionList component
+  .euiDescriptionList__title {
+    flex-basis: 15%;
+  }
+  .euiDescriptionList__description {
+    flex-basis: 85%;
+  }
+}
+
+.failure-list {
+  max-height: 200px;
+  overflow-y: auto;
+
+  .error-message {
+    color: $euiColorDanger;
+  }
+}

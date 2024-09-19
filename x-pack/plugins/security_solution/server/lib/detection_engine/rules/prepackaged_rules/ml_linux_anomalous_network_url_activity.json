@@ -1,0 +1,30 @@
+{
+  "anomaly_threshold": 50,
+  "author": [
+    "Elastic"
+  ],
+  "description": "A machine learning job detected an unusual web URL request from a Linux host, which can indicate malware delivery and execution. Wget and cURL are commonly used by Linux programs to download code and data. Most of the time, their usage is entirely normal. Generally, because they use a list of URLs, they repeatedly download from the same locations. However, Wget and cURL are sometimes used to deliver Linux exploit payloads, and threat actors use these tools to download additional software and code. For these reasons, unusual URLs can indicate unauthorized downloads or threat activity.",
+  "false_positives": [
+    "A new and unusual program or artifact download in the course of software upgrades, debugging, or troubleshooting could trigger this alert."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "linux_anomalous_network_url_activity_ecs",
+  "name": "Unusual Linux Web Activity",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "52afbdc5-db15-485e-bc35-f5707f820c4c",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 4
+}

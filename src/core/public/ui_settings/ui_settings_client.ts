@@ -1,0 +1,182 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { cloneDeep, defaultsDeep } from 'lodash';
+import { Observable, Subject, concat, defer, of } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+
+import { UserProvidedValues, PublicUiSettingsParams } from 'src/core/server/types';
+import { IUiSettingsClient, UiSettingsState } from './types';
+
+import { UiSettingsApi } from './ui_settings_api';
+
+interface UiSettingsClientParams {
+  api: UiSettingsApi;
+  defaults: Record<string, PublicUiSettingsParams>;
+  initialSettings?: UiSettingsState;
+  done$: Observable<unknown>;
+}
+
+export class UiSettingsClient implements IUiSettingsClient {
+  private readonly update$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
+  private readonly updateErrors$ = new Subject<Error>();
+
+  private readonly api: UiSettingsApi;
+  private readonly defaults: Record<string, PublicUiSettingsParams>;
+  private cache: Record<string, PublicUiSettingsParams & UserProvidedValues>;
+
+  constructor(params: UiSettingsClientParams) {
+    this.api = params.api;
+    this.defaults = cloneDeep(params.defaults);
+    this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
+
+    params.done$.subscribe({
+      complete: () => {
+        this.update$.complete();
+        this.updateErrors$.complete();
+      },
+    });
+  }
+
+  getAll() {
+    return cloneDeep(this.cache);
+  }
+
+  get<T = any>(key: string, defaultOverride?: T) {
+    const declared = this.isDeclared(key);
+
+    if (!declared && defaultOverride !== undefined) {
+      return defaultOverride;
+    }
+
+    if (!declared) {
+      throw new Error(
+        `Unexpected \`IUiSettingsClient.get("${key}")\` call on unrecognized configuration setting "${key}".
+Setting an initial value via \`IUiSettingsClient.set("${key}", value)\` before attempting to retrieve
+any custom setting value for "${key}" may fix this issue.
+You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just return
+\`defaultValue\` when the key is unrecognized.`
+      );
+    }
+
+    const type = this.cache[key].type;
+    const userValue = this.cache[key].userValue;
+    const defaultValue = defaultOverride !== undefined ? defaultOverride : this.cache[key].value;
+    const value = userValue == null ? defaultValue : userValue;
+
+    if (type === 'json') {
+      return JSON.parse(value);
+    }
+
+    if (type === 'number') {
+      return parseFloat(value);
+    }
+
+    return value;
+  }
+
+  get$<T = any>(key: string, defaultOverride?: T) {
+    return concat(
+      defer(() => of(this.get(key, defaultOverride))),
+      this.update$.pipe(
+        filter((update) => update.key === key),
+        map(() => this.get(key, defaultOverride))
+      )
+    );
+  }
+
+  async set(key: string, value: any) {
+    return await this.update(key, value);
+  }
+
+  async remove(key: string) {
+    return await this.update(key, null);
+  }
+
+  isDeclared(key: string) {
+    return key in this.cache;
+  }
+
+  isDefault(key: string) {
+    return !this.isDeclared(key) || this.cache[key].userValue == null;
+  }
+
+  isCustom(key: string) {
+    return this.isDeclared(key) && !('value' in this.cache[key]);
+  }
+
+  isOverridden(key: string) {
+    return this.isDeclared(key) && Boolean(this.cache[key].isOverridden);
+  }
+
+  getUpdate$() {
+    return this.update$.asObservable();
+  }
+
+  getUpdateErrors$() {
+    return this.updateErrors$.asObservable();
+  }
+
+  private assertUpdateAllowed(key: string) {
+    if (this.isOverridden(key)) {
+      throw new Error(
+        `Unable to update "${key}" because its value is overridden by the Kibana server`
+      );
+    }
+  }
+
+  private async update(key: string, newVal: any): Promise<boolean> {
+    this.assertUpdateAllowed(key);
+
+    const declared = this.isDeclared(key);
+    const defaults = this.defaults;
+
+    const oldVal = declared ? this.cache[key].userValue : undefined;
+
+    const unchanged = oldVal === newVal;
+    if (unchanged) {
+      return true;
+    }
+
+    const initialVal = declared ? this.get(key) : undefined;
+    this.setLocally(key, newVal);
+
+    try {
+      const { settings } = await this.api.batchSet(key, newVal);
+      this.cache = defaultsDeep({}, defaults, settings);
+      return true;
+    } catch (error) {
+      this.setLocally(key, initialVal);
+      this.updateErrors$.next(error);
+      return false;
+    }
+  }
+
+  private setLocally(key: string, newValue: any) {
+    this.assertUpdateAllowed(key);
+
+    if (!this.isDeclared(key)) {
+      this.cache[key] = {};
+    }
+
+    const oldValue = this.get(key);
+
+    if (newValue === null) {
+      delete this.cache[key].userValue;
+    } else {
+      const { type } = this.cache[key];
+      if (type === 'json' && typeof newValue !== 'string') {
+        this.cache[key].userValue = JSON.stringify(newValue);
+      } else {
+        this.cache[key].userValue = newValue;
+      }
+    }
+
+    this.update$.next({ key, newValue, oldValue });
+  }
+}

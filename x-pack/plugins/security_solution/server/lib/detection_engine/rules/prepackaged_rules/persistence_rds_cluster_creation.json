@@ -1,0 +1,66 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation of a new Amazon Relational Database Service (RDS) Aurora DB cluster or global database spread across multiple regions.",
+  "false_positives": [
+    "Valid clusters may be created by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Cluster creations from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS RDS Cluster Creation",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:rds.amazonaws.com and event.action:(CreateDBCluster or CreateGlobalCluster) and event.outcome:success\n",
+  "references": [
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/rds/create-db-cluster.html",
+    "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBCluster.html",
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/rds/create-global-cluster.html",
+    "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateGlobalCluster.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "e14c5fd7-fdd7-49c2-9e5b-ec49d817bc8d",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Asset Visibility"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1133",
+          "name": "External Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1133/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 6
+}

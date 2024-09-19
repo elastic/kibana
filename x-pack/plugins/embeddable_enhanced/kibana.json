@@ -1,0 +1,12 @@
+{
+  "id": "embeddableEnhanced",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Extends embeddable plugin with more functionality",
+  "requiredPlugins": ["embeddable", "kibanaReact", "uiActions", "uiActionsEnhanced"]
+}

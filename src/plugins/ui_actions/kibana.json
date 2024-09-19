@@ -1,0 +1,12 @@
+{
+  "id": "uiActions",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Adds UI Actions service to Kibana",
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+}

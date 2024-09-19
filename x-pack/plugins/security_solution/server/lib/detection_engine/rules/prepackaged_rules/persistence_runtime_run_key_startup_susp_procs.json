@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies execution of suspicious persistent programs (scripts, rundll32, etc.) by looking at process lineage and command line usage.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Execution of Persistent Suspicious Program",
+  "query": "/* userinit followed by explorer followed by early child process of explorer (unlikely to be launched interactively) within 1m */\nsequence by host.id, user.name with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"userinit.exe\" and process.parent.name : \"winlogon.exe\"]\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"explorer.exe\"]\n  [process where event.type in (\"start\", \"process_started\") and process.parent.name : \"explorer.exe\" and\n   /* add suspicious programs here */\n   process.pe.original_file_name in (\"cscript.exe\",\n                                     \"wscript.exe\",\n                                     \"PowerShell.EXE\",\n                                     \"MSHTA.EXE\",\n                                     \"RUNDLL32.EXE\",\n                                     \"REGSVR32.EXE\",\n                                     \"RegAsm.exe\",\n                                     \"MSBuild.exe\",\n                                     \"InstallUtil.exe\") and\n    /* add potential suspicious paths here */\n    process.args : (\"C:\\\\Users\\\\*\", \"C:\\\\ProgramData\\\\*\", \"C:\\\\Windows\\\\Temp\\\\*\", \"C:\\\\Windows\\\\Tasks\\\\*\", \"C:\\\\PerfLogs\\\\*\", \"C:\\\\Intel\\\\*\")\n   ]\n",
+  "risk_score": 47,
+  "rule_id": "e7125cea-9fe1-42a5-9a05-b0792cf86f5a",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.001",
+              "name": "Registry Run Keys / Startup Folder",
+              "reference": "https://attack.mitre.org/techniques/T1547/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 2
+}

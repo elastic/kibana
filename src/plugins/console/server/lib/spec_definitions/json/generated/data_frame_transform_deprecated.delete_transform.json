@@ -1,0 +1,10 @@
+{
+  "data_frame_transform_deprecated.delete_transform": {
+    "url_params": {
+      "force": "__flag__"
+    },
+    "methods": [],
+    "patterns": [],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-transform.html"
+  }
+}

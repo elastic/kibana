@@ -1,0 +1,13 @@
+{
+  "id": "share",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Adds URL Service and sharing capabilities to Kibana",
+  "requiredBundles": ["kibanaUtils"],
+  "optionalPlugins": []
+}

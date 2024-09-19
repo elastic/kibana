@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`\`format()\` correctly formats record and includes correct ECS version. 1`] = `
+Object {
+  "@timestamp": "2012-02-01T09:30:22.011-05:00",
+  "error": Object {
+    "message": "Some error message",
+    "stack_trace": "Some error stack",
+    "type": "Some error name",
+  },
+  "log": Object {
+    "level": "FATAL",
+    "logger": "context-1",
+  },
+  "message": "message-1",
+  "process": Object {
+    "pid": 5355,
+  },
+}
+`;
+
+exports[`\`format()\` correctly formats record and includes correct ECS version. 2`] = `
+Object {
+  "@timestamp": "2012-02-01T09:30:22.011-05:00",
+  "log": Object {
+    "level": "ERROR",
+    "logger": "context-2",
+  },
+  "message": "message-2",
+  "process": Object {
+    "pid": 5355,
+  },
+}
+`;
+
+exports[`\`format()\` correctly formats record and includes correct ECS version. 3`] = `
+Object {
+  "@timestamp": "2012-02-01T09:30:22.011-05:00",
+  "log": Object {
+    "level": "WARN",
+    "logger": "context-3",
+  },
+  "message": "message-3",
+  "process": Object {
+    "pid": 5355,
+  },
+}
+`;
+
+exports[`\`format()\` correctly formats record and includes correct ECS version. 4`] = `
+Object {
+  "@timestamp": "2012-02-01T09:30:22.011-05:00",
+  "log": Object {
+    "level": "DEBUG",
+    "logger": "context-4",
+  },
+  "message": "message-4",
+  "process": Object {
+    "pid": 5355,
+  },
+}
+`;
+
+exports[`\`format()\` correctly formats record and includes correct ECS version. 5`] = `
+Object {
+  "@timestamp": "2012-02-01T09:30:22.011-05:00",
+  "log": Object {
+    "level": "INFO",
+    "logger": "context-5",
+  },
+  "message": "message-5",
+  "process": Object {
+    "pid": 5355,
+  },
+}
+`;
+
+exports[`\`format()\` correctly formats record and includes correct ECS version. 6`] = `
+Object {
+  "@timestamp": "2012-02-01T09:30:22.011-05:00",
+  "log": Object {
+    "level": "TRACE",
+    "logger": "context-6",
+  },
+  "message": "message-6",
+  "process": Object {
+    "pid": 5355,
+  },
+}
+`;

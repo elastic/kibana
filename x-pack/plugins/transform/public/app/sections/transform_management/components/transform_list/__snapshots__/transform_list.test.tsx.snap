@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] = `
+<EuiFlexGroup
+  justifyContent="spaceAround"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPageContent
+      color="subdued"
+      horizontalPosition="center"
+      verticalPosition="center"
+    >
+      <EuiEmptyPrompt
+        actions={
+          Array [
+            <EuiButton
+              color="primary"
+              data-test-subj="transformCreateFirstButton"
+              fill={true}
+              isDisabled={true}
+              onClick={[MockFunction]}
+            >
+              Create your first transform
+            </EuiButton>,
+          ]
+        }
+        data-test-subj="transformNoTransformsFound"
+        title={
+          <h2>
+            No transforms found
+          </h2>
+        }
+      />
+    </EuiPageContent>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

@@ -1,0 +1,29 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies process execution with a single character process name. This is often done by adversaries while staging or executing temporary utilities.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious Execution - Short Program Name",
+  "query": "process where event.type in (\"start\", \"process_started\") and length(process.name) > 0 and\n length(process.name) == 5 and host.os.name == \"Windows\" and length(process.pe.original_file_name) > 5\n",
+  "risk_score": 47,
+  "rule_id": "17c7f6a5-5bc9-4e1f-92bf-13632d24384d",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

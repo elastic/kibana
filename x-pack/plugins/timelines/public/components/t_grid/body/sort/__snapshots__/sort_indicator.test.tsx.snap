@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SortIndicator rendering renders correctly against snapshot 1`] = `
+<EuiToolTip
+  content="Sorted descending"
+  data-test-subj="sort-indicator-tooltip"
+  delay="regular"
+  display="inlineBlock"
+  position="top"
+>
+  <EuiIcon
+    data-test-subj="sortIndicator"
+    type="sortDown"
+  />
+  <SortNumber
+    sortNumber={-1}
+  />
+</EuiToolTip>
+`;

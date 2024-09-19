@@ -1,0 +1,35 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "scripts/**/*",
+    "server/**/*",
+    "types/**/*"
+  ],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../../../src/plugins/home/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../../../src/plugins/vis_types/timeseries/tsconfig.json" },
+    { "path": "../data_enhanced/tsconfig.json" },
+    { "path": "../alerting/tsconfig.json" },
+    { "path": "../features/tsconfig.json" },
+    { "path": "../license_management/tsconfig.json" },
+    { "path": "../ml/tsconfig.json" },
+    { "path": "../observability/tsconfig.json" },
+    { "path": "../spaces/tsconfig.json" },
+    { "path": "../triggers_actions_ui/tsconfig.json" }
+  ]
+}
