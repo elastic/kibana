@@ -15,12 +15,12 @@ export interface Query {
 export const getRelatedAlertKuery = (tags?: string[], groups?: Group[]): string | undefined => {
   const tagKueries: string[] =
     tags?.map((tag) => {
-      return `tags: ${tag}`;
+      return `tags: "${tag}"`;
     }) ?? [];
   const groupKueries =
     (groups &&
       groups.map(({ field, value }) => {
-        return `(${[field]}: ${value} or kibana.alert.group.value: ${value})`;
+        return `(${field}: "${value}" or kibana.alert.group.value: "${value}")`;
       })) ??
     [];
 
