@@ -14,7 +14,10 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
-import { OPENAI_CHAT_URL } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import {
+  OPENAI_CHAT_URL,
+  OpenAiProviderType,
+} from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
@@ -34,6 +37,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   alertsIndexPattern,
   assistantTools = [],
   connectorApiUrl,
+  connectorApiProvider,
   bedrockChatEnabled,
   connectorId,
   conversationId,
@@ -56,7 +60,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpeAIType = llmType === 'openai';
-  const isOpenAI = isOpeAIType && (!connectorApiUrl || connectorApiUrl === OPENAI_CHAT_URL);
+  const isOpenAI =
+    isOpeAIType &&
+    (!connectorApiUrl ||
+      connectorApiUrl === OPENAI_CHAT_URL ||
+      connectorApiProvider === OpenAiProviderType.AzureAi);
   const isOssLlm = isOpeAIType && !isOpenAI;
   const llmClass = getLlmClass(llmType, bedrockChatEnabled);
 
@@ -158,7 +166,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     : await createStructuredChatAgent({
         llm: createLlmInstance(),
         tools,
-        prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
+        prompt: isOssLlm
+          ? formatPromptStructured(systemPrompts.ossLlm, systemPrompt)
+          : formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
         streamRunnable: isStream,
       });
 

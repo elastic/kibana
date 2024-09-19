@@ -19,6 +19,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { buildResponse } from '../../lib/build_response';
@@ -103,6 +104,9 @@ export const chatCompleteRoute = (
           actionTypeId = connector?.actionTypeId ?? '.gen-ai';
           const connectorApiUrl = connector?.config?.apiUrl
             ? (connector.config.apiUrl as string)
+            : undefined;
+          const connectorApiProvider = connector?.config?.apiProvider
+            ? (connector?.config?.apiProvider as OpenAiProviderType)
             : undefined;
 
           // replacements
@@ -197,6 +201,7 @@ export const chatCompleteRoute = (
             actionTypeId,
             connectorId,
             connectorApiUrl,
+            connectorApiProvider,
             conversationId: conversationId ?? newConversation?.id,
             context: ctx,
             getElser,

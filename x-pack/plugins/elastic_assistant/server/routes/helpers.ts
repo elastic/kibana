@@ -29,6 +29,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { FindResponse } from '../ai_assistant_data_clients/find';
 import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
@@ -324,6 +325,7 @@ export interface LangChainExecuteParams {
   connectorId: string;
   inference: InferenceServerStart;
   connectorApiUrl?: string;
+  connectorApiProvider?: OpenAiProviderType;
   conversationId?: string;
   context: AwaitedProperties<
     Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
@@ -351,6 +353,7 @@ export const langChainExecute = async ({
   actionTypeId,
   connectorId,
   connectorApiUrl,
+  connectorApiProvider,
   context,
   actionsClient,
   inference,
@@ -423,6 +426,7 @@ export const langChainExecute = async ({
     conversationId,
     connectorId,
     connectorApiUrl,
+    connectorApiProvider,
     esClient,
     esStore,
     inference,

@@ -17,6 +17,7 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
@@ -99,6 +100,9 @@ export const postActionsConnectorExecuteRoute = (
           const connectorApiUrl = connector?.config?.apiUrl
             ? (connector.config.apiUrl as string)
             : undefined;
+          const connectorApiProvider = connector?.config?.apiProvider
+            ? (connector?.config?.apiProvider as OpenAiProviderType)
+            : undefined;
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
@@ -135,6 +139,7 @@ export const postActionsConnectorExecuteRoute = (
             actionTypeId,
             connectorId,
             connectorApiUrl,
+            connectorApiProvider,
             conversationId,
             context: ctx,
             getElser,

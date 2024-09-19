@@ -164,8 +164,6 @@ export const streamGraph = async ({
       };
 
       const processSimpleChatModelEvent = () => {
-        // console.log(`[TEST] currentOutput: ${currentOutput}`);
-        // console.log(`[TEST] finalMessage: ${finalMessage}`);
         if (event.event === 'on_llm_stream') {
           const chunk = event.data?.chunk;
 
@@ -184,7 +182,6 @@ export const streamGraph = async ({
             }
           } else if (!streamingFinished && !didEnd) {
             if (msg.startsWith('"') && finalMessage.endsWith('\\')) {
-              // console.log(`[TEST] finalMessage: ${finalMessage}, msg: ${msg}`);
               finalMessage = finalMessage.slice(0, -1);
               msg = `\\${msg}`;
             }
@@ -202,11 +199,6 @@ export const streamGraph = async ({
             }
           }
         } else if (event.event === 'on_llm_end' && streamingFinished && !didEnd) {
-          // Sometimes llama returns extra escape backslash characters which breaks the markdown.
-          // One of the solutions that I've found is to use `JSON.parse` to remove those.
-          // console.log(`[TEST] finalMessage 1: ${finalMessage}`);
-          // finalMessage = JSON.parse(`{"content":"${finalMessage}"}`).content;
-          // console.log(`[TEST] finalMessage 2: ${finalMessage}`);
           handleStreamEnd(finalMessage);
         }
       };

@@ -30,7 +30,10 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
-import { OPENAI_CHAT_URL } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import {
+  OPENAI_CHAT_URL,
+  OpenAiProviderType,
+} from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
@@ -48,6 +51,7 @@ import {
   bedrockToolCallingAgentPrompt,
   geminiToolCallingAgentPrompt,
   openAIFunctionAgentPrompt,
+  ossLlmStructuredChatAgentPrompt,
   structuredChatAgentPrompt,
 } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getLlmClass, getLlmType } from '../utils';
@@ -199,8 +203,16 @@ export const postEvaluateRoute = (
               const connectorApiUrl = connector?.config?.apiUrl
                 ? (connector.config.apiUrl as string)
                 : undefined;
+              const connectorApiProvider = connector?.config?.apiProvider
+                ? (connector?.config?.apiProvider as OpenAiProviderType)
+                : undefined;
+              const isOpeAIType = llmType === 'openai';
               const isOpenAI =
-                llmType === 'openai' && (!connectorApiUrl || connectorApiUrl === OPENAI_CHAT_URL);
+                isOpeAIType &&
+                (!connectorApiUrl ||
+                  connectorApiUrl === OPENAI_CHAT_URL ||
+                  connectorApiProvider === OpenAiProviderType.AzureAi);
+              const isOssLlm = isOpeAIType && !isOpenAI;
               const llmClass = getLlmClass(llmType, true);
               const createLlmInstance = () =>
                 new llmClass({
@@ -294,7 +306,7 @@ export const postEvaluateRoute = (
                 : await createStructuredChatAgent({
                     llm,
                     tools,
-                    prompt: structuredChatAgentPrompt,
+                    prompt: isOssLlm ? ossLlmStructuredChatAgentPrompt : structuredChatAgentPrompt,
                     streamRunnable: false,
                   });
 

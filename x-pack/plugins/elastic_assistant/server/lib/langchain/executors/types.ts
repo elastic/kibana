@@ -15,6 +15,7 @@ import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
@@ -42,6 +43,7 @@ export interface AgentExecutorParams<T extends boolean> {
   assistantTools?: AssistantTool[];
   connectorId: string;
   connectorApiUrl?: string;
+  connectorApiProvider?: OpenAiProviderType;
   conversationId?: string;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
