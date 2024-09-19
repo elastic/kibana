@@ -16,10 +16,8 @@ import {
   EuiButtonIconProps,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
-import {
-  type LanguageDocumentationSections,
-  LanguageDocumentationPopoverContent,
-} from './documentation_content';
+import { LanguageDocumentationPopoverContent } from './popover_content';
+import type { LanguageDocumentationSections } from '../../types';
 
 interface DocumentationPopoverProps {
   language: string;

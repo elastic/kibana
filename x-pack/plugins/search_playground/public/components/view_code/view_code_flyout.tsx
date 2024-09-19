@@ -20,7 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, PlaygroundPageMode } from '../../types';
@@ -35,21 +34,13 @@ interface ViewCodeFlyoutProps {
   selectedPageMode: PlaygroundPageMode;
 }
 
-export const ES_CLIENT_DETAILS = (cloud: CloudSetup | undefined) => {
-  if (cloud) {
-    return `
+export const ES_CLIENT_DETAILS = (elasticsearchUrl: string) => {
+  return `
 es_client = Elasticsearch(
-    "${cloud.elasticsearchUrl}",
+    "${elasticsearchUrl || '<your-elasticsearch-url>'}",
     api_key=os.environ["ES_API_KEY"]
 )
       `;
-  }
-
-  return `
-es_client = Elasticsearch(
-    "<your-elasticsearch-url>"
-)
-  `;
 };
 
 export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selectedPageMode }) => {
@@ -60,8 +51,13 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selecte
   const {
     services: { cloud, http },
   } = useKibana();
-
-  const CLIENT_STEP = ES_CLIENT_DETAILS(cloud);
+  const [elasticsearchUrl, setElasticsearchUrl] = useState<string>('');
+  useEffect(() => {
+    cloud?.fetchElasticsearchConfig().then((config) => {
+      setElasticsearchUrl(config.elasticsearchUrl || '');
+    });
+  }, [cloud]);
+  const CLIENT_STEP = ES_CLIENT_DETAILS(elasticsearchUrl);
 
   const steps: Record<string, React.ReactElement> = {
     'lc-py': LANGCHAIN_PYTHON(formValues, CLIENT_STEP),
