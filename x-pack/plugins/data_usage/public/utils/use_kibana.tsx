@@ -13,18 +13,18 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { useMemo } from 'react';
-import { AppPluginStartDependencies, DataUsagePluginStart } from '../types';
+import { DataUsageStartDependencies, DataUsagePublicStart } from '../types';
 
 export type PluginKibanaContextValue = CoreStart &
-  AppPluginStartDependencies &
-  DataUsagePluginStart & {
+  DataUsageStartDependencies &
+  DataUsagePublicStart & {
     appParams: ManagementAppMountParams;
   };
 
 export const createKibanaContextForPlugin = (
   core: CoreStart,
-  plugins: AppPluginStartDependencies,
-  pluginStart: DataUsagePluginStart,
+  plugins: DataUsageStartDependencies,
+  pluginStart: DataUsagePublicStart,
   appParams: ManagementAppMountParams
 ) => {
   return createKibanaReactContext<PluginKibanaContextValue>({
@@ -40,8 +40,8 @@ export const useKibanaContextForPlugin =
 
 export const useKibanaContextForPluginProvider = (
   core: CoreStart,
-  plugins: AppPluginStartDependencies,
-  pluginStart: DataUsagePluginStart,
+  plugins: DataUsageStartDependencies,
+  pluginStart: DataUsagePublicStart,
   appParams: ManagementAppMountParams
 ) => {
   const { Provider } = useMemo(

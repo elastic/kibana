@@ -28,7 +28,6 @@ export class DataUsagePlugin
   constructor(context: PluginInitializerContext<DataUsageConfig>) {
     this.logger = context.logger.get();
   }
-  // TODO: check for serverless
   setup(coreSetup: CoreSetup, pluginsSetup: DataUsageSetupDependencies): DataUsageServerSetup {
     return {};
   }

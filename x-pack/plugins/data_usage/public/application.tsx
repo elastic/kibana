@@ -14,13 +14,13 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
-import { AppPluginStartDependencies, DataUsagePluginStart } from './types';
+import { DataUsageStartDependencies, DataUsagePublicStart } from './types';
 import { PLUGIN_ID } from '../common';
 
 export const renderApp = (
   core: CoreStart,
-  plugins: AppPluginStartDependencies,
-  pluginStart: DataUsagePluginStart,
+  plugins: DataUsageStartDependencies,
+  pluginStart: DataUsagePublicStart,
   params: ManagementAppMountParams
 ) => {
   ReactDOM.render(
@@ -60,8 +60,8 @@ const AppWithExecutionContext = ({
 
 interface AppProps {
   core: CoreStart;
-  plugins: AppPluginStartDependencies;
-  pluginStart: DataUsagePluginStart;
+  plugins: DataUsageStartDependencies;
+  pluginStart: DataUsagePublicStart;
   params: ManagementAppMountParams;
 }
 

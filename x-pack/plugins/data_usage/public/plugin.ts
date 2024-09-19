@@ -7,7 +7,6 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import type { PluginInitializerContext } from '@kbn/core/public';
 import {
   DataUsagePublicSetup,
   DataUsagePublicStart,
@@ -25,16 +24,11 @@ export class DataUsagePlugin
       DataUsageStartDependencies
     >
 {
-  private isServerless: boolean = false;
-  constructor(initializerContext: PluginInitializerContext) {
-    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
-  }
   public setup(
     core: CoreSetup<DataUsageStartDependencies, DataUsagePublicStart>,
     plugins: DataUsageSetupDependencies
   ): DataUsagePublicSetup {
     const { management } = plugins;
-    if (!this.isServerless) return {};
     management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,

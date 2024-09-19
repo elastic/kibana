@@ -22,5 +22,4 @@ export const plugin: PluginInitializer<
   DataUsagePublicStart,
   DataUsageSetupDependencies,
   DataUsageStartDependencies
-> = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>
-  new DataUsagePlugin(pluginInitializerContext);
+> = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) => new DataUsagePlugin();
