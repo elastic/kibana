@@ -18,7 +18,7 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { partition, take, uniqueId } from 'lodash';
+import { compact, partition, take, uniqueId } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
 import { Entity, EntityDefinition } from '../../../common/entities';
@@ -60,6 +60,7 @@ export function EntityOverview({
   }>;
 }) {
   const {
+    services: { inventoryAPIClient },
     dependencies: {
       start: { dataViews, data },
     },
@@ -101,7 +102,7 @@ export function EntityOverview({
 
     const logsQuery = `${baseQuery} | LIMIT 100`;
 
-    const histogramQuery = `${baseQuery} | STATS \`${metric.id}\` = ${
+    const histogramQuery = `${baseQuery} | STATS metric = ${
       metric.expression || 'COUNT(*)'
     } BY @timestamp = BUCKET(@timestamp, 1 minute)`;
 
@@ -121,14 +122,43 @@ export function EntityOverview({
     operationName: 'get_logs_for_entity',
   });
 
-  const histogramQueryResult = useEsqlQueryResult({
-    query: queries?.histogramQuery,
-    start,
-    end,
-    kuery: persistedKqlFilter ?? '',
-    dslFilter: queries?.baseDslFilter,
-    operationName: 'get_histogram_for_entity',
-  });
+  const histogramQueryFetch = useAbortableAsync(
+    async ({ signal }) => {
+      if (!queries?.histogramQuery) {
+        return undefined;
+      }
+
+      return inventoryAPIClient
+        .fetch('POST /internal/inventory/esql', {
+          signal,
+          params: {
+            body: {
+              query: queries.histogramQuery,
+              kuery: persistedKqlFilter ?? '',
+              dslFilter: queries.baseDslFilter,
+              operationName: 'get_histogram_for_entity',
+              start,
+              end,
+            },
+          },
+        })
+        .then((response) => {
+          return {
+            ...response,
+            metric,
+          };
+        });
+    },
+    [
+      metric,
+      queries?.histogramQuery,
+      persistedKqlFilter,
+      start,
+      end,
+      queries?.baseDslFilter,
+      inventoryAPIClient,
+    ]
+  );
 
   const columnAnalysis = useMemo(() => {
     if (logsQueryResult.value) {
@@ -263,7 +293,7 @@ export function EntityOverview({
               }}
               onRefresh={() => {
                 logsQueryResult.refresh();
-                histogramQueryResult.refresh();
+                histogramQueryFetch.refresh();
               }}
               placeholder={i18n.translate('xpack.inventory.entityOverview.searchBarPlaceholder', {
                 defaultMessage: 'Filter data by using KQL',
@@ -357,11 +387,16 @@ export function EntityOverview({
               </EuiButtonEmpty>
             </EuiFlexGroup>
             <ControlledEsqlChart
-              result={histogramQueryResult}
+              result={histogramQueryFetch}
               id="entity_log_rate"
-              metricNames={[metric.id]}
+              metricNames={['metric']}
               height={200}
-              chartType="bar"
+              chartType={
+                !histogramQueryFetch.value?.metric.expression ||
+                histogramQueryFetch.value.metric.expression.includes('COUNT(')
+                  ? 'bar'
+                  : 'line'
+              }
             />
           </EuiFlexGroup>
         </EuiPanel>

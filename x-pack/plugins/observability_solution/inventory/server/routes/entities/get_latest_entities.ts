@@ -6,7 +6,6 @@
  */
 
 import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { uniq } from 'lodash';
 import pLimit from 'p-limit';
 import { Logger } from '@kbn/logging';
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
@@ -58,12 +57,6 @@ export async function getLatestEntities({
     return esqlResponseToEntities(response);
   }
 
-  const indexPatterns = uniq(
-    typeDefinitions?.flatMap((definition) =>
-      definition.sources.flatMap((source) => source.indexPatterns)
-    )
-  );
-
   const limiter = pLimit(10);
 
   const entitiesFromSourceResults = await Promise.all(
@@ -74,7 +67,7 @@ export async function getLatestEntities({
           start,
           end,
           kuery,
-          indexPatterns,
+          indexPatterns: definition.sources.flatMap((source) => source.indexPatterns),
           definition,
           logger,
           dslFilter,

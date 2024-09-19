@@ -71,12 +71,12 @@ export function ControlledEsqlChart<T extends string>({
     [result, ...metricNames]
   );
 
-  if (result.loading) {
+  if (result.loading && !result.value?.values.length) {
     return (
       <LoadingPanel
         loading
         className={css`
-          height: 200;
+          height: ${height}px;
         `}
       />
     );
