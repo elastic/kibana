@@ -7,7 +7,7 @@ paths:
     post:
       summary: Builds Integration with the given input samples
       operationId: BuildIntegration
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       description: Build Integration for the given input samples
       tags:
         - Build Integration API
