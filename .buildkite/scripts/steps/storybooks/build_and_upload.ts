@@ -22,7 +22,6 @@ const STORYBOOKS = [
   'coloring',
   'chart_icons',
   'content_management_examples',
-  'controls',
   'custom_integrations',
   'dashboard_enhanced',
   'dashboard',

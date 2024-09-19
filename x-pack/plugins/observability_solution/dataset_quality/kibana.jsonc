@@ -23,9 +23,10 @@
       "fieldFormats",
       "dataViews",
       "lens",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "taskManager"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["telemetry"],
     "requiredBundles": ["unifiedHistogram", "discover"],
     "extraPublicDirs": [
       "common"

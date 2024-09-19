@@ -1724,6 +1724,15 @@
         "count_rules_muted": {
           "type": "long"
         },
+        "count_mw_total": {
+          "type": "long"
+        },
+        "count_mw_with_repeat_toggle_on": {
+          "type": "long"
+        },
+        "count_mw_with_filter_alert_toggle_on": {
+          "type": "long"
+        },
         "count_rules_with_muted_alerts": {
           "type": "long"
         },

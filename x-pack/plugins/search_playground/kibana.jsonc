@@ -12,6 +12,7 @@
     ],
     "requiredPlugins": [
       "actions",
+      "data",
       "encryptedSavedObjects",
       "navigation",
       "share",
@@ -25,7 +26,8 @@
       "usageCollection",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "unifiedDocViewer"
     ]
   }
 }

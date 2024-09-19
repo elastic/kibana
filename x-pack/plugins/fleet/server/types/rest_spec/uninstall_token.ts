@@ -6,6 +6,8 @@
  */
 import { schema } from '@kbn/config-schema';
 
+import { ListResponseSchema } from '../../routes/schema/utils';
+
 export const GetUninstallTokensMetadataRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(
@@ -26,8 +28,26 @@ export const GetUninstallTokensMetadataRequestSchema = {
   }),
 };
 
+const UninstallTokenMetadataSchema = schema.object({
+  id: schema.string(),
+  policy_id: schema.string(),
+  policy_name: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  created_at: schema.string(),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+export const GetUninstallTokensMetadataResponseSchema = ListResponseSchema(
+  UninstallTokenMetadataSchema
+);
+
 export const GetUninstallTokenRequestSchema = {
   params: schema.object({
     uninstallTokenId: schema.string(),
   }),
 };
+
+export const GetUninstallTokenResponseSchema = schema.object({
+  item: UninstallTokenMetadataSchema.extends({
+    token: schema.string(),
+  }),
+});

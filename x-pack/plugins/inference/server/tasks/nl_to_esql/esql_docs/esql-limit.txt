@@ -1,24 +1,19 @@
-## LIMIT
+# LIMIT
 
-The `LIMIT` processing command in ES|QL is used to restrict the number of rows returned by a query. This is particularly useful when you want to control the volume of data retrieved, either for performance reasons or to focus on a specific subset of the data. 
+The LIMIT command is used to restrict the number of rows returned by a query.
 
-### Use Cases
-- **Performance Optimization**: By limiting the number of rows returned, you can improve query performance and reduce the load on the Elasticsearch cluster.
-- **Data Sampling**: Useful for retrieving a sample of data for analysis or debugging.
-- **Pagination**: Helps in implementing pagination by limiting the number of rows per page.
+## Syntax
 
-### Limitations
-- **Maximum Rows**: Queries do not return more than 10,000 rows, regardless of the `LIMIT` command’s value. This limit only applies to the number of rows that are retrieved by the query. Queries and aggregations run on the full data set.
-- **Overcoming Limitations**: To overcome this limitation, you can:
-  - Reduce the result set size by modifying the query to only return relevant data using the `WHERE` command.
-  - Shift any post-query processing to the query itself using the `STATS ... BY` command to aggregate data in the query.
-- **Dynamic Cluster Settings**: The default and maximum limits can be changed using these dynamic cluster settings:
-  - `esql.query.result_truncation_default_size`
-  - `esql.query.result_truncation_max_size`
+`LIMIT max_number_of_rows`
 
-### Examples
+### Parameters
 
-#### Example 1: Basic Usage
+#### max_number_of_rows
+
+This parameter specifies the maximum number of rows to be returned.
+
+## Examples
+
 This example demonstrates how to limit the number of rows returned to 5.
 
 ```esql
@@ -27,8 +22,7 @@ FROM employees
 | LIMIT 5
 ```
 
-#### Example 2: Limiting Rows After Filtering
-This example shows how to limit the number of rows after applying a filter.
+This example shows how to limit the number of rows after applying a filter:
 
 ```esql
 FROM employees
@@ -36,8 +30,7 @@ FROM employees
 | LIMIT 10
 ```
 
-#### Example 3: Limiting Rows with Aggregation
-This example demonstrates limiting the number of rows after performing an aggregation.
+This example demonstrates limiting the number of rows after performing an aggregation:
 
 ```esql
 FROM employees
@@ -45,8 +38,7 @@ FROM employees
 | LIMIT 3
 ```
 
-#### Example 4: Limiting Rows with Sorting
-This example shows how to limit the number of rows after sorting the data.
+This example shows how to limit the number of rows after sorting the data:
 
 ```esql
 FROM employees
@@ -54,8 +46,7 @@ FROM employees
 | LIMIT 7
 ```
 
-#### Example 5: Limiting Rows with Multiple Commands
-This example demonstrates the use of `LIMIT` in conjunction with multiple other commands.
+This example demonstrates the use of `LIMIT` in conjunction with multiple other commands:
 
 ```esql
 FROM employees
@@ -65,4 +56,20 @@ FROM employees
 | LIMIT 5
 ```
 
-By using the `LIMIT` command, you can effectively manage the volume of data returned by your ES|QL queries, ensuring better performance and more focused results.
+## Limitations
+
+There is no way to achieve pagination with LIMIT, there is no offset parameter.
+
+A query will never return more than 10,000 rows. This limitation only applies to the number of rows retrieved by the query. The query and any aggregations will still run on the full dataset.
+
+To work around this limitation:
+
+- Reduce the size of the result set by modifying the query to only return relevant data. This can be achieved by using the WHERE command to select a smaller subset of the data.
+- Shift any post-query processing to the query itself. The ES|QL STATS ... BY command can be used to aggregate data within the query.
+
+## Notes
+
+The default and maximum limits can be adjusted using the following dynamic cluster settings:
+
+- `esql.query.result_truncation_default_size`
+- `esql.query.result_truncation_max_size`
