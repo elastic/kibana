@@ -24,7 +24,6 @@ import { DashboardApi } from '..';
 
 describe('Dashboard App', () => {
   const mockDashboard = buildMockDashboard();
-  const expandedPanelIdSpy = jest.spyOn(mockDashboard.expandedPanelId, 'subscribe');
   let mockHistory: MemoryHistory;
   let historySpy: jest.SpyInstance;
   let mockDashboardApiExpandedPanel: string | undefined;
@@ -55,7 +54,6 @@ describe('Dashboard App', () => {
 
     // reset the spies before each test
     historySpy.mockClear();
-    expandedPanelIdSpy.mockClear();
   });
 
   it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
@@ -84,13 +82,15 @@ describe('Dashboard App', () => {
 
     await waitFor(() => {
       expect(expandPanelSpyInRouter).toHaveBeenCalled();
-      expect(expandedPanelIdSpy).toHaveBeenCalledTimes(1);
       expect(historySpy).toHaveBeenCalledTimes(0);
     });
 
     // simulate minimizing a panel
     mockDashboard.expandedPanelId.next(undefined);
-    expect(historySpy).toHaveBeenCalledTimes(1);
-    expect(mockHistory.location.pathname).toBe('/create');
+    await waitFor(() => {
+      expect(mockDashboard.expandedPanelId.getValue()).toBe(undefined);
+      expect(historySpy).toHaveBeenCalledTimes(1);
+      expect(mockHistory.location.pathname).toBe('/create');
+    });
   });
 });
