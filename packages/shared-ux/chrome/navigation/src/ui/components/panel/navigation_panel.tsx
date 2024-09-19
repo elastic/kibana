@@ -18,11 +18,11 @@ import {
 import React, { useCallback, type FC } from 'react';
 import classNames from 'classnames';
 
+import type { PanelSelectedNode } from '@kbn/core-chrome-browser';
 import { usePanel } from './context';
 import { getNavPanelStyles, getPanelWrapperStyles } from './styles';
-import { PanelNavNode } from './types';
 
-const getTestSubj = (selectedNode: PanelNavNode | null): string | undefined => {
+const getTestSubj = (selectedNode: PanelSelectedNode | null): string | undefined => {
   if (!selectedNode) return;
 
   const deeplinkId = selectedNode.deepLink?.id;
