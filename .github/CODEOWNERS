@@ -913,9 +913,9 @@ packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless 
-test 
-x-pack/test 
+x-pack/test_serverless
+test
+x-pack/test
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 packages/kbn-text-based-editor @elastic/kibana-esql
@@ -1418,6 +1418,14 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/api_integration/test_suites/common/alerting/ @elastic/response-ops
 /x-pack/test/functional/es_archives/action_task_params @elastic/response-ops
+/x-pack/test/functional/es_archives/actions @elastic/response-ops
+/x-pack/test/functional/es_archives/alerting @elastic/response-ops
+/x-pack/test/functional/es_archives/alerts @elastic/response-ops
+/x-pack/test/functional/es_archives/alerts_legacy @elastic/response-ops
+/x-pack/test/functional/es_archives/observability/alerts @elastic/response-ops
+/x-pack/test/functional/es_archives/actions @elastic/response-ops
+/x-pack/test/functional/es_archives/rules_scheduled_task_id  @elastic/response-ops
+/x-pack/test/functional/es_archives/alerting/8_2_0  @elastic/response-ops
 
 # Enterprise Search
 /x-pack/test/functional_enterprise_search/ @elastic/search-kibana
