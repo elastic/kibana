@@ -1,0 +1,85 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "a4cf452c1e0375c3d4412cb550ad1783358468a3b3b777da4829d72c7d6fb74f",
+    "index": ".entities.v1.latest.ea_user_entity_store",
+    "source": {
+      "event": {
+        "ingested": "2024-09-11T11:26:49.706875Z"
+      },
+      "user": {
+        "full_name": [],
+        "domain": [],
+        "roles": [],
+        "name": "hinamatsumoto",
+        "id": [],
+        "email": [],
+        "hash": []
+      },
+      "entity": {
+        "lastSeenTimestamp": "2024-09-11T11:24:15.588Z",
+        "schemaVersion": "v1",
+        "definitionVersion": "1.0.0",
+        "displayName": "hinamatsumoto",
+        "identityFields": [
+          "user.name"
+        ],
+        "id": "LBQAgKHGmpup0Kg9nlKmeQ==",
+        "type": "node",
+        "firstSeenTimestamp": "2024-09-11T10:46:00.000Z",
+        "definitionId": "ea_user_entity_store"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb71f",
+    "index": ".entities.v1.latest.ea_host_entity_store",
+    "source": {
+      "event": {
+        "ingested": "2024-09-11T11:26:49.641707Z"
+      },
+      "host": {
+        "hostname": [
+          "ali-ubuntu-server"
+        ],
+        "domain": [],
+        "ip": [
+          "1050::6:600:300c:326c",
+          "192.168.1.10",
+          "1050::5:700:400d:427c",
+          "10.142.2.222"
+        ],
+        "name": "ali-ubuntu-server",
+        "id": [
+          "new_host_id",
+          "b123c1d92f3821b748a7218b4e78125f"
+        ],
+        "type": [],
+        "mac": [
+          "42-2b-ff-8e-ac-2f",
+          "51-3c-ff-9e-ac-2g"
+        ],
+        "architecture": [
+          "x86_64"
+        ]
+      },
+      "entity": {
+        "lastSeenTimestamp": "2024-09-11T11:24:15.591Z",
+        "schemaVersion": "v1",
+        "definitionVersion": "1.0.0",
+        "displayName": "ali-ubuntu-server",
+        "identityFields": [
+          "host.name"
+        ],
+        "id": "ZXKm6GEcUJY6NHkMgPPmGQ==",
+        "type": "node",
+        "firstSeenTimestamp": "2024-09-11T10:46:00.000Z",
+        "definitionId": "ea_host_entity_store"
+      }
+    }
+  }
+}
