@@ -33,6 +33,7 @@ export const muteAlertInstanceRoute = (
         params: paramSchema,
       },
       options: {
+        access: 'public',
         summary: 'Mute an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,

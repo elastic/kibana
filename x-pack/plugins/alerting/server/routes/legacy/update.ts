@@ -57,6 +57,7 @@ export const updateAlertRoute = (
         params: paramSchema,
       },
       options: {
+        access: 'public',
         summary: 'Update an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,

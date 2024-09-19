@@ -31,6 +31,7 @@ export const enableAlertRoute = (
         params: paramSchema,
       },
       options: {
+        access: 'public',
         summary: 'Enable an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,

@@ -40,6 +40,7 @@ export const getAlertInstanceSummaryRoute = (
         query: querySchema,
       },
       options: {
+        access: 'public',
         summary: 'Get an alert summary',
         tags: ['oas-tag:alerting'],
         deprecated: true,

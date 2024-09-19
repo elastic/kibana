@@ -25,6 +25,7 @@ export function healthRoute(
       path: '/api/alerts/_health',
       validate: false,
       options: {
+        access: 'public',
         summary: 'Get the alerting framework health',
         tags: ['oas-tag:alerting'],
         deprecated: true,

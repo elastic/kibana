@@ -30,6 +30,7 @@ export const unmuteAllAlertRoute = (
         params: paramSchema,
       },
       options: {
+        access: 'public',
         summary: 'Unmute all alert instances',
         tags: ['oas-tag:alerting'],
         deprecated: true,

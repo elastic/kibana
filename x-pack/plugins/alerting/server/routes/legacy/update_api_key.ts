@@ -31,6 +31,7 @@ export const updateApiKeyRoute = (
         params: paramSchema,
       },
       options: {
+        access: 'public',
         summary: 'Update the API key for an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,

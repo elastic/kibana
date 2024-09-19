@@ -73,6 +73,7 @@ export const findAlertRoute = (
         query: querySchema,
       },
       options: {
+        access: 'public',
         summary: 'Find alerts',
         tags: ['oas-tag:alerting'],
         description:

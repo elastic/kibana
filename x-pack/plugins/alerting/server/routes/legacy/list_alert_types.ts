@@ -21,6 +21,7 @@ export const listAlertTypesRoute = (
       path: `${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`,
       validate: {},
       options: {
+        access: 'public',
         summary: 'Get the alert types',
         tags: ['oas-tag:alerting'],
         deprecated: true,

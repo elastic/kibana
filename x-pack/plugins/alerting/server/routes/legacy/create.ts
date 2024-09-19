@@ -57,6 +57,7 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         body: bodySchema,
       },
       options: {
+        access: 'public',
         summary: 'Create an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,

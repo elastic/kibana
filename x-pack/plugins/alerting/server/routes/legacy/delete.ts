@@ -29,6 +29,7 @@ export const deleteAlertRoute = (
         params: paramSchema,
       },
       options: {
+        access: 'public',
         summary: 'Delete an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,

@@ -29,6 +29,7 @@ export const getAlertRoute = (
         params: paramSchema,
       },
       options: {
+        access: 'public',
         summary: 'Get an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,

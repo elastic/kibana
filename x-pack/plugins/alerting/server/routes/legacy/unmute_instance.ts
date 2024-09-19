@@ -31,6 +31,7 @@ export const unmuteAlertInstanceRoute = (
         params: paramSchema,
       },
       options: {
+        access: 'public',
         summary: 'Unmute an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,

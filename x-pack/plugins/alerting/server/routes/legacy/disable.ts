@@ -30,6 +30,7 @@ export const disableAlertRoute = (
         params: paramSchema,
       },
       options: {
+        access: 'public',
         summary: 'Disable an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,
