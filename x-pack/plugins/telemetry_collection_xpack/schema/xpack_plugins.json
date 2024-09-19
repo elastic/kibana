@@ -2969,6 +2969,12 @@
               "_meta": {
                 "description": "Total number of services utilizing the opentelemetry/webjs agent within the last day"
               }
+            },
+            "ios/swift": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the ios/swift agent within the last day"
+              }
             }
           }
         },
