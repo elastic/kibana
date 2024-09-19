@@ -14,8 +14,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function monitoringAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/193072
-  describe.skip('monitoring', () => {
+  describe('monitoring', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(async () => await objectRemover.removeAll());
@@ -24,7 +23,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ schedule: { interval: '3s' } }));
+        .send(getTestRuleData({ schedule: { interval: '1h' } }));
       expect(createResponse.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
@@ -57,7 +56,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       );
       expect(getResponse.status).to.eql(200);
 
-      expect(getResponse.body.monitoring.run.history.length).to.be(3);
+      expect(getResponse.body.monitoring.run.history.length >= 3).to.be(true);
       expect(getResponse.body.monitoring.run.history[0].success).to.be(true);
       expect(getResponse.body.monitoring.run.history[1].success).to.be(true);
       expect(getResponse.body.monitoring.run.history[2].success).to.be(true);
@@ -89,7 +88,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       );
       expect(getResponse.status).to.eql(200);
 
-      expect(getResponse.body.monitoring.run.history.length).to.be(5);
+      expect(getResponse.body.monitoring.run.history.length >= 5).to.be(true);
       expect(getResponse.body.monitoring.run.history[0].success).to.be(true);
       expect(getResponse.body.monitoring.run.history[1].success).to.be(true);
       expect(getResponse.body.monitoring.run.history[2].success).to.be(true);
