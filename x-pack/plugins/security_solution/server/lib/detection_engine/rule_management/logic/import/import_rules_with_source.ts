@@ -6,26 +6,14 @@
  */
 
 import { partition } from 'lodash';
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import type {
-  ImportExceptionsListSchema,
-  ImportExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 
-import { type RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import { type ImportRuleResponse, createBulkErrorObject } from '../../../routes/utils';
 import type { PrebuiltRulesImportHelper } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import { isRuleConflictError, isRuleImportError } from './errors';
+import type { RuleFromImportStream } from './types';
 
-export type PromiseFromStreams = RuleToImport | Error;
-export interface RuleExceptionsPromiseFromStreams {
-  rules: PromiseFromStreams[];
-  exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
-  actionConnectors: SavedObject[];
-}
-
-const ruleIsError = (rule: RuleToImport | Error): rule is Error => rule instanceof Error;
+const ruleIsError = (rule: RuleFromImportStream): rule is Error => rule instanceof Error;
 
 /**
  * Takes a stream of rules to be imported and either creates or updates rules
@@ -50,7 +38,7 @@ export const importRules = async ({
   allowMissingConnectorSecrets,
   savedObjectsClient,
 }: {
-  ruleChunks: PromiseFromStreams[][];
+  ruleChunks: RuleFromImportStream[][];
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;

@@ -6,25 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import type {
-  ImportExceptionsListSchema,
-  ImportExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import { getReferencedExceptionLists } from './gather_referenced_exceptions';
-
-export type PromiseFromStreams = RuleToImport | Error;
-export interface RuleExceptionsPromiseFromStreams {
-  rules: PromiseFromStreams[];
-  exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
-  actionConnectors: SavedObject[];
-}
+import type { RuleFromImportStream } from './types';
 
 /**
  * Takes rules to be imported and either creates or updates rules
@@ -48,7 +37,7 @@ export const importRules = async ({
   allowMissingConnectorSecrets,
   savedObjectsClient,
 }: {
-  ruleChunks: PromiseFromStreams[][];
+  ruleChunks: RuleFromImportStream[][];
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;

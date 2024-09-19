@@ -26,7 +26,7 @@ import {
   getBasicEmptySearchResponse,
 } from '../../../../routes/__mocks__/request_responses';
 
-import * as createRulesAndExceptionsStreamFromNdJson from '../../../logic/import/create_rules_stream_from_ndjson';
+import * as createPromiseFromRuleImportStream from '../../../logic/import/create_promise_from_rule_import_stream';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { importRulesRoute } from './route';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
@@ -120,9 +120,9 @@ describe('Import rules route', () => {
       });
     });
 
-    test('returns error if createRulesAndExceptionsStreamFromNdJson throws error', async () => {
+    test('returns error if createPromiseFromRuleImportStream throws error', async () => {
       const transformMock = jest
-        .spyOn(createRulesAndExceptionsStreamFromNdJson, 'createRulesAndExceptionsStreamFromNdJson')
+        .spyOn(createPromiseFromRuleImportStream, 'createPromiseFromRuleImportStream')
         .mockImplementation(() => {
           throw new Error('Test error');
         });

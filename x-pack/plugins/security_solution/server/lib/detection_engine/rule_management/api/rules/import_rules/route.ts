@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { createPromiseFromStreams } from '@kbn/utils';
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
@@ -25,8 +24,7 @@ import { PrebuiltRulesImportHelper } from '../../../../prebuilt_rules/logic/preb
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { importRules } from '../../../logic/import/import_rules_with_source';
 import { importRules as legacyImportRules } from '../../../logic/import/import_rules_utils';
-import { createRulesAndExceptionsStreamFromNdJson } from '../../../logic/import/create_rules_stream_from_ndjson';
-import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/import_rules_utils';
+import { createPromiseFromRuleImportStream } from '../../../logic/import/create_promise_from_rule_import_stream';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
 import {
   getTupleDuplicateErrorsAndUniqueRules,
@@ -98,10 +96,9 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           const objectLimit = config.maxRuleImportExportSize;
 
           // parse file to separate out exceptions from rules
-          const readAllStream = createRulesAndExceptionsStreamFromNdJson(objectLimit);
-          const [{ exceptions, rules, actionConnectors }] = await createPromiseFromStreams<
-            RuleExceptionsPromiseFromStreams[]
-          >([request.body.file as HapiReadableStream, ...readAllStream]);
+          const [{ exceptions, rules, actionConnectors }] = await createPromiseFromRuleImportStream(
+            { stream: request.body.file as HapiReadableStream, objectLimit }
+          );
 
           // import exceptions, includes validation
           const {
