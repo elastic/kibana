@@ -12,8 +12,8 @@ import type { RuleResponse, RuleToImport } from '../../../../../../../common/api
 import { ruleToImportHasVersion } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { PrebuiltRulesImportHelper } from '../../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
 import {
-  type RuleImportError,
-  createRuleImportError,
+  type RuleImportErrorObject,
+  createRuleImportErrorObject,
   isRuleImportError,
 } from '../../import/errors';
 import { checkRuleExceptionReferences } from '../../import/check_rule_exception_references';
@@ -39,7 +39,7 @@ export const importRules = async ({
   prebuiltRulesImportHelper: PrebuiltRulesImportHelper;
   rules: RuleToImport[];
   savedObjectsClient: SavedObjectsClientContract;
-}): Promise<Array<RuleResponse | RuleImportError>> => {
+}): Promise<Array<RuleResponse | RuleImportErrorObject>> => {
   const existingLists = await getReferencedExceptionLists({
     rules,
     savedObjectsClient,
@@ -55,7 +55,7 @@ export const importRules = async ({
   return Promise.all(
     rules.map(async (rule) => {
       if (!ruleToImportHasVersion(rule)) {
-        return createRuleImportError({
+        return createRuleImportErrorObject({
           message: i18n.translate(
             'xpack.securitySolution.detectionEngine.rules.cannotImportRuleWithoutVersion',
             {
@@ -66,6 +66,8 @@ export const importRules = async ({
           ruleId: rule.rule_id,
         });
       }
+
+      const errors: RuleImportErrorObject[] = [];
 
       const { immutable, ruleSource } = calculateRuleSourceForImport({
         rule,
@@ -78,6 +80,7 @@ export const importRules = async ({
           rule,
           existingLists,
         });
+        errors.push(...exceptionErrors);
 
         const importedRule = await detectionRulesClient.importRule({
           ruleToImport: {
@@ -90,18 +93,18 @@ export const importRules = async ({
           allowMissingConnectorSecrets,
         });
 
-        return [...exceptionErrors, importedRule];
+        return [...errors, importedRule];
       } catch (err) {
         const { error, message } = err;
 
-        if (isRuleImportError(err)) {
-          return err;
-        }
+        const caughtError = isRuleImportError(err)
+          ? err
+          : createRuleImportErrorObject({
+              ruleId: rule.rule_id,
+              message: message ?? error?.message ?? 'unknown error',
+            });
 
-        return createRuleImportError({
-          ruleId: rule.rule_id,
-          message: message ?? error?.message ?? 'unknown error',
-        });
+        return [...errors, caughtError];
       }
     })
   ).then((results) => results.flat());

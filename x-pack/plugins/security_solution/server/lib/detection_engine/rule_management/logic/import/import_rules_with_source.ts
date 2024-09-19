@@ -36,7 +36,6 @@ export const importRules = async ({
   detectionRulesClient,
   prebuiltRulesImportHelper,
   allowMissingConnectorSecrets,
-  savedObjectsClient,
 }: {
   ruleChunks: RuleFromImportStream[][];
   rulesResponseAcc: ImportRuleResponse[];
@@ -44,7 +43,6 @@ export const importRules = async ({
   detectionRulesClient: IDetectionRulesClient;
   prebuiltRulesImportHelper: PrebuiltRulesImportHelper;
   allowMissingConnectorSecrets?: boolean;
-  savedObjectsClient: SavedObjectsClientContract;
 }) => {
   let response: ImportRuleResponse[] = [...rulesResponseAcc];
 
@@ -62,11 +60,9 @@ export const importRules = async ({
 
     const importedRulesResponse = await detectionRulesClient.importRules({
       allowMissingConnectorSecrets,
-      detectionRulesClient,
       overwriteRules,
       prebuiltRulesImportHelper,
       rules,
-      savedObjectsClient,
     });
 
     const genericErrors = errors.map((error) =>

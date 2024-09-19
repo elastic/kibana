@@ -160,7 +160,6 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
               allowMissingConnectorSecrets: !!actionConnectors.length,
               prebuiltRulesImportHelper,
               detectionRulesClient,
-              savedObjectsClient,
             });
           } else {
             importRuleResponse = await legacyImportRules({

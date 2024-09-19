@@ -15,7 +15,7 @@ export type RuleImportErrorType = 'conflict' | 'unknown';
  *
  * NOTE that this does not inherit from Error
  */
-export interface RuleImportError {
+export interface RuleImportErrorObject {
   error: {
     ruleId: string;
     message: string;
@@ -23,7 +23,7 @@ export interface RuleImportError {
   };
 }
 
-export const createRuleImportError = ({
+export const createRuleImportErrorObject = ({
   ruleId,
   message,
   type,
@@ -31,7 +31,7 @@ export const createRuleImportError = ({
   ruleId: string;
   message: string;
   type?: RuleImportErrorType;
-}): RuleImportError => ({
+}): RuleImportErrorObject => ({
   error: {
     ruleId,
     message,
@@ -39,11 +39,11 @@ export const createRuleImportError = ({
   },
 });
 
-export const isRuleImportError = (obj: unknown): obj is RuleImportError =>
+export const isRuleImportError = (obj: unknown): obj is RuleImportErrorObject =>
   has(obj, 'error') &&
   has(obj, 'error.ruleId') &&
   has(obj, 'error.type') &&
   has(obj, 'error.message');
 
-export const isRuleConflictError = (error: RuleImportError): boolean =>
+export const isRuleConflictError = (error: RuleImportErrorObject): boolean =>
   error.error.type === 'conflict';

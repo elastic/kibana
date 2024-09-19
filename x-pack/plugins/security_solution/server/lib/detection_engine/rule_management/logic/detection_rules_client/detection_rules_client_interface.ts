@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
@@ -16,7 +15,7 @@ import type {
   RuleToImport,
   RuleSource,
 } from '../../../../../../common/api/detection_engine';
-import type { RuleImportError } from '../import/errors';
+import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesImportHelper } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
 
@@ -29,7 +28,7 @@ export interface IDetectionRulesClient {
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
   legacyImportRule: (args: LegacyImportRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
-  importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportError>>;
+  importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
 }
 
 export interface CreateCustomRuleArgs {
@@ -70,9 +69,7 @@ export interface ImportRuleArgs {
 
 export interface ImportRulesArgs {
   rules: RuleToImport[];
-  detectionRulesClient: IDetectionRulesClient;
   overwriteRules: boolean;
   prebuiltRulesImportHelper: PrebuiltRulesImportHelper;
   allowMissingConnectorSecrets?: boolean;
-  savedObjectsClient: SavedObjectsClientContract;
 }

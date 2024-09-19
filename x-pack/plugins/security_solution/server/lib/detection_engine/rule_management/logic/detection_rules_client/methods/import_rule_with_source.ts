@@ -20,7 +20,7 @@ import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
 import { validateMlAuth, toggleRuleEnabledOnUpdate } from '../utils';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 import { SERVER_APP_ID } from '../../../../../../../common';
-import { createRuleImportError } from '../../import/errors';
+import { createRuleImportErrorObject } from '../../import/errors';
 
 interface ImportRuleOptions {
   actionsClient: ActionsClient;
@@ -53,7 +53,7 @@ export const importRuleWithSource = async ({
   });
 
   if (existingRule && !overwriteRules) {
-    throw createRuleImportError({
+    throw createRuleImportErrorObject({
       ruleId: existingRule.rule_id,
       type: 'conflict',
       message: `rule_id: "${existingRule.rule_id}" already exists`,

@@ -13,7 +13,7 @@ import type { RuleResponse } from '../../../../../../common/api/detection_engine
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import type { RuleImportError } from '../import/errors';
+import type { RuleImportErrorObject } from '../import/errors';
 import type {
   CreateCustomRuleArgs,
   CreatePrebuiltRuleArgs,
@@ -149,11 +149,12 @@ export const createDetectionRulesClient = ({
       });
     },
 
-    async importRules(args: ImportRulesArgs): Promise<Array<RuleResponse | RuleImportError>> {
+    async importRules(args: ImportRulesArgs): Promise<Array<RuleResponse | RuleImportErrorObject>> {
       return withSecuritySpan('DetectionRulesClient.importRules', async () => {
         return importRules({
           ...args,
           detectionRulesClient: this,
+          savedObjectsClient,
         });
       });
     },
