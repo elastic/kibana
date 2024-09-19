@@ -25,5 +25,5 @@ export const PostHealthCheckResponseSchema = schema.object({
       },
     })
   ),
-  host_id: schema.string(),
+  host_id: schema.maybe(schema.string()),
 });
