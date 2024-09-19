@@ -2531,6 +2531,14 @@
             "section": "def-public.ExecutionContextSetup",
             "text": "ExecutionContextSetup"
           },
+          " | undefined; featureFlags?: ",
+          {
+            "pluginId": "@kbn/core-feature-flags-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+            "section": "def-public.FeatureFlagsStart",
+            "text": "FeatureFlagsStart"
+          },
           " | undefined; http?: ",
           {
             "pluginId": "@kbn/core-http-browser",
