@@ -38,9 +38,9 @@ import { buildEsQuery } from '../../../utils/build_es_query';
 import { mergeBoolQueries } from '../../alerts/helpers/merge_bool_queries';
 import { getRelatedAlertKuery } from '../helpers/get_related_alerts_query';
 
-const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
-const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
+const RELATED_ALERTS_SEARCH_BAR_ID = 'related-alerts-search-bar-o11y';
+const ALERTS_TABLE_ID = 'xpack.observability.related.alerts.table';
 
 interface Props {
   alert?: TopAlert;
@@ -87,7 +87,7 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
       <EuiFlexItem>
         <EuiSpacer size="l" />
         <ObservabilityAlertSearchbarWithUrlSync
-          appName={ALERTS_SEARCH_BAR_ID}
+          appName={RELATED_ALERTS_SEARCH_BAR_ID}
           onEsQueryChange={setEsQuery}
           urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
           defaultSearchQueries={defaultQuery.current}
