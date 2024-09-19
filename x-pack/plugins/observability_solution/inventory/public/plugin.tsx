@@ -70,9 +70,6 @@ export class InventoryPlugin
                     }),
                     app: INVENTORY_APP_ID,
                     path: '/',
-                    matchPath(currentPath: string) {
-                      return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
-                    },
                     isTechnicalPreview: true,
                   },
                 ],
@@ -82,6 +79,31 @@ export class InventoryPlugin
         )
       );
     }
+
+    pluginsSetup.observabilityShared.navigation.registerSections(
+      from(coreSetup.getStartServices()).pipe(
+        map(([coreStart, pluginsStart]) => {
+          return [
+            {
+              label: '',
+              sortKey: 101,
+              entries: [
+                {
+                  label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
+                    defaultMessage: 'Inventory',
+                  }),
+                  app: INVENTORY_APP_ID,
+                  path: '/',
+                  matchPath(currentPath: string) {
+                    return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
+                  },
+                },
+              ],
+            },
+          ];
+        })
+      )
+    );
 
     coreSetup.application.register({
       id: INVENTORY_APP_ID,
