@@ -294,35 +294,29 @@ export interface CMCrudTypes {
    * Delete item result
    */
   DeleteOut: DeleteResult;
-  /**
-   * Content attributes, might be different from saved object attributes
-   */
-  ContentAttributes: object;
 }
 
 /**
  * Types used by content management storage
  * @argument ContentType - content management type. assumed to be the same as saved object type
- * @argument SOAttributes - attributes of the saved object
- * @argument ContentAttributes - attributes of the content, may be different from saved object attributes
+ * @argument Attributes - attributes of the saved object
  */
 export interface ContentManagementCrudTypes<
   ContentType extends string,
-  SOAttributes extends object,
+  Attributes extends object,
   CreateOptions extends object,
   UpdateOptions extends object,
-  SearchOptions extends object,
-  ContentAttributes extends object = SOAttributes
+  SearchOptions extends object
 > {
-  Attributes: SOAttributes;
+  Attributes: Attributes;
   /**
    * Complete saved object
    */
-  Item: SOWithMetadata<ContentAttributes>;
+  Item: SOWithMetadata<Attributes>;
   /**
    * Partial saved object, used as output for update
    */
-  PartialItem: SOWithMetadataPartial<ContentAttributes>;
+  PartialItem: SOWithMetadataPartial<Attributes>;
   /**
    * Create options
    */
@@ -342,15 +336,15 @@ export interface ContentManagementCrudTypes<
   /**
    * Get item result
    */
-  GetOut: GetResultSO<SOWithMetadata<ContentAttributes>>;
+  GetOut: GetResultSO<SOWithMetadata<Attributes>>;
   /**
    * Create item params
    */
-  CreateIn: CreateIn<ContentType, SOAttributes, CreateOptions>;
+  CreateIn: CreateIn<ContentType, Attributes, CreateOptions>;
   /**
    * Create item result
    */
-  CreateOut: CreateResult<SOWithMetadata<ContentAttributes>>;
+  CreateOut: CreateResult<SOWithMetadata<Attributes>>;
 
   /**
    * Search item params
@@ -359,16 +353,16 @@ export interface ContentManagementCrudTypes<
   /**
    * Search item result
    */
-  SearchOut: SearchResult<SOWithMetadata<ContentAttributes>>;
+  SearchOut: SearchResult<SOWithMetadata<Attributes>>;
 
   /**
    * Update item params
    */
-  UpdateIn: UpdateIn<ContentType, Partial<SOAttributes>, UpdateOptions>;
+  UpdateIn: UpdateIn<ContentType, Partial<Attributes>, UpdateOptions>;
   /**
    * Update item result
    */
-  UpdateOut: UpdateResult<SOWithMetadataPartial<ContentAttributes>>;
+  UpdateOut: UpdateResult<SOWithMetadataPartial<Attributes>>;
 
   /**
    * Delete item params
@@ -378,8 +372,4 @@ export interface ContentManagementCrudTypes<
    * Delete item result
    */
   DeleteOut: DeleteResult;
-  /**
-   * Content attributes, might be different from saved object attributes
-   */
-  ContentAttributes: ContentAttributes;
 }
