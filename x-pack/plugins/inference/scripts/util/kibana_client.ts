@@ -179,6 +179,7 @@ export class KibanaClient {
       system,
       toolChoice,
       tools,
+      functionCalling,
     }) => {
       const body: ChatCompleteRequestBody = {
         connectorId: chatCompleteConnectorId,
@@ -186,6 +187,7 @@ export class KibanaClient {
         messages,
         toolChoice,
         tools,
+        functionCalling,
       };
 
       return stream(

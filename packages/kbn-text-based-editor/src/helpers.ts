@@ -161,43 +161,6 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
   });
 };
 
-export const getDocumentationSections = async (language: string) => {
-  const groups: Array<{
-    label: string;
-    description?: string;
-    items: Array<{ label: string; description?: JSX.Element }>;
-  }> = [];
-  if (language === 'esql') {
-    const {
-      sourceCommands,
-      processingCommands,
-      initialSection,
-      scalarFunctions,
-      aggregationFunctions,
-      groupingFunctions,
-      operators,
-    } = await import('./inline_documentation/esql_documentation_sections');
-    groups.push({
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.esql', {
-        defaultMessage: 'ES|QL',
-      }),
-      items: [],
-    });
-    groups.push(
-      sourceCommands,
-      processingCommands,
-      scalarFunctions,
-      aggregationFunctions,
-      groupingFunctions,
-      operators
-    );
-    return {
-      groups,
-      initialSection,
-    };
-  }
-};
-
 export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   const indices = await dataViews.getIndices({
     showAllIndices: false,
