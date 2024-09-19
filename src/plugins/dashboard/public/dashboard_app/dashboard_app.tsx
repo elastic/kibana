@@ -29,7 +29,7 @@ import {
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { DashboardTopNav } from '../dashboard_top_nav';
-import { coreServices } from '../services/kibana_services';
+import { coreServices, dataService } from '../services/kibana_services';
 import { pluginServices } from '../services/plugin_services';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
@@ -76,7 +76,6 @@ export function DashboardApp({
   const {
     screenshotMode: { isScreenshotMode, getScreenshotContext },
     embeddable: { getStateTransfer },
-    data: { search, dataViews },
     share: { url },
     observabilityAIAssistant,
   } = pluginServices.getServices();
@@ -86,8 +85,8 @@ export function DashboardApp({
   useObservabilityAIAssistantContext({
     observabilityAIAssistant: observabilityAIAssistant.start,
     dashboardApi,
-    search,
-    dataViews,
+    search: dataService.search,
+    dataViews: dataService.dataViews,
   });
 
   useExecutionContext(coreServices.executionContext, {
@@ -111,9 +110,9 @@ export function DashboardApp({
    */
   useEffect(() => {
     return () => {
-      search.session.clear();
+      dataService.search.session.clear();
     };
-  }, [search.session]);
+  }, []);
 
   /**
    * Validate saved object load outcome

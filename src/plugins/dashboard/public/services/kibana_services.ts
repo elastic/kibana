@@ -10,18 +10,25 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
+import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
 import { DashboardStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
-// export let dataService: DataPublicPluginStart;
+export let dataService: DataPublicPluginStart;
+export let fieldFormatService: FieldFormatsStart;
+export let presentationUtilService: PresentationUtilPluginStart;
 // export let dataViewsService: DataViewsPublicPluginStart;
 
 const servicesReady$ = new BehaviorSubject(false);
 
 export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
   coreServices = kibanaCore;
-  // dataService = deps.data;
+  dataService = deps.data;
+  fieldFormatService = deps.fieldFormats;
+  presentationUtilService = deps.presentationUtil;
   // dataViewsService = deps.dataViews;
 
   servicesReady$.next(true);

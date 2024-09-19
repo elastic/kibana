@@ -15,7 +15,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { DashboardRedirect } from '../../dashboard_container/types';
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
-import { coreServices } from '../../services/kibana_services';
+import { coreServices, dataService } from '../../services/kibana_services';
 import { pluginServices } from '../../services/plugin_services';
 import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
 import {
@@ -38,7 +38,6 @@ export const DashboardListingPage = ({
   kbnUrlStateStorage,
 }: DashboardListingPageProps) => {
   const {
-    data: { query },
     serverless,
     dashboardContentManagement: { findDashboards },
   } = pluginServices.getServices();
@@ -72,7 +71,7 @@ export const DashboardListingPage = ({
   useEffect(() => {
     // syncs `_g` portion of url with query services
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-      query,
+      dataService.query,
       kbnUrlStateStorage
     );
     if (title) {
@@ -89,7 +88,7 @@ export const DashboardListingPage = ({
     return () => {
       stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, redirectTo, query, kbnUrlStateStorage, findDashboards]);
+  }, [title, redirectTo, kbnUrlStateStorage, findDashboards]);
 
   const titleFilter = title ? `${title}` : '';
 

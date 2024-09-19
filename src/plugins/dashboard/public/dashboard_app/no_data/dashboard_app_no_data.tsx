@@ -12,7 +12,7 @@ import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
-import { coreServices } from '../../services/kibana_services';
+import { coreServices, dataService } from '../../services/kibana_services';
 import { pluginServices } from '../../services/plugin_services';
 
 export const DashboardAppNoDataPage = ({
@@ -20,16 +20,11 @@ export const DashboardAppNoDataPage = ({
 }: {
   onDataViewCreated: () => void;
 }) => {
-  const {
-    data: { dataViews },
-    dataViewEditor,
-    noDataPage,
-    share,
-  } = pluginServices.getServices();
+  const { dataViewEditor, noDataPage, share } = pluginServices.getServices();
 
   const analyticsServices = {
     coreStart: coreServices,
-    dataViews,
+    dataViews: dataService.dataViews,
     dataViewEditor,
     noDataPage,
     share: share.url ? { url: share.url } : undefined,
@@ -59,14 +54,9 @@ export const DashboardAppNoDataPage = ({
 };
 
 export const isDashboardAppInNoDataState = async () => {
-  const {
-    data: { dataViews },
-    embeddable,
-    dashboardContentManagement,
-    dashboardBackup,
-  } = pluginServices.getServices();
+  const { embeddable, dashboardContentManagement, dashboardBackup } = pluginServices.getServices();
 
-  const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
+  const hasUserDataView = await dataService.dataViews.hasData.hasUserDataView().catch(() => false);
 
   if (hasUserDataView) return false;
 

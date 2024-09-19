@@ -85,7 +85,7 @@ import {
 } from '../../dashboard_constants';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
 import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
-import { coreServices } from '../../services/kibana_services';
+import { coreServices, dataService } from '../../services/kibana_services';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
@@ -736,13 +736,7 @@ export class DashboardContainer
 
     // if we are using the unified search integration, we need to force reset the time picker.
     if (this.creationOptions?.useUnifiedSearchIntegration && lastSavedTimeRestore) {
-      const {
-        data: {
-          query: {
-            timefilter: { timefilter: timeFilterService },
-          },
-        },
-      } = pluginServices.getServices();
+      const timeFilterService = dataService.query.timefilter.timefilter;
       if (timeRange) timeFilterService.setTime(timeRange);
       if (refreshInterval) timeFilterService.setRefreshInterval(refreshInterval);
     }

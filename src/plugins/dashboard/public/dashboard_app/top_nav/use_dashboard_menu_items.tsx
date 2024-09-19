@@ -23,6 +23,7 @@ import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
+import { coreServices } from '../../services/kibana_services';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -45,10 +46,9 @@ export const useDashboardMenuItems = ({
   const {
     share,
     dashboardBackup,
-    settings: { uiSettings },
     dashboardCapabilities: { showWriteControls },
   } = pluginServices.getServices();
-  const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
+  const isLabsEnabled = coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
   /**
    * Unpack dashboard state from redux

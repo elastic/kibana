@@ -26,6 +26,7 @@ jest.mock('../../dashboard_listing/dashboard_listing', () => {
 });
 
 import { DashboardAppNoDataPage } from '../no_data/dashboard_app_no_data';
+import { dataService } from '../../services/kibana_services';
 const mockIsDashboardAppInNoDataState = jest.fn().mockResolvedValue(false);
 jest.mock('../no_data/dashboard_app_no_data', () => {
   const originalModule = jest.requireActual('../no_data/dashboard_app_no_data');
@@ -59,9 +60,7 @@ function mountWith({ props: incomingProps }: { props?: DashboardListingPageProps
 
 test('renders analytics no data page when the user has no data view', async () => {
   mockIsDashboardAppInNoDataState.mockResolvedValueOnce(true);
-  pluginServices.getServices().data.dataViews.hasData.hasUserDataView = jest
-    .fn()
-    .mockResolvedValue(false);
+  dataService.dataViews.hasData.hasUserDataView = jest.fn().mockResolvedValue(false);
 
   let component: ReactWrapper;
   await act(async () => {

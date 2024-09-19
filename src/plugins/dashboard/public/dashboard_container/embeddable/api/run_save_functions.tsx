@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep } from 'lodash';
+import React from 'react';
+import { batch } from 'react-redux';
+
 import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
@@ -14,12 +18,10 @@ import {
   isReferenceOrValueEmbeddable,
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
-import { cloneDeep } from 'lodash';
-import React from 'react';
-import { batch } from 'react-redux';
-import { i18n } from '@kbn/i18n';
+
 import {
   DashboardContainerInput,
   DashboardPanelMap,
@@ -30,6 +32,7 @@ import {
   SaveDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
+import { coreServices, dataService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
@@ -119,11 +122,6 @@ export async function runQuickSave(this: DashboardContainer) {
  */
 export async function runInteractiveSave(this: DashboardContainer, interactionMode: ViewMode) {
   const {
-    data: {
-      query: {
-        timefilter: { timefilter },
-      },
-    },
     savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
     dashboardContentManagement: { checkForDuplicateDashboardTitle, saveDashboardState },
   } = pluginServices.getServices();
@@ -172,8 +170,10 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           tags: [] as string[],
           description: newDescription,
           timeRestore: newTimeRestore,
-          timeRange: newTimeRestore ? timefilter.getTime() : undefined,
-          refreshInterval: newTimeRestore ? timefilter.getRefreshInterval() : undefined,
+          timeRange: newTimeRestore ? dataService.query.timefilter.timefilter.getTime() : undefined,
+          refreshInterval: newTimeRestore
+            ? dataService.query.timefilter.timefilter.getRefreshInterval()
+            : undefined,
         };
 
         if (hasSavedObjectsTagging && newTags) {
@@ -240,7 +240,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
 
         const addDuration = window.performance.now() - beforeAddTime;
 
-        reportPerformanceMetricEvent(pluginServices.getServices().analytics, {
+        reportPerformanceMetricEvent(coreServices.analytics, {
           eventName: SAVED_OBJECT_POST_TIME,
           duration: addDuration,
           meta: {

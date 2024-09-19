@@ -22,11 +22,11 @@ import { pluginServices } from '../../services/plugin_services';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
+import { dataService } from '../../services/kibana_services';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const {
     usageCollection,
-    data: { search },
     embeddable: { getStateTransfer },
     visualizations: { getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
@@ -72,11 +72,11 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
         state: {
           originatingApp: dashboardApi.getAppContext()?.currentAppId,
           originatingPath: dashboardApi.getAppContext()?.getCurrentPath?.(),
-          searchSessionId: search.session.getSessionId(),
+          searchSessionId: dataService.search.session.getSessionId(),
         },
       });
     },
-    [stateTransferService, dashboardApi, search.session, trackUiMetric]
+    [stateTransferService, dashboardApi, trackUiMetric]
   );
 
   /**

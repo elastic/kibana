@@ -47,7 +47,7 @@ import { DashboardEmbedSettings } from '../dashboard_app/types';
 import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
-import { coreServices } from '../services/kibana_services';
+import { coreServices, dataService } from '../services/kibana_services';
 import { pluginServices } from '../services/plugin_services';
 import './_dashboard_top_nav.scss';
 
@@ -80,9 +80,6 @@ export function InternalDashboardTopNav({
    * Unpack dashboard services
    */
   const {
-    data: {
-      query: { filterManager },
-    },
     serverless,
     navigation: { TopNavMenu },
     embeddable: { getStateTransfer },
@@ -234,7 +231,7 @@ export function InternalDashboardTopNav({
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
       (forceShow || isChromeVisible) && !fullScreenMode;
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
-      !forceHide && (filterManager.getFilters().length > 0 || !fullScreenMode);
+      !forceHide && (dataService.query.filterManager.getFilters().length > 0 || !fullScreenMode);
 
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
     const showQueryInput = Boolean(forceHideUnifiedSearch)
@@ -255,14 +252,7 @@ export function InternalDashboardTopNav({
       showQueryInput,
       showDatePicker,
     };
-  }, [
-    embedSettings,
-    filterManager,
-    forceHideUnifiedSearch,
-    fullScreenMode,
-    isChromeVisible,
-    viewMode,
-  ]);
+  }, [embedSettings, forceHideUnifiedSearch, fullScreenMode, isChromeVisible, viewMode]);
 
   const maybeRedirect = useCallback(
     (result?: SaveDashboardReturn) => {

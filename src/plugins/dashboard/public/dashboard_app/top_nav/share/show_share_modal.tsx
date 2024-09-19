@@ -22,7 +22,7 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import { convertPanelMapToSavedPanels, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
-import { coreServices } from '../../../services/kibana_services';
+import { coreServices, dataService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
@@ -55,13 +55,6 @@ export function ShowShareModal({
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
     dashboardBackup,
-    data: {
-      query: {
-        timefilter: {
-          timefilter: { getTime },
-        },
-      },
-    },
     share: { toggleShareContextMenu },
   } = pluginServices.getServices();
 
@@ -188,7 +181,7 @@ export function ShowShareModal({
     refreshInterval: undefined, // We don't share refresh interval externally
     viewMode: ViewMode.VIEW, // For share locators we always load the dashboard in view mode
     useHash: false,
-    timeRange: getTime(),
+    timeRange: dataService.query.timefilter.timefilter.getTime(),
     ...unsavedStateForLocator,
   };
 

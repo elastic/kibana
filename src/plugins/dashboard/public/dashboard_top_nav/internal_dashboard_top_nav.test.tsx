@@ -16,6 +16,7 @@ import { pluginServices } from '../services/plugin_services';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { DashboardApi } from '../dashboard_api/types';
+import { dataService } from '../services/kibana_services';
 
 describe('Internal dashboard top nav', () => {
   const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
@@ -32,9 +33,7 @@ describe('Internal dashboard top nav', () => {
 
   beforeEach(() => {
     setMockedPresentationUtilServices();
-    pluginServices.getServices().data.query.filterManager.getFilters = jest
-      .fn()
-      .mockReturnValue([]);
+    dataService.query.filterManager.getFilters = jest.fn().mockReturnValue([]);
     // topNavMenu is mocked as a jest.fn() so we want to mock it with a component
     // @ts-ignore type issue with the mockTopNav for this test suite
     pluginServices.getServices().navigation.TopNavMenu = ({ badges }: TopNavMenuProps) =>

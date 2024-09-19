@@ -35,7 +35,7 @@ import { DashboardMountContext } from './hooks/dashboard_mount_context';
 import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
 import { DashboardListingPage } from './listing_page/dashboard_listing_page';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
-import { coreServices } from '../services/kibana_services';
+import { coreServices, dataService } from '../services/kibana_services';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -59,7 +59,6 @@ export async function mountApp({
 }: DashboardMountProps) {
   const {
     dashboardCapabilities: { showWriteControls },
-    data: dataStart,
     embeddable,
   } = pluginServices.getServices();
 
@@ -139,7 +138,7 @@ export async function mountApp({
     embeddable.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false)
   );
   if (!hasEmbeddableIncoming) {
-    dataStart.dataViews.clearCache();
+    dataService.dataViews.clearCache();
   }
 
   // dispatch synthetic hash change event to update hash history objects
@@ -187,7 +186,7 @@ export async function mountApp({
   }
   render(app, element);
   return () => {
-    dataStart.search.session.clear();
+    dataService.search.session.clear();
     unlistenParentHistory();
     unmountComponentAtNode(element);
     appUnMounted();

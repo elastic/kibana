@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep, omit } from 'lodash';
+import { Subject } from 'rxjs';
+import { v4 } from 'uuid';
+
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { cloneDeep, omit } from 'lodash';
-import { Subject } from 'rxjs';
-import { v4 } from 'uuid';
+
 import {
   DashboardContainerInput,
   DashboardPanelMap,
@@ -26,10 +28,12 @@ import {
   GLOBAL_STATE_STORAGE_KEY,
   PanelPlacementStrategy,
 } from '../../../dashboard_constants';
+import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
 import {
   LoadDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
+import { dataService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
@@ -40,7 +44,6 @@ import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
-import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -51,7 +54,6 @@ export const createDashboard = async (
   savedObjectId?: string
 ): Promise<DashboardContainer | undefined> => {
   const {
-    data: { dataViews },
     dashboardContentManagement: { loadDashboardState },
   } = pluginServices.getServices();
 
@@ -71,7 +73,7 @@ export const createDashboard = async (
   // Lazy load required systems and Dashboard saved object.
   // --------------------------------------------------------------------------------------
   const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
-  const defaultDataViewExistsPromise = dataViews.defaultDataViewExists();
+  const defaultDataViewExistsPromise = dataService.dataViews.defaultDataViewExists();
   const dashboardSavedObjectPromise = loadDashboardState({ id: savedObjectId });
 
   const [reduxEmbeddablePackage, savedObjectResult] = await Promise.all([
@@ -144,17 +146,14 @@ export const initializeDashboard = async ({
     dashboardBackup,
     dashboardCapabilities: { showWriteControls },
     embeddable: { reactEmbeddableRegistryHasKey },
-    data: {
-      query: queryService,
-      search: { session },
-    },
     dashboardContentInsights,
   } = pluginServices.getServices();
+
   const {
     queryString,
     filterManager,
     timefilter: { timefilter: timefilterService },
-  } = queryService;
+  } = dataService.query;
 
   const {
     getInitialInput,
@@ -319,7 +318,7 @@ export const initializeDashboard = async ({
 
     // start syncing global query state with the URL.
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-      queryService,
+      dataService.query,
       kbnUrlStateStorage
     );
 
@@ -487,16 +486,18 @@ export const initializeDashboard = async ({
 
     // if this incoming embeddable has a session, continue it.
     if (incomingEmbeddable?.searchSessionId) {
-      session.continue(incomingEmbeddable.searchSessionId);
+      dataService.search.session.continue(incomingEmbeddable.searchSessionId);
     }
     if (sessionIdToRestore) {
-      session.restore(sessionIdToRestore);
+      dataService.search.session.restore(sessionIdToRestore);
     }
-    const existingSession = session.getSessionId();
+    const existingSession = dataService.search.session.getSessionId();
 
     initialSearchSessionId =
       sessionIdToRestore ??
-      (existingSession && incomingEmbeddable ? existingSession : session.start());
+      (existingSession && incomingEmbeddable
+        ? existingSession
+        : dataService.search.session.start());
 
     untilDashboardReady().then(async (container) => {
       await container.untilContainerInitialized();

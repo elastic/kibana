@@ -23,7 +23,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
-import { coreServices } from '../../../services/kibana_services';
+import { coreServices, dataService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
@@ -31,7 +31,6 @@ import { useDashboardContainer } from '../../embeddable/dashboard_container';
 export function DashboardEmptyScreen() {
   const {
     usageCollection,
-    data: { search },
     embeddable: { getStateTransfer },
     dashboardCapabilities: { showWriteControls },
     visualizations: { getAliases: getVisTypeAliases },
@@ -65,17 +64,10 @@ export function DashboardEmptyScreen() {
       state: {
         originatingApp,
         originatingPath,
-        searchSessionId: search.session.getSessionId(),
+        searchSessionId: dataService.search.session.getSessionId(),
       },
     });
-  }, [
-    getStateTransfer,
-    lensAlias,
-    originatingApp,
-    originatingPath,
-    search.session,
-    usageCollection,
-  ]);
+  }, [getStateTransfer, lensAlias, originatingApp, originatingPath, usageCollection]);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = coreServices.http.basePath.prepend(

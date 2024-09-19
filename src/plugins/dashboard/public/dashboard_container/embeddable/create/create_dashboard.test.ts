@@ -7,34 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
+  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples';
 import { Filter } from '@kbn/es-query';
-import { EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { createDashboard } from './create_dashboard';
-import { getSampleDashboardPanel } from '../../../mocks';
+import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { getSampleDashboardPanel, mockControlGroupApi } from '../../../mocks';
+import { dataService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
-import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
-import { mockControlGroupApi } from '../../../mocks';
+import { createDashboard } from './create_dashboard';
 
 test("doesn't throw error when no data views are available", async () => {
-  pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
-    .fn()
-    .mockReturnValue(false);
+  dataService.dataViews.defaultDataViewExists = jest.fn().mockReturnValue(false);
   expect(await createDashboard()).toBeDefined();
 
   // reset get default data view
-  pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
-    .fn()
-    .mockResolvedValue(true);
+  dataService.dataViews.defaultDataViewExists = jest.fn().mockResolvedValue(true);
 });
 
 test('throws error when provided validation function returns invalid', async () => {
@@ -286,10 +282,8 @@ test('applies filters and query from state to query service', async () => {
     },
     getInitialInput: () => ({ filters, query }),
   });
-  expect(pluginServices.getServices().data.query.queryString.setQuery).toHaveBeenCalledWith(query);
-  expect(pluginServices.getServices().data.query.filterManager.setAppFilters).toHaveBeenCalledWith(
-    filters
-  );
+  expect(dataService.query.queryString.setQuery).toHaveBeenCalledWith(query);
+  expect(dataService.query.filterManager.setAppFilters).toHaveBeenCalledWith(filters);
 });
 
 test('applies time range and refresh interval from initial input to query service if time restore is on', async () => {
@@ -302,12 +296,10 @@ test('applies time range and refresh interval from initial input to query servic
     },
     getInitialInput: () => ({ timeRange, refreshInterval, timeRestore: true }),
   });
-  expect(
-    pluginServices.getServices().data.query.timefilter.timefilter.setTime
-  ).toHaveBeenCalledWith(timeRange);
-  expect(
-    pluginServices.getServices().data.query.timefilter.timefilter.setRefreshInterval
-  ).toHaveBeenCalledWith(refreshInterval);
+  expect(dataService.query.timefilter.timefilter.setTime).toHaveBeenCalledWith(timeRange);
+  expect(dataService.query.timefilter.timefilter.setRefreshInterval).toHaveBeenCalledWith(
+    refreshInterval
+  );
 });
 
 test('applies time range from query service to initial input if time restore is on but there is an explicit time range in the URL', async () => {
@@ -517,7 +509,7 @@ test('searchSessionId is updated prior to child embeddable parent subscription e
     .fn()
     .mockReturnValue(embeddableFactory);
   let sessionCount = 0;
-  pluginServices.getServices().data.search.session.start = () => {
+  dataService.search.session.start = () => {
     sessionCount++;
     return `searchSessionId${sessionCount}`;
   };

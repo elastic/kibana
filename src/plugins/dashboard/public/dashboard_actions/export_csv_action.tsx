@@ -23,8 +23,7 @@ import {
   PublishesPanelTitle,
   getPanelTitle,
 } from '@kbn/presentation-publishing';
-import { coreServices } from '../services/kibana_services';
-import { pluginServices } from '../services/plugin_services';
+import { coreServices, fieldFormatService } from '../services/kibana_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
@@ -44,13 +43,7 @@ export class ExportCSVAction implements Action<ExportContext> {
   public readonly type = ACTION_EXPORT_CSV;
   public readonly order = 18; // right after Export in discover which is 19
 
-  private fieldFormats;
-
-  constructor() {
-    ({
-      data: { fieldFormats: this.fieldFormats },
-    } = pluginServices.getServices());
-  }
+  constructor() {}
 
   public getIconType() {
     return 'exportAction';
@@ -69,9 +62,7 @@ export class ExportCSVAction implements Action<ExportContext> {
   };
 
   private getFormatter = (): FormatFactory | undefined => {
-    if (this.fieldFormats) {
-      return this.fieldFormats.deserialize;
-    }
+    return fieldFormatService.deserialize;
   };
 
   private getDataTableContent = (adapters: Adapters | undefined) => {

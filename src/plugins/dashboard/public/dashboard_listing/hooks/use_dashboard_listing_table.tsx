@@ -213,7 +213,7 @@ export const useDashboardListingTable = ({
         .then(({ total, hits }) => {
           const searchEndTime = window.performance.now();
           const searchDuration = searchEndTime - searchStartTime;
-          reportPerformanceMetricEvent(pluginServices.getServices().analytics, {
+          reportPerformanceMetricEvent(coreServices.analytics, {
             eventName: SAVED_OBJECT_LOADED_TIME,
             duration: searchDuration,
             meta: {

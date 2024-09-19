@@ -8,74 +8,76 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs';
+import { BehaviorSubject, filter, map } from 'rxjs';
 
-import {
-  App,
-  Plugin,
-  AppUpdater,
-  ScopedHistory,
-  type CoreSetup,
-  type CoreStart,
-  AppMountParameters,
-  DEFAULT_APP_CATEGORIES,
-  PluginInitializerContext,
-} from '@kbn/core/public';
-import type {
-  ScreenshotModePluginSetup,
-  ScreenshotModePluginStart,
-} from '@kbn/screenshot-mode-plugin/public';
-import type {
-  UsageCollectionSetup,
-  UsageCollectionStart,
-} from '@kbn/usage-collection-plugin/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
-import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
-import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import {
+  APP_WRAPPER_CLASS,
+  App,
+  AppMountParameters,
+  AppUpdater,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+  PluginInitializerContext,
+  ScopedHistory,
+  type CoreSetup,
+  type CoreStart,
+} from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
+import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type {
+  ScreenshotModePluginSetup,
+  ScreenshotModePluginStart,
+} from '@kbn/screenshot-mode-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
+import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
-import { registerDashboardPanelPlacementSetting } from './dashboard_container/panel_placement';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import {
-  type DashboardAppLocator,
   DashboardAppLocatorDefinition,
+  type DashboardAppLocator,
 } from './dashboard_app/locator/locator';
+import { DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
 } from './dashboard_constants';
-import { DashboardMountContextProps } from './dashboard_app/types';
+import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
+import {
+  GetPanelPlacementSettings,
+  registerDashboardPanelPlacementSetting,
+} from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { GetPanelPlacementSettings } from './dashboard_container/panel_placement';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -99,6 +101,7 @@ export interface DashboardStartDependencies {
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   embeddable: EmbeddableStart;
+  fieldFormats: FieldFormatsStart;
   inspector: InspectorStartContract;
   navigation: NavigationPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
