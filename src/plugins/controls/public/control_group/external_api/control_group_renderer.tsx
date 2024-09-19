@@ -16,17 +16,17 @@ import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useSearchApi, type ViewMode as ViewModeType } from '@kbn/presentation-publishing';
 
-import type { ControlGroupApi } from '..';
+import type { ControlGroupApi } from '../..';
 import {
   CONTROL_GROUP_TYPE,
   type ControlGroupRuntimeState,
   type ControlGroupSerializedState,
-} from '../../common';
+} from '../../../common';
 import {
   type ControlGroupStateBuilder,
   controlGroupStateBuilder,
-} from '../control_group/utils/control_group_state_builder';
-import { getDefaultControlGroupRuntimeState } from '../control_group/utils/initialization_utils';
+} from '../utils/control_group_state_builder';
+import { getDefaultControlGroupRuntimeState } from '../utils/initialization_utils';
 import type { ControlGroupCreationOptions, ControlGroupRendererApi } from './types';
 
 export interface ControlGroupRendererProps {

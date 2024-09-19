@@ -25,7 +25,7 @@ export {
   type ControlGroupCreationOptions,
   type ControlGroupRendererApi,
   type ControlGroupRendererProps,
-} from './external_api';
+} from './control_group/external_api';
 
 export {
   CONTROL_GROUP_TYPE,
