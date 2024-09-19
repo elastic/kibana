@@ -19,21 +19,18 @@ export function getSuccessfulRequestTimings(
 ): ILensRequestPerformance | null {
   const requests = inspectorAdapters.requests?.getRequests() || [];
 
-  let totalTookTime = 0;
-  let totalTime = 0;
+  let esTookTotal = 0;
+  let requestTimeTotal = 0;
   for (let i = 0; i < requests.length; i++) {
     const request = requests[i];
     if (request.status !== RequestStatus.OK) {
       return null;
     }
-    totalTookTime +=
+    esTookTotal +=
       (request.response?.json as { rawResponse: estypes.SearchResponse | undefined } | undefined)
         ?.rawResponse?.took ?? 0;
-    totalTime += request.time || 0;
+    requestTimeTotal += request.time || 0;
   }
 
-  return {
-    requestTimeTotal: totalTime,
-    esTookTotal: totalTookTime,
-  };
+  return { requestTimeTotal, esTookTotal };
 }
