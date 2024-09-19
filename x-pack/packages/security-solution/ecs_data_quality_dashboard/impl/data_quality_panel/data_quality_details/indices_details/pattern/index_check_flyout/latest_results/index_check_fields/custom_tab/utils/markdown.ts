@@ -23,8 +23,13 @@ import {
   getSummaryTableMarkdownComment,
   getTabCountsMarkdownComment,
 } from '../../../../../../../../utils/markdown';
-import * as i18n from '../../../translations';
-import { INDEX_MAPPING_TYPE } from '../../compare_fields_table/translations';
+import { INDEX_MAPPING_TYPE } from '../translations';
+import {
+  CUSTOM_CALLOUT,
+  CUSTOM_CALLOUT_TITLE,
+  CUSTOM_FIELDS_TABLE_TITLE,
+  ECS_IS_A_PERMISSIVE_SCHEMA,
+} from '../../../../translations';
 
 export const getCustomMarkdownComment = ({
   customFieldMetadata,
@@ -32,14 +37,14 @@ export const getCustomMarkdownComment = ({
   customFieldMetadata: CustomFieldMetadata[];
 }): string =>
   getMarkdownComment({
-    suggestedAction: `${i18n.CUSTOM_CALLOUT({
+    suggestedAction: `${CUSTOM_CALLOUT({
       fieldCount: customFieldMetadata.length,
       version: EcsVersion,
     })}
 
-${i18n.ECS_IS_A_PERMISSIVE_SCHEMA}
+${ECS_IS_A_PERMISSIVE_SCHEMA}
 `,
-    title: i18n.CUSTOM_CALLOUT_TITLE(customFieldMetadata.length),
+    title: CUSTOM_CALLOUT_TITLE(customFieldMetadata.length),
   });
 
 export const getCustomMarkdownTableRows = (customFieldMetadata: CustomFieldMetadata[]): string =>
@@ -85,7 +90,13 @@ export const getAllCustomMarkdownComments = ({
     patternDocsCount,
     sizeInBytes,
   }),
-  getTabCountsMarkdownComment(partitionedFieldMetadata),
+  getTabCountsMarkdownComment({
+    all: partitionedFieldMetadata.all.length,
+    custom: partitionedFieldMetadata.custom.length,
+    ecsCompliant: partitionedFieldMetadata.ecsCompliant.length,
+    incompatible: partitionedFieldMetadata.incompatible.length,
+    sameFamily: partitionedFieldMetadata.sameFamily.length,
+  }),
   getCustomMarkdownComment({
     customFieldMetadata: partitionedFieldMetadata.custom,
   }),
@@ -93,6 +104,6 @@ export const getAllCustomMarkdownComments = ({
     enrichedFieldMetadata: partitionedFieldMetadata.custom,
     getMarkdownTableRows: getCustomMarkdownTableRows,
     headerNames: [FIELD, INDEX_MAPPING_TYPE],
-    title: i18n.CUSTOM_FIELDS_TABLE_TITLE(indexName),
+    title: CUSTOM_FIELDS_TABLE_TITLE(indexName),
   }),
 ];

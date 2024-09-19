@@ -20,8 +20,9 @@ import type {
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
+
 import { ChartLegendItem } from './chart_legend_item';
 import { NoData } from './no_data';
 import { PatternRollup, SelectedIndex } from '../../../types';
@@ -30,10 +31,25 @@ import { FlattenedBucket } from '../types';
 import { getPathToFlattenedBucketMap } from './utils/get_path_to_flattened_bucket_map';
 import { getLayersMultiDimensional } from './utils/get_layers_multi_dimensional';
 import { getLegendItems } from './utils/get_legend_items';
-import {
-  ChartFlexItem,
-  LegendContainer,
-} from '../../indices_details/pattern/index_check_flyout/latest_results/index_check_fields/styles';
+
+export const ChartFlexItem = styled(EuiFlexItem)<{
+  $maxChartHeight: number | undefined;
+  $minChartHeight: number;
+}>`
+  ${({ $maxChartHeight }) => ($maxChartHeight != null ? `max-height: ${$maxChartHeight}px;` : '')}
+  min-height: ${({ $minChartHeight }) => `${$minChartHeight}px`};
+`;
+
+export const LegendContainer = styled.div<{
+  $height?: number;
+  $width?: number;
+}>`
+  margin-left: ${({ theme }) => theme.eui.euiSizeM};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
+  ${({ $height }) => ($height != null ? `height: ${$height}px;` : '')}
+  scrollbar-width: thin;
+  ${({ $width }) => ($width != null ? `width: ${$width}px;` : '')}
+`;
 
 export const DEFAULT_MIN_CHART_HEIGHT = 240; // px
 export const LEGEND_WIDTH = 220; // px

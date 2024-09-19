@@ -46,8 +46,10 @@ import {
   ERROR_LOADING_HISTORICAL_RESULTS,
   LOADING_HISTORICAL_RESULTS,
   NO_HISTORICAL_RESULTS,
+  NO_HISTORICAL_RESULTS_BODY,
   TOTAL_CHECKS,
 } from './translations';
+import { HistoricalResult } from './historical_result';
 
 export interface Props {
   indexName: string;
@@ -340,12 +342,14 @@ export const HistoricalResultsComponent: React.FC<Props> = ({ indexName }) => {
                 </EuiFlexGroup>
               }
             >
-              {'Todo'}
+              <HistoricalResult indexName={indexName} result={result} />
             </StyledAccordion>
           </Fragment>
         ))
       ) : (
-        <EuiEmptyPrompt iconType="clockCounter" title={<h2>{NO_HISTORICAL_RESULTS}</h2>} />
+        <EuiEmptyPrompt iconType="clockCounter" title={<h2>{NO_HISTORICAL_RESULTS}</h2>}>
+          {NO_HISTORICAL_RESULTS_BODY}
+        </EuiEmptyPrompt>
       )}
       {results.length > 0 && (
         <>

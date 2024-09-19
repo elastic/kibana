@@ -23,15 +23,10 @@ import { CustomTab } from '../custom_tab';
 import { EcsCompliantTab } from '../ecs_compliant_tab';
 import { IncompatibleTab } from '../incompatible_tab';
 import { SameFamilyTab } from '../same_family_tab';
-import {
-  ALL_TAB_ID,
-  CUSTOM_TAB_ID,
-  ECS_COMPLIANT_TAB_ID,
-  INCOMPATIBLE_TAB_ID,
-  SAME_FAMILY_TAB_ID,
-} from '../constants';
+import { ALL_TAB_ID, CUSTOM_TAB_ID, ECS_COMPLIANT_TAB_ID } from '../constants';
 import { IlmPhase, MeteringStatsIndex, PartitionedFieldMetadata } from '../../../../../../../types';
 import { isTimestampFieldMissing } from './is_timestamp_field_missing';
+import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../constants';
 
 const StyledBadge = styled(EuiBadge)`
   text-align: right;
@@ -39,8 +34,6 @@ const StyledBadge = styled(EuiBadge)`
 `;
 
 interface TabOpts {
-  formatBytes: (value: number | undefined) => string;
-  formatNumber: (value: number | undefined) => string;
   docsCount: number;
   ilmPhase: IlmPhase | undefined;
   indexName: string;

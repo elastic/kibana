@@ -33,8 +33,6 @@ describe('getTabs', () => {
     expect(
       getTabs({
         docsCount: 4,
-        formatBytes: jest.fn(),
-        formatNumber: jest.fn(),
         ilmPhase: 'unmanaged',
         indexName: 'auditbeat-custom-index-1',
         partitionedFieldMetadata: mockPartitionedFieldMetadata,

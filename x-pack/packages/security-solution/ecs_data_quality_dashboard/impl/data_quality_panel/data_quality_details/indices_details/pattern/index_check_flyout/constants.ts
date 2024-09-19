@@ -7,3 +7,6 @@
 
 export const DEFAULT_HISTORICAL_RESULTS_START_DATE = 'now-7d';
 export const DEFAULT_HISTORICAL_RESULTS_END_DATE = 'now';
+
+export const INCOMPATIBLE_TAB_ID = 'incompatibleTab';
+export const SAME_FAMILY_TAB_ID = 'sameFamilyTab';

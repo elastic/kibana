@@ -8,19 +8,17 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { SameFamilyCallout } from './same_family_callout';
+import { SameFamilyCallout } from '../../../same_family_callout';
 import { CompareFieldsTable } from '../compare_fields_table';
-import { getIncompatibleMappingsTableColumns } from '../compare_fields_table/get_incompatible_mappings_table_columns';
 import { useDataQualityContext } from '../../../../../../../data_quality_context';
-import { getAllSameFamilyMarkdownComments, getSameFamilyMappings } from './helpers';
-import { SAME_FAMILY_FIELD_MAPPINGS_TABLE_TITLE } from './translations';
+import { getAllSameFamilyMarkdownComments } from './utils/markdown';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../../../../../types';
 import { StickyActions } from '../sticky_actions';
+import { getSameFamilyTableColumns } from './utils/get_same_family_table_columns';
+import { SAME_FAMILY_FIELD_MAPPINGS_TABLE_TITLE } from '../../../translations';
 
 interface Props {
   docsCount: number;
-  formatBytes: (value: number | undefined) => string;
-  formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata;
@@ -30,20 +28,15 @@ interface Props {
 
 const SameFamilyTabComponent: React.FC<Props> = ({
   docsCount,
-  formatBytes,
-  formatNumber,
   ilmPhase,
   indexName,
   partitionedFieldMetadata,
   patternDocsCount,
   sizeInBytes,
 }) => {
-  const sameFamilyMappings = useMemo(
-    () => getSameFamilyMappings(partitionedFieldMetadata.sameFamily),
-    [partitionedFieldMetadata.sameFamily]
-  );
+  const sameFamilyMappings = partitionedFieldMetadata.sameFamily;
 
-  const { isILMAvailable } = useDataQualityContext();
+  const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
   const markdownComment: string = useMemo(
     () =>
       getAllSameFamilyMarkdownComments({
@@ -72,7 +65,7 @@ const SameFamilyTabComponent: React.FC<Props> = ({
 
   return (
     <div data-test-subj="sameFamilyTabContent">
-      <SameFamilyCallout ecsBasedFieldMetadata={partitionedFieldMetadata.sameFamily} />
+      <SameFamilyCallout fieldCount={partitionedFieldMetadata.sameFamily.length} />
 
       <>
         {sameFamilyMappings.length > 0 && (
@@ -81,7 +74,7 @@ const SameFamilyTabComponent: React.FC<Props> = ({
 
             <CompareFieldsTable
               enrichedFieldMetadata={sameFamilyMappings}
-              getTableColumns={getIncompatibleMappingsTableColumns}
+              getTableColumns={getSameFamilyTableColumns}
               title={SAME_FAMILY_FIELD_MAPPINGS_TABLE_TITLE(indexName)}
             />
           </>

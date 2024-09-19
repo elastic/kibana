@@ -8,5 +8,3 @@
 export const ALL_TAB_ID = 'allTab';
 export const ECS_COMPLIANT_TAB_ID = 'ecsCompliantTab';
 export const CUSTOM_TAB_ID = 'customTab';
-export const INCOMPATIBLE_TAB_ID = 'incompatibleTab';
-export const SAME_FAMILY_TAB_ID = 'sameFamilyTab';

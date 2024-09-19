@@ -66,6 +66,7 @@ export interface CustomFieldMetadata {
   isEcsCompliant: false;
   isInSameFamily: false;
 }
+
 export interface EcsBasedFieldMetadata extends EcsFieldMetadata {
   hasEcsMetadata: true;
   indexFieldName: string;
@@ -75,14 +76,33 @@ export interface EcsBasedFieldMetadata extends EcsFieldMetadata {
   isInSameFamily: boolean;
 }
 
-export type EnrichedFieldMetadata = EcsBasedFieldMetadata | CustomFieldMetadata;
+export interface IncompatibleFieldMetadata extends EcsBasedFieldMetadata {
+  isInSameFamily: false;
+  isEcsCompliant: false;
+}
+
+export interface SameFamilyFieldMetadata extends EcsBasedFieldMetadata {
+  isEcsCompliant: false;
+  isInSameFamily: true;
+}
+
+export interface EcsCompliantFieldMetadata extends EcsBasedFieldMetadata {
+  isEcsCompliant: true;
+  isInSameFamily: false;
+}
+
+export type EnrichedFieldMetadata =
+  | EcsCompliantFieldMetadata
+  | CustomFieldMetadata
+  | IncompatibleFieldMetadata
+  | SameFamilyFieldMetadata;
 
 export interface PartitionedFieldMetadata {
   all: EnrichedFieldMetadata[];
   custom: CustomFieldMetadata[];
-  ecsCompliant: EcsBasedFieldMetadata[];
-  incompatible: EcsBasedFieldMetadata[];
-  sameFamily: EcsBasedFieldMetadata[];
+  ecsCompliant: EcsCompliantFieldMetadata[];
+  incompatible: IncompatibleFieldMetadata[];
+  sameFamily: SameFamilyFieldMetadata[];
 }
 
 export interface UnallowedValueRequestItem {

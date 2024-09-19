@@ -8,23 +8,20 @@
 import { EcsVersion } from '@elastic/ecs';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-
-import type { CustomFieldMetadata } from '../../../../../../../../types';
-
-import * as i18n from '../../../translations';
+import { CUSTOM_CALLOUT, ECS_IS_A_PERMISSIVE_SCHEMA } from '../../../../translations';
 
 interface Props {
-  customFieldMetadata: CustomFieldMetadata[];
+  fieldCount: number;
 }
 
-const CustomCalloutComponent: React.FC<Props> = ({ customFieldMetadata }) => {
+const CustomCalloutComponent: React.FC<Props> = ({ fieldCount }) => {
   return (
     <EuiCallOut color="primary" size="s">
       <div data-test-subj="fieldsNotDefinedByEcs">
-        {i18n.CUSTOM_CALLOUT({ fieldCount: customFieldMetadata.length, version: EcsVersion })}
+        {CUSTOM_CALLOUT({ fieldCount, version: EcsVersion })}
       </div>
       <EuiSpacer size="s" />
-      <div data-test-subj="ecsIsPermissive">{i18n.ECS_IS_A_PERMISSIVE_SCHEMA}</div>
+      <div data-test-subj="ecsIsPermissive">{ECS_IS_A_PERMISSIVE_SCHEMA}</div>
     </EuiCallOut>
   );
 };

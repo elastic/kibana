@@ -45,6 +45,13 @@ export const ALL = i18n.translate('securitySolutionPackages.ecsDataQualityDashbo
 export const NO_HISTORICAL_RESULTS = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.noHistoricalResults',
   {
-    defaultMessage: 'No historical results',
+    defaultMessage: 'No historical check results',
+  }
+);
+
+export const NO_HISTORICAL_RESULTS_BODY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.noHistoricalResultsBody',
+  {
+    defaultMessage: 'To run a data quality check, click Check now',
   }
 );

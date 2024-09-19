@@ -13,7 +13,8 @@ import { SelectedIndex } from '../../types';
 import { useDataQualityContext } from '../../data_quality_context';
 import { DOCS_UNIT } from './translations';
 import { getFlattenedBuckets } from './utils/get_flattened_buckets';
-import { DEFAULT_MAX_CHART_HEIGHT } from '../indices_details/pattern/index_check_flyout/latest_results/index_check_fields/styles';
+
+export const DEFAULT_MAX_CHART_HEIGHT = 300; // px
 
 export interface Props {
   onIndexSelected: ({ indexName, pattern }: SelectedIndex) => void;

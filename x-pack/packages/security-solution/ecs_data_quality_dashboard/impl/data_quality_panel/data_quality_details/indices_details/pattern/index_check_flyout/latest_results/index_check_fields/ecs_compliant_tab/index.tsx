@@ -12,13 +12,23 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { CompareFieldsTable } from '../compare_fields_table';
-import { getEcsCompliantTableColumns } from '../compare_fields_table/helpers';
-import { EmptyPromptBody } from '../../empty_prompt_body';
-import { EmptyPromptTitle } from '../../empty_prompt_title';
-import { CalloutItem } from '../styles';
-import * as i18n from '../../translations';
+import { EmptyPromptBody } from '../../../empty_prompt_body';
+import { EmptyPromptTitle } from '../../../empty_prompt_title';
 import type { PartitionedFieldMetadata } from '../../../../../../../types';
 import { isTimestampFieldMissing } from '../utils/is_timestamp_field_missing';
+import { getEcsCompliantTableColumns } from './utils/get_ecs_compliant_table_columns';
+import { CalloutItem } from '../../../styles';
+import {
+  CUSTOM_DETECTION_ENGINE_RULES_WORK,
+  ECS_COMPLIANT_CALLOUT,
+  ECS_COMPLIANT_EMPTY,
+  ECS_COMPLIANT_EMPTY_TITLE,
+  ECS_COMPLIANT_FIELDS_TABLE_TITLE,
+  ECS_COMPLIANT_MAPPINGS_ARE_FULLY_SUPPORTED,
+  OTHER_APP_CAPABILITIES_WORK_PROPERLY,
+  PAGES_DISPLAY_EVENTS,
+  PRE_BUILT_DETECTION_ENGINE_RULES_WORK,
+} from '../../../translations';
 
 const EmptyPromptContainer = styled.div`
   width: 100%;
@@ -30,8 +40,8 @@ interface Props {
 }
 
 const EcsCompliantTabComponent: React.FC<Props> = ({ indexName, partitionedFieldMetadata }) => {
-  const emptyPromptBody = useMemo(() => <EmptyPromptBody body={i18n.ECS_COMPLIANT_EMPTY} />, []);
-  const title = useMemo(() => <EmptyPromptTitle title={i18n.ECS_COMPLIANT_EMPTY_TITLE} />, []);
+  const emptyPromptBody = useMemo(() => <EmptyPromptBody body={ECS_COMPLIANT_EMPTY} />, []);
+  const title = useMemo(() => <EmptyPromptTitle title={ECS_COMPLIANT_EMPTY_TITLE} />, []);
 
   return (
     <div data-test-subj="ecsCompliantTabContent">
@@ -39,22 +49,22 @@ const EcsCompliantTabComponent: React.FC<Props> = ({ indexName, partitionedField
         <>
           <EuiCallOut size="s">
             <p>
-              {i18n.ECS_COMPLIANT_CALLOUT({
+              {ECS_COMPLIANT_CALLOUT({
                 fieldCount: partitionedFieldMetadata.ecsCompliant.length,
                 version: EcsVersion,
               })}
             </p>
-            <CalloutItem>{i18n.PRE_BUILT_DETECTION_ENGINE_RULES_WORK}</CalloutItem>
-            <CalloutItem>{i18n.CUSTOM_DETECTION_ENGINE_RULES_WORK}</CalloutItem>
-            <CalloutItem>{i18n.PAGES_DISPLAY_EVENTS}</CalloutItem>
-            <CalloutItem>{i18n.OTHER_APP_CAPABILITIES_WORK_PROPERLY}</CalloutItem>
-            <CalloutItem>{i18n.ECS_COMPLIANT_MAPPINGS_ARE_FULLY_SUPPORTED}</CalloutItem>
+            <CalloutItem>{PRE_BUILT_DETECTION_ENGINE_RULES_WORK}</CalloutItem>
+            <CalloutItem>{CUSTOM_DETECTION_ENGINE_RULES_WORK}</CalloutItem>
+            <CalloutItem>{PAGES_DISPLAY_EVENTS}</CalloutItem>
+            <CalloutItem>{OTHER_APP_CAPABILITIES_WORK_PROPERLY}</CalloutItem>
+            <CalloutItem>{ECS_COMPLIANT_MAPPINGS_ARE_FULLY_SUPPORTED}</CalloutItem>
           </EuiCallOut>
           <EuiSpacer />
           <CompareFieldsTable
             enrichedFieldMetadata={partitionedFieldMetadata.ecsCompliant}
             getTableColumns={getEcsCompliantTableColumns}
-            title={i18n.ECS_COMPLIANT_FIELDS_TABLE_TITLE(indexName)}
+            title={ECS_COMPLIANT_FIELDS_TABLE_TITLE(indexName)}
           />
         </>
       ) : (
