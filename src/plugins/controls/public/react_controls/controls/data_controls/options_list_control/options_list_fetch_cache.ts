@@ -14,13 +14,13 @@ import dateMath from '@kbn/datemath';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
-import {
-  type OptionsListFailureResponse,
-  type OptionsListRequest,
-  type OptionsListResponse,
-  type OptionsListSuccessResponse,
+import type {
+  OptionsListFailureResponse,
+  OptionsListRequest,
+  OptionsListResponse,
+  OptionsListSuccessResponse,
 } from '../../../../../common/options_list/types';
-import { DataControlServices } from '../types';
+import type { DataControlServices } from '../types';
 
 const REQUEST_CACHE_SIZE = 50; // only store a max of 50 responses
 const REQUEST_CACHE_TTL = 1000 * 60; // time to live = 1 minute

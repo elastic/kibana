@@ -23,6 +23,7 @@ import {
   throwError,
   timestamp,
 } from 'rxjs';
+import { AssistantScope } from '../../common/types';
 import { ChatCompletionChunkEvent, Message, MessageRole } from '../../common';
 import {
   StreamingChatResponseEventType,
@@ -137,19 +138,26 @@ export async function createChatService({
   signal: setupAbortSignal,
   registrations,
   apiClient,
+  scope,
 }: {
   analytics: AnalyticsServiceStart;
   signal: AbortSignal;
   registrations: ChatRegistrationRenderFunction[];
   apiClient: ObservabilityAIAssistantAPIClient;
+  scope: AssistantScope;
 }): Promise<ObservabilityAIAssistantChatService> {
   const functionRegistry: FunctionRegistry = new Map();
 
   const renderFunctionRegistry: Map<string, RenderFunction<unknown, FunctionResponse>> = new Map();
 
   const [{ functionDefinitions, systemMessage }] = await Promise.all([
-    apiClient('GET /internal/observability_ai_assistant/functions', {
+    apiClient('GET /internal/observability_ai_assistant/{scope}/functions', {
       signal: setupAbortSignal,
+      params: {
+        path: {
+          scope,
+        },
+      },
     }),
     ...registrations.map((registration) => {
       return registration({
@@ -196,6 +204,7 @@ export async function createChatService({
             connectorId,
             functionCall,
             functions: functions ?? [],
+            scope,
           },
         },
         signal,
@@ -228,6 +237,7 @@ export async function createChatService({
           signal,
           client,
           instructions,
+          scope,
         },
         ({ params }) => {
           return callStreamingApi('POST /internal/observability_ai_assistant/chat/complete', {
