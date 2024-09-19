@@ -38,7 +38,7 @@ export const emptyStateDefinitions: Record<EmptyStateKey, EmptyStateContent> = {
     }),
     content: i18n.translate('xpack.apm.serviceTabEmptyState.dependenciesContent', {
       defaultMessage:
-        'See your services dependencies on both internal and third-party services by instrumenting with APM.',
+        "See your service's dependencies on both internal and third-party services by instrumenting with APM.",
     }),
     imgName: 'service_tab_empty_state_dependencies.png',
   },
