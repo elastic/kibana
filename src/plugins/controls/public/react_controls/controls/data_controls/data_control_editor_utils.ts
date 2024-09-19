@@ -9,12 +9,10 @@
 
 import { memoize } from 'lodash';
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataControlFieldRegistry } from '../../../types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
-import { isDataControlFactory } from './types';
+import { isDataControlFactory, type DataControlFieldRegistry } from './types';
 
-/** TODO: This funciton is duplicated from the controls plugin to avoid exporting it */
 export const getDataControlFieldRegistry = memoize(
   async (dataView: DataView) => {
     return await loadFieldRegistryFromDataView(dataView);
@@ -22,7 +20,6 @@ export const getDataControlFieldRegistry = memoize(
   (dataView: DataView) => [dataView.id, JSON.stringify(dataView.fields.getAll())].join('|')
 );
 
-/** TODO: This function is duplicated from the controls plugin to avoid exporting it */
 const loadFieldRegistryFromDataView = async (
   dataView: DataView
 ): Promise<DataControlFieldRegistry> => {

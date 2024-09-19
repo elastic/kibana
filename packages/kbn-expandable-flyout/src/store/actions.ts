@@ -21,6 +21,17 @@ export enum ActionType {
   previousPreviewPanel = 'previous_preview_panel',
   closeFlyout = 'close_flyout',
   urlChanged = 'urlChanged',
+
+  changePushVsOverlay = 'change_push_overlay',
+
+  setDefaultWidths = 'set_default_widths',
+
+  changeUserCollapsedWidth = 'change_user_collapsed_width',
+  changeUserExpandedWidth = 'change_user_expanded_width',
+
+  changeUserSectionWidths = 'change_user_section_widths',
+
+  resetAllUserWidths = 'reset_all_user_widths',
 }
 
 export const openPanelsAction = createAction<{
@@ -120,3 +131,69 @@ export const urlChangedAction = createAction<{
    */
   id: string;
 }>(ActionType.urlChanged);
+
+export const changePushVsOverlayAction = createAction<{
+  /**
+   * Type of flyout to render, value and only be 'push' or 'overlay'
+   */
+  type: 'push' | 'overlay';
+  /**
+   * Used in the redux middleware to decide if the value needs to be saved to local storage.
+   * This is used to avoid saving the value to local storage when the value is changed by code instead of by a user action.
+   */
+  savedToLocalStorage: boolean;
+}>(ActionType.changePushVsOverlay);
+
+export const setDefaultWidthsAction = createAction<{
+  /**
+   * Default width for the right section
+   */
+  right: number;
+  /**
+   * Default width for the left section
+   */
+  left: number;
+  /**
+   * Default width for the preview section
+   */
+  preview: number;
+}>(ActionType.setDefaultWidths);
+
+export const changeUserCollapsedWidthAction = createAction<{
+  /**
+   * Width of the collapsed flyout
+   */
+  width: number;
+  /**
+   * Used in the redux middleware to decide if the value needs to be saved to local storage.
+   */
+  savedToLocalStorage: boolean;
+}>(ActionType.changeUserCollapsedWidth);
+
+export const changeUserExpandedWidthAction = createAction<{
+  /**
+   * Width of the expanded flyout
+   */
+  width: number;
+  /**
+   * Used in the redux middleware to decide if the value needs to be saved to local storage.
+   */
+  savedToLocalStorage: boolean;
+}>(ActionType.changeUserExpandedWidth);
+
+export const changeUserSectionWidthsAction = createAction<{
+  /**
+   * Width of the left section
+   */
+  left: number;
+  /**
+   * Width of the right section
+   */
+  right: number;
+  /**
+   * Used in the redux middleware to decide if the value needs to be saved to local storage.
+   */
+  savedToLocalStorage: boolean;
+}>(ActionType.changeUserSectionWidths);
+
+export const resetAllUserChangedWidthsAction = createAction(ActionType.resetAllUserWidths);

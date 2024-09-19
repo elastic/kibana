@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { PublishesPanelTitle, PublishesTimeslice } from '@kbn/presentation-publishing';
-import type { DefaultControlApi, DefaultControlState } from '../types';
+import type { DefaultControlState } from '../../../../common';
+import type { DefaultControlApi } from '../types';
 
 export type Timeslice = [number, number];
 
@@ -24,8 +23,3 @@ export interface TimesliderControlState extends DefaultControlState {
 export type TimesliderControlApi = DefaultControlApi &
   Pick<PublishesPanelTitle, 'defaultPanelTitle'> &
   PublishesTimeslice;
-
-export interface Services {
-  core: CoreStart;
-  data: DataPublicPluginStart;
-}
