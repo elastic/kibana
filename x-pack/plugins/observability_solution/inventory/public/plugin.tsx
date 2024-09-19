@@ -70,6 +70,9 @@ export class InventoryPlugin
                     }),
                     app: INVENTORY_APP_ID,
                     path: '/',
+                    matchPath(currentPath: string) {
+                      return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
+                    },
                     isTechnicalPreview: true,
                   },
                 ],
