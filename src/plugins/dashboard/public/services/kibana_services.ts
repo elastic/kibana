@@ -28,11 +28,14 @@ import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
+import type { DashboardCapabilities } from '../../common';
 import type { DashboardStartDependencies } from '../plugin';
+import { getDashboardCapabilities } from './get_dashboard_capabilities';
 
 // export let dataViewsService: DataViewsPublicPluginStart;
 // export let initContextService: PluginInitializerContext;
 export let coreServices: CoreStart;
+export let capabilitiesService: { dashboardCapabilities: DashboardCapabilities };
 export let dataService: DataPublicPluginStart;
 export let dataViewEditorService: DataViewEditorStart;
 export let embeddableService: EmbeddableStart;
@@ -55,6 +58,9 @@ const servicesReady$ = new BehaviorSubject(false);
 
 export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
   coreServices = kibanaCore;
+  capabilitiesService = {
+    dashboardCapabilities: getDashboardCapabilities(kibanaCore),
+  };
   dataService = deps.data;
   dataViewEditorService = deps.dataViewEditor;
   embeddableService = deps.embeddable;

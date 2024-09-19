@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { batch } from 'react-redux';
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
+import { batch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -16,14 +16,14 @@ import useMountedState from 'react-use/lib/useMountedState';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { UI_SETTINGS } from '../../../common';
-import { topNavStrings } from '../_dashboard_app_strings';
-import { ShowShareModal } from './share/show_share_modal';
-import { pluginServices } from '../../services/plugin_services';
+import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
-import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { coreServices } from '../../services/kibana_services';
+import { capabilitiesService, coreServices, shareService } from '../../services/kibana_services';
+import { pluginServices } from '../../services/plugin_services';
+import { topNavStrings } from '../_dashboard_app_strings';
+import { ShowShareModal } from './share/show_share_modal';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -43,11 +43,7 @@ export const useDashboardMenuItems = ({
   /**
    * Unpack dashboard services
    */
-  const {
-    share,
-    dashboardBackup,
-    dashboardCapabilities: { showWriteControls },
-  } = pluginServices.getServices();
+  const { dashboardBackup } = pluginServices.getServices();
   const isLabsEnabled = coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
   /**
@@ -275,8 +271,10 @@ export const useDashboardMenuItems = ({
    * Build ordered menus for view and edit mode.
    */
   const viewModeTopNavConfig = useMemo(() => {
+    const { showWriteControls } = capabilitiesService.dashboardCapabilities;
+
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = share ? [menuItems.share] : [];
+    const shareMenuItem = shareService ? [menuItems.share] : [];
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
     const editMenuItem = showWriteControls && !managed ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
@@ -289,19 +287,11 @@ export const useDashboardMenuItems = ({
       ...mayberesetChangesMenuItem,
       ...editMenuItem,
     ];
-  }, [
-    isLabsEnabled,
-    menuItems,
-    share,
-    showWriteControls,
-    managed,
-    showResetChange,
-    resetChangesMenuItem,
-  ]);
+  }, [isLabsEnabled, menuItems, managed, showResetChange, resetChangesMenuItem]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = share ? [menuItems.share] : [];
+    const shareMenuItem = shareService ? [menuItems.share] : [];
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
@@ -316,7 +306,7 @@ export const useDashboardMenuItems = ({
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
     return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
-  }, [isLabsEnabled, menuItems, share, lastSavedId, showResetChange, resetChangesMenuItem]);
+  }, [isLabsEnabled, menuItems, lastSavedId, showResetChange, resetChangesMenuItem]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
 };

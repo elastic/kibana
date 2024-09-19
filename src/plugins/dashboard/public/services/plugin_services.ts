@@ -17,7 +17,6 @@ import {
 import { DashboardPluginServiceParams, DashboardServices } from './types';
 
 import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup_service';
-import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
 import { dashboardContentInsightsServiceFactory } from './dashboard_content_insights/dashboard_content_insights_service';
 import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management_service';
 import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service';
@@ -31,7 +30,6 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   ]),
   dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory),
 
-  dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedFactory),
   dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),

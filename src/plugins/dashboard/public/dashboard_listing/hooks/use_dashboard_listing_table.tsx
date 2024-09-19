@@ -30,7 +30,7 @@ import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardItem } from '../../../common/content_management';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
-import { coreServices } from '../../services/kibana_services';
+import { capabilitiesService, coreServices } from '../../services/kibana_services';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -93,7 +93,6 @@ export const useDashboardListingTable = ({
 }): UseDashboardListingTableReturnType => {
   const {
     dashboardBackup,
-    dashboardCapabilities: { showWriteControls },
     dashboardContentManagement: {
       findDashboards,
       deleteDashboards,
@@ -277,8 +276,9 @@ export const useDashboardListingTable = ({
     [getDashboardUrl]
   );
 
-  const tableListViewTableProps: DashboardListingViewTableProps = useMemo(
-    () => ({
+  const tableListViewTableProps: DashboardListingViewTableProps = useMemo(() => {
+    const { showWriteControls } = capabilitiesService.dashboardCapabilities;
+    return {
       contentEditor: {
         isReadonly: !showWriteControls,
         onSave: updateItemMeta,
@@ -303,31 +303,29 @@ export const useDashboardListingTable = ({
       urlStateEnabled,
       createdByEnabled: true,
       recentlyAccessed: dashboardRecentlyAccessed,
-    }),
-    [
-      contentEditorValidators,
-      createItem,
-      dashboardListingId,
-      deleteItems,
-      editItem,
-      emptyPrompt,
-      entityName,
-      entityNamePlural,
-      findItems,
-      getDetailViewLink,
-      headingId,
-      initialFilter,
-      initialPageSize,
-      listingLimit,
-      onFetchSuccess,
-      showCreateDashboardButton,
-      showWriteControls,
-      title,
-      updateItemMeta,
-      urlStateEnabled,
-      dashboardRecentlyAccessed,
-    ]
-  );
+    };
+  }, [
+    contentEditorValidators,
+    createItem,
+    dashboardListingId,
+    deleteItems,
+    editItem,
+    emptyPrompt,
+    entityName,
+    entityNamePlural,
+    findItems,
+    getDetailViewLink,
+    headingId,
+    initialFilter,
+    initialPageSize,
+    listingLimit,
+    onFetchSuccess,
+    showCreateDashboardButton,
+    title,
+    updateItemMeta,
+    urlStateEnabled,
+    dashboardRecentlyAccessed,
+  ]);
 
   const refreshUnsavedDashboards = useCallback(
     () => setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges()),

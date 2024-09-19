@@ -13,7 +13,7 @@ import { useDashboardListingTable } from './use_dashboard_listing_table';
 import { pluginServices } from '../../services/plugin_services';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardSavedObjectUserContent } from '../types';
-import { coreServices } from '../../services/kibana_services';
+import { capabilitiesService, coreServices } from '../../services/kibana_services';
 const clearStateMock = jest.fn();
 const getDashboardUrl = jest.fn();
 const goToDashboard = jest.fn();
@@ -56,7 +56,7 @@ describe('useDashboardListingTable', () => {
       .mockReturnValue([]);
 
     getPluginServices.dashboardBackup.clearState = clearStateMock;
-    getPluginServices.dashboardCapabilities.showWriteControls = true;
+    capabilitiesService.dashboardCapabilities.showWriteControls = true;
     getPluginServices.dashboardContentManagement.deleteDashboards = deleteDashboards;
     coreServices.uiSettings.get = getUiSettingsMock;
     coreServices.notifications.toasts.addError = jest.fn();
@@ -233,7 +233,7 @@ describe('useDashboardListingTable', () => {
   });
 
   test('createItem should be undefined when showWriteControls equals false', () => {
-    getPluginServices.dashboardCapabilities.showWriteControls = false;
+    capabilitiesService.dashboardCapabilities.showWriteControls = false;
 
     const { result } = renderHook(() =>
       useDashboardListingTable({
@@ -246,7 +246,7 @@ describe('useDashboardListingTable', () => {
   });
 
   test('deleteItems should be undefined when showWriteControls equals false', () => {
-    getPluginServices.dashboardCapabilities.showWriteControls = false;
+    capabilitiesService.dashboardCapabilities.showWriteControls = false;
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,
@@ -258,7 +258,7 @@ describe('useDashboardListingTable', () => {
   });
 
   test('editItem should be undefined when showWriteControls equals false', () => {
-    getPluginServices.dashboardCapabilities.showWriteControls = false;
+    capabilitiesService.dashboardCapabilities.showWriteControls = false;
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,

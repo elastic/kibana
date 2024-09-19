@@ -11,8 +11,7 @@ import { skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
-import { dataService } from '../../../../services/kibana_services';
-import { pluginServices } from '../../../../services/plugin_services';
+import { capabilitiesService, dataService } from '../../../../services/kibana_services';
 import { DashboardContainer } from '../../dashboard_container';
 import { DashboardCreationOptions } from '../../dashboard_container_factory';
 import { newSession$ } from './new_session';
@@ -27,10 +26,6 @@ export function startDashboardSearchSessionIntegration(
   if (!searchSessionSettings) return;
 
   const {
-    dashboardCapabilities: { storeSearchSession: canStoreSearchSession },
-  } = pluginServices.getServices();
-
-  const {
     sessionIdUrlChangeObservable,
     getSearchSessionIdFromURL,
     removeSessionIdFromUrl,
@@ -39,7 +34,7 @@ export function startDashboardSearchSessionIntegration(
 
   dataService.search.session.enableStorage(createSessionRestorationDataProvider(this), {
     isDisabled: () =>
-      canStoreSearchSession
+      capabilitiesService.dashboardCapabilities.storeSearchSession
         ? { disabled: false }
         : {
             disabled: true,

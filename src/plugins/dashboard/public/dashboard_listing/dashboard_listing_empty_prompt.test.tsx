@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ComponentType, ReactWrapper, mount } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper, ComponentType } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
+import { capabilitiesService } from '../services/kibana_services';
+import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import {
   DashboardListingEmptyPrompt,
   DashboardListingEmptyPromptProps,
 } from './dashboard_listing_empty_prompt';
-import { pluginServices } from '../services/plugin_services';
-import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 
 jest.mock('./confirm_overlays', () => {
   const originalModule = jest.requireActual('./confirm_overlays');
@@ -56,7 +56,7 @@ function mountWith({
 }
 
 test('renders readonly empty prompt when showWriteControls is off', async () => {
-  pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+  capabilitiesService.dashboardCapabilities.showWriteControls = false;
 
   let component: ReactWrapper;
   await act(async () => {
@@ -68,7 +68,7 @@ test('renders readonly empty prompt when showWriteControls is off', async () => 
 });
 
 test('renders empty prompt with link when showWriteControls is on', async () => {
-  pluginServices.getServices().dashboardCapabilities.showWriteControls = true;
+  capabilitiesService.dashboardCapabilities.showWriteControls = true;
 
   let component: ReactWrapper;
   await act(async () => {
@@ -80,7 +80,7 @@ test('renders empty prompt with link when showWriteControls is on', async () => 
 });
 
 test('renders disabled action button when disableCreateDashboardButton is true', async () => {
-  pluginServices.getServices().dashboardCapabilities.showWriteControls = true;
+  capabilitiesService.dashboardCapabilities.showWriteControls = true;
 
   let component: ReactWrapper;
   await act(async () => {
@@ -95,7 +95,7 @@ test('renders disabled action button when disableCreateDashboardButton is true',
 });
 
 test('renders continue button when no dashboards exist but one is in progress', async () => {
-  pluginServices.getServices().dashboardCapabilities.showWriteControls = true;
+  capabilitiesService.dashboardCapabilities.showWriteControls = true;
   let component: ReactWrapper;
   let props: DashboardListingEmptyPromptProps;
   await act(async () => {
@@ -114,7 +114,7 @@ test('renders continue button when no dashboards exist but one is in progress', 
 });
 
 test('renders discard button when no dashboards exist but one is in progress', async () => {
-  pluginServices.getServices().dashboardCapabilities.showWriteControls = true;
+  capabilitiesService.dashboardCapabilities.showWriteControls = true;
   let component: ReactWrapper;
   await act(async () => {
     ({ component } = mountWith({

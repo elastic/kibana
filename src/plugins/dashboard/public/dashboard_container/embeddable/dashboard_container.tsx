@@ -84,8 +84,8 @@ import {
   PanelPlacementStrategy,
 } from '../../dashboard_constants';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
-import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
 import {
+  capabilitiesService,
   coreServices,
   dataService,
   embeddableService,
@@ -208,7 +208,7 @@ export class DashboardContainer
 
   // Services that are used in the Dashboard container code
   private creationOptions?: DashboardCreationOptions;
-  private showWriteControls: DashboardCapabilitiesService['showWriteControls'];
+  private showWriteControls: boolean;
 
   public trackContentfulRender() {
     if (!this.hadContentfulRender) {
@@ -265,9 +265,7 @@ export class DashboardContainer
       { untilContainerInitialized }
     );
 
-    ({
-      dashboardCapabilities: { showWriteControls: this.showWriteControls },
-    } = pluginServices.getServices());
+    ({ showWriteControls: this.showWriteControls } = capabilitiesService.dashboardCapabilities);
 
     this.controlGroupApi$ = controlGroupApi$;
     this.untilContainerInitialized = untilContainerInitialized;

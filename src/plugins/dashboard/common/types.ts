@@ -25,7 +25,8 @@ export interface DashboardCapabilities {
   saveQuery: boolean;
   createNew: boolean;
   show: boolean;
-  [key: string]: boolean;
+  createShortUrl?: boolean;
+  storeSearchSession?: boolean;
 }
 
 /**

@@ -22,12 +22,11 @@ import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plug
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { omit } from 'lodash';
-import React, { useCallback, useState } from 'react';
-import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';
-import { pluginServices } from '../services/plugin_services';
-import { CopyToDashboardAPI } from './copy_to_dashboard_action';
+import React, { useCallback, useMemo, useState } from 'react';
+import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../dashboard_constants';
+import { capabilitiesService, embeddableService } from '../services/kibana_services';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
-import { embeddableService } from '../services/kibana_services';
+import { CopyToDashboardAPI } from './copy_to_dashboard_action';
 
 interface CopyToDashboardModalProps {
   api: CopyToDashboardAPI;
@@ -37,10 +36,11 @@ interface CopyToDashboardModalProps {
 const DashboardPicker = withSuspense(LazyDashboardPicker);
 
 export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalProps) {
-  const {
-    dashboardCapabilities: { createNew: canCreateNew, showWriteControls: canEditExisting },
-  } = pluginServices.getServices();
-  const stateTransfer = embeddableService.getStateTransfer();
+  // Setup the necessary services
+  const [{ createNew: canCreateNew, showWriteControls: canEditExisting }, stateTransfer] =
+    useMemo(() => {
+      return [capabilitiesService.dashboardCapabilities, embeddableService.getStateTransfer()];
+    }, []);
 
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing'>('existing');
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(

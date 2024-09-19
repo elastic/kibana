@@ -24,25 +24,24 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
 import {
+  capabilitiesService,
   coreServices,
   dataService,
   embeddableService,
   usageCollectionService,
   visualizationsService,
 } from '../../../services/kibana_services';
-import { pluginServices } from '../../../services/plugin_services';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 export function DashboardEmptyScreen() {
-  const {
-    dashboardCapabilities: { showWriteControls },
-  } = pluginServices.getServices();
-
   const lensAlias = useMemo(
     () => visualizationsService.getAliases().find(({ name }) => name === 'lens'),
     []
   );
+  const { showWriteControls } = useMemo(() => {
+    return capabilitiesService.dashboardCapabilities;
+  }, []);
 
   const dashboardContainer = useDashboardContainer();
   const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;

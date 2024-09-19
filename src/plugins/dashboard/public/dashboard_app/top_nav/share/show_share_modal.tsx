@@ -22,7 +22,12 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import { convertPanelMapToSavedPanels, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
-import { coreServices, dataService } from '../../../services/kibana_services';
+import {
+  capabilitiesService,
+  coreServices,
+  dataService,
+  shareService,
+} from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
@@ -52,13 +57,9 @@ export function ShowShareModal({
   dashboardTitle,
   getPanelsState,
 }: ShowShareModalProps) {
-  const {
-    dashboardCapabilities: { createShortUrl: allowShortUrl },
-    dashboardBackup,
-    share: { toggleShareContextMenu },
-  } = pluginServices.getServices();
+  const { dashboardBackup } = pluginServices.getServices();
 
-  if (!toggleShareContextMenu) return; // TODO: Make this logic cleaner once share is an optional service
+  if (!shareService) return;
 
   const EmbedUrlParamExtension = ({
     setParamValue,
@@ -198,11 +199,11 @@ export function ShowShareModal({
     unhashUrl(baseUrl)
   );
 
-  toggleShareContextMenu({
+  shareService.toggleShareContextMenu({
     isDirty,
     anchorElement,
     allowEmbed: true,
-    allowShortUrl,
+    allowShortUrl: Boolean(capabilitiesService.dashboardCapabilities.createShortUrl),
     shareableUrl,
     objectId: savedObjectId,
     objectType: 'dashboard',

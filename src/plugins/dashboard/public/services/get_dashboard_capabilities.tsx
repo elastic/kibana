@@ -7,17 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import type { DashboardStartDependencies } from '../../plugin';
-import type { DashboardCapabilitiesService } from './types';
+import { CoreStart } from '@kbn/core/public';
+import { DashboardCapabilities } from '../../common';
 
-export type DashboardCapabilitiesServiceFactory = KibanaPluginServiceFactory<
-  DashboardCapabilitiesService,
-  DashboardStartDependencies
->;
-export const dashboardCapabilitiesServiceFactory: DashboardCapabilitiesServiceFactory = ({
-  coreStart,
-}) => {
+export const getDashboardCapabilities = (coreStart: CoreStart): DashboardCapabilities => {
   const {
     application: {
       capabilities: { dashboard, maps, visualize },

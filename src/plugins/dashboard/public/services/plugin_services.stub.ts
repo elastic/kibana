@@ -16,7 +16,6 @@ import {
 import { DashboardServices } from './types';
 
 import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup.stub';
-import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities.stub';
 import { dashboardContentInsightsServiceFactory } from './dashboard_content_insights/dashboard_content_insights.stub';
 import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management.stub';
 import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service.stub';
@@ -25,7 +24,6 @@ import { initializerContextServiceFactory } from './initializer_context/initiali
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),
-  dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedServiceFactory),

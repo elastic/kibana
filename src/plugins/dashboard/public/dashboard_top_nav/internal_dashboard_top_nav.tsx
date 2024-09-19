@@ -48,6 +48,7 @@ import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
 import {
+  capabilitiesService,
   coreServices,
   dataService,
   embeddableService,
@@ -87,7 +88,6 @@ export function InternalDashboardTopNav({
    */
   const {
     initializerContext: { allowByValueEmbeddables },
-    dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
     dashboardRecentlyAccessed,
   } = pluginServices.getServices();
   const isLabsEnabled = coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
@@ -315,6 +315,8 @@ export function InternalDashboardTopNav({
         } as EuiToolTipProps,
       });
     }
+
+    const { showWriteControls } = capabilitiesService.dashboardCapabilities;
     if (showWriteControls && managed) {
       const badgeProps = {
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
@@ -367,7 +369,6 @@ export function InternalDashboardTopNav({
     hasUnsavedChanges,
     viewMode,
     hasRunMigrations,
-    showWriteControls,
     managed,
     isPopoverOpen,
     dashboardApi,
@@ -390,7 +391,11 @@ export function InternalDashboardTopNav({
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews ?? []}
-        saveQueryMenuVisibility={allowSaveQuery ? 'allowed_by_app_privilege' : 'globally_managed'}
+        saveQueryMenuVisibility={
+          capabilitiesService.dashboardCapabilities.saveQuery
+            ? 'allowed_by_app_privilege'
+            : 'globally_managed'
+        }
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== 'print'}
         setMenuMountPoint={

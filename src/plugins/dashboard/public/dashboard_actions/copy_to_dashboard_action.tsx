@@ -26,8 +26,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
-import { coreServices } from '../services/kibana_services';
-import { pluginServices } from '../services/plugin_services';
+import { coreServices, capabilitiesService } from '../services/kibana_services';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 
@@ -59,11 +58,7 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_COPY_TO_DASHBOARD;
   public order = 1;
 
-  private dashboardCapabilities;
-
-  constructor(private core: CoreStart) {
-    ({ dashboardCapabilities: this.dashboardCapabilities } = pluginServices.getServices());
-  }
+  constructor(private core: CoreStart) {}
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!apiIsCompatible(embeddable)) throw new IncompatibleActionError();
@@ -79,7 +74,7 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!apiIsCompatible(embeddable)) return false;
     const { createNew: canCreateNew, showWriteControls: canEditExisting } =
-      this.dashboardCapabilities;
+      capabilitiesService.dashboardCapabilities;
     return Boolean(canCreateNew || canEditExisting);
   }
 

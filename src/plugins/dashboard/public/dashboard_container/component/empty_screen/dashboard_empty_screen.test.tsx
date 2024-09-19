@@ -13,8 +13,7 @@ import React from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { buildMockDashboard } from '../../../mocks';
-import { visualizationsService } from '../../../services/kibana_services';
-import { pluginServices } from '../../../services/plugin_services';
+import { capabilitiesService, visualizationsService } from '../../../services/kibana_services';
 import { DashboardContainerContext } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
 
@@ -55,7 +54,7 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders correctly with readonly mode', () => {
-    pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+    capabilitiesService.dashboardCapabilities.showWriteControls = false;
 
     const component = mountComponent(ViewMode.VIEW);
     expect(component.render()).toMatchSnapshot();
@@ -70,7 +69,7 @@ describe('DashboardEmptyScreen', () => {
 
   // even when in edit mode, readonly users should not have access to the editing buttons in the empty prompt.
   test('renders correctly with readonly and edit mode', () => {
-    pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+    capabilitiesService.dashboardCapabilities.showWriteControls = false;
 
     const component = mountComponent(ViewMode.EDIT);
     expect(component.render()).toMatchSnapshot();
