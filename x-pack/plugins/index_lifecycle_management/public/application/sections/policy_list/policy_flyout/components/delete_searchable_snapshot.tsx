@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18nTexts as i18nTextsFlyout } from './i18n_texts';
 import { SerializedDeletePhase } from '../../../../../../common/types';
 import { i18nTexts } from '../../../edit_policy/i18n_texts';
 import { ActionDescription } from './action_description';
@@ -15,7 +16,12 @@ export const DeleteSearchableSnapshot = ({ phase, phases }: ActionComponentProps
   const phaseConfig = phases[phase];
   const deleteSearchableSnapshot = (phaseConfig as SerializedDeletePhase)?.actions.delete
     ?.delete_searchable_snapshot;
-  return deleteSearchableSnapshot ? (
-    <ActionDescription title={i18nTexts.editPolicy.deleteSearchableSnapshotLabel} />
-  ) : null;
+  return (
+    <ActionDescription
+      title={i18nTexts.editPolicy.deleteSearchableSnapshotLabel}
+      descriptionItems={[
+        Boolean(deleteSearchableSnapshot) ? i18nTextsFlyout.yes : i18nTextsFlyout.no,
+      ]}
+    />
+  );
 };

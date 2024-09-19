@@ -934,6 +934,26 @@ exports[`View policy flyout shows all phases 1`] = `
           <div
             class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Delete searchable snapshot
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              No
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
         </dl>
         <div
           class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
