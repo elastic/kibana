@@ -310,7 +310,10 @@ import type {
   GetDraftTimelinesRequestQueryInput,
   GetDraftTimelinesResponse,
 } from './timeline/get_draft_timelines/get_draft_timelines_route.gen';
-import type { GetNotesRequestQueryInput } from './timeline/get_notes/get_notes_route.gen';
+import type {
+  GetNotesRequestQueryInput,
+  GetNotesResponse,
+} from './timeline/get_notes/get_notes_route.gen';
 import type {
   GetTimelineRequestQueryInput,
   GetTimelineResponse,
@@ -1243,7 +1246,7 @@ finalize it.
   async getNotes(props: GetNotesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetNotes`);
     return this.kbnClient
-      .request({
+      .request<GetNotesResponse>({
         path: '/api/note',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
