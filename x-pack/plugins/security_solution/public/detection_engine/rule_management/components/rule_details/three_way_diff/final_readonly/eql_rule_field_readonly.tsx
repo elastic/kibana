@@ -12,6 +12,7 @@ import { EqlQueryReadOnly } from './fields/eql_query/eql_query';
 import { TypeReadOnly } from './fields/type/type';
 import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { EventCategoryOverrideReadOnly } from './fields/event_category_override/event_category_override';
 
 interface EqlRuleFieldReadOnlyProps {
   fieldName: keyof DiffableEqlFields;
@@ -37,8 +38,11 @@ export function EqlRuleFieldReadOnly({ fieldName, finalDiffableRule }: EqlRuleFi
         />
       );
     case 'event_category_override':
-      /* Event Category Override is not displayed in UI */
-      return null;
+      return (
+        <EventCategoryOverrideReadOnly
+          eventCategoryOverride={finalDiffableRule.event_category_override}
+        />
+      );
     case 'type':
       return <TypeReadOnly type={finalDiffableRule.type} />;
     default:
