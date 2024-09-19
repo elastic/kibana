@@ -15,6 +15,7 @@ import type {
 } from '@kbn/cases-plugin/server/attachment_framework/types';
 import { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
+import { CASES_TELEMETRY_TASK_NAME } from '@kbn/cases-plugin/common/constants';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
@@ -175,6 +176,34 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         }
 
         throw err;
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/cases_fixture/telemetry/run_soon',
+      validate: {
+        body: schema.object({
+          taskId: schema.string({
+            validate: (telemetryTaskId: string) => {
+              if (CASES_TELEMETRY_TASK_NAME === telemetryTaskId) {
+                return;
+              }
+
+              return 'invalid telemetry task id';
+            },
+          }),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const { taskId } = req.body;
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
       }
     }
   );
