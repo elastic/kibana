@@ -135,6 +135,7 @@ export class ElasticsearchService
       agentStatsProvider: {
         getAgentsStats: agentManager.getAgentsStats.bind(agentManager),
       },
+      publicBaseUrl: config.publicBaseUrl,
     };
   }
 
@@ -194,6 +195,7 @@ export class ElasticsearchService
       metrics: {
         elasticsearchWaitTime,
       },
+      publicBaseUrl: config.publicBaseUrl,
     };
   }
 
