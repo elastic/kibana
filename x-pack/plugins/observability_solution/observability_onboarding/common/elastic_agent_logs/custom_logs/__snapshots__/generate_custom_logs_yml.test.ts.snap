@@ -5,8 +5,8 @@ exports[`generateCustomLogsYml should return a basic yml configuration 1`] = `
   default:
     type: elasticsearch
     hosts:
-      - 'http://localhost:9200'
-    api_key: 'elastic:changeme'
+      - http://localhost:9200
+    api_key: elastic:changeme
 inputs:
   - id: my-logs-id
     type: logfile
@@ -26,8 +26,8 @@ exports[`generateCustomLogsYml should return a yml configuration with customConf
   default:
     type: elasticsearch
     hosts:
-      - 'http://localhost:9200'
-    api_key: 'elastic:changeme'
+      - http://localhost:9200
+    api_key: elastic:changeme
 inputs:
   - id: my-logs-id
     type: logfile
@@ -52,8 +52,8 @@ exports[`generateCustomLogsYml should return a yml configuration with multiple l
   default:
     type: elasticsearch
     hosts:
-      - 'http://localhost:9200'
-    api_key: 'elastic:changeme'
+      - http://localhost:9200
+    api_key: elastic:changeme
 inputs:
   - id: my-logs-id
     type: logfile
@@ -74,8 +74,8 @@ exports[`generateCustomLogsYml should return a yml configuration with service na
   default:
     type: elasticsearch
     hosts:
-      - 'http://localhost:9200'
-    api_key: 'elastic:changeme'
+      - http://localhost:9200
+    api_key: elastic:changeme
 inputs:
   - id: my-logs-id
     type: logfile

@@ -266,7 +266,7 @@ describe('renderPackageManifestYAML', () => {
     const manifestContent = renderPackageManifestYAML(integration);
 
     // The manifest content must be parseable as YAML.
-    const manifest = yaml.safeLoad(manifestContent);
+    const manifest = yaml.load(manifestContent) as Record<string, unknown>;
 
     expect(manifest).toBeDefined();
     expect(manifest.title).toBe(integration.title);
