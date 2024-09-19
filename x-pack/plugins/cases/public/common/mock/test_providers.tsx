@@ -189,7 +189,7 @@ export const createAppMockRenderer = ({
     queryClient.getQueryCache().clear();
 
     await waitFor(() => {
-      console.log('stop fetching...');
+      // console.log('stop fetching...');
       return expect(queryClient.isFetching()).toBe(0);
     });
   };

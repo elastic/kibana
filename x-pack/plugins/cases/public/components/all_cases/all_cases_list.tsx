@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import type { EuiTableSelectionType } from '@elastic/eui';
 import { EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -52,6 +52,14 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { euiTheme } = useEuiTheme();
 
     const hasOwner = !!owner.length;
+
+    useEffect(() => {
+      console.log('mount');
+
+      return () => {
+        console.log('unmount');
+      };
+    }, []);
 
     const { queryParams, setQueryParams, filterOptions, setFilterOptions } =
       useAllCasesState(isSelectorView);
