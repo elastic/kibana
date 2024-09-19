@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  describe('misc console behavior', function testMiscConsoleBehavior() {
+  // Failing: See https://github.com/elastic/kibana/issues/193309
+  describe.skip('misc console behavior', function testMiscConsoleBehavior() {
     this.tags('includeFirefox');
     before(async () => {
       await browser.setWindowSize(1200, 800);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { fromKueryExpression } from '@kbn/es-query';
 import {
@@ -37,6 +37,7 @@ import {
 } from './utils';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedStatus } from '../../common/types/case';
+import type { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
 export const getLatestCasesDates = async ({
   savedObjectsClient,
@@ -48,6 +49,7 @@ export const getLatestCasesDates = async ({
       sortField,
       sortOrder: 'desc',
       type: CASE_SAVED_OBJECT,
+      namespaces: ['*'],
     });
 
   const savedObjects = await Promise.all([
@@ -145,7 +147,7 @@ export const getCasesTelemetryData = async ({
 };
 
 const getCasesSavedObjectTelemetry = async (
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsClient: TelemetrySavedObjectsClient
 ): Promise<SavedObjectsFindResponse<unknown, CaseAggregationResult>> => {
   const caseByOwnerAggregationQuery = OWNERS.reduce(
     (aggQuery, owner) => ({
@@ -169,6 +171,7 @@ const getCasesSavedObjectTelemetry = async (
     page: 0,
     perPage: 0,
     type: CASE_SAVED_OBJECT,
+    namespaces: ['*'],
     aggs: {
       ...caseByOwnerAggregationQuery,
       ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
@@ -231,7 +234,7 @@ const getAssigneesAggregations = () => ({
 });
 
 const getCommentsSavedObjectTelemetry = async (
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsClient: TelemetrySavedObjectsClient
 ): Promise<SavedObjectsFindResponse<unknown, AttachmentAggregationResult>> => {
   const attachmentRegistries = () => ({
     externalReferenceTypes: {
@@ -275,6 +278,7 @@ const getCommentsSavedObjectTelemetry = async (
     page: 0,
     perPage: 0,
     type: CASE_COMMENT_SAVED_OBJECT,
+    namespaces: ['*'],
     aggs: {
       ...attachmentsByOwnerAggregationQuery,
       ...attachmentRegistries(),
@@ -288,7 +292,7 @@ const getCommentsSavedObjectTelemetry = async (
 };
 
 const getFilesTelemetry = async (
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsClient: TelemetrySavedObjectsClient
 ): Promise<SavedObjectsFindResponse<unknown, FileAttachmentAggregationResults>> => {
   const averageSize = () => ({
     averageSize: {
@@ -332,17 +336,19 @@ const getFilesTelemetry = async (
     perPage: 0,
     type: FILE_SO_TYPE,
     filter: filterCaseIdExists,
+    namespaces: ['*'],
     aggs: { ...filesByOwnerAggregationQuery, ...averageSize(), ...top20MimeTypes() },
   });
 };
 
 const getAlertsTelemetry = async (
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsClient: TelemetrySavedObjectsClient
 ): Promise<SavedObjectsFindResponse<unknown, ReferencesAggregation>> => {
   return savedObjectsClient.find<unknown, ReferencesAggregation>({
     page: 0,
     perPage: 0,
     type: CASE_COMMENT_SAVED_OBJECT,
+    namespaces: ['*'],
     filter: getOnlyAlertsCommentsFilter(),
     aggs: {
       ...getReferencesAggregationQuery({
@@ -355,12 +361,13 @@ const getAlertsTelemetry = async (
 };
 
 const getConnectorsTelemetry = async (
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsClient: TelemetrySavedObjectsClient
 ): Promise<SavedObjectsFindResponse<unknown, ReferencesAggregation>> => {
   return savedObjectsClient.find<unknown, ReferencesAggregation>({
     page: 0,
     perPage: 0,
     type: CASE_USER_ACTION_SAVED_OBJECT,
+    namespaces: ['*'],
     filter: getOnlyConnectorsFilter(),
     aggs: {
       ...getReferencesAggregationQuery({

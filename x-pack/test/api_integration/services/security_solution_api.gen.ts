@@ -102,6 +102,7 @@ import {
   InitEntityStoreRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
+import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
 import {
@@ -870,6 +871,17 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * List entities records, paging, sorting and filtering as needed.
+     */
+    listEntities(props: ListEntitiesProps) {
+      return supertest
+        .get('/api/entity_store/entities/list')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
     listEntityStoreEngines() {
       return supertest
         .get('/api/entity_store/engines')
@@ -1346,6 +1358,9 @@ export interface InitEntityStoreProps {
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
+}
+export interface ListEntitiesProps {
+  query: ListEntitiesRequestQueryInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
