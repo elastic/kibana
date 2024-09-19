@@ -20,7 +20,7 @@ import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
 import { DashboardStartDependencies } from '../../../plugin';
-import { coreServices } from '../../kibana_services';
+import { coreServices, dataService } from '../../kibana_services';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import {
   DashboardContentManagementRequiredServices,
@@ -40,7 +40,6 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
 };
 
 type SaveDashboardStateProps = SaveDashboardProps & {
-  data: DashboardContentManagementRequiredServices['data'];
   contentManagement: DashboardStartDependencies['contentManagement'];
   embeddable: DashboardContentManagementRequiredServices['embeddable'];
   dashboardBackup: DashboardContentManagementRequiredServices['dashboardBackup'];
@@ -50,7 +49,6 @@ type SaveDashboardStateProps = SaveDashboardProps & {
 
 export const saveDashboardState = async ({
   controlGroupReferences,
-  data,
   embeddable,
   lastSavedId,
   saveOptions,
@@ -65,7 +63,7 @@ export const saveDashboardState = async ({
     query: {
       timefilter: { timefilter },
     },
-  } = data;
+  } = dataService;
 
   const {
     tags,

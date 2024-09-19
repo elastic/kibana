@@ -18,7 +18,6 @@ import { DashboardPluginServiceParams, DashboardServices } from './types';
 
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
 import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup_service';
-import { dataServiceFactory } from './data/data_service';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor_service';
 import { embeddableServiceFactory } from './embeddable/embeddable_service';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context_service';
@@ -50,12 +49,10 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
     'screenshotMode',
     'embeddable',
     'spaces',
-    'data',
   ]),
   dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory, ['spaces']),
 
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
-  data: new PluginServiceProvider(dataServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),

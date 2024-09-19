@@ -8,14 +8,13 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
-import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { DashboardContainerInput } from '../../../common';
 import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content_management';
 import { DashboardStartDependencies } from '../../plugin';
 import { DashboardBackupServiceType } from '../dashboard_backup/types';
-import { DashboardDataService } from '../data/types';
 import { DashboardEmbeddableService } from '../embeddable/types';
 import { DashboardInitializerContextService } from '../initializer_context/types';
 import { DashboardSavedObjectsTaggingService } from '../saved_objects_tagging/types';
@@ -29,7 +28,6 @@ import {
 } from './lib/find_dashboards';
 
 export interface DashboardContentManagementRequiredServices {
-  data: DashboardDataService;
   spaces: DashboardSpacesService;
   embeddable: DashboardEmbeddableService;
   dashboardBackup: DashboardBackupServiceType;
@@ -54,7 +52,6 @@ export interface DashboardContentManagementService {
  */
 export interface LoadDashboardFromSavedObjectProps {
   id?: string;
-  data: DashboardContentManagementRequiredServices['data'];
   contentManagement: DashboardStartDependencies['contentManagement'];
   embeddable: DashboardContentManagementRequiredServices['embeddable'];
   savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];

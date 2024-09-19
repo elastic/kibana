@@ -17,7 +17,6 @@ import { DashboardCustomBrandingService } from './custom_branding/types';
 import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
 import { DashboardContentManagementService } from './dashboard_content_management/types';
 import { DashboardBackupServiceType } from './dashboard_backup/types';
-import { DashboardDataService } from './data/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
 import { DashboardEmbeddableService } from './embeddable/types';
 import { DashboardInitializerContextService } from './initializer_context/types';
@@ -45,7 +44,6 @@ export interface DashboardServices {
   dashboardContentManagement: DashboardContentManagementService;
 
   dashboardCapabilities: DashboardCapabilitiesService;
-  data: DashboardDataService;
   dataViewEditor: DashboardDataViewEditorService; // this service is used only for the no data state
   embeddable: DashboardEmbeddableService;
   initializerContext: DashboardInitializerContextService;
