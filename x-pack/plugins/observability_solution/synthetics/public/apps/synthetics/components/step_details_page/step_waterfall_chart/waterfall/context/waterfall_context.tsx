@@ -20,7 +20,7 @@ import {
   WaterfallMetadata,
 } from '../../../common/network_data/types';
 import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../waterfall_flyout/use_flyout';
-import { SidebarItem } from '../../../common/network_data/types';
+import { WaterfallNetworkItem } from '../../../common/network_data/types';
 
 export type MarkerItems = Array<{
   id:
@@ -43,7 +43,7 @@ export interface IWaterfallContext {
   onSidebarClick?: OnSidebarClick;
   showOnlyHighlightedNetworkRequests: boolean;
   showCustomMarks: boolean;
-  sidebarItems?: SidebarItem[];
+  sidebarItems?: WaterfallNetworkItem[];
   metadata: WaterfallMetadata;
   renderTooltipItem: (
     item: WaterfallDataEntry['config']['tooltipProps'],
