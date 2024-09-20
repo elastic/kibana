@@ -198,6 +198,13 @@ export const getDefaultTab = (
   const installedPolicyTemplatesKspm = pluginStatus?.kspm?.status;
   let preferredDashboard: PosturePolicyTemplate = POSTURE_TYPE_CSPM;
 
+  if (
+    installedPolicyTemplatesCspm === 'unprivileged' &&
+    installedPolicyTemplatesKspm === 'unprivileged'
+  ) {
+    return preferredDashboard;
+  }
+
   if (!cspmStats || !pluginStatus) {
     return;
   }
