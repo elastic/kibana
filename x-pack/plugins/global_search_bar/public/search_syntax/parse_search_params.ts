@@ -17,31 +17,23 @@ const aliasMap = {
 };
 
 export const parseSearchParams = (term: string): ParsedSearchParams => {
+  const recognizedFields = knownFilters.concat(...Object.values(aliasMap));
   let query: Query;
 
   try {
-    query = Query.parse(term);
+    query = Query.parse(term, {
+      schema: { recognizedFields },
+    });
   } catch (e) {
     // if the query fails to parse, we just perform the search against the raw search term.
     return {
       term,
-      filters: {
-        unknowns: {},
-      },
+      filters: {},
     };
   }
 
   const searchTerm = getSearchTerm(query);
   const filterValues = applyAliases(getFieldValueMap(query), aliasMap);
-
-  const unknownFilters = [...filterValues.entries()]
-    .filter(([key]) => !knownFilters.includes(key))
-    .reduce((unknowns, [key, value]) => {
-      return {
-        ...unknowns,
-        [key]: value,
-      };
-    }, {} as Record<string, FilterValues>);
 
   const tags = filterValues.get('tag');
   const types = filterValues.get('type');
@@ -51,7 +43,6 @@ export const parseSearchParams = (term: string): ParsedSearchParams => {
     filters: {
       tags: tags ? valuesToString(tags) : undefined,
       types: types ? valuesToString(types) : undefined,
-      unknowns: unknownFilters,
     },
   };
 };

@@ -19,7 +19,7 @@ import { _IGNORED } from '../../../../common/es_fields';
 import { DataStreamDetails, DataStreamSettings } from '../../../../common/api_types';
 import { createDatasetQualityESClient } from '../../../utils';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
-import { getDataStreamsStats } from '../get_data_streams_stats';
+import { getDataStreams } from '../get_data_streams';
 
 export async function getDataStreamSettings({
   esClient,
@@ -52,13 +52,13 @@ export async function getDataStreamDetails({
   dataStream,
   start,
   end,
-  sizeStatsAvailable = true,
+  isServerless,
 }: {
   esClient: ElasticsearchClient;
   dataStream: string;
   start: number;
   end: number;
-  sizeStatsAvailable?: boolean; // Only Needed to determine whether `_stats` endpoint is available https://github.com/elastic/kibana/issues/178954
+  isServerless: boolean;
 }): Promise<DataStreamDetails> {
   throwIfInvalidDataStreamParams(dataStream);
 
@@ -66,14 +66,13 @@ export async function getDataStreamDetails({
     await datasetQualityPrivileges.getHasIndexPrivileges(esClient, [dataStream], ['monitor'])
   )[dataStream];
 
-  const lastActivity = hasAccessToDataStream
+  const esDataStream = hasAccessToDataStream
     ? (
-        await getDataStreamsStats({
+        await getDataStreams({
           esClient,
-          dataStreams: [dataStream],
-          sizeStatsAvailable,
+          datasetQuery: dataStream,
         })
-      ).items[0]?.lastActivity
+      ).dataStreams[0]
     : undefined;
 
   try {
@@ -85,17 +84,17 @@ export async function getDataStreamDetails({
     );
 
     const whenSizeStatsNotAvailable = NaN; // This will indicate size cannot be calculated
-    const avgDocSizeInBytes = sizeStatsAvailable
-      ? hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
-        ? await getAvgDocSizeInBytes(esClient, dataStream)
-        : 0
-      : whenSizeStatsNotAvailable;
+    const avgDocSizeInBytes = isServerless
+      ? whenSizeStatsNotAvailable
+      : hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
+      ? await getAvgDocSizeInBytes(esClient, dataStream)
+      : 0;
     const sizeBytes = Math.ceil(avgDocSizeInBytes * dataStreamSummaryStats.docsCount);
 
     return {
       ...dataStreamSummaryStats,
       sizeBytes,
-      lastActivity,
+      lastActivity: esDataStream?.lastActivity,
       userPrivileges: {
         canMonitor: hasAccessToDataStream,
       },
