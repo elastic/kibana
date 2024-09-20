@@ -20,7 +20,7 @@ export const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-output`;
 export const ES_TEST_DATA_STREAM_NAME = 'test-data-stream';
 
 export const RULE_INTERVALS_TO_WRITE = 5;
-export const RULE_INTERVAL_SECONDS = 6;
+export const RULE_INTERVAL_SECONDS = 4;
 export const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
 export const ES_GROUPS_TO_WRITE = 3;
 

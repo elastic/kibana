@@ -84,7 +84,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
   private readonly executionContext: ExecutionContextStart;
-  private readonly pollIntervalConfiguration$: Observable<number>;
 
   private logger: Logger;
   public pool: TaskPool;
@@ -123,7 +122,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.config = config;
-    this.pollIntervalConfiguration$ = pollIntervalConfiguration$;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -222,10 +220,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
-      config: this.config,
+      eventLoopDelayConfig: { ...this.config.event_loop_delay },
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       strategy: this.config.claim_strategy,
-      pollIntervalConfiguration$: this.pollIntervalConfiguration$,
     });
   };
 
