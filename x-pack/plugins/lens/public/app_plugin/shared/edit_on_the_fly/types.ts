@@ -38,7 +38,11 @@ export interface EditConfigPanelProps {
   /** The attributes of the Lens embeddable */
   attributes: TypedLensSerializedState['attributes'];
   /** Callback for updating the visualization and datasources state.*/
-  updatePanelState: (datasourceState: unknown, visualizationState: unknown) => void;
+  updatePanelState: (
+    datasourceState: unknown,
+    visualizationState: unknown,
+    visualiationId?: string
+  ) => void;
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */
   setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;

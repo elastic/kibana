@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { AggregateQuery, ExecutionContextSearch, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
 import {
@@ -18,7 +18,6 @@ import {
   StateComparators,
   ViewMode,
 } from '@kbn/presentation-publishing';
-// import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import {
   BrushTriggerEvent,
@@ -215,6 +214,9 @@ interface LensPanelProps {
   id?: string;
   renderMode?: ViewMode;
   disableTriggers?: boolean;
+  syncColors?: boolean;
+  syncTooltips?: boolean;
+  syncCursor?: boolean;
 }
 
 interface LensRequestHandlersProps {
@@ -256,10 +258,15 @@ export type LensComponentProps = Simplify<
        */
       extraActions?: Action[];
       /**
+       * Disable specific actions for the embeddable
+       */
+      disabledActions?: string[];
+      /**
        * Toggles the inspector
        */
       showInspector?: boolean;
 
+      executionContext?: KibanaExecutionContext;
       style?: React.CSSProperties;
       className?: string;
       noPadding?: boolean;
@@ -272,21 +279,8 @@ export type LensComponentProps = Simplify<
  */
 export type LensComponentForwardedProps = Pick<
   LensComponentProps,
-  'style' | 'className' | 'noPadding' | 'viewMode' | 'abortController'
+  'style' | 'className' | 'noPadding' | 'viewMode' | 'abortController' | 'executionContext'
 >;
-
-/**
- * This is a version of the LensSerializedState who has the attributes defined
- * and is ready to be used in the runtime.
- * This helps clear it out the different between a by-Value and by-Ref state.
- * From this state onward, the only difference between by-Value and by-Ref would be the
- * presence of the savedObjectId.
- */
-// export type LensRuntimeState = Simplify<
-//   Omit<LensSerializedState, 'attributes'> & {
-//     attributes: NonNullable<LensSerializedState['attributes']>;
-//   }
-// >;
 
 /**
  * Carefully chosen props to expose on the Lens renderer component used by
@@ -405,6 +399,9 @@ export type TypedLensSerializedState = Simplify<
  * Backward compatibility types
  */
 export type LensByValueInput = Omit<LensRendererPrivateProps, 'savedObjectId'>;
-export type LensByReferenceInput = Pick<LensRendererPrivateProps, 'savedObjectId'>;
+export type LensByReferenceInput = Omit<LensRendererPrivateProps, 'attributes'>;
 export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
+export type LensEmbeddableOutput = {
+  indexPatterns?: DataView[];
+} & EmbeddableOutput;

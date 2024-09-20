@@ -127,6 +127,7 @@ export const createLensEmbeddableFactory = (
           ...searchContextConfig.serialize(),
           ...dataConfig.serialize(),
           ...integrationsConfig.serialize(),
+          ...stateConfig.serialize(),
         };
       }
 

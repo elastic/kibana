@@ -6,7 +6,6 @@
  */
 
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
-import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { fetch$, apiHasExecutionContext, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type KibanaExecutionContext } from '@kbn/core/public';
@@ -84,14 +83,6 @@ export function loadEmbeddableData(
 
     const { searchSessionId, ...unifiedSearch } = unifiedSearch$.getValue();
 
-    const settings = apiPublishesSettings(parentApi)
-      ? {
-          syncColors: parentApi.settings.syncColors$.getValue(),
-          syncCursor: parentApi.settings.syncCursor$.getValue(),
-          syncTooltips: parentApi.settings.syncTooltips$.getValue(),
-        }
-      : {};
-
     const getExecutionContext = () => {
       const parentContext = apiHasExecutionContext(parentApi)
         ? parentApi.executionContext
@@ -125,8 +116,12 @@ export function loadEmbeddableData(
     const { params, abortController, ...rest } = await getExpressionRendererParams(currentState, {
       unifiedSearch,
       api,
-      settings,
-      renderMode: viewMode$.getValue() as RenderMode,
+      settings: {
+        syncColors: currentState.syncColors,
+        syncCursor: currentState.syncCursor,
+        syncTooltips: currentState.syncTooltips,
+      },
+      renderMode: currentState.viewMode as RenderMode,
       services,
       searchSessionId,
       abortController: expressionAbortController$.getValue(),

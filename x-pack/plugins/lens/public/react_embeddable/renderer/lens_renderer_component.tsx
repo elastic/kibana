@@ -7,7 +7,8 @@
 
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type { LensApi, LensRendererProps, LensRuntimeState, LensSerializedState } from '../types';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 
@@ -44,8 +45,20 @@ export function LensRenderer({
   withDefaultActions,
   extraActions,
   showInspector,
+  syncColors,
+  syncCursor,
+  syncTooltips,
   ...props
 }: LensRendererProps) {
+  // Use the settings interface to store panel settings
+  const settings = useMemo(() => {
+    return {
+      syncColors$: new BehaviorSubject(false),
+      syncCursor$: new BehaviorSubject(false),
+      syncTooltips$: new BehaviorSubject(false),
+    };
+  }, []);
+
   const apiRef = useRef<LensApi | undefined>(undefined);
   const initialStateRef = useRef<LensSerializedState>(
     props.attributes || createEmptyLensState(title, query, filters)
@@ -68,6 +81,18 @@ export function LensRenderer({
     }
   }, [props.attributes, props.overrides]);
 
+  useEffect(() => {
+    if (syncColors != null && settings.syncColors$.getValue() !== syncColors) {
+      settings.syncColors$.next(syncColors);
+    }
+    if (syncCursor != null && settings.syncCursor$.getValue() !== syncCursor) {
+      settings.syncCursor$.next(syncCursor);
+    }
+    if (syncTooltips != null && settings.syncTooltips$.getValue() !== syncTooltips) {
+      settings.syncTooltips$.next(syncTooltips);
+    }
+  }, [settings, syncColors, syncCursor, syncTooltips]);
+
   return (
     <ReactEmbeddableRenderer<LensSerializedState, LensRuntimeState, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
@@ -76,13 +101,15 @@ export function LensRenderer({
         ...searchApi,
         // forward the Lens components to the embeddable
         ...props,
+        // pass the sync* settings with the unified settings interface
+        settings,
         // make sure to provide the initial state (useful for the comparison check)
         getSerializedStateForChild: () => ({ rawState: initialStateRef.current, references: [] }),
         // update the runtime state on changes
-        getRuntimeStateForChild: () => ({
-          ...initialStateRef.current,
-          attributes: props.attributes,
-        }),
+        // getRuntimeStateForChild: () => ({
+        //   ...initialStateRef.current,
+        //   attributes: props.attributes,
+        // }),
       })}
       onApiAvailable={(api) => {
         apiRef.current = api;
@@ -90,6 +117,10 @@ export function LensRenderer({
       hidePanelChrome={!showPanelChrome}
       panelProps={{
         hideInspector: !showInspector,
+        hideHeader: showPanelChrome,
+        showNotifications: showPanelChrome,
+        showShadow: showPanelChrome,
+        showBadges: showPanelChrome,
       }}
     />
   );

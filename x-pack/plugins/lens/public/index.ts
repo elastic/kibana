@@ -17,7 +17,9 @@ export type {
   LensByReferenceInput,
   TypedLensByValueInput,
   LensEmbeddableInput,
+  LensEmbeddableOutput,
   LensSavedObjectAttributes,
+  LensRendererProps as EmbeddableComponentProps,
 } from './react_embeddable/types';
 
 export type {

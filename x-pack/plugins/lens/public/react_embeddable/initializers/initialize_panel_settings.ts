@@ -7,6 +7,7 @@
 
 import { getUnchangingComparator, initializeTitles } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
+import { apiPublishesSettings } from '@kbn/presentation-containers';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { buildObservableVariable } from '../helper';
 import type { LensComponentProps, LensRuntimeState } from '../types';
@@ -15,9 +16,6 @@ import { apiHasLensComponentProps } from '../renderer/type_guards';
 export function initializePanelSettings(state: LensRuntimeState, parentApi: unknown) {
   const title = initializeTitles(state);
   const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(state.title);
-  const { style, noPadding, className, viewMode } = apiHasLensComponentProps(parentApi)
-    ? parentApi
-    : ({} as LensComponentProps);
 
   return {
     api: {
@@ -33,8 +31,25 @@ export function initializePanelSettings(state: LensRuntimeState, parentApi: unkn
       noPadding: getUnchangingComparator<LensRuntimeState, 'noPadding'>(),
       palette: getUnchangingComparator<LensRuntimeState, 'palette'>(),
       viewMode: getUnchangingComparator<LensRuntimeState, 'viewMode'>(),
+      renderMode: getUnchangingComparator<LensRuntimeState, 'viewMode'>(),
+      executionContext: getUnchangingComparator<LensRuntimeState, 'executionContext'>(),
+      syncColors: getUnchangingComparator<LensRuntimeState, 'syncColors'>(),
+      syncCursor: getUnchangingComparator<LensRuntimeState, 'syncCursor'>(),
+      syncTooltips: getUnchangingComparator<LensRuntimeState, 'syncTooltips'>(),
     },
-    serialize: () => ({ ...title.serializeTitles(), style, noPadding, className, viewMode }),
+    serialize: () => {
+      const { style, noPadding, className, viewMode } = apiHasLensComponentProps(parentApi)
+        ? parentApi
+        : ({} as LensComponentProps);
+      const settings = apiPublishesSettings(parentApi)
+        ? {
+            syncColors: parentApi.settings.syncColors$.getValue(),
+            syncCursor: parentApi.settings.syncCursor$.getValue(),
+            syncTooltips: parentApi.settings.syncTooltips$.getValue(),
+          }
+        : {};
+      return { ...title.serializeTitles(), style, noPadding, className, viewMode, ...settings };
+    },
     cleanup: noop,
   };
 }

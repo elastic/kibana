@@ -5,11 +5,8 @@
  * 2.0.
  */
 
+import { isObject } from 'lodash';
 import type { LensComponentForwardedProps, LensPublicCallbacks } from '../types';
-
-function isObject(api: unknown): api is object {
-  return Boolean(api && typeof api === 'object');
-}
 
 // This file contains few utility typeguards to check if the parentApi provided
 // comes from a Lens component or else
@@ -26,6 +23,12 @@ export function apiHasLensComponentCallbacks(api: unknown): api is LensPublicCal
 export function apiHasLensComponentProps(api: unknown): api is LensComponentForwardedProps {
   return (
     isObject(api) &&
-    ['style', 'className', 'noPadding', 'viewModets'].some((prop) => Object.hasOwn(api, prop))
+    ['style', 'className', 'noPadding', 'viewMode', 'abortController'].some((prop) =>
+      Object.hasOwn(api, prop)
+    )
   );
+}
+
+export function apiHasAbortController(api: unknown): api is { abortController: AbortController } {
+  return isObject(api) && Object.hasOwn(api, 'abortController');
 }

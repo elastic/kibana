@@ -9,11 +9,15 @@ import { type ViewMode } from '@kbn/presentation-publishing';
 
 import { buildObservableVariable } from '../helper';
 import { ExpressionWrapperProps } from '../types';
+import { apiHasAbortController, apiHasLensComponentProps } from '../renderer/type_guards';
 
 export function initializeObservables(parentApi: unknown) {
   const [viewMode$, viewModeComparator] = buildObservableVariable<ViewMode | undefined>(
     'view' as ViewMode
   );
+  if (apiHasLensComponentProps(parentApi)) {
+    viewMode$.next(parentApi.viewMode);
+  }
   const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
   const [dataLoading$] = buildObservableVariable<boolean | undefined>(undefined);
 
@@ -25,6 +29,10 @@ export function initializeObservables(parentApi: unknown) {
   >(new AbortController());
 
   const [renderCount$] = buildObservableVariable<number>(0);
+
+  if (apiHasAbortController(parentApi)) {
+    expressionAbortController$.next(parentApi.abortController);
+  }
 
   return {
     variables: {
