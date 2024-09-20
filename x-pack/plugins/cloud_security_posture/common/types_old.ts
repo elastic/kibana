@@ -151,8 +151,6 @@ export interface CnvmDashboardData {
   topVulnerabilities: VulnerabilityStat[];
 }
 
-// export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
-
 export interface VulnerableResourceStat {
   vulnerabilityCount: number | undefined;
   resource: {
