@@ -86,6 +86,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
     [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
     [ConfigKey.PARAMS]: t.string,
+    [ConfigKey.LABELS]: t.record(t.string, t.string),
     retest_on_failure: t.boolean,
   }),
 ]);
