@@ -86,7 +86,6 @@ export function GoodBadEventsChart({
         mode: 'absolute' as const,
       };
       openInDiscover({ slo, showBad: isBad, showGood: !isBad, timeRange, discover, uiSettings });
-
     }
   };
 
