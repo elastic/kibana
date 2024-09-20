@@ -518,7 +518,7 @@ export const QueryBarTopRow = React.memo(
           className="kbnQueryBar__datePicker"
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
-          compressed={shouldShowDatePickerAsBadge()}
+          compressed
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
@@ -627,7 +627,14 @@ export const QueryBarTopRow = React.memo(
     function renderDataViewsPicker() {
       if (props.dataViewPickerComponentProps && !Boolean(isQueryLangSelected)) {
         return (
-          <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
+          <EuiFlexItem
+            style={
+              props.screenTitle === 'lens'
+                ? { maxWidth: '100%', maxHeight: '32px' }
+                : { maxWidth: '100%' }
+            }
+            grow={isMobile}
+          >
             <DataViewPicker
               {...props.dataViewPickerComponentProps}
               trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
@@ -750,6 +757,7 @@ export const QueryBarTopRow = React.memo(
     }
     const { euiTheme } = useEuiTheme();
     const isScreenshotMode = props.isScreenshotMode === true;
+    const getMaxHeight = props.screenTitle === 'lens' ? `'max-height' : ${euiTheme.size.s};` : null;
 
     return (
       <>
@@ -761,7 +769,7 @@ export const QueryBarTopRow = React.memo(
         {!isScreenshotMode && (
           <>
             <EuiFlexGroup
-              className="kbnQueryBar"
+              className={'kbnQueryBar'}
               direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
               responsive={false}
               gutterSize="s"
@@ -769,6 +777,7 @@ export const QueryBarTopRow = React.memo(
                 padding: ${isQueryLangSelected && !props.disableExternalPadding
                   ? euiTheme.size.s
                   : 0};
+                ${getMaxHeight};
               `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap

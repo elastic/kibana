@@ -3,3 +3,9 @@
     background-image: euiFormControlGradient($euiColorDanger);
   }
 }
+
+.kbnQueryBar, .euiSuperUpdateButton {
+  height: $euiFormControlCompressedHeight;
+  border-top-left-radius: calc($euiBorderRadius / 2);
+  border-bottom-left-radius: calc($euiBorderRadius / 2);
+}

@@ -123,14 +123,15 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
         }
       }}
     >
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false} compressed>
           <EuiToolTip
             content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
               defaultMessage: 'Select a data source to begin graphing relationships.',
             })}
           >
             <EuiButton
+              size="s"
               className="gphSearchBar__datasourceButton"
               data-test-subj="graphDatasourceButton"
               onClick={() => {
@@ -168,7 +169,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             </EuiButton>
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem compressed>
           <QueryStringInput
             timeRangeForSuggestionsOverride={false} // to don't filter suggestions by the global time range
             disableAutoFocus
@@ -182,7 +183,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             appName={appName}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} compressed>
           <TooltipWrapper
             condition={!currentIndexPattern || !selectedFields.length}
             tooltipContent={
@@ -197,6 +198,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
           >
             <EuiButton
               fill
+              size="s"
               type="submit"
               disabled={isLoading || !currentIndexPattern || !selectedFields.length}
               data-test-subj="graph-explore-button"

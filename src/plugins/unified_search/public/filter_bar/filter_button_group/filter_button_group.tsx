@@ -25,7 +25,7 @@ interface Props {
   size?: 'm' | 's';
 }
 
-export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 'm', ...rest }: Props) => {
+export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 's', ...rest }: Props) => {
   return (
     <EuiFlexGroup
       className={classNames('kbnFilterButtonGroup', {
@@ -38,7 +38,7 @@ export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 'm', ...r
     >
       {items.map((item, i) =>
         item == null ? undefined : (
-          <EuiFlexItem key={i} grow={false}>
+          <EuiFlexItem key={i} grow={false} compressed>
             {item}
           </EuiFlexItem>
         )

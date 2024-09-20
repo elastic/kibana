@@ -16,6 +16,9 @@ export const searchBarStyles = ({ euiTheme }: UseEuiTheme, isESQLQuery: boolean)
       padding: ${isESQLQuery ? 0 : euiTheme.size.s};
       position: relative;
     `,
+    noExpand: css`
+      max-height: ${euiTheme.size.xxxl};
+    `,
     detached: css`
       border-bottom: ${euiTheme.border.thin};
     `,
@@ -28,6 +31,9 @@ export const searchBarStyles = ({ euiTheme }: UseEuiTheme, isESQLQuery: boolean)
     `,
     hidden: css`
       display: none;
+    `,
+    withFilters: css`
+      max-height: 90px;
     `,
   };
 };

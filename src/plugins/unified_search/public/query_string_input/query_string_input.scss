@@ -1,8 +1,12 @@
 .kbnQueryBar__wrap {
   width: 100%;
   z-index: $euiZContentMenu;
-  height: $euiFormControlHeight;
+  height: $euiFormControlCompressedHeight;
   display: flex;
+  border-radius: $euiFormControlBorderRadius;
+  border-top-left-radius: calc($euiBorderRadius / 2);
+  border-bottom-left-radius: calc($euiBorderRadius / 2);
+  flex-direction: row;
 
   >[aria-expanded='true'] {
     // Using filter allows it to adhere the children's bounds
@@ -20,13 +24,14 @@
 .kbnQueryBar__textarea {
   z-index: $euiZContentMenu;
   resize: none !important; // When in the group, it will autosize
-  height: $euiFormControlHeight;
   // Unlike most inputs within layout control groups, the text area still needs a border
   // for multi-line content. These adjusts help it sit above the control groups
   // shadow to line up correctly.
   padding: ($euiSizeS + 2px) $euiSizeS $euiSizeS;
   // Firefox adds margin to textarea
   margin: 0;
+  height: $euiFormControlCompressedHeight;
+  line-height: 1;
 
   &:not(.kbnQueryBar__textarea--autoHeight) {
     overflow-y: hidden;
