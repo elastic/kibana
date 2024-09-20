@@ -16,9 +16,9 @@ import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { useKibana } from '../../hooks/use_kibana';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
+import { CodeSample } from '../shared/code_sample';
 import { LanguageSelector } from '../shared/language_selector';
 
-import { CodeSample } from './code_sample';
 import { CreateIndexFormState } from './types';
 
 export interface CreateIndexCodeViewProps {
