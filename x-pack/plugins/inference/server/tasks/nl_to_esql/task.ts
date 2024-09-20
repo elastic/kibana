@@ -43,6 +43,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
           tools,
           toolChoice,
         },
+        system,
       });
 
       return requestDocumentation({

@@ -333,8 +333,10 @@ export function extractMetricDefinitions({
               Description: <description>
               Usefulness: <usefulness>
               Validity: <validity>`,
-            input: `Generate metric descriptions based on the following
-              information:
+            input: `Generate ES|QL queries based on the following
+              information. Pay special attention to the formatting
+              instructions in your system message.
+              
               # Entity
 
               The monitored entity is ${entity.displayName} which is 
@@ -371,6 +373,8 @@ export function extractMetricDefinitions({
           return '```esql\n' + correctionResult.output + '\n```';
         });
       });
+
+      logger.debug(() => `Generated ES|QL queries: ${esqlQueries}`);
 
       return step(
         'generating_metric_suggestions',
