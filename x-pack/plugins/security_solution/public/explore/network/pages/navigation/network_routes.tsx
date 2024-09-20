@@ -31,17 +31,8 @@ import { NetworkRouteType } from './types';
 import { NETWORK_PATH } from '../../../../../common/constants';
 
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
-  ({
-    type,
-    to,
-    filterQuery,
-    isInitializing,
-    from,
-    dataViewSpec: indexPattern,
-    indexNames,
-    setQuery,
-  }) => {
-    const index = useMemo(() => dataViewSpecToViewBase(indexPattern), [indexPattern]);
+  ({ type, to, filterQuery, isInitializing, from, dataViewSpec, indexNames, setQuery }) => {
+    const index = useMemo(() => dataViewSpecToViewBase(dataViewSpec), [dataViewSpec]);
 
     const networkAnomaliesFilterQuery = {
       bool: {
