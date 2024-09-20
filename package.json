@@ -592,7 +592,7 @@
     "@kbn/kibana-utils-plugin": "link:src/plugins/kibana_utils",
     "@kbn/kubernetes-security-plugin": "link:x-pack/plugins/kubernetes_security",
     "@kbn/langchain": "link:x-pack/packages/kbn-langchain",
-    "@kbn/language-documentation-popover": "link:packages/kbn-language-documentation-popover",
+    "@kbn/language-documentation": "link:packages/kbn-language-documentation",
     "@kbn/lens-config-builder-example-plugin": "link:x-pack/examples/lens_config_builder_example",
     "@kbn/lens-embeddable-utils": "link:packages/kbn-lens-embeddable-utils",
     "@kbn/lens-formula-docs": "link:packages/kbn-lens-formula-docs",

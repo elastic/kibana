@@ -19,7 +19,7 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
-import { LanguageDocumentationFlyout } from '@kbn/language-documentation-popover';
+import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export const ESQLMenuPopover = () => {

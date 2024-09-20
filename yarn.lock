@@ -5474,7 +5474,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/language-documentation-popover@link:packages/kbn-language-documentation-popover":
+"@kbn/language-documentation@link:packages/kbn-language-documentation":
   version "0.0.0"
   uid ""
 

@@ -58,7 +58,7 @@
     "@kbn/ui-theme",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/monaco",
-    "@kbn/language-documentation-popover",
+    "@kbn/language-documentation",
     "@kbn/core-saved-objects-common",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-saved-objects-server",
