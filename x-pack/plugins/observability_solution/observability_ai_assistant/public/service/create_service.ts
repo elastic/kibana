@@ -8,7 +8,11 @@
 import type { AnalyticsServiceStart, CoreStart } from '@kbn/core/public';
 import { compact, without } from 'lodash';
 import { BehaviorSubject, debounceTime, filter, lastValueFrom, of, Subject, take } from 'rxjs';
-import type { Message, ObservabilityAIAssistantScreenContext } from '../../common/types';
+import type {
+  AssistantScope,
+  Message,
+  ObservabilityAIAssistantScreenContext,
+} from '../../common/types';
 import { createFunctionRequestMessage } from '../../common/utils/create_function_request_message';
 import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
 import { createCallObservabilityAIAssistantAPI } from '../api';
@@ -19,10 +23,12 @@ export function createService({
   analytics,
   coreStart,
   enabled,
+  scope,
 }: {
   analytics: AnalyticsServiceStart;
   coreStart: CoreStart;
   enabled: boolean;
+  scope: AssistantScope;
 }): ObservabilityAIAssistantService {
   const apiClient = createCallObservabilityAIAssistantAPI(coreStart);
 
@@ -42,7 +48,7 @@ export function createService({
     },
     start: async ({ signal }) => {
       const mod = await import('./create_chat_service');
-      return await mod.createChatService({ analytics, apiClient, signal, registrations });
+      return await mod.createChatService({ analytics, apiClient, signal, registrations, scope });
     },
     callApi: apiClient,
     getScreenContexts() {
@@ -89,5 +95,6 @@ export function createService({
       },
       predefinedConversation$: predefinedConversation$.asObservable(),
     },
+    scope,
   };
 }

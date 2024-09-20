@@ -15,8 +15,8 @@ import { render } from '@testing-library/react';
 import { ControlGroupApi } from '../../..';
 import {
   ControlGroupChainingSystem,
-  ControlStyle,
-  DEFAULT_CONTROL_STYLE,
+  ControlLabelPosition,
+  DEFAULT_CONTROL_LABEL_POSITION,
   ParentIgnoreSettings,
 } from '../../../../common';
 import { DefaultControlApi } from '../../controls/types';
@@ -33,7 +33,7 @@ describe('render', () => {
     onDeleteAll: () => {},
     stateManager: {
       chainingSystem: new BehaviorSubject<ControlGroupChainingSystem>('HIERARCHICAL'),
-      labelPosition: new BehaviorSubject<ControlStyle>(DEFAULT_CONTROL_STYLE),
+      labelPosition: new BehaviorSubject<ControlLabelPosition>(DEFAULT_CONTROL_LABEL_POSITION),
       autoApplySelections: new BehaviorSubject<boolean>(true),
       ignoreParentSettings: new BehaviorSubject<ParentIgnoreSettings | undefined>(undefined),
     },

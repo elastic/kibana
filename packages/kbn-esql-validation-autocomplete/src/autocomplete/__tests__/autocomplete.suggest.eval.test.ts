@@ -559,7 +559,7 @@ describe('autocomplete.suggest', () => {
     test('case', async () => {
       const { assertSuggestions } = await setup();
       const comparisonOperators = ['==', '!=', '>', '<', '>=', '<=']
-        .map((op) => `${op} `)
+        .map((op) => `${op}`)
         .concat(',');
 
       // case( / ) suggest any field/eval function in this position as first argument
@@ -626,7 +626,6 @@ describe('autocomplete.suggest', () => {
         // Notice no extra space after field name
         ...getFieldNamesByType('any').map((field) => `${field}`),
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, []),
-        'var0 = ',
       ]);
 
       // case( field > 0, >) suggests fields like normal
