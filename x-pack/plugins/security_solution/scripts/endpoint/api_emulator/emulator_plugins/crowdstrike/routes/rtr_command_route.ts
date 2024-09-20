@@ -29,7 +29,7 @@ const rtrCommandInvalidCommandError = async () => {
     meta: {
       query_time: 0.049229938,
       powered_by: 'empower-api',
-      trace_id: '9a58f783-08f8-4245-8a4e-70811d60e2c8',
+      trace_id: 'xxx',
     },
     resources: [],
     errors: [
@@ -47,7 +47,7 @@ const rtrCommandInvalidSessionError = async () => {
     meta: {
       query_time: 0.018424436,
       powered_by: 'empower-api',
-      trace_id: '3212d22f-0655-4dce-8685-43f1ed1494ee',
+      trace_id: 'xxx',
     },
     resources: [],
     errors: [

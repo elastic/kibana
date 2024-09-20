@@ -41,12 +41,12 @@ const commandDetailsFailedCommandError = async () => {
     meta: {
       query_time: 0.308849455,
       powered_by: 'empower-api',
-      trace_id: '9ddfef6a-bbc6-483b-a52d-2ed3e51573b6',
+      trace_id: 'xxx',
     },
     resources: [
       {
-        session_id: 'ce718ac2-e132-43f3-a1c8-d697bf23b8b0',
-        task_id: 'deda36d8-deae-43dc-b623-88cc35446100',
+        session_id: TEST_SESSION_ID,
+        task_id: 'xxx',
         complete: true,
         stdout: '',
         stderr: 'cat: tessst.txt: No such file or directory\n',
