@@ -79,6 +79,7 @@ export const LazyPackagePolicyInputVarField = lazy(() =>
 export type { PackageListGridProps } from './applications/integrations/sections/epm/components/package_list_grid';
 export type { AvailablePackagesHookType } from './applications/integrations/sections/epm/screens/home/hooks/use_available_packages';
 export type { IntegrationCardItem } from './applications/integrations/sections/epm/screens/home';
+export type { CategoryFacet } from './applications/integrations/sections/epm/screens/home/category_facets';
 
 export const PackageList = () => {
   return import('./applications/integrations/sections/epm/components/package_list_grid');

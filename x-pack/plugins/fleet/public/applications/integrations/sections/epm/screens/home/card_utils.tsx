@@ -60,7 +60,8 @@ export interface IntegrationCardItem {
   isCollectionCard?: boolean;
   showInstallationStatus?: boolean;
   installStatus: EpmPackageInstallStatus | null | undefined;
-  lineClamp?: number;
+  titleLineClamp?: number;
+  descriptionLineClamp?: number;
   fixedCardHeight?: number;
 }
 

@@ -13,6 +13,9 @@ const LocalStorageKey = {
   videoVisited: 'ONBOARDING_HUB.VIDEO_VISITED',
   completeCards: 'ONBOARDING_HUB.COMPLETE_CARDS',
   expandedCard: 'ONBOARDING_HUB.EXPANDED_CARD',
+  selectedIntegrationTabId: 'ONBOARDING_HUB.SELECTED_INTEGRATION_TAB_ID',
+  IntegrationSearchTerm: 'ONBOARDING_HUB.INTEGRATION_SEARCH_TERM',
+  IntegrationScrollTop: 'ONBOARDING_HUB.INTEGRATION_SCROLL_TOP',
 } as const;
 
 /**
@@ -41,5 +44,23 @@ export const useStoredCompletedCardIds = (spaceId: string) =>
 export const useStoredExpandedCardId = (spaceId: string) =>
   useDefinedLocalStorage<OnboardingCardId | null>(
     `${LocalStorageKey.expandedCard}.${spaceId}`,
+    null
+  );
+
+/**
+ * Stores either the video card has been visited or not, per space
+ */
+export const useStoredHasVideoVisited = (spaceId: string) =>
+  useDefinedLocalStorage<boolean>(`${LocalStorageKey.videoVisited}.${spaceId}`, false);
+
+export const useStoredIntegrationTabId = (spaceId: string, defaultSelectedTabId: string) =>
+  useDefinedLocalStorage<string>(
+    `${LocalStorageKey.selectedIntegrationTabId}.${spaceId}`,
+    defaultSelectedTabId
+  );
+
+export const useStoredIntegrationSearchTerm = (spaceId: string) =>
+  useDefinedLocalStorage<string | null>(
+    `${LocalStorageKey.IntegrationSearchTerm}.${spaceId}`,
     null
   );

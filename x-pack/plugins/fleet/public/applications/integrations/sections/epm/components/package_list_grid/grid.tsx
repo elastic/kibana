@@ -28,6 +28,7 @@ interface GridColumnProps {
   isLoading: boolean;
   showMissingIntegrationMessage?: boolean;
   showCardLabels?: boolean;
+  scrollElementId?: string;
 }
 
 const VirtualizedRow: React.FC<{
@@ -61,6 +62,7 @@ export const GridColumn = ({
   showMissingIntegrationMessage = false,
   showCardLabels = false,
   isLoading,
+  scrollElementId,
 }: GridColumnProps) => {
   const itemsSizeRefs = useRef(new Map<number, number>());
   const listRef = useRef<List>(null);
@@ -107,6 +109,7 @@ export const GridColumn = ({
       </EuiFlexGrid>
     );
   }
+
   return (
     <>
       <WindowScroller
@@ -115,6 +118,9 @@ export const GridColumn = ({
             listRef.current.scrollTo(scrollTop);
           }
         }}
+        scrollElement={
+          scrollElementId ? document.getElementById(scrollElementId) ?? undefined : undefined
+        }
       >
         {() => (
           <EuiAutoSizer disableHeight>

@@ -10,8 +10,15 @@ import { EuiPanel, type EuiPanelProps } from '@elastic/eui';
 export const OnboardingCardContentPanel = React.memo<PropsWithChildren<EuiPanelProps>>(
   ({ children, ...panelProps }) => {
     return (
-      <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
-        <EuiPanel {...panelProps} hasShadow={false} paddingSize="l">
+      <EuiPanel
+        hasShadow={false}
+        hasBorder={false}
+        paddingSize="l"
+        css={`
+          padding-top: 8px;
+        `}
+      >
+        <EuiPanel {...panelProps} hasShadow={false} paddingSize="none">
           {children}
         </EuiPanel>
       </EuiPanel>
