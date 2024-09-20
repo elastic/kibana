@@ -19,7 +19,7 @@ export const useIndex = (indexName: string) => {
     refetchInterval: POLLING_INTERVAL,
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: 'always',
-    retry: 3,
+    retry: false,
     queryFn: () =>
       http.fetch<Index>(`/internal/index_management/indices/${encodeURIComponent(indexName)}`),
   });
