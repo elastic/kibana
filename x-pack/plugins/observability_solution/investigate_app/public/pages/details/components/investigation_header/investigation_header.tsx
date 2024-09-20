@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { formatDistance } from 'date-fns';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { InvestigationStatusBadge } from '../../../../components/investigation_status_badge/investigation_status_badge';
+import { InvestigationTag } from '../../../../components/investigation_tag/investigation_tag';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { AlertDetailsButton } from './alert_details_button';
-import { InvestigationTag } from '../../../../components/investigation_tag/investigation_tag';
-import { InvestigationStatusBadge } from '../../../../components/investigation_status_badge/investigation_status_badge';
 
 export function InvestigationHeader() {
   const { investigation } = useInvestigation();
@@ -24,21 +27,39 @@ export function InvestigationHeader() {
       <EuiFlexItem>
         <AlertDetailsButton />
       </EuiFlexItem>
-      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem>{investigation.title}</EuiFlexItem>
 
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <InvestigationStatusBadge status={investigation.status} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} wrap gutterSize="s">
-              {investigation.tags.map((tag) => (
-                <InvestigationTag key={tag} tag={tag} />
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlexItem>{investigation.title}</EuiFlexItem>
+
+      <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <InvestigationStatusBadge status={investigation.status} />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false} wrap gutterSize="s">
+            {investigation.tags.map((tag) => (
+              <InvestigationTag key={tag} tag={tag} />
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.investigateApp.investigationHeader.startedLabel"
+              defaultMessage="Started: {timeAgo}"
+              values={{
+                timeAgo: (
+                  <strong>
+                    {formatDistance(new Date(investigation.createdAt), new Date(), {
+                      addSuffix: true,
+                    })}
+                  </strong>
+                ),
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
