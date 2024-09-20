@@ -9,7 +9,6 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
-import { BehaviorSubject } from 'rxjs';
 import {
   createTaskRunError,
   TaskErrorSource,
