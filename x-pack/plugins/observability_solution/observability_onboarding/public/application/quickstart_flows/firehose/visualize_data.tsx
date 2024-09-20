@@ -25,10 +25,17 @@ import { useAWSServiceGetStartedList } from './use_aws_service_get_started_list'
 import { AutoRefreshCallout } from './auto_refresh_callout';
 import { ProgressCallout } from './progress_callout';
 import { HAS_DATA_FETCH_INTERVAL } from './utils';
+import { useDataReceivedTelemetryEvent } from './use_data_received_telemetry_event';
+import { CreateStackOption } from './types';
 
 const REQUEST_PENDING_STATUS_LIST = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
 
-export function VisualizeData() {
+interface Props {
+  onboardingId: string;
+  selectedCreateStackOption: CreateStackOption;
+}
+
+export function VisualizeData({ onboardingId, selectedCreateStackOption }: Props) {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
   const [orderedPopulatedAWSLogsIndexList, setOrderedPopulatedAWSLogsIndexList] = useState<
     AWSIndexName[]
@@ -101,6 +108,12 @@ export function VisualizeData() {
     refetch();
   }, HAS_DATA_FETCH_INTERVAL);
 
+  useDataReceivedTelemetryEvent({
+    populatedAWSLogsIndexList: orderedPopulatedAWSLogsIndexList,
+    selectedCreateStackOption,
+    onboardingId,
+  });
+
   if (populatedAWSLogsIndexList === undefined) {
     return null;
   }
@@ -155,6 +168,7 @@ export function VisualizeData() {
                 isLoading={false}
                 actionLinks={actionLinks}
                 previewImage={previewImage}
+                onboardingId={onboardingId}
               />
             </AccordionWithIcon>
           );

@@ -36,6 +36,9 @@ import {
   OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_FIREHOSE_INITIALIZE_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_FIREHOSE_STARTED_MONITOR_DATA_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_FIREHOSE_DATA_RECEIVED_TELEMETRY_EVENT,
 } from '../common/telemetry_events';
 
 export type ObservabilityOnboardingPluginSetup = void;
@@ -116,6 +119,7 @@ export class ObservabilityOnboardingPlugin
               isServerless:
                 Boolean(pluginSetupDeps.cloud?.isServerlessEnabled) || isServerlessBuild,
               stackVersion,
+              cloudServiceProvider: pluginSetupDeps.cloud?.csp,
             },
           });
         },
@@ -130,6 +134,13 @@ export class ObservabilityOnboardingPlugin
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT);
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FIREHOSE_INITIALIZE_TELEMETRY_EVENT);
+    core.analytics.registerEventType(
+      OBSERVABILITY_ONBOARDING_FIREHOSE_STARTED_MONITOR_DATA_TELEMETRY_EVENT
+    );
+    core.analytics.registerEventType(
+      OBSERVABILITY_ONBOARDING_FIREHOSE_DATA_RECEIVED_TELEMETRY_EVENT
+    );
 
     return {
       locators: this.locators,

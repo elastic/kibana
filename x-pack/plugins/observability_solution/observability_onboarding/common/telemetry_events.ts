@@ -128,3 +128,112 @@ export const OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT: ObservabilityO
       },
     },
   };
+
+export const OBSERVABILITY_ONBOARDING_FIREHOSE_INITIALIZE_TELEMETRY_EVENT: EventTypeOpts<{
+  status: string;
+  cloudServiceProvider?: string;
+  onboardingId?: string;
+  error?: string;
+}> = {
+  eventType: 'observability_onboarding_firehose_initialize',
+  schema: {
+    status: {
+      type: 'keyword',
+      _meta: {
+        description: "The status of the initialization process. Can be 'success', or 'failure'",
+      },
+    },
+    cloudServiceProvider: {
+      type: 'keyword',
+      _meta: {
+        description:
+          "The cloud service provider where the stack is deployed. Can be 'aws', 'gcp' or 'azure'",
+        optional: true,
+      },
+    },
+    onboardingId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The unique identifier of the onboarding session',
+        optional: true,
+      },
+    },
+    error: {
+      type: 'text',
+      _meta: {
+        description:
+          "The error message if the initialization process failed. Only present if the status is 'error'",
+        optional: true,
+      },
+    },
+  },
+};
+
+export const OBSERVABILITY_ONBOARDING_FIREHOSE_STARTED_MONITOR_DATA_TELEMETRY_EVENT: EventTypeOpts<{
+  selectedCreateStackOption: string;
+  onboardingId: string;
+  cloudServiceProvider?: string;
+}> = {
+  eventType: 'observability_onboarding_firehose_started_monitor_data',
+  schema: {
+    selectedCreateStackOption: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Which option for creating CloudFormation stack is selected in the UI while data was detected. Serves as a good indication of the way user chose to create the stack.',
+      },
+    },
+    cloudServiceProvider: {
+      type: 'keyword',
+      _meta: {
+        description:
+          "The cloud service provider where the stack is deployed. Can be 'aws', 'gcp' or 'azure'",
+        optional: true,
+      },
+    },
+    onboardingId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The unique identifier of the onboarding session',
+      },
+    },
+  },
+};
+
+export const OBSERVABILITY_ONBOARDING_FIREHOSE_DATA_RECEIVED_TELEMETRY_EVENT: EventTypeOpts<{
+  indexName: string;
+  selectedCreateStackOption: string;
+  onboardingId: string;
+  cloudServiceProvider?: string;
+}> = {
+  eventType: 'observability_onboarding_firehose_data_received',
+  schema: {
+    indexName: {
+      type: 'keyword',
+      _meta: {
+        description: 'ES index which was detected to have data from the firehose stream.',
+      },
+    },
+    selectedCreateStackOption: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Which option for creating CloudFormation stack is selected in the UI while data was detected. Serves as a good indication of the way user chose to create the stack.',
+      },
+    },
+    cloudServiceProvider: {
+      type: 'keyword',
+      _meta: {
+        description:
+          "The cloud service provider where the stack is deployed. Can be 'aws', 'gcp' or 'azure'",
+        optional: true,
+      },
+    },
+    onboardingId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The unique identifier of the onboarding session',
+      },
+    },
+  },
+};

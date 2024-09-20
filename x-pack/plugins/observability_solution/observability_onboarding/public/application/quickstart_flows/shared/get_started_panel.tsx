@@ -26,6 +26,7 @@ export function GetStartedPanel({
   previewImage = 'charts_screen.svg',
   newTab,
   isLoading,
+  onboardingId,
 }: {
   integration: string;
   newTab: boolean;
@@ -37,6 +38,7 @@ export function GetStartedPanel({
   }>;
   previewImage?: string;
   isLoading: boolean;
+  onboardingId?: string;
 }) {
   const {
     services: { http },
@@ -69,6 +71,7 @@ export function GetStartedPanel({
                   </EuiText>
                   <EuiLink
                     data-test-subj={`observabilityOnboardingDataIngestStatusActionLink-${id}`}
+                    data-onboarding-id={onboardingId}
                     href={href}
                     target={newTab ? '_blank' : '_self'}
                   >
