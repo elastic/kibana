@@ -9,11 +9,13 @@
 
 import React, { useImperativeHandle } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { render, waitFor } from '@testing-library/react';
-import { ControlPanel } from './control_panel';
-import { registry as presentationUtilServicesRegistry } from '@kbn/presentation-util-plugin/public/services/plugin_services.story';
+
 import { pluginServices as presentationUtilPluginServices } from '@kbn/presentation-util-plugin/public/services';
-import { ControlStyle, ControlWidth } from '../../..';
+import { registry as presentationUtilServicesRegistry } from '@kbn/presentation-util-plugin/public/services/plugin_services.story';
+import { render, waitFor } from '@testing-library/react';
+
+import type { ControlLabelPosition, ControlWidth } from '../../../../common';
+import { ControlPanel } from './control_panel';
 
 describe('render', () => {
   let mockApi = {};
@@ -50,7 +52,7 @@ describe('render', () => {
       await waitFor(() => {
         const controlFrame = controlPanel.getByTestId('control-frame');
         expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--medium');
-        expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--grow');
+        expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-grow');
       });
     });
 
@@ -72,7 +74,7 @@ describe('render', () => {
       mockApi = {
         uuid: 'control1',
         parentApi: {
-          labelPosition: new BehaviorSubject<ControlStyle>('oneLine'),
+          labelPosition: new BehaviorSubject<ControlLabelPosition>('oneLine'),
         },
       };
       const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
@@ -90,7 +92,7 @@ describe('render', () => {
       mockApi = {
         uuid: 'control1',
         parentApi: {
-          labelPosition: new BehaviorSubject<ControlStyle>('twoLine'),
+          labelPosition: new BehaviorSubject<ControlLabelPosition>('twoLine'),
         },
       };
       const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
