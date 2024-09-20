@@ -23,7 +23,7 @@ import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../rou
 import { createRuleSourceImporter } from '../../../../prebuilt_rules/logic/rule_source_importer';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
-import { importRules } from '../../../logic/import/import_rules_with_source';
+import { importRules } from '../../../logic/import/import_rules';
 import { importRules as legacyImportRules } from '../../../logic/import/import_rules_utils';
 import { createPromiseFromRuleImportStream } from '../../../logic/import/create_promise_from_rule_import_stream';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
