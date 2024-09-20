@@ -223,6 +223,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
                   defaultMessage: 'Data view',
                 }
               )}
+              css={css({ padding: euiThemeVars.euiSizeM })}
             >
               <IndexPatternSelect
                 autoFocus={!dataViewId}
