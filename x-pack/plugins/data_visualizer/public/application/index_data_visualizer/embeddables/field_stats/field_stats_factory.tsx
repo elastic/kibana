@@ -373,7 +373,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 title={
                   <h3>
                     <FormattedMessage
-                      id="xpack.dashboard.fieldStats.noDataViewSelected"
+                      id="xpack.dataVisualizer.dashboard.fieldStats.noDataViewSelected"
                       defaultMessage="No data view selected"
                     />
                   </h3>
@@ -381,7 +381,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 body={
                   <p>
                     <FormattedMessage
-                      id="xpack.dashboard.fieldStats.noDataViewSelectedDescription"
+                      id="xpack.dataVisualizer.dashboard.fieldStats.noDataViewSelectedDescription"
                       defaultMessage="Pick a data view to view field statistics."
                     />
                   </p>
@@ -396,7 +396,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 title={
                   <h3>
                     <FormattedMessage
-                      id="xpack.dashboard.fieldStats.noDataViewSelected"
+                      id="xpack.dataVisualizer.fieldStats.noDataViewSelected"
                       defaultMessage="ES|QL is disabled"
                     />
                   </h3>
