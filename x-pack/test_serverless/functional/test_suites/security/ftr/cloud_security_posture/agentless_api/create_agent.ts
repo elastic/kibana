@@ -27,7 +27,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Agentless API Serverless', function () {
     let mockApiServer: http.Server;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
-    const isCloud = !!process.env.TEST_CLOUD;
 
     before(async () => {
       // If process.env.TEST_CLOUD is set, then the test is running in the Serverless Quality Gates
