@@ -445,6 +445,7 @@
     "@kbn/default-nav-ml": "link:packages/default-nav/ml",
     "@kbn/dev-tools-plugin": "link:src/plugins/dev_tools",
     "@kbn/developer-examples-plugin": "link:examples/developer_examples",
+    "@kbn/di": "link:packages/kbn-di",
     "@kbn/discover-customization-examples-plugin": "link:examples/discover_customization_examples",
     "@kbn/discover-enhanced-plugin": "link:x-pack/plugins/discover_enhanced",
     "@kbn/discover-plugin": "link:src/plugins/discover",

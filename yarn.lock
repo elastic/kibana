@@ -4787,6 +4787,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/di@link:packages/kbn-di":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-customization-examples-plugin@link:examples/discover_customization_examples":
   version "0.0.0"
   uid ""

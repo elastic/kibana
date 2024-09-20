@@ -758,6 +758,8 @@
       "@kbn/dev-utils/*": ["packages/kbn-dev-utils/*"],
       "@kbn/developer-examples-plugin": ["examples/developer_examples"],
       "@kbn/developer-examples-plugin/*": ["examples/developer_examples/*"],
+      "@kbn/di": ["packages/kbn-di"],
+      "@kbn/di/*": ["packages/kbn-di/*"],
       "@kbn/discover-customization-examples-plugin": ["examples/discover_customization_examples"],
       "@kbn/discover-customization-examples-plugin/*": ["examples/discover_customization_examples/*"],
       "@kbn/discover-enhanced-plugin": ["x-pack/plugins/discover_enhanced"],
