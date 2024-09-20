@@ -8,7 +8,7 @@
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { IUiSettingsClient } from '@kbn/core/server';
-import { IndexLifeCycleDataTier } from '@kbn/observability-shared-plugin/common';
+import type { IndexLifeCycleDataTier } from '@kbn/observability-shared-plugin/common';
 import { getDataTierFilterCombined } from '@kbn/apm-data-access-plugin/server/utils';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
 
