@@ -23,8 +23,8 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
+import { dashboardCapabilitiesService } from '../../../services/dashboard_services';
 import {
-  capabilitiesService,
   coreServices,
   dataService,
   embeddableService,
@@ -40,7 +40,7 @@ export function DashboardEmptyScreen() {
     []
   );
   const { showWriteControls } = useMemo(() => {
-    return capabilitiesService.dashboardCapabilities;
+    return dashboardCapabilitiesService.dashboardCapabilities;
   }, []);
 
   const dashboardContainer = useDashboardContainer();

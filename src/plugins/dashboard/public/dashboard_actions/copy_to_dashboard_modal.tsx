@@ -24,7 +24,8 @@ import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../dashboard_constants';
-import { capabilitiesService, embeddableService } from '../services/kibana_services';
+import { dashboardCapabilitiesService } from '../services/dashboard_services';
+import { embeddableService } from '../services/kibana_services';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 import { CopyToDashboardAPI } from './copy_to_dashboard_action';
 
@@ -39,7 +40,10 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
   // Setup the necessary services
   const [{ createNew: canCreateNew, showWriteControls: canEditExisting }, stateTransfer] =
     useMemo(() => {
-      return [capabilitiesService.dashboardCapabilities, embeddableService.getStateTransfer()];
+      return [
+        dashboardCapabilitiesService.dashboardCapabilities,
+        embeddableService.getStateTransfer(),
+      ];
     }, []);
 
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing'>('existing');

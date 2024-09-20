@@ -78,8 +78,7 @@ import {
   registerDashboardPanelPlacementSetting,
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
-import { setKibanaServices } from './services/kibana_services';
-import { untilPluginStartServicesReady } from './services/services';
+import { setServices, untilPluginStartServicesReady } from './services/services';
 import { buildAllDashboardActions } from './dashboard_actions';
 import { dashboardContentManagementService } from './services/dashboard_services';
 
@@ -259,6 +258,7 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
+        await untilPluginStartServicesReady();
         const { mountApp } = await import('./dashboard_app/dashboard_router');
         appMounted();
 
@@ -337,7 +337,7 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    setKibanaServices(core, plugins);
+    setServices(core, plugins);
     untilPluginStartServicesReady().then(() => {
       buildAllDashboardActions({
         core,

@@ -19,7 +19,7 @@ import { I18nProvider } from '@kbn/i18n-react';
  */
 import { TableListView } from '@kbn/content-management-table-list-view';
 
-import { capabilitiesService } from '../services/kibana_services';
+import { dashboardCapabilitiesService } from '../services/dashboard_services';
 import { DashboardListing } from './dashboard_listing';
 import { DashboardListingProps } from './types';
 
@@ -65,7 +65,7 @@ function mountWith({ props: incomingProps }: { props?: Partial<DashboardListingP
 }
 
 test('initial filter is passed through', async () => {
-  capabilitiesService.dashboardCapabilities.showWriteControls = false;
+  dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = false;
 
   let component: ReactWrapper;
 
@@ -80,7 +80,7 @@ test('initial filter is passed through', async () => {
 });
 
 test('when showWriteControls is true, table list view is passed editing functions', async () => {
-  capabilitiesService.dashboardCapabilities.showWriteControls = true;
+  dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = true;
 
   let component: ReactWrapper;
 
@@ -99,7 +99,7 @@ test('when showWriteControls is true, table list view is passed editing function
 });
 
 test('when showWriteControls is false, table list view is not passed editing functions', async () => {
-  capabilitiesService.dashboardCapabilities.showWriteControls = false;
+  dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = false;
 
   let component: ReactWrapper;
 

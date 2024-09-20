@@ -26,7 +26,8 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
-import { coreServices, capabilitiesService } from '../services/kibana_services';
+import { dashboardCapabilitiesService } from '../services/dashboard_services';
+import { coreServices } from '../services/kibana_services';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 
@@ -74,7 +75,7 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!apiIsCompatible(embeddable)) return false;
     const { createNew: canCreateNew, showWriteControls: canEditExisting } =
-      capabilitiesService.dashboardCapabilities;
+      dashboardCapabilitiesService.dashboardCapabilities;
     return Boolean(canCreateNew || canEditExisting);
   }
 

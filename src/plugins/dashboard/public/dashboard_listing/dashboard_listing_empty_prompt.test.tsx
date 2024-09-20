@@ -13,7 +13,7 @@ import { act } from 'react-dom/test-utils';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { capabilitiesService } from '../services/kibana_services';
+import { dashboardCapabilitiesService } from '../services/dashboard_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import {
   DashboardListingEmptyPrompt,
@@ -56,7 +56,7 @@ function mountWith({
 }
 
 test('renders readonly empty prompt when showWriteControls is off', async () => {
-  capabilitiesService.dashboardCapabilities.showWriteControls = false;
+  dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = false;
 
   let component: ReactWrapper;
   await act(async () => {
@@ -68,7 +68,7 @@ test('renders readonly empty prompt when showWriteControls is off', async () => 
 });
 
 test('renders empty prompt with link when showWriteControls is on', async () => {
-  capabilitiesService.dashboardCapabilities.showWriteControls = true;
+  dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = true;
 
   let component: ReactWrapper;
   await act(async () => {
@@ -80,7 +80,7 @@ test('renders empty prompt with link when showWriteControls is on', async () => 
 });
 
 test('renders disabled action button when disableCreateDashboardButton is true', async () => {
-  capabilitiesService.dashboardCapabilities.showWriteControls = true;
+  dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = true;
 
   let component: ReactWrapper;
   await act(async () => {
@@ -95,7 +95,7 @@ test('renders disabled action button when disableCreateDashboardButton is true',
 });
 
 test('renders continue button when no dashboards exist but one is in progress', async () => {
-  capabilitiesService.dashboardCapabilities.showWriteControls = true;
+  dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = true;
   let component: ReactWrapper;
   let props: DashboardListingEmptyPromptProps;
   await act(async () => {
@@ -114,7 +114,7 @@ test('renders continue button when no dashboards exist but one is in progress', 
 });
 
 test('renders discard button when no dashboards exist but one is in progress', async () => {
-  capabilitiesService.dashboardCapabilities.showWriteControls = true;
+  dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = true;
   let component: ReactWrapper;
   await act(async () => {
     ({ component } = mountWith({

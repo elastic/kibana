@@ -10,7 +10,7 @@
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardCrudTypes } from '../../../../common/content_management';
-import { dashboardContentManagementCache } from '../dashboard_content_management_service';
+import { dashboardContentManagementCache } from '../dashboard_content_management_cache';
 
 export const deleteDashboards = async (
   ids: string[],
