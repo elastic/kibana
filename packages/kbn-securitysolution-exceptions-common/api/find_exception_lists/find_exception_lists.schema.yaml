@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: FindExceptionLists
       x-codegen-enabled: true
-      summary: Finds exception lists
+      summary: Get exception lists
+      description: Get a list of all exception lists.
       parameters:
         - name: filter
           in: query
