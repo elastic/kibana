@@ -126,7 +126,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should go back via breadcrumbs with updated state after a goBack browser', async function () {
+    // Fails in chrome 128+: https://github.com/elastic/kibana-operations/issues/199
+    it.skip('should go back via breadcrumbs with updated state after a goBack browser', async function () {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();
