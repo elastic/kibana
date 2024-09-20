@@ -75,21 +75,21 @@ describe('ruleSourceImporter', () => {
     beforeEach(() => {});
 
     it("returns false if the rule's rule_id doesn't match an available rule asset", async () => {
-      ruleAssetsClientMock.fetchLatestAssetsByRuleId.mockResolvedValue([]);
+      ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([]);
       await subject.setup({ rules: [ruleToImport] });
 
       expect(subject.isPrebuiltRule(ruleToImport)).toBe(false);
     });
 
     it("returns true if the rule's rule_id matches an available rule asset", async () => {
-      ruleAssetsClientMock.fetchLatestAssetsByRuleId.mockResolvedValue([ruleToImport]);
+      ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([ruleToImport]);
       await subject.setup({ rules: [ruleToImport] });
 
       expect(subject.isPrebuiltRule(ruleToImport)).toBe(true);
     });
 
     it('throws an error if the rule is not known to the calculator', async () => {
-      ruleAssetsClientMock.fetchLatestAssetsByRuleId.mockResolvedValue([ruleToImport]);
+      ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([ruleToImport]);
       await subject.setup({ rules: [ruleToImport] });
 
       expect(() =>
@@ -112,7 +112,7 @@ describe('ruleSourceImporter', () => {
       ruleAssetsClientMock.fetchAssetsByVersion.mockResolvedValue([
         getPrebuiltRuleMock({ rule_id: 'rule-1' }),
       ]);
-      ruleAssetsClientMock.fetchLatestAssetsByRuleId.mockResolvedValue([
+      ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([
         getPrebuiltRuleMock({ rule_id: 'rule-1' }),
         getPrebuiltRuleMock({ rule_id: 'rule-2' }),
       ]);
@@ -135,7 +135,7 @@ describe('ruleSourceImporter', () => {
     });
 
     it('throws an error if the rule is not known to the calculator', async () => {
-      ruleAssetsClientMock.fetchLatestAssetsByRuleId.mockResolvedValue([ruleToImport]);
+      ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([ruleToImport]);
       await subject.setup({ rules: [ruleToImport] });
 
       expect(() => subject.calculateRuleSource(rule)).toThrowErrorMatchingInlineSnapshot(

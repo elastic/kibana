@@ -8,7 +8,6 @@
 export const createPrebuiltRuleAssetsClient = () => {
   return {
     fetchLatestAssets: jest.fn(),
-    fetchLatestAssetsByRuleId: jest.fn(),
     fetchLatestVersions: jest.fn(),
     fetchAssetsByVersion: jest.fn(),
   };
