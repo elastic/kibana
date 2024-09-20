@@ -31,6 +31,7 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.TEXT_ASSERTION,
   ConfigKey.CONFIG_HASH,
   ConfigKey.ALERT_CONFIG,
+  ConfigKey.LABELS,
   'secrets',
 ];
 
@@ -100,6 +101,7 @@ export const formatHeartbeatRequest = async (
   const heartbeatIdT = heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID];
 
   const paramsString = params ?? (monitor as BrowserFields)[ConfigKey.PARAMS];
+  const { labels } = monitor;
 
   return {
     ...monitor,
@@ -113,6 +115,7 @@ export const formatHeartbeatRequest = async (
       meta: {
         space_id: spaceId,
       },
+      ...(isEmpty(labels) ? {} : { labels }),
     },
     fields_under_root: true,
     params: monitor.type === 'browser' ? paramsString : '',

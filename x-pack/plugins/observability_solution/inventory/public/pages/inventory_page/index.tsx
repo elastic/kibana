@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
 import { EuiDataGridSorting } from '@elastic/eui';
+import React from 'react';
 import { EntitiesGrid } from '../../components/entities_grid';
-import { useKibana } from '../../hooks/use_kibana';
+import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function InventoryPage() {
   const {
@@ -20,7 +20,7 @@ export function InventoryPage() {
   const { sortDirection, sortField, pageIndex } = query;
   const inventoryRoute = useInventoryRouter();
 
-  const { value = { entities: [] }, loading } = useAbortableAsync(
+  const { value = { entities: [] }, loading } = useInventoryAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
         params: {

@@ -203,6 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
           revision: 1,
           locations: [LOCAL_LOCATION],
           name: 'Test HTTP Monitor 044',
+          labels: {},
         });
       });
 
