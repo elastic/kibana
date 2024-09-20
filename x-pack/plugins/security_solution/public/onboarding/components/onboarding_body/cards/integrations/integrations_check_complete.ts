@@ -8,8 +8,9 @@
 import type { GetPackagesResponse } from '@kbn/fleet-plugin/public';
 import { EPM_PACKAGES_MANY, installationStatuses } from '@kbn/fleet-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { OnboardingCardCheckComplete } from '../../../../types';
-import { getDummyAdditionalBadge } from './integrations_header_badges';
+// import { getDummyAdditionalBadge } from './integrations_header_badges';
 
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async ({
   http,
@@ -19,10 +20,31 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async 
   const data = await http.get<GetPackagesResponse>(EPM_PACKAGES_MANY, {
     version: '2023-10-31',
   });
-  const installed = (data?.items || []).filter(
+  const installed = data?.items?.filter(
     (pkg) =>
       pkg.status === installationStatuses.Installed ||
       pkg.status === installationStatuses.InstallFailed
   );
-  return installed.length > 0;
+  const isComplete = installed && installed.length > 0;
+
+  if (!isComplete) {
+    return {
+      isComplete,
+    };
+  }
+
+  return {
+    isComplete,
+    completeBadgeText: i18n.translate(
+      'xpack.securitySolution.onboarding.integrationsCard.badge.completeText',
+      {
+        defaultMessage: '{count} {count, plural, one {integration} other {integrations}} added',
+        values: { count: installed.length },
+      }
+    ),
+    // additionalBadges: [getDummyAdditionalBadge()],
+    metadata: {
+      integrationsInstalled: installed.length,
+    },
+  };
 };
