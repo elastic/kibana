@@ -45,33 +45,46 @@ const LogMessage = ({
 };
 
 export const Content = ({
-  row,
+  columnId,
   dataView,
   fieldFormats,
-  columnId,
   isCompressed,
   isSingleLine,
+  row,
   shouldShowFieldHandler,
 }: ContentProps) => {
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
   const { field, value } = getMessageFieldWithFallbacks(documentOverview);
   const shouldRenderContent = !!field && !!value;
 
-  const formattedRow = useMemo(() => formatJsonDocumentForContent(row), [row]);
-
   return shouldRenderContent ? (
     <LogMessage field={field} value={value} className={isSingleLine ? 'eui-textTruncate' : ''} />
   ) : (
-    <SourceDocument
+    <FormattedSourceDocument
       columnId={columnId}
-      dataTestSubj="discoverCellDescriptionList"
       dataView={dataView}
       fieldFormats={fieldFormats}
+      shouldShowFieldHandler={shouldShowFieldHandler}
+      isCompressed={isCompressed}
+      row={row}
+    />
+  );
+};
+
+type FormattedSourceDocumentProps = Pick<
+  ContentProps,
+  'columnId' | 'dataView' | 'fieldFormats' | 'isCompressed' | 'row' | 'shouldShowFieldHandler'
+>;
+
+const FormattedSourceDocument = ({ row, ...props }: FormattedSourceDocumentProps) => {
+  const formattedRow = useMemo(() => formatJsonDocumentForContent(row), [row]);
+
+  return (
+    <SourceDocument
       maxEntries={50}
       row={formattedRow}
-      shouldShowFieldHandler={shouldShowFieldHandler}
       useTopLevelObjectColumns={false}
-      isCompressed={isCompressed}
+      {...props}
     />
   );
 };
