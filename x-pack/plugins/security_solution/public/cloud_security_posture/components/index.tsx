@@ -27,10 +27,25 @@ export const EntityInsight = <T,>({
   const getSetupStatus = useCspSetupStatusApi();
   const hasMisconfigurationFindings = getSetupStatus.data?.hasMisconfigurationsFindings;
   const hasVulnerabilitiesFindings = getSetupStatus.data?.hasVulnerabilitiesFindings;
-
+  const insightContent: React.ReactElement[] = [];
+  if (hasMisconfigurationFindings)
+    insightContent.push(
+      <>
+        <MisconfigurationsPreview name={name} fieldName={fieldName} isPreviewMode={isPreviewMode} />
+        <EuiSpacer size="m" />
+      </>
+    );
+  if (hasVulnerabilitiesFindings && fieldName === 'host.name')
+    insightContent.push(
+      <>
+        <VulnerabilitiesPreview hostName={name} />
+        <EuiSpacer size="m" />
+      </>
+    );
   return (
     <>
-      {(hasMisconfigurationFindings || hasVulnerabilitiesFindings) && (
+      {(hasMisconfigurationFindings ||
+        (hasVulnerabilitiesFindings && fieldName === 'host.name')) && (
         <>
           <EuiAccordion
             initialIsOpen={true}
@@ -54,22 +69,7 @@ export const EntityInsight = <T,>({
             }
           >
             <EuiSpacer size="m" />
-            {hasMisconfigurationFindings && (
-              <>
-                <MisconfigurationsPreview
-                  name={name}
-                  fieldName={fieldName}
-                  isPreviewMode={isPreviewMode}
-                />
-                <EuiSpacer size="m" />
-              </>
-            )}
-            {hasVulnerabilitiesFindings && (
-              <>
-                <VulnerabilitiesPreview hostName={name} />
-                <EuiSpacer size="m" />
-              </>
-            )}
+            {insightContent}
           </EuiAccordion>
           <EuiHorizontalRule />
         </>
