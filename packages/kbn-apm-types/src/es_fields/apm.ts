@@ -72,6 +72,8 @@ export const TRANSACTION_OVERFLOW_COUNT = 'transaction.aggregation.overflow_coun
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
 export const TRANSACTION_PROFILER_STACK_TRACE_IDS = 'transaction.profiler_stack_trace_ids';
+export const TRANSACTION_NAME_TEXT = 'transaction.name.text';
+export const TRANSACTION_REPRESENTATIVE_COUNT = 'transaction.representative_count';
 
 export const EVENT_OUTCOME = 'event.outcome';
 
@@ -143,6 +145,7 @@ export const LABEL_GC = 'labels.gc';
 export const LABEL_TYPE = 'labels.type';
 export const LABEL_TELEMETRY_AUTO_VERSION = 'labels.telemetry_auto_version';
 export const LABEL_LIFECYCLE_STATE = 'labels.lifecycle_state';
+export const LABEL_SOME_RESOURCE_ATTRIBUTE = 'labels.some_resource_attribute';
 
 export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
@@ -185,6 +188,8 @@ export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
 export const TIER = '_tier';
 export const INDEX = '_index';
 export const DATA_STEAM_TYPE = 'data_stream.type';
+export const DATA_STREAM_NAMESPACE = 'data_stream.namespace';
+export const DATA_STREAM_DATASET = 'data_stream.dataset';
 
 // Mobile
 export const NETWORK_CONNECTION_TYPE = 'network.connection.type';

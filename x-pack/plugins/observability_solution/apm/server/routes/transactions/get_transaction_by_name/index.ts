@@ -6,13 +6,12 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { normalizeFields } from '../../../utils/normalize_fields';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { transactionMapping } from '../../../utils/es_fields_mappings';
 
 export async function getTransactionByName({
   transactionName,
@@ -53,8 +52,5 @@ export async function getTransactionByName({
     },
   });
 
-  const fields = resp.hits.hits[0]?.fields;
-  const fieldsNorm = normalizeFields(fields) as unknown as Transaction;
-
-  return fieldsNorm;
+  return transactionMapping(resp.hits.hits[0]?.fields);
 }

@@ -11,7 +11,13 @@ import {
   AGENT_NAME,
   AGENT_VERSION,
   AT_TIMESTAMP,
+  DATA_STEAM_TYPE,
+  DATA_STREAM_DATASET,
+  DATA_STREAM_NAMESPACE,
   EVENT_OUTCOME,
+  EVENT_SUCCESS_COUNT,
+  LABEL_SOME_RESOURCE_ATTRIBUTE,
+  OBSERVER_HOSTNAME,
   OBSERVER_TYPE,
   OBSERVER_VERSION,
   OBSERVER_VERSION_MAJOR,
@@ -19,7 +25,9 @@ import {
   PROCESOR_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
+  SERVICE_FRAMEWORK_NAME,
   SERVICE_NAME,
+  SERVICE_NODE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DURATION,
   SPAN_ID,
@@ -33,6 +41,9 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TRANSACTION_REPRESENTATIVE_COUNT,
+  TRANSACTION_RESULT,
+  TRANSACTION_SAMPLED,
   TRANSACTION_TYPE,
 } from '@kbn/apm-types/src/es_fields/apm';
 import { EventOutcome } from '../../common/event_outcome';
@@ -189,6 +200,68 @@ export const linkedParentsOfSpanMapping = (fields: Partial<Record<string, unknow
           },
         },
       ],
+    },
+  };
+};
+
+export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  return {
+    transaction: {
+      representative_count: normalizeValue<number>(fields[TRANSACTION_REPRESENTATIVE_COUNT]),
+      result: normalizeValue<string>(fields[TRANSACTION_RESULT]),
+      sampled: normalizeValue<boolean>(fields[TRANSACTION_SAMPLED]),
+      id: normalizeValue<string>(fields[TRANSACTION_ID]),
+      duration: {
+        us: normalizeValue<number>(fields[TRANSACTION_DURATION]),
+      },
+      type: normalizeValue<string>(fields[TRANSACTION_TYPE]),
+      name: normalizeValue<string>(fields[TRANSACTION_NAME]),
+    },
+    service: {
+      node: {
+        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
+      },
+      language: {
+        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
+      },
+      name: normalizeValue<string>(fields[SERVICE_NAME]),
+      framework: {
+        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
+      },
+    },
+    trace: {
+      id: normalizeValue<string>(fields[TRACE_ID]),
+    },
+    agent: {
+      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
+      version: normalizeValue<string>(fields[AGENT_VERSION]),
+    },
+    event: {
+      success_count: normalizeValue<boolean>(fields[EVENT_SUCCESS_COUNT]),
+      outcome: normalizeValue<EventOutcome>(fields[EVENT_OUTCOME]),
+    },
+    processor: {
+      event: normalizeValue<'transaction'>(fields[PROCESSOR_EVENT]),
+    },
+    data_stream: {
+      namespace: normalizeValue<string>(fields[DATA_STREAM_NAMESPACE]),
+      type: normalizeValue<string>(fields[DATA_STEAM_TYPE]),
+      dataset: normalizeValue<string>(fields[DATA_STREAM_DATASET]),
+    },
+    span: {
+      id: normalizeValue<string>(fields[SPAN_ID]),
+    },
+    observer: {
+      hostname: normalizeValue<string>(fields[OBSERVER_HOSTNAME]),
+      type: normalizeValue<string>(fields[OBSERVER_TYPE]),
+      version: normalizeValue<string>(fields[OBSERVER_VERSION]),
+    },
+    timestamp: {
+      us: normalizeValue<number>(fields[TIMESTAMP]),
+    },
+    '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
+    labels: {
+      some_resource_attribute: normalizeValue<string>(fields[LABEL_SOME_RESOURCE_ATTRIBUTE]),
     },
   };
 };
