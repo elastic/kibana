@@ -7,8 +7,8 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
-import { InventoryStartDependencies } from '../types';
-import { InventoryServices } from '../services/types';
+import type { InventoryStartDependencies } from '../types';
+import type { InventoryServices } from '../services/types';
 
 export type InventoryKibanaContext = CoreStart & InventoryStartDependencies & InventoryServices;
 
