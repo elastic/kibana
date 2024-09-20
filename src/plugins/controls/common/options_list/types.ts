@@ -15,8 +15,6 @@ import { OptionsListSortingType } from './suggestions_sorting';
 import { DefaultDataControlState } from '../types';
 import { OptionsListSearchTechnique } from './suggestions_searching';
 
-export const OPTIONS_LIST_CONTROL = 'optionsListControl'; // TODO: Replace with OPTIONS_LIST_CONTROL_TYPE
-
 /**
  * ----------------------------------------------------------------
  * Options list state types
