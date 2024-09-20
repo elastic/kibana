@@ -5,22 +5,26 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { OnboardingBody } from './onboarding_body';
 import { useBodyConfig } from './hooks/use_body_config';
-import { useOnboardingContext } from '../onboarding_context';
 import { useExpandedCard } from './hooks/use_expanded_card';
 import { useCompletedCards } from './hooks/use_completed_cards';
-import { useCheckCompleteCards } from './hooks/use_check_complete_cards';
 
-// Mocking hooks
-jest.mock('./hooks/use_body_config');
 jest.mock('../onboarding_context');
+jest.mock('./hooks/use_body_config');
 jest.mock('./hooks/use_expanded_card');
 jest.mock('./hooks/use_completed_cards');
-jest.mock('./hooks/use_check_complete_cards');
 
-const mockBodyConfig = [
+const mockUseBodyConfig = useBodyConfig as jest.Mock;
+const mockUseExpandedCard = useExpandedCard as jest.Mock;
+const mockUseCompletedCards = useCompletedCards as jest.Mock;
+
+// Mock the hooks to return desired test data
+const mockComponent = jest.fn(function Component(_: { setComplete: (complete: boolean) => void }) {
+  return <div>{'Card 1 Content'}</div>;
+});
+mockUseBodyConfig.mockReturnValue([
   {
     title: 'Group 1',
     cards: [
@@ -28,29 +32,24 @@ const mockBodyConfig = [
         id: 'card-1',
         title: 'Card 1',
         icon: 'icon1',
-        Component: () => <div>{'Card 1 Content'}</div>,
+        Component: mockComponent,
       },
     ],
   },
-];
+]);
 
-const mockUseBodyConfig = useBodyConfig as jest.Mock;
-const mockUseOnboardingContext = useOnboardingContext as jest.Mock;
-const mockUseExpandedCard = useExpandedCard as jest.Mock;
-const mockUseCompletedCards = useCompletedCards as jest.Mock;
-const mockUseCheckCompleteCards = useCheckCompleteCards as jest.Mock;
-
-// Mock the hooks to return desired test data
-mockUseOnboardingContext.mockReturnValue({ spaceId: 'space-1' });
-mockUseBodyConfig.mockReturnValue(mockBodyConfig);
-mockUseExpandedCard.mockReturnValue({ expandedCardId: null, setExpandedCardId: jest.fn() });
+const mockSetExpandedCardId = jest.fn();
+mockUseExpandedCard.mockReturnValue({
+  expandedCardId: null,
+  setExpandedCardId: mockSetExpandedCardId,
+});
+const mockCheckCardComplete = jest.fn();
+const mockSetCardComplete = jest.fn();
 mockUseCompletedCards.mockReturnValue({
   isCardComplete: jest.fn(() => false),
-  setCardComplete: jest.fn(),
-});
-mockUseCheckCompleteCards.mockReturnValue({
-  checkAllCardsComplete: jest.fn(),
-  checkCardComplete: jest.fn(),
+  setCardComplete: mockSetCardComplete,
+  getCardCheckCompleteResult: jest.fn(),
+  checkCardComplete: mockCheckCardComplete,
 });
 
 describe('OnboardingBody Component', () => {
@@ -58,56 +57,83 @@ describe('OnboardingBody Component', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the OnboardingBody component with the correct content', async () => {
+  it('should render the OnboardingBody component with the correct content', () => {
     render(<OnboardingBody />);
-
-    // Check that the group title is rendered
     expect(screen.getByText('Group 1')).toBeInTheDocument();
-
-    // Check that the card title and content are rendered
     expect(screen.getByText('Card 1')).toBeInTheDocument();
-    expect(screen.getByText('Card 1 Content')).toBeInTheDocument();
   });
 
-  it('calls the necessary functions when expanding a card', async () => {
-    const mockSetExpandedCardId = jest.fn();
-    const mockCheckCardComplete = jest.fn();
-
-    // Update the mock with new behavior
-    mockUseExpandedCard.mockReturnValueOnce({
-      expandedCardId: null,
-      setExpandedCardId: mockSetExpandedCardId,
-    });
-    mockUseCheckCompleteCards.mockReturnValueOnce({
-      checkAllCardsComplete: jest.fn(),
-      checkCardComplete: mockCheckCardComplete,
+  describe('when the card is expanded', () => {
+    beforeEach(() => {
+      render(<OnboardingBody />);
+      fireEvent.click(screen.getByText('Card 1'));
     });
 
-    render(<OnboardingBody />);
+    it('should set the expanded card', () => {
+      expect(mockSetExpandedCardId).toHaveBeenCalledWith('card-1');
+    });
 
-    // Click the card to expand it
-    fireEvent.click(screen.getByText('Card 1'));
-
-    // Check that the setExpandedCardId function was called with the correct card id
-    expect(mockSetExpandedCardId).toHaveBeenCalledWith('card-1');
-
-    // Check that the checkCardComplete function was called for the expanded card
-    await waitFor(() => {
+    it('should check the card for completion', () => {
       expect(mockCheckCardComplete).toHaveBeenCalledWith('card-1');
     });
   });
 
-  it('auto-checks all cards when the component mounts', () => {
-    const mockCheckAllCardsComplete = jest.fn();
+  describe('when the card is collapsed', () => {
+    beforeEach(() => {
+      mockUseExpandedCard.mockReturnValueOnce({
+        expandedCardId: 'card-1',
+        setExpandedCardId: mockSetExpandedCardId,
+      });
 
-    mockUseCheckCompleteCards.mockReturnValueOnce({
-      checkAllCardsComplete: mockCheckAllCardsComplete,
-      checkCardComplete: jest.fn(),
+      render(<OnboardingBody />);
+
+      fireEvent.click(screen.getByText('Card 1'));
     });
 
-    render(<OnboardingBody />);
+    it('should unset the expanded the card', async () => {
+      expect(mockSetExpandedCardId).toHaveBeenCalledWith(null);
+    });
 
-    // Ensure that the checkAllCardsComplete is called on component mount
-    expect(mockCheckAllCardsComplete).toHaveBeenCalled();
+    it('should not check the card for completion', () => {
+      expect(mockCheckCardComplete).not.toHaveBeenCalledWith('card-1');
+    });
+  });
+
+  describe('when the card is set as complete from the card component', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockComponent.mockImplementationOnce(function Component({ setComplete }) {
+        setComplete(true);
+        return <div>{'Card 1 Content'}</div>;
+      });
+
+      render(<OnboardingBody />);
+      act(() => {
+        fireEvent.click(screen.getByText('Card 1'));
+      });
+    });
+
+    it('should set the card as complete', () => {
+      expect(mockSetCardComplete).toHaveBeenCalledWith('card-1', true);
+    });
+  });
+
+  describe('when the card is set as incomplete from the card component', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockComponent.mockImplementationOnce(function Component({ setComplete }) {
+        setComplete(false);
+        return <div>{'Card 1 Content'}</div>;
+      });
+
+      render(<OnboardingBody />);
+      act(() => {
+        fireEvent.click(screen.getByText('Card 1'));
+      });
+    });
+
+    it('should set the card as incomplete', () => {
+      expect(mockSetCardComplete).toHaveBeenCalledWith('card-1', false);
+    });
   });
 });

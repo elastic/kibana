@@ -19,7 +19,7 @@ import { useOnboardingContext } from '../../onboarding_context';
 export type IsCardComplete = (cardId: OnboardingCardId) => boolean;
 export type SetCardComplete = (
   cardId: OnboardingCardId,
-  complete: boolean,
+  completed: boolean,
   options?: { auto?: boolean }
 ) => void;
 export type GetCardCheckCompleteResult = (
@@ -40,34 +40,32 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
   // Local state to store the checkCompleteResult for each card
   const [cardCheckCompleteResult, setCardsCompleteResult] = useState<CardCheckCompleteResult>({});
 
-  useEffect(() => {
-    setStoredCompleteCardIds(completeCardIds); // Keep the stored state in sync with the local state
-  }, [completeCardIds, setStoredCompleteCardIds]);
-
-  // Exported: checks if a specific card has been completed
   const isCardComplete = useCallback<IsCardComplete>(
     (cardId) => completeCardIds.includes(cardId),
     [completeCardIds]
   );
 
-  // Exported: sets the completed state for a specific card
   const setCardComplete = useCallback<SetCardComplete>(
-    (cardId, complete, options) => {
-      setCompleteCardIds((currentCompleteCards = []) => {
+    (cardId, completed, options) => {
+      // This state update has side effects, using a callback
+      setCompleteCardIds((currentCompleteCards) => {
         const isCurrentlyComplete = currentCompleteCards.includes(cardId);
-        if (complete && !isCurrentlyComplete) {
+        if (completed && !isCurrentlyComplete) {
+          const newCompleteCardIds = [...currentCompleteCards, cardId];
           reportCardComplete(cardId, options);
-          return [...currentCompleteCards, cardId];
-        } else if (!complete && isCurrentlyComplete) {
-          return currentCompleteCards.filter((id) => id !== cardId);
+          setStoredCompleteCardIds(newCompleteCardIds); // Keep the stored state in sync with the local state
+          return newCompleteCardIds;
+        } else if (!completed && isCurrentlyComplete) {
+          const newCompleteCardIds = currentCompleteCards.filter((id) => id !== cardId);
+          setStoredCompleteCardIds(newCompleteCardIds); // Keep the stored state in sync with the local state
+          return newCompleteCardIds;
         }
-        return currentCompleteCards;
+        return currentCompleteCards; // No change
       });
     },
-    [reportCardComplete]
+    [reportCardComplete, setStoredCompleteCardIds] // static dependencies, this function needs to be stable
   );
 
-  // Exported: gets the checkCompleteResult for a specific card
   const getCardCheckCompleteResult = useCallback<GetCardCheckCompleteResult>(
     (cardId) => cardCheckCompleteResult[cardId],
     [cardCheckCompleteResult]
@@ -108,7 +106,6 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
     [setCardComplete, setCardCheckCompleteResult]
   );
 
-  // Exported: runs the check for a specific card
   const checkCardComplete = useCallback(
     (cardId: OnboardingCardId) => {
       const cardConfig = cardsWithAutoCheck.find(({ id }) => id === cardId);

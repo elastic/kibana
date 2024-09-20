@@ -10,7 +10,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import type { OnboardingCardId } from '../constants';
 
-interface OnboardingContextValue {
+export interface OnboardingContextValue {
   spaceId: string;
   reportCardOpen: (cardId: OnboardingCardId, options?: { auto?: boolean }) => void;
   reportCardComplete: (cardId: OnboardingCardId, options?: { auto?: boolean }) => void;
