@@ -114,8 +114,8 @@ describe('PackagePolicyActionsMenu', () => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
   });
 
-  it('Should disable upgrade button if package does not have upgrade', async () => {
-    for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 100; i++) {
+    it('Should disable upgrade button if package does not have upgrade', async () => {
       const agentPolicies = createMockAgentPolicies();
       const packagePolicy = createMockPackagePolicy({ hasUpgrade: false });
       const { utils } = renderMenu({ agentPolicies, packagePolicy });
@@ -124,8 +124,8 @@ describe('PackagePolicyActionsMenu', () => {
         const upgradeButton = utils.getByText('Upgrade integration policy').closest('button');
         expect(upgradeButton).toBeDisabled();
       });
-    }
-  });
+    });
+  }
 
   it('Should enable upgrade button if package has upgrade', async () => {
     const agentPolicies = createMockAgentPolicies();
