@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import ReactDOM from 'react-dom';
+
 import { i18n } from '@kbn/i18n';
 import { from, map } from 'rxjs';
 import {
   AppMountParameters,
-  APP_WRAPPER_CLASS,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -19,7 +17,6 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
-import { css } from '@emotion/css';
 import type {
   ConfigSchema,
   InventoryPublicSetup,
@@ -29,6 +26,7 @@ import type {
 } from './types';
 import { InventoryServices } from './services/types';
 import { createCallInventoryAPI } from './api';
+import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export class InventoryPlugin
   implements
@@ -40,15 +38,18 @@ export class InventoryPlugin
     >
 {
   logger: Logger;
+  telemetry: TelemetryService;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.telemetry = new TelemetryService();
   }
   setup(
     coreSetup: CoreSetup<InventoryStartDependencies, InventoryPublicStart>,
     pluginsSetup: InventorySetupDependencies
   ): InventoryPublicSetup {
     const inventoryAPIClient = createCallInventoryAPI(coreSetup);
+    this.telemetry.setup({ analytics: coreSetup.analytics });
 
     pluginsSetup.observabilityShared.navigation.registerSections(
       from(coreSetup.getStartServices()).pipe(
@@ -75,6 +76,8 @@ export class InventoryPlugin
       )
     );
 
+    const telemetry = this.telemetry.start();
+
     coreSetup.application.register({
       id: INVENTORY_APP_ID,
       title: i18n.translate('xpack.inventory.appTitle', {
@@ -96,38 +99,22 @@ export class InventoryPlugin
       ],
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
-        const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
+        const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application'),
           coreSetup.getStartServices(),
         ]);
 
         const services: InventoryServices = {
           inventoryAPIClient,
+          telemetry,
         };
 
-        ReactDOM.render(
-          <Application
-            coreStart={coreStart}
-            history={appMountParameters.history}
-            pluginsStart={pluginsStart}
-            theme$={appMountParameters.theme$}
-            services={services}
-          />,
-          appMountParameters.element
-        );
-
-        const appWrapperClassName = css`
-          overflow: auto;
-        `;
-
-        const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
-
-        appWrapperElement.classList.add(appWrapperClassName);
-
-        return () => {
-          ReactDOM.unmountComponentAtNode(appMountParameters.element);
-          appWrapperElement.classList.remove(appWrapperClassName);
-        };
+        return renderApp({
+          coreStart,
+          pluginsStart,
+          services,
+          appMountParameters,
+        });
       },
     });
 
