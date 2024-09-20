@@ -10474,6 +10474,15 @@
             }
           }
         },
+        "observability:logSources": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Non-default value of setting."
+            }
+          }
+        },
         "banners:placement": {
           "type": "keyword",
           "_meta": {
@@ -10748,6 +10757,15 @@
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
+          }
+        },
+        "observability:searchExcludedDataTiers": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Non-default value of setting."
+            }
           }
         }
       }
