@@ -7,6 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import type { IndexSettingProps } from '@kbn/index-management-shared-types';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { AppDependencies } from '../../../../../app_context';
 import { ExtensionsService } from '../../../../../../services/extensions_service';
 
@@ -17,4 +18,5 @@ export type IndexSettingWithContextProps = {
   dependencies: Omit<AppDependencies, 'services'> & {
     services: { extensionsService: ExtensionsService };
   };
+  usageCollection: UsageCollectionSetup;
 } & IndexSettingProps;
