@@ -15,8 +15,7 @@ import { registry } from '../../plugin_services.stub';
 import { saveDashboardState } from './save_dashboard_state';
 
 pluginServices.setRegistry(registry.start({}));
-const { dashboardBackup, contentManagement, initializerContext, savedObjectsTagging } =
-  pluginServices.getServices();
+const { dashboardBackup, contentManagement } = pluginServices.getServices();
 
 contentManagement.client.create = jest.fn().mockImplementation(({ options }) => {
   if (options.id === undefined) {
@@ -38,8 +37,6 @@ const allServices = {
   embeddable: embeddableService,
   dashboardBackup,
   contentManagement,
-  initializerContext,
-  savedObjectsTagging,
 };
 allServices.data.query.timefilter.timefilter.getTime = jest
   .fn()

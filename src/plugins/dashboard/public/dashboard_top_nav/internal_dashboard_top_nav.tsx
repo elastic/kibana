@@ -48,7 +48,6 @@ import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
 import {
-  capabilitiesService,
   coreServices,
   dataService,
   embeddableService,
@@ -57,6 +56,7 @@ import {
 } from '../services/kibana_services';
 import { pluginServices } from '../services/plugin_services';
 import './_dashboard_top_nav.scss';
+import { initializerContextService } from '../services/dashboard_services';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -86,10 +86,7 @@ export function InternalDashboardTopNav({
   /**
    * Unpack dashboard services
    */
-  const {
-    initializerContext: { allowByValueEmbeddables },
-    dashboardRecentlyAccessed,
-  } = pluginServices.getServices();
+  const { dashboardRecentlyAccessed } = pluginServices.getServices();
   const isLabsEnabled = coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
@@ -161,7 +158,7 @@ export function InternalDashboardTopNav({
       );
     }
     return () => subscription.unsubscribe();
-  }, [allowByValueEmbeddables, lastSavedId, viewMode, title, dashboardRecentlyAccessed]);
+  }, [lastSavedId, viewMode, title, dashboardRecentlyAccessed]);
 
   /**
    * Set breadcrumbs to dashboard title when dashboard's title or view mode changes

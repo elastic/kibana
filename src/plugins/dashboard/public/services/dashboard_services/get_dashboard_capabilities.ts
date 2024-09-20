@@ -8,12 +8,12 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { DashboardCapabilities } from '../../common';
+import { DashboardCapabilities } from '../../../common';
 
 export const getDashboardCapabilities = (coreStart: CoreStart): DashboardCapabilities => {
   const {
     application: {
-      capabilities: { dashboard, maps, visualize },
+      capabilities: { dashboard },
     },
   } = coreStart;
 
@@ -21,10 +21,8 @@ export const getDashboardCapabilities = (coreStart: CoreStart): DashboardCapabil
     show: Boolean(dashboard.show),
     saveQuery: Boolean(dashboard.saveQuery),
     createNew: Boolean(dashboard.createNew),
-    mapsCapabilities: { save: Boolean(maps?.save) },
     createShortUrl: Boolean(dashboard.createShortUrl),
     showWriteControls: Boolean(dashboard.showWriteControls),
-    visualizeCapabilities: { save: Boolean(visualize?.save) },
     storeSearchSession: Boolean(dashboard.storeSearchSession),
   };
 };

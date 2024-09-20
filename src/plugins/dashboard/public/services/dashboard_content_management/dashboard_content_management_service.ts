@@ -39,7 +39,7 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
   { startPlugins: { contentManagement } },
   requiredServices
 ) => {
-  const { dashboardBackup, initializerContext } = requiredServices;
+  const { dashboardBackup } = requiredServices;
   return {
     loadDashboardState: ({ id }) =>
       loadDashboardState({
@@ -61,7 +61,6 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
         panelReferences,
         dashboardBackup,
         contentManagement,
-        initializerContext,
       }),
     findDashboards: {
       search: ({ hasReference, hasNoReference, search, size, options }) =>

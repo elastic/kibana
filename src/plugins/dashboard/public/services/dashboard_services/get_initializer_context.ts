@@ -7,17 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
 import { DashboardFeatureFlagConfig } from '../..';
-import { DashboardPluginServiceParams } from '../types';
-import { DashboardInitializerContextService } from './types';
 
-export type InitializerContextServiceFactory = (
-  params: DashboardPluginServiceParams
-) => DashboardInitializerContextService;
-
-export const initializerContextServiceFactory: InitializerContextServiceFactory = ({
-  initContext,
-}) => {
+export const getInitializerContext = (initContext: PluginInitializerContext) => {
   const {
     env: {
       packageInfo: { version },

@@ -16,7 +16,6 @@ import { DashboardContentInsightsService } from './dashboard_content_insights/ty
 import { DashboardContentManagementService } from './dashboard_content_management/types';
 import { DashboardFavoritesService } from './dashboard_favorites/types';
 import { DashboardRecentlyAccessedService } from './dashboard_recently_accessed/types';
-import { DashboardInitializerContextService } from './initializer_context/types';
 
 export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardStartDependencies> & {
   initContext: PluginInitializerContext; // need a custom type so that initContext is a required parameter for initializerContext
@@ -25,7 +24,6 @@ export interface DashboardServices {
   dashboardBackup: DashboardBackupServiceType;
   dashboardContentManagement: DashboardContentManagementService;
 
-  initializerContext: DashboardInitializerContextService;
   dashboardRecentlyAccessed: DashboardRecentlyAccessedService;
   dashboardContentInsights: DashboardContentInsightsService;
   dashboardFavorites: DashboardFavoritesService;

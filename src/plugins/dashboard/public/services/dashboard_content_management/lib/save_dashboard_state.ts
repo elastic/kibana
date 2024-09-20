@@ -47,7 +47,6 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
 type SaveDashboardStateProps = SaveDashboardProps & {
   contentManagement: DashboardStartDependencies['contentManagement'];
   dashboardBackup: DashboardContentManagementRequiredServices['dashboardBackup'];
-  initializerContext: DashboardContentManagementRequiredServices['initializerContext'];
 };
 
 export const saveDashboardState = async ({
