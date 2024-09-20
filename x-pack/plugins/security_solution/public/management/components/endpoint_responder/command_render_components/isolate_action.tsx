@@ -13,7 +13,6 @@ import { useSendIsolateEndpointRequest } from '../../../hooks/response_actions/u
 
 export const IsolateActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {
-    console.log('command: ', command);
     const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
       'responseActionsSentinelOneV1Enabled'
     );

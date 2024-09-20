@@ -20,7 +20,6 @@ import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter
 export const SuspendProcessActionResult = memo<
   ActionRequestComponentProps<{ pid?: string[]; entityId?: string[] }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
-  console.log('command: ', command);
   const actionCreator = useSendSuspendProcessRequest();
 
   const actionRequestBody = useMemo<undefined | SuspendProcessRequestBody>(() => {

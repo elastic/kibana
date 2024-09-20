@@ -26,8 +26,6 @@ export const UploadActionResult = memo<
     ResponseActionUploadParameters
   >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
-  console.log('command: ', command);
-
   const actionCreator = useSendUploadEndpointRequest();
 
   const actionRequestBody = useMemo<undefined | UploadActionUIRequestBody>(() => {
