@@ -68,8 +68,8 @@ describe('EntityStoreDataClient', () => {
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: [
-            '.entities.v1.latest.ea_host_entity_store',
-            '.entities.v1.latest.ea_user_entity_store',
+            '.entities.v1.latest.ea_default_host_entity_store',
+            '.entities.v1.latest.ea_default_user_entity_store',
           ],
         })
       );
