@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         // get auth header for Viewer role
-        adminCredentials = await svlUserManager.getM2MApiCredentialsWithRoleScope('admin');
+        adminCredentials = await svlUserManager.getM2MApiCookieCredentialsWithRoleScope('admin');
       });
 
       it('composite features', async () => {
