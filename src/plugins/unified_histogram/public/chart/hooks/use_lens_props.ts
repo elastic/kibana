@@ -66,7 +66,7 @@ export const getLensProps = ({
   searchSessionId?: string;
   getTimeRange: () => TimeRange;
   attributes: TypedLensByValueInput['attributes'];
-  onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
+  onLoad?: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => ({
   id: 'unifiedHistogramLensComponent',
   viewMode: ViewMode.VIEW,

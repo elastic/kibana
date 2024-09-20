@@ -389,18 +389,16 @@ export function Chart({
       )}
       {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (
         <ChartConfigPanel
-          {...{
-            services,
-            visContext,
-            lensAdapters,
-            lensEmbeddableOutput$,
-            isFlyoutVisible,
-            setIsFlyoutVisible,
-            isPlainRecord,
-            query,
-            currentSuggestionContext: lensVisServiceCurrentSuggestionContext,
-            onSuggestionContextEdit,
-          }}
+          services={services}
+          visContext={visContext}
+          lensAdapters={lensAdapters}
+          lensEmbeddableOutput$={lensEmbeddableOutput$}
+          isFlyoutVisible
+          setIsFlyoutVisible={setIsFlyoutVisible}
+          isPlainRecord
+          query={query}
+          currentSuggestionContext={lensVisServiceCurrentSuggestionContext}
+          onSuggestionContextEdit={onSuggestionContextEdit}
         />
       )}
     </EuiFlexGroup>
