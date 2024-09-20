@@ -172,9 +172,3 @@ export type RecursivePartial<T> = {
     : RecursivePartial<T[P]>;
 };
 type NonAny = number | boolean | string | symbol | null;
-
-export type RemoveIndexSignatures<O> = {
-  // copy all attributes from the person interface
-  // and remove the index signature
-  [K in keyof O as string extends K ? never : number extends K ? never : K]: O[K];
-};

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RemoveIndexSignatures } from '@kbn/utility-types';
 import type { RouteValidator } from './route_validator';
 
 /**
@@ -112,27 +111,31 @@ export interface RouteConfigOptionsBody {
  */
 export type RouteAccess = 'public' | 'internal';
 
-type InputDeprecationLocation = 'query' | 'body';
+/** @public */
+export type InputDeprecationLocation = 'query' | 'body';
 
-export interface RouteInputDeprecationRenamedDescription  {
+/** @public */
+export interface RouteInputDeprecationRenamedDescription {
   type: 'renamed';
   location: InputDeprecationLocation;
   old: string;
   new: string;
 }
 
-export interface RouteInputDeprecationRemovedDescription  {
+/** @public */
+export interface RouteInputDeprecationRemovedDescription {
   type: 'removed';
   location: InputDeprecationLocation;
   path: string;
 }
 
+/** @public */
 export type RouteInputDeprecationDescription =
   | RouteInputDeprecationRenamedDescription
   | RouteInputDeprecationRemovedDescription;
 
 /**
- * For now, this is only supports a small subset of possible deprecations.
+ * Factory for supported types of route API deprecations.
  * @public
  */
 export type RouteInputDeprecationFactory = (factories: {
@@ -144,7 +147,7 @@ export type RouteInputDeprecationFactory = (factories: {
  * Declare route input deprecations.
  * @public
  */
-export interface RouteInputDeprecation<P = unknown, Q = unknown, B = unknown> {
+export interface RouteInputDeprecation {
   query?: RouteInputDeprecationFactory;
   body?: RouteInputDeprecationFactory;
 }
@@ -176,10 +179,7 @@ export interface RouteInputDeprecation<P = unknown, Q = unknown, B = unknown> {
  * @default false
  * @public
  */
-export type RouteDeprecation<P = unknown, Q = unknown, B = unknown> =
-  | boolean
-  | string
-  | RouteInputDeprecation<P, Q, B>;
+export type RouteDeprecation = boolean | string | RouteInputDeprecation;
 
 /**
  * Additional route options.
@@ -280,7 +280,7 @@ export interface RouteConfigOptions<
    *
    * @remarks This may be surfaced in OAS documentation.
    */
-  deprecated?: RouteDeprecation<P, Q, B>;
+  deprecated?: RouteDeprecation;
 
   /**
    * Release version or date that this route will be removed
