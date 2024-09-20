@@ -9,7 +9,7 @@ import nunjucks from 'nunjucks';
 import * as yaml from 'js-yaml';
 import { flattenObjectsList } from '../util/samples';
 import { createSync, generateFields, mergeSamples } from '../util';
-import { Docs } from '@kbn/integration-assistant-plugin/common';
+import { Docs } from '../../common';
 
 export function createFieldMapping(
   packageName: string,
