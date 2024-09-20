@@ -35,15 +35,11 @@ export function DegradedFields() {
   const { totalItemCount, toggleCurrentQualityIssues, showCurrentQualityIssues } =
     useDegradedFields();
 
-  const onChange = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
-    toggleCurrentQualityIssues();
-  };
-
   const latestBackingIndexToggle = (
     <EuiSwitch
       label={overviewDegradedFieldToggleSwitch}
       checked={showCurrentQualityIssues}
-      onChange={onChange}
+      onChange={toggleCurrentQualityIssues}
       aria-describedby={toggleTextSwitchId}
       compressed
       data-test-subj="datasetQualityDetailsOverviewDegradedFieldToggleSwitch"
