@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiPageTemplate,
   EuiFlexItem,
-  EuiTabbedContent,
   EuiFlexGroup,
   EuiPopover,
   EuiButtonIcon,
@@ -19,8 +18,10 @@ import {
   EuiText,
   EuiIcon,
   EuiButtonEmpty,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -33,11 +34,14 @@ import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 import { IndexDocuments } from '../index_documents/index_documents';
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
+import { SearchIndicesDetailsMappingsTabs } from '../../routes';
+import { SearchIndexDetailsMappings } from './details_page_mappings';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
-  const { console: consolePlugin, docLinks, application } = useKibana().services;
+  const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
+  const { console: consolePlugin, docLinks, application, history } = useKibana().services;
   const { data: index, refetch, isError: isIndexError, isInitialLoading } = useIndex(indexName);
   const {
     data: mappings,
@@ -45,6 +49,41 @@ export const SearchIndexDetailsPage = () => {
     isInitialLoading: isMappingsInitialLoading,
   } = useIndexMapping(indexName);
 
+  const SearchIndexDetailsTabs: EuiTabbedContentTab[] = useMemo(() => {
+    return [
+      {
+        id: SearchIndicesDetailsMappingsTabs.DATA,
+        name: i18n.translate('xpack.searchIndices.documentsTabLabel', {
+          defaultMessage: 'Data',
+        }),
+        content: <IndexDocuments indexName={indexName} />,
+        'data-test-subj': `${SearchIndicesDetailsMappingsTabs.DATA}Tab`,
+      },
+      {
+        id: SearchIndicesDetailsMappingsTabs.MAPPINGS,
+        name: i18n.translate('xpack.searchIndices.mappingsTabLabel', {
+          defaultMessage: 'Mappings',
+        }),
+        content: <SearchIndexDetailsMappings index={index} />,
+        'data-test-subj': `${SearchIndicesDetailsMappingsTabs.MAPPINGS}Tab`,
+      },
+    ];
+  }, [index, indexName]);
+
+  const [selectedTab, setSelectedTab] = useState(SearchIndexDetailsTabs[0]);
+
+  useEffect(() => {
+    const newTab = SearchIndexDetailsTabs.find((tab) => tab.id === tabId);
+    if (newTab) setSelectedTab(newTab);
+  }, [SearchIndexDetailsTabs, tabId]);
+
+  const handleTabClick = useCallback(
+    (tab) => {
+      history.push(`index_details/${indexName}/${tab.id}`);
+    },
+
+    [history, indexName]
+  );
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
@@ -176,15 +215,9 @@ export const SearchIndexDetailsPage = () => {
               <EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTabbedContent
-                    tabs={[
-                      {
-                        id: 'data',
-                        name: i18n.translate('xpack.searchIndices.documentsTabLabel', {
-                          defaultMessage: 'Data',
-                        }),
-                        content: <IndexDocuments indexName={indexName} />,
-                      },
-                    ]}
+                    tabs={SearchIndexDetailsTabs}
+                    onTabClick={handleTabClick}
+                    selectedTab={selectedTab}
                   />
                 </EuiFlexItem>
               </EuiFlexItem>

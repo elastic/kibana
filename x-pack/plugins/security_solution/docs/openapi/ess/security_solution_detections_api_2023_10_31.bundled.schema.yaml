@@ -891,6 +891,15 @@ paths:
   /api/detection_engine/rules/preview:
     post:
       operationId: RulePreview
+      parameters:
+        - description: >-
+            Enables logging and returning in response ES queries, performed
+            during rule execution
+          in: query
+          name: enable_logged_requests
+          required: false
+          schema:
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -5178,6 +5187,17 @@ components:
         - $ref: '#/components/schemas/MachineLearningRulePatchProps'
         - $ref: '#/components/schemas/NewTermsRulePatchProps'
         - $ref: '#/components/schemas/EsqlRulePatchProps'
+    RulePreviewLoggedRequest:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/NonEmptyString'
+        duration:
+          type: integer
+        request:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - request
     RulePreviewLogs:
       type: object
       properties:
@@ -5187,6 +5207,10 @@ components:
         errors:
           items:
             $ref: '#/components/schemas/NonEmptyString'
+          type: array
+        requests:
+          items:
+            $ref: '#/components/schemas/RulePreviewLoggedRequest'
           type: array
         startedAt:
           $ref: '#/components/schemas/NonEmptyString'

@@ -30,7 +30,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '
 import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import type { ControlStyle } from '../../../../common';
+import type { ControlLabelPosition } from '../../../../common';
 import type { DefaultControlApi } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlsInOrder } from '../init_controls_manager';
@@ -49,7 +49,7 @@ interface Props {
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => void;
   };
   hasUnappliedSelections: boolean;
-  labelPosition: ControlStyle;
+  labelPosition: ControlLabelPosition;
 }
 
 export function ControlGroup({
