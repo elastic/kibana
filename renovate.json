@@ -78,7 +78,22 @@
     },
     {
       "groupName": "LaunchDarkly",
-      "matchDepNames": ["launchdarkly-js-client-sdk", "@launchdarkly/node-server-sdk", "launchdarkly/find-code-references"],
+      "matchDepNames": [
+        "launchdarkly-js-client-sdk",
+        "@openfeature/launchdarkly-client-provider",
+        "@launchdarkly/node-server-sdk",
+        "@launchdarkly/openfeature-node-server",
+        "launchdarkly/find-code-references"
+      ],
+      "reviewers": ["team:kibana-security", "team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Security", "Team:Core", "backport:prev-minor"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "OpenFeature",
+      "matchDepNames": ["@openfeature/core", "@openfeature/server-sdk", "@openfeature/web-sdk"],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Security", "Team:Core", "backport:prev-minor"],
@@ -491,6 +506,15 @@
       "reviewers": ["team:security-engineering-productivity"],
       "matchBaseBranches": ["main"],
       "labels": ["Team: Sec Eng Productivity", "release_note:skip", "backport:all-open"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@mswjs/http-middleware",
+      "matchPackageNames": ["@mswjs/http-middleware"],
+      "reviewers": ["team:kibana-cloud-security-posture"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
       "minimumReleaseAge": "7 days",
       "enabled": true
     }
