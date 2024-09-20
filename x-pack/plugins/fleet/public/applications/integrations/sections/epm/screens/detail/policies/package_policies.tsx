@@ -20,8 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
-import { policyHasFleetServer } from '../../../../../../../../common/services';
-
 import { InstallStatus } from '../../../../../types';
 import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
 import {
@@ -108,8 +106,6 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
-  const canAddAgents = useAuthz().fleet.addAgents;
-  const canAddFleetServers = useAuthz().fleet.addFleetServers;
   const canReadAgentPolicies = useAuthz().fleet.readAgentPolicies;
 
   const packageAndAgentPolicies = useMemo((): Array<{
@@ -294,16 +290,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
               </EuiText>
             );
           }
-          const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
-          const canAddAgentsForPolicy = policyHasFleetServer(agentPolicy)
-            ? canAddFleetServers
-            : canAddAgents;
           return (
             <PackagePolicyAgentsCell
-              agentPolicy={agentPolicy}
-              agentCount={agentPolicy.agents}
-              onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
-              canAddAgents={canAddAgentsForPolicy}
+              agentPolicies={agentPolicies}
+              onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicies[0].id)}
               hasHelpPopover={showAddAgentHelpForPackagePolicyId === packagePolicy.id}
             />
           );
@@ -340,8 +330,6 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       getHref,
       canWriteIntegrationPolicies,
       canShowMultiplePoliciesCell,
-      canAddFleetServers,
-      canAddAgents,
       showAddAgentHelpForPackagePolicyId,
       refreshPolicies,
     ]
@@ -402,7 +390,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             const { addAgentToPolicyId, ...rest } = parse(search);
             history.replace({ search: stringify(rest) });
           }}
-          agentPolicy={agentPolicies[0]}
+          agentPolicy={agentPolicies[0]} //fix me
           isIntegrationFlow={true}
           installedPackagePolicy={{
             name: packagePolicy?.package?.name || '',
