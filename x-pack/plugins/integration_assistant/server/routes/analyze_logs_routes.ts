@@ -16,6 +16,7 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse, UnsupportedLogFormatError } from '../lib/errors';
 
 export function registerAnalyzeLogsRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -82,13 +83,13 @@ export function registerAnalyzeLogsRoutes(
           const graphResults = await graph.invoke(logFormatParameters, options);
           const graphLogFormat = graphResults.results.samplesFormat.name;
           if (graphLogFormat === 'unsupported' || graphLogFormat === 'csv') {
-            return res.customError({
-              statusCode: 501,
-              body: { message: `Unsupported log samples format` },
-            });
+            throw new UnsupportedLogFormatError('Unsupported log format in the samples');
           }
           return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });
         } catch (e) {
+          if (isErrorThatHandlesItsOwnResponse(e)) {
+            return e.sendResponse(res);
+          }
           return res.badRequest({ body: e });
         }
       })
