@@ -10,6 +10,20 @@
 import { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+
+const FIELD_USAGE_EVENT_TYPE = 'discover_field_usage';
+const FIELD_USAGE_EVENT_NAME = 'eventName';
+const FIELD_USAGE_FIELD_NAME = 'fieldName';
+
+export enum FieldUsageEventName {
+  dataTableSelection = 'dataTableSelection',
+  dataTableRemoval = 'dataTableRemoval',
+}
+interface FieldUsageEventData {
+  [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
+  [FIELD_USAGE_FIELD_NAME]?: string;
+}
 
 export interface DiscoverEBTContextProps {
   discoverProfiles: string[]; // Discover Context Awareness Profiles
@@ -19,15 +33,16 @@ export type DiscoverEBTContext = BehaviorSubject<DiscoverEBTContextProps>;
 export class DiscoverEBTContextManager {
   private isEnabled: boolean = false;
   private ebtContext$: DiscoverEBTContext | undefined;
+  private reportEvent: CoreSetup['analytics']['reportEvent'] | undefined;
 
   constructor() {}
 
   // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
   public initialize({ core }: { core: CoreSetup }) {
+    // Register Discover specific context to be used in EBT
     const context$ = new BehaviorSubject<DiscoverEBTContextProps>({
       discoverProfiles: [],
     });
-
     core.analytics.registerContextProvider({
       name: 'discover_context',
       context$,
@@ -44,8 +59,29 @@ export class DiscoverEBTContextManager {
         // If we decide to extend EBT context with more properties, we can do it here
       },
     });
-
     this.ebtContext$ = context$;
+
+    // Register Discover events to be used with EBT
+    core.analytics.registerEventType({
+      eventType: FIELD_USAGE_EVENT_TYPE,
+      schema: {
+        [FIELD_USAGE_EVENT_NAME]: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval',
+          },
+        },
+        [FIELD_USAGE_FIELD_NAME]: {
+          type: 'keyword',
+          _meta: {
+            description: "Field name if it's a part of ECS schema",
+            optional: true,
+          },
+        },
+      },
+    });
+    this.reportEvent = core.analytics.reportEvent;
   }
 
   public enable() {
@@ -66,6 +102,58 @@ export class DiscoverEBTContextManager {
 
   public getProfilesContext() {
     return this.ebtContext$?.getValue()?.discoverProfiles;
+  }
+
+  private async trackFieldUsageEvent({
+    eventName,
+    fieldName,
+    fieldsMetadata,
+  }: {
+    eventName: FieldUsageEventName;
+    fieldName: string;
+    fieldsMetadata: FieldsMetadataPublicStart | undefined;
+  }) {
+    if (!this.reportEvent) {
+      return;
+    }
+
+    const eventData: FieldUsageEventData = {
+      [FIELD_USAGE_EVENT_NAME]: eventName,
+    };
+
+    if (fieldsMetadata) {
+      eventData[FIELD_USAGE_FIELD_NAME] = fieldName; // TODO: exclude none ECS fields
+    }
+
+    this.reportEvent(FIELD_USAGE_EVENT_TYPE, eventData);
+  }
+
+  public async trackDataTableSelection({
+    fieldName,
+    fieldsMetadata,
+  }: {
+    fieldName: string;
+    fieldsMetadata: FieldsMetadataPublicStart | undefined;
+  }) {
+    await this.trackFieldUsageEvent({
+      eventName: FieldUsageEventName.dataTableSelection,
+      fieldName,
+      fieldsMetadata,
+    });
+  }
+
+  public async trackDataTableRemoval({
+    fieldName,
+    fieldsMetadata,
+  }: {
+    fieldName: string;
+    fieldsMetadata: FieldsMetadataPublicStart | undefined;
+  }) {
+    await this.trackFieldUsageEvent({
+      eventName: FieldUsageEventName.dataTableRemoval,
+      fieldName,
+      fieldsMetadata,
+    });
   }
 
   public disableAndReset() {

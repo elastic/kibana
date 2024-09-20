@@ -114,7 +114,8 @@ function DiscoverDocumentsComponent({
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
-  const { dataViews, capabilities, uiSettings, uiActions } = services;
+  const { dataViews, capabilities, uiSettings, uiActions, ebtContextManager, fieldsMetadata } =
+    services;
   const [
     dataSource,
     query,
@@ -196,6 +197,22 @@ function DiscoverDocumentsComponent({
     sort,
     settings: grid,
   });
+
+  const onAddColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onAddColumn(columnName);
+      void ebtContextManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+    },
+    [onAddColumn, ebtContextManager, fieldsMetadata]
+  );
+
+  const onRemoveColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onRemoveColumn(columnName);
+      void ebtContextManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+    },
+    [onRemoveColumn, ebtContextManager, fieldsMetadata]
+  );
 
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
@@ -296,14 +313,22 @@ function DiscoverDocumentsComponent({
         columnsMeta={customColumnsMeta}
         savedSearchId={savedSearch.id}
         onFilter={onAddFilter}
-        onRemoveColumn={onRemoveColumn}
-        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumnWithTracking}
+        onAddColumn={onAddColumnWithTracking}
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
         query={query}
       />
     ),
-    [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
+    [
+      dataView,
+      onAddColumnWithTracking,
+      onAddFilter,
+      onRemoveColumnWithTracking,
+      query,
+      savedSearch.id,
+      setExpandedDoc,
+    ]
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};

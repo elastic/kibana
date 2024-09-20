@@ -78,6 +78,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
+    ebtContextManager,
+    fieldsMetadata,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -153,6 +155,22 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     sort,
     settings: grid,
   });
+
+  const onAddColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onAddColumn(columnName);
+      void ebtContextManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+    },
+    [onAddColumn, ebtContextManager, fieldsMetadata]
+  );
+
+  const onRemoveColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onRemoveColumn(columnName);
+      void ebtContextManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+    },
+    [onRemoveColumn, ebtContextManager, fieldsMetadata]
+  );
 
   // The assistant is getting the state from the url correctly
   // expect from the index pattern where we have only the dataview id
@@ -274,8 +292,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       return undefined;
     }
 
-    return () => onAddColumn(draggingFieldName);
-  }, [onAddColumn, draggingFieldName, currentColumns]);
+    return () => onAddColumnWithTracking(draggingFieldName);
+  }, [onAddColumnWithTracking, draggingFieldName, currentColumns]);
 
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
@@ -396,10 +414,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             sidebarPanel={
               <SidebarMemoized
                 documents$={stateContainer.dataState.data$.documents$}
-                onAddField={onAddColumn}
+                onAddField={onAddColumnWithTracking}
+                onRemoveField={onRemoveColumnWithTracking}
                 columns={currentColumns}
                 onAddFilter={onFilter}
-                onRemoveField={onRemoveColumn}
                 onChangeDataView={stateContainer.actions.onChangeDataView}
                 selectedDataView={dataView}
                 trackUiMetric={trackUiMetric}
