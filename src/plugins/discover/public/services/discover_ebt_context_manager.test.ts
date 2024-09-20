@@ -10,11 +10,24 @@
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DiscoverEBTContextManager } from './discover_ebt_context_manager';
-
-const coreSetupMock = coreMock.createSetup();
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 describe('DiscoverEBTContextManager', () => {
   let discoverEBTContextManager: DiscoverEBTContextManager;
+
+  const coreSetupMock = coreMock.createSetup();
+
+  const fieldsMetadata = {
+    getClient: jest.fn().mockResolvedValue({
+      find: jest.fn().mockResolvedValue({
+        fields: {
+          test: {
+            short: 'test',
+          },
+        },
+      }),
+    }),
+  } as unknown as FieldsMetadataPublicStart;
 
   beforeEach(() => {
     discoverEBTContextManager = new DiscoverEBTContextManager();
@@ -90,6 +103,56 @@ describe('DiscoverEBTContextManager', () => {
       discoverEBTContextManager.enable();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
+    });
+  });
+
+  describe('trackFieldUsageEvent', () => {
+    it('should track the field usage when a field is added to the table', async () => {
+      discoverEBTContextManager.register({ core: coreSetupMock });
+      discoverEBTContextManager.enable();
+
+      await discoverEBTContextManager.trackDataTableSelection({
+        fieldName: 'test',
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith('discover_field_usage', {
+        eventName: 'dataTableSelection',
+        fieldName: 'test',
+      });
+
+      await discoverEBTContextManager.trackDataTableSelection({
+        fieldName: 'test2',
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
+        eventName: 'dataTableSelection', // non-ECS fields would not be included in properties
+      });
+    });
+
+    it('should track the field usage when a field is removed from the table', async () => {
+      discoverEBTContextManager.register({ core: coreSetupMock });
+      discoverEBTContextManager.enable();
+
+      await discoverEBTContextManager.trackDataTableRemoval({
+        fieldName: 'test',
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith('discover_field_usage', {
+        eventName: 'dataTableRemoval',
+        fieldName: 'test',
+      });
+
+      await discoverEBTContextManager.trackDataTableRemoval({
+        fieldName: 'test2',
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
+        eventName: 'dataTableRemoval', // non-ECS fields would not be included in properties
+      });
     });
   });
 });

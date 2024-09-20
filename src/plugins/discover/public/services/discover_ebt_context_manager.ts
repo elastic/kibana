@@ -122,7 +122,16 @@ export class DiscoverEBTContextManager {
     };
 
     if (fieldsMetadata) {
-      eventData[FIELD_USAGE_FIELD_NAME] = fieldName; // TODO: exclude none ECS fields
+      const client = await fieldsMetadata.getClient();
+      const { fields } = await client.find({
+        attributes: ['short'],
+        fieldNames: [fieldName],
+      });
+
+      // excludes non ECS fields
+      if (fields[fieldName]?.short) {
+        eventData[FIELD_USAGE_FIELD_NAME] = fieldName;
+      }
     }
 
     this.reportEvent(FIELD_USAGE_EVENT_TYPE, eventData);
