@@ -13,8 +13,6 @@ import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/shared-ux-markdown';
 
-/** TODO: This file is duplicated from the controls plugin to avoid exporting it */
-
 interface ControlErrorProps {
   error: Error | string;
 }

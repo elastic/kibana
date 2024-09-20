@@ -16,21 +16,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TextBasedLanguagesEditor } from './text_based_languages_editor';
 import type { TextBasedLanguagesEditorProps } from './types';
 import { ReactWrapper } from 'enzyme';
-
-jest.mock('./helpers', () => {
-  const module = jest.requireActual('./helpers');
-  return {
-    ...module,
-    getDocumentationSections: () => ({
-      groups: [
-        {
-          label: 'How it works',
-          items: [],
-        },
-      ],
-    }),
-  };
-});
 import { of } from 'rxjs';
 
 describe('TextBasedLanguagesEditor', () => {
@@ -133,9 +118,6 @@ describe('TextBasedLanguagesEditor', () => {
     expect(
       component!.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
     ).not.toBe(0);
-    expect(component!.find('[data-test-subj="TextBasedLangEditor-documentation"]').length).not.toBe(
-      0
-    );
   });
 
   it('should render the resize for the expanded code editor mode', async () => {
@@ -154,6 +136,18 @@ describe('TextBasedLanguagesEditor', () => {
   it('should render the run query text', async () => {
     const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).not.toBe(0);
+  });
+
+  it('should render the doc icon if the displayDocumentationAsFlyout is true', async () => {
+    const newProps = {
+      ...props,
+      displayDocumentationAsFlyout: true,
+      editorIsInline: false,
+    };
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    expect(component.find('[data-test-subj="TextBasedLangEditor-documentation"]').length).not.toBe(
+      0
+    );
   });
 
   it('should not render the run query text if the hideRunQueryText prop is set to true', async () => {
