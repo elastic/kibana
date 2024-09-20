@@ -9,13 +9,20 @@
 
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 import {
   currentVersion,
   defaultKibanaIndex,
+  defaultKibanaTaskIndex,
   defaultLogFilePath,
   getKibanaMigratorTestKit,
   nextMinor,
 } from './kibana_migrator_test_kit';
+
+export const baselineIndexTypesMap: IndexTypesMap = {
+  [defaultKibanaIndex]: ['basic', 'complex', 'server', 'deprecated'],
+  [defaultKibanaTaskIndex]: ['task'],
+};
 
 const defaultType: SavedObjectsType<any> = {
   name: 'defaultType',
@@ -47,6 +54,11 @@ export const baselineTypes: Array<SavedObjectsType<any>> = [
   {
     ...defaultType,
     name: 'deprecated',
+  },
+  {
+    ...defaultType,
+    name: 'task',
+    indexPattern: `${defaultKibanaIndex}_tasks`,
   },
   {
     ...defaultType,
@@ -164,6 +176,12 @@ export const getBaselineDocuments = (
       type: 'deprecated',
       attributes: {
         name: `deprecated-${index}`,
+      },
+    })),
+    ...new Array(documentsPerType).fill(true).map((_, index) => ({
+      type: 'task',
+      attributes: {
+        name: `task-${index}`,
       },
     })),
     ...new Array(documentsPerType).fill(true).map((_, index) => ({

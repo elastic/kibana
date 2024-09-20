@@ -88,17 +88,23 @@ describe('reindexing migrations', () => {
         "basic": ${BASELINE_DOCUMENTS_PER_TYPE_1K},
         "complex": ${BASELINE_DOCUMENTS_PER_TYPE_1K / 2},
         "deprecated": ${BASELINE_DOCUMENTS_PER_TYPE_1K},
+        "task": ${BASELINE_DOCUMENTS_PER_TYPE_1K},
       }
     `);
   });
 
-  it('return a migrated status for each reindexed index', () => {
+  it('return a migrated status for each SO index', () => {
     // omit elapsedMs as it varies in each execution
     expect(migrationResults.map((result) => omit(result, 'elapsedMs'))).toMatchInlineSnapshot(`
       Array [
         Object {
-          "destIndex": ".kibana_migrator_tests_9.1.0_001",
-          "sourceIndex": ".kibana_migrator_tests_9.0.0_001",
+          "destIndex": ".kibana_migrator_9.1.0_001",
+          "sourceIndex": ".kibana_migrator_9.0.0_001",
+          "status": "migrated",
+        },
+        Object {
+          "destIndex": ".kibana_migrator_tasks_9.0.0_001",
+          "sourceIndex": ".kibana_migrator_tasks_9.0.0_001",
           "status": "migrated",
         },
       ]

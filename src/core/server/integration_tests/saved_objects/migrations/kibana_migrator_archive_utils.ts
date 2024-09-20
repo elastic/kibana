@@ -27,8 +27,8 @@ import { delay } from './test_utils';
 import { baselineTypes, getBaselineDocuments } from './kibana_migrator_test_kit.fixtures';
 
 export const BASELINE_ELASTICSEARCH_VERSION = currentVersion;
-export const BASELINE_DOCUMENTS_PER_TYPE_1K = 250;
-export const BASELINE_DOCUMENTS_PER_TYPE_400K = 100_000;
+export const BASELINE_DOCUMENTS_PER_TYPE_1K = 200;
+export const BASELINE_DOCUMENTS_PER_TYPE_500K = 100_000;
 
 export const BASELINE_TEST_ARCHIVE_1K = join(
   __dirname,
@@ -38,11 +38,11 @@ export const BASELINE_TEST_ARCHIVE_1K = join(
   }k_docs.zip`
 );
 
-export const BASELINE_TEST_ARCHIVE_400K = join(
+export const BASELINE_TEST_ARCHIVE_500K = join(
   __dirname,
   'archives',
   `${BASELINE_ELASTICSEARCH_VERSION}_baseline_${
-    (BASELINE_DOCUMENTS_PER_TYPE_400K * baselineTypes.length) / 1000
+    (BASELINE_DOCUMENTS_PER_TYPE_500K * baselineTypes.length) / 1000
   }k_docs.zip`
 );
 

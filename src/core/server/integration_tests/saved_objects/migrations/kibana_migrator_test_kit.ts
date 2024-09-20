@@ -59,7 +59,8 @@ const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 export const currentVersion = env.packageInfo.version;
 export const nextMinor = new SemVer(currentVersion).inc('minor').format();
 export const currentBranch = env.packageInfo.branch;
-export const defaultKibanaIndex = '.kibana_migrator_tests';
+export const defaultKibanaIndex = '.kibana_migrator';
+export const defaultKibanaTaskIndex = `${defaultKibanaIndex}_tasks`;
 export const defaultNodeRoles: NodeRoles = { migrator: true, ui: true, backgroundTasks: true };
 
 export interface GetEsClientParams {
@@ -347,7 +348,7 @@ export const deleteSavedObjectIndices = async (
 
 export const getAggregatedTypesCount = async (
   client: ElasticsearchClient,
-  index: string = defaultKibanaIndex
+  index: string | string[] = [defaultKibanaIndex, defaultKibanaTaskIndex]
 ): Promise<Record<string, number>> => {
   try {
     await client.indices.refresh({ index });

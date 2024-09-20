@@ -10,17 +10,17 @@
 import { getBaselineDocuments } from '../kibana_migrator_test_kit.fixtures';
 import {
   BASELINE_DOCUMENTS_PER_TYPE_1K,
-  BASELINE_DOCUMENTS_PER_TYPE_400K,
+  BASELINE_DOCUMENTS_PER_TYPE_500K,
   BASELINE_ELASTICSEARCH_VERSION,
   BASELINE_TEST_ARCHIVE_1K,
-  BASELINE_TEST_ARCHIVE_400K,
+  BASELINE_TEST_ARCHIVE_500K,
   createBaselineArchive,
 } from '../kibana_migrator_archive_utils';
 
 /**
  * Enable and execute this test ONLY IN YOUR DEV MACHINE, in order to build new test packages
  */
-describe.skip('migration tests toolkit', () => {
+describe('migration tests toolkit', () => {
   it('can create a 1k documents ZIP archive', async () => {
     await createBaselineArchive({
       esVersion: BASELINE_ELASTICSEARCH_VERSION,
@@ -32,8 +32,8 @@ describe.skip('migration tests toolkit', () => {
   it('can create a 400k documents ZIP archive', async () => {
     await createBaselineArchive({
       esVersion: BASELINE_ELASTICSEARCH_VERSION,
-      documents: getBaselineDocuments({ documentsPerType: BASELINE_DOCUMENTS_PER_TYPE_400K }),
-      dataArchive: BASELINE_TEST_ARCHIVE_400K,
+      documents: getBaselineDocuments({ documentsPerType: BASELINE_DOCUMENTS_PER_TYPE_500K }),
+      dataArchive: BASELINE_TEST_ARCHIVE_500K,
     });
   });
 });

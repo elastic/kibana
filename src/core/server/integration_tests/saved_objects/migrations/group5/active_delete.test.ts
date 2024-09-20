@@ -148,7 +148,7 @@ describe('when upgrading to a new stack version', () => {
         } catch (err) {
           const errorMessage = err.message;
           expect(errorMessage).toMatch(
-            'Unable to complete saved object migrations for the [.kibana_migrator_tests] index: Migration failed because some documents were found which use unknown saved object types:'
+            `Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: Migration failed because some documents were found which use unknown saved object types:`
           );
           expect(errorMessage).toMatch(
             'To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.'
@@ -299,7 +299,7 @@ describe('when upgrading to a new stack version', () => {
         } catch (err) {
           const errorMessage = err.message;
           expect(errorMessage).toMatch(
-            'Unable to complete saved object migrations for the [.kibana_migrator_tests] index: Migration failed because some documents were found which use unknown saved object types:'
+            `Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: Migration failed because some documents were found which use unknown saved object types:`
           );
           expect(errorMessage).toMatch(
             'To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.'
@@ -308,10 +308,14 @@ describe('when upgrading to a new stack version', () => {
         }
 
         const logs = await readLog();
-        expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
-        expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.'); // this step is run only if mappings are compatible but NOT equal
-        expect(logs).toMatch('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
-        expect(logs).toMatch('CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL.');
+        expect(logs).toMatch(`[${defaultKibanaIndex}] INIT -> WAIT_FOR_YELLOW_SOURCE.`);
+        expect(logs).toMatch(
+          `[${defaultKibanaIndex}] WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.`
+        ); // this step is run only if mappings are compatible but NOT equal
+        expect(logs).toMatch(
+          `[${defaultKibanaIndex}] UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED.`
+        );
+        expect(logs).toMatch(`[${defaultKibanaIndex}] CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL.`);
       });
 
       it('proceeds if there are no unknown documents', async () => {
