@@ -37,6 +37,7 @@
     "@kbn/es-types",
     "@kbn/entities-schema",
     "@kbn/i18n-react",
-    "@kbn/io-ts-utils"
+    "@kbn/io-ts-utils",
+    "@kbn/core-http-browser"
   ]
 }

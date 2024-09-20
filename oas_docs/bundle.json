@@ -1493,6 +1493,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Delete a rule",
@@ -2399,6 +2408,15 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Get rule details",
@@ -3586,6 +3604,15 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "409": {
+            "description": "Indicates that the rule id is already in use."
           }
         },
         "summary": "Create a rule",
@@ -4756,6 +4783,18 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
+          },
+          "409": {
+            "description": "Indicates that the rule has already been updated by another user."
           }
         },
         "summary": "Update a rule",
@@ -4821,6 +4860,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Disable a rule",
@@ -4868,6 +4916,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Enable a rule",
@@ -5009,6 +5066,18 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
+          },
+          "409": {
+            "description": "Indicates that the rule has already been updated by another user."
           }
         },
         "summary": "Update the API key for a rule",
@@ -5065,6 +5134,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule or alert with the given ID does not exist."
           }
         },
         "summary": "Mute an alert",
@@ -5121,6 +5199,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule or alert with the given ID does not exist."
           }
         },
         "summary": "Unmute an alert",
@@ -6162,6 +6249,12 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Get information about rules",
