@@ -7,7 +7,6 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { validateDurationSchema, parseDuration } from './lib';
-import { DEFAULT_CACHE_INTERVAL_MS } from './rules_settings';
 
 export const DEFAULT_MAX_ALERTS = 1000;
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -75,9 +74,6 @@ export const configSchema = schema.object({
   enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,
-  rulesSettings: schema.object({
-    cacheInterval: schema.number({ defaultValue: DEFAULT_CACHE_INTERVAL_MS }),
-  }),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;

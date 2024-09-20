@@ -48,6 +48,7 @@ import {
   MaintenanceWindowClientApi,
   RawRule,
   RulesClientApi,
+  RulesSettingsClientApi,
   RuleTypeRegistry,
   SpaceIdToNamespaceFunction,
 } from '../types';
@@ -56,7 +57,6 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { BackfillClient } from '../backfill_client/backfill_client';
 import { ElasticsearchError } from '../lib';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { RulesSettingsService } from '../rules_settings';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -160,7 +160,6 @@ export interface TaskRunnerContext {
   backfillClient: BackfillClient;
   basePathService: IBasePath;
   cancelAlertsOnRuleTimeout: boolean;
-  connectorAdapterRegistry: ConnectorAdapterRegistry;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   elasticsearch: ElasticsearchServiceStart;
@@ -169,16 +168,17 @@ export interface TaskRunnerContext {
   executionContext: ExecutionContextStart;
   getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
+  getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
   kibanaBaseUrl: string | undefined;
   logger: Logger;
   maxAlerts: number;
   maxEphemeralActionsPerRule: number;
   ruleTypeRegistry: RuleTypeRegistry;
-  rulesSettingsService: RulesSettingsService;
   savedObjects: SavedObjectsServiceStart;
   share: SharePluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   supportsEphemeralTasks: boolean;
   uiSettings: UiSettingsServiceStart;
   usageCounter?: UsageCounter;
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
 }

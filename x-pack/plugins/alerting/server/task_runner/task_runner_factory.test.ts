@@ -28,17 +28,16 @@ import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
-import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const backfillClient = backfillClientMock.create();
-const rulesSettingsService = rulesSettingsServiceMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
@@ -104,35 +103,39 @@ describe('Task Runner Factory', () => {
   const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
-    actionsConfigMap: { default: { max: 1000 } },
-    actionsPlugin: actionsMock.createStart(),
-    alertsService: mockAlertService,
     backfillClient,
-    basePathService: httpServiceMock.createBasePath(),
-    cancelAlertsOnRuleTimeout: true,
-    connectorAdapterRegistry,
     data: dataPlugin,
     dataViews: dataViewsMock,
+    savedObjects: savedObjectsService,
+    share: {} as SharePluginStart,
+    uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
+    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
+    actionsPlugin: actionsMock.createStart(),
     encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
+    logger: loggingSystemMock.create().get(),
+    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+    basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
+    ruleTypeRegistry: ruleTypeRegistryMock.create(),
+    alertsService: mockAlertService,
+    kibanaBaseUrl: 'https://localhost:5601',
+    supportsEphemeralTasks: true,
+    maxEphemeralActionsPerRule: 10,
+    maxAlerts: 1000,
+    cancelAlertsOnRuleTimeout: true,
     executionContext,
+    usageCounter: mockUsageCounter,
+    actionsConfigMap: {
+      default: {
+        max: 1000,
+      },
+    },
+    getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
     getMaintenanceWindowClientWithRequest: jest
       .fn()
       .mockReturnValue(maintenanceWindowClientMock.create()),
-    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
-    kibanaBaseUrl: 'https://localhost:5601',
-    logger: loggingSystemMock.create().get(),
-    maxAlerts: 1000,
-    maxEphemeralActionsPerRule: 10,
-    ruleTypeRegistry: ruleTypeRegistryMock.create(),
-    rulesSettingsService,
-    savedObjects: savedObjectsService,
-    share: {} as SharePluginStart,
-    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    supportsEphemeralTasks: true,
-    uiSettings: uiSettingsService,
-    usageCounter: mockUsageCounter,
+    connectorAdapterRegistry,
   };
 
   beforeEach(() => {

@@ -15,8 +15,6 @@ import {
   AlertInstanceContext,
   Rule,
   RuleAlertData,
-  DEFAULT_FLAPPING_SETTINGS,
-  DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskRunner } from './task_runner';
@@ -56,6 +54,7 @@ import { EVENT_LOG_ACTIONS } from '../plugin';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
@@ -63,7 +62,6 @@ import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -118,7 +116,6 @@ describe('Task Runner Cancel', () => {
   const dataPlugin = dataPluginMock.createStartContract();
   const inMemoryMetrics = inMemoryMetricsMock.create();
   const connectorAdapterRegistry = new ConnectorAdapterRegistry();
-  const rulesSettingsService = rulesSettingsServiceMock.create();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -127,35 +124,39 @@ describe('Task Runner Cancel', () => {
   };
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
-    actionsConfigMap: { default: { max: 1000 } },
-    actionsPlugin: actionsMock.createStart(),
-    alertsService,
-    backfillClient,
-    basePathService: httpServiceMock.createBasePath(),
-    cancelAlertsOnRuleTimeout: true,
-    connectorAdapterRegistry,
     data: dataPlugin,
     dataViews: dataViewsMock,
+    savedObjects: savedObjectsService,
+    share: {} as SharePluginStart,
+    uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
+    actionsPlugin: actionsMock.createStart(),
+    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     encryptedSavedObjectsClient,
-    eventLogger: eventLoggerMock.create(),
+    logger,
     executionContext: executionContextServiceMock.createInternalStartContract(),
+    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+    basePathService: httpServiceMock.createBasePath(),
+    eventLogger: eventLoggerMock.create(),
+    backfillClient,
+    ruleTypeRegistry,
+    alertsService,
+    kibanaBaseUrl: 'https://localhost:5601',
+    supportsEphemeralTasks: false,
+    maxEphemeralActionsPerRule: 10,
+    maxAlerts: 1000,
+    cancelAlertsOnRuleTimeout: true,
+    usageCounter: mockUsageCounter,
+    actionsConfigMap: {
+      default: {
+        max: 1000,
+      },
+    },
+    getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
     getMaintenanceWindowClientWithRequest: jest
       .fn()
       .mockReturnValue(maintenanceWindowClientMock.create()),
-    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
-    kibanaBaseUrl: 'https://localhost:5601',
-    logger,
-    maxAlerts: 1000,
-    maxEphemeralActionsPerRule: 10,
-    ruleTypeRegistry,
-    rulesSettingsService,
-    savedObjects: savedObjectsService,
-    share: {} as SharePluginStart,
-    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    supportsEphemeralTasks: false,
-    uiSettings: uiSettingsService,
-    usageCounter: mockUsageCounter,
+    connectorAdapterRegistry,
   };
 
   beforeEach(() => {
@@ -183,10 +184,9 @@ describe('Task Runner Cancel', () => {
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
     );
-    rulesSettingsService.getSettings.mockResolvedValue({
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
-    });
+    taskRunnerFactoryInitializerParams.getRulesSettingsClientWithRequest.mockReturnValue(
+      rulesSettingsClientMock.create()
+    );
     taskRunnerFactoryInitializerParams.getMaintenanceWindowClientWithRequest.mockReturnValue(
       maintenanceWindowClientMock.create()
     );

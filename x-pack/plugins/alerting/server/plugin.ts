@@ -66,11 +66,7 @@ import { ServerlessPluginSetup } from '@kbn/serverless/server';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
-import {
-  RulesSettingsClientFactory,
-  RulesSettingsService,
-  getRulesSettingsFeature,
-} from './rules_settings';
+import { RulesSettingsClientFactory } from './rules_settings_client_factory';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
 import { AlertingRequestHandlerContext, ALERTING_FEATURE_ID, RuleAlertData } from './types';
@@ -110,6 +106,7 @@ import {
   type InitializationPromise,
   errorResult,
 } from './alerts_service';
+import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
@@ -591,38 +588,33 @@ export class AlertingPlugin {
     };
 
     taskRunnerFactory.initialize({
-      actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
-      actionsPlugin: plugins.actions,
-      alertsService: this.alertsService,
-      backfillClient: this.backfillClient!,
-      basePathService: core.http.basePath,
-      cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
-      connectorAdapterRegistry: this.connectorAdapterRegistry,
+      logger,
       data: plugins.data,
+      share: plugins.share,
       dataViews: plugins.dataViews,
+      savedObjects: core.savedObjects,
+      uiSettings: core.uiSettings,
       elasticsearch: core.elasticsearch,
+      getRulesClientWithRequest,
+      spaceIdToNamespace,
+      actionsPlugin: plugins.actions,
       encryptedSavedObjectsClient,
+      basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
       executionContext: core.executionContext,
-      getMaintenanceWindowClientWithRequest,
-      getRulesClientWithRequest,
-      kibanaBaseUrl: this.kibanaBaseUrl,
-      logger,
-      maxAlerts: this.config.rules.run.alerts.max,
-      maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
       ruleTypeRegistry: this.ruleTypeRegistry!,
-      rulesSettingsService: new RulesSettingsService({
-        cacheInterval: this.config.rulesSettings.cacheInterval,
-        getRulesSettingsClientWithRequest,
-        isServerless: !!plugins.serverless,
-        logger,
-      }),
-      savedObjects: core.savedObjects,
-      share: plugins.share,
-      spaceIdToNamespace,
+      alertsService: this.alertsService,
+      kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
-      uiSettings: core.uiSettings,
+      maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
+      cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      maxAlerts: this.config.rules.run.alerts.max,
+      actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
+      getRulesSettingsClientWithRequest,
+      getMaintenanceWindowClientWithRequest,
+      backfillClient: this.backfillClient!,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
     });
 
     this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {

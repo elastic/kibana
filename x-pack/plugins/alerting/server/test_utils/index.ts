@@ -71,6 +71,5 @@ export function generateAlertingConfig(): AlertingConfig {
         },
       },
     },
-    rulesSettings: { cacheInterval: 60000 },
   };
 }

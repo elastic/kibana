@@ -37,9 +37,6 @@ describe('config validation', () => {
             },
           },
         },
-        "rulesSettings": Object {
-          "cacheInterval": 60000,
-        },
       }
     `);
   });
