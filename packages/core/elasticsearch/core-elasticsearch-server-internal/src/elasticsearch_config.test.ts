@@ -47,6 +47,7 @@ test('set correct defaults', () => {
       "maxSockets": 800,
       "password": undefined,
       "pingTimeout": "PT30S",
+      "publicBaseUrl": undefined,
       "requestHeadersWhitelist": Array [
         "authorization",
         "es-client-authentication",
