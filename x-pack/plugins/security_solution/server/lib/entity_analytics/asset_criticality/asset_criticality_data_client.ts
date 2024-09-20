@@ -23,10 +23,6 @@ import { CRITICALITY_VALUES, assetCriticalityFieldMap } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import { getImplicitEntityFields } from './helpers';
-import {
-  ensureAssetCriticalityEnrichPolicies,
-  executeAssetCriticalityEnrichPolicies,
-} from './asset_criticality_enrich_policy';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -70,14 +66,6 @@ export class AssetCriticalityDataClient {
         outcome: AUDIT_OUTCOME.SUCCESS,
       },
     });
-  }
-
-  public async ensureEnrichPolicies() {
-    await ensureAssetCriticalityEnrichPolicies(this.options.namespace, this.options.esClient);
-  }
-
-  public async executeEnrichPolicies() {
-    await executeAssetCriticalityEnrichPolicies(this.options.namespace, this.options.esClient);
   }
 
   /**

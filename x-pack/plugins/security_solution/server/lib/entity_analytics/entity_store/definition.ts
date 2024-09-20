@@ -6,18 +6,22 @@
  */
 
 import { entityDefinitionSchema, type EntityDefinition } from '@kbn/entities-schema';
+import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
+import { getRiskScoreLatestIndex } from '../../../../common/entity_analytics/risk_engine';
+import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
 import { ENTITY_STORE_DEFAULT_SOURCE_INDICES } from './constants';
 import { buildEntityDefinitionId } from './utils/utils';
 
-export const buildHostEntityDefinition = (space: string): EntityDefinition =>
+export const buildHostEntityDefinition = (spaceId: string): EntityDefinition =>
   entityDefinitionSchema.parse({
-    id: buildEntityDefinitionId('host', space),
+    id: buildEntityDefinitionId('host', spaceId),
     name: 'EA Host Store',
     type: 'host',
     indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
     identityFields: ['host.name'],
     displayNameTemplate: '{{host.name}}',
     metadata: [
+      'asset.criticality',
       'host.domain',
       'host.hostname',
       'host.id',
@@ -26,6 +30,7 @@ export const buildHostEntityDefinition = (space: string): EntityDefinition =>
       'host.name',
       'host.type',
       'host.architecture',
+      'host.risk.calculated_level',
     ],
     history: {
       timestampField: '@timestamp',
@@ -35,15 +40,25 @@ export const buildHostEntityDefinition = (space: string): EntityDefinition =>
     managed: true,
   });
 
-export const buildUserEntityDefinition = (space: string): EntityDefinition =>
+export const buildUserEntityDefinition = (spaceId: string): EntityDefinition =>
   entityDefinitionSchema.parse({
-    id: buildEntityDefinitionId('user', space),
+    id: buildEntityDefinitionId('user', spaceId),
     name: 'EA User Store',
     type: 'user',
     indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
     identityFields: ['user.name'],
     displayNameTemplate: '{{user.name}}',
-    metadata: ['user.email', 'user.full_name', 'user.hash', 'user.id', 'user.name', 'user.roles'],
+    metadata: [
+      'asset.criticality',
+      'user.domain',
+      'user.email',
+      'user.full_name',
+      'user.hash',
+      'user.id',
+      'user.name',
+      'user.roles',
+      'user.risk.calculated_level',
+    ],
     history: {
       timestampField: '@timestamp',
       interval: '1m',
@@ -51,3 +66,22 @@ export const buildUserEntityDefinition = (space: string): EntityDefinition =>
     version: '1.0.0',
     managed: true,
   });
+
+const ENTITY_TYPE_TO_ENTITY_DEFINITION: Record<EntityType, (spaceId: string) => EntityDefinition> =
+  {
+    host: buildHostEntityDefinition,
+    user: buildUserEntityDefinition,
+  };
+
+// TODO: space support
+export const getDefinitionForEntityType = (entityType: EntityType, spaceId: string) => {
+  const definitionBuilder = ENTITY_TYPE_TO_ENTITY_DEFINITION[entityType];
+  const entityDefinition = { ...definitionBuilder(spaceId) };
+
+  entityDefinition.indexPatterns.push(
+    getAssetCriticalityIndex(spaceId),
+    getRiskScoreLatestIndex(spaceId)
+  );
+
+  return entityDefinition;
+};

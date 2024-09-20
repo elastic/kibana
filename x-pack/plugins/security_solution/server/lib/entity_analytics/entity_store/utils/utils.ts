@@ -11,20 +11,7 @@ import {
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
-import { buildHostEntityDefinition, buildUserEntityDefinition } from '../definition';
 import { entityEngineDescriptorTypeName } from '../saved_object';
-import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
-
-export const getEntityDefinition = (entityType: EntityType, spaceId: string = 'default') => {
-  const entityDefinition =
-    entityType === 'host' ? buildHostEntityDefinition(spaceId) : buildUserEntityDefinition(spaceId);
-
-  const assetCriticalityIndex = getAssetCriticalityIndex(spaceId);
-
-  entityDefinition.indexPatterns.push(assetCriticalityIndex);
-
-  return entityDefinition;
-};
 
 export const getIdentityFieldForEntityType = (entityType: EntityType) => {
   if (entityType === 'host') return 'host.name';
