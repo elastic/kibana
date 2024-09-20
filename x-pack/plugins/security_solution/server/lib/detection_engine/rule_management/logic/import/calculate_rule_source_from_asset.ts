@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { RuleSource } from '../../../../../../../../common/api/detection_engine';
-import type { DiffableRuleInput } from '../../../../../../../../common/detection_engine/prebuilt_rules/diff/types';
-import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
-import { calculateIsCustomized } from './calculate_is_customized';
+import type { RuleSource } from '../../../../../../common/api/detection_engine';
+import type { DiffableRuleInput } from '../../../../../../common/detection_engine/prebuilt_rules/diff/types';
+import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
+import { calculateIsCustomized } from '../detection_rules_client/mergers/rule_source/calculate_is_customized';
 
 /**
  * Calculates rule_source for a rule based on two pieces of information:

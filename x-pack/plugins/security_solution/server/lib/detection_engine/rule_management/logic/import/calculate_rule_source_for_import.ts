@@ -10,7 +10,7 @@ import type {
   ValidatedRuleToImport,
 } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
-import { calculateRuleSourceFromAsset } from '../detection_rules_client/mergers/rule_source/calculate_rule_source_from_asset';
+import { calculateRuleSourceFromAsset } from './calculate_rule_source_from_asset';
 
 /**
  * Calculates the rule_source field for a rule being imported

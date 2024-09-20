@@ -6,8 +6,8 @@
  */
 
 import { calculateRuleSourceFromAsset } from './calculate_rule_source_from_asset';
-import { getRulesSchemaMock } from '../../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { getPrebuiltRuleMock } from '../../../../../prebuilt_rules/mocks';
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { getPrebuiltRuleMock } from '../../../prebuilt_rules/mocks';
 
 describe('calculateRuleSourceFromAsset', () => {
   it('calculates as internal if no asset is found', () => {
