@@ -559,12 +559,13 @@ describe('Response actions', () => {
         expect(
           (await endpointAppContextService.getTelemetryService().reportEvent) as jest.Mock
         ).toHaveBeenCalledWith('endpoint_response_action_sent', {
-          responseActions: expect.objectContaining({
+          responseActions: {
             actionId: expect.any(String),
             agentType: 'endpoint',
             command,
             endpointIds: ['agent-a'],
-          }),
+            isAutomated: false,
+          },
         });
       });
 
@@ -603,11 +604,11 @@ describe('Response actions', () => {
         expect(
           (await endpointAppContextService.getTelemetryService().reportEvent) as jest.Mock
         ).toHaveBeenCalledWith('endpoint_response_action_sent_error', {
-          responseActions: expect.objectContaining({
+          responseActions: {
             agentType: 'endpoint',
             command,
             error: expect.any(ResponseActionsClientError),
-          }),
+          },
         });
       });
     });
