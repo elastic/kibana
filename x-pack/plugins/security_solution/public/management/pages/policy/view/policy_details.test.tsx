@@ -225,7 +225,7 @@ describe('Policy Details', () => {
       expect(tab).toHaveLength(1);
     });
 
-    it("shouldn't display when user doesn't have access", async () => {
+    it("shouldn't display the host isolation exceptions tab when user doesn't have access", async () => {
       useHostIsolationExceptionsAccessMock.mockReturnValue({
         hasAccessToHostIsolationExceptions: false,
         isHostIsolationExceptionsAccessLoading: false,
