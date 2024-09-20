@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from './use_kibana';
 import * as i18n from './translations';
@@ -44,4 +44,23 @@ export const useDeleteEndpoint = (onSuccess?: () => void) => {
       },
     }
   );
+};
+
+interface ShowUsageArgs {
+  type: string;
+  id: string;
+}
+
+export const useShowUsage = ({ type, id }: ShowUsageArgs) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: ['inference-endpoint-show-usage'],
+    queryFn: () =>
+      services.http.delete(`/internal/inference_endpoint/endpoints/${type}/${id}`, {
+        query: {
+          showUsage: true,
+        },
+      }),
+  });
 };
