@@ -140,7 +140,7 @@ Array [
     "type": "index-pattern",
   },
   Object {
-    "appLink": "",
+    "appLink": "/app/ml/supplied_configurations/?_a=(supplied_configurations%3A(queryText%3A'Nginx%20access%20logs'))",
     "attributes": Object {
       "description": "Find unusual activity in HTTP access logs from filebeat (ECS).",
       "title": "Nginx access logs",
