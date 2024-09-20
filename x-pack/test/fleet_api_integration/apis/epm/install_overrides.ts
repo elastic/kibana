@@ -61,6 +61,7 @@ export default function (providerContext: FtrProviderContext) {
         `logs@mappings`,
         `logs@settings`,
         `${templateName}@package`,
+        'logs@custom',
         `${templateName}@custom`,
         `ecs@mappings`,
         '.fleet_globals-1',

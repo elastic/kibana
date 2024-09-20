@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   DataViewBase,
   EsQueryConfig,
@@ -86,6 +87,7 @@ import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { canTrackContentfulRender } from '@kbn/presentation-containers';
+import { getSuccessfulRequestTimings } from '../report_performance_metric_util';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -1076,6 +1078,18 @@ export class Embeddable
       ...this.getOutput(),
       rendered: true,
     });
+
+    const inspectorAdapters = this.getInspectorAdapters();
+    const timings = getSuccessfulRequestTimings(inspectorAdapters);
+    if (timings) {
+      const esRequestMetrics = {
+        eventName: 'lens_chart_es_request_totals',
+        duration: timings.requestTimeTotal,
+        key1: 'es_took_total',
+        value1: timings.esTookTotal,
+      };
+      reportPerformanceMetricEvent(this.deps.coreStart.analytics, esRequestMetrics);
+    }
   };
 
   getExecutionContext() {
