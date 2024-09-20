@@ -6,8 +6,10 @@
  */
 
 import { AgentName } from '@kbn/elastic-agent-utils';
-import { Span } from '@kbn/apm-types';
 import {
+  APMError,
+  Span,
+  SpanLink,
   AGENT_NAME,
   AGENT_VERSION,
   AT_TIMESTAMP,
@@ -61,8 +63,8 @@ import {
   ERROR_GROUP_ID,
   ERROR_ID,
   ERROR_LOG_MESSAGE,
-} from '@kbn/apm-types/src/es_fields/apm';
-import { SpanLink } from '@kbn/apm-types/src/es_schemas/raw/fields/span_links';
+  HOST_NAME,
+} from '@kbn/apm-types';
 import {
   WaterfallError,
   WaterfallSpan,
@@ -401,6 +403,56 @@ export const errorGroupMainStatisticsMapping = (fields: Partial<Record<string, u
       grouping_key: normalizeValue<string>(fields[ERROR_GROUP_ID]),
     },
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
+  };
+};
+
+export const errorSampleDetails = (fields: Partial<Record<string, unknown[]>>): APMError => {
+  return {
+    observer: {
+      type: normalizeValue<string>(fields[OBSERVER_TYPE]),
+      version: normalizeValue<string>(fields[OBSERVER_VERSION]),
+      version_major: normalizeValue<number>(fields[OBSERVER_VERSION_MAJOR]),
+    },
+    agent: {
+      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
+      version: '',
+    },
+    trace: {
+      id: normalizeValue<string>(fields[TRACE_ID]),
+    },
+    '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
+    service: {
+      node: {
+        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
+      },
+      name: normalizeValue<string>(fields[SERVICE_NAME]),
+      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
+    },
+    host: {
+      name: normalizeValue<string>(fields[HOST_NAME]),
+    },
+    error: {
+      id: normalizeValue<string>(fields[ERROR_ID]),
+      exception: [
+        {
+          message: normalizeValue<string>(fields[ERROR_EXC_MESSAGE]),
+          type: normalizeValue<string>(fields[ERROR_EXC_TYPE]),
+        },
+      ],
+      grouping_key: normalizeValue<string>(fields[ERROR_GROUP_ID]),
+    },
+    processor: {
+      name: normalizeValue<'error'>(fields[PROCESOR_NAME]),
+      event: normalizeValue<'error'>(fields[PROCESSOR_EVENT]),
+    },
+    transaction: {
+      id: normalizeValue<string>(fields[TRANSACTION_ID]),
+      type: normalizeValue<string>(fields[TRANSACTION_TYPE]),
+      sampled: normalizeValue<boolean>(fields[TRANSACTION_SAMPLED]),
+    },
+    timestamp: {
+      us: normalizeValue<number>(fields[TIMESTAMP]),
+    },
   };
 };
 
