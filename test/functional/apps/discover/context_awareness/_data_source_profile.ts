@@ -102,6 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickNewDashboard();
         await timePicker.setDefaultAbsoluteRange();
+        await ebtUIHelper.setOptIn(true);
         await dashboardAddPanel.addSavedSearch('A Saved Search');
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
