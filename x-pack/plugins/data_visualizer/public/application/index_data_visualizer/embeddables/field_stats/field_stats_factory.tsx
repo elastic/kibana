@@ -392,18 +392,20 @@ export const getFieldStatsChartEmbeddableFactory = (
 
           if (isEsqlMode && !isEsqlEnabled) {
             return (
-              <EuiCallOut
-                title={
-                  <h3>
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.fieldStats.noDataViewSelected"
-                      defaultMessage="ES|QL is disabled"
-                    />
-                  </h3>
-                }
-                color="warning"
-                iconType="alert"
-              />
+              <EuiFlexItem css={statsTableCss} data-test-subj="dashboardFieldStatsEmbeddedContent">
+                <EuiCallOut
+                  title={
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.fieldStats.noDataViewSelected"
+                        defaultMessage="ES|QL is disabled"
+                      />
+                    </h3>
+                  }
+                  color="warning"
+                  iconType="alert"
+                />
+              </EuiFlexItem>
             );
           }
 
