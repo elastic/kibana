@@ -7,10 +7,11 @@
 
 import { entityDefinitionSchema, type EntityDefinition } from '@kbn/entities-schema';
 import { ENTITY_STORE_DEFAULT_SOURCE_INDICES } from './constants';
+import { buildEntityDefinitionId } from './utils/utils';
 
-export const HOST_ENTITY_DEFINITION: (id: string) => EntityDefinition = (id) =>
+export const buildHostEntityDefinition = (space: string): EntityDefinition =>
   entityDefinitionSchema.parse({
-    id,
+    id: buildEntityDefinitionId('host', space),
     name: 'EA Host Store',
     type: 'host',
     indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
@@ -33,23 +34,14 @@ export const HOST_ENTITY_DEFINITION: (id: string) => EntityDefinition = (id) =>
     version: '1.0.0',
   });
 
-export const USER_ENTITY_DEFINITION: (id: string) => EntityDefinition = (id) =>
+export const buildUserEntityDefinition = (space: string): EntityDefinition =>
   entityDefinitionSchema.parse({
-    id,
+    id: buildEntityDefinitionId('user', space),
     name: 'EA User Store',
-    type: 'user',
     indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
     identityFields: ['user.name'],
     displayNameTemplate: '{{user.name}}',
-    metadata: [
-      'user.domain',
-      'user.email',
-      'user.full_name',
-      'user.hash',
-      'user.id',
-      'user.name',
-      'user.roles',
-    ],
+    metadata: ['user.email', 'user.full_name', 'user.hash', 'user.id', 'user.name', 'user.roles'],
     history: {
       timestampField: '@timestamp',
       interval: '1m',

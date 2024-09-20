@@ -5,23 +5,34 @@
  * 2.0.
  */
 
+import {
+  ENTITY_LATEST,
+  ENTITY_SCHEMA_VERSION_V1,
+  entitiesIndexPattern,
+} from '@kbn/entities-schema';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
-import { HOST_ENTITY_DEFINITION, USER_ENTITY_DEFINITION } from '../definition';
+import { buildHostEntityDefinition, buildUserEntityDefinition } from '../definition';
+
 import { entityEngineDescriptorTypeName } from '../saved_object';
 
 export const getEntityDefinition = (entityType: EntityType, space: string) => {
-  if (entityType === 'host')
-    return HOST_ENTITY_DEFINITION(buildEntityDefinitionId(entityType, space));
-  if (entityType === 'user')
-    return USER_ENTITY_DEFINITION(buildEntityDefinitionId(entityType, space));
+  if (entityType === 'host') return buildHostEntityDefinition(space);
+  if (entityType === 'user') return buildUserEntityDefinition(space);
 
   throw new Error(`Unsupported entity type: ${entityType}`);
 };
 
-export const buildEntityDefinitionId = (entityType: EntityType, space: string) => {
-  return `ea_${space}_${entityType}_entity_store`;
-};
-
 export const getByEntityTypeQuery = (entityType: EntityType) => {
   return `${entityEngineDescriptorTypeName}.attributes.type: ${entityType}`;
+};
+
+export const getEntitiesIndexName = (entityType: EntityType, namespace: string) =>
+  entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+    dataset: ENTITY_LATEST,
+    definitionId: buildEntityDefinitionId(entityType, namespace),
+  });
+
+export const buildEntityDefinitionId = (entityType: EntityType, space: string) => {
+  return `ea_${space}_${entityType}_entity_store`;
 };
