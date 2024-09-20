@@ -36,7 +36,6 @@
     "@kbn/entities-schema",
     "@kbn/i18n-react",
     "@kbn/io-ts-utils",
-    "@kbn/react-kibana-context-theme",
     "@kbn/core-analytics-browser"
   ]
 }
