@@ -222,12 +222,10 @@ export function getQueryParams({
       searchFieldsParam.length === 0 ||
       (searchFieldsParam.length === 1 && searchFieldsParam[0] === '*');
 
-    const { simpleQuerySearchFields, simpleQueryTypes, nestedQueryFields } = getFieldsByQueryType({
+    const { simpleQuerySearchFields, nestedQueryFields } = getFieldsByQueryType({
       searchFields: searchFieldsParam,
       types,
       mappings,
-      useMatchPhrasePrefix,
-      isSearchingInAllFields,
     });
 
     const useNestedStringClause = nestedQueryFields.size > 0;
@@ -239,7 +237,7 @@ export function getQueryParams({
       ? getSimpleQueryStringClause({
           search,
           searchFields: simpleQuerySearchFields,
-          types: simpleQueryTypes,
+          types,
           rootSearchFields,
           defaultSearchOperator,
         })
@@ -256,7 +254,7 @@ export function getQueryParams({
       ? getMatchPhrasePrefixClauses({
           search,
           searchFields: simpleQuerySearchFields,
-          types: simpleQueryTypes,
+          types,
           registry,
           mappings,
         })
@@ -300,7 +298,7 @@ const getMatchPhrasePrefixClauses = ({
 }) => {
   // need to remove the prefix search operator
   const query = search.replace(/[*]$/, '');
-  const mppFields = getMatchPhrasePrefixFields({ searchFields, types, registry, mappings });
+  const mppFields = getMatchPhrasePrefixFields({ searchFields, types, registry });
   return mppFields.map(({ field, boost }) => {
     return {
       match_phrase_prefix: {
@@ -322,12 +320,10 @@ const getMatchPhrasePrefixFields = ({
   searchFields = [],
   types,
   registry,
-  mappings,
 }: {
   searchFields?: string[];
   types: string[];
   registry: ISavedObjectTypeRegistry;
-  mappings: IndexMapping;
 }): FieldWithBoost[] => {
   const output: FieldWithBoost[] = [];
 
@@ -344,15 +340,7 @@ const getMatchPhrasePrefixFields = ({
   } else {
     fields = [];
     for (const field of searchFields) {
-      fields = fields.concat(
-        types
-          .map((type) => `${type}.${field}`)
-          .filter((absoluteFieldPath) => {
-            const parentNode = absoluteFieldPath.split('.').slice(0, -1).join('.');
-            const parentNodeType = getProperty(mappings, parentNode)?.type;
-            return parentNodeType !== 'nested';
-          })
-      );
+      fields = fields.concat(types.map((type) => `${type}.${field}`));
     }
   }
 
@@ -385,16 +373,11 @@ const getFieldsByQueryType = ({
   searchFields,
   types,
   mappings,
-  useMatchPhrasePrefix,
-  isSearchingInAllFields,
 }: {
   searchFields: string[];
   types: string[];
   mappings: IndexMapping;
-  useMatchPhrasePrefix: boolean;
-  isSearchingInAllFields: boolean;
 }): {
-  simpleQueryTypes: string[];
   simpleQuerySearchFields: string[];
   nestedQueryFields: Map<string, string[]>;
 } => {
@@ -408,37 +391,22 @@ const getFieldsByQueryType = ({
       const isBoostedOrWildcard = rawSearchField !== searchField;
       const isFieldDefinedAsNested = searchField.split('.').length > 1;
       const absoluteFieldPath = `${type}.${searchField}`;
-      const nodeType = getProperty(mappings, absoluteFieldPath)?.type;
       const parentNode = absoluteFieldPath.split('.').slice(0, -1).join('.');
       const parentNodeType = getProperty(mappings, parentNode)?.type;
 
-      if (isFieldDefinedAsNested && nodeType !== undefined) {
-        if (parentNodeType === 'nested') {
-          nestedQueryFields.set(parentNode, [
-            ...(nestedQueryFields.get(parentNode) || []),
-            absoluteFieldPath,
-          ]);
-        } else {
-          simpleQuerySearchFields.add(rawSearchField);
-          simpleQueryTypes.add(type);
-        }
-      } else if (isBoostedOrWildcard || (nodeType !== undefined && nodeType !== 'nested')) {
+      if (isFieldDefinedAsNested && parentNodeType === 'nested') {
+        nestedQueryFields.set(parentNode, [
+          ...(nestedQueryFields.get(parentNode) || []),
+          isBoostedOrWildcard ? `${type}.${rawSearchField}` : absoluteFieldPath,
+        ]);
+      } else {
         simpleQuerySearchFields.add(rawSearchField);
         simpleQueryTypes.add(type);
       }
     });
   });
 
-  if (nestedQueryFields.size === 0 || isSearchingInAllFields || useMatchPhrasePrefix) {
-    return {
-      simpleQueryTypes: types,
-      simpleQuerySearchFields: searchFields,
-      nestedQueryFields: new Map(),
-    };
-  }
-
   return {
-    simpleQueryTypes: Array.from(simpleQueryTypes.values()),
     simpleQuerySearchFields: Array.from(simpleQuerySearchFields.values()),
     nestedQueryFields,
   };
