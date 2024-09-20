@@ -7,9 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { PathWithOwners } from './src/file_code_owner';
-export {
-  getPathsWithOwnersReversed,
-  getCodeOwnersForFile,
-  runGetOwnersForFileCli,
-} from './src/file_code_owner';
+require('../src/setup_node_env');
+require('@kbn/code-owners').runGetOwnersForFileCli();
