@@ -53,7 +53,7 @@ const mockUseKibana = () => {
 };
 
 describe('useAlertsCount', () => {
-  const ruleTypeIds: string[] = ['infrastructure'];
+  const ruleTypeIds: string[] = ['metrics.alert.inventory.threshold'];
 
   beforeAll(() => {
     mockUseKibana();
@@ -103,7 +103,7 @@ describe('useAlertsCount', () => {
           terms: { field: ALERT_STATUS },
         },
       },
-      feature_ids: ruleTypeIds,
+      rule_type_ids: ruleTypeIds,
       query,
       size: 0,
     });
