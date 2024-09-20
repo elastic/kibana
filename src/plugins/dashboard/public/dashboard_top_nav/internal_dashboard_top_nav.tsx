@@ -54,9 +54,8 @@ import {
   navigationService,
   serverlessService,
 } from '../services/kibana_services';
-import { pluginServices } from '../services/plugin_services';
 import './_dashboard_top_nav.scss';
-import { initializerContextService } from '../services/dashboard_services';
+import { capabilitiesService, recentlyAccessedService } from '../services/dashboard_services';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -86,7 +85,6 @@ export function InternalDashboardTopNav({
   /**
    * Unpack dashboard services
    */
-  const { dashboardRecentlyAccessed } = pluginServices.getServices();
   const isLabsEnabled = coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
@@ -151,14 +149,14 @@ export function InternalDashboardTopNav({
         title,
         lastSavedId
       );
-      dashboardRecentlyAccessed.add(
+      recentlyAccessedService.add(
         getFullEditPath(lastSavedId, viewMode === 'edit'),
         title,
         lastSavedId
       );
     }
     return () => subscription.unsubscribe();
-  }, [lastSavedId, viewMode, title, dashboardRecentlyAccessed]);
+  }, [lastSavedId, viewMode, title]);
 
   /**
    * Set breadcrumbs to dashboard title when dashboard's title or view mode changes

@@ -19,6 +19,7 @@ import { pluginServices } from '../services/plugin_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
 import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import { favoritesService } from '../services/dashboard_services';
 
 export const DashboardListing = ({
   children,
@@ -29,7 +30,6 @@ export const DashboardListing = ({
 }: DashboardListingProps) => {
   const {
     dashboardContentInsights: { contentInsightsClient },
-    dashboardFavorites,
   } = pluginServices.getServices();
 
   useExecutionContext(coreServices.executionContext, {
@@ -52,7 +52,7 @@ export const DashboardListing = ({
           core: coreServices,
           savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
           FormattedRelative,
-          favorites: dashboardFavorites,
+          favorites: favoritesService,
           contentInsightsClient,
         }}
       >

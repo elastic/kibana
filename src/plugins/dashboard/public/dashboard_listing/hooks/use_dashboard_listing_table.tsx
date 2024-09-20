@@ -7,30 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { DashboardContainerInput } from '../../../common';
+import { DashboardItem } from '../../../common/content_management';
 import {
   DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../dashboard_constants';
+import { capabilitiesService, recentlyAccessedService } from '../../services/dashboard_services';
+import { coreServices } from '../../services/kibana_services';
+import { pluginServices } from '../../services/plugin_services';
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
 } from '../_dashboard_listing_strings';
-import { DashboardContainerInput } from '../../../common';
-import { DashboardSavedObjectUserContent } from '../types';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
-import { pluginServices } from '../../services/plugin_services';
-import { DashboardItem } from '../../../common/content_management';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
-import { capabilitiesService, coreServices } from '../../services/kibana_services';
+import { DashboardSavedObjectUserContent } from '../types';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -99,7 +100,6 @@ export const useDashboardListingTable = ({
       updateDashboardMeta,
       checkForDuplicateDashboardTitle,
     },
-    dashboardRecentlyAccessed,
   } = pluginServices.getServices();
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
@@ -302,7 +302,7 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
-      recentlyAccessed: dashboardRecentlyAccessed,
+      recentlyAccessed: recentlyAccessedService,
     };
   }, [
     contentEditorValidators,
@@ -324,7 +324,6 @@ export const useDashboardListingTable = ({
     title,
     updateItemMeta,
     urlStateEnabled,
-    dashboardRecentlyAccessed,
   ]);
 
   const refreshUnsavedDashboards = useCallback(

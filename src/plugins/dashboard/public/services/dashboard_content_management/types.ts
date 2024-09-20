@@ -15,7 +15,6 @@ import { DashboardContainerInput } from '../../../common';
 import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content_management';
 import { DashboardStartDependencies } from '../../plugin';
 import { DashboardBackupServiceType } from '../dashboard_backup/types';
-import { DashboardInitializerContextService } from '../initializer_context/types';
 import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import {
   FindDashboardsByIdResponse,
@@ -25,7 +24,6 @@ import {
 
 export interface DashboardContentManagementRequiredServices {
   dashboardBackup: DashboardBackupServiceType;
-  initializerContext: DashboardInitializerContextService;
 }
 
 export interface DashboardContentManagementService {

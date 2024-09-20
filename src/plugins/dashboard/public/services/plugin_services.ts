@@ -19,19 +19,13 @@ import { DashboardPluginServiceParams, DashboardServices } from './types';
 import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup_service';
 import { dashboardContentInsightsServiceFactory } from './dashboard_content_insights/dashboard_content_insights_service';
 import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management_service';
-import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service';
-import { dashboardRecentlyAccessedFactory } from './dashboard_recently_accessed/dashboard_recently_accessed';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
-    'initializerContext',
     'dashboardBackup',
   ]),
   dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory),
-
-  dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedFactory),
   dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),
-  dashboardFavorites: new PluginServiceProvider(dashboardFavoritesServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

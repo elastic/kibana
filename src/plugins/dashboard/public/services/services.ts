@@ -23,7 +23,7 @@ export const setServices = (
   initializerContext: PluginInitializerContext
 ) => {
   setKibanaServices(kibanaCore, deps);
-  setDashboardServices(kibanaCore, deps, initializerContext);
+  setDashboardServices(kibanaCore, deps);
   servicesReady$.next(true);
 };
 
