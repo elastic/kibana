@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  GetInvestigationNotesResponse,
-  InvestigationNoteResponse,
-} from '@kbn/investigation-shared';
+import { i18n } from '@kbn/i18n';
+import { GetInvestigationNotesResponse } from '@kbn/investigation-shared';
 import {
   QueryObserverResult,
   RefetchOptions,
@@ -20,7 +18,6 @@ import { useKibana } from './use_kibana';
 
 export interface Params {
   investigationId: string;
-  initialNotes?: InvestigationNoteResponse[];
 }
 
 export interface Response {
@@ -35,7 +32,7 @@ export interface Response {
   data: GetInvestigationNotesResponse | undefined;
 }
 
-export function useFetchInvestigationNotes({ investigationId, initialNotes }: Params): Response {
+export function useFetchInvestigationNotes({ investigationId }: Params): Response {
   const {
     core: {
       http,
@@ -45,20 +42,20 @@ export function useFetchInvestigationNotes({ investigationId, initialNotes }: Pa
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: investigationKeys.fetchNotes({ investigationId }),
+      queryKey: investigationKeys.detailNotes(investigationId),
       queryFn: async ({ signal }) => {
         return await http.get<GetInvestigationNotesResponse>(
           `/api/observability/investigations/${investigationId}/notes`,
           { version: '2023-10-31', signal }
         );
       },
-      initialData: initialNotes,
       refetchOnWindowFocus: false,
       refetchInterval: 10 * 1000,
-      refetchIntervalInBackground: true,
       onError: (error: Error) => {
         toasts.addError(error, {
-          title: 'Something went wrong while fetching investigation notes',
+          title: i18n.translate('xpack.investigateApp.useFetchInvestigationNotes.errorTitle', {
+            defaultMessage: 'Something went wrong while fetching investigation notes',
+          }),
         });
       },
     }

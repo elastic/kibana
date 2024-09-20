@@ -28,6 +28,7 @@ export const getConfigurationTelemetryData = async ({
     page: 1,
     perPage: 5,
     type: CASE_CONFIGURE_SAVED_OBJECT,
+    namespaces: ['*'],
     aggs: {
       closureType: {
         terms: { field: `${CASE_CONFIGURE_SAVED_OBJECT}.attributes.closure_type` },

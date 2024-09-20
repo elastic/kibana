@@ -8,7 +8,6 @@
  */
 
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiHasParentApi } from '@kbn/presentation-publishing';
@@ -19,13 +18,11 @@ import { BehaviorSubject } from 'rxjs';
 import { ControlStateManager } from '../controls/types';
 import { ControlGroupEditor } from './components/control_group_editor';
 import { ControlGroupApi, ControlGroupEditorState } from './types';
+import { coreServices } from '../../services/kibana_services';
 
 export const openEditControlGroupFlyout = (
   controlGroupApi: ControlGroupApi,
-  stateManager: ControlStateManager<ControlGroupEditorState>,
-  services: {
-    core: CoreStart;
-  }
+  stateManager: ControlStateManager<ControlGroupEditorState>
 ) => {
   /**
    * Duplicate all state into a new manager because we do not want to actually apply the changes
@@ -50,7 +47,7 @@ export const openEditControlGroupFlyout = (
   };
 
   const onDeleteAll = (ref: OverlayRef) => {
-    services.core.overlays
+    coreServices.overlays
       .openConfirm(
         i18n.translate('controls.controlGroup.management.delete.sub', {
           defaultMessage: 'Controls are not recoverable once removed.',
@@ -73,11 +70,11 @@ export const openEditControlGroupFlyout = (
           Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
             controlGroupApi.removePanel(childId);
           });
-        ref.close();
+        closeOverlay(ref);
       });
   };
 
-  const overlay = services.core.overlays.openFlyout(
+  const overlay = coreServices.overlays.openFlyout(
     toMountPoint(
       <ControlGroupEditor
         api={controlGroupApi}
@@ -96,8 +93,8 @@ export const openEditControlGroupFlyout = (
         onCancel={() => closeOverlay(overlay)}
       />,
       {
-        theme: services.core.theme,
-        i18n: services.core.i18n,
+        theme: coreServices.theme,
+        i18n: coreServices.i18n,
       }
     ),
     {

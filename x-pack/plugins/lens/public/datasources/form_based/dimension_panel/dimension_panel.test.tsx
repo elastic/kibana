@@ -301,7 +301,7 @@ describe('FormBasedDimensionEditor', () => {
       const optionsList = screen.getByRole('dialog');
       return within(optionsList)
         .getAllByRole('option')
-        .map((option) => option.textContent);
+        .map((option) => within(option).getByTestId('fullText').textContent);
     };
 
     return { ...rtlRender, getVisibleFieldSelectOptions };
@@ -344,21 +344,20 @@ describe('FormBasedDimensionEditor', () => {
     expect(screen.queryByTestId('indexPattern-dimension-field')).not.toBeInTheDocument();
   });
 
-  it('should not show any choices if the filter returns false', () => {
+  it('should not show any choices if the filter returns false', async () => {
     renderDimensionPanel({
       columnId: 'col2',
       filterOperations: () => false,
     });
-    userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
+    await userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
     expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
-
-  it('should list all field names and document as a whole in prioritized order', () => {
+  test('should list all field names and document as a whole in prioritized order', async () => {
     const { getVisibleFieldSelectOptions } = renderDimensionPanel();
 
     const comboBoxButton = screen.getAllByRole('button', { name: /open list of options/i })[0];
     const comboBoxInput = screen.getAllByTestId('comboBoxSearchInput')[0];
-    userEvent.click(comboBoxButton);
+    await userEvent.click(comboBoxButton);
 
     const allOptions = [
       'Records',
@@ -371,14 +370,9 @@ describe('FormBasedDimensionEditor', () => {
     ];
     expect(allOptions.slice(0, 7)).toEqual(getVisibleFieldSelectOptions());
 
-    // keep hitting arrow down to scroll to the next options (react-window only renders visible options)
-    userEvent.type(comboBoxInput, '{ArrowDown}'.repeat(12));
-
-    expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(5, 16));
-
-    // press again to go back to the beginning
-    userEvent.type(comboBoxInput, '{ArrowDown}');
-    expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(0, 9));
+    // // press arrow up to go back to the beginning
+    await userEvent.type(comboBoxInput, '{ArrowUp}{ArrowUp}');
+    expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(8));
   });
 
   it('should hide fields that have no data', () => {

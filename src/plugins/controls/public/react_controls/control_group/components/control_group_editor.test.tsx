@@ -9,11 +9,18 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+
 import { render } from '@testing-library/react';
-import { ControlGroupEditor } from './control_group_editor';
-import { ControlGroupApi, ControlStyle, ParentIgnoreSettings } from '../../..';
-import { ControlGroupChainingSystem, DEFAULT_CONTROL_STYLE } from '../../../../common';
+
+import { ControlGroupApi } from '../../..';
+import {
+  ControlGroupChainingSystem,
+  ControlLabelPosition,
+  DEFAULT_CONTROL_LABEL_POSITION,
+  ParentIgnoreSettings,
+} from '../../../../common';
 import { DefaultControlApi } from '../../controls/types';
+import { ControlGroupEditor } from './control_group_editor';
 
 describe('render', () => {
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
@@ -26,7 +33,7 @@ describe('render', () => {
     onDeleteAll: () => {},
     stateManager: {
       chainingSystem: new BehaviorSubject<ControlGroupChainingSystem>('HIERARCHICAL'),
-      labelPosition: new BehaviorSubject<ControlStyle>(DEFAULT_CONTROL_STYLE),
+      labelPosition: new BehaviorSubject<ControlLabelPosition>(DEFAULT_CONTROL_LABEL_POSITION),
       autoApplySelections: new BehaviorSubject<boolean>(true),
       ignoreParentSettings: new BehaviorSubject<ParentIgnoreSettings | undefined>(undefined),
     },

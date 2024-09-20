@@ -7,8 +7,7 @@
 
 import datemath from '@elastic/datemath';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { CoreRequestHandlerContext } from '@kbn/core/server';
-import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { flattenObject, KeyValuePair } from '../../../../common/utils/flatten_object';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { PROCESSOR_EVENT, TRACE_ID } from '../../../../common/es_fields/apm';
@@ -26,12 +25,12 @@ export interface LogCategory {
 export async function getLogCategories({
   apmEventClient,
   esClient,
-  coreContext,
+  logSourcesService,
   arguments: args,
 }: {
   apmEventClient: APMEventClient;
   esClient: ElasticsearchClient;
-  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
+  logSourcesService: LogSourcesService;
   arguments: {
     start: string;
     end: string;
@@ -53,7 +52,7 @@ export async function getLogCategories({
     Object.entries(args.entities).map(([key, value]) => ({ field: key, value }))
   );
 
-  const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
+  const index = await logSourcesService.getFlattenedLogSources();
   const search = getTypedSearch(esClient);
 
   const query = {

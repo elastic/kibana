@@ -1,17 +1,28 @@
-## DATE_FORMAT
+# DATE_FORMAT
 
-The `DATE_FORMAT` function returns a string representation of a date in the provided format. If no format is specified, the default format `yyyy-MM-dd'T'HH:mm:ss.SSSZ` is used. If the date expression is null, the function returns null.
+The DATE_FORMAT function returns a string representation of a date, formatted according to the provided format.
 
-### Examples
+## Syntax
+
+`DATE_FORMAT(dateFormat, date)`
+
+### Parameters
+
+#### dateFormat
+
+This is an optional parameter that specifies the desired date format.
+If no format is provided, the function defaults to the `yyyy-MM-dd'T'HH:mm:ss.SSSZ` format.
+
+#### date
+
+This is the date expression that you want to format.
+
+## Examples
+
+In this example, the `hire_date` field is formatted according to the "YYYY-MM-dd" format, and the result is stored in the `hired` field:
 
 ```esql
 FROM employees
 | KEEP first_name, last_name, hire_date
 | EVAL hired = DATE_FORMAT("YYYY-MM-dd", hire_date)
-```
-
-```esql
-FROM employees
-| KEEP first_name, last_name, hire_date
-| EVAL hired = DATE_FORMAT("yyyy/MM/dd", hire_date)
 ```
