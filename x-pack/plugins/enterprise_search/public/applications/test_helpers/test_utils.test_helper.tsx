@@ -41,6 +41,7 @@ export const mockKibanaProps: KibanaLogicProps = {
   charts: chartPluginMock.createStartContract(),
   cloud: {
     ...cloudMock.createSetup(),
+    ...cloudMock.createStart(),
     isCloudEnabled: false,
   },
   config: {
