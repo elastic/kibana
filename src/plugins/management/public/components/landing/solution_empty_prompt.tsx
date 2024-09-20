@@ -19,7 +19,10 @@ interface Props {
 }
 
 const IndicesLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
-  <EuiLink href={coreStart.application.getUrlForApp('management/data/index_management')}>
+  <EuiLink
+    href={coreStart.application.getUrlForApp('management', { path: 'data/index_management' })}
+    data-test-subj="managementLinkToIndices"
+  >
     {i18n.translate('management.landing.subhead.indicesLink', {
       defaultMessage: 'indices',
     })}
@@ -27,7 +30,10 @@ const IndicesLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
 );
 
 const DataViewsLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
-  <EuiLink href={coreStart.application.getUrlForApp('management/kibana/dataViews')}>
+  <EuiLink
+    href={coreStart.application.getUrlForApp('management', { path: 'kibana/dataViews' })}
+    data-test-subj="managementLinkToDataViews"
+  >
     {i18n.translate('management.landing.subhead.dataViewsLink', {
       defaultMessage: 'data views',
     })}
@@ -35,7 +41,10 @@ const DataViewsLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
 );
 
 const IngestPipelinesLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
-  <EuiLink href={coreStart.application.getUrlForApp('management/ingest/ingest_pipelines')}>
+  <EuiLink
+    href={coreStart.application.getUrlForApp('management', { path: 'ingest/ingest_pipelines' })}
+    data-test-subj="managementLinkToIngestPipelines"
+  >
     {i18n.translate('management.landing.subhead.ingestPipelinesLink', {
       defaultMessage: 'ingest pipelines',
     })}
@@ -43,7 +52,10 @@ const IngestPipelinesLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
 );
 
 const UsersLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
-  <EuiLink href={coreStart.application.getUrlForApp('management/security/users')}>
+  <EuiLink
+    href={coreStart.application.getUrlForApp('management', { path: 'security/users' })}
+    data-test-subj="managementLinkToUsers"
+  >
     {i18n.translate('management.landing.subhead.usersLink', {
       defaultMessage: 'users',
     })}
@@ -86,6 +98,7 @@ export const SolutionEmptyPrompt: FC<Props> = ({ kibanaVersion, coreStart }) => 
               onClick={() => {
                 coreStart.chrome.sideNav.setPanelSelectedNode('stack_management');
               }}
+              data-test-subj="viewAllStackMngtPagesButton"
             >
               <FormattedMessage
                 id="management.landing.solution.viewAllPagesButton"
