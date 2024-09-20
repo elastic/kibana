@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import fp from 'lodash/fp';
+
+import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
+import type { ESFilter } from '@kbn/es-types';
 import { CriticalityModifiers } from '../../../../common/entity_analytics/asset_criticality';
 import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 import { RISK_SCORING_NORMALIZATION_MAX } from '../risk_score/constants';
+import { CRITICALITY_VALUES } from './constants';
 
 /**
  * Retrieves the criticality modifier for a given criticality level.
@@ -65,3 +70,21 @@ export const bayesianUpdate = ({
   const newProbability = priorProbability * modifier;
   return (max * newProbability) / (1 + newProbability);
 };
+
+export const addNotDeletedClause: (query: ESFilter) => ESFilter = fp.update(
+  'query.bool.must_not',
+  (val: QueryDslBoolQuery['must_not']) => {
+    const notDeleted: QueryDslBoolQuery['must_not'] = {
+      match: { criticality_level: CRITICALITY_VALUES.DELETED },
+    };
+    if (!val) {
+      return notDeleted;
+    }
+
+    if (Array.isArray(val)) {
+      return [...val, notDeleted];
+    }
+
+    return [val, notDeleted];
+  }
+);

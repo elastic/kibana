@@ -10,6 +10,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+
 import type {
   BulkUpsertAssetCriticalityRecordsResponse,
   AssetCriticalityUpsert,
@@ -17,9 +18,11 @@ import type {
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
-import { assetCriticalityFieldMap } from './constants';
+import type { CriticalityValues } from './constants';
+import { CRITICALITY_VALUES, assetCriticalityFieldMap } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import { addNotDeletedClause } from './helpers';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -33,6 +36,12 @@ type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue
 type BulkUpsertFromStreamOptions = {
   recordsStream: NodeJS.ReadableStream;
 } & Pick<Parameters<ElasticsearchClient['helpers']['bulk']>[0], 'flushBytes' | 'retries'>;
+
+type StoredAssetCriticalityRecord = {
+  [K in keyof AssetCriticalityRecord]: K extends 'criticality_level'
+    ? CriticalityValues
+    : AssetCriticalityRecord[K];
+};
 
 const MAX_CRITICALITY_RESPONSE_SIZE = 100_000;
 const DEFAULT_CRITICALITY_RESPONSE_SIZE = 1_000;
@@ -87,7 +96,7 @@ export class AssetCriticalityDataClient {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
       ignore_unavailable: true,
-      query,
+      query: addNotDeletedClause(query),
       size: Math.min(size, MAX_CRITICALITY_RESPONSE_SIZE),
       from,
       sort,
@@ -154,12 +163,16 @@ export class AssetCriticalityDataClient {
     const id = createId(idParts);
 
     try {
-      const body = await this.options.esClient.get<AssetCriticalityRecord>({
+      const { _source: doc } = await this.options.esClient.get<StoredAssetCriticalityRecord>({
         id,
         index: this.getIndex(),
       });
 
-      return body._source;
+      if (doc?.criticality_level === CRITICALITY_VALUES.DELETED) {
+        return undefined;
+      }
+
+      return doc as AssetCriticalityRecord;
     } catch (err) {
       if (err.statusCode === 404) {
         return undefined;
@@ -291,11 +304,18 @@ export class AssetCriticalityDataClient {
       return undefined;
     }
 
+    if (record.id_value === 'deleted') {
+      return undefined;
+    }
+
     try {
-      await this.options.esClient.delete({
+      await this.options.esClient.update({
         id: createId(idParts),
         index: this.getIndex(),
         refresh: refresh ?? false,
+        doc: {
+          criticality_level: 'deleted',
+        },
       });
     } catch (err) {
       this.options.logger.error(`Failed to delete asset criticality record: ${err.message}`);

@@ -6,6 +6,9 @@
  */
 
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+
+export type CriticalityValues = AssetCriticalityRecord['criticality_level'] | 'deleted';
 
 export const assetCriticalityFieldMap: FieldMap = {
   '@timestamp': {
@@ -34,3 +37,11 @@ export const assetCriticalityFieldMap: FieldMap = {
     required: false,
   },
 } as const;
+
+export const CRITICALITY_VALUES: { readonly [K in CriticalityValues as Uppercase<K>]: K } = {
+  LOW_IMPACT: 'low_impact',
+  MEDIUM_IMPACT: 'medium_impact',
+  HIGH_IMPACT: 'high_impact',
+  EXTREME_IMPACT: 'extreme_impact',
+  DELETED: 'deleted',
+};
