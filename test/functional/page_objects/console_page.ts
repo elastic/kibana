@@ -379,11 +379,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async hasSuccessBadge() {
-    return await this.find.existsByCssSelector('.monaco__status_badge--success');
+    return await this.find.existsByCssSelector('.ace_badge--success');
   }
 
   public async hasWarningBadge() {
-    return await this.find.existsByCssSelector('.monaco__status_badge--warning');
+    return await this.find.existsByCssSelector('.ace_badge--warning');
   }
 
   public async getResponseStatus() {

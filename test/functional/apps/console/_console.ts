@@ -144,8 +144,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should send request with mixed case methods', async () => {
-      await PageObjects.console.monaco.clearEditorText();
-      await PageObjects.console.monaco.enterText('Get /');
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText('Get /');
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
         const status = await PageObjects.console.getResponseStatus();
@@ -216,7 +216,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should display status badges', async () => {
+      // not implemented for monaco yet https://github.com/elastic/kibana/issues/184010
+      it.skip('should display status badges', async () => {
         await sendMultipleRequests(['\n GET _search/test', '\n GET _search']);
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.console.hasWarningBadge()).to.be(true);
