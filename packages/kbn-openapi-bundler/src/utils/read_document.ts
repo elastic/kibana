@@ -9,6 +9,7 @@
 
 import fs from 'fs/promises';
 import { basename, extname } from 'path';
+import { load } from 'js-yaml';
 import chalk from 'chalk';
 import { logger } from '../logger';
 import { isPlainObjectType } from './is_plain_object_type';
