@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
 
@@ -20,7 +19,7 @@ import {
   GetOneOutputRequestSchema,
   GetOutputsRequestSchema,
   GetOutputsResponseSchema,
-  OutputSchema,
+  OutputResponseSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
@@ -84,10 +83,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetOneOutputRequestSchema,
           response: {
             200: {
-              body: () =>
-                schema.object({
-                  item: OutputSchema,
-                }),
+              body: () => OutputResponseSchema,
             },
             400: {
               body: genericErrorResponse,
@@ -115,10 +111,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PutOutputRequestSchema,
           response: {
             200: {
-              body: () =>
-                schema.object({
-                  item: OutputSchema,
-                }),
+              body: () => OutputResponseSchema,
             },
             400: {
               body: genericErrorResponse,
@@ -147,10 +140,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PostOutputRequestSchema,
           response: {
             200: {
-              body: () =>
-                schema.object({
-                  item: OutputSchema,
-                }),
+              body: () => OutputResponseSchema,
             },
             400: {
               body: genericErrorResponse,

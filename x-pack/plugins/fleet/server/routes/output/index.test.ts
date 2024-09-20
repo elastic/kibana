@@ -17,7 +17,7 @@ import {
   GenerateLogstashApiKeyResponseSchema,
   GetLatestOutputHealthResponseSchema,
   GetOutputsResponseSchema,
-  OutputSchema,
+  OutputResponseSchema,
 } from '../../types';
 
 import {
@@ -115,7 +115,7 @@ describe('schema validation', () => {
   });
 
   it('get one output should return valid response', async () => {
-    const expectedResponse: Output = {
+    const output: Output = {
       id: 'output1',
       type: 'remote_elasticsearch',
       hosts: ['http://elasticsearch:9200'],
@@ -126,18 +126,19 @@ describe('schema validation', () => {
         service_token: 'ref1',
       },
     };
-    outputServiceMock.get.mockResolvedValue(expectedResponse);
+    const expectedResponse = { item: output };
+    outputServiceMock.get.mockResolvedValue(output);
     await getOneOuputHandler(context, { params: { outputId: 'output1' } } as any, response);
 
     expect(response.ok).toHaveBeenCalledWith({
-      body: { item: expectedResponse },
+      body: expectedResponse,
     });
-    const validationResp = OutputSchema.validate(expectedResponse);
+    const validationResp = OutputResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
   });
 
   it('put output should return valid response', async () => {
-    const expectedResponse: Output = {
+    const output: Output = {
       id: 'output1',
       type: 'logstash',
       hosts: ['logstash'],
@@ -147,8 +148,10 @@ describe('schema validation', () => {
       secrets: {
         ssl: { key: 'ref1' },
       },
-    };
-    outputServiceMock.get.mockResolvedValue(expectedResponse);
+      client_id: null, // extra field from previous kafka output
+    } as any;
+    const expectedResponse = { item: output };
+    outputServiceMock.get.mockResolvedValue(output);
     await putOutputHandler(
       context,
       {
@@ -161,14 +164,14 @@ describe('schema validation', () => {
     );
 
     expect(response.ok).toHaveBeenCalledWith({
-      body: { item: expectedResponse },
+      body: expectedResponse,
     });
-    const validationResp = OutputSchema.validate(expectedResponse);
+    const validationResp = OutputResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
   });
 
   it('create output should return valid response', async () => {
-    const expectedResponse: Output = {
+    const output: Output = {
       id: 'output1',
       type: 'kafka',
       hosts: ['kafka:8000'],
@@ -186,7 +189,8 @@ describe('schema validation', () => {
       password: null,
       username: null,
     };
-    outputServiceMock.create.mockResolvedValue(expectedResponse);
+    const expectedResponse = { item: output };
+    outputServiceMock.create.mockResolvedValue(output);
     await postOutputHandler(
       context,
       {
@@ -199,9 +203,9 @@ describe('schema validation', () => {
     );
 
     expect(response.ok).toHaveBeenCalledWith({
-      body: { item: expectedResponse },
+      body: expectedResponse,
     });
-    const validationResp = OutputSchema.validate(expectedResponse);
+    const validationResp = OutputResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
   });
 

@@ -345,6 +345,12 @@ export const OutputSchema = schema.oneOf([
   schema.object({ ...KafkaSchema }),
 ]);
 
+export const OutputResponseSchema = schema.object({
+  item: OutputSchema.extendsDeep({
+    unknowns: 'allow',
+  }),
+});
+
 export const UpdateOutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchUpdateSchema }),
   schema.object({ ...RemoteElasticSearchUpdateSchema }),

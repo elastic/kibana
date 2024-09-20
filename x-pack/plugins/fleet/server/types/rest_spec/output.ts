@@ -32,7 +32,11 @@ export const GenerateLogstashApiKeyResponseSchema = schema.object({
 
 export const GetOutputsRequestSchema = {};
 
-export const GetOutputsResponseSchema = ListResponseSchema(OutputSchema);
+export const GetOutputsResponseSchema = ListResponseSchema(
+  OutputSchema.extendsDeep({
+    unknowns: 'allow',
+  })
+);
 
 export const PostOutputRequestSchema = {
   body: OutputSchema,
