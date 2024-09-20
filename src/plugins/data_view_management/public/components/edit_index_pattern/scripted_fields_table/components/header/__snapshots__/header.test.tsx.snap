@@ -19,7 +19,7 @@ exports[`Header should render normally 1`] = `
           color="inherit"
           data-euiicon-type="warning"
         />
-        Scripted fields are deprecated.
+        Scripted fields are deprecated
       </p>
       <div
         class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -28,7 +28,7 @@ exports[`Header should render normally 1`] = `
         class="euiText emotion-euiText-s-euiTextColor-default"
       >
         <span>
-          Use 
+          Use
           <button
             class="euiLink emotion-euiLink-primary"
             type="button"

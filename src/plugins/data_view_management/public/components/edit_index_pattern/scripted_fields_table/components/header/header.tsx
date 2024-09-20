@@ -24,7 +24,7 @@ export const Header = () => {
       <EuiFlexItem>
         <EuiCallOut
           title={i18n.translate('indexPatternManagement.editIndexPattern.deprecation.title', {
-            defaultMessage: 'Scripted fields are deprecated.',
+            defaultMessage: 'Scripted fields are deprecated',
           })}
           color="warning"
           iconType="warning"
