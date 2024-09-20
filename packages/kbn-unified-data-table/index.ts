@@ -18,6 +18,7 @@ export { getTextBasedColumnsMeta } from './src/utils/get_columns_meta';
 export { ROWS_HEIGHT_OPTIONS, DataGridDensity } from './src/constants';
 
 export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';
+export { SourceDocument } from './src/components/source_document';
 
 export * from './src/types';
 export * as columnActions from './src/components/actions/columns';

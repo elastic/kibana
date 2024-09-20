@@ -9,19 +9,14 @@
 
 import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import {
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
 } from '@kbn/discover-utils';
-import { dynamic } from '@kbn/shared-ux-utility';
 import * as constants from '../../../../../common/data_types/logs/constants';
 import { formatJsonDocumentForContent } from './utils';
-
-const SourceDocument = dynamic(
-  () => import('@kbn/unified-data-table/src/components/source_document')
-);
 
 interface ContentProps extends DataGridCellValueElementProps {
   isCompressed: boolean;
