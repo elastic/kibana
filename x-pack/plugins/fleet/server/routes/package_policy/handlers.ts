@@ -438,7 +438,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     if (error.statusCode) {
       return response.customError({
         statusCode: error.statusCode,
-        body: { message: error.message, error: error.message, statusCode: error.statusCode },
+        body: { message: error.message },
       });
     }
     return defaultFleetErrorHandler({ error, response });
