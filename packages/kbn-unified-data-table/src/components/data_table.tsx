@@ -497,8 +497,14 @@ export const UnifiedDataTable = ({
   const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
-  const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
-  const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
+  const docMap = useMemo(
+    () =>
+      new Map<string, { row: DataTableRecord; rowIndex: number }>(
+        rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []
+      ),
+    [rows]
+  );
+  const getDocById = useCallback((id: string) => docMap.get(id)?.doc, [docMap]);
   const selectedDocsState = useSelectedDocs(docMap);
   const {
     isDocSelected,

@@ -38,7 +38,7 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
   const { record, rowIndex } = useControlColumn(props);
   const { euiTheme } = useEuiTheme();
   const { selectedDocsState } = useContext(UnifiedDataTableContext);
-  const { isDocSelected, toggleDocSelection } = selectedDocsState;
+  const { isDocSelected, toggleDocSelection, toggleMultipleDocsSelection } = selectedDocsState;
 
   const toggleDocumentSelectionLabel = i18n.translate('unifiedDataTable.grid.selectDoc', {
     defaultMessage: `Select document ''{rowNumber}''`,
@@ -62,8 +62,12 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
           aria-label={toggleDocumentSelectionLabel}
           checked={isDocSelected(record.id)}
           data-test-subj={`dscGridSelectDoc-${record.id}`}
-          onChange={() => {
-            toggleDocSelection(record.id);
+          onChange={(event) => {
+            if (event.nativeEvent?.shiftKey) {
+              toggleMultipleDocsSelection(record.id);
+            } else {
+              toggleDocSelection(record.id);
+            }
           }}
         />
       </EuiFlexItem>
