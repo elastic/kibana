@@ -219,7 +219,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           // For the versioned route security is validated in the versioned router
           security: internalOptions.isVersioned
             ? route.security
-            : validRouteSecurity(route.security as DeepPartial<RouteSecurity>),
+            : validRouteSecurity(route.security as DeepPartial<RouteSecurity>, route.options),
           /** Below is added for introspection */
           validationSchemas: route.validate,
           isVersioned: internalOptions.isVersioned,

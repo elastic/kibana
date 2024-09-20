@@ -353,23 +353,6 @@ describe('CoreKibanaRequest', () => {
     });
 
     describe('route.options.security property', () => {
-      it('throws if auth is both configured with security and legacy authRequired option', () => {
-        const request = hapiMocks.createRequest({
-          route: {
-            settings: {
-              app: {
-                security: { authc: { enabled: true } },
-              },
-              // @ts-expect-error According to types/hapi__hapi, `auth` can't be a boolean, but it can according to the @hapi/hapi source (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
-              auth: false,
-            },
-          },
-        });
-        expect(() => CoreKibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
-          `"unexpected authentication options for route: /. Auth cannot be configured with security config and authRequired option"`
-        );
-      });
-
       it('handles required authc: undefined', () => {
         const request = hapiMocks.createRequest({
           route: {

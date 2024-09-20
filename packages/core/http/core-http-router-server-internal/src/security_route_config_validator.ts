@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import type { RouteSecurity } from '@kbn/core-http-server';
+import { schema } from '@kbn/config-schema';
+import type { RouteSecurity, RouteConfigOptions } from '@kbn/core-http-server';
 import type { DeepPartial } from '@kbn/utility-types';
 
 const privilegeSetSchema = schema.object(
@@ -100,12 +100,17 @@ const routeSecuritySchema = schema.object({
   authc: schema.maybe(authcSchema),
 });
 
-export const validRouteSecurity = (routeSecurity?: DeepPartial<RouteSecurity>) => {
+export const validRouteSecurity = (
+  routeSecurity?: DeepPartial<RouteSecurity>,
+  options?: DeepPartial<RouteConfigOptions<any>>
+) => {
   if (!routeSecurity) {
     return routeSecurity;
   }
 
-  const validatedData: TypeOf<typeof routeSecuritySchema> =
-    routeSecuritySchema.validate(routeSecurity);
-  return validatedData;
+  if (routeSecurity?.authc !== undefined && options?.authRequired !== undefined) {
+    throw new Error('Cannot specify both security.authc and options.authRequired');
+  }
+
+  return routeSecuritySchema.validate(routeSecurity);
 };
