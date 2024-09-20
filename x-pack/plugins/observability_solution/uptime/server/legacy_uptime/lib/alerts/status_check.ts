@@ -214,7 +214,7 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummary) => ({
   'monitor.tags': monitorSummary.tags,
   'url.full': monitorSummary.monitorUrl,
   'observer.geo.name': [monitorSummary.observerLocation],
-  'observer.name': monitorSummary.observerName,
+  'observer.name': [monitorSummary.observerName!],
   'error.message': monitorSummary.latestErrorMessage,
   'agent.name': monitorSummary.observerHostname,
   [ALERT_REASON]: monitorSummary.reason,
