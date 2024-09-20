@@ -30,10 +30,12 @@ import { NewsfeedItem } from '../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsLoadingPrompt } from './loading_news';
 
-export const NewsfeedFlyout = (props: Partial<EuiFlyoutProps> & { showPlainSpinner: boolean }) => {
+export const NewsfeedFlyout = (
+  props: Partial<EuiFlyoutProps> & { showPlainSpinner: boolean; isServerless: boolean }
+) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
-  const { showPlainSpinner, ...rest } = props;
+  const { showPlainSpinner, isServerless, ...rest } = props;
   return (
     <EuiPortal>
       <EuiFlyout
@@ -90,7 +92,7 @@ export const NewsfeedFlyout = (props: Partial<EuiFlyoutProps> & { showPlainSpinn
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {newsFetchResult ? (
+              {newsFetchResult && !isServerless ? (
                 <EuiText color="subdued" size="s">
                   <p>
                     <FormattedMessage
