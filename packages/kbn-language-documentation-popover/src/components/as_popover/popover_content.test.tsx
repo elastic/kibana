@@ -11,7 +11,7 @@ import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { Markdown } from '@kbn/shared-ux-markdown';
-import { LanguageDocumentationPopoverContent } from './documentation_content';
+import { LanguageDocumentationPopoverContent } from './popover_content';
 
 describe('###Documentation popover content', () => {
   const sections = {
