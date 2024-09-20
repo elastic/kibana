@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { keyBy, memoize, merge, values } from 'lodash';
+import { memoize } from 'lodash';
 import pLimit from 'p-limit';
 import {
   Dashboard,
@@ -50,30 +50,37 @@ const statsRoute = createDatasetQualityServerRoute({
   }> {
     const { context, params, getEsCapabilities } = resources;
     const coreContext = await context.core;
-    const sizeStatsAvailable = !(await getEsCapabilities()).serverless;
+    const isServerless = (await getEsCapabilities()).serverless;
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const { items, datasetUserPrivileges } = await getDataStreams({
+    const { dataStreams, datasetUserPrivileges } = await getDataStreams({
       esClient,
       ...params.query,
       uncategorisedOnly: false,
     });
 
-    const privilegedDataStreams = items.filter((stream) => {
-      return stream.userPrivileges.canMonitor;
+    const privilegedDataStreams = dataStreams.filter((dataStream) => {
+      return dataStream.userPrivileges.canMonitor;
     });
 
-    const dataStreamsStats = await getDataStreamsStats({
-      esClient,
-      dataStreams: privilegedDataStreams.map((stream) => stream.name),
-      sizeStatsAvailable,
-    });
+    const dataStreamsStats = isServerless
+      ? {}
+      : await getDataStreamsStats({
+          esClient,
+          dataStreams: privilegedDataStreams.map((stream) => stream.name),
+        });
 
     return {
       datasetUserPrivileges,
-      dataStreamsStats: values(merge(keyBy(items, 'name'), keyBy(dataStreamsStats.items, 'name'))),
+      dataStreamsStats: dataStreams.map((dataStream: DataStreamStat) => {
+        dataStream.size = dataStreamsStats[dataStream.name]?.size;
+        dataStream.sizeBytes = dataStreamsStats[dataStream.name]?.sizeBytes;
+        dataStream.totalDocs = dataStreamsStats[dataStream.name]?.totalDocs;
+
+        return dataStream;
+      }),
     };
   },
 });
@@ -271,13 +278,13 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const sizeStatsAvailable = !(await getEsCapabilities()).serverless;
+    const isServerless = (await getEsCapabilities()).serverless;
     const dataStreamDetails = await getDataStreamDetails({
       esClient,
       dataStream,
       start,
       end,
-      sizeStatsAvailable,
+      isServerless,
     });
 
     return dataStreamDetails;
