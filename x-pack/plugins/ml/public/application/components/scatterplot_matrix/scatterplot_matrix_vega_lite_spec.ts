@@ -253,7 +253,25 @@ const getVegaSpecLayer = (
 // since VEGA treats dots/brackets in field names as nested values.
 // See https://vega.github.io/vega-lite/docs/field.html for details.
 export function getEscapedVegaFieldName(fieldName: string, prependString: string = '') {
-  return `${prependString}${fieldName.replace(/([\.|\[|\]|\\])/g, '\\$1')}`;
+  // Note the following isn't 100% ideal because there are cases when we may
+  // end up with an additional backslash being rendered for labels of the
+  // scatterplot. However, all other variations I tried caused rendering
+  // problems of the charts and rendering would fail completely.
+
+  // For example, just escaping \n in the first replace without the general
+  // backslash escaping causes the following Vega error:
+  // Duplicate scale or projection name: "child__row_my_numbercolumn_my_number_x"
+
+  // Escaping just the backslash without the additional \n escaping causes field
+  // names with \n causes an "expression parse error" in in Vega and the chart
+  // wouldn't render.
+
+  // Escape newline characters
+  fieldName = fieldName.replace(/\n/g, '\\n');
+  // Escape .[]\
+  fieldName = fieldName.replace(/([\.|\[|\]|\\])/g, '\\$1');
+
+  return `${prependString}${fieldName}`;
 }
 
 type VegaValue = Record<string, string | number>;

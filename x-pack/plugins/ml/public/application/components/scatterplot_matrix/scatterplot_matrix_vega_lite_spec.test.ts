@@ -108,7 +108,18 @@ describe('getEscapedVegaFieldName()', () => {
     expect(escapedFieldName).toBe('prefix_field\\.name');
   });
 
+  it('should escape newlines in field names', () => {
+    // String quotes process backslashes, so we need to escape them for
+    // the test string to contain a backslash. For example, without the
+    // double backslash, this string would contain a newline character.
+    const fieldName = 'field\\name';
+    const escapedFieldName = getEscapedVegaFieldName(fieldName);
+    expect(escapedFieldName).toBe('field\\\\name');
+  });
+
   it('should escape backslashes in field names', () => {
+    // String quotes process backslashes, so we need to escape them for
+    // the test string to contain a backslash.
     const fieldName = 'fieldname\\withbackslash';
     const escapedFieldName = getEscapedVegaFieldName(fieldName);
     expect(escapedFieldName).toBe('fieldname\\\\withbackslash');
