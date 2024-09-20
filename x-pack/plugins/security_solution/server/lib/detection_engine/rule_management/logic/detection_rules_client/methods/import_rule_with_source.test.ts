@@ -73,8 +73,9 @@ describe('importRuleWithSource', () => {
         })
       ).rejects.toMatchObject({
         error: {
+          type: 'conflict',
+          ruleId: 'rule-1',
           message: 'rule_id: "rule-1" already exists',
-          status_code: 409,
         },
       });
     });

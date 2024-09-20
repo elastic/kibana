@@ -237,10 +237,10 @@ describe('DetectionRulesClient.importRule', () => {
         })
       ).rejects.toMatchObject({
         error: {
-          status_code: 409,
+          ruleId: ruleToImport.rule_id,
+          type: 'conflict',
           message: `rule_id: "${ruleToImport.rule_id}" already exists`,
         },
-        rule_id: ruleToImport.rule_id,
       });
     });
   });
