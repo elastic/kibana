@@ -19,26 +19,11 @@ import {
   uiActionsService,
   visualizationsService,
 } from '../../services/kibana_services';
-import { pluginServices } from '../../services/plugin_services';
 
-jest.mock('../../services/plugin_services', () => {
-  const module = jest.requireActual('../../services/plugin_services');
-
-  const _pluginServices = (module.pluginServices as typeof pluginServices).getServices();
-
-  jest.spyOn(embeddableService, 'getEmbeddableFactories').mockReturnValue(new Map().values());
-  jest.spyOn(uiActionsService, 'getTriggerCompatibleActions').mockResolvedValue([]);
-  jest.spyOn(visualizationsService, 'getByGroup').mockReturnValue([]);
-  jest.spyOn(visualizationsService, 'getAliases').mockReturnValue([]);
-
-  return {
-    ...module,
-    pluginServices: {
-      ...module.pluginServices,
-      getServices: jest.fn().mockReturnValue(_pluginServices),
-    },
-  };
-});
+jest.spyOn(embeddableService, 'getEmbeddableFactories').mockReturnValue(new Map().values());
+jest.spyOn(uiActionsService, 'getTriggerCompatibleActions').mockResolvedValue([]);
+jest.spyOn(visualizationsService, 'getByGroup').mockReturnValue([]);
+jest.spyOn(visualizationsService, 'getAliases').mockReturnValue([]);
 
 describe('editor menu', () => {
   it('renders without crashing', async () => {

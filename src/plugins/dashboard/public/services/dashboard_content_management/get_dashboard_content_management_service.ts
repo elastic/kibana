@@ -45,7 +45,6 @@ export const getDashboardContentManagementService = (
         lastSavedId,
         currentState,
         panelReferences,
-        dashboardBackup,
         contentManagement: deps.contentManagement,
       }),
     findDashboards: {

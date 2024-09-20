@@ -17,7 +17,7 @@ import {
 } from '../../../../common/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardStartDependencies } from '../../../plugin';
-import { dashboardContentManagementCache } from '../dashboard_content_management_service';
+import { dashboardContentManagementCache } from '../dashboard_content_management_cache';
 
 export interface SearchDashboardsArgs {
   contentManagement: DashboardStartDependencies['contentManagement'];

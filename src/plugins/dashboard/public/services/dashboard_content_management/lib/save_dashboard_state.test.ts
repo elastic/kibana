@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { DashboardContainerInput } from '../../../../common';
 import { getSampleDashboardInput } from '../../../mocks';
 import { coreServices, dataService, embeddableService } from '../../kibana_services';
-import { pluginServices } from '../../plugin_services';
-import { registry } from '../../plugin_services.stub';
 import { saveDashboardState } from './save_dashboard_state';
 
-pluginServices.setRegistry(registry.start({}));
-const { dashboardBackup, contentManagement } = pluginServices.getServices();
+const contentManagement = contentManagementMock.createStartContract();
 
 contentManagement.client.create = jest.fn().mockImplementation(({ options }) => {
   if (options.id === undefined) {
@@ -32,16 +30,10 @@ contentManagement.client.update = jest.fn().mockImplementation(({ id }) => {
   return { item: { id } };
 });
 
-const allServices = {
-  data: dataService,
-  embeddable: embeddableService,
-  dashboardBackup,
-  contentManagement,
-};
-allServices.data.query.timefilter.timefilter.getTime = jest
+dataService.query.timefilter.timefilter.getTime = jest
   .fn()
   .mockReturnValue({ from: 'then', to: 'now' });
-allServices.embeddable.extract = jest
+embeddableService.extract = jest
   .fn()
   .mockImplementation((attributes) => ({ state: attributes, references: [] }));
 
@@ -58,11 +50,11 @@ describe('Save dashboard state', () => {
       } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogaloo',
       saveOptions: {},
-      ...allServices,
+      contentManagement,
     });
 
     expect(result.id).toBe('Boogaloo');
-    expect(allServices.contentManagement.client.update).toHaveBeenCalledWith(
+    expect(contentManagement.client.update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'Boogaloo' })
     );
     expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -80,12 +72,12 @@ describe('Save dashboard state', () => {
       } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogaloonie',
       saveOptions: { saveAsCopy: true },
-      ...allServices,
+      contentManagement,
     });
 
     expect(result.id).toBe('newlyGeneratedId');
     expect(result.redirectRequired).toBe(true);
-    expect(allServices.contentManagement.client.create).toHaveBeenCalledWith(
+    expect(contentManagement.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
         options: { references: [] },
       })
@@ -106,12 +98,12 @@ describe('Save dashboard state', () => {
       } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
-      ...allServices,
+      contentManagement,
     });
 
     expect(result.id).toBe('newlyGeneratedId');
 
-    expect(allServices.contentManagement.client.create).toHaveBeenCalledWith(
+    expect(contentManagement.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           panelsJSON: expect.not.stringContaining('neverGonnaGetThisId'),
@@ -130,11 +122,11 @@ describe('Save dashboard state', () => {
       panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
-      ...allServices,
+      contentManagement,
     });
 
     expect(result.id).toBe('newlyGeneratedId');
-    expect(allServices.contentManagement.client.create).toHaveBeenCalledWith(
+    expect(contentManagement.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
         options: expect.objectContaining({
           references: expect.arrayContaining([
@@ -158,7 +150,7 @@ describe('Save dashboard state', () => {
       } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
-      ...allServices,
+      contentManagement,
     });
 
     expect(result.id).toBeUndefined();

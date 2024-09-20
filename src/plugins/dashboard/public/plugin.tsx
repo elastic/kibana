@@ -78,6 +78,10 @@ import {
   registerDashboardPanelPlacementSetting,
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
+import { setKibanaServices } from './services/kibana_services';
+import { untilPluginStartServicesReady } from './services/services';
+import { buildAllDashboardActions } from './dashboard_actions';
+import { dashboardContentManagementService } from './services/dashboard_services';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -151,16 +155,6 @@ export class DashboardPlugin
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
   private locator?: DashboardAppLocator;
 
-  private async startDashboardKibanaServices(
-    coreStart: CoreStart,
-    startPlugins: DashboardStartDependencies,
-    initContext: PluginInitializerContext
-  ) {
-    const { registry, pluginServices } = await import('./services/plugin_services');
-    pluginServices.setRegistry(registry.start({ coreStart, startPlugins, initContext }));
-    resolveServicesReady();
-  }
-
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     {
@@ -186,11 +180,11 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            const { pluginServices } = await import('./services/plugin_services');
-            const {
-              dashboardContentManagement: { loadDashboardState },
-            } = pluginServices.getServices();
-            return (await loadDashboardState({ id: dashboardId })).dashboardInput?.filters ?? [];
+            await untilPluginStartServicesReady();
+            return (
+              (await dashboardContentManagementService.loadDashboardState({ id: dashboardId }))
+                .dashboardInput?.filters ?? []
+            );
           },
         })
       );
@@ -343,8 +337,8 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    this.startDashboardKibanaServices(core, plugins, this.initializerContext).then(async () => {
-      const { buildAllDashboardActions } = await import('./dashboard_actions');
+    setKibanaServices(core, plugins);
+    untilPluginStartServicesReady().then(() => {
       buildAllDashboardActions({
         core,
         plugins,
@@ -357,11 +351,8 @@ export class DashboardPlugin
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
-        const { pluginServices } = await import('./services/plugin_services');
-        const {
-          dashboardContentManagement: { findDashboards },
-        } = pluginServices.getServices();
-        return findDashboards;
+        await untilPluginStartServicesReady(); // the services promise might not have resolved yet
+        return dashboardContentManagementService.findDashboards;
       },
     };
   }

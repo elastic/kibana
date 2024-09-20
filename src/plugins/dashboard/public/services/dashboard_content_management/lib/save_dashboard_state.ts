@@ -29,7 +29,7 @@ import {
 import { dashboardContentManagementCache } from '../dashboard_content_management_cache';
 import { SaveDashboardProps, SaveDashboardReturn } from '../types';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
-import { DashboardBackupServiceType } from '../../dashboard_backup/types';
+import { dashboardBackupService } from '../../dashboard_services';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -43,7 +43,6 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
 
 type SaveDashboardStateProps = SaveDashboardProps & {
   contentManagement: DashboardStartDependencies['contentManagement'];
-  dashboardBackup: DashboardBackupServiceType;
 };
 
 export const saveDashboardState = async ({
@@ -52,7 +51,6 @@ export const saveDashboardState = async ({
   saveOptions,
   currentState,
   panelReferences,
-  dashboardBackup,
   contentManagement,
 }: SaveDashboardStateProps): Promise<SaveDashboardReturn> => {
   const {
@@ -216,7 +214,7 @@ export const saveDashboardState = async ({
        * If the dashboard id has been changed, redirect to the new ID to keep the url param in sync.
        */
       if (newId !== lastSavedId) {
-        dashboardBackup.clearState(lastSavedId);
+        dashboardBackupService.clearState(lastSavedId);
         return { redirectRequired: true, id: newId, references: allReferences };
       } else {
         dashboardContentManagementCache.deleteDashboard(newId); // something changed in an existing dashboard, so delete it from the cache so that it can be re-fetched
