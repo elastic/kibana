@@ -437,6 +437,82 @@ paths:
       summary: Stop the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
+  /api/entity_store/entities/list:
+    get:
+      description: List entities records, paging, sorting and filtering as needed.
+      operationId: ListEntities
+      parameters:
+        - in: query
+          name: sort_field
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: sort_order
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+        - in: query
+          name: per_page
+          required: false
+          schema:
+            maximum: 10000
+            minimum: 1
+            type: integer
+        - description: An ES query to filter by.
+          in: query
+          name: filterQuery
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: entities_types
+          required: true
+          schema:
+            items:
+              $ref: '#/components/schemas/EntityType'
+            type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  inspect:
+                    $ref: '#/components/schemas/InspectQuery'
+                  page:
+                    minimum: 1
+                    type: integer
+                  per_page:
+                    maximum: 1000
+                    minimum: 1
+                    type: integer
+                  records:
+                    items:
+                      $ref: '#/components/schemas/Entity'
+                    type: array
+                  total:
+                    minimum: 0
+                    type: integer
+                required:
+                  - records
+                  - page
+                  - per_page
+                  - total
+          description: Entities returned successfully
+      summary: List Entity Store Entities
+      tags:
+        - Security Solution Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
       operationId: ScheduleRiskEngineNow
@@ -549,11 +625,90 @@ components:
         - started
         - stopped
       type: string
+    Entity:
+      oneOf:
+        - $ref: '#/components/schemas/UserEntity'
+        - $ref: '#/components/schemas/HostEntity'
     EntityType:
       enum:
         - user
         - host
       type: string
+    HostEntity:
+      type: object
+      properties:
+        entity:
+          type: object
+          properties:
+            definitionId:
+              type: string
+            definitionVersion:
+              type: string
+            displayName:
+              type: string
+            firstSeenTimestamp:
+              format: date-time
+              type: string
+            id:
+              type: string
+            identityFields:
+              items:
+                type: string
+              type: array
+            lastSeenTimestamp:
+              format: date-time
+              type: string
+            schemaVersion:
+              type: string
+            type:
+              enum:
+                - node
+              type: string
+          required:
+            - lastSeenTimestamp
+            - schemaVersion
+            - definitionVersion
+            - displayName
+            - identityFields
+            - id
+            - type
+            - firstSeenTimestamp
+            - definitionId
+        host:
+          type: object
+          properties:
+            architecture:
+              items:
+                type: string
+              type: array
+            domain:
+              items:
+                type: string
+              type: array
+            hostname:
+              items:
+                type: string
+              type: array
+            id:
+              items:
+                type: string
+              type: array
+            ip:
+              items:
+                type: string
+              type: array
+            mac:
+              items:
+                type: string
+              type: array
+            name:
+              type: string
+            type:
+              items:
+                type: string
+              type: array
+          required:
+            - name
     IdField:
       enum:
         - host.name
@@ -561,6 +716,20 @@ components:
       type: string
     IndexPattern:
       type: string
+    InspectQuery:
+      type: object
+      properties:
+        dsl:
+          items:
+            type: string
+          type: array
+        response:
+          items:
+            type: string
+          type: array
+      required:
+        - dsl
+        - response
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -588,6 +757,77 @@ components:
       required:
         - status_code
         - message
+    UserEntity:
+      type: object
+      properties:
+        entity:
+          type: object
+          properties:
+            definitionId:
+              type: string
+            definitionVersion:
+              type: string
+            displayName:
+              type: string
+            firstSeenTimestamp:
+              format: date-time
+              type: string
+            id:
+              type: string
+            identityFields:
+              items:
+                type: string
+              type: array
+            lastSeenTimestamp:
+              format: date-time
+              type: string
+            schemaVersion:
+              type: string
+            type:
+              enum:
+                - node
+              type: string
+          required:
+            - lastSeenTimestamp
+            - schemaVersion
+            - definitionVersion
+            - displayName
+            - identityFields
+            - id
+            - type
+            - firstSeenTimestamp
+            - definitionId
+        user:
+          type: object
+          properties:
+            domain:
+              items:
+                type: string
+              type: array
+            email:
+              items:
+                type: string
+              type: array
+            full_name:
+              items:
+                type: string
+              type: array
+            hash:
+              items:
+                type: string
+              type: array
+            id:
+              items:
+                type: string
+              type: array
+            name:
+              type: string
+            roles:
+              items:
+                type: string
+              type: array
+          required:
+            - name
   securitySchemes:
     BasicAuth:
       scheme: basic
