@@ -1241,7 +1241,7 @@
     "source-map-support": "^0.5.19",
     "stats-lite": "^2.2.0",
     "strip-ansi": "^6.0.0",
-    "styled-components": "^5.1.0",
+    "styled-components": "^5.3.11",
     "suricata-sid-db": "^1.0.2",
     "swr": "^2.2.5",
     "symbol-observable": "^1.2.0",
