@@ -11,6 +11,7 @@ import { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typ
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { last } from 'lodash';
+import { errorDocsMapping, traceDocMapping } from '../../utils/es_fields_mappings';
 import { APMConfig } from '../..';
 import {
   AGENT_NAME,
@@ -54,7 +55,6 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
-import { normalizeFields } from '../../utils/normalize_fields';
 
 export interface TraceItems {
   exceedsMax: boolean;
@@ -135,12 +135,8 @@ export async function getTraceItems({
   const traceDocsTotal = traceResponse.total;
   const exceedsMax = traceDocsTotal > maxTraceItems;
 
-  const traceDocs = traceResponse.hits.map(
-    (hit) => normalizeFields(hit.fields) as unknown as WaterfallTransaction | WaterfallSpan
-  );
-  const errorDocs = errorResponse.hits.hits.map(
-    (hit) => normalizeFields(hit.fields) as unknown as WaterfallError
-  );
+  const traceDocs = traceResponse.hits.map((hit) => traceDocMapping(hit.fields));
+  const errorDocs = errorResponse.hits.hits.map((hit) => errorDocsMapping(hit.fields));
 
   return {
     exceedsMax,

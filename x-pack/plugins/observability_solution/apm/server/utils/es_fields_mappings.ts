@@ -11,11 +11,13 @@ import {
   AGENT_NAME,
   AGENT_VERSION,
   AT_TIMESTAMP,
+  CHILD_ID,
   DATA_STEAM_TYPE,
   DATA_STREAM_DATASET,
   DATA_STREAM_NAMESPACE,
   EVENT_OUTCOME,
   EVENT_SUCCESS_COUNT,
+  FAAS_COLDSTART,
   LABEL_SOME_RESOURCE_ATTRIBUTE,
   OBSERVER_HOSTNAME,
   OBSERVER_TYPE,
@@ -28,6 +30,9 @@ import {
   SERVICE_FRAMEWORK_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
+  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
+  SPAN_COMPOSITE_COUNT,
+  SPAN_COMPOSITE_SUM,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DURATION,
   SPAN_ID,
@@ -35,6 +40,7 @@ import {
   SPAN_LINKS_TRACE_ID,
   SPAN_NAME,
   SPAN_SUBTYPE,
+  SPAN_SYNC,
   SPAN_TYPE,
   TIMESTAMP,
   TRACE_ID,
@@ -46,7 +52,22 @@ import {
   TRANSACTION_SAMPLED,
   TRANSACTION_TYPE,
 } from '@kbn/apm-types/src/es_fields/apm';
+import { SpanLink } from '@kbn/apm-types/src/es_schemas/raw/fields/span_links';
+import {
+  ERROR_EXCEPTION,
+  ERROR_GROUP_ID,
+  ERROR_ID,
+  ERROR_LOG_MESSAGE,
+} from '../../common/es_fields/apm';
+import {
+  WaterfallError,
+  WaterfallSpan,
+  WaterfallTransaction,
+} from '../../common/waterfall/typings';
+import { SPAN_LINKS } from '../../common/es_fields/apm';
+import { SPAN_ACTION } from '../../common/es_fields/apm';
 import { EventOutcome } from '../../common/event_outcome';
+import { Exception } from '../../typings/es_schemas/raw/error_raw';
 
 export const metadataForDependencyMapping = (fields: Partial<Record<string, unknown[]>>) => {
   return {
@@ -262,6 +283,97 @@ export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) =
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
     labels: {
       some_resource_attribute: normalizeValue<string>(fields[LABEL_SOME_RESOURCE_ATTRIBUTE]),
+    },
+  };
+};
+
+export const traceDocMapping = (
+  fields: Partial<Record<string, unknown[]>>
+): WaterfallTransaction | WaterfallSpan => {
+  return {
+    timestamp: {
+      us: normalizeValue<number>(fields[TIMESTAMP]),
+    },
+    trace: {
+      id: normalizeValue<string>(fields[TRACE_ID]),
+    },
+    parent: {
+      id: normalizeValue<string>(fields[PARENT_ID]),
+    },
+    service: {
+      name: normalizeValue<string>(fields[SERVICE_NAME]),
+      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
+    },
+    agent: {
+      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
+    },
+    event: {
+      outcome: normalizeValue<EventOutcome>(fields[EVENT_OUTCOME]),
+    },
+    processor: {
+      event: normalizeValue<'span'>(fields[PROCESSOR_EVENT]),
+    },
+    transaction: {
+      result: normalizeValue<string>(fields[TRANSACTION_RESULT]),
+      id: normalizeValue<string>(fields[TRANSACTION_ID]),
+      duration: {
+        us: normalizeValue<number>(fields[TRANSACTION_DURATION]),
+      },
+      type: normalizeValue<string>(fields[TRANSACTION_TYPE]),
+      name: normalizeValue<string>(fields[TRANSACTION_NAME]),
+    },
+    faas: {
+      coldstart: normalizeValue<boolean>(fields[FAAS_COLDSTART]),
+    },
+    span: {
+      id: normalizeValue<string>(fields[SPAN_ID]),
+      name: normalizeValue<string>(fields[SPAN_NAME]),
+      type: normalizeValue<string>(fields[SPAN_TYPE]),
+      subtype: normalizeValue<string>(fields[SPAN_SUBTYPE]),
+      duration: {
+        us: normalizeValue<number>(fields[SPAN_DURATION]),
+      },
+      action: normalizeValue<string>(fields[SPAN_ACTION]),
+      links: normalizeValue<SpanLink[]>(fields[SPAN_LINKS]),
+      composite: {
+        count: normalizeValue<number>(fields[SPAN_COMPOSITE_COUNT]),
+        sum: {
+          us: normalizeValue<number>(fields[SPAN_COMPOSITE_SUM]),
+        },
+        compression_strategy: normalizeValue<string>(fields[SPAN_COMPOSITE_COMPRESSION_STRATEGY]),
+      },
+      sync: normalizeValue<boolean>(fields[SPAN_SYNC]),
+    },
+    child: {
+      id: normalizeValue<string[]>(fields[CHILD_ID]),
+    },
+  };
+};
+
+export const errorDocsMapping = (fields: Partial<Record<string, unknown[]>>): WaterfallError => {
+  return {
+    timestamp: {
+      us: normalizeValue<number>(fields[TIMESTAMP]),
+    },
+    trace: {
+      id: normalizeValue<string>(fields[TRACE_ID]),
+    },
+    transaction: {
+      id: normalizeValue<string>(fields[TRANSACTION_ID]),
+    },
+    parent: {
+      id: normalizeValue<string>(fields[PARENT_ID]),
+    },
+    service: {
+      name: normalizeValue<string>(fields[SERVICE_NAME]),
+    },
+    error: {
+      id: normalizeValue<string>(fields[ERROR_ID]),
+      log: {
+        message: normalizeValue<string>(fields[ERROR_LOG_MESSAGE]),
+      },
+      exception: normalizeValue<Exception[]>(fields[ERROR_EXCEPTION]),
+      grouping_key: normalizeValue<string>(fields[ERROR_GROUP_ID]),
     },
   };
 };
