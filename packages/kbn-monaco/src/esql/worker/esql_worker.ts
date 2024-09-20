@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CharStreams } from 'antlr4';
-import {
-  getAstAndSyntaxErrors,
-  getParser,
-  ROOT_STATEMENT,
-  ESQLErrorListener,
-  type EditorError,
-} from '@kbn/esql-ast';
+import { parse, parseErrors, type EditorError } from '@kbn/esql-ast';
 import type { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
 
@@ -38,33 +31,21 @@ export class ESQLWorker implements BaseWorkerDefinition {
     this._ctx = ctx;
   }
 
-  private getModelCharStream(modelUri: string) {
+  public async getSyntaxErrors(modelUri: string) {
     const model = this._ctx.getMirrorModels().find((m) => m.uri.toString() === modelUri);
     const text = model?.getValue();
 
-    if (text) {
-      return CharStreams.fromString(text);
-    }
-  }
+    if (!text) return [];
 
-  public async getSyntaxErrors(modelUri: string) {
-    const inputStream = this.getModelCharStream(modelUri);
+    const errors = parseErrors(text);
 
-    if (inputStream) {
-      const errorListener = new ESQLErrorListener();
-      const { parser } = getParser(inputStream, errorListener);
-
-      parser[ROOT_STATEMENT]();
-
-      return errorListener.getErrors().map(inlineToMonacoErrors);
-    }
-    return [];
+    return errors.map(inlineToMonacoErrors);
   }
 
   getAst(text: string | undefined) {
-    const rawAst = getAstAndSyntaxErrors(text);
+    const rawAst = parse(text);
     return {
-      ast: rawAst.ast,
+      ast: rawAst.root.commands,
       errors: rawAst.errors.map(inlineToMonacoErrors),
     };
   }

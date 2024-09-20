@@ -12,6 +12,7 @@ export {
   getParser,
   createParser,
   parse,
+  parseErrors,
   type ParseOptions,
   type ParseResult,
 

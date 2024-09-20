@@ -128,3 +128,12 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
 
   return { root, ast: commands, errors, tokens: tokens.tokens };
 };
+
+export const parseErrors = (text: string) => {
+  const errorListener = new ESQLErrorListener();
+  const { parser } = getParser(CharStreams.fromString(text), errorListener);
+
+  parser[GRAMMAR_ROOT_RULE]();
+
+  return errorListener.getErrors();
+};

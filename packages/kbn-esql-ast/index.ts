@@ -37,6 +37,7 @@ export {
   createParser,
   getLexer,
   parse,
+  parseErrors,
   type ParseOptions,
   type ParseResult,
   getAstAndSyntaxErrors,
