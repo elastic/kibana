@@ -8,11 +8,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { APP_WRAPPER_CLASS, type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { css } from '@emotion/css';
 import type { InventoryStartDependencies } from './types';
 import { InventoryServices } from './services/types';
-import { AppRoot } from './components/routing/root';
+import { AppRoot } from './components/app_root';
 
 export const renderApp = ({
   coreStart,
@@ -24,7 +23,7 @@ export const renderApp = ({
   pluginsStart: InventoryStartDependencies;
   services: InventoryServices;
 } & { appMountParameters: AppMountParameters }) => {
-  const { element, theme$ } = appMountParameters;
+  const { element } = appMountParameters;
 
   const appWrapperClassName = css`
     overflow: auto;
@@ -34,22 +33,12 @@ export const renderApp = ({
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...coreStart}>
-      <KibanaThemeProvider
-        theme={{ theme$ }}
-        modify={{
-          breakpoint: {
-            xxl: 1600,
-            xxxl: 2000,
-          },
-        }}
-      >
-        <AppRoot
-          appMountParameters={appMountParameters}
-          coreStart={coreStart}
-          pluginsStart={pluginsStart}
-          services={services}
-        />
-      </KibanaThemeProvider>
+      <AppRoot
+        appMountParameters={appMountParameters}
+        coreStart={coreStart}
+        pluginsStart={pluginsStart}
+        services={services}
+      />
     </KibanaRenderContextProvider>,
     element
   );

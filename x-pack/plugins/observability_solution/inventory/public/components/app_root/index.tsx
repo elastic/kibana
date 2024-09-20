@@ -38,12 +38,10 @@ export function AppRoot({
   return (
     <InventoryContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
-        <coreStart.i18n.Context>
-          <RouterProvider history={history} router={inventoryRouter}>
-            <RouteRenderer />
-            <InventoryHeaderActionMenu appMountParameters={appMountParameters} />
-          </RouterProvider>
-        </coreStart.i18n.Context>
+        <RouterProvider history={history} router={inventoryRouter}>
+          <RouteRenderer />
+          <InventoryHeaderActionMenu appMountParameters={appMountParameters} />
+        </RouterProvider>
       </RedirectAppLinks>
     </InventoryContextProvider>
   );
