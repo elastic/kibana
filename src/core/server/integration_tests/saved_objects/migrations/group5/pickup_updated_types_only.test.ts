@@ -42,9 +42,11 @@ describe('pickupUpdatedMappings', () => {
 
       const logs = await parseLogFile(logFilePath);
 
-      expect(logs).not.toContainLogEntry('Documents of the following SO types will be updated');
       expect(logs).not.toContainLogEntry(
-        'There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.'
+        `[${defaultKibanaIndex}] Documents of the following SO types will be updated`
+      );
+      expect(logs).not.toContainLogEntry(
+        `[${defaultKibanaIndex}] There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.`
       );
     });
   });

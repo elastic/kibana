@@ -32,20 +32,20 @@ import {
 const logFilePath = join(__dirname, 'reindexing_migration.log');
 
 describe('reindexing migrations', () => {
-  let es: TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let kit: KibanaMigratorTestKit;
   let migrationResults: MigrationResult[];
 
   beforeAll(async () => {
-    es = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_1K });
+    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_1K });
     await clearLog(logFilePath);
     kit = await getReindexingMigratorTestKit({ logFilePath });
     migrationResults = await kit.runMigrations();
   });
 
   afterAll(async () => {
-    if (es) {
-      es.stop();
+    if (esServer) {
+      await esServer.stop();
       await delay(5); // give it a few seconds... cause we always do ¯\_(ツ)_/¯
     }
   });
