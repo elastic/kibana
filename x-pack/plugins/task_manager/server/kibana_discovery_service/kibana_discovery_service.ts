@@ -79,10 +79,6 @@ export class KibanaDiscoveryService {
           this.discoveryInterval - (Date.now() - lastSeenDate.getTime())
         );
       }
-    } else {
-      if (this.timer) {
-        clearTimeout(this.timer);
-      }
     }
   }
 
@@ -117,5 +113,8 @@ export class KibanaDiscoveryService {
 
   public stop() {
     this.stopped = true;
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
   }
 }
