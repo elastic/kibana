@@ -1674,33 +1674,39 @@ async function getOptionArgsSuggestions(
   if (option.name === 'metadata') {
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
-    const lastWord = findFinalWord(innerText);
-    if (lastWord) {
-      // METADATA something<suggest>
-      const isField = METADATA_FIELDS.includes(lastWord);
-      if (isField) {
-        // METADATA field<suggest>
-        suggestions.push({
-          ...pipeCompleteItem,
-          text: lastWord + ' | ',
-          filterText: lastWord,
-          command: TRIGGER_SUGGESTION_COMMAND,
-        });
-        if (filteredMetaFields.length > 1) {
-          suggestions.push({
-            ...commaCompleteItem,
-            text: lastWord + ', ',
-            filterText: lastWord,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          });
-        }
-      } else {
-        suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
-      }
-    } else if (isNewExpression) {
-      // METADATA <suggest>
-      // METADATA field, <suggest>
-      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    if (isNewExpression) {
+      suggestions.push(
+        ...(await handleFragment(
+          innerText,
+          (fragment) => METADATA_FIELDS.includes(fragment),
+          (_fragment, rangeToReplace) =>
+            buildFieldsDefinitions(filteredMetaFields).map((suggestion) => ({
+              ...suggestion,
+              rangeToReplace,
+            })),
+          (fragment, rangeToReplace) => {
+            const _suggestions = [
+              {
+                ...pipeCompleteItem,
+                text: fragment + ' | ',
+                filterText: fragment,
+                command: TRIGGER_SUGGESTION_COMMAND,
+                rangeToReplace,
+              },
+            ];
+            if (filteredMetaFields.length > 1) {
+              _suggestions.push({
+                ...commaCompleteItem,
+                text: fragment + ', ',
+                filterText: fragment,
+                command: TRIGGER_SUGGESTION_COMMAND,
+                rangeToReplace,
+              });
+            }
+            return _suggestions;
+          }
+        ))
+      );
     } else {
       if (existingFields.size > 0) {
         // METADATA field <suggest>
