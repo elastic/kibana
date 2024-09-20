@@ -76,12 +76,3 @@ jobs:
       run: |
         npm ci --omit=dev
         node codeql-alert 
-
-    - name: CodeQL alert statistics
-      working-directory: ./kibana-operations/triage
-      env:
-        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
-        SLACK_TOKEN: ${{secrets.CODE_SCANNING_SLACK_TOKEN}}
-      run: |
-        npm ci --omit=dev
-        node codeql-alert-stats
