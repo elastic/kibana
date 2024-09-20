@@ -349,7 +349,7 @@ export interface AddVersionOpts<P, Q, B> {
   /**
    * A description of which parts of this route are deprecated.
    */
-  deprecated?: RouteInputDeprecation<P, Q, B>;
+  deprecated?: RouteInputDeprecation;
 }
 
 /**

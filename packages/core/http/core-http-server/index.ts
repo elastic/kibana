@@ -111,6 +111,9 @@ export type {
   RouteInputDeprecationDescription,
   RouteInputDeprecation,
   RouteInputDeprecationFactory,
+  RouteInputDeprecationLocation,
+  RouteInputDeprecationRemovedDescription,
+  RouteInputDeprecationRenamedDescription,
 } from './src/router';
 export {
   validBodyOutput,

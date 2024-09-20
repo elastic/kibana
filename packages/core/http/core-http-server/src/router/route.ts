@@ -112,12 +112,12 @@ export interface RouteConfigOptionsBody {
 export type RouteAccess = 'public' | 'internal';
 
 /** @public */
-export type InputDeprecationLocation = 'query' | 'body';
+export type RouteInputDeprecationLocation = 'query' | 'body';
 
 /** @public */
 export interface RouteInputDeprecationRenamedDescription {
   type: 'renamed';
-  location: InputDeprecationLocation;
+  location: RouteInputDeprecationLocation;
   old: string;
   new: string;
 }
@@ -125,7 +125,7 @@ export interface RouteInputDeprecationRenamedDescription {
 /** @public */
 export interface RouteInputDeprecationRemovedDescription {
   type: 'removed';
-  location: InputDeprecationLocation;
+  location: RouteInputDeprecationLocation;
   path: string;
 }
 
@@ -139,8 +139,8 @@ export type RouteInputDeprecationDescription =
  * @public
  */
 export type RouteInputDeprecationFactory = (factories: {
-  removed(path: string): RouteInputDeprecationRemovedDescription;
-  renamed(input: { oldPath: string; newPath: string }): RouteInputDeprecationRenamedDescription;
+  remove(path: string): RouteInputDeprecationRemovedDescription;
+  rename(oldPath: string, newPath: string): RouteInputDeprecationRenamedDescription;
 }) => RouteInputDeprecationDescription[];
 
 /**

@@ -11,9 +11,10 @@ import type { OnPostAuthHandler } from '@kbn/core-http-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-server-internal';
 import type { Logger } from '@kbn/logging';
 
-import { findInputDeprecations } from './find_deprecations';
+import { buildDeprecations } from '@kbn/core-http-router-server-internal';
 
 interface Dependencies {
+  logRouteApiDeprecations: boolean;
   log: Logger;
   coreUsageData: InternalCoreUsageDataSetup;
 }
@@ -22,22 +23,25 @@ export function createRouteDeprecationsHandler({ coreUsageData }: Dependencies):
   return (req, res, toolkit) => {
     const {
       route: {
-        options: { deprecated },
+        options: { deprecated: deprecatedInput },
       },
     } = req;
     const messages = [];
-    if (typeof deprecated === 'boolean' && deprecated === true) {
+    if (typeof deprecatedInput === 'boolean' && deprecatedInput === true) {
       // Log route level deprecation
-    } else if (typeof deprecated === 'string') {
+      messages.push(`${req.route.method} ${req.route.path} is deprecated.`);
+    } else if (typeof deprecatedInput === 'string') {
       // Log route level deprecation + message
-    } else if (typeof deprecated === 'object') {
-      messages.push(...findInputDeprecations(req, deprecated() /* TODO */));
+      messages.push(deprecatedInput);
+    } else if (typeof deprecatedInput === 'object') {
       // Log route input level deprecation + message
+      const deprecations = buildDeprecations(deprecatedInput);
+      for (const { check, message, location } of deprecations) {
+        if (check(req[location])) messages.push(`${req.route.method} ${req.route.path} ${message}`);
+      }
     }
     for (const message of messages) {
-      coreUsageData.incrementUsageCounter({
-        counterName: `[${req.route.method}]${req.route.path} ${message}`,
-      });
+      coreUsageData.incrementUsageCounter({ counterName: message }); // TODO(jloleysens) figure this part out
     }
     return toolkit.next();
   };
