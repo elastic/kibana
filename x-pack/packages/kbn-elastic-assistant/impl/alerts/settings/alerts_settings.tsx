@@ -26,14 +26,6 @@ interface Props {
 const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }: Props) => {
   return (
     <>
-      {/* <AlertsSwitch*/}
-      {/*  isEnabledRAGAlerts={knowledgeBase.isEnabledRAGAlerts}*/}
-      {/*  setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}*/}
-      {/*  knowledgeBase={knowledgeBase}*/}
-      {/* />*/}
-
-      <EuiSpacer size="xs" />
-
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem
           css={css`

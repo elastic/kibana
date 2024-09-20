@@ -9,7 +9,6 @@ import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { KnowledgeBaseConfig } from '../../assistant/types';
 import { AlertsRange } from '../../knowledge_base/alerts_range';
-import { AlertsSwitch } from '../../knowledge_base/alerts_switch';
 import * as i18n from '../../knowledge_base/translations';
 
 interface Props {
@@ -31,14 +30,6 @@ export const AlertsSettingsManagement: React.FC<Props> = React.memo(
             {i18n.YOUR_ANONYMIZATION_SETTINGS}
           </span>
         </EuiText>
-        <EuiSpacer size="m" />
-        <AlertsSwitch
-          isEnabledRAGAlerts={true}
-          compressed={false}
-          setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-          knowledgeBase={knowledgeBase}
-          showLabel={true}
-        />
         <EuiSpacer size="l" />
         <AlertsRange
           knowledgeBase={knowledgeBase}

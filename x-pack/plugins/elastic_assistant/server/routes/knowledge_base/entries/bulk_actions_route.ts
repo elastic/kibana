@@ -207,7 +207,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 spaceId,
                 user: authenticatedUser,
                 entry,
-                // TODO: Add V2 flag
               })
             ),
             documentsToDelete: body.delete?.ids,

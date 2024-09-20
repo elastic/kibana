@@ -25,12 +25,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { AlertsSettingsManagement } from '../../alerts/settings/alerts_settings_management';
 import { useKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_knowledge_base_entries';
-import {
-  isKnowledgeBaseSetup,
-  useKnowledgeBaseStatus,
-} from '../../assistant/api/knowledge_base/use_knowledge_base_status';
 import { useAssistantContext } from '../../assistant_context';
-import { ESQL_RESOURCE } from '../const';
 import { useKnowledgeBaseTable } from './use_knowledge_base_table';
 import {
   useSettingsUpdater,
@@ -73,15 +68,6 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
 
   const [selectedEntry, setSelectedEntry] =
     useState<Partial<DocumentEntry | IndexEntry | KnowledgeBaseEntryCreateProps>>();
-
-  // Knowledge Base Setup/Status
-  const {
-    data: kbStatus,
-    isLoading: isKbLoadingInitial,
-    isFetching: isKbFetching,
-  } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
-  const isKbSetup = isKnowledgeBaseSetup(kbStatus);
-  const isKbLoading = isKbLoadingInitial || isKbFetching;
 
   // CRUD API accessors
   const { mutate: createEntry, isLoading: isCreatingEntry } = useCreateKnowledgeBaseEntry({
@@ -209,7 +195,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
               ),
             }}
           />
-          {!isKbSetup && !isKbLoading && <SetupKnowledgeBaseButton display={'mini'} />}
+          <SetupKnowledgeBaseButton display={'mini'} />
         </EuiText>
         <EuiSpacer size="l" />
         <EuiInMemoryTable
