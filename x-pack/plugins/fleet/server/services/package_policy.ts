@@ -1035,11 +1035,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     logger.debug(`Bumping revision of associated agent policies ${associatedPolicyIds}`);
     const bumpPromises = [];
     for (const policyId of associatedPolicyIds) {
-      // If the agent policy is no longer associated with the endpoint package policy, remove the protection
+      // Check if the agent policy is in both old and updated package policies
+      const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
+      const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
+
+      // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
       const removeProtection =
-        newPolicy.package?.name === 'endpoint' &&
-        oldPackagePolicy.policy_ids.includes(policyId) &&
-        !newPolicy.policy_ids.includes(policyId);
+        (assignedInOldPolicy && !assignedInNewPolicy) ||
+        (!assignedInOldPolicy && assignedInNewPolicy);
 
       bumpPromises.push(
         agentPolicyService.bumpRevision(soClient, esClient, policyId, {
@@ -1218,18 +1221,26 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const [endpointPackagePolicyUpdatesIds, endpointOldPackagePoliciesIds] = [
       packagePolicyUpdates,
       oldPackagePolicies,
-    ].map((packagePolicies) =>
-      packagePolicies
-        .filter((p) => p.package?.name === 'endpoint')
-        .map((p) => p.policy_ids)
-        .flat()
+    ].map(
+      (packagePolicies) =>
+        new Set(
+          packagePolicies
+            .filter((p) => p.package?.name === 'endpoint')
+            .map((p) => p.policy_ids)
+            .flat()
+        )
     );
 
     const bumpPromise = pMap(associatedPolicyIds, async (agentPolicyId) => {
-      // If the agent policy is no longer associated with the endpoint package policy, remove the protection
+      // Check if the agent policy is in both old and updated package policies
+      const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
+      const assignedInUpdatedPolicies = endpointPackagePolicyUpdatesIds.has(agentPolicyId);
+
+      // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
       const removeProtection =
-        endpointOldPackagePoliciesIds.includes(agentPolicyId) &&
-        !endpointPackagePolicyUpdatesIds.includes(agentPolicyId);
+        (assignedInOldPolicies && !assignedInUpdatedPolicies) ||
+        (!assignedInOldPolicies && assignedInUpdatedPolicies);
+
       await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
         user: options?.user,
         removeProtection,
