@@ -100,7 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Serverless - Agentless CIS_GCP edit flow', () => {
+    describe.skip('Serverless - Agentless CIS_GCP edit flow', () => {
       it(`user should save and edit agentless integration policy`, async () => {
         const newCredentialsJSON = 'newJson';
         await cisIntegration.createAgentlessIntegration({

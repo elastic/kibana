@@ -1486,25 +1486,13 @@ export default function (providerContext: FtrProviderContext) {
             support_agentless: true,
           })
           .expect(200);
-        const {
-          body: { item: agentlessPolicy },
-        } = await supertest
-          .put(`/api/fleet/agent_policies/${createdPolicy.id}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'Agentless policy',
-            namespace: 'default',
-            support_agentless: true,
-          })
-          .expect(200);
-
         const { body } = await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxx')
-          .send({ agentPolicyId: agentlessPolicy.id });
+          .send({ agentPolicyId: createdPolicy.id });
 
         expect(body).to.eql({
-          id: agentlessPolicy.id,
+          id: createdPolicy.id,
           name: 'Agentless policy',
         });
       });

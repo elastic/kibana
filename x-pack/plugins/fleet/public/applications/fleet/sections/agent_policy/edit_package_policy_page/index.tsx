@@ -60,6 +60,8 @@ import { RootPrivilegesCallout } from '../create_package_policy_page/single_page
 
 import { StepsWithLessPadding } from '../create_package_policy_page/single_page_layout';
 
+import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
+
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
@@ -71,7 +73,6 @@ export const EditPackagePolicyPage = memo(() => {
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
 
   const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
-
   const extensionView = useUIExtension(
     packagePolicy.data?.item?.package?.name ?? '',
     'package-policy-edit'
@@ -102,6 +103,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+  const { isAgentlessAgentPolicy } = useAgentless();
   const {
     // data
     agentPolicies: existingAgentPolicies,
@@ -125,8 +127,12 @@ export const EditPackagePolicyForm = memo<{
     forceUpgrade,
   });
 
-  const hasAgentlessAgentPolicy = existingAgentPolicies.some(
-    (policy) => policy.id === policyId && policy.supports_agentless === true
+  const hasAgentlessAgentPolicy = useMemo(
+    () =>
+      existingAgentPolicies.length === 1
+        ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy))
+        : false,
+    [existingAgentPolicies, isAgentlessAgentPolicy]
   );
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;

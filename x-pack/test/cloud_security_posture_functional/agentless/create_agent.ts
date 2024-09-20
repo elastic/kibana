@@ -73,6 +73,63 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     });
 
+    it(`should show setup technology selector in edit mode`, async () => {
+      const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
+      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
+        CLOUD_CREDENTIALS_PACKAGE_VERSION
+      );
+
+      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+
+      await cisIntegration.inputIntegrationName(integrationPolicyName);
+
+      await cisIntegration.selectSetupTechnology('agentless');
+      await cisIntegration.selectAwsCredentials('direct');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await cisIntegration.clickSaveButton();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+
+      await cisIntegration.navigateToIntegrationCspList();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await cisIntegration.navigateToEditIntegrationPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await cisIntegration.showSetupTechnologyComponent()).to.be(true);
+    });
+
+    it(`should hide setup technology selector in edit mode`, async () => {
+      const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
+      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
+        CLOUD_CREDENTIALS_PACKAGE_VERSION
+      );
+
+      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+
+      await cisIntegration.inputIntegrationName(integrationPolicyName);
+      await cisIntegration.selectSetupTechnology('agent-based');
+      await cisIntegration.selectAwsCredentials('direct');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await cisIntegration.clickSaveButton();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+
+      await cisIntegration.navigateToIntegrationCspList();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await cisIntegration.navigateToEditIntegrationPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await cisIntegration.showSetupTechnologyComponent()).to.be(false);
+    });
+
     it(`should create default agent-based agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
 
