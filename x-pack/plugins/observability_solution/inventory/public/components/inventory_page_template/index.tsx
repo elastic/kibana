@@ -21,7 +21,7 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
   const {
     isEntityManagerEnabled,
-    isEnablementPending,
+    isEnablementLoading,
     refresh,
     showWelcomedModal,
     toggleWelcomedModal,
@@ -36,7 +36,7 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
     <ObservabilityPageTemplate
       noDataConfig={getEntityManagerEnablement({
         enabled: isEntityManagerEnabled,
-        loading: isEnablementPending,
+        loading: isEnablementLoading,
         onSuccess: handleSuccess,
       })}
       pageHeader={{

@@ -31,7 +31,7 @@ export const useEntityManager = () => {
 
   return {
     isEntityManagerEnabled: value.enabled,
-    isEnablementPending: loading,
+    isEnablementLoading: loading,
     refresh,
     showWelcomedModal,
     toggleWelcomedModal: () => setWelcomedModal(!showWelcomedModal),
