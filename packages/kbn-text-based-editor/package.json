@@ -5,10 +5,5 @@
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "sideEffects": [
     "*.scss"
-  ],
-  "scripts": {
-    "make:docs": "ts-node --transpileOnly scripts/generate_esql_docs.ts",
-    "postmake:docs": "yarn run lint:fix",
-    "lint:fix": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-text-based-editor/src/inline_documentation/generated"
-  }
+  ]
 }

@@ -7,7 +7,7 @@ info:
   title: Security Solution Detections API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -362,7 +362,7 @@ paths:
               items:
                 $ref: '#/components/schemas/RuleCreateProps'
               type: array
-        description: 'A JSON array of rules, where each rule contains the required fields.'
+        description: A JSON array of rules, where each rule contains the required fields.
         required: true
       responses:
         '200':
@@ -492,7 +492,7 @@ paths:
               items:
                 $ref: '#/components/schemas/RulePatchProps'
               type: array
-        description: 'A JSON array of rules, where each rule contains the required fields.'
+        description: A JSON array of rules, where each rule contains the required fields.
         required: true
       responses:
         '200':
@@ -891,6 +891,15 @@ paths:
   /api/detection_engine/rules/preview:
     post:
       operationId: RulePreview
+      parameters:
+        - description: >-
+            Enables logging and returning in response ES queries, performed
+            during rule execution
+          in: query
+          name: enable_logged_requests
+          required: false
+          schema:
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -1682,12 +1691,12 @@ components:
                 Interval in which the rule runs. For example, `"1h"` means the
                 rule runs every hour.
               example: 1h
-              pattern: '^[1-9]\d*[smh]$'
+              pattern: ^[1-9]\d*[smh]$
               type: string
             lookback:
               description: Lookback time for the rule
               example: 1h
-              pattern: '^[1-9]\d*[smh]$'
+              pattern: ^[1-9]\d*[smh]$
               type: string
           required:
             - interval
@@ -4990,9 +4999,9 @@ components:
             - no_actions
             - rule
           type: string
-        - description: 'Time interval in seconds, minutes, hours, or days.'
+        - description: Time interval in seconds, minutes, hours, or days.
           example: 1h
-          pattern: '^[1-9]\d*[smhd]$'
+          pattern: ^[1-9]\d*[smhd]$
           type: string
     RuleAuthorArray:
       items:
@@ -5178,6 +5187,17 @@ components:
         - $ref: '#/components/schemas/MachineLearningRulePatchProps'
         - $ref: '#/components/schemas/NewTermsRulePatchProps'
         - $ref: '#/components/schemas/EsqlRulePatchProps'
+    RulePreviewLoggedRequest:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/NonEmptyString'
+        duration:
+          type: integer
+        request:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - request
     RulePreviewLogs:
       type: object
       properties:
@@ -5187,6 +5207,10 @@ components:
         errors:
           items:
             $ref: '#/components/schemas/NonEmptyString'
+          type: array
+        requests:
+          items:
+            $ref: '#/components/schemas/RulePreviewLoggedRequest'
           type: array
         startedAt:
           $ref: '#/components/schemas/NonEmptyString'
@@ -5228,7 +5252,7 @@ components:
       discriminator:
         propertyName: type
     RuleSignatureId:
-      description: 'Could be any string, not necessarily a UUID'
+      description: Could be any string, not necessarily a UUID
       type: string
     RuleSource:
       description: >-

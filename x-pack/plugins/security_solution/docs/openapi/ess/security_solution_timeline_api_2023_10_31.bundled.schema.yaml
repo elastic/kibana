@@ -51,6 +51,8 @@ paths:
                   data:
                     type: object
           description: Indicates the note was successfully deleted.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Delete a note
       tags:
         - Security Solution Timeline API
@@ -102,6 +104,8 @@ paths:
                   - $ref: '#/components/schemas/GetNotesResult'
                   - type: object
           description: Indicates the requested notes were returned.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get notes
       tags:
         - Security Solution Timeline API
@@ -156,6 +160,8 @@ paths:
                 required:
                   - data
           description: Indicates the note was successfully created.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Add or update a note
       tags:
         - Security Solution Timeline API
@@ -199,6 +205,8 @@ paths:
                 required:
                   - data
           description: Indicates the event was successfully pinned to the Timeline.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Pin an event
       tags:
         - Security Solution Timeline API
@@ -245,6 +253,8 @@ paths:
                 required:
                   - data
           description: Indicates the Timeline was successfully deleted.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Delete Timelines or Timeline templates
       tags:
         - Security Solution Timeline API
@@ -282,6 +292,8 @@ paths:
                       - data
                   - type: object
           description: Indicates that the (template) Timeline was found and returned.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get Timeline or Timeline template details
       tags:
         - Security Solution Timeline API
@@ -350,6 +362,8 @@ paths:
           description: >-
             Indicates that the user does not have the required access to create
             a draft Timeline.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Update a Timeline
       tags:
         - Security Solution Timeline API
@@ -422,6 +436,8 @@ paths:
                   statusCode:
                     type: number
           description: Indicates that there was an error in the Timeline creation.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Create a Timeline or Timeline template
       tags:
         - Security Solution Timeline API
@@ -467,6 +483,8 @@ paths:
                 required:
                   - data
           description: Indicates that the timeline has been successfully copied.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Copies timeline or timeline template.
       tags:
         - Security Solution Timeline API
@@ -534,6 +552,8 @@ paths:
             This should never happen, but if a draft Timeline was not found and
             we attempted to create one, it indicates that there is already a
             draft Timeline with the given `timelineId`.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get draft Timeline or Timeline template details
       tags:
         - Security Solution Timeline API
@@ -612,6 +632,8 @@ paths:
           description: >-
             Indicates that there is already a draft Timeline with the given
             `timelineId`.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Create a clean draft Timeline or Timeline template
       tags:
         - Security Solution Timeline API
@@ -659,6 +681,8 @@ paths:
                   statusCode:
                     type: number
           description: Indicates that the export size limit was exceeded.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Export Timelines
       tags:
         - Security Solution Timeline API
@@ -722,6 +746,8 @@ paths:
           description: >-
             Indicates the user does not have the required permissions to persist
             the favorite status.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Favorite a Timeline or Timeline template
       tags:
         - Security Solution Timeline API
@@ -794,6 +820,8 @@ paths:
                   statusCode:
                     type: number
           description: Indicates the import of Timelines was unsuccessful.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Import Timelines
       tags:
         - Security Solution Timeline API
@@ -849,6 +877,8 @@ paths:
           description: >-
             Indicates the installation of prepackaged Timelines was
             unsuccessful.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Install prepackaged Timelines
       tags:
         - Security Solution Timeline API
@@ -885,6 +915,8 @@ paths:
           description: The request is missing parameters
         '404':
           description: The (template) Timeline was not found
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get an existing saved Timeline or Timeline template
       tags:
         - Security Solution Timeline API
@@ -986,11 +1018,20 @@ paths:
                   statusCode:
                     type: number
           description: Bad request. The user supplied invalid data.
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get Timelines or Timeline templates
       tags:
         - Security Solution Timeline API
         - 'access:securitySolution'
 components:
+  callbacks: !<tag:yaml.org,2002:js/undefined> ''
+  examples: !<tag:yaml.org,2002:js/undefined> ''
+  headers: !<tag:yaml.org,2002:js/undefined> ''
+  links: !<tag:yaml.org,2002:js/undefined> ''
+  parameters: !<tag:yaml.org,2002:js/undefined> ''
+  requestBodies: !<tag:yaml.org,2002:js/undefined> ''
+  responses: !<tag:yaml.org,2002:js/undefined> ''
   schemas:
     BareNote:
       type: object
@@ -1674,3 +1715,4 @@ tags:
       You can create Timelines and Timeline templates via the API, as well as
       import new Timelines from an ndjson file.
     name: Security Solution Timeline API
+externalDocs: !<tag:yaml.org,2002:js/undefined> ''
