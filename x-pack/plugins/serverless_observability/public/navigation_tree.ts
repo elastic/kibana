@@ -126,31 +126,46 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
-          link: 'apm:services',
-          renderAs: 'accordion',
+          // link: 'apm:services',
+          renderAs: 'panelOpener',
           children: [
             {
-              link: 'apm:services',
-              getIsActive: ({ pathNameSerialized }) => {
-                const regex = /app\/apm\/.*service.*/;
-                return regex.test(pathNameSerialized);
-              },
-            },
-            {
-              link: 'apm:traces',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
-              },
-            },
-            {
-              link: 'apm:dependencies',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
-              },
-            },
-            {
-              link: 'apm:settings',
-              sideNavStatus: 'hidden', // only to be considered in the breadcrumbs
+              children: [
+                { link: 'apm:services' },
+                { link: 'apm:traces' },
+                { link: 'apm:dependencies' },
+                { link: 'apm:settings' },
+                {
+                  id: 'synthetics',
+                  title: i18n.translate('xpack.serverlessObservability.nav.synthetics', {
+                    defaultMessage: 'Synthetics',
+                  }),
+                  children: [
+                    {
+                      title: i18n.translate(
+                        'xpack.serverlessObservability.nav.synthetics.overviewItem',
+                        {
+                          defaultMessage: 'Overview',
+                        }
+                      ),
+                      id: 'synthetics-overview',
+                      link: 'synthetics:overview',
+                      breadcrumbStatus: 'hidden',
+                    },
+                    {
+                      link: 'synthetics:certificates',
+                      title: i18n.translate(
+                        'xpack.serverlessObservability.nav.synthetics.certificatesItem',
+                        {
+                          defaultMessage: 'TLS Certificates',
+                        }
+                      ),
+                      id: 'synthetics-certificates',
+                      breadcrumbStatus: 'hidden',
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
@@ -159,57 +174,16 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
-          link: 'metrics:inventory',
-          renderAs: 'accordion',
+          // link: 'metrics:inventory',
+          renderAs: 'panelOpener',
           children: [
             {
-              link: 'metrics:inventory',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
-              },
-            },
-            {
-              link: 'metrics:hosts',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
-              },
-            },
-            {
-              link: 'metrics:settings',
-              sideNavStatus: 'hidden', // only to be considered in the breadcrumbs
-            },
-            {
-              link: 'metrics:assetDetails',
-              sideNavStatus: 'hidden', // only to be considered in the breadcrumbs
-            },
-          ],
-        },
-        {
-          id: 'synthetics',
-          title: i18n.translate('xpack.serverlessObservability.nav.synthetics', {
-            defaultMessage: 'Synthetics',
-          }),
-          renderAs: 'accordion',
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              title: i18n.translate('xpack.serverlessObservability.nav.synthetics.overviewItem', {
-                defaultMessage: 'Overview',
-              }),
-              id: 'synthetics-overview',
-              link: 'synthetics:overview',
-              breadcrumbStatus: 'hidden',
-            },
-            {
-              link: 'synthetics:certificates',
-              title: i18n.translate(
-                'xpack.serverlessObservability.nav.synthetics.certificatesItem',
-                {
-                  defaultMessage: 'TLS Certificates',
-                }
-              ),
-              id: 'synthetics-certificates',
-              breadcrumbStatus: 'hidden',
+              children: [
+                { link: 'metrics:inventory' },
+                { link: 'metrics:hosts' },
+                { link: 'metrics:settings' },
+                { link: 'metrics:assetDetails' },
+              ],
             },
           ],
         },
