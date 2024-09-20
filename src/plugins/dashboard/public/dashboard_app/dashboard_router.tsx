@@ -101,7 +101,9 @@ export async function mountApp({
     };
   };
 
-  const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
+  const renderDashboard = (
+    routeProps: RouteComponentProps<{ id?: string; expandedPanelId?: string }>
+  ) => {
     const routeParams = parse(routeProps.history.location.search);
     if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
@@ -112,6 +114,7 @@ export async function mountApp({
         embedSettings={globalEmbedSettings}
         savedDashboardId={routeProps.match.params.id}
         redirectTo={redirect}
+        expandedPanelId={routeProps.match.params.expandedPanelId}
       />
     );
   };
@@ -154,7 +157,11 @@ export async function mountApp({
         <HashRouter>
           <Routes>
             <Route
-              path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
+              path={[
+                CREATE_NEW_DASHBOARD_URL,
+                `${VIEW_DASHBOARD_URL}/:id/:expandedPanelId`,
+                `${VIEW_DASHBOARD_URL}/:id`,
+              ]}
               render={renderDashboard}
             />
             <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
