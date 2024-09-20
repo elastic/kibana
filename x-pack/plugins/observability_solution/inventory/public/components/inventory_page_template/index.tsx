@@ -28,18 +28,15 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
       <EuiFlexItem grow={false}>
         <EuiBetaBadge
           iconType="beaker"
-          label={i18n.translate('xpack.observability_solution.inventory.techPreviewBadge.label', {
+          label={i18n.translate('xpack.inventory.techPreviewBadge.label', {
             defaultMessage: 'Technical preview',
           })}
           size="m"
           color="hollow"
-          tooltipContent={i18n.translate(
-            'xpack.observability_solution.inventory.techPreviewBadge.tooltip',
-            {
-              defaultMessage:
-                'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-            }
-          )}
+          tooltipContent={i18n.translate('xpack.inventory.techPreviewBadge.tooltip', {
+            defaultMessage:
+              'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+          })}
           tooltipPosition={'right'}
         />
       </EuiFlexItem>
