@@ -20,7 +20,7 @@ var allManifestPaths = Object.values(manifestsSource).flat();
 
 try {
   for (var manifestRelPath of allManifestPaths) {
-    var manifest = yaml.safeLoad(fs.readFileSync(manifestRelPath, 'utf8'));
+    var manifest = yaml.load(fs.readFileSync(manifestRelPath, 'utf8'));
     if (manifest.enabled) {
       manifest.enabled.forEach(function (x) {
         console.log(x);
