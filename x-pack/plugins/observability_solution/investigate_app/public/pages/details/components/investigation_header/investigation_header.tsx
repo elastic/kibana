@@ -35,13 +35,15 @@ export function InvestigationHeader() {
           <InvestigationStatusBadge status={investigation.status} />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false} wrap gutterSize="s">
-            {investigation.tags.map((tag) => (
-              <InvestigationTag key={tag} tag={tag} />
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {investigation.tags.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false} wrap gutterSize="s">
+              {investigation.tags.map((tag) => (
+                <InvestigationTag key={tag} tag={tag} />
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
 
         <EuiFlexItem grow={false}>
           <EuiText size="s">
