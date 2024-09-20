@@ -59,6 +59,7 @@ import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_
 import { useGetAgentStatus as _useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
 import { agentStatusMocks } from '../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 import { useBulkGetAgentPolicies } from '../../../services/policies/hooks';
+import type { PartialEndpointPolicyData } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -228,28 +229,34 @@ describe('when on the endpoint list page', () => {
       return [...options].map(({ textContent }) => textContent);
     };
 
-    beforeEach(async () => {
-      useBulkGetAgentPoliciesMock.mockReturnValue({
-        data: [
-          { id: 'policy-1', name: 'Agent Policy 1' },
-          { id: 'policy-2a', name: 'Agent Policy 2A' },
-          { id: 'policy-2b', name: 'Agent Policy 2B' },
-        ],
-        isLoading: false,
-      });
-
-      const policyData = [
+    const setupPolicyDataMocks = (
+      partialPolicyData: PartialEndpointPolicyData[] = [
         { name: 'Package 1', policy_ids: ['policy-1'] },
-        { name: 'Package 2', policy_ids: ['policy-2a', 'policy-2b'] },
-        { name: 'Package 3', policy_ids: ['policy-3'] }, // no matching Agent Policy
-        { name: 'Package 4', policy_ids: [] }, // no assigned Agent Policy
-      ].map((overrides) => docGenerator.generatePolicyPackagePolicy({ overrides }));
+      ]
+    ) => {
+      const policyData = partialPolicyData.map((overrides) =>
+        docGenerator.generatePolicyPackagePolicy({ overrides })
+      );
 
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: [],
         endpointPackagePolicies: policyData,
       });
+    };
+
+    beforeEach(async () => {
+      useBulkGetAgentPoliciesMock.mockReturnValue({
+        data: [
+          { id: 'policy-1', name: 'Agent Policy 1' },
+          { id: 'policy-2', name: 'Agent Policy 2' },
+          { id: 'policy-3', name: 'Agent Policy 3' },
+        ],
+        isLoading: false,
+      });
+
+      setupPolicyDataMocks();
     });
+
     afterEach(() => {
       jest.clearAllMocks();
     });
@@ -279,40 +286,125 @@ describe('when on the endpoint list page', () => {
       expect(onboardingSteps).toBeInTheDocument();
     });
 
-    it('should show policy selection', async () => {
-      render();
-      const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
-      expect(onboardingPolicySelect).toBeInTheDocument();
+    describe('policy selection', () => {
+      it('should show policy selection', async () => {
+        render();
+        const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
+        expect(onboardingPolicySelect).toBeInTheDocument();
+      });
+
+      it('should show discrete `package policy - agent policy` pairs', async () => {
+        setupPolicyDataMocks([
+          { name: 'Package 1', policy_ids: ['policy-1'] },
+          { name: 'Package 2', policy_ids: ['policy-2'] },
+        ]);
+
+        render();
+        const optionsTexts = await getOptionsTexts();
+
+        expect(optionsTexts).toStrictEqual([
+          'Package 1 - Agent Policy 1',
+          'Package 2 - Agent Policy 2',
+        ]);
+      });
+
+      it('should display the same package policy with multiple Agent Policies multiple times', async () => {
+        setupPolicyDataMocks([
+          { name: 'Package 1', policy_ids: ['policy-1', 'policy-2', 'policy-3'] },
+        ]);
+
+        render();
+        const optionsTexts = await getOptionsTexts();
+
+        expect(optionsTexts).toStrictEqual([
+          'Package 1 - Agent Policy 1',
+          'Package 1 - Agent Policy 2',
+          'Package 1 - Agent Policy 3',
+        ]);
+      });
+
+      it('should not display a package policy without agent policy', async () => {
+        setupPolicyDataMocks([
+          { name: 'Package 1', policy_ids: [] },
+          { name: 'Package 2', policy_ids: ['policy-1'] },
+        ]);
+
+        render();
+        const optionsTexts = await getOptionsTexts();
+
+        expect(optionsTexts).toStrictEqual(['Package 2 - Agent Policy 1']);
+      });
+
+      it("should fallback to agent policy ID if it's not found", async () => {
+        setupPolicyDataMocks([{ name: 'Package 1', policy_ids: ['agent-policy-id'] }]);
+
+        render();
+        const optionsTexts = await getOptionsTexts();
+        expect(
+          renderResult.queryByTestId('noIntegrationsAddedToAgentPoliciesCallout')
+        ).not.toBeInTheDocument();
+
+        expect(optionsTexts).toStrictEqual(['Package 1 - agent-policy-id']);
+      });
+
+      it('should show callout indicating that none of the integrations are added to agent policies', async () => {
+        setupPolicyDataMocks([{ name: 'Package 1', policy_ids: [] }]);
+
+        render();
+
+        expect(
+          await renderResult.findByTestId('noIntegrationsAddedToAgentPoliciesCallout')
+        ).toBeInTheDocument();
+      });
     });
 
-    it('should show discrete `package policy - agent policy` pairs', async () => {
-      render();
-      const optionsTexts = await getOptionsTexts();
+    describe('integration not added to agent policy callout', () => {
+      it('should not display callout if all integrations are added to agent policies', async () => {
+        setupPolicyDataMocks([
+          { name: 'Package 1', policy_ids: ['policy-1'] },
+          { name: 'Package 2', policy_ids: ['policy-2'] },
+        ]);
 
-      expect(optionsTexts.length).toBe(4);
-      expect(optionsTexts[0]).toBe('Package 1 - Agent Policy 1');
-    });
+        render();
+        await getOptionsTexts();
 
-    it('should display the same package policy with multiple Agent Policies multiple times', async () => {
-      render();
-      const optionsTexts = await getOptionsTexts();
+        expect(
+          renderResult.queryByTestId('integrationsNotAddedToAgentPolicyCallout')
+        ).not.toBeInTheDocument();
+      });
 
-      expect(optionsTexts[1]).toBe('Package 2 - Agent Policy 2A');
-      expect(optionsTexts[2]).toBe('Package 2 - Agent Policy 2B');
-    });
+      it('should display callout if an integration is not added to an agent policy', async () => {
+        setupPolicyDataMocks([
+          { name: 'Package 1', policy_ids: ['policy-1'] },
+          { name: 'Package 2', policy_ids: [] },
+        ]);
 
-    it('should not display a package policy without agent policy', async () => {
-      render();
-      const optionsTexts = await getOptionsTexts();
+        render();
 
-      expect(optionsTexts.join()).not.toContain('Package 4');
-    });
+        expect(
+          await renderResult.findByTestId('integrationsNotAddedToAgentPolicyCallout')
+        ).toBeInTheDocument();
+      });
 
-    it("should fallback to agent policy ID if it's not found", async () => {
-      render();
-      const optionsTexts = await getOptionsTexts();
+      it('should list all integrations which are not added to an agent policy', async () => {
+        setupPolicyDataMocks([
+          { name: 'Package 1', policy_ids: ['policy-1'] },
+          { name: 'Package 2', policy_ids: [] },
+          { name: 'Package 3', policy_ids: [] },
+          { name: 'Package 4', policy_ids: [] },
+        ]);
 
-      expect(optionsTexts[3]).toBe('Package 3 - policy-3');
+        render();
+
+        const integrations = await renderResult.findAllByTestId(
+          'integrationWithoutAgentPolicyListItem'
+        );
+        expect(integrations.map(({ textContent }) => textContent)).toStrictEqual([
+          'Package 2',
+          'Package 3',
+          'Package 4',
+        ]);
+      });
     });
   });
 

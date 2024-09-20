@@ -644,6 +644,7 @@ export const EndpointList = () => {
             actionDisabled={!selectedPolicyId}
             handleSelectableOnChange={handleSelectableOnChange}
             selectionOptions={selectionOptions}
+            policyItems={policyItems}
           />
         );
       case 'policyEmptyState':
