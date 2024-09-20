@@ -15,16 +15,26 @@ import { RecentlyAccessedService, type RecentlyAccessed } from '@kbn/recently-ac
 import type { DashboardCapabilities } from '../../common';
 import { DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID } from '../dashboard_constants';
 import type { DashboardStartDependencies } from '../plugin';
+import { getDashboardBackupService } from './dashboard_backup/dashboard_backup_service';
+import { getDashboardContentManagementService } from './dashboard_content_management/get_dashboard_content_management_service';
+import { DashboardContentManagementService } from './dashboard_content_management/types';
 
+export let dashboardBackupService: ReturnType<typeof getDashboardBackupService>;
 export let dashboardCapabilitiesService: { dashboardCapabilities: DashboardCapabilities };
+export let dashboardContentManagementService: DashboardContentManagementService;
 export let dashboardFavoritesService: FavoritesClient;
 export let dashboardInsightsService: ReturnType<typeof getDashboardInsightsService>;
 export let dashboardRecentlyAccessedService: RecentlyAccessed;
 
 export const setDashboardServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
+  dashboardBackupService = getDashboardBackupService();
   dashboardCapabilitiesService = {
     dashboardCapabilities: getDashboardCapabilities(kibanaCore),
   };
+  dashboardContentManagementService = getDashboardContentManagementService(
+    dashboardBackupService,
+    deps
+  );
   dashboardFavoritesService = new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
     http: kibanaCore.http,
     usageCollection: deps.usageCollection,

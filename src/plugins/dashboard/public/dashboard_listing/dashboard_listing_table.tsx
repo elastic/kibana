@@ -54,7 +54,7 @@ export const DashboardListingTable = ({
     <I18nProvider>
       <TableListViewKibanaProvider
         core={coreServices}
-        savedObjectsTagging={savedObjectsTaggingService?.getTaggingApi()}
+        savedObjectsTagging={savedObjectsTaggingService}
         FormattedRelative={FormattedRelative}
         contentInsightsClient={dashboardInsightsService.contentInsightsClient}
       >

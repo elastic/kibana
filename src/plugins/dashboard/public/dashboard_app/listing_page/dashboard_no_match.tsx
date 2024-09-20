@@ -16,21 +16,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { LANDING_PAGE_PATH } from '../../dashboard_constants';
-import { coreServices } from '../../services/kibana_services';
-import { pluginServices } from '../../services/plugin_services';
+import { coreServices, urlForwardingService } from '../../services/kibana_services';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 
 let bannerId: string | undefined;
 
 export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['history'] }) => {
   const { restorePreviousUrl } = useDashboardMountContext();
-  const {
-    urlForwarding: { navigateToLegacyKibanaUrl },
-  } = pluginServices.getServices();
 
   useEffect(() => {
     restorePreviousUrl();
-    const { navigated } = navigateToLegacyKibanaUrl(
+    const { navigated } = urlForwardingService.navigateToLegacyKibanaUrl(
       history.location.pathname + history.location.search
     );
 
@@ -66,7 +62,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
 
       history.replace(LANDING_PAGE_PATH);
     }
-  }, [restorePreviousUrl, navigateToLegacyKibanaUrl, history]);
+  }, [restorePreviousUrl, history]);
 
   return null;
 };

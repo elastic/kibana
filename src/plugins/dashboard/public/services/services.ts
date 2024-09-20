@@ -9,19 +9,15 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 
 import { DashboardStartDependencies } from '../plugin';
-import { setKibanaServices } from './kibana_services';
 import { setDashboardServices } from './dashboard_services';
+import { setKibanaServices } from './kibana_services';
 
 const servicesReady$ = new BehaviorSubject(false);
 
-export const setServices = (
-  kibanaCore: CoreStart,
-  deps: DashboardStartDependencies,
-  initializerContext: PluginInitializerContext
-) => {
+export const setServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
   setKibanaServices(kibanaCore, deps);
   setDashboardServices(kibanaCore, deps);
   servicesReady$.next(true);

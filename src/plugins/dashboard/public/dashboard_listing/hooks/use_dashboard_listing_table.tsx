@@ -23,11 +23,12 @@ import {
   SAVED_OBJECT_LOADED_TIME,
 } from '../../dashboard_constants';
 import {
+  dashboardBackupService,
   dashboardCapabilitiesService,
+  dashboardContentManagementService,
   dashboardRecentlyAccessedService,
 } from '../../services/dashboard_services';
 import { coreServices } from '../../services/kibana_services';
-import { pluginServices } from '../../services/plugin_services';
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
@@ -95,16 +96,6 @@ export const useDashboardListingTable = ({
   useSessionStorageIntegration?: boolean;
   showCreateDashboardButton?: boolean;
 }): UseDashboardListingTableReturnType => {
-  const {
-    dashboardBackup,
-    dashboardContentManagement: {
-      findDashboards,
-      deleteDashboards,
-      updateDashboardMeta,
-      checkForDuplicateDashboardTitle,
-    },
-  } = pluginServices.getServices();
-
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
   const title = getTableListTitle();
   const entityName = getEntityName();
@@ -112,30 +103,30 @@ export const useDashboardListingTable = ({
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
-    dashboardBackup.getDashboardIdsWithUnsavedChanges()
+    dashboardBackupService.getDashboardIdsWithUnsavedChanges()
   );
 
   const listingLimit = coreServices.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = coreServices.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   const createItem = useCallback(() => {
-    if (useSessionStorageIntegration && dashboardBackup.dashboardHasUnsavedEdits()) {
+    if (useSessionStorageIntegration && dashboardBackupService.dashboardHasUnsavedEdits()) {
       confirmCreateWithUnsaved(() => {
-        dashboardBackup.clearState();
+        dashboardBackupService.clearState();
         goToDashboard();
       }, goToDashboard);
       return;
     }
     goToDashboard();
-  }, [dashboardBackup, goToDashboard, useSessionStorageIntegration]);
+  }, [goToDashboard, useSessionStorageIntegration]);
 
   const updateItemMeta = useCallback(
     async (props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>) => {
-      await updateDashboardMeta(props);
+      await dashboardContentManagementService.updateDashboardMeta(props);
 
-      setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
+      setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackup, updateDashboardMeta]
+    []
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -146,17 +137,19 @@ export const useDashboardListingTable = ({
           fn: async (value: string, id: string) => {
             if (id) {
               try {
-                const [dashboard] = await findDashboards.findByIds([id]);
+                const [dashboard] =
+                  await dashboardContentManagementService.findDashboards.findByIds([id]);
                 if (dashboard.status === 'error') {
                   return;
                 }
 
-                const validTitle = await checkForDuplicateDashboardTitle({
-                  title: value,
-                  copyOnSave: false,
-                  lastSavedTitle: dashboard.attributes.title,
-                  isTitleDuplicateConfirmed: false,
-                });
+                const validTitle =
+                  await dashboardContentManagementService.checkForDuplicateDashboardTitle({
+                    title: value,
+                    copyOnSave: false,
+                    lastSavedTitle: dashboard.attributes.title,
+                    isTitleDuplicateConfirmed: false,
+                  });
 
                 if (!validTitle) {
                   throw new Error(dashboardListingErrorStrings.getDuplicateTitleWarning(value));
@@ -169,7 +162,7 @@ export const useDashboardListingTable = ({
         },
       ],
     }),
-    [checkForDuplicateDashboardTitle, findDashboards]
+    []
   );
 
   const emptyPrompt = useMemo(
@@ -205,7 +198,7 @@ export const useDashboardListingTable = ({
     ) => {
       const searchStartTime = window.performance.now();
 
-      return findDashboards
+      return dashboardContentManagementService.findDashboards
         .search({
           search: searchTerm,
           size: listingLimit,
@@ -228,40 +221,37 @@ export const useDashboardListingTable = ({
           };
         });
     },
-    [findDashboards, listingLimit]
+    [listingLimit]
   );
 
-  const deleteItems = useCallback(
-    async (dashboardsToDelete: Array<{ id: string }>) => {
-      try {
-        const deleteStartTime = window.performance.now();
+  const deleteItems = useCallback(async (dashboardsToDelete: Array<{ id: string }>) => {
+    try {
+      const deleteStartTime = window.performance.now();
 
-        await deleteDashboards(
-          dashboardsToDelete.map(({ id }) => {
-            dashboardBackup.clearState(id);
-            return id;
-          })
-        );
+      await dashboardContentManagementService.deleteDashboards(
+        dashboardsToDelete.map(({ id }) => {
+          dashboardBackupService.clearState(id);
+          return id;
+        })
+      );
 
-        const deleteDuration = window.performance.now() - deleteStartTime;
-        reportPerformanceMetricEvent(coreServices.analytics, {
-          eventName: SAVED_OBJECT_DELETE_TIME,
-          duration: deleteDuration,
-          meta: {
-            saved_object_type: DASHBOARD_CONTENT_ID,
-            total: dashboardsToDelete.length,
-          },
-        });
-      } catch (error) {
-        coreServices.notifications.toasts.addError(error, {
-          title: dashboardListingErrorStrings.getErrorDeletingDashboardToast(),
-        });
-      }
+      const deleteDuration = window.performance.now() - deleteStartTime;
+      reportPerformanceMetricEvent(coreServices.analytics, {
+        eventName: SAVED_OBJECT_DELETE_TIME,
+        duration: deleteDuration,
+        meta: {
+          saved_object_type: DASHBOARD_CONTENT_ID,
+          total: dashboardsToDelete.length,
+        },
+      });
+    } catch (error) {
+      coreServices.notifications.toasts.addError(error, {
+        title: dashboardListingErrorStrings.getErrorDeletingDashboardToast(),
+      });
+    }
 
-      setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
-    },
-    [dashboardBackup, deleteDashboards]
-  );
+    setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
+  }, []);
 
   const editItem = useCallback(
     ({ id }: { id: string | undefined }) => goToDashboard(id, ViewMode.EDIT),
@@ -330,8 +320,8 @@ export const useDashboardListingTable = ({
   ]);
 
   const refreshUnsavedDashboards = useCallback(
-    () => setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges()),
-    [dashboardBackup]
+    () => setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges()),
+    []
   );
 
   return {

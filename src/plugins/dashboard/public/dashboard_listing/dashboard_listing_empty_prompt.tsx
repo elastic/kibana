@@ -20,7 +20,6 @@ import React, { useCallback, useMemo } from 'react';
 
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
 import { coreServices } from '../services/kibana_services';
-import { pluginServices } from '../services/plugin_services';
 import {
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
@@ -28,6 +27,10 @@ import {
 } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { DashboardListingProps } from './types';
+import {
+  dashboardBackupService,
+  dashboardCapabilitiesService,
+} from '../services/dashboard_services';
 
 export interface DashboardListingEmptyPromptProps {
   createItem: () => void;
@@ -46,11 +49,6 @@ export const DashboardListingEmptyPrompt = ({
   createItem,
   disableCreateDashboardButton,
 }: DashboardListingEmptyPromptProps) => {
-  const {
-    dashboardBackup,
-    dashboardCapabilities: { showWriteControls },
-  } = pluginServices.getServices();
-
   const isEditingFirstDashboard = useMemo(
     () => useSessionStorageIntegration && unsavedDashboardIds.length === 1,
     [unsavedDashboardIds.length, useSessionStorageIntegration]
@@ -78,8 +76,8 @@ export const DashboardListingEmptyPrompt = ({
             color="danger"
             onClick={() =>
               confirmDiscardUnsavedChanges(() => {
-                dashboardBackup.clearState(DASHBOARD_PANELS_UNSAVED_ID);
-                setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
+                dashboardBackupService.clearState(DASHBOARD_PANELS_UNSAVED_ID);
+                setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
               })
             }
             data-test-subj="discardDashboardPromptButton"
@@ -106,12 +104,11 @@ export const DashboardListingEmptyPrompt = ({
     isEditingFirstDashboard,
     createItem,
     disableCreateDashboardButton,
-    dashboardBackup,
     goToDashboard,
     setUnsavedDashboardIds,
   ]);
 
-  if (!showWriteControls) {
+  if (!dashboardCapabilitiesService.dashboardCapabilities.showWriteControls) {
     return (
       <EuiEmptyPrompt
         iconType="glasses"

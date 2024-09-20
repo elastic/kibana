@@ -26,15 +26,14 @@ export const updateDashboardMeta = async (
   { id, title, description = '', tags }: UpdateDashboardMetaProps,
   { contentManagement }: UpdateDashboardMetaDependencies
 ) => {
-  const taggingApi = savedObjectsTaggingService?.getTaggingApi();
   const [dashboard] = await findDashboardsByIds(contentManagement, [id]);
   if (dashboard.status === 'error') {
     return;
   }
 
   const references =
-    taggingApi?.ui.updateTagsReferences && tags.length
-      ? taggingApi.ui.updateTagsReferences(dashboard.references, tags)
+    savedObjectsTaggingService?.ui.updateTagsReferences && tags.length
+      ? savedObjectsTaggingService.ui.updateTagsReferences(dashboard.references, tags)
       : dashboard.references;
 
   await contentManagement.client.update<

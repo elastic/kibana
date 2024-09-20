@@ -34,11 +34,12 @@ import {
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
 import {
+  dashboardBackupService,
   dashboardCapabilitiesService,
+  dashboardContentManagementService,
   dashboardInsightsService,
 } from '../../../services/dashboard_services';
 import { dataService, embeddableService } from '../../../services/kibana_services';
-import { pluginServices } from '../../../services/plugin_services';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
 import { DashboardPublicState, UnsavedPanelState } from '../../types';
@@ -57,10 +58,6 @@ export const createDashboard = async (
   dashboardCreationStartTime?: number,
   savedObjectId?: string
 ): Promise<DashboardContainer | undefined> => {
-  const {
-    dashboardContentManagement: { loadDashboardState },
-  } = pluginServices.getServices();
-
   // --------------------------------------------------------------------------------------
   // Create method which allows work to be done on the dashboard container when it's ready.
   // --------------------------------------------------------------------------------------
@@ -78,7 +75,9 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
   const defaultDataViewExistsPromise = dataService.dataViews.defaultDataViewExists();
-  const dashboardSavedObjectPromise = loadDashboardState({ id: savedObjectId });
+  const dashboardSavedObjectPromise = dashboardContentManagementService.loadDashboardState({
+    id: savedObjectId,
+  });
 
   const [reduxEmbeddablePackage, savedObjectResult] = await Promise.all([
     reduxEmbeddablePackagePromise,
@@ -146,8 +145,6 @@ export const initializeDashboard = async ({
   untilDashboardReady: () => Promise<DashboardContainer>;
   creationOptions?: DashboardCreationOptions;
 }) => {
-  const { dashboardBackup } = pluginServices.getServices();
-
   const {
     queryString,
     filterManager,
@@ -177,7 +174,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, and session storage
   // --------------------------------------------------------------------------------------
-  const dashboardBackupState = dashboardBackup.getState(loadDashboardReturn.dashboardId);
+  const dashboardBackupState = dashboardBackupService.getState(loadDashboardReturn.dashboardId);
   const runtimePanelsToRestore: UnsavedPanelState = useSessionStorageIntegration
     ? dashboardBackupState?.panels ?? {}
     : {};
@@ -194,12 +191,12 @@ export const initializeDashboard = async ({
       return ViewMode.VIEW;
     if (
       loadDashboardReturn.newDashboardCreated ||
-      dashboardBackup.dashboardHasUnsavedEdits(loadDashboardReturn.dashboardId)
+      dashboardBackupService.dashboardHasUnsavedEdits(loadDashboardReturn.dashboardId)
     ) {
       return ViewMode.EDIT;
     }
 
-    return dashboardBackup.getViewMode();
+    return dashboardBackupService.getViewMode();
   })();
 
   const combinedSessionInput: DashboardContainerInput = {
@@ -265,7 +262,7 @@ export const initializeDashboard = async ({
 
   // Back up any view mode passed in explicitly.
   if (overrideInput?.viewMode) {
-    dashboardBackup.storeViewMode(overrideInput?.viewMode);
+    dashboardBackupService.storeViewMode(overrideInput?.viewMode);
   }
 
   initialDashboardInput.executionContext = {

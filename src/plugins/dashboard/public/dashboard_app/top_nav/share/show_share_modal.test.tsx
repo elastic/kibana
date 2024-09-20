@@ -8,10 +8,11 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
-import { DashboardLocatorParams } from '../../../dashboard_container';
 import { convertPanelMapToSavedPanels, DashboardContainerInput } from '../../../../common';
+import { DashboardLocatorParams } from '../../../dashboard_container';
 
-import { pluginServices } from '../../../services/plugin_services';
+import { dashboardBackupService } from '../../../services/dashboard_services';
+import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 
 describe('showPublicUrlSwitch', () => {
@@ -59,10 +60,7 @@ describe('ShowShareModal', () => {
   const unsavedStateKeys = ['query', 'filters', 'options', 'savedQuery', 'panels'] as Array<
     keyof DashboardLocatorParams
   >;
-  const toggleShareMenuSpy = jest.spyOn(
-    pluginServices.getServices().share,
-    'toggleShareContextMenu'
-  );
+  const toggleShareMenuSpy = jest.spyOn(shareService!, 'toggleShareContextMenu');
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -71,9 +69,7 @@ describe('ShowShareModal', () => {
   const getPropsAndShare = (
     unsavedState?: Partial<DashboardContainerInput>
   ): ShowShareModalProps => {
-    pluginServices.getServices().dashboardBackup.getState = jest
-      .fn()
-      .mockReturnValue({ dashboardState: unsavedState });
+    dashboardBackupService.getState = jest.fn().mockReturnValue({ dashboardState: unsavedState });
     return {
       isDirty: true,
       anchorElement: document.createElement('div'),
@@ -169,7 +165,7 @@ describe('ShowShareModal', () => {
       },
     };
     const props = getPropsAndShare(unsavedDashboardState);
-    pluginServices.getServices().dashboardBackup.getState = jest.fn().mockReturnValue({
+    dashboardBackupService.getState = jest.fn().mockReturnValue({
       dashboardState: unsavedDashboardState,
       panels: {
         panel_1: { changedKey1: 'changed' },

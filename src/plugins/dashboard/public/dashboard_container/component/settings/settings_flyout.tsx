@@ -32,8 +32,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DashboardContainerInput } from '../../../../common';
+import { dashboardContentManagementService } from '../../../services/dashboard_services';
 import { savedObjectsTaggingService } from '../../../services/kibana_services';
-import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 interface DashboardSettingsProps {
@@ -43,10 +43,6 @@ interface DashboardSettingsProps {
 const DUPLICATE_TITLE_CALLOUT_ID = 'duplicateTitleCallout';
 
 export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
-  const {
-    dashboardContentManagement: { checkForDuplicateDashboardTitle },
-  } = pluginServices.getServices();
-
   const dashboard = useDashboardContainer();
 
   const [dashboardSettingsState, setDashboardSettingsState] = useState({
@@ -70,7 +66,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
 
   const onApply = async () => {
     setIsApplying(true);
-    const validTitle = await checkForDuplicateDashboardTitle({
+    const validTitle = await dashboardContentManagementService.checkForDuplicateDashboardTitle({
       title: dashboardSettingsState.title,
       copyOnSave: false,
       lastSavedTitle,
@@ -128,8 +124,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   };
 
   const renderTagSelector = () => {
-    const api = savedObjectsTaggingService?.getTaggingApi();
-    if (!api) return;
+    if (!savedObjectsTaggingService) return;
 
     return (
       <EuiFormRow
@@ -140,7 +135,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           />
         }
       >
-        <api.ui.components.TagSelector
+        <savedObjectsTaggingService.ui.components.TagSelector
           selected={dashboardSettingsState.tags}
           onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
         />

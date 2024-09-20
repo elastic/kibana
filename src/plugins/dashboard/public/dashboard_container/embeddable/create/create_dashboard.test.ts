@@ -20,8 +20,11 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import { getSampleDashboardPanel, mockControlGroupApi } from '../../../mocks';
+import {
+  dashboardBackupService,
+  dashboardContentManagementService,
+} from '../../../services/dashboard_services';
 import { dataService, embeddableService } from '../../../services/kibana_services';
-import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { createDashboard } from './create_dashboard';
 
@@ -69,79 +72,63 @@ test('does not get initial input when provided validation function returns redir
 });
 
 test('pulls state from dashboard saved object when given a saved object id', async () => {
-  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
-    .fn()
-    .mockResolvedValue({
-      dashboardInput: {
-        ...DEFAULT_DASHBOARD_INPUT,
-        description: `wow would you look at that? Wow.`,
-      },
-    });
+  dashboardContentManagementService.loadDashboardState = jest.fn().mockResolvedValue({
+    dashboardInput: {
+      ...DEFAULT_DASHBOARD_INPUT,
+      description: `wow would you look at that? Wow.`,
+    },
+  });
   const dashboard = await createDashboard({}, 0, 'wow-such-id');
-  expect(
-    pluginServices.getServices().dashboardContentManagement.loadDashboardState
-  ).toHaveBeenCalledWith({ id: 'wow-such-id' });
+  expect(dashboardContentManagementService.loadDashboardState).toHaveBeenCalledWith({
+    id: 'wow-such-id',
+  });
   expect(dashboard).toBeDefined();
   expect(dashboard!.getState().explicitInput.description).toBe(`wow would you look at that? Wow.`);
 });
 
 test('passes managed state from the saved object into the Dashboard component state', async () => {
-  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
-    .fn()
-    .mockResolvedValue({
-      dashboardInput: {
-        ...DEFAULT_DASHBOARD_INPUT,
-        description: 'wow this description is okay',
-      },
-      managed: true,
-    });
+  dashboardContentManagementService.loadDashboardState = jest.fn().mockResolvedValue({
+    dashboardInput: {
+      ...DEFAULT_DASHBOARD_INPUT,
+      description: 'wow this description is okay',
+    },
+    managed: true,
+  });
   const dashboard = await createDashboard({}, 0, 'what-an-id');
   expect(dashboard).toBeDefined();
   expect(dashboard!.getState().componentState.managed).toBe(true);
 });
 
 test('pulls view mode from dashboard backup', async () => {
-  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
-    .fn()
-    .mockResolvedValue({
-      dashboardInput: DEFAULT_DASHBOARD_INPUT,
-    });
-  pluginServices.getServices().dashboardBackup.getViewMode = jest
-    .fn()
-    .mockReturnValue(ViewMode.EDIT);
+  dashboardContentManagementService.loadDashboardState = jest.fn().mockResolvedValue({
+    dashboardInput: DEFAULT_DASHBOARD_INPUT,
+  });
+  dashboardBackupService.getViewMode = jest.fn().mockReturnValue(ViewMode.EDIT);
   const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'what-an-id');
   expect(dashboard).toBeDefined();
   expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.EDIT);
 });
 
 test('new dashboards start in edit mode', async () => {
-  pluginServices.getServices().dashboardBackup.getViewMode = jest
-    .fn()
-    .mockReturnValue(ViewMode.VIEW);
-  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
-    .fn()
-    .mockResolvedValue({
-      newDashboardCreated: true,
-      dashboardInput: {
-        ...DEFAULT_DASHBOARD_INPUT,
-        description: 'wow this description is okay',
-      },
-    });
+  dashboardBackupService.getViewMode = jest.fn().mockReturnValue(ViewMode.VIEW);
+  dashboardContentManagementService.loadDashboardState = jest.fn().mockResolvedValue({
+    newDashboardCreated: true,
+    dashboardInput: {
+      ...DEFAULT_DASHBOARD_INPUT,
+      description: 'wow this description is okay',
+    },
+  });
   const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'wow-such-id');
   expect(dashboard).toBeDefined();
   expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.EDIT);
 });
 
 test('managed dashboards start in view mode', async () => {
-  pluginServices.getServices().dashboardBackup.getViewMode = jest
-    .fn()
-    .mockReturnValue(ViewMode.EDIT);
-  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
-    .fn()
-    .mockResolvedValue({
-      dashboardInput: DEFAULT_DASHBOARD_INPUT,
-      managed: true,
-    });
+  dashboardBackupService.getViewMode = jest.fn().mockReturnValue(ViewMode.EDIT);
+  dashboardContentManagementService.loadDashboardState = jest.fn().mockResolvedValue({
+    dashboardInput: DEFAULT_DASHBOARD_INPUT,
+    managed: true,
+  });
   const dashboard = await createDashboard({}, 0, 'what-an-id');
   expect(dashboard).toBeDefined();
   expect(dashboard!.getState().componentState.managed).toBe(true);
@@ -149,15 +136,13 @@ test('managed dashboards start in view mode', async () => {
 });
 
 test('pulls state from backup which overrides state from saved object', async () => {
-  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
-    .fn()
-    .mockResolvedValue({
-      dashboardInput: {
-        ...DEFAULT_DASHBOARD_INPUT,
-        description: 'wow this description is okay',
-      },
-    });
-  pluginServices.getServices().dashboardBackup.getState = jest
+  dashboardContentManagementService.loadDashboardState = jest.fn().mockResolvedValue({
+    dashboardInput: {
+      ...DEFAULT_DASHBOARD_INPUT,
+      description: 'wow this description is okay',
+    },
+  });
+  dashboardBackupService.getState = jest
     .fn()
     .mockReturnValue({ dashboardState: { description: 'wow this description marginally better' } });
   const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'wow-such-id');
@@ -168,15 +153,13 @@ test('pulls state from backup which overrides state from saved object', async ()
 });
 
 test('pulls state from override input which overrides all other state sources', async () => {
-  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
-    .fn()
-    .mockResolvedValue({
-      dashboardInput: {
-        ...DEFAULT_DASHBOARD_INPUT,
-        description: 'wow this description is okay',
-      },
-    });
-  pluginServices.getServices().dashboardBackup.getState = jest
+  dashboardContentManagementService.loadDashboardState = jest.fn().mockResolvedValue({
+    dashboardInput: {
+      ...DEFAULT_DASHBOARD_INPUT,
+      description: 'wow this description is okay',
+    },
+  });
+  dashboardBackupService.getState = jest
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
   const dashboard = await createDashboard(
@@ -197,32 +180,30 @@ test('pulls panels from override input', async () => {
   embeddableService.reactEmbeddableRegistryHasKey = jest
     .fn()
     .mockImplementation((type: string) => type === 'reactEmbeddable');
-  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
-    .fn()
-    .mockResolvedValue({
-      dashboardInput: {
-        ...DEFAULT_DASHBOARD_INPUT,
-        panels: {
-          ...DEFAULT_DASHBOARD_INPUT.panels,
-          someLegacyPanel: {
-            type: 'legacy',
-            gridData: { x: 0, y: 0, w: 0, h: 0, i: 'someLegacyPanel' },
-            explicitInput: {
-              id: 'someLegacyPanel',
-              title: 'stateFromSavedObject',
-            },
+  dashboardContentManagementService.loadDashboardState = jest.fn().mockResolvedValue({
+    dashboardInput: {
+      ...DEFAULT_DASHBOARD_INPUT,
+      panels: {
+        ...DEFAULT_DASHBOARD_INPUT.panels,
+        someLegacyPanel: {
+          type: 'legacy',
+          gridData: { x: 0, y: 0, w: 0, h: 0, i: 'someLegacyPanel' },
+          explicitInput: {
+            id: 'someLegacyPanel',
+            title: 'stateFromSavedObject',
           },
-          someReactEmbeddablePanel: {
-            type: 'reactEmbeddable',
-            gridData: { x: 0, y: 0, w: 0, h: 0, i: 'someReactEmbeddablePanel' },
-            explicitInput: {
-              id: 'someReactEmbeddablePanel',
-              title: 'stateFromSavedObject',
-            },
+        },
+        someReactEmbeddablePanel: {
+          type: 'reactEmbeddable',
+          gridData: { x: 0, y: 0, w: 0, h: 0, i: 'someReactEmbeddablePanel' },
+          explicitInput: {
+            id: 'someReactEmbeddablePanel',
+            title: 'stateFromSavedObject',
           },
         },
       },
-    });
+    },
+  });
   const dashboard = await createDashboard(
     {
       useSessionStorageIntegration: true,

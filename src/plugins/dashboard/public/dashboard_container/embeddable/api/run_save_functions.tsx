@@ -32,8 +32,13 @@ import {
   SaveDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
-import { coreServices, dataService, embeddableService } from '../../../services/kibana_services';
-import { pluginServices } from '../../../services/plugin_services';
+import { dashboardContentManagementService } from '../../../services/dashboard_services';
+import {
+  coreServices,
+  dataService,
+  embeddableService,
+  savedObjectsTaggingService,
+} from '../../../services/kibana_services';
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
@@ -76,10 +81,6 @@ const serializeAllPanelState = async (
  */
 export async function runQuickSave(this: DashboardContainer) {
   const {
-    dashboardContentManagement: { saveDashboardState },
-  } = pluginServices.getServices();
-
-  const {
     explicitInput: currentState,
     componentState: { lastSavedId, managed },
   } = this.getState();
@@ -98,7 +99,7 @@ export async function runQuickSave(this: DashboardContainer) {
     stateToSave = { ...stateToSave, controlGroupInput: controlGroupSerializedState };
   }
 
-  const saveResult = await saveDashboardState({
+  const saveResult = await dashboardContentManagementService.saveDashboardState({
     controlGroupReferences,
     panelReferences: references,
     currentState: stateToSave,
@@ -118,11 +119,6 @@ export async function runQuickSave(this: DashboardContainer) {
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */
 export async function runInteractiveSave(this: DashboardContainer, interactionMode: ViewMode) {
-  const {
-    savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
-    dashboardContentManagement: { checkForDuplicateDashboardTitle, saveDashboardState },
-  } = pluginServices.getServices();
-
   const {
     explicitInput: currentState,
     componentState: { lastSavedId, managed },
@@ -151,7 +147,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
 
       try {
         if (
-          !(await checkForDuplicateDashboardTitle({
+          !(await dashboardContentManagementService.checkForDuplicateDashboardTitle({
             title: newTitle,
             onTitleDuplicate,
             lastSavedTitle: currentState.title,
@@ -173,7 +169,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
             : undefined,
         };
 
-        if (hasSavedObjectsTagging && newTags) {
+        if (savedObjectsTaggingService && newTags) {
           // remove `hasSavedObjectsTagging` once the savedObjectsTagging service is optional
           stateFromSaveModal.tags = newTags;
         }
@@ -223,7 +219,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
 
         const beforeAddTime = window.performance.now();
 
-        const saveResult = await saveDashboardState({
+        const saveResult = await dashboardContentManagementService.saveDashboardState({
           controlGroupReferences,
           panelReferences: references,
           saveOptions,
@@ -276,7 +272,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
 
           newTitle = `${baseTitle} (${baseCount + 1})`;
 
-          await checkForDuplicateDashboardTitle({
+          await dashboardContentManagementService.checkForDuplicateDashboardTitle({
             title: newTitle,
             lastSavedTitle: currentState.title,
             copyOnSave: true,

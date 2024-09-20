@@ -20,8 +20,11 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
-import { capabilitiesService, coreServices, shareService } from '../../services/kibana_services';
-import { pluginServices } from '../../services/plugin_services';
+import {
+  dashboardBackupService,
+  dashboardCapabilitiesService,
+} from '../../services/dashboard_services';
+import { coreServices, shareService } from '../../services/kibana_services';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 
@@ -43,7 +46,6 @@ export const useDashboardMenuItems = ({
   /**
    * Unpack dashboard services
    */
-  const { dashboardBackup } = pluginServices.getServices();
   const isLabsEnabled = coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
   /**
@@ -115,7 +117,7 @@ export const useDashboardMenuItems = ({
       const switchModes = switchToViewMode
         ? () => {
             dashboardApi.setViewMode(ViewMode.VIEW);
-            dashboardBackup.storeViewMode(ViewMode.VIEW);
+            dashboardBackupService.storeViewMode(ViewMode.VIEW);
           }
         : undefined;
       if (!hasUnsavedChanges) {
@@ -133,7 +135,7 @@ export const useDashboardMenuItems = ({
         });
       }, viewMode as ViewMode);
     },
-    [dashboardApi, dashboardBackup, hasUnsavedChanges, viewMode, isMounted]
+    [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
   );
 
   /**
@@ -165,7 +167,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
         run: () => {
-          dashboardBackup.storeViewMode(ViewMode.EDIT);
+          dashboardBackupService.storeViewMode(ViewMode.EDIT);
           dashboardApi.setViewMode(ViewMode.EDIT);
           dashboardApi.clearOverlays();
         },
@@ -238,7 +240,6 @@ export const useDashboardMenuItems = ({
     dashboardApi,
     setIsLabsShown,
     isLabsShown,
-    dashboardBackup,
     quickSaveDashboard,
     resetChanges,
     isResetting,
@@ -271,7 +272,7 @@ export const useDashboardMenuItems = ({
    * Build ordered menus for view and edit mode.
    */
   const viewModeTopNavConfig = useMemo(() => {
-    const { showWriteControls } = capabilitiesService.dashboardCapabilities;
+    const { showWriteControls } = dashboardCapabilitiesService.dashboardCapabilities;
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService ? [menuItems.share] : [];

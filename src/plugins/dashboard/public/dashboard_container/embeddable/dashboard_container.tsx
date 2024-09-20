@@ -85,13 +85,15 @@ import {
 } from '../../dashboard_constants';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
 import {
-  capabilitiesService,
+  dashboardCapabilitiesService,
+  dashboardContentManagementService,
+} from '../../services/dashboard_services';
+import {
   coreServices,
   dataService,
   embeddableService,
   usageCollectionService,
 } from '../../services/kibana_services';
-import { pluginServices } from '../../services/plugin_services';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
 import { placePanel } from '../panel_placement';
@@ -265,7 +267,8 @@ export class DashboardContainer
       { untilContainerInitialized }
     );
 
-    ({ showWriteControls: this.showWriteControls } = capabilitiesService.dashboardCapabilities);
+    ({ showWriteControls: this.showWriteControls } =
+      dashboardCapabilitiesService.dashboardCapabilities);
 
     this.controlGroupApi$ = controlGroupApi$;
     this.untilContainerInitialized = untilContainerInitialized;
@@ -742,13 +745,12 @@ export class DashboardContainer
     this.integrationSubscriptions = new Subscription();
     this.stopSyncingWithUnifiedSearch?.();
 
-    const {
-      dashboardContentManagement: { loadDashboardState },
-    } = pluginServices.getServices();
     if (newCreationOptions) {
       this.creationOptions = { ...this.creationOptions, ...newCreationOptions };
     }
-    const loadDashboardReturn = await loadDashboardState({ id: newSavedObjectId });
+    const loadDashboardReturn = await dashboardContentManagementService.loadDashboardState({
+      id: newSavedObjectId,
+    });
 
     const dashboardContainerReady$ = new Subject<DashboardContainer>();
     const untilDashboardReady = () =>

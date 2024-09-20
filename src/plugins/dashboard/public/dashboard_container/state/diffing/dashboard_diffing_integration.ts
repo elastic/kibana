@@ -13,11 +13,11 @@ import { combineLatest, debounceTime, skipWhile, startWith, switchMap } from 'rx
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
-import { pluginServices } from '../../../services/plugin_services';
+import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
+import { dashboardBackupService } from '../../../services/dashboard_services';
 import { UnsavedPanelState } from '../../types';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
 import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_diffing_functions';
-import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
 
 /**
  * An array of reducers which cannot cause unsaved changes. Unsaved changes only compares the explicit input
@@ -188,10 +188,9 @@ function backupUnsavedChanges(
   dashboardChanges: Partial<DashboardContainerInput>,
   reactEmbeddableChanges: UnsavedPanelState
 ) {
-  const { dashboardBackup } = pluginServices.getServices();
   const dashboardStateToBackup = omit(dashboardChanges, keysToOmitFromSessionStorage);
 
-  dashboardBackup.setState(
+  dashboardBackupService.setState(
     this.getDashboardSavedObjectId(),
     {
       ...dashboardStateToBackup,

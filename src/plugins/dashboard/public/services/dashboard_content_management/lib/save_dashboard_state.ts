@@ -26,13 +26,10 @@ import {
   embeddableService,
   savedObjectsTaggingService,
 } from '../../kibana_services';
-import { dashboardContentManagementCache } from '../dashboard_content_management_service';
-import {
-  DashboardContentManagementRequiredServices,
-  SaveDashboardProps,
-  SaveDashboardReturn,
-} from '../types';
+import { dashboardContentManagementCache } from '../dashboard_content_management_cache';
+import { SaveDashboardProps, SaveDashboardReturn } from '../types';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
+import { DashboardBackupServiceType } from '../../dashboard_backup/types';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -46,7 +43,7 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
 
 type SaveDashboardStateProps = SaveDashboardProps & {
   contentManagement: DashboardStartDependencies['contentManagement'];
-  dashboardBackup: DashboardContentManagementRequiredServices['dashboardBackup'];
+  dashboardBackup: DashboardBackupServiceType;
 };
 
 export const saveDashboardState = async ({
@@ -165,9 +162,8 @@ export const saveDashboardState = async ({
     { embeddablePersistableStateService: embeddableService }
   );
 
-  const taggingApi = savedObjectsTaggingService?.getTaggingApi();
-  const references = taggingApi?.ui.updateTagsReferences
-    ? taggingApi?.ui.updateTagsReferences(dashboardReferences, tags)
+  const references = savedObjectsTaggingService?.ui.updateTagsReferences
+    ? savedObjectsTaggingService?.ui.updateTagsReferences(dashboardReferences, tags)
     : dashboardReferences;
 
   const allReferences = [

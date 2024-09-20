@@ -39,3 +39,5 @@ export class DashboardContentManagementCache {
     this.cache.del(id);
   }
 }
+
+export const dashboardContentManagementCache = new DashboardContentManagementCache();

@@ -20,7 +20,10 @@ import {
   noDataPageService,
   shareService,
 } from '../../services/kibana_services';
-import { pluginServices } from '../../services/plugin_services';
+import {
+  dashboardBackupService,
+  dashboardContentManagementService,
+} from '../../services/dashboard_services';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
@@ -59,8 +62,6 @@ export const DashboardAppNoDataPage = ({
 };
 
 export const isDashboardAppInNoDataState = async () => {
-  const { dashboardContentManagement, dashboardBackup } = pluginServices.getServices();
-
   const hasUserDataView = await dataService.dataViews.hasData.hasUserDataView().catch(() => false);
 
   if (hasUserDataView) return false;
@@ -72,10 +73,10 @@ export const isDashboardAppInNoDataState = async () => {
   if (hasIncomingEmbeddable) return false;
 
   // consider has data if there is unsaved dashboard with edits
-  if (dashboardBackup.dashboardHasUnsavedEdits()) return false;
+  if (dashboardBackupService.dashboardHasUnsavedEdits()) return false;
 
   // consider has data if there is at least one dashboard
-  const { total } = await dashboardContentManagement.findDashboards
+  const { total } = await dashboardContentManagementService.findDashboards
     .search({ search: '', size: 1 })
     .catch(() => ({ total: 0 }));
   if (total > 0) return false;

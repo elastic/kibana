@@ -16,7 +16,7 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -37,7 +37,7 @@ export let navigationService: NavigationPublicPluginStart;
 export let noDataPageService: NoDataPagePluginStart | undefined;
 export let observabilityAssistantService: ObservabilityAIAssistantPublicStart | undefined;
 export let presentationUtilService: PresentationUtilPluginStart;
-export let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
+export let savedObjectsTaggingService: SavedObjectsTaggingApi | undefined;
 export let screenshotModeService: ScreenshotModePluginStart;
 export let serverlessService: ServerlessPluginStart | undefined;
 export let shareService: SharePluginStart | undefined;
@@ -57,7 +57,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   noDataPageService = deps.noDataPage;
   observabilityAssistantService = deps.observabilityAIAssistant;
   presentationUtilService = deps.presentationUtil;
-  savedObjectsTaggingService = deps.savedObjectsTaggingOss;
+  savedObjectsTaggingService = deps.savedObjectsTaggingOss?.getTaggingApi();
   serverlessService = deps.serverless;
   screenshotModeService = deps.screenshotMode;
   shareService = deps.share;

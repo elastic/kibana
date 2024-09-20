@@ -23,12 +23,10 @@ import { convertPanelMapToSavedPanels, DashboardPanelMap } from '../../../../com
 import { DashboardLocatorParams } from '../../../dashboard_container';
 import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
 import {
-  capabilitiesService,
-  coreServices,
-  dataService,
-  shareService,
-} from '../../../services/kibana_services';
-import { pluginServices } from '../../../services/plugin_services';
+  dashboardBackupService,
+  dashboardCapabilitiesService,
+} from '../../../services/dashboard_services';
+import { coreServices, dataService, shareService } from '../../../services/kibana_services';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
 
@@ -57,8 +55,6 @@ export function ShowShareModal({
   dashboardTitle,
   getPanelsState,
 }: ShowShareModalProps) {
-  const { dashboardBackup } = pluginServices.getServices();
-
   if (!shareService) return;
 
   const EmbedUrlParamExtension = ({
@@ -121,7 +117,7 @@ export function ShowShareModal({
   let unsavedStateForLocator: DashboardLocatorParams = {};
 
   const { dashboardState: unsavedDashboardState, panels: panelModifications } =
-    dashboardBackup.getState(savedObjectId) ?? {};
+    dashboardBackupService.getState(savedObjectId) ?? {};
 
   const allUnsavedPanels = (() => {
     if (
@@ -203,7 +199,7 @@ export function ShowShareModal({
     isDirty,
     anchorElement,
     allowEmbed: true,
-    allowShortUrl: Boolean(capabilitiesService.dashboardCapabilities.createShortUrl),
+    allowShortUrl: Boolean(dashboardCapabilitiesService.dashboardCapabilities.createShortUrl),
     shareableUrl,
     objectId: savedObjectId,
     objectType: 'dashboard',

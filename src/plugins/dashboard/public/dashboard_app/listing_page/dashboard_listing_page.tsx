@@ -16,13 +16,13 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DashboardRedirect } from '../../dashboard_container/types';
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 import { coreServices, dataService, serverlessService } from '../../services/kibana_services';
-import { pluginServices } from '../../services/plugin_services';
 import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
 } from '../no_data/dashboard_app_no_data';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
+import { dashboardContentManagementService } from '../../services/dashboard_services';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -37,10 +37,6 @@ export const DashboardListingPage = ({
   initialFilter,
   kbnUrlStateStorage,
 }: DashboardListingPageProps) => {
-  const {
-    dashboardContentManagement: { findDashboards },
-  } = pluginServices.getServices();
-
   const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
   useEffect(() => {
     let isMounted = true;
@@ -74,7 +70,7 @@ export const DashboardListingPage = ({
       kbnUrlStateStorage
     );
     if (title) {
-      findDashboards.findByTitle(title).then((result) => {
+      dashboardContentManagementService.findDashboards.findByTitle(title).then((result) => {
         if (!result) return;
         redirectTo({
           destination: 'dashboard',
@@ -87,7 +83,7 @@ export const DashboardListingPage = ({
     return () => {
       stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, redirectTo, kbnUrlStateStorage, findDashboards]);
+  }, [title, redirectTo, kbnUrlStateStorage]);
 
   const titleFilter = title ? `${title}` : '';
 

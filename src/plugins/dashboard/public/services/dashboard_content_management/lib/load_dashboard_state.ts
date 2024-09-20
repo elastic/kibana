@@ -24,7 +24,7 @@ import {
 import { DashboardCrudTypes } from '../../../../common/content_management';
 import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import { dataService, embeddableService, savedObjectsTaggingService } from '../../kibana_services';
-import { dashboardContentManagementCache } from '../dashboard_content_management_service';
+import { dashboardContentManagementCache } from '../dashboard_content_management_cache';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 import { convertNumberToDashboardVersion } from './dashboard_versioning';
 import { migrateDashboardInput } from './migrate_dashboard_input';
@@ -183,7 +183,7 @@ export const loadDashboardState = async ({
     title,
 
     viewMode: ViewMode.VIEW, // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
-    tags: savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
+    tags: savedObjectsTaggingService?.ui.getTagIdsFromReferences(references) ?? [],
 
     controlGroupInput: attributes.controlGroupInput,
 

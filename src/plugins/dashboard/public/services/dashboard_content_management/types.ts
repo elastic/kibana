@@ -14,17 +14,12 @@ import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { DashboardContainerInput } from '../../../common';
 import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content_management';
 import { DashboardStartDependencies } from '../../plugin';
-import { DashboardBackupServiceType } from '../dashboard_backup/types';
 import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import {
   FindDashboardsByIdResponse,
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
-
-export interface DashboardContentManagementRequiredServices {
-  dashboardBackup: DashboardBackupServiceType;
-}
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;

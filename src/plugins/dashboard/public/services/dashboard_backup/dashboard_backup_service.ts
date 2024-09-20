@@ -12,13 +12,11 @@ import { firstValueFrom } from 'rxjs';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { set } from '@kbn/safer-lodash-set';
 
 import type { DashboardContainerInput } from '../../../common';
 import { backupServiceStrings } from '../../dashboard_container/_dashboard_container_strings';
 import { UnsavedPanelState } from '../../dashboard_container/types';
-import type { DashboardStartDependencies } from '../../plugin';
 import { coreServices, spacesService } from '../kibana_services';
 import type { DashboardBackupServiceType } from './types';
 
@@ -29,13 +27,6 @@ const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 
 // this key is named `panels` for BWC reasons, but actually contains the entire dashboard state
 const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
-
-export type DashboardBackupServiceFactory = KibanaPluginServiceFactory<
-  DashboardBackupServiceType,
-  DashboardStartDependencies,
-  {}
->;
-
 class DashboardBackupService implements DashboardBackupServiceType {
   private activeSpaceId: string;
   private sessionStorage: Storage;
@@ -182,9 +173,6 @@ class DashboardBackupService implements DashboardBackupServiceType {
   }
 }
 
-export const dashboardBackupServiceFactory: DashboardBackupServiceFactory = (
-  core,
-  requiredServices
-) => {
+export const getDashboardBackupService = (): DashboardBackupService => {
   return new DashboardBackupService();
 };
