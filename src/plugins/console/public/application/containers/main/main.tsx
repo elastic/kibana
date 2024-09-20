@@ -183,6 +183,8 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
     );
   }
 
+  if (!currentTextObject) return null;
+
   const shortcutsButton = (
     <NavIconButton
       iconType="keyboard"
@@ -311,6 +313,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           {currentTab === SHELL_TAB_ID && (
             <Editor
               loading={!done}
+              initialTextObject={currentTextObject}
               inputEditorValue={inputEditorValue}
               setInputEditorValue={setInputEditorValue}
             />

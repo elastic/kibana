@@ -61,7 +61,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         if (parsedURL.origin === 'https://www.elastic.co') {
           const resp = await fetch(parsedURL);
           const data = await resp.text();
-          setValue(`${localStorageValue}\n\n${data}`);
+          setValue(`${localStorageValue ?? ''}\n\n${data}`);
         } else {
           toasts.addWarning(
             i18n.translate('console.monaco.loadFromDataUnrecognizedUrlErrorMessage', {
@@ -107,7 +107,8 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     if (loadFromParam) {
       loadBufferFromRemote(loadFromParam);
     } else {
-      setValue(localStorageValue || DEFAULT_INPUT_VALUE);
+      // Only set to default input value if the localstorage value is undefined
+      setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
     }
 
     return () => {

@@ -37,7 +37,7 @@ export const useDataInit = () => {
           const newObject = await objectStorageClient.text.create({
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            text: '',
+            text: undefined,
           });
           dispatch({ type: 'setCurrentTextObject', payload: newObject });
         } else {
