@@ -19,6 +19,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import { RULE_SAVED_OBJECT_TYPE } from '.';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { estypes } from '@elastic/elasticsearch';
+import { RuleExecutionStatuses } from '@kbn/alerting-types';
 
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
 const MockISavedObjectsRepository =
@@ -119,19 +120,20 @@ describe('partiallyUpdateRuleWithEs', () => {
   test('should work with no options', async () => {
     esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
 
-    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes);
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributesForEsUpdate);
     expect(esClient.update).toHaveBeenCalledTimes(1);
     expect(esClient.update).toHaveBeenCalledWith({
       id: `alert:${MockRuleId}`,
       index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       doc: {
-        alert: DefaultAttributes,
+        alert: DefaultAttributesForEsUpdate,
       },
     });
   });
 
-  test('should work with extraneous attributes ', async () => {
-    const attributes = ExtraneousAttributes as unknown as PartiallyUpdateableRuleAttributes;
+  test('should strip unallowed attributes ', async () => {
+    const attributes =
+      AttributesForEsUpdateWithUnallowedFields as unknown as PartiallyUpdateableRuleAttributes;
     esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
 
     await partiallyUpdateRuleWithEs(esClient, MockRuleId, attributes);
@@ -139,7 +141,7 @@ describe('partiallyUpdateRuleWithEs', () => {
       id: `alert:${MockRuleId}`,
       index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       doc: {
-        alert: ExtraneousAttributes,
+        alert: DefaultAttributesForEsUpdate,
       },
     });
   });
@@ -155,7 +157,7 @@ describe('partiallyUpdateRuleWithEs', () => {
   test('should handle the version option', async () => {
     esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
 
-    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes, {
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributesForEsUpdate, {
       version: 'WzQsMV0=',
     });
     expect(esClient.update).toHaveBeenCalledWith({
@@ -164,7 +166,7 @@ describe('partiallyUpdateRuleWithEs', () => {
       if_primary_term: 1,
       if_seq_no: 4,
       doc: {
-        alert: DefaultAttributes,
+        alert: DefaultAttributesForEsUpdate,
       },
     });
   });
@@ -172,13 +174,15 @@ describe('partiallyUpdateRuleWithEs', () => {
   test('should handle the ignore404 option', async () => {
     esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
 
-    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes, { ignore404: true });
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributesForEsUpdate, {
+      ignore404: true,
+    });
     expect(esClient.update).toHaveBeenCalledWith(
       {
         id: `alert:${MockRuleId}`,
         index: ALERTING_CASES_SAVED_OBJECT_INDEX,
         doc: {
-          alert: DefaultAttributes,
+          alert: DefaultAttributesForEsUpdate,
         },
       },
       { ignore: [404] }
@@ -188,14 +192,14 @@ describe('partiallyUpdateRuleWithEs', () => {
   test('should handle the refresh option', async () => {
     esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
 
-    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes, {
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributesForEsUpdate, {
       refresh: 'wait_for',
     });
     expect(esClient.update).toHaveBeenCalledWith({
       id: `alert:${MockRuleId}`,
       index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       doc: {
-        alert: DefaultAttributes,
+        alert: DefaultAttributesForEsUpdate,
       },
       refresh: 'wait_for',
     });
@@ -223,6 +227,50 @@ const DefaultAttributes = {
 };
 
 const ExtraneousAttributes = { ...DefaultAttributes, foo: 'bar' };
+
+const DefaultAttributesForEsUpdate = {
+  running: false,
+  executionStatus: {
+    status: 'active' as RuleExecutionStatuses,
+    lastExecutionDate: '2023-01-01T08:44:40.000Z',
+    lastDuration: 12,
+    error: null,
+    warning: null,
+  },
+  monitoring: {
+    run: {
+      calculated_metrics: {
+        success_ratio: 20,
+      },
+      history: [
+        {
+          success: true,
+          timestamp: 1640991880000,
+          duration: 12,
+          outcome: 'success',
+        },
+      ],
+      last_run: {
+        timestamp: '2023-01-01T08:44:40.000Z',
+        metrics: {
+          duration: 12,
+          gap_duration_s: null,
+          total_alerts_created: null,
+          total_alerts_detected: null,
+          total_indexing_duration_ms: null,
+          total_search_duration_ms: null,
+        },
+      },
+    },
+  },
+};
+
+const AttributesForEsUpdateWithUnallowedFields = {
+  ...DefaultAttributesForEsUpdate,
+  alertTypeId: 'foo',
+  consumer: 'consumer',
+  randomField: 'bar',
+};
 
 const MockRuleId = 'rule-id';
 

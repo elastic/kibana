@@ -71,6 +71,16 @@ export async function partiallyUpdateRule(
   }
 }
 
+// Explicit list of attributes that we allow to be partially updated
+// There should be no overlap between this list and RuleAttributesIncludedInAAD or RuleAttributesToEncrypt
+const RuleAttributesAllowedForPartialUpdate = [
+  'executionStatus',
+  'lastRun',
+  'monitoring',
+  'nextRun',
+  'running',
+];
+
 // direct, partial update to a rule saved object via ElasticsearchClient
 export async function partiallyUpdateRuleWithEs(
   esClient: ElasticsearchClient,
@@ -83,13 +93,15 @@ export async function partiallyUpdateRuleWithEs(
     ...RuleAttributesToEncrypt,
     ...RuleAttributesIncludedInAAD,
   ]);
+  // ensure we only have attributes that we explicitly allow to be updated
+  const attributesAllowedForUpdate = pick(attributeUpdates, RuleAttributesAllowedForPartialUpdate);
 
   const updateParams = {
     id: `alert:${id}`,
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     ...(options.version ? decodeRequestVersion(options.version) : {}),
     doc: {
-      alert: attributeUpdates,
+      alert: attributesAllowedForUpdate,
     },
     ...(options.refresh ? { refresh: options.refresh } : {}),
   };
