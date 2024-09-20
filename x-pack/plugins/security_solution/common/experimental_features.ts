@@ -199,6 +199,11 @@ export const allowedExperimentalValues = Object.freeze({
   analyzerDatePickersAndSourcererDisabled: false,
 
   /**
+   * Enables visualization: session viewer and analyzer in expandable flyout
+   */
+  visualizationInFlyoutEnabled: false,
+
+  /**
    * Enables an ability to customize Elastic prebuilt rules.
    *
    * Ticket: https://github.com/elastic/kibana/issues/174168
