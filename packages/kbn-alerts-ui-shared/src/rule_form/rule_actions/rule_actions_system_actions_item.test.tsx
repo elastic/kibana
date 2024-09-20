@@ -164,7 +164,10 @@ describe('ruleActionsSystemActionsItem', () => {
     );
 
     await userEvent.click(screen.getByTestId('ruleActionsSystemActionsItemDeleteActionButton'));
-    expect(mockOnChange).toHaveBeenCalledWith({ payload: 'uuid-action-1', type: 'removeAction' });
+    expect(mockOnChange).toHaveBeenCalledWith({
+      payload: { uuid: 'uuid-action-1' },
+      type: 'removeAction',
+    });
   });
 
   test('should render error icon if error exists', async () => {

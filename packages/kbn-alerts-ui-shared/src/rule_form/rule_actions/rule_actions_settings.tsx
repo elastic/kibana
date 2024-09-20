@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -32,6 +32,35 @@ import { DEFAULT_VALID_CONSUMERS } from '../constants';
 import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
 import { RuleActionsAlertsFilter } from './rule_actions_alerts_filter';
 import { RuleActionsAlertsFilterTimeframe } from './rule_actions_alerts_filter_timeframe';
+
+const getMinimumThrottleWarnings = ({
+  actionThrottle,
+  actionThrottleUnit,
+  minimumActionThrottle,
+  minimumActionThrottleUnit,
+}: {
+  actionThrottle: number | null;
+  actionThrottleUnit: string;
+  minimumActionThrottle: number;
+  minimumActionThrottleUnit: string;
+}) => {
+  try {
+    if (!actionThrottle) return [false, false];
+    const throttleUnitDuration = parseDuration(`1${actionThrottleUnit}`);
+    const minThrottleUnitDuration = parseDuration(`1${minimumActionThrottleUnit}`);
+    const boundedThrottle =
+      throttleUnitDuration > minThrottleUnitDuration
+        ? actionThrottle
+        : Math.max(actionThrottle, minimumActionThrottle);
+    const boundedThrottleUnit =
+      parseDuration(`${actionThrottle}${actionThrottleUnit}`) >= minThrottleUnitDuration
+        ? actionThrottleUnit
+        : minimumActionThrottleUnit;
+    return [boundedThrottle !== actionThrottle, boundedThrottleUnit !== actionThrottleUnit];
+  } catch (e) {
+    return [false, false];
+  }
+};
 
 const ACTION_GROUP_NOT_SUPPORTED = (actionGroupName: string) =>
   i18n.translate('alertsUIShared.ruleActionsSetting.actionGroupNotSupported', {
@@ -154,24 +183,12 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
     intervalUnit,
   ] ?? [-1, 's'];
 
-  const [showMinimumThrottleWarning, showMinimumThrottleUnitWarning] = useMemo(() => {
-    try {
-      if (!actionThrottle) return [false, false];
-      const throttleUnitDuration = parseDuration(`1${actionThrottleUnit}`);
-      const minThrottleUnitDuration = parseDuration(`1${minimumActionThrottleUnit}`);
-      const boundedThrottle =
-        throttleUnitDuration > minThrottleUnitDuration
-          ? actionThrottle
-          : Math.max(actionThrottle, minimumActionThrottle);
-      const boundedThrottleUnit =
-        parseDuration(`${actionThrottle}${actionThrottleUnit}`) >= minThrottleUnitDuration
-          ? actionThrottleUnit
-          : minimumActionThrottleUnit;
-      return [boundedThrottle !== actionThrottle, boundedThrottleUnit !== actionThrottleUnit];
-    } catch (e) {
-      return [false, false];
-    }
-  }, [minimumActionThrottle, minimumActionThrottleUnit, actionThrottle, actionThrottleUnit]);
+  const [showMinimumThrottleWarning, showMinimumThrottleUnitWarning] = getMinimumThrottleWarnings({
+    actionThrottle,
+    actionThrottleUnit,
+    minimumActionThrottle,
+    minimumActionThrottleUnit,
+  });
 
   const showActionAlertsFilter =
     hasFieldsForAad({

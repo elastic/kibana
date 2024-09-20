@@ -27,10 +27,10 @@ export const hasFieldsForAad = ({
     : false;
 
   if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id)) {
-    return (
+    return !!(
       (validConsumers || DEFAULT_VALID_CONSUMERS).includes(consumer as RuleCreationValidConsumer) &&
       hasAlertHasData
     );
   }
-  return hasAlertHasData;
+  return !!hasAlertHasData;
 };

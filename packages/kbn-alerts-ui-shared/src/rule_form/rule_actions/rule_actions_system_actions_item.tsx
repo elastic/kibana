@@ -87,7 +87,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
   };
 
   const onDelete = (id: string) => {
-    dispatch({ type: 'removeAction', payload: id });
+    dispatch({ type: 'removeAction', payload: { uuid: id } });
   };
 
   const onStoredActionParamsChange = useCallback(

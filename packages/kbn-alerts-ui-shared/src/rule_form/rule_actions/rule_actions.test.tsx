@@ -19,6 +19,7 @@ import {
 } from '../../common/test_utils/actions_test_utils';
 import userEvent from '@testing-library/user-event';
 import { ActionConnector } from '../../common/types';
+import { RuleActionsItemProps } from './rule_actions_item';
 
 const http = httpServiceMock.createStartContract();
 
@@ -28,11 +29,25 @@ jest.mock('../hooks', () => ({
 }));
 
 jest.mock('./rule_actions_system_actions_item', () => ({
-  RuleActionsSystemActionsItem: () => <div>RuleActionsSystemActionsItem</div>,
+  RuleActionsSystemActionsItem: ({ action, producerId }: RuleActionsItemProps) => (
+    <div>
+      RuleActionsSystemActionsItem
+      <div>
+        {action.id} producerId: {producerId}
+      </div>
+    </div>
+  ),
 }));
 
 jest.mock('./rule_actions_item', () => ({
-  RuleActionsItem: () => <div>RuleActionsItem</div>,
+  RuleActionsItem: ({ action, producerId }: RuleActionsItemProps) => (
+    <div>
+      RuleActionsItem
+      <div>
+        {action.id} producerId: {producerId}
+      </div>
+    </div>
+  ),
 }));
 
 jest.mock('./rule_actions_connectors_modal', () => ({
@@ -166,7 +181,7 @@ describe('ruleActions', () => {
     expect(screen.queryAllByText('RuleActionsSystemActionsItem').length).toEqual(0);
   });
 
-  test('should be able to open the connector modal', async () => {
+  test('should be able to open and close the connector modal', async () => {
     render(<RuleActions />);
 
     await userEvent.click(screen.getByTestId('ruleActionsAddActionButton'));
@@ -193,5 +208,43 @@ describe('ruleActions', () => {
     });
 
     expect(screen.queryByText('RuleActionsConnectorsModal')).not.toBeInTheDocument();
+  });
+
+  test('should use the rule producer ID if it is not a multi-consumer rule', async () => {
+    render(<RuleActions />);
+
+    expect(await screen.findByText('action-1 producerId: stackAlerts')).toBeInTheDocument();
+    expect(await screen.findByText('action-1 producerId: stackAlerts')).toBeInTheDocument();
+    expect(await screen.findByText('system-action-3 producerId: stackAlerts')).toBeInTheDocument();
+  });
+
+  test('should use the rules consumer if the rule is a multi-consumer rule', async () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        http,
+      },
+      formData: {
+        actions: [...mockActions, ...mockSystemActions],
+        consumer: 'logs',
+      },
+      selectedRuleType: {
+        id: 'observability.rules.custom_threshold',
+        defaultActionGroupId: 'test',
+        producer: 'stackAlerts',
+      },
+      connectors: mockConnectors,
+      connectorTypes: [
+        getActionType('1'),
+        getActionType('2'),
+        getActionType('3', { isSystemActionType: true }),
+      ],
+      aadTemplateFields: [],
+    });
+
+    render(<RuleActions />);
+
+    expect(await screen.findByText('action-1 producerId: logs')).toBeInTheDocument();
+    expect(await screen.findByText('action-1 producerId: logs')).toBeInTheDocument();
+    expect(await screen.findByText('system-action-3 producerId: logs')).toBeInTheDocument();
   });
 });

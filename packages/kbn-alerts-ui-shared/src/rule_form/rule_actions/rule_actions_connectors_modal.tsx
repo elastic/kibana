@@ -53,7 +53,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
   const { onClose, onSelectConnector } = props;
 
   const [searchValue, setSearchValue] = useState<string>('');
-  const [selectedConnector, setSelectedConnector] = useState<string>('all');
+  const [selectedConnectorType, setSelectedConnectorType] = useState<string>('all');
 
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
@@ -103,7 +103,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
 
   const onConnectorOptionSelect = useCallback(
     (id: string) => () => {
-      setSelectedConnector((prev) => {
+      setSelectedConnectorType((prev) => {
         if (prev === id) {
           return '';
         }
@@ -115,7 +115,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
 
   const onClearFilters = useCallback(() => {
     setSearchValue('');
-    setSelectedConnector('all');
+    setSelectedConnectorType('all');
   }, []);
 
   const connectorsMap: ConnectorsMap | null = useMemo(() => {
@@ -136,10 +136,10 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
   const filteredConnectors = useMemo(() => {
     return availableConnectors
       .filter(({ actionTypeId }) => {
-        if (selectedConnector === 'all' || selectedConnector === '') {
+        if (selectedConnectorType === 'all' || selectedConnectorType === '') {
           return true;
         }
-        if (selectedConnector === actionTypeId) {
+        if (selectedConnectorType === actionTypeId) {
           return true;
         }
         return false;
@@ -159,7 +159,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
         ];
         return textSearchTargets.some((text) => text?.includes(trimmedSearchValue));
       });
-  }, [availableConnectors, selectedConnector, searchValue, connectorTypes, actionTypeRegistry]);
+  }, [availableConnectors, selectedConnectorType, searchValue, connectorTypes, actionTypeRegistry]);
 
   const connectorFacetButtons = useMemo(() => {
     return (
@@ -168,7 +168,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
           data-test-subj="ruleActionsConnectorsModalFilterButton"
           key="all"
           quantity={availableConnectors.length}
-          isSelected={selectedConnector === 'all'}
+          isSelected={selectedConnectorType === 'all'}
           onClick={onConnectorOptionSelect('all')}
         >
           {ACTION_TYPE_MODAL_FILTER_ALL}
@@ -181,7 +181,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
                 data-test-subj="ruleActionsConnectorsModalFilterButton"
                 key={actionTypeId}
                 quantity={total}
-                isSelected={selectedConnector === actionTypeId}
+                isSelected={selectedConnectorType === actionTypeId}
                 onClick={onConnectorOptionSelect(actionTypeId)}
               >
                 {name}
@@ -190,7 +190,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
           })}
       </EuiFacetGroup>
     );
-  }, [availableConnectors, connectorsMap, selectedConnector, onConnectorOptionSelect]);
+  }, [availableConnectors, connectorsMap, selectedConnectorType, onConnectorOptionSelect]);
 
   const connectorCards = useMemo(() => {
     if (!filteredConnectors.length) {

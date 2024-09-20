@@ -74,7 +74,9 @@ export type RuleFormStateReducerAction =
     }
   | {
       type: 'removeAction';
-      payload: string;
+      payload: {
+        uuid: string;
+      };
     }
   | {
       type: 'setActionProperty';
@@ -237,21 +239,23 @@ export const ruleFormStateReducer = (
       }));
     }
     case 'removeAction': {
-      const { payload } = action;
+      const {
+        payload: { uuid },
+      } = action;
       return {
         ...ruleFormState,
         ...updateWithValidation(() => ({
           ...formData,
-          actions: formData.actions.filter((existingAction) => existingAction.uuid !== payload),
+          actions: formData.actions.filter((existingAction) => existingAction.uuid !== uuid),
         })),
         ...(ruleFormState.actionsErrors
           ? {
-              actionsErrors: omit(ruleFormState.actionsErrors, payload),
+              actionsErrors: omit(ruleFormState.actionsErrors, uuid),
             }
           : {}),
         ...(ruleFormState.actionsParamsErrors
           ? {
-              actionsParamsErrors: omit(ruleFormState.actionsParamsErrors, payload),
+              actionsParamsErrors: omit(ruleFormState.actionsParamsErrors, uuid),
             }
           : {}),
       };

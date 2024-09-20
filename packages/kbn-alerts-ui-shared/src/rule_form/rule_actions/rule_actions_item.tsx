@@ -23,6 +23,8 @@ import {
   EuiTab,
   EuiToolTip,
   EuiBadge,
+  RecursivePartial,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import {
   ActionVariable,
@@ -48,7 +50,12 @@ import { validateAction, validateParamsForWarnings } from '../validation';
 import { RuleActionsSettings } from './rule_actions_settings';
 import { getSelectedActionGroup } from '../utils';
 import { RuleActionsMessage } from './rule_actions_message';
-import { ACTION_ERROR_TOOLTIP, ACTION_WARNING_TITLE } from '../translations';
+import {
+  ACTION_ERROR_TOOLTIP,
+  ACTION_WARNING_TITLE,
+  TECH_PREVIEW_DESCRIPTION,
+  TECH_PREVIEW_LABEL,
+} from '../translations';
 
 const SUMMARY_GROUP_TITLE = i18n.translate('alertsUIShared.ruleActionsItem.summaryGroupTitle', {
   defaultMessage: 'Summary of alerts',
@@ -62,7 +69,7 @@ const RUN_WHEN_GROUP_TITLE = (groupName: string) =>
     },
   });
 
-const PRECONFIGURED_ACTION_TITLE = (connector: ActionConnector) =>
+const ACTION_TITLE = (connector: ActionConnector) =>
   i18n.translate('alertsUIShared.ruleActionsItem.existingAlertActionTypeEditTitle', {
     defaultMessage: '{actionConnectorName}',
     values: {
@@ -88,11 +95,16 @@ const getDefaultParams = ({
   }
 };
 
-interface RuleActionsItemProps {
+export interface RuleActionsItemProps {
   action: RuleAction;
   index: number;
   producerId: string;
 }
+
+type ParamsType = RecursivePartial<any>;
+
+const MESSAGES_TAB = 'messages';
+const SETTINGS_TAB = 'settings';
 
 export const RuleActionsItem = (props: RuleActionsItemProps) => {
   const { action, index, producerId } = props;
@@ -107,7 +119,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     aadTemplateFields,
   } = useRuleFormState();
 
-  const [tab, setTab] = useState<string>('messages');
+  const [tab, setTab] = useState<string>(MESSAGES_TAB);
   const subdued = useEuiBackgroundColor('subdued');
   const plain = useEuiBackgroundColor('plain');
   const { euiTheme } = useEuiTheme();
@@ -146,7 +158,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     : availableActionVariables;
 
   const onDelete = (id: string) => {
-    dispatch({ type: 'removeAction', payload: id });
+    dispatch({ type: 'removeAction', payload: { uuid: id } });
   };
 
   const validateActionBase = useCallback(
@@ -226,10 +238,11 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
       if (!defaultParams) {
         return;
       }
-      const newDefaultParams: typeof defaultParams = {};
-      const defaultAADParams: typeof defaultParams = {};
+      const newDefaultParams: ParamsType = {};
+      const defaultAADParams: ParamsType = {};
       for (const [key, paramValue] of Object.entries(defaultParams)) {
         newDefaultParams[key] = paramValue;
+        // Collects AAD params by checking if the value is {x}.{y}
         if (typeof paramValue !== 'string' || !paramValue.match(/{{.*?}}/g)) {
           defaultAADParams[key] = paramValue;
         }
@@ -434,7 +447,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText>{PRECONFIGURED_ACTION_TITLE(connector)}</EuiText>
+              <EuiText>{ACTION_TITLE(connector)}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
@@ -457,6 +470,16 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
                 </EuiBadge>
               </EuiFlexItem>
             )}
+            {actionTypeModel.isExperimental && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  alignment="middle"
+                  data-test-subj="ruleActionsSystemActionsItemBetaBadge"
+                  label={TECH_PREVIEW_LABEL}
+                  tooltipContent={TECH_PREVIEW_DESCRIPTION}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       }
@@ -471,16 +494,16 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
       >
         <EuiFlexItem>
           <EuiTabs>
-            <EuiTab isSelected={tab === 'messages'} onClick={() => setTab('messages')}>
+            <EuiTab isSelected={tab === MESSAGES_TAB} onClick={() => setTab(MESSAGES_TAB)}>
               Message
             </EuiTab>
-            <EuiTab isSelected={tab === 'settings'} onClick={() => setTab('settings')}>
+            <EuiTab isSelected={tab === SETTINGS_TAB} onClick={() => setTab(SETTINGS_TAB)}>
               Settings
             </EuiTab>
           </EuiTabs>
         </EuiFlexItem>
         <EuiFlexItem>
-          {tab === 'messages' && (
+          {tab === MESSAGES_TAB && (
             <RuleActionsMessage
               action={action}
               index={index}
@@ -492,7 +515,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
               onParamsChange={onParamsChange}
             />
           )}
-          {tab === 'settings' && (
+          {tab === SETTINGS_TAB && (
             <RuleActionsSettings
               action={action}
               producerId={producerId}

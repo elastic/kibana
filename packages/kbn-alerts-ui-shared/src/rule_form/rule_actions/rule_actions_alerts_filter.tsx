@@ -48,7 +48,7 @@ export const RuleActionsAlertsFilter = ({
     notifications: { toasts },
     unifiedSearch,
     dataViews,
-  } = plugins || propsPlugins || {};
+  } = propsPlugins || plugins;
 
   const query = action.alertsFilter?.query;
 

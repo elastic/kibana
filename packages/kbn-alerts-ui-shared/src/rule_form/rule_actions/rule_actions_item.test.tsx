@@ -377,6 +377,9 @@ describe('ruleActionsItem', () => {
 
     await userEvent.click(screen.getByTestId('ruleActionsItemDeleteButton'));
 
-    expect(mockOnChange).toHaveBeenCalledWith({ payload: 'uuid-action-1', type: 'removeAction' });
+    expect(mockOnChange).toHaveBeenCalledWith({
+      payload: { uuid: 'uuid-action-1' },
+      type: 'removeAction',
+    });
   });
 });
