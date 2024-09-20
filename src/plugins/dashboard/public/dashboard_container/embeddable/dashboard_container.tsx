@@ -293,7 +293,11 @@ export class DashboardContainer
     this.dispatch = reduxTools.dispatch;
     this.select = reduxTools.select;
 
-    this.uuid = this.getInput().id;
+    this.uuid$ = embeddableInputToSubject<string>(
+      this.publishingSubscription,
+      this,
+      'id'
+    ) as BehaviorSubject<string>;
 
     this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
     this.expandedPanelId = new BehaviorSubject(this.getExpandedPanelId());
@@ -586,7 +590,7 @@ export class DashboardContainer
   public animatePanelTransforms$: BehaviorSubject<boolean | undefined>;
   public panels$: BehaviorSubject<DashboardPanelMap>;
   public embeddedExternally$: BehaviorSubject<boolean | undefined>;
-  public uuid: string;
+  public uuid$: BehaviorSubject<string>;
 
   public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
     const newId = await this.replaceEmbeddable(

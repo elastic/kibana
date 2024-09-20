@@ -18,7 +18,6 @@ import {
 import {
   HasAppContext,
   HasType,
-  HasUniqueId,
   PublishesDataViews,
   PublishesPanelDescription,
   PublishesPanelTitle,
@@ -40,7 +39,6 @@ export type DashboardApi = CanExpandPanels &
   HasRuntimeChildState &
   HasSerializedChildState &
   HasType<'dashboard'> &
-  HasUniqueId &
   PresentationContainer &
   PublishesDataViews &
   PublishesPanelDescription &
@@ -84,6 +82,8 @@ export type DashboardApi = CanExpandPanels &
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     setViewMode: (viewMode: ViewMode) => void;
     useMargins$: PublishingSubject<boolean | undefined>;
+    // TODO replace with HasUniqueId once dashboard is refactored and navigateToDashboard is removed
+    uuid$: PublishingSubject<string>;
 
     // TODO remove types below this line - from legacy embeddable system
     untilEmbeddableLoaded: (id: string) => Promise<IEmbeddable | ErrorEmbeddable>;
