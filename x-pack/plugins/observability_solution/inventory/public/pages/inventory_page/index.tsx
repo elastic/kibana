@@ -45,16 +45,18 @@ export function InventoryPage() {
   );
 
   useEffectOnce(() => {
-    const searchBarContentSubscription = searchBarContentSubject$.subscribe((searchBar) => {
-      if (searchBar.refresh) {
-        refresh();
-      } else {
-        inventoryRoute.push('/', {
-          path: {},
-          query: { ...query, ...searchBar },
-        });
+    const searchBarContentSubscription = searchBarContentSubject$.subscribe(
+      ({ refresh: isRefresh, ...queryParams }) => {
+        if (isRefresh) {
+          refresh();
+        } else {
+          inventoryRoute.push('/', {
+            path: {},
+            query: { ...query, ...queryParams },
+          });
+        }
       }
-    });
+    );
     return () => {
       searchBarContentSubscription.unsubscribe();
     };
