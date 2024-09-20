@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type { Agent as SuperTestAgent } from 'supertest';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   data as telemetryMockData,
   MockTelemetryFindings,
 } from '@kbn/test-suites-xpack/cloud_security_posture_api/telemetry/data';
 import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
@@ -27,31 +27,11 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
   let roleAuthc: RoleCredentials;
   let internalRequestHeader: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string };
-
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (
-    supertestWithoutAuthParam: SuperTestAgent,
-    internalRequestHeaderParam: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string },
-    roleAuthcParam: RoleCredentials
-  ): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
-      const response = await supertestWithoutAuthParam
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(internalRequestHeaderParam)
-        .set(roleAuthcParam.apiKeyHeader)
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
 
   const index = {
     remove: () =>
@@ -79,6 +59,14 @@ export default function ({ getService }: FtrProviderContext) {
     let agentPolicyId: string;
 
     before(async () => {
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+          withCustomHeaders: { [ELASTIC_HTTP_VERSION_HEADER]: '2' },
+        }
+      );
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       await kibanaServer.savedObjects.cleanStandardList();
@@ -106,7 +94,23 @@ export default function ({ getService }: FtrProviderContext) {
         roleAuthc,
         internalRequestHeader
       );
-      await waitForPluginInitialized(supertestWithoutAuth, internalRequestHeader, roleAuthc);
+
+      log.debug('Check CSP plugin is initialized');
+      await retry.try(async () => {
+        const supertestAdminWithHttpHeaderV1 = await roleScopedSupertest.getSupertestWithRoleScope(
+          'admin',
+          {
+            useCookieHeader: true,
+            withInternalHeaders: true,
+            withCustomHeaders: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+          }
+        );
+        const response = await supertestAdminWithHttpHeaderV1
+          .get('/internal/cloud_security_posture/status?check=init')
+          .expect(200);
+        expect(response.body).to.eql({ isPluginInitialized: true });
+        log.debug('CSP plugin is initialized');
+      });
     });
 
     after(async () => {
@@ -124,11 +128,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertestWithoutAuth
+      } = await supertestAdminWithCookieCredentials
         .post(`/internal/telemetry/clusters/_stats`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -178,11 +179,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertestWithoutAuth
+      } = await supertestAdminWithCookieCredentials
         .post(`/internal/telemetry/clusters/_stats`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -225,11 +223,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertestWithoutAuth
+      } = await supertestAdminWithCookieCredentials
         .post(`/internal/telemetry/clusters/_stats`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -303,11 +298,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertestWithoutAuth
+      } = await supertestAdminWithCookieCredentials
         .post(`/internal/telemetry/clusters/_stats`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -359,11 +351,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertestWithoutAuth
+      } = await supertestAdminWithCookieCredentials
         .post(`/internal/telemetry/clusters/_stats`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
