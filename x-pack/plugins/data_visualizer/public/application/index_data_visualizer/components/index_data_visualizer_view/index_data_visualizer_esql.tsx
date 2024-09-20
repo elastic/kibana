@@ -275,7 +275,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             detectedTimestamp={currentDataView?.timeFieldName}
             hideRunQueryText={false}
             isLoading={queryHistoryStatus ?? false}
-          />
+            displayDocumentationAsFlyout
+        />
         </EuiFlexItem>
 
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
