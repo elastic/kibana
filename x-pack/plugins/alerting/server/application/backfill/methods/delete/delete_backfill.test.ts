@@ -70,6 +70,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
+const fakeRuleName = 'fakeRuleName';
+
 const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
   id: '1',
   type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
@@ -80,7 +82,7 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
     duration: '12h',
     enabled: true,
     rule: {
-      name: 'my rule name',
+      name: fakeRuleName,
       tags: ['foo'],
       alertTypeId: 'myType',
       // @ts-expect-error
@@ -149,10 +151,11 @@ describe('deleteBackfill()', () => {
         saved_object: {
           id: '1',
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          name: `backfill for rule "my rule name"`,
+          name: 'backfill for rule "fakeRuleName"',
         },
       },
-      message: 'User is deleting ad hoc run for ad_hoc_run_params [id=1]',
+      message:
+        'User is deleting ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
     });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenLastCalledWith(
       AD_HOC_RUN_SAVED_OBJECT_TYPE,
@@ -212,10 +215,11 @@ describe('deleteBackfill()', () => {
           saved_object: {
             id: '1',
             type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-            name: `backfill for rule "my rule name"`,
+            name: 'backfill for rule "fakeRuleName"',
           },
         },
-        message: 'Failed attempt to delete ad hoc run for ad_hoc_run_params [id=1]',
+        message:
+          'Failed attempt to delete ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
       });
     });
 
@@ -229,6 +233,7 @@ describe('deleteBackfill()', () => {
           message: 'Unable to get',
           statusCode: 404,
         },
+        attributes: { rule: { name: fakeRuleName } },
       });
 
       await expect(rulesClient.deleteBackfill('1')).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -246,8 +251,15 @@ describe('deleteBackfill()', () => {
           outcome: 'failure',
           type: ['deletion'],
         },
-        kibana: { saved_object: { id: '1', type: AD_HOC_RUN_SAVED_OBJECT_TYPE } },
-        message: 'Failed attempt to delete ad hoc run for ad_hoc_run_params [id=1]',
+        kibana: {
+          saved_object: {
+            id: '1',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            name: 'backfill for rule "fakeRuleName"',
+          },
+        },
+        message:
+          'Failed attempt to delete ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
       });
     });
 

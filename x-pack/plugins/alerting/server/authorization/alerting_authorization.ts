@@ -179,6 +179,7 @@ export class AlertingAuthorization {
     entity,
     additionalPrivileges = [],
   }: EnsureAuthorizedOpts) {
+    console.log('ensureAuthorized', ensureAuthorized);
     const { authorization } = this;
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     const consumer = getValidConsumer({

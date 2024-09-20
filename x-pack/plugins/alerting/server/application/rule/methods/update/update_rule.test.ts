@@ -118,6 +118,7 @@ describe('update()', () => {
     id: '1',
     type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
+      name: 'fakeRuleName',
       enabled: true,
       tags: ['foo'],
       alertTypeId: 'myType',
@@ -3001,6 +3002,7 @@ describe('update()', () => {
         id: '1',
         type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
+          name: 'fakeRuleName',
           enabled: true,
           schedule: { interval: '1m' },
           params: {
@@ -3041,7 +3043,9 @@ describe('update()', () => {
             action: 'rule_update',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: {
+            saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeRuleName' },
+          },
         })
       );
     });
@@ -3075,6 +3079,7 @@ describe('update()', () => {
             saved_object: {
               id: '1',
               type: RULE_SAVED_OBJECT_TYPE,
+              name: 'fakeRuleName',
             },
           },
           error: {

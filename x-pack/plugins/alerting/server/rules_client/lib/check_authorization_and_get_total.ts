@@ -84,7 +84,7 @@ export const checkAuthorizationAndGetTotal = async (
   await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
     pMap(
       buckets,
-      async ({ key: [ruleType, consumer, actions] }) => {
+      async ({ key: [ruleType, consumer, name, id] }) => {
         context.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
         try {
           await context.authorization.ensureAuthorized({
@@ -97,6 +97,7 @@ export const checkAuthorizationAndGetTotal = async (
           context.auditLogger?.log(
             ruleAuditEvent({
               action: actionToConstantsMapping[action].RuleAuditAction,
+              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name },
               error,
             })
           );

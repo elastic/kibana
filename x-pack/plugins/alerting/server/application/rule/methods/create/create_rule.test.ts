@@ -302,7 +302,9 @@ describe('create()', () => {
             action: 'rule_create',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: 'mock-saved-object-id', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: {
+            saved_object: { id: 'mock-saved-object-id', type: RULE_SAVED_OBJECT_TYPE, name: 'abc' },
+          },
         })
       );
     });
@@ -328,6 +330,7 @@ describe('create()', () => {
             saved_object: {
               id: 'mock-saved-object-id',
               type: RULE_SAVED_OBJECT_TYPE,
+              name: 'abc',
             },
           },
           error: {

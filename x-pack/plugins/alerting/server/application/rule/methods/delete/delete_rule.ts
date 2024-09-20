@@ -80,7 +80,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.DELETE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
         error,
       })
     );
@@ -104,7 +104,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
     ruleAuditEvent({
       action: RuleAuditAction.DELETE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
   const removeResult = await deleteRuleSo({

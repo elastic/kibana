@@ -78,7 +78,7 @@ async function disableWithOCC(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.DISABLE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
         error,
       })
     );
@@ -93,7 +93,7 @@ async function disableWithOCC(
     ruleAuditEvent({
       action: RuleAuditAction.DISABLE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
 

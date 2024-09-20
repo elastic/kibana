@@ -161,7 +161,12 @@ export function ruleAuditEvent({
   outcome,
   error,
 }: RuleAuditEventParams): AuditEvent {
-  const doc = savedObject ? `rule [id=${savedObject.id}]` : 'a rule';
+  const doc = savedObject
+    ? [`rule [id=${savedObject.id}]`, savedObject.name && `[name:${savedObject.name}]`]
+        .filter(Boolean)
+        .join(' ')
+    : 'a rule';
+
   const [present, progressive, past] = ruleEventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
@@ -195,7 +200,12 @@ export function adHocRunAuditEvent({
   error,
 }: AdHocRunAuditEventParams): AuditEvent {
   const doc = savedObject
-    ? `${AD_HOC_RUN_SAVED_OBJECT_TYPE} [id=${savedObject.id}]`
+    ? [
+        `${AD_HOC_RUN_SAVED_OBJECT_TYPE} [id=${savedObject.id}]`,
+        savedObject.name && `${savedObject.name}`,
+      ]
+        .filter(Boolean)
+        .join(' ')
     : 'an ad hoc run';
   const [present, progressive, past] = adHocRunEventVerbs[action];
   const message = error
