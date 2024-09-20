@@ -1872,6 +1872,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         });
 
         it('should generate expected events with a alertDelay', async () => {
+          // wait so cache expires so maintenance window from previous test will be cleared
+          await setTimeoutAsync(10000);
+
           const ACTIVE_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.active';
           const NEW_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.new';
           const RECOVERED_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.recovered';
