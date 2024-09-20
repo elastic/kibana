@@ -226,7 +226,7 @@ export class DiscoverPlugin
         });
 
         return () => {
-          ebtContextManager.reset();
+          ebtContextManager.disableAndReset();
           unlistenParentHistory();
           unmount();
           appUnMounted();

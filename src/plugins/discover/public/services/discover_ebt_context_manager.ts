@@ -69,7 +69,7 @@ export class DiscoverEBTContextManager {
     return this.ebtContext$?.getValue()?.dscProfiles;
   }
 
-  public reset() {
+  public disableAndReset() {
     this.updateProfilesContextWith([]);
     this.isEnabled = false;
   }

@@ -84,7 +84,7 @@ describe('DiscoverEBTContextManager', () => {
       discoverEBTContextManager.enable();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
-      discoverEBTContextManager.reset();
+      discoverEBTContextManager.disableAndReset();
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
