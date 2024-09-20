@@ -34,8 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('validate response body is not empty', async () => {
       await testSubjects.findService.clickByCssSelector('#response');
-      const requestText = await testSubjects.getVisibleText('painlessLabFlyoutResponse');
-      expect(requestText.length === 0).to.be(false);
+      const responseText = await testSubjects.getVisibleText('painlessLabFlyoutResponse');
+      expect(responseText.length === 0).to.be(false);
     });
   });
 }
