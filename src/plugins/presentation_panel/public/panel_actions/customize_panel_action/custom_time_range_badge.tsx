@@ -22,6 +22,16 @@ import { customizePanelAction } from '../panel_actions';
 
 export const CUSTOM_TIME_RANGE_BADGE = 'CUSTOM_TIME_RANGE_BADGE';
 
+function debounce(fn: Function, delay: number) {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return function (...args: any[]) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      fn.apply(this, args);
+    }, delay);
+  };
+}
+
 export class CustomTimeRangeBadge
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
 {
@@ -64,8 +74,12 @@ export class CustomTimeRangeBadge
     onChange: (isCompatible: boolean, action: CustomTimeRangeBadge) => void
   ) {
     if (!apiPublishesTimeRange(embeddable)) return;
+  const debouncedOnChange = debounce((isCompatible: boolean) => {
+      onChange(isCompatible, this);
+    }, 300);
+
     return embeddable.timeRange$.subscribe((timeRange) => {
-      onChange(Boolean(timeRange), this);
+      debouncedOnChange(Boolean(timeRange));
     });
   }
 
