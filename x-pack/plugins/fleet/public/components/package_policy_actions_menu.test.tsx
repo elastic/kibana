@@ -125,115 +125,115 @@ describe('PackagePolicyActionsMenu', () => {
         expect(upgradeButton).toBeDisabled();
       });
     });
-  }
 
-  it('Should enable upgrade button if package has upgrade', async () => {
-    const agentPolicies = createMockAgentPolicies();
-    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    it('Should enable upgrade button if package has upgrade', async () => {
+      const agentPolicies = createMockAgentPolicies();
+      const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
 
-    await act(async () => {
-      const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
-      expect(upgradeButton).not.toBeDisabled();
-    });
-  });
-
-  it('Should not be able to delete integration from a managed policy', async () => {
-    const agentPolicies = createMockAgentPolicies({ is_managed: true });
-    const packagePolicy = createMockPackagePolicy();
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
-    await act(async () => {
-      expect(utils.queryByText('Delete integration')).toBeNull();
-    });
-  });
-
-  it('Should be able to delete integration from a non-managed policy', async () => {
-    const agentPolicies = createMockAgentPolicies({ is_managed: false });
-    const packagePolicy = createMockPackagePolicy();
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
-    await act(async () => {
-      expect(utils.queryByText('Delete integration')).not.toBeNull();
-    });
-  });
-
-  it('Should be able to delete integration from a managed agentless policy', async () => {
-    const agentPolicies = createMockAgentPolicies({ is_managed: true, supports_agentless: true });
-    const packagePolicy = createMockPackagePolicy();
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
-    await act(async () => {
-      expect(utils.queryByText('Delete integration')).not.toBeNull();
-    });
-  });
-
-  it('Should navigate on delete integration when having an agentless policy', async () => {
-    const agentPolicies = createMockAgentPolicies({ is_managed: true, supports_agentless: true });
-    const packagePolicy = createMockPackagePolicy();
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
-
-    await act(async () => {
-      fireEvent.click(utils.getByTestId('PackagePolicyActionsDeleteItem'));
-    });
-    await act(async () => {
-      fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
-    });
-    expect(useStartServices().application.navigateToApp as jest.Mock).toHaveBeenCalledWith(
-      'fleet',
-      { path: '/policies' }
-    );
-  });
-
-  it('Should show add button if the policy is not managed and showAddAgent=true', async () => {
-    const agentPolicies = createMockAgentPolicies();
-    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
-    const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
-    await act(async () => {
-      expect(utils.queryByText('Add agent')).not.toBeNull();
-    });
-  });
-
-  it('Should not show add button if the policy is managed and showAddAgent=true', async () => {
-    const agentPolicies = createMockAgentPolicies({ is_managed: true });
-    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
-    const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
-    await act(async () => {
-      expect(utils.queryByText('Add agent')).toBeNull();
-    });
-  });
-
-  it('Should show Edit integration with correct href when agentPolicy is defined', async () => {
-    const agentPolicies = createMockAgentPolicies();
-    const packagePolicy = createMockPackagePolicy();
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
-    await act(async () => {
-      const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
-      expect(editButton).not.toHaveAttribute('disabled');
-      expect(editButton).toHaveAttribute('href');
-      expect(useLink().getHref as jest.Mock).toHaveBeenCalledWith('edit_integration', {
-        policyId: 'some-uuid1',
-        packagePolicyId: 'some-uuid2',
+      await act(async () => {
+        const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
+        expect(upgradeButton).not.toBeDisabled();
       });
-      expect(editButton).toHaveAttribute(
-        'href',
-        '/mock/app/fleet/policies/some-uuid1/edit-integration/some-uuid2'
+    });
+
+    it('Should not be able to delete integration from a managed policy', async () => {
+      const agentPolicies = createMockAgentPolicies({ is_managed: true });
+      const packagePolicy = createMockPackagePolicy();
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await act(async () => {
+        expect(utils.queryByText('Delete integration')).toBeNull();
+      });
+    });
+
+    it('Should be able to delete integration from a non-managed policy', async () => {
+      const agentPolicies = createMockAgentPolicies({ is_managed: false });
+      const packagePolicy = createMockPackagePolicy();
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await act(async () => {
+        expect(utils.queryByText('Delete integration')).not.toBeNull();
+      });
+    });
+
+    it('Should be able to delete integration from a managed agentless policy', async () => {
+      const agentPolicies = createMockAgentPolicies({ is_managed: true, supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy();
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await act(async () => {
+        expect(utils.queryByText('Delete integration')).not.toBeNull();
+      });
+    });
+
+    it('Should navigate on delete integration when having an agentless policy', async () => {
+      const agentPolicies = createMockAgentPolicies({ is_managed: true, supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy();
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+
+      await act(async () => {
+        fireEvent.click(utils.getByTestId('PackagePolicyActionsDeleteItem'));
+      });
+      await act(async () => {
+        fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
+      });
+      expect(useStartServices().application.navigateToApp as jest.Mock).toHaveBeenCalledWith(
+        'fleet',
+        { path: '/policies' }
       );
     });
-  });
 
-  it('Should show Edit integration with correct href when there is no agent policy', async () => {
-    const packagePolicy = createMockPackagePolicy({
-      policy_ids: [],
-    });
-    const { utils } = renderMenu({
-      agentPolicies: [],
-      packagePolicy,
-    });
-    await act(async () => {
-      const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
-      expect(editButton).not.toHaveAttribute('disabled');
-      expect(editButton).toHaveAttribute('href');
-      expect(useLink().getHref as jest.Mock).toHaveBeenCalledWith('integration_policy_edit', {
-        packagePolicyId: 'some-uuid2',
+    it('Should show add button if the policy is not managed and showAddAgent=true', async () => {
+      const agentPolicies = createMockAgentPolicies();
+      const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
+      await act(async () => {
+        expect(utils.queryByText('Add agent')).not.toBeNull();
       });
     });
-  });
+
+    it('Should not show add button if the policy is managed and showAddAgent=true', async () => {
+      const agentPolicies = createMockAgentPolicies({ is_managed: true });
+      const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
+      await act(async () => {
+        expect(utils.queryByText('Add agent')).toBeNull();
+      });
+    });
+
+    it('Should show Edit integration with correct href when agentPolicy is defined', async () => {
+      const agentPolicies = createMockAgentPolicies();
+      const packagePolicy = createMockPackagePolicy();
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await act(async () => {
+        const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
+        expect(editButton).not.toHaveAttribute('disabled');
+        expect(editButton).toHaveAttribute('href');
+        expect(useLink().getHref as jest.Mock).toHaveBeenCalledWith('edit_integration', {
+          policyId: 'some-uuid1',
+          packagePolicyId: 'some-uuid2',
+        });
+        expect(editButton).toHaveAttribute(
+          'href',
+          '/mock/app/fleet/policies/some-uuid1/edit-integration/some-uuid2'
+        );
+      });
+    });
+
+    it('Should show Edit integration with correct href when there is no agent policy', async () => {
+      const packagePolicy = createMockPackagePolicy({
+        policy_ids: [],
+      });
+      const { utils } = renderMenu({
+        agentPolicies: [],
+        packagePolicy,
+      });
+      await act(async () => {
+        const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
+        expect(editButton).not.toHaveAttribute('disabled');
+        expect(editButton).toHaveAttribute('href');
+        expect(useLink().getHref as jest.Mock).toHaveBeenCalledWith('integration_policy_edit', {
+          packagePolicyId: 'some-uuid2',
+        });
+      });
+    });
+  }
 });
