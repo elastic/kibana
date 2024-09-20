@@ -9,6 +9,9 @@
 
 import { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import React, { memo, useEffect } from 'react';
+import { SOURCE_COLUMN } from './columns';
+
+const FIELDS_WITH_WIDE_POPOVER = [SOURCE_COLUMN];
 
 /*
  *
@@ -23,14 +26,20 @@ export const getCustomCellPopoverRenderer = () => {
   const RenderCustomCellPopoverMemoized = memo(function RenderCustomCellPopoverMemoized(
     props: EuiDataGridCellPopoverElementProps
   ) {
-    const { setCellPopoverProps, DefaultCellPopover } = props;
+    const { columnId, setCellPopoverProps, DefaultCellPopover } = props;
 
     useEffect(() => {
-      setCellPopoverProps({
+      const popoverProps: Parameters<typeof setCellPopoverProps>[0] = {
         panelClassName: 'unifiedDataTable__cellPopover',
-        panelProps: { css: { maxInlineSize: 'min(75vw, 600px) !important' } },
-      });
-    }, [setCellPopoverProps]);
+      };
+
+      const shouldRenderWidePopover = FIELDS_WITH_WIDE_POPOVER.includes(columnId);
+      if (shouldRenderWidePopover) {
+        popoverProps.panelProps = { css: { maxInlineSize: 'min(75vw, 600px) !important' } };
+      }
+
+      setCellPopoverProps(popoverProps);
+    }, [columnId, setCellPopoverProps]);
 
     return <DefaultCellPopover {...props} />;
   });
