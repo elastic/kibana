@@ -142,6 +142,34 @@ describe('Policy Details', () => {
       history.push(policyDetailsPathUrl);
     });
 
+    it('should NOT display tabs when Host Isolation Exceptions access is loading', async () => {
+      useHostIsolationExceptionsAccessMock.mockReturnValue({
+        hasAccessToHostIsolationExceptions: false,
+        isHostIsolationExceptionsAccessLoading: true,
+      });
+      policyView = render();
+      await asyncActions;
+      policyView.update();
+      const tab = policyView.find('[data-test-subj="policyTabs"]');
+      expect(tab).toHaveLength(0);
+      const loader = policyView.find('span[data-test-subj="privilegesLoading"]');
+      expect(loader).toHaveLength(1);
+    });
+
+    it('should display tabs when Host Isolation Exceptions access is not loading', async () => {
+      useHostIsolationExceptionsAccessMock.mockReturnValue({
+        hasAccessToHostIsolationExceptions: true,
+        isHostIsolationExceptionsAccessLoading: false,
+      });
+      policyView = render();
+      await asyncActions;
+      policyView.update();
+      const tab = policyView.find('div[data-test-subj="policyTabs"]');
+      expect(tab).toHaveLength(1);
+      const loader = policyView.find('div[data-test-subj="privilegesLoading"]');
+      expect(loader).toHaveLength(0);
+    });
+
     it('should NOT display timeline', async () => {
       policyView = render();
       await asyncActions;

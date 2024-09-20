@@ -71,4 +71,14 @@ describe('useHostIsolationExceptionsAccess', () => {
       expect(result.current.hasAccessToHostIsolationExceptions).toBe(true);
     });
   });
+
+  test('should set loading state correctly while checking access', async () => {
+    const { result, waitFor } = setupHook(false, true);
+
+    expect(result.current.isHostIsolationExceptionsAccessLoading).toBe(true);
+
+    await waitFor(() => {
+      expect(result.current.isHostIsolationExceptionsAccessLoading).toBe(false);
+    });
+  });
 });
