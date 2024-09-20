@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
       await spacesService.delete('test');
     });
 
-    it('should pass', async () => {
+    it('should be able to create data view WITHOUT space access', async () => {
       spacesService.create({
         id: 'test',
         name: 'Test-Space',
