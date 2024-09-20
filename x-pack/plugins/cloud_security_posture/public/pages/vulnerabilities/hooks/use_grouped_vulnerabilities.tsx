@@ -11,7 +11,7 @@ import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/grouping/sr
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { showErrorToast } from '@kbn/cloud-security-posture';
-import { CDR_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
+import { CDR_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
 // Elasticsearch returns `null` when a sub-aggregation cannot be computed

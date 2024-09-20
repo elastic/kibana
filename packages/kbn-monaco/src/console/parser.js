@@ -67,6 +67,14 @@ export const createParser = () => {
       at += 1;
       return ch;
     },
+    nextOneOf = function (chars) {
+      if (chars && !chars.includes(ch)) {
+        error('Expected one of ' + chars + ' instead of \'' + ch + '\'');
+      }
+      ch = text.charAt(at);
+      at += 1;
+      return ch;
+    },
     nextUpTo = function (upTo, errorMessage) {
       let currentAt = at,
         i = text.indexOf(upTo, currentAt);
@@ -221,84 +229,45 @@ export const createParser = () => {
     },
     // parses and returns the method
     method = function () {
-      switch (ch) {
-        case 'g':
-          next('g');
-          next('e');
-          next('t');
-          return 'get';
+    const upperCaseChar = ch.toUpperCase();
+      switch (upperCaseChar) {
         case 'G':
-          next('G');
-          next('E');
-          next('T');
+          nextOneOf(['G', 'g']);
+          nextOneOf(['E', 'e']);
+          nextOneOf(['T', 't']);
           return 'GET';
-        case 'h':
-          next('h');
-          next('e');
-          next('a');
-          next('d');
-          return 'head';
         case 'H':
-          next('H');
-          next('E');
-          next('A');
-          next('D');
+          nextOneOf(['H', 'h']);
+          nextOneOf(['E', 'e']);
+          nextOneOf(['A', 'a']);
+          nextOneOf(['D', 'd']);
           return 'HEAD';
-        case 'd':
-          next('d');
-          next('e');
-          next('l');
-          next('e');
-          next('t');
-          next('e');
-          return 'delete';
         case 'D':
-          next('D');
-          next('E');
-          next('L');
-          next('E');
-          next('T');
-          next('E');
+          nextOneOf(['D', 'd']);
+          nextOneOf(['E', 'e']);
+          nextOneOf(['L', 'l']);
+          nextOneOf(['E', 'e']);
+          nextOneOf(['T', 't']);
+          nextOneOf(['E', 'e']);
           return 'DELETE';
-        case 'p':
-          next('p');
-          switch (ch) {
-            case 'a':
-              next('a');
-              next('t');
-              next('c');
-              next('h');
-              return 'patch';
-            case 'u':
-              next('u');
-              next('t');
-              return 'put';
-            case 'o':
-              next('o');
-              next('s');
-              next('t');
-              return 'post';
-            default:
-              error('Unexpected \'' + ch + '\'');
-          }
-          break;
         case 'P':
-          next('P');
-          switch (ch) {
+          nextOneOf(['P', 'p']);
+          const nextUpperCaseChar = ch.toUpperCase();
+          switch (nextUpperCaseChar) {
             case 'A':
-              next('A');
-              next('T');
-              next('C');
-              next('H');
+              nextOneOf(['A', 'a']);
+              nextOneOf(['T', 't']);
+              nextOneOf(['C', 'c']);
+              nextOneOf(['H', 'h']);
               return 'PATCH';
             case 'U':
-              next('U');
-              next('T');
+              nextOneOf(['U', 'u']);
+              nextOneOf(['T', 't']);
               return 'PUT';
             case 'O':
-              next('O');
-              next('S');
-              next('T');
+              nextOneOf(['O', 'o']);
+              nextOneOf(['S', 's']);
+              nextOneOf(['T', 't']);
               return 'POST';
             default:
               error('Unexpected \'' + ch + '\'');
