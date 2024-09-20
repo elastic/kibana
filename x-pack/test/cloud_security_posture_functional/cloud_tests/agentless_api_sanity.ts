@@ -13,6 +13,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header', 'cisAddIntegration', 'findings']);
 
   describe('Agentless Cloud - Sanity Tests', function () {
+    this.tags(['cloud_security_posture_ui_sanity']);
+
     it(`should have agentless agent findings for AWS provider`, async () => {
       const findings = pageObjects.findings;
 
