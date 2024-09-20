@@ -70,6 +70,7 @@ export interface PackageListGridProps {
   showControls?: boolean;
   showSearchTools?: boolean;
   spacer?: boolean;
+  scrollElementId?: string;
 }
 
 export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
@@ -93,6 +94,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   showControls = true,
   showSearchTools = true,
   spacer = true,
+  scrollElementId,
 }) => {
   const localSearchRef = useLocalSearch(list, !!isLoading);
 
@@ -276,6 +278,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             list={filteredPromotedList}
             showMissingIntegrationMessage={showMissingIntegrationMessage}
             showCardLabels={showCardLabels}
+            scrollElementId={scrollElementId}
           />
         </EuiFlexItem>
         {showMissingIntegrationMessage && (
