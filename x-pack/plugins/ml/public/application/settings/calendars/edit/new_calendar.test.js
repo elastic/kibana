@@ -115,16 +115,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 import { NewCalendar } from './new_calendar';
 
-const props = {
-  canCreateCalendar: true,
-  canDeleteCalendar: true,
-};
-
 describe('NewCalendar', () => {
   test('Renders new calendar form', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <NewCalendar {...props} />
+        <NewCalendar />
       </IntlProvider>
     );
 
@@ -134,7 +129,7 @@ describe('NewCalendar', () => {
   test('Import modal button is disabled', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <NewCalendar {...props} />
+        <NewCalendar />
       </IntlProvider>
     );
 
@@ -146,7 +141,7 @@ describe('NewCalendar', () => {
   test('New event modal button is disabled', async () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <NewCalendar {...props} />
+        <NewCalendar />
       </IntlProvider>
     );
 
@@ -158,7 +153,7 @@ describe('NewCalendar', () => {
   test('isDuplicateId returns true if form calendar id already exists in calendars', async () => {
     const { getByTestId, queryByTestId, getByText } = render(
       <IntlProvider locale="en">
-        <NewCalendar {...props} />
+        <NewCalendar />
       </IntlProvider>
     );
 
@@ -186,21 +181,5 @@ describe('NewCalendar', () => {
     expect(mockAddDanger).toHaveBeenCalledWith(
       'Cannot create calendar with id [this-is-a-new-calendar] as it already exists.'
     );
-  });
-
-  test('Save button is disabled if canCreateCalendar is false', () => {
-    const noCreateProps = {
-      ...props,
-      canCreateCalendar: false,
-    };
-
-    const { getByTestId } = render(
-      <IntlProvider locale="en">
-        <NewCalendar {...noCreateProps} />
-      </IntlProvider>
-    );
-
-    const saveButton = getByTestId('mlSaveCalendarButton');
-    expect(saveButton).toBeDisabled();
   });
 });

@@ -26,8 +26,11 @@ export const CalendarsListTable = ({
   canDeleteCalendar,
   mlNodesAvailable,
   itemsSelected,
+  isDst,
 }) => {
-  const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_NEW);
+  const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(
+    isDst ? ML_PAGES.CALENDARS_DST_NEW : ML_PAGES.CALENDARS_NEW
+  );
 
   const sorting = {
     sort: {

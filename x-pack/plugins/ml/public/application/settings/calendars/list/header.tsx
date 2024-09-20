@@ -9,7 +9,7 @@
  * React component for the header section of the calendars list page.
  */
 
-import PropTypes from 'prop-types';
+import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,18 +23,36 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { MlPageHeader } from '../../../components/page_header';
+import { useMlKibana } from '../../../contexts/kibana/kibana_context';
 
-function CalendarsListHeaderUI({ totalCount, refreshCalendars, kibana }) {
-  const docsUrl = kibana.services.docLinks.links.ml.calendars;
+interface Props {
+  isDst: boolean;
+  totalCount: number;
+  refreshCalendars: () => void;
+}
+
+export const CalendarsListHeader: FC<Props> = ({ totalCount, refreshCalendars, isDst }) => {
+  const {
+    services: {
+      docLinks: { links },
+    },
+  } = useMlKibana();
+  const docsUrl = links.ml.calendars;
   return (
     <>
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
-          defaultMessage="Calendars"
-        />
+        {isDst ? (
+          <FormattedMessage
+            id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
+            defaultMessage="Daylight savings calendars"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
+            defaultMessage="Calendars"
+          />
+        )}
       </MlPageHeader>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
         <EuiFlexItem grow={false}>
@@ -98,10 +116,4 @@ function CalendarsListHeaderUI({ totalCount, refreshCalendars, kibana }) {
       <EuiSpacer size="m" />
     </>
   );
-}
-CalendarsListHeaderUI.propTypes = {
-  totalCount: PropTypes.number.isRequired,
-  refreshCalendars: PropTypes.func.isRequired,
 };
-
-export const CalendarsListHeader = withKibana(CalendarsListHeaderUI);

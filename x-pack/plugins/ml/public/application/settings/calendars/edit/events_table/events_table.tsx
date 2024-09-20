@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import moment from 'moment';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { EuiButton, EuiButtonEmpty, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 
-function DeleteButton({ onClick, testSubj, disabled }) {
+const DeleteButton: FC<{
+  onClick: () => void;
+  testSubj: string;
+  disabled: boolean;
+}> = ({ onClick, testSubj, disabled }) => {
   return (
-    <Fragment>
+    <>
       <EuiButtonEmpty
         size="xs"
         color="danger"
@@ -30,13 +36,21 @@ function DeleteButton({ onClick, testSubj, disabled }) {
           defaultMessage="Delete"
         />
       </EuiButtonEmpty>
-    </Fragment>
+    </>
   );
+};
+
+interface Props {
+  eventsList: estypes.MlCalendarEvent[];
+  onDeleteClick: (eventId: string) => void;
+  showImportModal: () => void;
+  showNewEventModal: () => void;
+  showSearchBar?: boolean;
+  loading?: boolean;
+  saving?: boolean;
 }
 
-export const EventsTable = ({
-  canCreateCalendar,
-  canDeleteCalendar,
+export const EventsTable: FC<Props> = ({
   eventsList,
   onDeleteClick,
   showSearchBar,
@@ -45,12 +59,10 @@ export const EventsTable = ({
   loading,
   saving,
 }) => {
-  const sorting = {
-    sort: {
-      field: 'description',
-      direction: 'asc',
-    },
-  };
+  const [canCreateCalendar, canDeleteCalendar] = usePermissionCheck([
+    'canCreateCalendar',
+    'canDeleteCalendar',
+  ]);
 
   const pagination = {
     initialPageSize: 5,
@@ -73,7 +85,7 @@ export const EventsTable = ({
         defaultMessage: 'Start',
       }),
       sortable: true,
-      render: (timeMs) => {
+      render: (timeMs: number) => {
         const time = moment(timeMs);
         return time.format(TIME_FORMAT);
       },
@@ -84,7 +96,7 @@ export const EventsTable = ({
         defaultMessage: 'End',
       }),
       sortable: true,
-      render: (timeMs) => {
+      render: (timeMs: number) => {
         const time = moment(timeMs);
         return time.format(TIME_FORMAT);
       },
@@ -92,12 +104,12 @@ export const EventsTable = ({
     {
       field: '',
       name: '',
-      render: (event) => (
+      render: (event: estypes.MlCalendarEvent) => (
         <DeleteButton
           testSubj="mlCalendarEventDeleteButton"
           disabled={canDeleteCalendar === false || saving === true || loading === true}
           onClick={() => {
-            onDeleteClick(event.event_id);
+            onDeleteClick(event.event_id!);
           }}
         />
       ),
@@ -140,38 +152,25 @@ export const EventsTable = ({
   };
 
   return (
-    <Fragment>
+    <>
       <EuiSpacer size="m" />
-      <EuiInMemoryTable
+      <EuiInMemoryTable<estypes.MlCalendarEvent>
         items={eventsList}
         itemId="event_id"
         columns={columns}
         pagination={pagination}
-        sorting={sorting}
+        sorting={{
+          sort: {
+            field: 'start_time',
+            direction: 'asc',
+          },
+        }}
         search={showSearchBar ? search : undefined}
         data-test-subj="mlCalendarEventsTable"
         rowProps={(item) => ({
           'data-test-subj': `mlCalendarEventListRow row-${item.description}`,
         })}
       />
-    </Fragment>
+    </>
   );
-};
-
-EventsTable.propTypes = {
-  canCreateCalendar: PropTypes.bool,
-  canDeleteCalendar: PropTypes.bool,
-  eventsList: PropTypes.array.isRequired,
-  onDeleteClick: PropTypes.func.isRequired,
-  showImportModal: PropTypes.func,
-  showNewEventModal: PropTypes.func,
-  showSearchBar: PropTypes.bool,
-  loading: PropTypes.bool,
-  saving: PropTypes.bool,
-};
-
-EventsTable.defaultProps = {
-  showSearchBar: false,
-  canCreateCalendar: true,
-  canDeleteCalendar: true,
 };

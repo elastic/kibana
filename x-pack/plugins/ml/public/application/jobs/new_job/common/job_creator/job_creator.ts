@@ -43,7 +43,7 @@ import { JOB_TYPE, SHARED_RESULTS_INDEX_NAME } from '../../../../../../common/co
 import { collectAggs } from './util/general';
 import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
-import type { Calendar } from '../../../../../../common/types/calendars';
+import type { MlCalendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
 import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
@@ -56,7 +56,7 @@ export class JobCreator {
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _indexPatternDisplayName: string = '';
   protected _job_config: Job;
-  protected _calendars: Calendar[];
+  protected _calendars: MlCalendar[];
   protected _datafeed_config: Datafeed;
   protected _detectors: Detector[];
   protected _influencers: string[];
@@ -269,11 +269,11 @@ export class JobCreator {
     this._job_config.groups = groups;
   }
 
-  public get calendars(): Calendar[] {
+  public get calendars(): MlCalendar[] {
     return this._calendars;
   }
 
-  public set calendars(calendars: Calendar[]) {
+  public set calendars(calendars: MlCalendar[]) {
     this._calendars = calendars;
   }
 

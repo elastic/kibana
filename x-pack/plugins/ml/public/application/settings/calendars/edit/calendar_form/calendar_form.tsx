@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { PropTypes } from 'prop-types';
+import type { FC } from 'react';
+import React from 'react';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EuiSwitchEvent, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiComboBox,
@@ -21,17 +23,20 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { EventsTable } from '../events_table';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
+import { EventsTable } from '../events_table';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
 
-function EditHeader({ calendarId, description }) {
+const EditHeader: FC<{ calendarId: string; description: string }> = ({
+  calendarId,
+  description,
+}) => {
   return (
-    <Fragment>
+    <>
       <MlPageHeader>
         <span data-test-subj={'mlCalendarTitle'}>
           <FormattedMessage
@@ -49,20 +54,45 @@ function EditHeader({ calendarId, description }) {
           <EuiSpacer size="l" />
         </>
       ) : null}
-    </Fragment>
+    </>
   );
+};
+
+interface Props {
+  calendarId: string;
+  description: string;
+  eventsList: estypes.MlCalendarEvent[];
+  groupIdOptions: EuiComboBoxOptionOption[];
+  isEdit: boolean;
+  isNewCalendarIdValid: boolean;
+  jobIdOptions: EuiComboBoxOptionOption[];
+  onCalendarIdChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCreate: () => void;
+  onCreateGroupOption: (searchValue: string, flattenedOptions: EuiComboBoxOptionOption[]) => void;
+  onDescriptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onEdit: () => void;
+  onEventDelete: (eventId: string) => void;
+  onGroupSelection: (selectedOptions: any) => void;
+  showImportModal: () => void;
+  onJobSelection: (selectedOptions: any) => void;
+  saving: boolean;
+  loading: boolean;
+  selectedGroupOptions: EuiComboBoxOptionOption[];
+  selectedJobOptions: EuiComboBoxOptionOption[];
+  showNewEventModal: () => void;
+  isGlobalCalendar: boolean;
+  onGlobalCalendarChange: (e: EuiSwitchEvent) => void;
+  addEvents: (events: estypes.MlCalendarEvent[]) => void;
 }
 
-export const CalendarForm = ({
+export const CalendarForm: FC<Props> = ({
   calendarId,
-  canCreateCalendar,
-  canDeleteCalendar,
   description,
   eventsList,
-  groupIds,
+  groupIdOptions,
   isEdit,
   isNewCalendarIdValid,
-  jobIds,
+  jobIdOptions,
   onCalendarIdChange,
   onCreate,
   onCreateGroupOption,
@@ -80,6 +110,7 @@ export const CalendarForm = ({
   isGlobalCalendar,
   onGlobalCalendarChange,
 }) => {
+  const [canCreateCalendar] = usePermissionCheck(['canCreateCalendar']);
   const msg = i18n.translate('xpack.ml.calendarsEdit.calendarForm.allowedCharactersDescription', {
     defaultMessage:
       'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; ' +
@@ -100,7 +131,7 @@ export const CalendarForm = ({
       {isEdit === true ? (
         <EditHeader calendarId={calendarId} description={description} />
       ) : (
-        <Fragment>
+        <>
           <MlPageHeader>
             <FormattedMessage
               id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
@@ -122,7 +153,7 @@ export const CalendarForm = ({
               name="calendarId"
               value={calendarId}
               onChange={onCalendarIdChange}
-              disabled={isEdit === true || saving === true || loading === true}
+              disabled={saving === true || loading === true}
               data-test-subj="mlCalendarIdInput"
             />
           </EuiFormRow>
@@ -139,13 +170,13 @@ export const CalendarForm = ({
               name="description"
               value={description}
               onChange={onDescriptionChange}
-              disabled={isEdit === true || saving === true || loading === true}
+              disabled={saving === true || loading === true}
               data-test-subj="mlCalendarDescriptionInput"
             />
           </EuiFormRow>
 
           <EuiSpacer size="m" />
-        </Fragment>
+        </>
       )}
 
       <EuiSwitch
@@ -175,7 +206,7 @@ export const CalendarForm = ({
             }
           >
             <EuiComboBox
-              options={jobIds}
+              options={jobIdOptions}
               selectedOptions={selectedJobOptions}
               onChange={onJobSelection}
               isDisabled={saving === true || canCreateCalendar === false || loading === true}
@@ -193,7 +224,7 @@ export const CalendarForm = ({
           >
             <EuiComboBox
               onCreateOption={onCreateGroupOption}
-              options={groupIds}
+              options={groupIdOptions}
               selectedOptions={selectedGroupOptions}
               onChange={onGroupSelection}
               isDisabled={saving === true || canCreateCalendar === false || loading === true}
@@ -215,8 +246,6 @@ export const CalendarForm = ({
         fullWidth
       >
         <EventsTable
-          canCreateCalendar={canCreateCalendar}
-          canDeleteCalendar={canDeleteCalendar}
           eventsList={eventsList}
           onDeleteClick={onEventDelete}
           showImportModal={showImportModal}
@@ -259,31 +288,4 @@ export const CalendarForm = ({
       </EuiFlexGroup>
     </EuiForm>
   );
-};
-
-CalendarForm.propTypes = {
-  calendarId: PropTypes.string.isRequired,
-  canCreateCalendar: PropTypes.bool.isRequired,
-  canDeleteCalendar: PropTypes.bool.isRequired,
-  description: PropTypes.string,
-  groupIds: PropTypes.array.isRequired,
-  isEdit: PropTypes.bool.isRequired,
-  isNewCalendarIdValid: PropTypes.bool.isRequired,
-  jobIds: PropTypes.array.isRequired,
-  onCalendarIdChange: PropTypes.func.isRequired,
-  onCreate: PropTypes.func.isRequired,
-  onCreateGroupOption: PropTypes.func.isRequired,
-  onDescriptionChange: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired,
-  onEventDelete: PropTypes.func.isRequired,
-  onGroupSelection: PropTypes.func.isRequired,
-  showImportModal: PropTypes.func.isRequired,
-  onJobSelection: PropTypes.func.isRequired,
-  saving: PropTypes.bool.isRequired,
-  loading: PropTypes.bool.isRequired,
-  selectedGroupOptions: PropTypes.array.isRequired,
-  selectedJobOptions: PropTypes.array.isRequired,
-  showNewEventModal: PropTypes.func.isRequired,
-  isGlobalCalendar: PropTypes.bool.isRequired,
-  onGlobalCalendarChange: PropTypes.func.isRequired,
 };

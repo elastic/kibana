@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
-import type { Calendar } from '../../../../../../../../../../../common/types/calendars';
+import type { MlCalendar } from '../../../../../../../../../../../common/types/calendars';
 import { useMlApi, useMlKibana } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
@@ -37,11 +37,11 @@ export const CalendarsSelection: FC = () => {
   const mlApi = useMlApi();
 
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
-  const [selectedCalendars, setSelectedCalendars] = useState<Calendar[]>(jobCreator.calendars);
-  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<Calendar>>>(
-    []
-  );
-  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<Calendar>>>([]);
+  const [selectedCalendars, setSelectedCalendars] = useState<MlCalendar[]>(jobCreator.calendars);
+  const [selectedOptions, setSelectedOptions] = useState<
+    Array<EuiComboBoxOptionOption<MlCalendar>>
+  >([]);
+  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<MlCalendar>>>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   async function loadCalendars() {
@@ -65,7 +65,7 @@ export const CalendarsSelection: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCalendars.join()]);
 
-  const comboBoxProps: EuiComboBoxProps<Calendar> = {
+  const comboBoxProps: EuiComboBoxProps<MlCalendar> = {
     async: true,
     options,
     selectedOptions,

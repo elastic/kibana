@@ -40,7 +40,9 @@ export const AnomalyDetectionSettings: FC = () => {
 
   const { displayErrorToast } = useToastNotificationService();
   const redirectToCalendarList = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
+  const redirectToCalendarDstList = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_DST_MANAGE);
   const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_NEW);
+  const redirectToNewCalendarDstPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_DST_NEW);
   const redirectToFilterLists = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_MANAGE);
   const redirectToNewFilterListPage = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_NEW);
 
@@ -219,6 +221,72 @@ export const AnomalyDetectionSettings: FC = () => {
               >
                 <FormattedMessage
                   id="xpack.ml.settings.anomalyDetection.createFilterListsLink"
+                  defaultMessage="Create"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={5}>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.ml.settings.anomalyDetection.calendarsTitle"
+                defaultMessage="Calendars DST"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <EuiTextColor color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.calendarsText"
+                  defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays."
+                />
+              </p>
+            </EuiTextColor>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center">
+            {canGetCalendars && (
+              <EuiFlexItem grow={false} style={{ display: 'block' }}>
+                <EuiText>
+                  <FormattedMessage
+                    id="xpack.ml.settings.anomalyDetection.calendarsSummaryCount"
+                    defaultMessage="You have {calendarsCountBadge} {calendarsCount, plural, one {calendar} other {calendars}}"
+                    values={{
+                      calendarsCountBadge: <EuiBadge>{calendarsCount}</EuiBadge>,
+                      calendarsCount,
+                    }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="mlCalendarsMngButton"
+                flush="left"
+                color="primary"
+                onClick={redirectToCalendarDstList}
+                isDisabled={canGetCalendars === false}
+              >
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.manageCalendarsLink"
+                  defaultMessage="Manage"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="mlCalendarsCreateButton"
+                flush="left"
+                color="primary"
+                onClick={redirectToNewCalendarDstPage}
+                isDisabled={canCreateCalendar === false}
+              >
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.createCalendarLink"
                   defaultMessage="Create"
                 />
               </EuiButtonEmpty>

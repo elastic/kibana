@@ -114,13 +114,16 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.FILTER_LISTS_MANAGE:
       case ML_PAGES.FILTER_LISTS_NEW:
       case ML_PAGES.CALENDARS_MANAGE:
+      case ML_PAGES.CALENDARS_DST_MANAGE:
       case ML_PAGES.CALENDARS_NEW:
+      case ML_PAGES.CALENDARS_DST_NEW:
         path = formatGenericMlUrl('', params.page, params.pageState);
         break;
       case ML_PAGES.FILTER_LISTS_EDIT:
         path = formatEditFilterUrl('', params.pageState);
         break;
       case ML_PAGES.CALENDARS_EDIT:
+      case ML_PAGES.CALENDARS_DST_EDIT:
         path = formatEditCalendarUrl('', params.pageState);
         break;
       case ML_PAGES.NOTIFICATIONS:

@@ -31,7 +31,7 @@ export const calendarListRouteFactory = (
   title: i18n.translate('xpack.ml.settings.calendarList.docTitle', {
     defaultMessage: 'Calendars',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} isDst={false} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
@@ -40,7 +40,24 @@ export const calendarListRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = () => {
+export const calendarDstListRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
+  path: createPath(ML_PAGES.CALENDARS_DST_MANAGE),
+  title: i18n.translate('xpack.ml.settings.calendarList.docTitle', {
+    defaultMessage: 'Calendars',
+  }),
+  render: (props, deps) => <PageWrapper {...props} deps={deps} isDst={true} />,
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB'),
+  ],
+});
+
+const PageWrapper: FC<PageProps & { isDst: boolean }> = ({ isDst }) => {
   const { context } = useRouteResolver('full', ['canGetCalendars'], { getMlNodeCount });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
@@ -52,7 +69,7 @@ const PageWrapper: FC<PageProps> = () => {
 
   return (
     <PageLoader context={context}>
-      <CalendarsList {...{ canCreateCalendar, canDeleteCalendar }} />
+      <CalendarsList {...{ canCreateCalendar, canDeleteCalendar, isDst }} />
     </PageLoader>
   );
 };

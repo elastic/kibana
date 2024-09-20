@@ -20,7 +20,7 @@ import type {
 } from '../../../../common/types/ml_server_info';
 import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import type { RecognizeModuleResult } from '../../../../common/types/modules';
-import type { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
+import type { MlCalendar, MlCalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import type { BucketSpanEstimatorData } from '../../../../common/types/job_service';
 import type {
   Job,
@@ -553,9 +553,9 @@ export function mlApiProvider(httpService: HttpService) {
     /**
      * Gets a list of calendars
      * @param obj
-     * @returns {Promise<Calendar[]>}
+     * @returns {Promise<MlCalendar[]>}
      */
-    calendars(obj?: { calendarId?: CalendarId; calendarIds?: CalendarId[] }) {
+    calendars(obj?: { calendarId?: MlCalendarId; calendarIds?: MlCalendarId[] }) {
       const { calendarId, calendarIds } = obj || {};
       let calendarIdsPathComponent = '';
       if (calendarId) {
@@ -563,14 +563,14 @@ export function mlApiProvider(httpService: HttpService) {
       } else if (calendarIds) {
         calendarIdsPathComponent = `/${calendarIds.join(',')}`;
       }
-      return httpService.http<Calendar[]>({
+      return httpService.http<MlCalendar[]>({
         path: `${ML_INTERNAL_BASE_PATH}/calendars${calendarIdsPathComponent}`,
         method: 'GET',
         version: '1',
       });
     },
 
-    addCalendar(obj: Calendar) {
+    addCalendar(obj: MlCalendar) {
       const body = JSON.stringify(obj);
       return httpService.http<any>({
         path: `${ML_INTERNAL_BASE_PATH}/calendars`,

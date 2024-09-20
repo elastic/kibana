@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { i18n } from '@kbn/i18n';
 
-function getJobIds(mlApi) {
+import { isJobIdValid } from '../../../../../common/util/job_utils';
+import type { MlApi } from '../../../services/ml_api_service';
+
+function getJobIds(mlApi: MlApi) {
   return new Promise((resolve, reject) => {
     mlApi.jobs
-      .jobsSummary()
+      .jobsSummary([])
       .then((resp) => {
         resolve(resp.map((job) => job.id));
       })
@@ -23,13 +25,14 @@ function getJobIds(mlApi) {
             values: { err },
           }
         );
+        // eslint-disable-next-line no-console
         console.log(errorMessage);
         reject(errorMessage);
       });
   });
 }
 
-function getGroupIds(mlApi) {
+function getGroupIds(mlApi: MlApi) {
   return new Promise((resolve, reject) => {
     mlApi.jobs
       .groups()
@@ -44,13 +47,14 @@ function getGroupIds(mlApi) {
             values: { err },
           }
         );
+        // eslint-disable-next-line no-console
         console.log(errorMessage);
         reject(errorMessage);
       });
   });
 }
 
-function getCalendars(mlApi) {
+function getCalendars(mlApi: MlApi) {
   return new Promise((resolve, reject) => {
     mlApi
       .calendars()
@@ -65,13 +69,14 @@ function getCalendars(mlApi) {
             values: { err },
           }
         );
+        // eslint-disable-next-line no-console
         console.log(errorMessage);
         reject(errorMessage);
       });
   });
 }
 
-export function getCalendarSettingsData(mlApi) {
+export function getCalendarSettingsData(mlApi: MlApi) {
   return new Promise(async (resolve, reject) => {
     try {
       const [jobIds, groupIds, calendars] = await Promise.all([
@@ -86,13 +91,14 @@ export function getCalendarSettingsData(mlApi) {
         calendars,
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.log(error);
       reject(error);
     }
   });
 }
 
-export function validateCalendarId(calendarId) {
+export function validateCalendarId(calendarId: string) {
   let valid = true;
 
   if (calendarId === '' || calendarId === undefined) {
