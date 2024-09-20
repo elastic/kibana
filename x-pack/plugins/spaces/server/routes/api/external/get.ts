@@ -19,6 +19,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
     {
       path: '/api/spaces/space/{id}',
       options: {
+        access: 'public',
         description: `Get a space`,
       },
       validate: {

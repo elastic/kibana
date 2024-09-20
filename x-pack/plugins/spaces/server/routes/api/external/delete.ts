@@ -21,6 +21,7 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
     {
       path: '/api/spaces/space/{id}',
       options: {
+        access: 'public',
         description: `Delete a space`,
       },
       validate: {
