@@ -11,22 +11,33 @@ import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
-import type { SummaryColumnFactoryDeps, SummaryColumnProps } from './summary_column';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataGridDensity } from '@kbn/unified-data-table';
+import type { SummaryColumnProps } from './summary_column';
 
 const SummaryColumn = dynamic(() => import('./summary_column'));
 
-export type SummaryColumnGetterDeps = Omit<SummaryColumnFactoryDeps, 'shouldShowFieldHandler'>;
+export interface SummaryColumnGetterParams {
+  dataView: DataView;
+  density: DataGridDensity | undefined;
+  rowHeight: number | undefined;
+}
+export interface SummaryColumnGetterDeps {
+  data: DataPublicPluginStart;
+  params: SummaryColumnGetterParams;
+}
 
 export const getSummaryColumn = ({ data, params }: SummaryColumnGetterDeps) => {
-  const { dataView } = params;
+  const { dataView, density, rowHeight } = params;
   const shouldShowFieldHandler = createGetShouldShowFieldHandler(dataView);
 
   return (props: SummaryColumnProps) => (
     <SummaryColumn
-      data={data}
-      params={params}
-      shouldShowFieldHandler={shouldShowFieldHandler}
       {...props}
+      data={data}
+      density={density}
+      rowHeight={rowHeight}
+      shouldShowFieldHandler={shouldShowFieldHandler}
     />
   );
 };

@@ -38,7 +38,9 @@ const renderSummary = (
         setCellProps={() => {}}
         closePopover={() => {}}
         data={dataPluginMock.createStartContract()}
-        params={{ density: DataGridDensity.COMPACT, rowHeight: ROWS_HEIGHT_OPTIONS.single }}
+        density={DataGridDensity.COMPACT}
+        rowHeight={ROWS_HEIGHT_OPTIONS.single}
+        shouldShowFieldHandler={() => true}
         {...opts}
       />
     </KibanaContextProvider>
@@ -107,7 +109,8 @@ describe('SummaryColumn', () => {
     it('should render all the available resources in row autofit/custom mode', () => {
       const record = getBaseRecord();
       renderSummary(record, {
-        params: { density: DataGridDensity.COMPACT, rowHeight: ROWS_HEIGHT_OPTIONS.auto },
+        density: DataGridDensity.COMPACT,
+        rowHeight: ROWS_HEIGHT_OPTIONS.auto,
       });
       expect(
         screen.queryByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`)

@@ -21,7 +21,6 @@ import {
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataGridCellServicesProvider } from '../../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
 import { Resource, StaticResource } from './resource';
 import { Content } from './content';
@@ -30,26 +29,23 @@ import { createResourceFields, formatJsonDocumentForContent } from './utils';
 
 export interface SummaryColumnFactoryDeps {
   data: DataPublicPluginStart;
-  params: SummaryColumnsGridParams;
+  density: DataGridDensity | undefined;
+  rowHeight: number | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }
 
-export type SummaryColumnProps = DataGridCellValueElementProps;
+export interface SummaryColumnProps
+  extends DataGridCellValueElementProps,
+    SummaryColumnFactoryDeps {}
 
-export interface SummaryColumnsGridParams {
-  dataView: DataView;
-  density: DataGridDensity | undefined;
-  rowHeight: number | undefined;
-}
-
-const SummaryColumn = (props: SummaryColumnProps & SummaryColumnFactoryDeps) => {
-  const { isDetails, params } = props;
+const SummaryColumn = (props: SummaryColumnProps) => {
+  const { isDetails } = props;
 
   if (isDetails) {
     return <SummaryCellPopover {...props} />;
   }
 
-  return <SummaryCell {...props} density={params.density} rowHeight={params.rowHeight} />;
+  return <SummaryCell {...props} />;
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -59,7 +55,7 @@ const SummaryCell = ({
   density: maybeNullishDensity,
   rowHeight: maybeNullishRowHeight,
   ...props
-}: SummaryColumnProps & SummaryColumnFactoryDeps & Omit<SummaryColumnsGridParams, 'dataView'>) => {
+}: SummaryColumnProps) => {
   const { data, dataView, row } = props;
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
@@ -95,7 +91,7 @@ const SummaryCell = ({
   );
 };
 
-const SummaryCellPopover = (props: SummaryColumnProps & SummaryColumnFactoryDeps) => {
+const SummaryCellPopover = (props: SummaryColumnProps) => {
   const { row, data, dataView, fieldFormats } = props;
 
   const resourceFields = createResourceFields(row);
