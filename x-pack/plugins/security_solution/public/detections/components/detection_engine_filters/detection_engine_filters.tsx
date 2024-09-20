@@ -24,10 +24,13 @@ export type DetectionEngineFiltersProps = Pick<
   AlertFilterControlsProps,
   'filters' | 'onFiltersChange' | 'query' | 'timeRange' | 'onInit'
 > & {
-  indexPattern?: DataViewSpec;
+  dataViewSpec?: DataViewSpec;
 };
 
-export const DetectionEngineFilters = ({ indexPattern, ...props }: DetectionEngineFiltersProps) => {
+export const DetectionEngineFilters = ({
+  dataViewSpec: indexPattern,
+  ...props
+}: DetectionEngineFiltersProps) => {
   const { http, notifications, dataViews } = useKibana().services;
   const spaceId = useSpaceId();
   const history = useHistory();

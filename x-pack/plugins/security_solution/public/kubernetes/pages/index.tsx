@@ -46,7 +46,7 @@ export const KubernetesContainer = React.memo(() => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern: sourcererDataView,
+        dataViewSpec: sourcererDataView,
         queries: [query],
         filters,
       }),

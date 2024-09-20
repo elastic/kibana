@@ -113,7 +113,7 @@ const OverviewComponent = () => {
                       deleteQuery={deleteQuery}
                       filters={filters}
                       from={from}
-                      indexPattern={sourcererDataView}
+                      dataViewSpec={sourcererDataView}
                       query={query}
                       queryType="overview"
                       setQuery={setQuery}
@@ -126,7 +126,7 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       indexNames={selectedPatterns}
-                      indexPattern={sourcererDataView}
+                      dataViewSpec={sourcererDataView}
                       query={query}
                       setQuery={setQuery}
                       to={to}

@@ -41,6 +41,6 @@ export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
     indexNames: string[];
     hostDetailsFilter: Filter[];
     filterQuery?: string;
-    indexPattern?: DataViewSpec;
+    dataViewSpec?: DataViewSpec;
     type: hostsModel.HostsType;
   };

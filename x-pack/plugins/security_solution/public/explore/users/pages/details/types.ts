@@ -48,6 +48,6 @@ export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
     indexNames: string[];
     userDetailFilter: Filter[];
     filterQuery?: string;
-    indexPattern?: DataViewSpec;
+    dataViewSpec?: DataViewSpec;
     type: usersModel.UsersType;
   };

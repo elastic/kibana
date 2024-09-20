@@ -103,7 +103,7 @@ const UsersComponent = () => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern: sourcererDataView,
+        dataViewSpec: sourcererDataView,
         queries: [query],
         filters: globalFilters,
       }),
@@ -113,7 +113,7 @@ const UsersComponent = () => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern: sourcererDataView,
+        dataViewSpec: sourcererDataView,
         queries: [query],
         filters: tabsFilters,
       }),

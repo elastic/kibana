@@ -44,7 +44,7 @@ export const TopValuesPopover = React.memo(() => {
         showLegend
         scopeId={data.scopeId}
         toggleTopN={onClose}
-        indexPattern={sourcererDataView}
+        dataViewSpec={sourcererDataView}
         browserFields={browserFields}
       />
     </EuiWrappingPopover>

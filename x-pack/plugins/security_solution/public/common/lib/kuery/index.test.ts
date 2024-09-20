@@ -61,7 +61,7 @@ describe('convertToBuildEsQuery', () => {
     const [converted, _] = convertToBuildEsQuery({
       config,
       queries: queryWithNestedFields,
-      indexPattern: mockDataViewSpec,
+      dataViewSpec: mockDataViewSpec,
       filters,
     });
 
@@ -176,7 +176,7 @@ describe('convertToBuildEsQuery', () => {
     const [converted, _] = convertToBuildEsQuery({
       config: configWithOverride,
       queries: queryWithNestedFields,
-      indexPattern: mockDataViewSpec,
+      dataViewSpec: mockDataViewSpec,
       filters,
     });
 

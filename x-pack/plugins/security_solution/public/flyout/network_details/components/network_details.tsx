@@ -79,7 +79,7 @@ export const NetworkDetails = ({
   const { indicesExist, sourcererDataView, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
-    indexPattern: sourcererDataView,
+    dataViewSpec: sourcererDataView,
     queries: [query],
     filters,
   });
