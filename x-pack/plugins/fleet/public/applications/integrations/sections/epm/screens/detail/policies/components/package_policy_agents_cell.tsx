@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 
-import { EuiButton } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiProgress,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { LinkedAgentCount, AddAgentHelpPopover } from '../../../../../../components';
 import type { AgentPolicy } from '../../../../../../types';
@@ -85,13 +93,7 @@ export const PackagePolicyAgentsCell = ({
   const canAddFleetServers = useAuthz().fleet.addFleetServers;
 
   if (canUseMultipleAgentPolicies && agentCount > 0 && agentPolicies.length > 1) {
-    return (
-      <LinkedAgentCount
-        count={agentCount}
-        agentPolicyId={agentPolicies[0].id} // fix me
-        className="eui-textTruncate"
-      />
-    ); // Build new component with agents count break down
+    return <MultipleAgentsCountBreakDown agentCount={agentCount} agentPolicies={agentPolicies} />;
   }
 
   if (!canUseMultipleAgentPolicies || (agentCount > 0 && agentPolicies.length === 1)) {
@@ -118,5 +120,57 @@ export const PackagePolicyAgentsCell = ({
       canAddAgents={canAddAgents && canAddFleetServers}
       withPopover={hasHelpPopover}
     />
+  );
+};
+
+export const MultipleAgentsCountBreakDown = ({
+  agentPolicies,
+  agentCount,
+}: {
+  agentPolicies: AgentPolicy[];
+  agentCount: number;
+}) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const closePopover = () => setIsPopoverOpen(false);
+  const maxValue = Math.max(...agentPolicies.map((policy) => policy?.agents ?? 0));
+
+  return (
+    <>
+      <EuiBadge
+        color="hollow"
+        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+        onClickAriaLabel="Open agents count popover"
+        data-test-subj="multipleAgentsCountBreakdownBadge"
+      >
+        {agentCount}
+      </EuiBadge>
+      <EuiPopover
+        data-test-subj="agentCountsPopover"
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        anchorPosition="downCenter"
+      >
+        <EuiPopoverTitle>
+          {i18n.translate('xpack.fleet.agentsCountsBreakdown.popover.title', {
+            defaultMessage: 'Agents count by policy',
+          })}
+        </EuiPopoverTitle>
+        <div style={{ maxWidth: 250 }}>
+          {agentPolicies.map((agentPolicy) => (
+            <Fragment key={agentPolicy.id}>
+              <EuiProgress
+                max={maxValue}
+                valueText={maxValue}
+                color="primary"
+                size="m"
+                value={agentPolicy.agents ?? 0}
+                label={agentPolicy.name}
+              />
+              <EuiSpacer size="s" />
+            </Fragment>
+          ))}
+        </div>
+      </EuiPopover>
+    </>
   );
 };
