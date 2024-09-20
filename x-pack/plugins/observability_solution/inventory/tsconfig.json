@@ -19,7 +19,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
-    "@kbn/config-schema",
     "@kbn/observability-shared-plugin",
     "@kbn/server-route-repository",
     "@kbn/shared-ux-link-redirect-app",
