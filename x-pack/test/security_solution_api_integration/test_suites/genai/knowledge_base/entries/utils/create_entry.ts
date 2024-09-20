@@ -13,7 +13,7 @@ import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
-import type User from './auth/types';
+import type { User } from './auth/types';
 
 import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
 

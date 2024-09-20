@@ -13,7 +13,7 @@ import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   FindKnowledgeBaseEntriesRequestQuery,
 } from '@kbn/elastic-assistant-common';
-import type User from './auth/types';
+import type { User } from './auth/types';
 
 import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
 
