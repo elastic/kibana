@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getAstAndSyntaxErrors, Walker, walk, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { parse, Walker, walk, BasicPrettyPrinter } from '@kbn/esql-ast';
 
 import type {
   ESQLSource,
@@ -20,7 +20,7 @@ const DEFAULT_ESQL_LIMIT = 1000;
 
 // retrieves the index pattern from the aggregate query for ES|QL using ast parsing
 export function getIndexPatternFromESQLQuery(esql?: string) {
-  const { ast } = getAstAndSyntaxErrors(esql);
+  const { ast } = parse(esql);
   const sourceCommand = ast.find(({ name }) => ['from', 'metrics'].includes(name));
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
   const indices = args.filter((arg) => arg.sourceType === 'index');
@@ -31,7 +31,7 @@ export function getIndexPatternFromESQLQuery(esql?: string) {
 // The metrics command too but only if it aggregates
 export function hasTransformationalCommand(esql?: string) {
   const transformationalCommands = ['stats', 'keep'];
-  const { ast } = getAstAndSyntaxErrors(esql);
+  const { ast } = parse(esql);
   const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
     ast.find(({ name }) => name === command)
   );
@@ -48,7 +48,7 @@ export function hasTransformationalCommand(esql?: string) {
 }
 
 export function getLimitFromESQLQuery(esql: string): number {
-  const { ast } = getAstAndSyntaxErrors(esql);
+  const { ast } = parse(esql);
   const limitCommands = ast.filter(({ name }) => name === 'limit');
   if (!limitCommands || !limitCommands.length) {
     return DEFAULT_ESQL_LIMIT;
@@ -82,7 +82,7 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
  * @returns string
  */
 export const getTimeFieldFromESQLQuery = (esql: string) => {
-  const { ast } = getAstAndSyntaxErrors(esql);
+  const { ast } = parse(esql);
   const functions: ESQLFunction[] = [];
 
   walk(ast, {
@@ -115,19 +115,19 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
 };
 
 export const isQueryWrappedByPipes = (query: string): boolean => {
-  const { ast } = getAstAndSyntaxErrors(query);
+  const { ast } = parse(query);
   const numberOfCommands = ast.length;
   const pipesWithNewLine = query.split('\n  |');
   return numberOfCommands === pipesWithNewLine?.length;
 };
 
 export const prettifyQuery = (query: string, isWrapped: boolean): string => {
-  const { ast } = getAstAndSyntaxErrors(query);
-  return BasicPrettyPrinter.print(ast, { multiline: !isWrapped });
+  const { root } = parse(query);
+  return BasicPrettyPrinter.print(root, { multiline: !isWrapped });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
-  const { ast } = getAstAndSyntaxErrors(esql);
+  const { ast } = parse(esql);
   const options: ESQLCommandOption[] = [];
 
   walk(ast, {
