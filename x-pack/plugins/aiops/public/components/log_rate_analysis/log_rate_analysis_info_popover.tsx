@@ -24,6 +24,9 @@ export const LogRateAnalysisInfoPopoverButton: FC<{
       iconType="help"
       iconSide="right"
       color="success"
+      // Defining both iconOnClick and onClick so the mouse cursor changes for cases.
+      iconOnClick={onClick}
+      iconOnClickAriaLabel='Click to open "Log rate analysis info" popover'
       onClick={onClick}
       onClickAriaLabel='Click to open "Log rate analysis info" popover'
       data-test-subj="aiopsLogRateAnalysisInfoPopoverButton"
