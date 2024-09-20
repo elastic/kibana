@@ -315,7 +315,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               setQuery={setQuery}
               filterQuery={stringifiedAdditionalFilters}
               hostDetailsPagePath={hostDetailsPagePath}
-              indexPattern={sourcererDataView}
+              dataViewSpec={sourcererDataView}
             />
           </SecuritySolutionPageWrapper>
         </>

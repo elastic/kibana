@@ -26,7 +26,7 @@ import { SecurityPageName } from '../../../../common/constants';
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters: Filter[];
   indexNames: string[];
-  indexPattern?: DataViewSpec;
+  dataViewSpec?: DataViewSpec;
   query: Query;
 }
 
@@ -34,7 +34,7 @@ const EventCountsComponent: React.FC<Props> = ({
   filters,
   from,
   indexNames,
-  indexPattern,
+  dataViewSpec: indexPattern,
   query,
   setQuery,
   to,
@@ -45,7 +45,7 @@ const EventCountsComponent: React.FC<Props> = ({
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern,
+        dataViewSpec: indexPattern,
         queries: [query],
         filters: [...filters, ...fieldNameExistsFilter(SecurityPageName.hosts)],
       }),
@@ -56,7 +56,7 @@ const EventCountsComponent: React.FC<Props> = ({
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern,
+        dataViewSpec: indexPattern,
         queries: [query],
         filters: [...filters, ...sourceOrDestinationIpExistsFilter],
       }),

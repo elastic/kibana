@@ -72,7 +72,7 @@ describe('DetectionEngineFilters', () => {
     },
     timeRange: { from: 'now-15m', to: 'now' },
     onInit: jest.fn(),
-    indexPattern: {
+    dataViewSpec: {
       title: 'mock-title',
       fields: {},
     },

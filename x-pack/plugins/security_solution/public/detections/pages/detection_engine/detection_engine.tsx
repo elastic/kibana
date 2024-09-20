@@ -312,7 +312,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
           mode: 'absolute',
         }}
         onInit={setDetectionPageFilterHandler}
-        indexPattern={sourcererDataView}
+        dataViewSpec={sourcererDataView}
       />
     ),
     [from, sourcererDataView, onFilterControlsChange, query, to, topLevelFilters]

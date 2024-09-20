@@ -47,7 +47,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   filterQuery?: string;
   filters: Filter[];
   headerChildren?: React.ReactNode;
-  indexPattern?: DataViewSpec;
+  dataViewSpec?: DataViewSpec;
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
@@ -78,7 +78,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   filters,
   from,
   headerChildren,
-  indexPattern,
+  dataViewSpec: indexPattern,
   onlyField,
   paddingSize,
   query,
@@ -133,7 +133,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     if (filterQueryFromProps == null) {
       return convertToBuildEsQuery({
         config: getEsQueryConfig(kibana.services.uiSettings),
-        indexPattern,
+        dataViewSpec: indexPattern,
         queries: [query],
         filters,
       });

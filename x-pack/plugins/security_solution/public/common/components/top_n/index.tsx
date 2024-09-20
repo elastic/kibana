@@ -77,7 +77,7 @@ const connector = connect(makeMapStateToProps);
 export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
-  indexPattern?: DataViewSpec;
+  dataViewSpec?: DataViewSpec;
   scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -97,7 +97,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   browserFields,
   dataProviders,
   field,
-  indexPattern,
+  dataViewSpec: indexPattern,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,

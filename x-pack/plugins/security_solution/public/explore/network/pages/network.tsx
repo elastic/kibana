@@ -116,14 +116,14 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config: getEsQueryConfig(kibana.services.uiSettings),
-      indexPattern: sourcererDataView,
+      dataViewSpec: sourcererDataView,
       queries: [query],
       filters: globalFilters,
     });
 
     const [tabsFilterQuery] = convertToBuildEsQuery({
       config: getEsQueryConfig(kibana.services.uiSettings),
-      indexPattern: sourcererDataView,
+      dataViewSpec: sourcererDataView,
       queries: [query],
       filters: tabsFilters,
     });
@@ -186,7 +186,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     filterQuery={tabsFilterQuery}
                     from={from}
                     isInitializing={isInitializing}
-                    indexPattern={sourcererDataView}
+                    dataViewSpec={sourcererDataView}
                     indexNames={selectedPatterns}
                     setQuery={setQuery}
                     type={networkModel.NetworkType.page}

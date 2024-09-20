@@ -206,12 +206,12 @@ export const dataViewSpecToViewBase = (dataViewSpec?: DataViewSpec): DataViewBas
 
 export const convertToBuildEsQuery = ({
   config,
-  indexPattern,
+  dataViewSpec,
   queries,
   filters,
 }: {
   config: EsQueryConfig;
-  indexPattern: DataViewSpec | undefined;
+  dataViewSpec: DataViewSpec | undefined;
   queries: Query[];
   filters: Filter[];
 }): [string, undefined] | [undefined, Error] => {
@@ -219,7 +219,7 @@ export const convertToBuildEsQuery = ({
     return [
       JSON.stringify(
         buildEsQuery(
-          dataViewSpecToViewBase(indexPattern),
+          dataViewSpecToViewBase(dataViewSpec),
           queries,
           filters.filter((f) => f.meta.disabled === false),
           {
@@ -258,7 +258,7 @@ export const combineQueries = ({
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
       queries: [kuery],
-      indexPattern,
+      dataViewSpec: indexPattern,
       filters,
     });
 
@@ -286,7 +286,7 @@ export const combineQueries = ({
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config,
     queries: [kuery],
-    indexPattern,
+    dataViewSpec: indexPattern,
     filters,
   });
 

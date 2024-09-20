@@ -109,7 +109,7 @@ const HostsComponent = () => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern: sourcererDataView,
+        dataViewSpec: sourcererDataView,
         queries: [query],
         filters: globalFilters,
       }),
@@ -119,7 +119,7 @@ const HostsComponent = () => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern: sourcererDataView,
+        dataViewSpec: sourcererDataView,
         queries: [query],
         filters: tabsFilters,
       }),
