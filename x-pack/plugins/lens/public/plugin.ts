@@ -144,7 +144,7 @@ import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the
 import { ChartType } from './lens_suggestions_api';
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
 import { LensRenderer } from './react_embeddable/renderer/lens_renderer_component';
-import { deserializeState } from './react_embeddable/lens_embeddable';
+import { deserializeState } from './react_embeddable/helper';
 
 export type { SaveProps } from './app_plugin';
 

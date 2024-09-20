@@ -9,7 +9,22 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { isOfQueryType } from '@kbn/es-query';
-import { LensRuntimeState } from './types';
+import { LensRuntimeState, LensSerializedState } from './types';
+import type { LensAttributesService } from '../lens_attribute_service';
+
+// Shared logic to ensure the attributes are correctly loaded
+export async function deserializeState(
+  attributeService: LensAttributesService,
+  rawState: LensSerializedState
+) {
+  if (rawState.savedObjectId) {
+    const { attributes, managed, sharingSavedObjectProps } = await attributeService.loadFromLibrary(
+      rawState.savedObjectId
+    );
+    return { ...rawState, attributes, managed, sharingSavedObjectProps };
+  }
+  return ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState;
+}
 
 export function emptySerializer() {
   return {};

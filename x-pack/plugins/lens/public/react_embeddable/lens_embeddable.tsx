@@ -16,10 +16,9 @@ import {
   LensSerializedState,
 } from './types';
 
-import type { LensAttributesService } from '../lens_attribute_service';
 import { ExpressionWrapper } from './expression_wrapper';
 import { loadEmbeddableData, hasExpressionParamsToRender } from './data_loader';
-import { isTextBasedLanguage } from './helper';
+import { isTextBasedLanguage, deserializeState } from './helper';
 import { UserMessages } from './user_messages/container';
 import { useMessages } from './user_messages/use_messages';
 import { initializeEditApi } from './initializers/inizialize_edit';
@@ -34,20 +33,6 @@ import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { apiHasLensComponentCallbacks } from './renderer/type_guards';
-
-// Shared logic to ensure the attributes are correctly loaded
-export async function deserializeState(
-  attributeService: LensAttributesService,
-  rawState: LensSerializedState
-) {
-  if (rawState.savedObjectId) {
-    const { attributes, managed, sharingSavedObjectProps } = await attributeService.loadFromLibrary(
-      rawState.savedObjectId
-    );
-    return { ...rawState, attributes, managed, sharingSavedObjectProps };
-  }
-  return ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState;
-}
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
