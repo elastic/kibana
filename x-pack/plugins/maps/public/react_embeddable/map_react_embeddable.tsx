@@ -236,7 +236,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
             <MapContainer
               onSingleValueTrigger={actionHandlers.onSingleValueTrigger}
               addFilters={
-                (apiHidesFilterActions(parent) && parent.hideFilterActions) ||
+                (apiHidesFilterActions(parentApi) && parentApi.hideFilterActions) ||
                 areTriggersDisabled(api)
                   ? null
                   : actionHandlers.addFilters
@@ -244,14 +244,14 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
               getFilterActions={actionHandlers.getFilterActions}
               getActionContext={actionHandlers.getActionContext}
               renderTooltipContent={
-                isMapRendererApi(parent) && parent.getTooltipRenderer
-                  ? parent.getTooltipRenderer()
+                isMapRendererApi(parentApi) && parentApi.getTooltipRenderer
+                  ? parentApi.getTooltipRenderer()
                   : undefined
               }
               title={panelTitle ?? defaultPanelTitle}
               description={panelDescription ?? defaultPanelDescription}
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
-              isSharable={apiIsOfType(parent, 'dashboard') || apiIsOfType(parent, 'canvas')}
+              isSharable={apiIsOfType(parentApi, 'dashboard') || apiIsOfType(parentApi, 'canvas')}
             />
           </Provider>
         );
