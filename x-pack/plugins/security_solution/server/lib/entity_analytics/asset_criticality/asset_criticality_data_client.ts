@@ -22,7 +22,6 @@ import type { CriticalityValues } from './constants';
 import { CRITICALITY_VALUES, assetCriticalityFieldMap } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
-import { addNotDeletedClause } from './helpers';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -96,10 +95,17 @@ export class AssetCriticalityDataClient {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
       ignore_unavailable: true,
-      query: addNotDeletedClause(query),
+      query,
       size: Math.min(size, MAX_CRITICALITY_RESPONSE_SIZE),
       from,
       sort,
+      post_filter: {
+        bool: {
+          must_not: {
+            term: { criticality_level: CRITICALITY_VALUES.DELETED },
+          },
+        },
+      },
     });
     return response;
   }
