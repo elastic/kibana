@@ -14,9 +14,6 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
   const retry = getService('retry');
 
   return {
-    async expectToBeIndexDetailPage() {
-      expect(await browser.getCurrentUrl()).contain('/index_details');
-    },
     async expectIndexDetailPageHeader() {
       await testSubjects.existOrFail('searchIndexDetailsHeader', { timeout: 2000 });
     },
@@ -110,6 +107,19 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.click('reloadButton', 2000);
       });
+    },
+    async expectWithDataTabsExists() {
+      await testSubjects.existOrFail('mappingsTab', { timeout: 2000 });
+      await testSubjects.existOrFail('dataTab', { timeout: 2000 });
+    },
+    async expectShouldDefaultToDataTab() {
+      expect(await browser.getCurrentUrl()).contain('/data');
+    },
+    async withDataChangeTabs(tab: 'dataTab' | 'mappingsTab') {
+      await testSubjects.click(tab);
+    },
+    async expectUrlShouldChangeTo(tab: 'data' | 'mappings') {
+      expect(await browser.getCurrentUrl()).contain(`/${tab}`);
     },
   };
 }
