@@ -246,6 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
             max_attempts: 2,
             updated_at: decryptedCreatedMonitor.rawBody.updated_at,
             created_at: decryptedCreatedMonitor.rawBody.created_at,
+            labels: {},
           });
         }
       } finally {
@@ -435,6 +436,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv6: true,
             ipv4: true,
             max_attempts: 2,
+            labels: {},
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
           });
@@ -557,6 +559,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv4: true,
             params: '',
             max_attempts: 2,
+            labels: {},
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
           });
@@ -678,6 +681,7 @@ export default function ({ getService }: FtrProviderContext) {
             max_attempts: 2,
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
+            labels: {},
           });
         }
       } finally {

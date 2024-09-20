@@ -202,6 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
             revision: 1,
             locations: [LOCAL_LOCATION],
             name: 'Test HTTP Monitor 044',
+            labels: {},
           })
         );
       });
@@ -225,6 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
               hash: '',
               journey_id: '',
               max_attempts: 2,
+              labels: {},
             },
             ['config_id', 'id', 'form_monitor_type']
           )

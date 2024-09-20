@@ -32,7 +32,7 @@ export const renderApp = (
   executionContext: ExecutionContextStart,
   cloud?: CloudSetup
 ): UnmountCallback => {
-  const { navigateToUrl, getUrlForApp } = application;
+  const { navigateToUrl, getUrlForApp, capabilities } = application;
   const { overlays, http } = startServices;
 
   render(
@@ -55,6 +55,7 @@ export const renderApp = (
               overlays,
               http,
               history,
+              capabilities,
             }}
           >
             <App history={history} />
