@@ -1996,11 +1996,8 @@
     "useUnknownInCatchVariables": false,
     // enabled to point out not supported features when emitting in an isolated module environment
     "isolatedModules": true,
-    // TODO(jbudz): should be uncommented when upgrading to TS@4.8
-    //
     // ensures every non-declaration file is treated as a module
-    // "moduleDetection": "force",
-    //
+    "moduleDetection": "force",
     // disabled for better IDE support, enabled when running the type_check script
     "composite": false,
     // enabled for improved performance
