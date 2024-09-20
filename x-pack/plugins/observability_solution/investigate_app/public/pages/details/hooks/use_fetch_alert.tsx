@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { BASE_RAC_ALERTS_API_PATH, EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface AlertParams {
   id?: string;
