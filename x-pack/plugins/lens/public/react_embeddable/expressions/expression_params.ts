@@ -210,9 +210,9 @@ export async function getExpressionRendererParams(
       getCompatibleCellValueActions: buildGetCompatibleCellValueActions(api, services),
       variables: getVariables(api, state),
       /** TODO: fix these */
-      style: undefined,
-      className: undefined,
-      noPadding: false,
+      style: state.style,
+      className: state.className,
+      noPadding: state.noPadding,
     };
     return {
       indexPatterns,

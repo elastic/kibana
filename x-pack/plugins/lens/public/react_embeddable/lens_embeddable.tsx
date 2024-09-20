@@ -16,46 +16,65 @@ import {
   LensSerializedState,
 } from './types';
 
-import { initializeEditApi } from './initializers/inizialize_edit';
+import type { LensAttributesService } from '../lens_attribute_service';
 import { ExpressionWrapper } from './expression_wrapper';
 import { loadEmbeddableData, hasExpressionParamsToRender } from './data_loader';
+import { isTextBasedLanguage } from './helper';
+import { UserMessages } from './user_messages/container';
+import { useMessages } from './user_messages/use_messages';
+import { initializeEditApi } from './initializers/inizialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
 import { initializeLibraryServices } from './initializers/initialize_library_services';
 import { initializeObservables } from './initializers/initialize_observables';
 import { initializePanelSettings } from './initializers/initialize_panel_settings';
 import { initializeSearchContext } from './initializers/initialize_search_context';
-import { isTextBasedLanguage } from './helper';
 import { initializeData } from './initializers/initialize_data';
-import { UserMessages } from './user_messages/container';
-import { useMessages } from './user_messages/use_messages';
 import { initializeVisualizationContext } from './initializers/initialize_visualization_context';
 import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
+import { apiHasLensComponentCallbacks } from './renderer/type_guards';
+
+// Shared logic to ensure the attributes are correctly loaded
+export async function deserializeState(
+  attributeService: LensAttributesService,
+  rawState: LensSerializedState
+) {
+  if (rawState.savedObjectId) {
+    const { attributes, managed, sharingSavedObjectProps } = await attributeService.loadFromLibrary(
+      rawState.savedObjectId
+    );
+    return { ...rawState, attributes, managed, sharingSavedObjectProps };
+  }
+  return ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState;
+}
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
 ): ReactEmbeddableFactory<LensSerializedState, LensRuntimeState, LensApi> => {
-  // Shared logic to ensure the attributes are correctly loaded
-  async function ensureAttributesInState(rawState: LensSerializedState) {
-    if (rawState.savedObjectId) {
-      const { attributes, managed, sharingSavedObjectProps } =
-        await services.attributeService.loadFromLibrary(rawState.savedObjectId);
-      return { ...rawState, attributes, managed, sharingSavedObjectProps };
-    }
-    return ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState;
-  }
-
   return {
     type: DOC_TYPE,
     /**
      * This is called before the build and will make sure that the
      * final state will contain the attributes object
      */
-    deserializeState: async ({ rawState }) => ensureAttributesInState(rawState),
-    buildEmbeddable: async (rawState, buildApi, uuid, parentApi) => {
-      // When a panel gets added as by ref from Library, it won't pass thru the deserializeState
-      const state = 'attributes' in rawState ? rawState : await ensureAttributesInState(rawState);
+    deserializeState: async ({ rawState }) => deserializeState(services.attributeService, rawState),
+    /**
+     * This is called after the deserialize, so some assumptions can be made about its arguments:
+     * @param state     the Lens "runtime" state, which means that 'attributes' is always present.
+     *                  The difference for a by-value and a by-ref can be determined by the presence of 'savedObjectId' in the state
+     * @param buildApi  a utility function to build the Lens API together to instrument the embeddable container on how to detect
+     *                  significative changes in the state (i.e. worth a save or not)
+     * @param uuid      a unique identifier for the embeddable panel
+     * @param parentApi a set of props passed down from the embeddable container. Note: no assumptions can be made about its content
+     *                  so the usage of type-guards is recommended before extracting data from it.
+     *                  Due to the new embeddable being rendered by a <ReactEmbeddableRenderer /> wrapper, this is the only way
+     *                  to pass data/props from a container.
+     *                  Typical use cases is the forwarding of the unifiedSearch context to the embeddable, or the passing props
+     *                  from the Lens component container to the Lens embeddable.
+     * @returns an object with the Lens API and the React component to render in the Embeddable
+     */
+    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       /**
        * Observables declared here are the bridge between the outer world
        * and the embeddable. They are updated within a subscribe callback
@@ -81,7 +100,7 @@ export const createLensEmbeddableFactory = (
        * If there's something that should be immediately computed use the "state" deserialized variable.
        */
       const stateConfig = initializeStateManagement(state);
-      const panelConfig = initializePanelSettings(state);
+      const panelConfig = initializePanelSettings(state, parentApi);
       const inspectorConfig = initializeInspector(services);
       const editConfig = initializeEditApi(
         uuid,
@@ -140,6 +159,7 @@ export const createLensEmbeddableFactory = (
           ...dataConfig.api,
           ...actionsConfig.api,
           ...integrationsConfig.api,
+          ...stateConfig.api,
         },
         {
           ...stateConfig.comparators,
@@ -166,6 +186,11 @@ export const createLensEmbeddableFactory = (
         visualizationContextHelper,
         updateRenderCount
       );
+
+      // the component is ready to load
+      if (apiHasLensComponentCallbacks(parentApi)) {
+        parentApi.onLoad?.(true);
+      }
 
       return {
         api,

@@ -8,7 +8,7 @@
 import { LensPlugin } from './plugin';
 
 export { isLensApi } from './react_embeddable/type_guards';
-export { type EmbeddableComponent } from './react_embeddable/lens_renderer_component';
+export { type EmbeddableComponent } from './react_embeddable/renderer/lens_renderer_component';
 export type {
   LensApi,
   LensSerializedState,

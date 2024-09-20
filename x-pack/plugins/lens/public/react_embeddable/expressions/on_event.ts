@@ -14,13 +14,19 @@ import {
   isLensTableRowContextMenuClickEvent,
 } from '../../types';
 import { inferTimeField } from '../../utils';
-import { GetStateType, LensApi, LensCallbacks, LensEmbeddableStartServices } from '../types';
+import type {
+  GetStateType,
+  LensApi,
+  LensEmbeddableStartServices,
+  LensPublicCallbacks,
+} from '../types';
 import { isTextBasedLanguage } from '../helper';
 
 export const prepareEventHandler =
   (
     api: LensApi,
     getState: GetStateType,
+    callbacks: LensPublicCallbacks,
     { data, uiActions }: LensEmbeddableStartServices,
     disableTriggers: boolean | undefined
   ) =>
@@ -30,17 +36,17 @@ export const prepareEventHandler =
     }
 
     let eventHandler:
-      | LensCallbacks['onBrushEnd']
-      | LensCallbacks['onFilter']
-      | LensCallbacks['onTableRowClick'];
+      | LensPublicCallbacks['onBrushEnd']
+      | LensPublicCallbacks['onFilter']
+      | LensPublicCallbacks['onTableRowClick'];
     let shouldExecuteDefaultTriggers = true;
 
     if (isLensBrushEvent(event)) {
-      eventHandler = api.onBrushEnd;
+      eventHandler = callbacks.onBrushEnd;
     } else if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
-      eventHandler = api.onFilter;
+      eventHandler = callbacks.onFilter;
     } else if (isLensTableRowContextMenuClickEvent(event)) {
-      eventHandler = api.onTableRowClick;
+      eventHandler = callbacks.onTableRowClick;
     }
     const currentState = getState();
     const esqlQuery = isTextBasedLanguage(currentState)

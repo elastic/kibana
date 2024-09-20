@@ -37,7 +37,7 @@ import {
   EDITOR_UNKNOWN_VIS_TYPE,
 } from '../user_messages_ids';
 import { NonNullable } from '../react_embeddable/helper';
-import { LensCallbacks } from '../react_embeddable/types';
+import type { LensPublicCallbacks } from '../react_embeddable/types';
 
 export interface UserMessageGetterProps {
   visualizationType: string | null | undefined;
@@ -208,7 +208,7 @@ function getMissingIndexPatternsErrors(
 
 export const handleMessageOverwriteFromConsumer = (
   messages: UserMessage[],
-  onBeforeBadgesRender?: LensCallbacks['onBeforeBadgesRender']
+  onBeforeBadgesRender?: LensPublicCallbacks['onBeforeBadgesRender']
 ) => {
   if (onBeforeBadgesRender) {
     // we need something else to better identify those errors

@@ -59,6 +59,7 @@ const LensApiMock: LensApi = {
   saveToLibrary: jest.fn(async () => 'saved-id'),
   getByReferenceState: jest.fn(),
   getByValueState: jest.fn(),
+  updateState: jest.fn(),
 };
 
 const LensSerializedStateMock: LensSerializedState = {

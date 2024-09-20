@@ -235,7 +235,7 @@ describe('LensEditConfigurationFlyout', () => {
     renderConfigFlyout(
       {
         closeFlyout: jest.fn(),
-        onApplyCb: onApplyCbSpy,
+        onApply: onApplyCbSpy,
       },
       { esql: 'from index1 | limit 10' }
     );

@@ -143,7 +143,8 @@ import {
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { ChartType } from './lens_suggestions_api';
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
-import { LensRenderer } from './react_embeddable/lens_renderer_component';
+import { LensRenderer } from './react_embeddable/renderer/lens_renderer_component';
+import { deserializeState } from './react_embeddable/lens_embeddable';
 
 export type { SaveProps } from './app_plugin';
 
@@ -410,10 +411,15 @@ export class LensPlugin {
 
       // Let Dashboard know about the Lens panel type
       embeddable.registerReactEmbeddableSavedObject<LensSavedObjectAttributes>({
-        onAdd: (container, savedObject) => {
+        onAdd: async (container, savedObject) => {
+          const { attributeService } = await getStartServicesForEmbeddable();
+          // deserialize the saved object from visualize library
+          // this make sure to fit into the new embeddable model, where the following build()
+          // function expects a fully loaded runtime state
+          const state = await deserializeState(attributeService, { savedObjectId: savedObject.id });
           container.addNewPanel({
             panelType: LENS_EMBEDDABLE_TYPE,
-            initialState: { savedObjectId: savedObject.id },
+            initialState: state,
           });
         },
         embeddableType: LENS_EMBEDDABLE_TYPE,

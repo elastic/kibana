@@ -5,27 +5,30 @@
  * 2.0.
  */
 
-import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
+import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
-import { fetch$, apiHasExecutionContext, FetchContext } from '@kbn/presentation-publishing';
+import { fetch$, apiHasExecutionContext, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { KibanaExecutionContext } from '@kbn/core/public';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { type KibanaExecutionContext } from '@kbn/core/public';
+import { BehaviorSubject, type Subscription, distinctUntilChanged, skip } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 import { getEditPath } from '../../common/constants';
-import {
+import type {
   ExpressionWrapperProps,
   GetStateType,
   LensApi,
+  LensPublicCallbacks,
   LensRuntimeState,
   VisualizationContextHelper,
 } from './types';
 import { getExpressionRendererParams } from './expressions/expression_params';
-import { ReactiveConfigs } from './initializers/initialize_observables';
-import { LensEmbeddableStartServices } from './types';
+import type { ReactiveConfigs } from './initializers/initialize_observables';
+import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
 import { buildUserMessagesHelper } from './user_messages/methods';
 import { getLogError } from './expressions/telemetry';
-import { SharingSavedObjectProps } from '../types';
+import type { SharingSavedObjectProps } from '../types';
+import { apiHasLensComponentCallbacks } from './renderer/type_guards';
 
 /**
  * The function computes the expression used to render the panel and produces the necessary props
@@ -52,11 +55,14 @@ export function loadEmbeddableData(
   // reset the render on reload
   hasRenderCompleted$.next(false);
   const dispatchRenderComplete = () => hasRenderCompleted$.next(true);
+  const { onLoad, onBeforeBadgesRender, ...callbacks } = apiHasLensComponentCallbacks(parentApi)
+    ? parentApi
+    : ({} as LensPublicCallbacks);
 
   const { getUserMessages, addUserMessages, resetRuntimeMessages } = buildUserMessagesHelper(
     getVisualizationContext,
     services,
-    api.onBeforeBadgesRender,
+    onBeforeBadgesRender,
     services.spaces,
     metaInfo
   );
@@ -113,9 +119,9 @@ export function loadEmbeddableData(
       updateVisualizationContext({
         activeData: adapters?.tables?.tables,
       });
+      onLoad?.(false, adapters);
     };
 
-    // const parentApiContext = apiHasAppContext(parentApi) ? parentApi.getAppContext() : undefined;
     const { params, abortController, ...rest } = await getExpressionRendererParams(currentState, {
       unifiedSearch,
       api,
@@ -134,7 +140,8 @@ export function loadEmbeddableData(
         services,
         getExecutionContext,
         onDataCallback,
-        dispatchRenderComplete
+        dispatchRenderComplete,
+        callbacks
       ),
     });
     if (params?.expression != null) {
@@ -169,7 +176,28 @@ export function loadEmbeddableData(
     }),
     // On state change, reload
     // this is used to refresh the chart on inline editing
-    state$.subscribe(reload),
+    // just make sure to avoid to rerender if there's no substantial change
+    state$
+      .pipe(
+        distinctUntilChanged((prevState, nextState) =>
+          fastIsEqual(
+            [
+              'attributes' in prevState && prevState.attributes,
+              'savedObjectId' in prevState && prevState.savedObjectId,
+              'overrides' in prevState && prevState.overrides,
+              'disableTriggers' in prevState && prevState.disableTriggers,
+            ],
+            [
+              'attributes' in nextState && nextState.attributes,
+              'savedObjectId' in nextState && nextState.savedObjectId,
+              'overrides' in nextState && nextState.overrides,
+              'disableTriggers' in nextState && nextState.disableTriggers,
+            ]
+          )
+        ),
+        skip(1)
+      )
+      .subscribe(reload),
 
     // reload on view mode change only if drilldowns are set
     viewMode$.subscribe(() => {

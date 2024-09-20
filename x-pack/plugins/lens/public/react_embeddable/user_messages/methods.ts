@@ -25,7 +25,7 @@ import {
   getInitialDataViewsObject,
 } from '../../utils';
 import {
-  LensCallbacks,
+  LensPublicCallbacks,
   LensEmbeddableStartServices,
   VisualizationContext,
   VisualizationContextHelper,
@@ -70,7 +70,7 @@ function getUpdatedState(
 export function buildUserMessagesHelper(
   getVisualizationContext: () => VisualizationContext,
   { coreStart, visualizationMap, datasourceMap }: LensEmbeddableStartServices,
-  onBeforeBadgesRender: LensCallbacks['onBeforeBadgesRender'],
+  onBeforeBadgesRender: LensPublicCallbacks['onBeforeBadgesRender'],
   spaces?: SpacesApi,
   metaInfo?: SharingSavedObjectProps
 ): {

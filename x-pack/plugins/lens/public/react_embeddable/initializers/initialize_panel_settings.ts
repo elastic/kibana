@@ -9,11 +9,15 @@ import { getUnchangingComparator, initializeTitles } from '@kbn/presentation-pub
 import { noop } from 'lodash';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { buildObservableVariable } from '../helper';
-import type { LensRuntimeState } from '../types';
+import type { LensComponentProps, LensRuntimeState } from '../types';
+import { apiHasLensComponentProps } from '../renderer/type_guards';
 
-export function initializePanelSettings(state: LensRuntimeState) {
+export function initializePanelSettings(state: LensRuntimeState, parentApi: unknown) {
   const title = initializeTitles(state);
   const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(state.title);
+  const { style, noPadding, className, viewMode } = apiHasLensComponentProps(parentApi)
+    ? parentApi
+    : ({} as LensComponentProps);
 
   return {
     api: {
@@ -28,8 +32,9 @@ export function initializePanelSettings(state: LensRuntimeState) {
       className: getUnchangingComparator<LensRuntimeState, 'className'>(),
       noPadding: getUnchangingComparator<LensRuntimeState, 'noPadding'>(),
       palette: getUnchangingComparator<LensRuntimeState, 'palette'>(),
+      viewMode: getUnchangingComparator<LensRuntimeState, 'viewMode'>(),
     },
-    serialize: () => title.serializeTitles(),
+    serialize: () => ({ ...title.serializeTitles(), style, noPadding, className, viewMode }),
     cleanup: noop,
   };
 }

@@ -15,6 +15,7 @@ import {
   PublishesDataLoading,
   PublishesUnifiedSearch,
   SerializedTitles,
+  StateComparators,
   ViewMode,
 } from '@kbn/presentation-publishing';
 // import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
@@ -77,6 +78,19 @@ import { FormBasedPersistedState } from '..';
 import { TextBasedPersistedState } from '../datasources/text_based/types';
 import { GaugeVisualizationState } from '../visualizations/gauge/constants';
 import { MetricVisualizationState } from '../visualizations/metric/types';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface LensApiProps {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface LensStateProps {}
+
+export interface LensInitType<Api extends LensApiProps = {}, Props extends LensStateProps = {}> {
+  api: Api;
+  comparators: StateComparators<Props>;
+  serialize: () => Props;
+  cleanup: () => void;
+}
 
 export type LensSavedObjectAttributes = Omit<LensDocument, 'savedObjectId' | 'type'>;
 
@@ -155,7 +169,20 @@ interface LensByReference {
 
 type LensPropsVariants = LensByValue & LensByReference;
 
-export interface LensCallbacks {
+interface ViewInDiscoverCallbacks extends LensApiProps {
+  canViewUnderlyingData: () => Promise<boolean>;
+  getViewUnderlyingDataArgs: () => ViewUnderlyingDataArgs | undefined;
+}
+
+interface IntegrationCallbacks extends LensApiProps {
+  isTextBasedLanguage: () => boolean | undefined;
+  getTextBasedLanguage: () => string | undefined;
+  getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
+  getFullAttributes: () => LensDocument | undefined;
+  updateState: (newState: LensRuntimeState) => void;
+}
+
+export interface LensPublicCallbacks extends LensApiProps {
   onBrushEnd?: (data: Simplify<BrushTriggerEvent['data'] & PreventableEvent>) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
   onFilter?: (
@@ -170,21 +197,7 @@ export interface LensCallbacks {
   onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
-interface ViewInDiscoverCallbacks {
-  canViewUnderlyingData: () => Promise<boolean>;
-  getViewUnderlyingDataArgs: () => ViewUnderlyingDataArgs | undefined;
-}
-
-interface IntegrationCallbacks {
-  isTextBasedLanguage: () => boolean | undefined;
-  getTextBasedLanguage: () => string | undefined;
-  getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
-  getFullAttributes: () => LensDocument | undefined;
-}
-
-export type LensApiCallbacks = Simplify<
-  LensCallbacks & ViewInDiscoverCallbacks & IntegrationCallbacks
->;
+export type LensApiCallbacks = Simplify<ViewInDiscoverCallbacks & IntegrationCallbacks>;
 
 export interface LensUnifiedSearchContext {
   filters?: Filter[];
@@ -198,16 +211,16 @@ type LensKibanaContextProps = LensUnifiedSearchContext & {
   palette?: PaletteOutput;
 };
 
-interface LensPanelStyleProps {
+interface LensPanelProps {
   id?: string;
   renderMode?: ViewMode;
-  style?: React.CSSProperties;
-  className?: string;
-  noPadding?: boolean;
   disableTriggers?: boolean;
 }
 
 interface LensRequestHandlersProps {
+  /**
+   * Custom abort controller to be used for the ES client
+   */
   abortController?: AbortController;
 }
 
@@ -223,9 +236,43 @@ interface LensRequestHandlersProps {
 export type LensSerializedState = Simplify<
   LensPropsVariants &
     LensKibanaContextProps &
-    LensPanelStyleProps &
+    LensPanelProps &
     SerializedTitles &
     Partial<DynamicActionsSerializedState>
+>;
+
+/**
+ * Custom props exposed on the Lens exported component
+ */
+export type LensComponentProps = Simplify<
+  LensRequestHandlersProps &
+    LensStateProps & {
+      /**
+       * When enabled the Lens component will render as a dashboard panel
+       */
+      withDefaultActions?: boolean;
+      /**
+       * Allow custom actions to be rendered in the panel
+       */
+      extraActions?: Action[];
+      /**
+       * Toggles the inspector
+       */
+      showInspector?: boolean;
+
+      style?: React.CSSProperties;
+      className?: string;
+      noPadding?: boolean;
+      viewMode?: ViewMode;
+    }
+>;
+
+/**
+ * This is the subset of props that from the LensComponent will be forwarded to the Lens embeddable
+ */
+export type LensComponentForwardedProps = Pick<
+  LensComponentProps,
+  'style' | 'className' | 'noPadding' | 'viewMode' | 'abortController'
 >;
 
 /**
@@ -235,10 +282,34 @@ export type LensSerializedState = Simplify<
  * From this state onward, the only difference between by-Value and by-Ref would be the
  * presence of the savedObjectId.
  */
+// export type LensRuntimeState = Simplify<
+//   Omit<LensSerializedState, 'attributes'> & {
+//     attributes: NonNullable<LensSerializedState['attributes']>;
+//   }
+// >;
+
+/**
+ * Carefully chosen props to expose on the Lens renderer component used by
+ * other plugins
+ */
+
+type ComponentProps = LensComponentProps & LensPublicCallbacks;
+type ComponentSerializedProps = TypedLensSerializedState;
+
+type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
+export type LensRendererProps = Simplify<LensRendererPrivateProps>;
+
+/**
+ * The LensRuntimeState is the state stored for a dashboard panel
+ * that contains:
+ * * Lens document state
+ * * Panel settings
+ * * other props from the embeddable
+ */
 export type LensRuntimeState = Simplify<
-  Omit<LensSerializedState, 'attributes'> & {
+  Omit<ComponentSerializedProps, 'attributes'> & {
     attributes: NonNullable<LensSerializedState['attributes']>;
-  }
+  } & LensComponentForwardedProps
 >;
 
 export interface LensInspectorAdapters {
@@ -331,42 +402,9 @@ export type TypedLensSerializedState = Simplify<
 >;
 
 /**
- * Custom props exposed on the Lens exported component
- */
-export interface LensCustomCallbacks {
-  /**
-   * When enabled the Lens component will render as a dashboard panel
-   */
-  withDefaultActions?: boolean;
-  /**
-   * Allow custom actions to be rendered in the panel
-   */
-  extraActions?: Action[];
-  /**
-   * Toggles the inspector
-   */
-  showInspector?: boolean;
-  /**
-   * Custom abort controller to be used for the ES client
-   */
-  abortController?: AbortController;
-}
-/**
- * Carefully chosen props to expose on the Lens renderer component used by
- * other plugins
- */
-
-type ComponentCallbacks = LensCustomCallbacks & LensCallbacks;
-type ComponentSerializedProps = TypedLensSerializedState;
-export type LensRendererProps = Simplify<ComponentSerializedProps & ComponentCallbacks>;
-
-/**
  * Backward compatibility types
  */
-export type LensByValueInput = Omit<ComponentSerializedProps & ComponentCallbacks, 'savedObjectId'>;
-export type LensByReferenceInput = Pick<
-  ComponentSerializedProps & ComponentCallbacks,
-  'savedObjectId'
->;
+export type LensByValueInput = Omit<LensRendererPrivateProps, 'savedObjectId'>;
+export type LensByReferenceInput = Pick<LensRendererPrivateProps, 'savedObjectId'>;
 export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;

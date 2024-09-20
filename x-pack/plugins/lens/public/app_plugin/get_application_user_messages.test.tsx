@@ -20,7 +20,7 @@ import {
 import { cleanup, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
-import { LensCallbacks } from '../react_embeddable/types';
+import { LensPublicCallbacks } from '../react_embeddable/types';
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => {
   const original = jest.requireActual('@kbn/shared-ux-link-redirect-app');
@@ -400,7 +400,7 @@ describe('filtering user messages', () => {
   describe('override messages with custom callback', () => {
     it('should override embeddableBadge message', async () => {
       const getBadgeMessage = jest.fn(
-        (): ReturnType<NonNullable<LensCallbacks['onBeforeBadgesRender']>> => [
+        (): ReturnType<NonNullable<LensPublicCallbacks['onBeforeBadgesRender']>> => [
           {
             uniqueId: FIELD_NOT_FOUND,
             severity: 'warning',
