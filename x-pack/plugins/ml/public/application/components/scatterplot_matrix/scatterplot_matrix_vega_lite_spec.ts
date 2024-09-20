@@ -262,9 +262,8 @@ export function getEscapedVegaFieldName(fieldName: string, prependString: string
   // backslash escaping causes the following Vega error:
   // Duplicate scale or projection name: "child__row_my_numbercolumn_my_number_x"
 
-  // Escaping just the backslash without the additional \n escaping causes field
-  // names with \n causes an "expression parse error" in in Vega and the chart
-  // wouldn't render.
+  // Escaping just the backslash without the additional \n escaping causes
+  // causes an "expression parse error" in Vega and the chart wouldn't render.
 
   // Escape newline characters
   fieldName = fieldName.replace(/\n/g, '\\n');
