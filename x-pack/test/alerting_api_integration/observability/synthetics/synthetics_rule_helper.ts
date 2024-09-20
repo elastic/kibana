@@ -278,6 +278,9 @@ export class SyntheticsRuleHelper {
       };
     }
 
+    this.logger.debug(
+      `created synthetics summary, status: ${status}, monitor: "${monitor.name}", location: "${location?.label}"`
+    );
     await this.esClient.index({
       index,
       document,
