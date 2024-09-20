@@ -221,7 +221,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
                     </style>
                     <style
                       data-styled="active"
-                      data-styled-version="5.1.0"
+                      data-styled-version="5.3.11"
                     />
                   </head>,
                   "ctr": 2,

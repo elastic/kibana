@@ -71,6 +71,11 @@ export type {
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
+export type {
+  EvaluationContext,
+  FeatureFlagsStart,
+  FeatureFlagsSetup,
+} from '@kbn/core-feature-flags-server';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   CapabilitiesProvider,
