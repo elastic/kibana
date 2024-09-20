@@ -84,7 +84,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
         .send(
           getTestRuleData({
             rule_type_id: 'test.patternSuccessOrFailure',
-            schedule: { interval: '3s' },
+            schedule: { interval: '1h' },
             params: {
               pattern,
             },
