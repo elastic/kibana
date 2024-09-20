@@ -46,6 +46,7 @@ export const IGNORE_FILE_GLOBS = [
   'test/package/Vagrantfile',
   'x-pack/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
   '**/test/**/fixtures/**/*',
+  'packages/kbn-router-to-openapispec/openapi-types.d.ts',
 
   // Required to match the name in the docs.elastic.dev repo.
   'dev_docs/nav-kibana-dev.docnav.json',
@@ -120,6 +121,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
   'typings/*',
+  'typings/**/*',
 ];
 
 /**

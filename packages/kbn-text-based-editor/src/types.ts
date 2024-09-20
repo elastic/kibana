@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface TextBasedLanguagesEditorProps {
@@ -61,6 +61,9 @@ export interface TextBasedLanguagesEditorProps {
 
   /** adds border in the editor **/
   hasOutline?: boolean;
+
+  /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
+  displayDocumentationAsFlyout?: boolean;
 }
 
 export interface TextBasedEditorDeps {

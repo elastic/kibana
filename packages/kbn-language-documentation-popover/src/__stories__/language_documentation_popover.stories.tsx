@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { LanguageDocumentationPopover } from '../components/documentation_popover';
+import { LanguageDocumentationPopover } from '../components/as_popover';
 
 const sections = {
   groups: [

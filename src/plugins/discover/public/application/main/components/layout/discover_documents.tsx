@@ -58,11 +58,6 @@ import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
-import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
-import {
-  DISCOVER_TOUR_STEP_ANCHOR_IDS,
-  DiscoverTourProvider,
-} from '../../../../components/discover_tour';
 import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
@@ -89,8 +84,6 @@ const containerStyles = css`
 const progressStyle = css`
   z-index: 2;
 `;
-
-const TOUR_STEPS = { expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument };
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
@@ -340,18 +333,6 @@ function DiscoverDocumentsComponent({
     [currentColumns, documents?.esqlQueryColumns, documentState.interceptedWarnings]
   );
 
-  const gridAnnouncementCallout = useMemo(() => {
-    if (hideAnnouncements || isLegacy) {
-      return null;
-    }
-
-    return !isEsqlMode ? (
-      <DiscoverTourProvider>
-        <DocumentExplorerUpdateCallout />
-      </DiscoverTourProvider>
-    ) : null;
-  }, [hideAnnouncements, isLegacy, isEsqlMode]);
-
   const loadingIndicator = useMemo(
     () =>
       isDataLoading ? (
@@ -373,12 +354,11 @@ function DiscoverDocumentsComponent({
         bottomSection: (
           <>
             {callouts}
-            {gridAnnouncementCallout}
             {loadingIndicator}
           </>
         ),
       }),
-    [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
+    [viewModeToggle, callouts, loadingIndicator]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -486,13 +466,13 @@ function DiscoverDocumentsComponent({
                 services={services}
                 totalHits={totalHits}
                 onFetchMoreRecords={onFetchMoreRecords}
-                componentsTourSteps={TOUR_STEPS}
                 externalCustomRenderers={cellRenderers}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 additionalFieldGroups={additionalFieldGroups}
                 dataGridDensityState={density}
                 onUpdateDataGridDensity={onUpdateDensity}
+                query={query}
                 cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
                 cellActionsMetadata={cellActionsMetadata}
                 cellActionsHandling="append"

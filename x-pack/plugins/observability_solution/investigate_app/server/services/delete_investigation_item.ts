@@ -19,7 +19,7 @@ export async function deleteInvestigationItem(
     throw new Error('Note not found');
   }
 
-  if (item.createdBy !== user.username) {
+  if (item.createdBy !== user.profile_uid) {
     throw new Error('User does not have permission to delete note');
   }
 

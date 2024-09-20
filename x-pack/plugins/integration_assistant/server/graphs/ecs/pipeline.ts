@@ -5,13 +5,12 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
-import { Pipeline } from '../../../common/api/model/common_attributes';
+import { Pipeline, ESProcessorItem } from '../../../common';
 import type { EcsMappingState } from '../../types';
 import { ECS_TYPES } from './constants';
-import { ESProcessorItem } from '../../../common/api/model/processor_attributes';
 import { deepCopy } from '../../util/util';
 
 interface IngestPipeline {
@@ -192,7 +191,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
   });
   const template = env.getTemplate('pipeline.yml.njk');
   const renderedTemplate = template.render(mappedValues);
-  let ingestPipeline = safeLoad(renderedTemplate) as Pipeline;
+  let ingestPipeline = load(renderedTemplate) as Pipeline;
   if (state.additionalProcessors.length > 0) {
     ingestPipeline = combineProcessors(ingestPipeline, state.additionalProcessors);
   }

@@ -7,6 +7,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import deepEqual from 'fast-deep-equal';
 import { mapValues, pick } from 'lodash';
 import { InvokeCreator } from 'xstate';
 import {
@@ -39,8 +40,17 @@ export const subscribeControlGroup =
       discoverStateContainer.actions.fetchData();
     });
 
+    const inputSubscription = context.controlGroupAPI
+      .getInput$()
+      .subscribe(({ initialChildControlState: panels }) => {
+        if (!deepEqual(panels, context.controlPanels)) {
+          send({ type: 'UPDATE_CONTROL_PANELS', controlPanels: panels });
+        }
+      });
+
     return () => {
       filtersSubscription.unsubscribe();
+      inputSubscription.unsubscribe();
     };
   };
 

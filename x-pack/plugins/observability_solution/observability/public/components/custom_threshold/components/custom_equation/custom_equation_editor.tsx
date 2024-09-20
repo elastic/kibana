@@ -185,7 +185,7 @@ export function CustomEquationEditor({
                 'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.equationAndThreshold',
                 { defaultMessage: 'Equation and threshold' }
               )}
-              error={[errors.equation]}
+              error={[errors.equation as string]}
             >
               <>
                 <EuiSpacer size="xs" />
