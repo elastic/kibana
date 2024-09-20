@@ -42,7 +42,7 @@ import { initializeEditApi } from './initialize_edit_api';
 import { extractReferences } from '../../common/migrations/references';
 import { MapAttributes } from '../../common/content_management';
 import { MapSettings } from '../../common/descriptor_types';
-import { isMapRendererApi } from './map_renderer/types';
+import { apiHidesFilterActions, isMapRendererApi } from './map_renderer/types';
 
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
@@ -236,7 +236,8 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
             <MapContainer
               onSingleValueTrigger={actionHandlers.onSingleValueTrigger}
               addFilters={
-                (isMapRendererApi(parent) && parent.hideFilterActions) || areTriggersDisabled(api)
+                (apiHidesFilterActions(parent) && parent.hideFilterActions) ||
+                areTriggersDisabled(api)
                   ? null
                   : actionHandlers.addFilters
               }
