@@ -571,7 +571,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
-      messageSigningService: plugins.fleet?.messageSigningService,
       esClient: core.elasticsearch.client.asInternalUser,
       productFeaturesService,
       savedObjectsServiceStart: core.savedObjects,

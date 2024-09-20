@@ -16,6 +16,7 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   securityServiceMock,
+  coreMock,
 } from '@kbn/core/server/mocks';
 import type {
   IRouter,
@@ -24,23 +25,20 @@ import type {
   RouteConfig,
   RouteMethod,
   SavedObjectsClientContract,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import {
   createFleetActionsClientMock,
   createFleetFromHostFilesClientMock,
+  createFleetStartContractMock,
   createFleetToHostFilesClientMock,
   createMessageSigningServiceMock,
-  createMockAgentPolicyService,
-  createMockAgentService,
-  createMockPackageService,
   createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions, RouterMock } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -48,8 +46,10 @@ import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
 import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
-import type { PluginStartContract } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Mutable } from 'utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type { ProductFeaturesService } from '../../lib/product_features_service';
 import { responseActionsClientMock } from '../services/actions/clients/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 import { createMockConfig, requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
@@ -66,15 +66,14 @@ import {
   parseExperimentalConfigValue,
 } from '../../../common/experimental_features';
 import { requestContextFactoryMock } from '../../request_context_factory.mock';
-import { EndpointMetadataService } from '../services/metadata';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../lib/detection_engine/routes/__mocks__/request_context';
 import { createMockClients } from '../../lib/detection_engine/routes/__mocks__/request_context';
 import { createEndpointMetadataServiceTestContextMock } from '../services/metadata/mocks';
 import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
-import { EndpointFleetServicesFactory } from '../services/fleet';
 import { createLicenseServiceMock } from '../../../common/license/mocks';
 import { createFeatureUsageServiceMock } from '../services/feature_usage/mocks';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
+
 /**
  * Creates a mocked EndpointAppContext.
  */
@@ -143,6 +142,7 @@ export const createMockEndpointAppContextServiceSetupContract =
       securitySolutionRequestContextFactory: requestContextFactoryMock.create(),
       cloud: cloudMock.createSetup(),
       loggerFactory: loggingSystemMock.create(),
+      httpServiceSetup: coreMock.createSetup().http,
     };
   };
 
@@ -150,38 +150,13 @@ export const createMockEndpointAppContextServiceSetupContract =
  * Creates a mocked input contract for the `EndpointAppContextService#start()` method
  */
 export const createMockEndpointAppContextServiceStartContract =
-  (): jest.Mocked<EndpointAppContextServiceStartContract> => {
+  (): DeeplyMockedKeys<EndpointAppContextServiceStartContract> => {
     const config = createMockConfig();
 
     const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
-    const savedObjectsStart = savedObjectsServiceMock.createStartContract();
-    const security = securityServiceMock.createStart();
-    const agentService = createMockAgentService();
-    const agentPolicyService = createMockAgentPolicyService();
+    const security =
+      securityServiceMock.createStart() as unknown as DeeplyMockedKeys<SecurityServiceStart>;
     const packagePolicyService = createPackagePolicyServiceMock();
-    const packageService = createMockPackageService();
-    const endpointMetadataService = new EndpointMetadataService(
-      savedObjectsStart,
-      agentPolicyService,
-      packagePolicyService,
-      logger
-    );
-    const endpointFleetServicesFactory = new EndpointFleetServicesFactory(
-      {
-        packageService,
-        packagePolicyService,
-        agentPolicyService,
-        agentService,
-      },
-      savedObjectsStart
-    );
-    const experimentalFeatures = config.experimentalFeatures;
-    const productFeaturesService = createProductFeaturesServiceMock(
-      undefined,
-      experimentalFeatures,
-      undefined,
-      logger
-    );
 
     packagePolicyService.list.mockImplementation(async (_, options) => {
       return {
@@ -197,47 +172,32 @@ export const createMockEndpointAppContextServiceStartContract =
       securityMock.createMockAuthenticatedUser({ roles: ['superuser'] })
     );
 
-    const casesMock = casesPluginMock.createStartContract();
-    const fleetActionsClientMock = createFleetActionsClientMock();
-
-    return {
-      endpointMetadataService,
-      endpointFleetServicesFactory,
-      logger,
-      fleetAuthzService: createFleetAuthzServiceMock(),
-      createFleetFilesClient: {
-        fromHost: jest.fn((..._) => createFleetFromHostFilesClientMock()),
-        toHost: jest.fn((..._) => createFleetToHostFilesClientMock()),
-      },
-      manifestManager: getManifestManagerMock(),
+    const startContract: DeeplyMockedKeys<EndpointAppContextServiceStartContract> = {
       security,
-      alerting: alertsMock.createStart(),
       config,
+      productFeaturesService: createProductFeaturesServiceMock(
+        undefined,
+        config.experimentalFeatures,
+        undefined,
+        logger
+      ) as DeeplyMockedKeys<ProductFeaturesService>,
+      experimentalFeatures: config.experimentalFeatures,
+      fleetStartServices: createFleetStartContractMock(),
+      cases: casesPluginMock.createStartContract(),
+      manifestManager: getManifestManagerMock() as DeeplyMockedKeys<ManifestManager>,
+      alerting: alertsMock.createStart(),
       licenseService: createLicenseServiceMock(),
-      registerIngestCallback: jest.fn<
-        ReturnType<FleetStartContract['registerExternalCallback']>,
-        Parameters<FleetStartContract['registerExternalCallback']>
-      >(),
       exceptionListsClient: listMock.getExceptionListClient(),
-      cases: casesMock,
       featureUsageService: createFeatureUsageServiceMock(),
-      experimentalFeatures,
-      messageSigningService: createMessageSigningServiceMock(),
-      createFleetActionsClient: jest.fn((_) => fleetActionsClientMock),
       esClient: elasticsearchClientMock.createElasticsearchClient(),
-      productFeaturesService,
-      savedObjectsClient: savedObjectsClientMock.create(),
+      savedObjectsServiceStart: savedObjectsServiceMock.createStartContract(),
       connectorActions: {
         getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
-      } as unknown as jest.Mocked<PluginStartContract>,
+      } as unknown as jest.Mocked<ActionPluginStartContract>,
     };
-  };
 
-export const createFleetAuthzServiceMock = (): jest.Mocked<FleetStartContract['authz']> => {
-  return {
-    fromRequest: jest.fn(async (_) => createFleetAuthzMock()),
+    return startContract;
   };
-};
 
 export function createRouteHandlerContext(
   dataClient: ScopedClusterClientMock,

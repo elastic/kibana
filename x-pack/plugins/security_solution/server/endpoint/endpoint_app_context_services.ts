@@ -77,7 +77,6 @@ export interface EndpointAppContextServiceStartContract {
   cases: CasesServerStart | undefined;
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
-  messageSigningService: MessageSigningServiceInterface | undefined;
   /** An internal ES client */
   esClient: ElasticsearchClient;
   productFeaturesService: ProductFeaturesService;
@@ -310,11 +309,11 @@ export class EndpointAppContextService {
   }
 
   public getMessageSigningService(): MessageSigningServiceInterface {
-    if (!this.startDependencies?.messageSigningService) {
+    if (!this.startDependencies?.fleetStartServices.messageSigningService) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.startDependencies.messageSigningService;
+    return this.startDependencies?.fleetStartServices.messageSigningService;
   }
 
   public getInternalResponseActionsClient({
