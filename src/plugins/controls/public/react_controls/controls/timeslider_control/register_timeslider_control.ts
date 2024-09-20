@@ -7,20 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup } from '@kbn/core/public';
-import type { ControlsPluginStartDeps } from '../../../types';
-import { registerControlFactory } from '../../control_factory_registry';
 import { TIME_SLIDER_CONTROL } from '../../../../common';
+import { untilPluginStartServicesReady } from '../../../services/kibana_services';
+import { registerControlFactory } from '../../control_factory_registry';
 
-export function registerTimeSliderControl(coreSetup: CoreSetup<ControlsPluginStartDeps>) {
+export function registerTimeSliderControl() {
   registerControlFactory(TIME_SLIDER_CONTROL, async () => {
-    const [{ getTimesliderControlFactory }, [coreStart, depsStart]] = await Promise.all([
+    const [{ getTimesliderControlFactory }] = await Promise.all([
       import('./get_timeslider_control_factory'),
-      coreSetup.getStartServices(),
+      untilPluginStartServicesReady(),
     ]);
-    return getTimesliderControlFactory({
-      core: coreStart,
-      data: depsStart.data,
-    });
+    return getTimesliderControlFactory();
   });
 }

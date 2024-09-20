@@ -84,6 +84,7 @@ import {
   textExistsAndIsValid,
   createInlineCast,
   createUnknownItem,
+  createOrderExpression,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import {
@@ -97,6 +98,7 @@ import {
   ESQLUnnamedParamLiteral,
   ESQLPositionalParamLiteral,
   ESQLNamedParamLiteral,
+  ESQLOrderExpression,
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
@@ -608,34 +610,43 @@ export function visitByOption(
   return [option];
 }
 
-export function visitOrderExpression(ctx: OrderExpressionContext[]) {
-  const ast: ESQLAstItem[] = [];
-  for (const orderCtx of ctx) {
-    const expression = collectBooleanExpression(orderCtx.booleanExpression());
-    if (orderCtx._ordering) {
-      const terminalNode =
-        orderCtx.getToken(esql_parser.ASC, 0) || orderCtx.getToken(esql_parser.DESC, 0);
-      const literal = createLiteral('string', terminalNode);
-      if (literal) {
-        expression.push(literal);
-      }
-    }
-    if (orderCtx.NULLS()) {
-      expression.push(createLiteral('string', orderCtx.NULLS()!)!);
-      if (orderCtx._nullOrdering && orderCtx._nullOrdering.text !== '<first missing>') {
-        const innerTerminalNode =
-          orderCtx.getToken(esql_parser.FIRST, 0) || orderCtx.getToken(esql_parser.LAST, 0);
-        const literal = createLiteral('string', innerTerminalNode);
-        if (literal) {
-          expression.push(literal);
-        }
-      }
-    }
+const visitOrderExpression = (ctx: OrderExpressionContext): ESQLOrderExpression | ESQLAstItem => {
+  const arg = collectBooleanExpression(ctx.booleanExpression())[0];
 
-    if (expression.length) {
-      ast.push(...expression);
-    }
+  let order: ESQLOrderExpression['order'] = '';
+  let nulls: ESQLOrderExpression['nulls'] = '';
+
+  const ordering = ctx._ordering?.text?.toUpperCase();
+
+  if (ordering) order = ordering as ESQLOrderExpression['order'];
+
+  const nullOrdering = ctx._nullOrdering?.text?.toUpperCase();
+
+  switch (nullOrdering) {
+    case 'LAST':
+      nulls = 'NULLS LAST';
+      break;
+    case 'FIRST':
+      nulls = 'NULLS FIRST';
+      break;
   }
+
+  if (!order && !nulls) {
+    return arg;
+  }
+
+  return createOrderExpression(ctx, arg, order, nulls);
+};
+
+export function visitOrderExpressions(
+  ctx: OrderExpressionContext[]
+): Array<ESQLOrderExpression | ESQLAstItem> {
+  const ast: Array<ESQLOrderExpression | ESQLAstItem> = [];
+
+  for (const orderCtx of ctx) {
+    ast.push(visitOrderExpression(orderCtx));
+  }
+
   return ast;
 }
 

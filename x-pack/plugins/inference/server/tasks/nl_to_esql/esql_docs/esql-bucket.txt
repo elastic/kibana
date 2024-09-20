@@ -4,7 +4,7 @@ The BUCKET function allows you to create groups of values, known as buckets, fro
 
 ## Syntax
 
-`BUCKET(field, buckets, from, to)`
+`BUCKET(field, buckets [, from, to])`
 
 ### Parameters
 
@@ -18,15 +18,24 @@ The target number of buckets, or the desired bucket size if `from` and `to` para
 
 #### from
 
-The start of the range. This can be a number, a date, or a date expressed as a string.
+(optional) The start of the range. This can be a number, a date, or a date expressed as a string.
 
 #### to
 
-The end of the range. This can be a number, a date, or a date expressed as a string.
+(optional) The end of the range. This can be a number, a date, or a date expressed as a string.
+
+## Important notes:
+
+BUCKET can operate in two modes:
+- one where the bucket size is computed based on a bucket count recommendation and a range,
+- and another where the bucket size is provided directly.
+
+When the bucket size is provided directly for time interval,
+it is expressed as a *timespan literal*, e.g.
+- GOOD: `BUCKET(@timestamp, 1 month)`
+- BAD: `BUCKET(@timestamp, "month")`
 
 ## Examples
-
-BUCKET can operate in two modes: one where the bucket size is computed based on a bucket count recommendation and a range, and another where the bucket size is provided directly.
 
 For instance, asking for at most 20 buckets over a year results in monthly buckets:
 
