@@ -527,12 +527,14 @@ export const mockGlobalState: State = {
     ids: ['1'],
     status: {
       fetchNotesByDocumentIds: ReqStatus.Idle,
+      fetchNotesBySavedObjectIds: ReqStatus.Idle,
       createNote: ReqStatus.Idle,
       deleteNotes: ReqStatus.Idle,
       fetchNotes: ReqStatus.Idle,
     },
     error: {
       fetchNotesByDocumentIds: null,
+      fetchNotesBySavedObjectIds: null,
       createNote: null,
       deleteNotes: null,
       fetchNotes: null,

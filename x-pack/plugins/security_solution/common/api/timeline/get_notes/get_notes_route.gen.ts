@@ -21,6 +21,9 @@ import { Note } from '../model/components.gen';
 export type DocumentIds = z.infer<typeof DocumentIds>;
 export const DocumentIds = z.union([z.array(z.string()), z.string()]);
 
+export type SavedObjectIds = z.infer<typeof SavedObjectIds>;
+export const SavedObjectIds = z.union([z.array(z.string()), z.string()]);
+
 export type GetNotesResult = z.infer<typeof GetNotesResult>;
 export const GetNotesResult = z.object({
   totalCount: z.number(),
@@ -30,6 +33,7 @@ export const GetNotesResult = z.object({
 export type GetNotesRequestQuery = z.infer<typeof GetNotesRequestQuery>;
 export const GetNotesRequestQuery = z.object({
   documentIds: DocumentIds.optional(),
+  savedObjectIds: SavedObjectIds.optional(),
   page: z.string().nullable().optional(),
   perPage: z.string().nullable().optional(),
   search: z.string().nullable().optional(),

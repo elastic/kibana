@@ -42,6 +42,7 @@ import {
   userSelectedRowForDeletion,
   userSortedNotes,
   selectSortedNotesByDocumentId,
+  fetchNotesBySavedObjectIds,
 } from './notes.slice';
 import type { NotesState } from './notes.slice';
 import { mockGlobalState } from '../../common/mock';
@@ -72,11 +73,18 @@ const initialNonEmptyState = {
   ids: [mockNote1.noteId, mockNote2.noteId],
   status: {
     fetchNotesByDocumentIds: ReqStatus.Idle,
+    fetchNotesBySavedObjectIds: ReqStatus.Idle,
     createNote: ReqStatus.Idle,
     deleteNotes: ReqStatus.Idle,
     fetchNotes: ReqStatus.Idle,
   },
-  error: { fetchNotesByDocumentIds: null, createNote: null, deleteNotes: null, fetchNotes: null },
+  error: {
+    fetchNotesByDocumentIds: null,
+    fetchNotesBySavedObjectIds: null,
+    createNote: null,
+    deleteNotes: null,
+    fetchNotes: null,
+  },
   pagination: {
     page: 1,
     perPage: 10,
@@ -175,6 +183,88 @@ describe('notesSlice', () => {
           error: {
             ...initalEmptyState.error,
             fetchNotesByDocumentIds: 'error',
+          },
+        });
+      });
+    });
+
+    describe('fetchNotesBySavedObjectIds', () => {
+      it('should set correct status state when fetching notes by saved object ids', () => {
+        const action = { type: fetchNotesBySavedObjectIds.pending.type };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          status: {
+            ...initalEmptyState.status,
+            fetchNotesBySavedObjectIds: ReqStatus.Loading,
+          },
+        });
+      });
+
+      it('should set correct state when success on fetch notes by saved object id ids on an empty state', () => {
+        const action = {
+          type: fetchNotesBySavedObjectIds.fulfilled.type,
+          payload: {
+            entities: {
+              notes: {
+                [mockNote1.noteId]: mockNote1,
+              },
+            },
+            result: [mockNote1.noteId],
+          },
+        };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          entities: action.payload.entities.notes,
+          ids: action.payload.result,
+          status: {
+            ...initalEmptyState.status,
+            fetchNotesBySavedObjectIds: ReqStatus.Succeeded,
+          },
+        });
+      });
+
+      it('should replace notes when success on fetch notes by saved object id ids on a non-empty state', () => {
+        const newMockNote = { ...mockNote1, timelineId: 'timelineId' };
+        const action = {
+          type: fetchNotesBySavedObjectIds.fulfilled.type,
+          payload: {
+            entities: {
+              notes: {
+                [newMockNote.noteId]: newMockNote,
+              },
+            },
+            result: [newMockNote.noteId],
+          },
+        };
+
+        expect(notesReducer(initialNonEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          entities: {
+            [newMockNote.noteId]: newMockNote,
+            [mockNote2.noteId]: mockNote2,
+          },
+          ids: [newMockNote.noteId, mockNote2.noteId],
+          status: {
+            ...initalEmptyState.status,
+            fetchNotesBySavedObjectIds: ReqStatus.Succeeded,
+          },
+        });
+      });
+
+      it('should set correct error state when failing to fetch notes by saved object ids', () => {
+        const action = { type: fetchNotesBySavedObjectIds.rejected.type, error: 'error' };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          status: {
+            ...initalEmptyState.status,
+            fetchNotesBySavedObjectIds: ReqStatus.Failed,
+          },
+          error: {
+            ...initalEmptyState.error,
+            fetchNotesBySavedObjectIds: 'error',
           },
         });
       });

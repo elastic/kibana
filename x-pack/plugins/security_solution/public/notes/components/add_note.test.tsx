@@ -5,26 +5,18 @@
  * 2.0.
  */
 
-import * as uuid from 'uuid';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
-import { AddNote, CREATE_NOTE_ERROR } from './add_note';
-import {
-  ADD_NOTE_BUTTON_TEST_ID,
-  ADD_NOTE_MARKDOWN_TEST_ID,
-  ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID,
-} from './test_ids';
-import { ReqStatus } from '../../../../notes/store/notes.slice';
-import { TimelineId } from '../../../../../common/types';
 import userEvent from '@testing-library/user-event';
-import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
-import { Flyouts } from '../../shared/constants/flyouts';
+import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
+import { AddNote, CREATE_NOTE_ERROR } from './add_note';
+import { ADD_NOTE_BUTTON_TEST_ID, ADD_NOTE_MARKDOWN_TEST_ID } from './test_ids';
+import { ReqStatus } from '../store/notes.slice';
 
-jest.mock('../../shared/hooks/use_which_flyout');
+jest.mock('../../flyout/document_details/shared/hooks/use_which_flyout');
 
 const mockAddError = jest.fn();
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
+jest.mock('../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
     addError: mockAddError,
   }),
@@ -52,7 +44,6 @@ describe('AddNote', () => {
 
     expect(getByTestId(ADD_NOTE_MARKDOWN_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ADD_NOTE_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).toBeInTheDocument();
   });
 
   it('should create note', async () => {
@@ -122,64 +113,5 @@ describe('AddNote', () => {
     expect(mockAddError).toHaveBeenCalledWith(null, {
       title: CREATE_NOTE_ERROR,
     });
-  });
-
-  it('should disable attach to timeline checkbox if flyout is not open from timeline', () => {
-    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.securitySolution);
-
-    const { getByTestId } = renderAddNote();
-
-    expect(getByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).toHaveAttribute('disabled');
-  });
-
-  it('should disable attach to timeline checkbox if active timeline is not saved', () => {
-    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
-
-    const store = createMockStore({
-      ...mockGlobalState,
-      timeline: {
-        ...mockGlobalState.timeline,
-        timelineById: {
-          ...mockGlobalState.timeline.timelineById,
-          [TimelineId.active]: {
-            ...mockGlobalState.timeline.timelineById[TimelineId.test],
-          },
-        },
-      },
-    });
-
-    const { getByTestId } = render(
-      <TestProviders store={store}>
-        <AddNote eventId={'event-id'} />
-      </TestProviders>
-    );
-
-    expect(getByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).toHaveAttribute('disabled');
-  });
-
-  it('should have attach to timeline checkbox enabled', () => {
-    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
-
-    const store = createMockStore({
-      ...mockGlobalState,
-      timeline: {
-        ...mockGlobalState.timeline,
-        timelineById: {
-          ...mockGlobalState.timeline.timelineById,
-          [TimelineId.active]: {
-            ...mockGlobalState.timeline.timelineById[TimelineId.test],
-            savedObjectId: uuid.v4(),
-          },
-        },
-      },
-    });
-
-    const { getByTestId } = render(
-      <TestProviders store={store}>
-        <AddNote eventId={'event-id'} />
-      </TestProviders>
-    );
-
-    expect(getByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).not.toHaveAttribute('disabled');
   });
 });
