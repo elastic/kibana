@@ -939,7 +939,23 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; forceRefresh: () => void; getPanelsState: () => ",
+          "<string | undefined>; forceRefresh: () => void; getDashboardPanelFromId: (id: string) => Promise<",
+          {
+            "pluginId": "dashboard",
+            "scope": "common",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.DashboardPanelState",
+            "text": "DashboardPanelState"
+          },
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.SavedObjectEmbeddableInput",
+            "text": "SavedObjectEmbeddableInput"
+          },
+          ">>; getPanelsState: () => ",
           {
             "pluginId": "dashboard",
             "scope": "common",
