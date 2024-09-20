@@ -134,6 +134,11 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
+   * enables logging requests during rule preview
+   */
+  loggingRequestsEnabled: false,
+
+  /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
@@ -187,6 +192,11 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   analyzerDatePickersAndSourcererDisabled: false,
+
+  /**
+   * Enables visualization: session viewer and analyzer in expandable flyout
+   */
+  visualizationInFlyoutEnabled: false,
 
   /**
    * Enables an ability to customize Elastic prebuilt rules.
