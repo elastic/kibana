@@ -11,7 +11,6 @@ import { AgentStatus } from '../../../../../../common/components/endpoint/agents
 import { useGetAgentStatus } from '../../../../../hooks/agents/use_get_agent_status';
 import { HeaderAgentInfo } from '../header_agent_info';
 import type { Platform } from '../platforms';
-
 interface AgentInfoProps {
   agentId: string;
   agentType: ResponseActionAgentType;

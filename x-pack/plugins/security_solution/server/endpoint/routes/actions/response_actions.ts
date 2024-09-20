@@ -8,7 +8,6 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { InitActionRequestSchema } from '../../../../common/api/endpoint/actions/response_actions/init';
 import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
@@ -34,6 +33,8 @@ import {
   UnisolateRouteRequestSchema,
   type UploadActionApiRequestBody,
   UploadActionRequestSchema,
+  InitActionRequestSchema,
+  ShellActionRequestSchema,
 } from '../../../../common/api/endpoint';
 
 import {
@@ -45,6 +46,7 @@ import {
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
   SCAN_ROUTE,
+  SHELL_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
@@ -327,6 +329,25 @@ export function registerResponseActionRoutes(
         responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'init')
       )
     );
+  router.versioned
+    .post({
+      access: 'public',
+      path: SHELL_ROUTE,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ShellActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        {},
+        logger,
+        responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'shell')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -419,7 +440,10 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
           break;
 
         case 'init':
-          action = await responseActionsClient.init(req.body as ScanActionRequestBody);
+          action = await responseActionsClient.init(req.body);
+          break;
+        case 'shell':
+          action = await responseActionsClient.shell(req.body);
           break;
 
         default:

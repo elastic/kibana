@@ -138,6 +138,18 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       crowdstrike: true,
     },
   },
+  shell: {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: true,
+    },
+  },
 };
 
 /**

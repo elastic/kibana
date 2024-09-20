@@ -165,4 +165,14 @@ export interface ResponseActionsClient {
     actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>>;
+
+  /**
+   * Interactive shell command
+   * @param actionRequest
+   * @param options
+   */
+  shell: (
+    actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>>;
 }

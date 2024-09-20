@@ -1,0 +1,44 @@
+openapi: 3.0.0
+info:
+  title: Shell Action Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/shell:
+    post:
+      summary: Run a command
+      operationId: EndpointShellAction
+      description: Run an interactive shell command on an endpoint.
+      x-codegen-enabled: true
+      x-labels: [ ess, serverless ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShellRouteRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+components:
+  schemas:
+    ShellRouteRequestBody:
+      allOf:
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              required:
+                - command
+              type: object
+              properties:
+                command:
+                  $ref: '../../../model/schema/common.schema.yaml#/components/schemas/Command'
+                timeout:
+                  $ref: '../../../model/schema/common.schema.yaml#/components/schemas/Timeout'

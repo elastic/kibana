@@ -35,6 +35,28 @@ const commandDetailsMissingCloudIdError = async () => {
   };
 };
 
+// @ts-expect-error - example of a failed rtr command
+const commandDetailsFailedCommandError = async () => {
+  return {
+    meta: {
+      query_time: 0.308849455,
+      powered_by: 'empower-api',
+      trace_id: '9ddfef6a-bbc6-483b-a52d-2ed3e51573b6',
+    },
+    resources: [
+      {
+        session_id: 'ce718ac2-e132-43f3-a1c8-d697bf23b8b0',
+        task_id: 'deda36d8-deae-43dc-b623-88cc35446100',
+        complete: true,
+        stdout: '',
+        stderr: 'cat: tessst.txt: No such file or directory\n',
+        base_command: 'cat',
+      },
+    ],
+    errors: [],
+  };
+};
+
 const getRTRCommandDetailsSuccessHandler: ExternalEdrServerEmulatorRouteHandlerMethod<
   {},
   {}

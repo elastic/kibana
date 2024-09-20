@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ShellActionResult } from '../command_render_components/shell_acton';
 import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
@@ -33,6 +34,7 @@ import { GetProcessesActionResult } from '../command_render_components/get_proce
 import {
   ExecuteActionResult,
   getExecuteCommandArgAboutInfo,
+  getShellCommandArgAboutInfo,
 } from '../command_render_components/execute_action';
 import type { EndpointPrivileges, ImmutableArray } from '../../../../../common/endpoint/types';
 import {
@@ -44,6 +46,7 @@ import { getCommandAboutInfo } from './get_command_about_info';
 import { validateUnitOfTime } from './utils';
 import { CONSOLE_COMMANDS } from '../../../common/translations';
 import { ScanActionResult } from '../command_render_components/scan_action';
+import { InitActionResult } from '../command_render_components/init_action';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -517,6 +520,71 @@ export const getEndpointConsoleCommands = ({
     helpDisabled: !doesEndpointSupportCommand('scan'),
     helpHidden: !getRbacControl({
       commandName: 'scan',
+      privileges: endpointPrivileges,
+    }),
+  });
+
+  consoleCommands.push({
+    name: 'init',
+    about: getCommandAboutInfo({
+      aboutInfo: CONSOLE_COMMANDS.init.about(agentType),
+      isSupported: doesEndpointSupportCommand('init'),
+    }),
+    RenderComponent: InitActionResult,
+    meta: {
+      agentType,
+      endpointId: endpointAgentId,
+      capabilities: endpointCapabilities,
+      privileges: endpointPrivileges,
+    },
+    exampleUsage: 'init',
+    exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+    validate: capabilitiesAndPrivilegesValidator(agentType),
+    mustHaveArgs: false,
+    args: {
+      ...commandCommentArgument(),
+    },
+    helpGroupLabel: HELP_GROUPS.responseActions.label,
+    helpGroupPosition: HELP_GROUPS.responseActions.position,
+    helpCommandPosition: 8,
+    helpDisabled: !doesEndpointSupportCommand('init'),
+    helpHidden: !getRbacControl({
+      commandName: 'init',
+      privileges: endpointPrivileges,
+    }),
+  });
+  consoleCommands.push({
+    name: 'shell',
+    about: getCommandAboutInfo({
+      aboutInfo: CONSOLE_COMMANDS.shell.about(agentType),
+      isSupported: doesEndpointSupportCommand('shell'),
+    }),
+    RenderComponent: ShellActionResult, // todo
+    meta: {
+      agentType,
+      endpointId: endpointAgentId,
+      capabilities: endpointCapabilities,
+      privileges: endpointPrivileges,
+    },
+    exampleUsage: 'shell --command "ls -al" --timeout 2s --comment "Get list of all files"',
+    exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+    validate: capabilitiesAndPrivilegesValidator(agentType),
+    mustHaveArgs: true,
+    args: {
+      command: {
+        required: true,
+        allowMultiples: false,
+        about: getShellCommandArgAboutInfo(), // todo
+        mustHaveValue: 'non-empty-string',
+      },
+      ...commandCommentArgument(),
+    },
+    helpGroupLabel: HELP_GROUPS.responseActions.label,
+    helpGroupPosition: HELP_GROUPS.responseActions.position,
+    helpCommandPosition: 6,
+    helpDisabled: !doesEndpointSupportCommand('shell'),
+    helpHidden: !getRbacControl({
+      commandName: 'shell',
       privileges: endpointPrivileges,
     }),
   });

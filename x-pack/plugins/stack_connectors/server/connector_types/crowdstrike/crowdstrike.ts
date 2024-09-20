@@ -54,7 +54,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
   CrowdstrikeSecrets
 > {
   private static token: string | null;
-  private static currentBatchId: string | null;
+  private static currentSessionIO: string | null;
   private static tokenExpiryTimeout: NodeJS.Timeout;
   private static base64encodedToken: string;
   private urls: {
@@ -63,7 +63,10 @@ export class CrowdstrikeConnector extends SubActionConnector<
     hostAction: string;
     agentStatus: string;
     initRTRSession: string;
+    batchInitRTRSession: string;
     executeRTR: string;
+    getExecuteRTRDetails: string;
+    batchExecuteRTR: string;
   };
 
   constructor(params: ServiceParams<CrowdstrikeConfig, CrowdstrikeSecrets>) {
@@ -73,8 +76,11 @@ export class CrowdstrikeConnector extends SubActionConnector<
       hostAction: `${this.config.url}/devices/entities/devices-actions/v2`,
       agents: `${this.config.url}/devices/entities/devices/v2`,
       agentStatus: `${this.config.url}/devices/entities/online-state/v1`,
-      initRTRSession: `${this.config.url}/real-time-response/combined/batch-init-session/v1`,
-      executeRTR: `${this.config.url}/real-time-response/combined/batch-command/v1`,
+      initRTRSession: `${this.config.url}/real-time-response/entities/sessions/v1`,
+      batchInitRTRSession: `${this.config.url}/real-time-response/combined/batch-init-session/v1`,
+      executeRTR: `${this.config.url}/real-time-response/entities/command/v1`,
+      getExecuteRTRDetails: `${this.config.url}/real-time-response/entities/command/v1`,
+      batchExecuteRTR: `${this.config.url}/real-time-response/combined/batch-command/v1`,
     };
 
     if (!CrowdstrikeConnector.base64encodedToken) {
@@ -109,9 +115,20 @@ export class CrowdstrikeConnector extends SubActionConnector<
       method: 'initRTRSession',
       schema: CrowdstrikeInitRTRParamsSchema,
     });
+
+    this.registerSubAction({
+      name: SUB_ACTION.BATCH_INIT_RTR_SESSION,
+      method: 'batchInitRTRSession',
+      schema: CrowdstrikeInitRTRParamsSchema,
+    });
     this.registerSubAction({
       name: SUB_ACTION.EXECUTE_RTR,
       method: 'executeRTR',
+      schema: CrowdstrikeExecuteRTRParamsSchema,
+    });
+    this.registerSubAction({
+      name: SUB_ACTION.BATCH_EXECUTE_RTR,
+      method: 'batchExecuteRTR',
       schema: CrowdstrikeExecuteRTRParamsSchema,
     });
   }
@@ -243,37 +260,122 @@ export class CrowdstrikeConnector extends SubActionConnector<
     }
   }
 
-  public async initRTRSession({ alertIds, ...payload }: CrowdstrikeInitRTRParamsSchema) {
+  // public async batchInitRTRSession({ alertIds, ...payload }: CrowdstrikeInitRTRParams) {
+  //   const response = await this.crowdstrikeApiRequest({
+  //     url: this.urls.batchInitRTRSession,
+  //     method: 'post',
+  //     data: {
+  //       host_ids: payload.endpoint_ids,
+  //     },
+  //     paramsSerializer,
+  //     responseSchema: CrowdstrikeInitRTRResponseSchema,
+  //   });
+  //
+  //   CrowdstrikeConnector.currentSessionIO = response.session_id;
+  // }
+
+  public async initRTRSession({ alertIds, ...payload }: CrowdstrikeInitRTRParams) {
     const response = await this.crowdstrikeApiRequest({
       url: this.urls.initRTRSession,
       method: 'post',
       data: {
-        host_ids: payload.endpoint_ids,
+        device_id: payload.endpoint_ids[0],
       },
       paramsSerializer,
       responseSchema: CrowdstrikeInitRTRResponseSchema,
     });
 
-    CrowdstrikeConnector.currentBatchId = response.batch_id;
+    CrowdstrikeConnector.currentSessionIO = response.session_id;
+    return response;
   }
 
+  // public async executeRTR({ alertIds, ...payload }: CrowdstrikeExecuteRTRParamsSchema) {
+  //   const action = await this.crowdstrikeApiRequest({
+  //     url: this.urls.executeRTR,
+  //     method: 'post',
+  //     data: {
+  //       base_command: payload.command,
+  //       command_string: payload.command,
+  //       session_id: CrowdstrikeConnector.currentSessionIO,
+  //       device_id: 'test-agent-id-123456789', // payload ids[0]
+  //       persist: false,
+  //     },
+  //     paramsSerializer,
+  //     responseSchema: CrowdstrikeExecuteRTRResponseSchema,
+  //   });
+  //
+  //   const response = await this.crowdstrikeApiRequest({
+  //     url: this.urls.getExecuteRTRDetails,
+  //     method: 'get',
+  //     data: {
+  //       cloud_request_id: action.resources[0].cloud_request_id,
+  //       sequence_id: 0, // verify
+  //     },
+  //     paramsSerializer,
+  //     responseSchema: CrowdstrikeExecuteRTRResponseSchema,
+  //   });
+  //
+  //
+  //   return response;
+  // }
+
   public async executeRTR({ alertIds, ...payload }: CrowdstrikeExecuteRTRParamsSchema) {
-    const response = await this.crowdstrikeApiRequest({
+    const action = await this.crowdstrikeApiRequest({
       url: this.urls.executeRTR,
       method: 'post',
       data: {
         base_command: payload.command,
         command_string: payload.command,
-        batch_id: CrowdstrikeConnector.currentBatchId,
-        hosts: ['f467660e26454df6a2de19dc3f4531a8'],
-        persist_all: false,
+        session_id: CrowdstrikeConnector.currentSessionIO,
+        device_id: 'test-agent-id-123456789', // payload ids[0]
+        persist: false,
       },
       paramsSerializer,
       responseSchema: CrowdstrikeExecuteRTRResponseSchema,
     });
 
-    return response;
+    const getExecuteRTRDetails = async (sequence_id: number): Promise<any> => {
+      const content = [];
+      const response = await this.crowdstrikeApiRequest({
+        url: this.urls.getExecuteRTRDetails,
+        method: 'get',
+        data: {
+          cloud_request_id: action.resources[0].cloud_request_id,
+          sequence_id,
+        },
+        paramsSerializer,
+        responseSchema: CrowdstrikeExecuteRTRResponseSchema,
+      });
+
+      // Crowdstrike returns response in chunks, we need to wait until the last chunk is received (then set to complete === true)
+      if (response?.resources[0].complete === true) {
+        content.push(response);
+        return content;
+      } else {
+        return await getExecuteRTRDetails(sequence_id + 1);
+      }
+    };
+
+    return getExecuteRTRDetails(0);
   }
+
+  // public async batchExecuteRTR({ alertIds, ...payload }: CrowdstrikeExecuteRTRParamsSchema) {
+  //   const response = await this.crowdstrikeApiRequest({
+  //     url: this.urls.batchExecuteRTR,
+  //     method: 'post',
+  //     data: {
+  //       base_command: payload.command,
+  //       command_string: payload.command,
+  //       batch_id: CrowdstrikeConnector.currentBatchId,
+  //       hosts: ['test-agent-id-123456789'],
+  //       persist_all: false,
+  //     },
+  //     paramsSerializer,
+  //     responseSchema: CrowdstrikeExecuteRTRResponseSchema,
+  //   });
+  //
+  //   return response;
+  // }
 
   protected getResponseErrorMessage(
     error: AxiosError<{ errors: Array<{ message: string; code: number }> }>

@@ -57,6 +57,7 @@ import { EndpointIsolateActionRequestBodyInput } from '@kbn/security-solution-pl
 import { EndpointIsolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/isolate/deprecated_isolate.gen';
 import { EndpointKillProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/kill_process/kill_process.gen';
 import { EndpointScanActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/scan/scan.gen';
+import { EndpointShellActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/shell/shell.gen';
 import { EndpointSuspendProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/suspend_process/suspend_process.gen';
 import { EndpointUnisolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/unisolate.gen';
 import { EndpointUnisolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/deprecated_unisolate.gen';
@@ -539,6 +540,17 @@ Migrations are initiated per index. While the process is neither destructive nor
     endpointScanAction(props: EndpointScanActionProps) {
       return supertest
         .post('/api/endpoint/action/scan')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Run a shell command on an endpoint.
+     */
+    endpointShellAction(props: EndpointShellActionProps) {
+      return supertest
+        .post('/api/endpoint/action/shell')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1275,6 +1287,9 @@ export interface EndpointKillProcessActionProps {
 }
 export interface EndpointScanActionProps {
   body: EndpointScanActionRequestBodyInput;
+}
+export interface EndpointShellActionProps {
+  body: EndpointShellActionRequestBodyInput;
 }
 export interface EndpointSuspendProcessActionProps {
   body: EndpointSuspendProcessActionRequestBodyInput;

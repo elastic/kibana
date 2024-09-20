@@ -273,6 +273,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
           onHide={handleOnHide}
           console={
             <Console
+              agentType={visibleConsoleMeta.agentType}
               {...visibleConsole.consoleProps}
               managedKey={visibleConsole.key}
               key={visibleConsole.client.id}
@@ -285,7 +286,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
             )
           }
           body={
-            visibleConsole.PageBodyComponent && (
+            visibleConsole.PageBodxyComponent && (
               <visibleConsole.PageBodyComponent meta={visibleConsoleMeta} />
             )
           }

@@ -76,21 +76,25 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           storagePrefix: 'xpack.securitySolution.Responder',
           TitleComponent: () => {
             return (
-              <AgentInfo
-                agentId={agentId}
-                agentType={agentType}
-                hostName={hostName}
-                platform={platform}
-              />
+              <>
+                TEST!11
+                <AgentInfo
+                  agentId={agentId}
+                  agentType={agentType}
+                  hostName={hostName}
+                  platform={platform}
+                />
+              </>
             );
           },
         };
 
         consoleManager
-          .register({
+          .register<string>({
             id: agentId,
             meta: {
               agentId,
+              agentType,
               hostName,
               capabilities,
               platform,

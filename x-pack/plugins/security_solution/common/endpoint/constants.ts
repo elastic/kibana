@@ -96,6 +96,7 @@ export const EXECUTE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/execute`;
 export const UPLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/upload`;
 export const SCAN_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/scan`;
 export const INIT_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/init`;
+export const SHELL_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/shell`;
 
 /** Endpoint Actions Routes */
 export const ENDPOINT_ACTION_LOG_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_log/{agent_id}`;

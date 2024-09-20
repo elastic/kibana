@@ -173,6 +173,10 @@ import type {
   EndpointScanActionResponse,
 } from './endpoint/actions/response_actions/scan/scan.gen';
 import type {
+  EndpointShellActionRequestBodyInput,
+  EndpointShellActionResponse,
+} from './endpoint/actions/response_actions/shell/shell.gen';
+import type {
   EndpointSuspendProcessActionRequestBodyInput,
   EndpointSuspendProcessActionResponse,
 } from './endpoint/actions/response_actions/suspend_process/suspend_process.gen';
@@ -964,6 +968,22 @@ Migrations are initiated per index. While the process is neither destructive nor
     return this.kbnClient
       .request<EndpointScanActionResponse>({
         path: '/api/endpoint/action/scan',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Run a shell command on an endpoint.
+   */
+  async endpointShellAction(props: EndpointShellActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EndpointShellAction`);
+    return this.kbnClient
+      .request<EndpointShellActionResponse>({
+        path: '/api/endpoint/action/shell',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -2035,6 +2055,9 @@ export interface EndpointKillProcessActionProps {
 }
 export interface EndpointScanActionProps {
   body: EndpointScanActionRequestBodyInput;
+}
+export interface EndpointShellActionProps {
+  body: EndpointShellActionRequestBodyInput;
 }
 export interface EndpointSuspendProcessActionProps {
   body: EndpointSuspendProcessActionRequestBodyInput;

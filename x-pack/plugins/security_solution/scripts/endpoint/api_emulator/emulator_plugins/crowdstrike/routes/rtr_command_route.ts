@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  buildCrowdstrikeRoutePath,
-  TEST_AGENT_ID,
-  TEST_CLOUD_REQUEST_ID,
-  TEST_SESSION_ID,
-} from './utils';
+import { buildCrowdstrikeRoutePath, TEST_CLOUD_REQUEST_ID, TEST_SESSION_ID } from './utils';
 import type { ExternalEdrServerEmulatorRouteHandlerMethod } from '../../../external_edr_server_emulator.types';
 import type { EmulatorServerRouteDefinition } from '../../../lib/emulator_server.types';
 
@@ -28,62 +23,21 @@ export const rtrCommandRoute = (): EmulatorServerRouteDefinition => {
 //   "persist": true
 // }
 
-// @ts-expect-error - example of error response while executing cat command
-const rtrCommandExampleError = async () => {
-  return {
-    meta: {
-      query_time: 0.913513625,
-      powered_by: 'empower-api',
-      trace_id: 'xxx',
-    },
-    combined: {
-      resources: {
-        [TEST_AGENT_ID]: {
-          session_id: TEST_SESSION_ID,
-          task_id: 'xxx',
-          complete: true,
-          stdout: '',
-          stderr: 'cat: test.xt: No such file or directory',
-          base_command: 'cat',
-          aid: TEST_AGENT_ID,
-          errors: [],
-          query_time: 0.912058582,
-          offline_queued: false,
-        },
-      },
-    },
-    errors: [],
-  };
-};
-
 // @ts-expect-error - invalid command
 const rtrCommandInvalidCommandError = async () => {
   return {
     meta: {
-      query_time: 0.101208469,
+      query_time: 0.049229938,
       powered_by: 'empower-api',
-      trace_id: 'xxx',
+      trace_id: '9a58f783-08f8-4245-8a4e-70811d60e2c8',
     },
-    combined: {
-      resources: {
-        [TEST_AGENT_ID]: {
-          session_id: '',
-          complete: false,
-          stdout: '',
-          stderr: '',
-          aid: TEST_AGENT_ID,
-          errors: [
-            {
-              code: 40007,
-              message: 'Command not found',
-            },
-          ],
-          query_time: 0,
-          offline_queued: false,
-        },
+    resources: [],
+    errors: [
+      {
+        code: 40007,
+        message: 'Command not found',
       },
-    },
-    errors: [],
+    ],
   };
 };
 
@@ -91,30 +45,17 @@ const rtrCommandInvalidCommandError = async () => {
 const rtrCommandInvalidSessionError = async () => {
   return {
     meta: {
-      query_time: 0.02078217,
+      query_time: 0.018424436,
       powered_by: 'empower-api',
-      trace_id: 'xxx',
+      trace_id: '3212d22f-0655-4dce-8685-43f1ed1494ee',
     },
-    combined: {
-      resources: {
-        [TEST_AGENT_ID]: {
-          session_id: '',
-          complete: false,
-          stdout: '',
-          stderr: '',
-          aid: TEST_AGENT_ID,
-          errors: [
-            {
-              code: 50007,
-              message: 'could not get session',
-            },
-          ],
-          query_time: 0,
-          offline_queued: false,
-        },
+    resources: [],
+    errors: [
+      {
+        code: 40002,
+        message: 'Could not find existing session',
       },
-    },
-    errors: [],
+    ],
   };
 };
 

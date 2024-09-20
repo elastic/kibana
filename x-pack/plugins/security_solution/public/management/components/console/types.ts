@@ -279,6 +279,11 @@ export interface ConsoleProps extends CommonProps {
   commands: CommandDefinition[];
 
   /**
+   * The type of agent that will be used in the console.
+   */
+  agentType: string;
+
+  /**
    * If defined, then the `help` builtin command will display this output instead of the default one
    * which is generated out of the Command list.
    */
