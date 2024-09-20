@@ -378,6 +378,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
       if (simulatedMapping != null) {
         await esClient.indices.putMapping({ index: name, body: simulatedMapping });
+        this.logger.debug(`Successfully updated concrete index mappings for ${name}`);
       }
     } catch (err) {
       this.logger.error(`Error updating index mappings for ${name}: ${err.message}`);
