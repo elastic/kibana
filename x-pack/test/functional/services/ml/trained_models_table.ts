@@ -534,15 +534,17 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertAdvancedConfigurationOpen(expectedValue: boolean) {
-      const panelElement = await testSubjects.find(
-        'mlModelsStartDeploymentModalAdvancedConfiguration'
-      );
-      const isOpen = await panelElement.elementHasClass('euiPanel-isOpen');
+      await retry.tryForTime(5 * 1000, async () => {
+        const panelElement = await testSubjects.find(
+          'mlModelsStartDeploymentModalAdvancedConfiguration'
+        );
+        const isOpen = await panelElement.elementHasClass('euiAccordion-isOpen');
 
-      expect(isOpen).to.eql(
-        expectedValue,
-        `Expected Advanced configuration to be ${expectedValue ? 'open' : 'closed'}`
-      );
+        expect(isOpen).to.eql(
+          expectedValue,
+          `Expected Advanced configuration to be ${expectedValue ? 'open' : 'closed'}`
+        );
+      });
     }
 
     public async toggleAdvancedConfiguration(open: boolean) {
