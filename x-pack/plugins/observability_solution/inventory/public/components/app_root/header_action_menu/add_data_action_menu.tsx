@@ -21,7 +21,7 @@ import {
   ObservabilityOnboardingLocatorParams,
 } from '@kbn/deeplinks-observability';
 import { useKibana } from '../../../hooks/use_kibana';
-import { InventoryAddDataParams } from '../../../services/telemetry/types';
+import type { InventoryAddDataParams } from '../../../services/telemetry/types';
 
 const addDataTitle = i18n.translate('xpack.inventory.addDataContextMenu.link', {
   defaultMessage: 'Add data',

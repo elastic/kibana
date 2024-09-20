@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import { TelemetryServiceSetupParams, ITelemetryClient, TelemetryEventParams } from './types';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { TelemetryServiceSetupParams, ITelemetryClient, TelemetryEventParams } from './types';
 import { inventoryTelemetryEventBasedTypes } from './telemetry_events';
 import { TelemetryClient } from './telemetry_client';
 

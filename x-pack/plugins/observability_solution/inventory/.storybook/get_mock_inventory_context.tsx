@@ -8,9 +8,9 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { InventoryKibanaContext } from '../public/hooks/use_kibana';
-import { ITelemetryClient } from '../public/services/telemetry/types';
+import type { ITelemetryClient } from '../public/services/telemetry/types';
 
 export function getMockInventoryContext(): InventoryKibanaContext {
   const coreStart = coreMock.createStart();
