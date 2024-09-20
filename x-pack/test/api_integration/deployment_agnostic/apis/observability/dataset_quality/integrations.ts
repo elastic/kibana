@@ -8,8 +8,8 @@
 import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/dataset-quality-plugin/common/rest';
-import { CustomIntegration } from '../../../../services/package_api';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { CustomIntegration } from '../../../services/package_api';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');

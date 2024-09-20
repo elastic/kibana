@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function toBoolean(value: any): boolean {
+export function toBoolean(value: string | boolean): boolean {
   if (typeof value === 'string') {
     return value.toLowerCase() === 'true';
   }

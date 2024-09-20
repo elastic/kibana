@@ -9,6 +9,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Dataset quality', () => {
-    loadTestFile(require.resolve('./integrations/integrations'));
+    loadTestFile(require.resolve('./integrations'));
+    loadTestFile(require.resolve('./degraded_field_analyze'));
   });
 }
