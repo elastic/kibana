@@ -1,30 +1,3 @@
-.controlsWrapper {
-  min-height: $euiSize * 4;
-}
-
-.optionsList--filterBtn, .euiFilterButton {
-  height: $euiFormControlHeight !important;
-}
-
-.euiFilterGroup {
-  height: $euiFormControlHeight !important;
-  border-radius: $euiFormControlBorderRadius !important;
-}
-
-.controlPanel {
-
-  .euiDualRange, .euiRange {
-    height: $euiFormControlHeight !important;
-  }
-
-  .controlPanel--label {
-    height: $euiFormControlHeight !important;
-  }
-}
-
-.dshDashboardViewport-controls {
-  padding-bottom: $euiSizeXS;
-}
 
 .controlPanel--labelWrapper > label {
   height: $euiFormControlHeight !important;
@@ -35,6 +8,6 @@
   height: $euiFormControlHeight !important;
 }
 
-.controlFrame__formControlLayout {
-  block-size: $euiFormControlHeight !important;
+.optionsList--selectionText {
+  padding-top: 5px;
 }

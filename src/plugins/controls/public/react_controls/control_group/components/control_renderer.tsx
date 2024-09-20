@@ -31,14 +31,12 @@ export const ControlRenderer = <
   getParentApi,
   onApiAvailable,
   isControlGroupInitialized,
-  className,
 }: {
   type: string;
   uuid: string;
   getParentApi: () => ControlGroupApi;
   onApiAvailable?: (api: ApiType) => void;
   isControlGroupInitialized: boolean;
-  className?: string;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
 
@@ -137,7 +135,7 @@ export const ControlRenderer = <
 
   return component && isControlGroupInitialized ? (
     // @ts-expect-error
-    <ControlPanel<ApiType> Component={component} uuid={uuid} className={className} />
+    <ControlPanel<ApiType> Component={component} uuid={uuid} />
   ) : // Control group will not display controls until all controls are initialized
   null;
 };
