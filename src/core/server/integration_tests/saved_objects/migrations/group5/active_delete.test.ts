@@ -381,6 +381,7 @@ describe('when upgrading to a new stack version', () => {
           "basic": 10,
           "complex": 5,
           "deprecated": 10,
+          "task": 10,
         }
       `);
     });

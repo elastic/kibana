@@ -205,12 +205,15 @@ export const createBaseline = async (params: CreateBaselineParams = {}) => {
     types: baselineTypes,
   });
 
-  // remove the testing index (current and next minor)
+  // remove the testing indices (current and next minor)
   await client.indices.delete({
     index: [
       defaultKibanaIndex,
       `${defaultKibanaIndex}_${currentVersion}_001`,
       `${defaultKibanaIndex}_${nextMinor}_001`,
+      defaultKibanaTaskIndex,
+      `${defaultKibanaTaskIndex}_${currentVersion}_001`,
+      `${defaultKibanaTaskIndex}_${nextMinor}_001`,
     ],
     ignore_unavailable: true,
   });

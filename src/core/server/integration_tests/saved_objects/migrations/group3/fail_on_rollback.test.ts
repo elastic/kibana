@@ -56,7 +56,7 @@ describe('when rolling back to an older version', () => {
     );
 
     const logs = await parseLogFile(logFilePath);
-    expect(logs).toContainLogEntry(`${defaultKibanaIndex} INIT -> FATAL.`);
+    expect(logs).toContainLogEntry(`[${defaultKibanaIndex}] INIT -> FATAL.`);
   });
 
   afterAll(async () => {
