@@ -101,7 +101,7 @@
     "@kbn/test-eui-helpers",
     "@kbn/shared-ux-utility",
     "@kbn/esql-utils",
-    "@kbn/text-based-editor",
+    "@kbn/esql-editor",
     "@kbn/managed-content-badge",
     "@kbn/sort-predicates",
     "@kbn/presentation-publishing",

@@ -54,7 +54,7 @@ const STORYBOOKS = [
   'language_documentation_popover',
   'unified_search',
   'random_sampling',
-  'text_based_editor',
+  'esql_editor',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';

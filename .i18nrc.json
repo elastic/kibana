@@ -98,7 +98,7 @@
     "presentationUtil": "src/plugins/presentation_util",
     "randomSampling": "x-pack/packages/kbn-random-sampling",
     "reactPackages": "packages/react",
-    "textBasedEditor": "packages/kbn-text-based-editor",
+    "esqlEditor": "packages/kbn-esql-editor",
     "esqlUtils": "packages/kbn-esql-utils",
     "reporting": "packages/kbn-reporting",
     "savedObjects": "src/plugins/saved_objects",

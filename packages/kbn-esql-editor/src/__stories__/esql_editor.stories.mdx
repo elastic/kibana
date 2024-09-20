@@ -1,7 +1,7 @@
 import { Canvas, Meta, Story, ArgsTable } from '@storybook/addon-docs/blocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { TextBasedLanguagesEditor } from '../text_based_languages_editor';
+import { ESQLEditor } from '../text_based_languages_editor';
 
 
 export const Template = (args) => 
@@ -12,19 +12,19 @@ export const Template = (args) =>
           uiSettings: { get: () => {} },
         }}
     >
-        <TextBasedLanguagesEditor {...args} />
+        <ESQLEditor {...args} />
     </KibanaContextProvider>
 </I18nProvider>;
 
 <Meta 
     title="Text based languages editor"
-    component={TextBasedLanguagesEditor}
+    component={ESQLEditor}
 />
 
 
 # Overview
 
-The TextBasedLanguagesEditor component is a reusable component and can be used to support text based languages in your application (SQL, ESQL):
+The ESQLEditor component is a reusable component and can be used to support text based languages in your application (SQL, ESQL):
 
 <Canvas>
     <Story 
@@ -71,4 +71,4 @@ When there are errors to the query the UI displays the errors to the editor:
 
 The component exposes the following properties:
 
-<ArgsTable story="expanded mode"/>
+<ArgsTable story="expanded mode"/>../esql_editor

@@ -6938,7 +6938,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/text-based-editor@link:packages/kbn-text-based-editor":
+"@kbn/esql-editor@link:packages/kbn-esql-editor":
   version "0.0.0"
   uid ""
 

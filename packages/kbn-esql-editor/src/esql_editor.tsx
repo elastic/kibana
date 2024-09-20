@@ -49,9 +49,9 @@ import {
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
   EDITOR_MAX_HEIGHT,
   EDITOR_MIN_HEIGHT,
-  textBasedLanguageEditorStyles,
-} from './text_based_languages_editor.styles';
-import type { TextBasedLanguagesEditorProps, TextBasedEditorDeps } from './types';
+  esqlEditorStyles,
+} from './esql_editor.styles';
+import type { ESQLEditorProps, ESQLEditorDeps } from './types';
 
 import './overwrite.scss';
 
@@ -61,7 +61,7 @@ const KEYCODE_ARROW_DOWN = 40;
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 
-export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
+export const ESQLEditor = memo(function ESQLEditor({
   query,
   onTextLangQueryChange,
   onTextLangQuerySubmit,
@@ -79,11 +79,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
-}: TextBasedLanguagesEditorProps) {
+}: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const { euiTheme } = useEuiTheme();
-  const kibana = useKibana<TextBasedEditorDeps>();
+  const kibana = useKibana<ESQLEditorDeps>();
   const {
     dataViews,
     expressions,
@@ -235,7 +235,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     openTimePickerPopover();
   });
 
-  const styles = textBasedLanguageEditorStyles(
+  const styles = esqlEditorStyles(
     euiTheme,
     editorHeight,
     Boolean(editorMessages.errors.length),
@@ -396,7 +396,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
       return {
-        label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.cancel', {
+        label: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.cancel', {
           defaultMessage: 'Cancel',
         }),
         iconType: 'cross',
@@ -405,7 +405,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
     if (code !== codeWhenSubmitted) {
       return {
-        label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
+        label: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.runQuery', {
           defaultMessage: 'Run query',
         }),
         iconType: 'play',
@@ -413,7 +413,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       };
     }
     return {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.refreshLabel', {
+      label: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.refreshLabel', {
         defaultMessage: 'Refresh',
       }),
       iconType: 'refresh',
@@ -611,7 +611,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
-              content={i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
+              content={i18n.translate('esqlEditor.query.textBasedLanguagesEditor.runQuery', {
                 defaultMessage: 'Run query',
               })}
             >

@@ -14,7 +14,7 @@ export const EDITOR_INITIAL_HEIGHT_INLINE_EDITING = 140;
 export const EDITOR_MIN_HEIGHT = 40;
 export const EDITOR_MAX_HEIGHT = 400;
 
-export const textBasedLanguageEditorStyles = (
+export const esqlEditorStyles = (
   euiTheme: EuiThemeComputed,
   editorHeight: number,
   hasErrors: boolean,

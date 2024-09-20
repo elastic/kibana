@@ -13,12 +13,12 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { TextBasedLanguagesEditor } from './text_based_languages_editor';
-import type { TextBasedLanguagesEditorProps } from './types';
+import { ESQLEditor } from './esql_editor';
+import type { ESQLEditorProps } from './types';
 import { ReactWrapper } from 'enzyme';
 import { of } from 'rxjs';
 
-describe('TextBasedLanguagesEditor', () => {
+describe('ESQLEditor', () => {
   const uiConfig: Record<string, any> = {};
   const uiSettings = {
     get: (key: string) => uiConfig[key],
@@ -35,14 +35,14 @@ describe('TextBasedLanguagesEditor', () => {
     theme,
   };
 
-  function renderTextBasedLanguagesEditorComponent(testProps: TextBasedLanguagesEditorProps) {
+  function renderESQLEditorComponent(testProps: ESQLEditorProps) {
     return (
       <KibanaContextProvider services={services}>
-        <TextBasedLanguagesEditor {...testProps} />
+        <ESQLEditor {...testProps} />
       </KibanaContextProvider>
     );
   }
-  let props: TextBasedLanguagesEditorProps;
+  let props: ESQLEditorProps;
 
   beforeEach(() => {
     props = {
@@ -52,19 +52,19 @@ describe('TextBasedLanguagesEditor', () => {
     };
   });
   it('should  render the editor component', async () => {
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
+    const component = mount(renderESQLEditorComponent({ ...props }));
     expect(component.find('[data-test-subj="TextBasedLangEditor"]').length).not.toBe(0);
   });
 
   it('should  render the date info with no @timestamp found', async () => {
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
+    const component = mount(renderESQLEditorComponent({ ...props }));
     expect(
       component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
     ).toStrictEqual('@timestamp not found');
   });
 
   it('should  render the feedback link', async () => {
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
+    const component = mount(renderESQLEditorComponent({ ...props }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-feedback-link"]').length).not.toBe(
       0
     );
@@ -75,7 +75,7 @@ describe('TextBasedLanguagesEditor', () => {
       ...props,
       hideTimeFilterInfo: true,
     };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderESQLEditorComponent({ ...newProps }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-date-info"]').length).toBe(0);
   });
 
@@ -84,14 +84,14 @@ describe('TextBasedLanguagesEditor', () => {
       ...props,
       detectedTimestamp: '@timestamp',
     };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderESQLEditorComponent({ ...newProps }));
     expect(
       component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
     ).toStrictEqual('@timestamp found');
   });
 
   it('should  render the limit information', async () => {
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
+    const component = mount(renderESQLEditorComponent({ ...props }));
     expect(
       component.find('[data-test-subj="TextBasedLangEditor-limit-info"]').at(0).text()
     ).toStrictEqual('LIMIT 1000 rows');
@@ -102,7 +102,7 @@ describe('TextBasedLanguagesEditor', () => {
       ...props,
       hideQueryHistory: true,
     };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderESQLEditorComponent({ ...newProps }));
     expect(
       component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
         .length
@@ -112,7 +112,7 @@ describe('TextBasedLanguagesEditor', () => {
   it('should render the correct buttons for the expanded code editor mode', async () => {
     let component: ReactWrapper;
     await act(async () => {
-      component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
+      component = mount(renderESQLEditorComponent({ ...props }));
     });
     component!.update();
     expect(
@@ -121,12 +121,12 @@ describe('TextBasedLanguagesEditor', () => {
   });
 
   it('should render the resize for the expanded code editor mode', async () => {
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
+    const component = mount(renderESQLEditorComponent({ ...props }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-resize"]').length).not.toBe(0);
   });
 
   it('should render the footer for the expanded code editor mode', async () => {
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
+    const component = mount(renderESQLEditorComponent({ ...props }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-footer"]').length).not.toBe(0);
     expect(component.find('[data-test-subj="TextBasedLangEditor-footer-lines"]').at(0).text()).toBe(
       '1 line'
@@ -134,7 +134,7 @@ describe('TextBasedLanguagesEditor', () => {
   });
 
   it('should render the run query text', async () => {
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
+    const component = mount(renderESQLEditorComponent({ ...props }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).not.toBe(0);
   });
 
@@ -144,7 +144,7 @@ describe('TextBasedLanguagesEditor', () => {
       displayDocumentationAsFlyout: true,
       editorIsInline: false,
     };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderESQLEditorComponent({ ...newProps }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-documentation"]').length).not.toBe(
       0
     );
@@ -155,7 +155,7 @@ describe('TextBasedLanguagesEditor', () => {
       ...props,
       hideRunQueryText: true,
     };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderESQLEditorComponent({ ...newProps }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).toBe(0);
   });
 
@@ -167,7 +167,7 @@ describe('TextBasedLanguagesEditor', () => {
       editorIsInline: true,
       onTextLangQuerySubmit,
     };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderESQLEditorComponent({ ...newProps }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).toBe(0);
     expect(
       component.find('[data-test-subj="TextBasedLangEditor-run-query-button"]').length

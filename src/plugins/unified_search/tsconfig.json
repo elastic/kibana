@@ -36,7 +36,7 @@
     "@kbn/ui-theme",
     "@kbn/saved-objects-management-plugin",
     "@kbn/esql",
-    "@kbn/text-based-editor",
+    "@kbn/esql-editor",
     "@kbn/core-doc-links-browser",
     "@kbn/core-lifecycle-browser",
     "@kbn/ml-string-hash",

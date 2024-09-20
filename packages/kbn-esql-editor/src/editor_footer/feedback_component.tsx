@@ -27,7 +27,7 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
           >
             <EuiToolTip
               position="top"
-              content={i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.feedback', {
+              content={i18n.translate('esqlEditor.query.textBasedLanguagesEditor.feedback', {
                 defaultMessage: 'Feedback',
               })}
             >
@@ -59,7 +59,7 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
               `}
               data-test-subj="TextBasedLangEditor-feedback-link"
             >
-              {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.submitFeedback', {
+              {i18n.translate('esqlEditor.query.textBasedLanguagesEditor.submitFeedback', {
                 defaultMessage: 'Submit feedback',
               })}
             </EuiLink>

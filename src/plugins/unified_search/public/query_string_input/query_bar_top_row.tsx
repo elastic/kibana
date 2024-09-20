@@ -20,7 +20,7 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import { TextBasedLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle } from 'lodash';
@@ -728,7 +728,7 @@ export const QueryBarTopRow = React.memo(
         isQueryLangSelected &&
         props.query &&
         isOfAggregateQueryType(props.query) && (
-          <TextBasedLangEditor
+          <ESQLLangEditor
             query={props.query}
             onTextLangQueryChange={props.onTextLangQueryChange}
             errors={props.textBasedLanguageModeErrors}

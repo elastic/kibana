@@ -30,12 +30,12 @@ export function QueryWrapComponent({
         content={
           isWrappedByPipes
             ? i18n.translate(
-                'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                'esqlEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
                 {
                   defaultMessage: 'Remove line breaks on pipes',
                 }
               )
-            : i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel', {
+            : i18n.translate('esqlEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel', {
                 defaultMessage: 'Add line breaks on pipes',
               })
         }
@@ -48,13 +48,13 @@ export function QueryWrapComponent({
           aria-label={
             isWrappedByPipes
               ? i18n.translate(
-                  'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                  'esqlEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
                   {
                     defaultMessage: 'Remove line breaks on pipes',
                   }
                 )
               : i18n.translate(
-                  'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                  'esqlEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
                   {
                     defaultMessage: 'Add line breaks on pipes',
                   }

@@ -138,7 +138,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
       };
     } else if (error.message.includes('expression was aborted')) {
       return {
-        message: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.aborted', {
+        message: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.aborted', {
           defaultMessage: 'Request was aborted',
         }),
         startColumn: 1,

@@ -14,7 +14,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
-export interface TextBasedLanguagesEditorProps {
+export interface ESQLEditorProps {
   /** The aggregate type query */
   query: AggregateQuery;
   /** Callback running everytime the query changes */
@@ -66,7 +66,7 @@ export interface TextBasedLanguagesEditorProps {
   displayDocumentationAsFlyout?: boolean;
 }
 
-export interface TextBasedEditorDeps {
+export interface ESQLEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;

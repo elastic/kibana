@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useRef, useState, useCallback } from 'react';
-import { TextBasedLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { EuiFlexItem } from '@elastic/eui';
 import type { AggregateQuery } from '@kbn/es-query';
 
@@ -39,7 +39,7 @@ export const FieldStatsESQLEditor = ({
 
   return (
     <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
-      <TextBasedLangEditor
+      <ESQLLangEditor
         query={query}
         onTextLangQueryChange={(q) => {
           setQuery(q);

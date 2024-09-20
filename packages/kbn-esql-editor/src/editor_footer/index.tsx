@@ -30,7 +30,7 @@ import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QueryHistoryAction, QueryHistory } from './query_history';
 import { SubmitFeedbackComponent } from './feedback_component';
 import { QueryWrapComponent } from './query_wrap_component';
-import type { TextBasedEditorDeps } from '../types';
+import type { ESQLEditorDeps } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -81,7 +81,7 @@ export const EditorFooter = memo(function EditorFooter({
   measuredContainerWidth,
   code,
 }: EditorFooterProps) {
-  const kibana = useKibana<TextBasedEditorDeps>();
+  const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
@@ -147,7 +147,7 @@ export const EditorFooter = memo(function EditorFooter({
                   data-test-subj="TextBasedLangEditor-footer-lines"
                 >
                   <p>
-                    {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.lineCount', {
+                    {i18n.translate('esqlEditor.query.textBasedLanguagesEditor.lineCount', {
                       defaultMessage: '{count} {count, plural, one {line} other {lines}}',
                       values: { count: lines },
                     })}
@@ -169,14 +169,14 @@ export const EditorFooter = memo(function EditorFooter({
                             ? '@timestamp'
                             : detectedTimestamp
                             ? i18n.translate(
-                                'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
+                                'esqlEditor.query.textBasedLanguagesEditor.timestampDetected',
                                 {
                                   defaultMessage: '{detectedTimestamp} found',
                                   values: { detectedTimestamp },
                                 }
                               )
                             : i18n.translate(
-                                'textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected',
+                                'esqlEditor.query.textBasedLanguagesEditor.timestampNotDetected',
                                 {
                                   defaultMessage: '@timestamp not found',
                                 }
@@ -198,14 +198,14 @@ export const EditorFooter = memo(function EditorFooter({
                       <p>
                         {isSpaceReduced
                           ? i18n.translate(
-                              'textBasedEditor.query.textBasedLanguagesEditor.limitInfoReduced',
+                              'esqlEditor.query.textBasedLanguagesEditor.limitInfoReduced',
                               {
                                 defaultMessage: 'LIMIT {limit}',
                                 values: { limit },
                               }
                             )
                           : i18n.translate(
-                              'textBasedEditor.query.textBasedLanguagesEditor.limitInfo',
+                              'esqlEditor.query.textBasedLanguagesEditor.limitInfo',
                               {
                                 defaultMessage: 'LIMIT {limit} rows',
                                 values: { limit },
@@ -270,7 +270,7 @@ export const EditorFooter = memo(function EditorFooter({
                       >
                         <p>
                           {i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
+                            'esqlEditor.query.textBasedLanguagesEditor.runQuery',
                             {
                               defaultMessage: 'Run query',
                             }

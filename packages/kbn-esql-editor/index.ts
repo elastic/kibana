@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-text-based-editor'],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-text-based-editor/setup_tests.ts'],
-};
+export type { ESQLEditorProps } from './src/types';
+export { fetchFieldsFromESQL } from './src/fetch_fields_from_esql';
+import { ESQLEditor } from './src/esql_editor';
+
+// React.lazy support
+// eslint-disable-next-line import/no-default-export
+export default ESQLEditor;

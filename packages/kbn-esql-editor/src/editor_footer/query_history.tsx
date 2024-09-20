@@ -53,13 +53,13 @@ export function QueryHistoryAction({
             content={
               isHistoryOpen
                 ? i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.hideQueriesLabel',
+                    'esqlEditor.query.textBasedLanguagesEditor.hideQueriesLabel',
                     {
                       defaultMessage: 'Hide recent queries',
                     }
                   )
                 : i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.showQueriesLabel',
+                    'esqlEditor.query.textBasedLanguagesEditor.showQueriesLabel',
                     {
                       defaultMessage: 'Show recent queries',
                     }
@@ -95,10 +95,10 @@ export function QueryHistoryAction({
             data-test-subj="TextBasedLangEditor-toggle-query-history-button"
           >
             {isHistoryOpen
-              ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.hideQueriesLabel', {
+              ? i18n.translate('esqlEditor.query.textBasedLanguagesEditor.hideQueriesLabel', {
                   defaultMessage: 'Hide recent queries',
                 })
-              : i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.showQueriesLabel', {
+              : i18n.translate('esqlEditor.query.textBasedLanguagesEditor.showQueriesLabel', {
                   defaultMessage: 'Show recent queries',
                 })}
           </EuiButtonEmpty>
@@ -127,7 +127,7 @@ export const getTableColumns = (
               <EuiToolTip
                 position="top"
                 content={i18n.translate(
-                  'textBasedEditor.query.textBasedLanguagesEditor.querieshistory.success',
+                  'esqlEditor.query.textBasedLanguagesEditor.querieshistory.success',
                   {
                     defaultMessage: 'Query ran successfully',
                   }
@@ -146,7 +146,7 @@ export const getTableColumns = (
               <EuiToolTip
                 position="top"
                 content={i18n.translate(
-                  'textBasedEditor.query.textBasedLanguagesEditor.querieshistory.error',
+                  'esqlEditor.query.textBasedLanguagesEditor.querieshistory.error',
                   {
                     defaultMessage: 'Query failed',
                   }
@@ -165,7 +165,7 @@ export const getTableColumns = (
               <EuiToolTip
                 position="top"
                 content={i18n.translate(
-                  'textBasedEditor.query.textBasedLanguagesEditor.querieshistory.error',
+                  'esqlEditor.query.textBasedLanguagesEditor.querieshistory.error',
                   {
                     defaultMessage: 'Query failed',
                   }
@@ -188,7 +188,7 @@ export const getTableColumns = (
       field: 'queryString',
       'data-test-subj': 'queryString',
       name: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.recentQueriesColumnLabel',
+        'esqlEditor.query.textBasedLanguagesEditor.recentQueriesColumnLabel',
         {
           defaultMessage: 'Recent queries',
         }
@@ -204,7 +204,7 @@ export const getTableColumns = (
     {
       field: 'timeRan',
       'data-test-subj': 'timeRan',
-      name: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.timeRanColumnLabel', {
+      name: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.timeRanColumnLabel', {
         defaultMessage: 'Time ran',
       }),
       sortable: true,
@@ -249,7 +249,7 @@ export function QueryHistory({
                 <EuiToolTip
                   position="top"
                   content={i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryRun',
+                    'esqlEditor.query.textBasedLanguagesEditor.querieshistoryRun',
                     {
                       defaultMessage: 'Run query',
                     }
@@ -258,7 +258,7 @@ export function QueryHistory({
                   <EuiButtonIcon
                     iconType="play"
                     aria-label={i18n.translate(
-                      'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryRun',
+                      'esqlEditor.query.textBasedLanguagesEditor.querieshistoryRun',
                       {
                         defaultMessage: 'Run query',
                       }
@@ -277,7 +277,7 @@ export function QueryHistory({
                 <EuiCopy
                   textToCopy={item.queryString}
                   content={i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryCopy',
+                    'esqlEditor.query.textBasedLanguagesEditor.querieshistoryCopy',
                     {
                       defaultMessage: 'Copy query to clipboard',
                     }
@@ -292,7 +292,7 @@ export function QueryHistory({
                         cursor: pointer;
                       `}
                       aria-label={i18n.translate(
-                        'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryCopy',
+                        'esqlEditor.query.textBasedLanguagesEditor.querieshistoryCopy',
                         {
                           defaultMessage: 'Copy query to clipboard',
                         }
@@ -352,7 +352,7 @@ export function QueryHistory({
     <div data-test-subj="TextBasedLangEditor-queryHistory" css={containerCSS}>
       <EuiInMemoryTable
         tableCaption={i18n.translate(
-          'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryTable',
+          'esqlEditor.query.textBasedLanguagesEditor.querieshistoryTable',
           {
             defaultMessage: 'Queries history table',
           }
@@ -401,10 +401,10 @@ export function QueryColumn({
           data-test-subj="TextBasedLangEditor-queryHistory-queryString-expanded"
           aria-label={
             isRowExpanded
-              ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.collapseLabel', {
+              ? i18n.translate('esqlEditor.query.textBasedLanguagesEditor.collapseLabel', {
                   defaultMessage: 'Collapse',
                 })
-              : i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.expandLabel', {
+              : i18n.translate('esqlEditor.query.textBasedLanguagesEditor.expandLabel', {
                   defaultMessage: 'Expand',
                 })
           }

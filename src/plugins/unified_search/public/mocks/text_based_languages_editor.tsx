@@ -9,14 +9,14 @@
 
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
+import { ESQLEditorProps } from '@kbn/esql-editor';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-const TextBasedLanguagesEditorLazy = React.lazy(() => import('@kbn/text-based-editor'));
-const TextBasedLanguagesEditor = withSuspense(TextBasedLanguagesEditorLazy);
+const ESQLEditorLazy = React.lazy(() => import('@kbn/esql-editor'));
+const ESQLEditor = withSuspense(ESQLEditorLazy);
 
 function createEditor() {
-  return (props: TextBasedLanguagesEditorProps) => {
+  return (props: ESQLEditorProps) => {
     return (
       <KibanaContextProvider
         services={{
@@ -24,7 +24,7 @@ function createEditor() {
           uiSettings: { get: () => {} },
         }}
       >
-        <TextBasedLanguagesEditor {...props} />
+        <ESQLEditor {...props} />
       </KibanaContextProvider>
     );
   };
