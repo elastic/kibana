@@ -8,6 +8,7 @@
  */
 
 import { accessSync, constants, readFileSync, statSync } from 'fs';
+import { load } from 'js-yaml';
 import { dirname, join } from 'path';
 import { Observable, firstValueFrom } from 'rxjs';
 import { ensureDeepObject } from '@kbn/std';

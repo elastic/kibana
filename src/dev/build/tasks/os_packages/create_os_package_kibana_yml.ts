@@ -9,6 +9,7 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
+import { dump } from 'js-yaml';
 import { Build, Config, mkdirp } from '../../lib';
 
 export async function createOSPackageKibanaYML(config: Config, build: Build) {

@@ -11,6 +11,7 @@ import crypto from 'crypto';
 import { join } from 'path';
 import { get } from 'lodash';
 import { readFileSync } from 'fs';
+import { load } from 'js-yaml';
 
 import { getConfigDirectory } from '@kbn/utils';
 

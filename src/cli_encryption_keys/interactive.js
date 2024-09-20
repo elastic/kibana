@@ -11,6 +11,7 @@ import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { confirm, question } from '../cli/keystore/utils';
 import { getConfigDirectory } from '@kbn/utils';
+import { dump } from 'js-yaml';
 
 export async function interactive(keys, docs, logger) {
   const settings = Object.keys(keys);

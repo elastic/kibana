@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { load } from 'js-yaml';
 import deepMerge from 'deepmerge';
 import { set } from '@kbn/safer-lodash-set';
 

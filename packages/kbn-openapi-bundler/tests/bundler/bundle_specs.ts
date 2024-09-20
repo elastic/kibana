@@ -17,6 +17,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'fs';
+import { dump, load } from 'js-yaml';
 import { OpenAPIV3 } from 'openapi-types';
 import { bundle, BundlerConfig } from '../../src/openapi_bundler';
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { load } from 'js-yaml';
+
 import semverGte from 'semver/functions/gte';
 import semverLte from 'semver/functions/lte';
 

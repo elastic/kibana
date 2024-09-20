@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { load } from 'js-yaml';
 
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>

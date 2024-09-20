@@ -8,7 +8,6 @@
  */
 
 import { readFileSync } from 'fs';
-
 import { set } from '@kbn/safer-lodash-set';
 import { ensureDeepObject } from '@kbn/std';
 import { isPlainObject } from 'lodash';

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
+import { load } from 'js-yaml';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';

@@ -6,6 +6,7 @@
  */
 
 import Handlebars from 'handlebars';
+import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
 import type { PackagePolicyConfigRecord } from '../../../../common/types';

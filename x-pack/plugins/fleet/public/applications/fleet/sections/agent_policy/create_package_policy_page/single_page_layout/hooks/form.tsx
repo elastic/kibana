@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { load } from 'js-yaml';
 
 import { isEqual } from 'lodash';
 

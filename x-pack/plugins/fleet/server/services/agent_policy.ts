@@ -7,6 +7,7 @@
 
 import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
+import { dump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
 import type {

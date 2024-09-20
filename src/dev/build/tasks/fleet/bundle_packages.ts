@@ -11,6 +11,7 @@ import Fsp from 'fs/promises';
 import Path from 'path';
 
 import JSON5 from 'json5';
+import { load, dump } from 'js-yaml';
 import { asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 

@@ -8,6 +8,7 @@
  */
 
 import { readFileSync } from 'fs';
+import { load } from 'js-yaml';
 import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 import { ensureValidObjectPath } from '@kbn/std';

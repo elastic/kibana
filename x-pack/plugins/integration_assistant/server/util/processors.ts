@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { load } from 'js-yaml';
 import { join as joinPath } from 'path';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { deepCopy } from './util';

@@ -9,6 +9,8 @@ import crypto from 'crypto';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { dump } from 'js-yaml';
+
 import type { PackagePolicy, AgentPolicy } from '../../types';
 import {
   sendGetOneAgentPolicy,

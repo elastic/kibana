@@ -8,6 +8,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 
+import { load } from 'js-yaml';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { dump } from 'js-yaml';
+
 interface SystemLogsStream {
   id: string;
   data_stream: {

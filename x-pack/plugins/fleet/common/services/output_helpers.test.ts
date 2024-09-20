@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { load } from 'js-yaml';
+
 import {
   getAllowedOutputTypeForPolicy,
   outputYmlIncludesReservedPerformanceKey,

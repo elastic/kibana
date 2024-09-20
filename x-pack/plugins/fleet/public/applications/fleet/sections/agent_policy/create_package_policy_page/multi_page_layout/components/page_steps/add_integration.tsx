@@ -8,6 +8,7 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { load } from 'js-yaml';
 
 import { i18n } from '@kbn/i18n';
 

@@ -8,6 +8,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { dump, load } from 'js-yaml';
 
 import {
   sendPostFleetProxy,

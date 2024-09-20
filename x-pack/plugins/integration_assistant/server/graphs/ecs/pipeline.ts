@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { load } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
 import { Pipeline, ESProcessorItem } from '../../../common';

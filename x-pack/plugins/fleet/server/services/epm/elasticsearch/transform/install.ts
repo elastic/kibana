@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
+import { load } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
 

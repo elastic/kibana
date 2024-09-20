@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { load } from 'js-yaml';
+
 import { installationStatuses } from '../constants';
 import type { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../types';
 

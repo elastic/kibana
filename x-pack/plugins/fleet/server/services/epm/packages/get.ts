@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { load } from 'js-yaml';
 import pMap from 'p-map';
 import minimatch from 'minimatch';
 import type {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { dump } from 'js-yaml';
+
 import type { FullAgentPolicy } from '../types';
 
 const POLICY_KEYS_ORDER = [

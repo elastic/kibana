@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { dump } from 'js-yaml';
+
 // NOTE: The install methods will take care of adding a reference to a @custom pipeline. We don't need to add one here.
 export const createDefaultPipeline = (dataset: string, type: string) => {
   const pipeline = {
