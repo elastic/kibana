@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
-
-export type RuleFromImportStream = RuleToImport | Error;
+export * from './types';
+export * from './rule_source_importer';

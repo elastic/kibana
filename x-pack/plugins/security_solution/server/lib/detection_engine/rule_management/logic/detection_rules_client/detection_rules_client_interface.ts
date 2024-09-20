@@ -15,9 +15,9 @@ import type {
   RuleToImport,
   RuleSource,
 } from '../../../../../../common/api/detection_engine';
+import type { IRuleSourceImporter } from '../../../prebuilt_rules/logic/rule_source_importer';
 import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
-import type { PrebuiltRulesImportHelper } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
 
 export interface IDetectionRulesClient {
   createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
@@ -70,6 +70,6 @@ export interface ImportRuleArgs {
 export interface ImportRulesArgs {
   rules: RuleToImport[];
   overwriteRules: boolean;
-  prebuiltRulesImportHelper: PrebuiltRulesImportHelper;
+  ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
 }

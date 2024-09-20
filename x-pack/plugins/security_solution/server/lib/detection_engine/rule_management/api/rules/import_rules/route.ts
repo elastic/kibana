@@ -20,7 +20,8 @@ import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
 import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
-import { PrebuiltRulesImportHelper } from '../../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
+import { createRuleSourceImporter } from '../../../../prebuilt_rules/logic/rule_source_importer';
+import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { importRules } from '../../../logic/import/import_rules_with_source';
 import { importRules as legacyImportRules } from '../../../logic/import/import_rules_utils';
@@ -142,10 +143,10 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             ? []
             : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
 
-          const prebuiltRulesImportHelper = new PrebuiltRulesImportHelper({
+          const ruleSourceImporter = createRuleSourceImporter({
             config,
             context: ctx.securitySolution,
-            savedObjectsClient,
+            prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
           });
 
           const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
@@ -158,7 +159,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
               rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
               overwriteRules: request.query.overwrite,
               allowMissingConnectorSecrets: !!actionConnectors.length,
-              prebuiltRulesImportHelper,
+              ruleSourceImporter,
               detectionRulesClient,
             });
           } else {

@@ -8,12 +8,10 @@
 import { partition } from 'lodash';
 
 import { type ImportRuleResponse, createBulkErrorObject } from '../../../routes/utils';
-import type { PrebuiltRulesImportHelper } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
+import type { IRuleSourceImporter } from '../../../prebuilt_rules/logic/rule_source_importer';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import { isRuleConflictError, isRuleImportError } from './errors';
-import type { RuleFromImportStream } from './types';
-
-const ruleIsError = (rule: RuleFromImportStream): rule is Error => rule instanceof Error;
+import { isRuleToImport, type RuleFromImportStream } from './utils';
 
 /**
  * Takes a stream of rules to be imported and either creates or updates rules
@@ -34,14 +32,14 @@ export const importRules = async ({
   rulesResponseAcc,
   overwriteRules,
   detectionRulesClient,
-  prebuiltRulesImportHelper,
+  ruleSourceImporter,
   allowMissingConnectorSecrets,
 }: {
   ruleChunks: RuleFromImportStream[][];
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
-  prebuiltRulesImportHelper: PrebuiltRulesImportHelper;
+  ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
 }) => {
   let response: ImportRuleResponse[] = [...rulesResponseAcc];
@@ -52,16 +50,14 @@ export const importRules = async ({
     return response;
   }
 
-  await prebuiltRulesImportHelper.setup();
-
   while (ruleChunks.length) {
     const ruleChunk = ruleChunks.shift() ?? [];
-    const [errors, rules] = partition(ruleChunk, ruleIsError);
+    const [rules, errors] = partition(ruleChunk, isRuleToImport);
 
     const importedRulesResponse = await detectionRulesClient.importRules({
       allowMissingConnectorSecrets,
       overwriteRules,
-      prebuiltRulesImportHelper,
+      ruleSourceImporter,
       rules,
     });
 

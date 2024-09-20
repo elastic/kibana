@@ -7,7 +7,7 @@
 
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
-import { prebuiltRulesImportHelperMock } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper.mock';
+import { ruleSourceImporterMock } from '../../../prebuilt_rules/logic/rule_source_importer/rule_source_importer.mock';
 
 import { importRules } from './import_rules_with_source';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
@@ -18,7 +18,7 @@ describe('importRules', () => {
   let ruleToImport: ReturnType<typeof getImportRulesSchemaMock>;
 
   let detectionRulesClient: jest.Mocked<IDetectionRulesClient>;
-  let prebuiltRulesImportHelper: ReturnType<typeof prebuiltRulesImportHelperMock.create>;
+  let mockRuleSourceImporter: ReturnType<typeof ruleSourceImporterMock.create>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -26,9 +26,7 @@ describe('importRules', () => {
     detectionRulesClient = detectionRulesClientMock.create();
     detectionRulesClient.importRules.mockResolvedValue([]);
     ruleToImport = getImportRulesSchemaMock();
-    prebuiltRulesImportHelper = prebuiltRulesImportHelperMock.create();
-    prebuiltRulesImportHelper.fetchMatchingAssets.mockResolvedValue([]);
-    prebuiltRulesImportHelper.fetchAssetRuleIds.mockResolvedValue([]);
+    mockRuleSourceImporter = ruleSourceImporterMock.create();
   });
 
   it('returns an empty rules response if no rules to import', async () => {
@@ -37,7 +35,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient,
-      prebuiltRulesImportHelper,
+      ruleSourceImporter: mockRuleSourceImporter,
     });
 
     expect(result).toEqual([]);
@@ -51,7 +49,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient,
-      prebuiltRulesImportHelper,
+      ruleSourceImporter: mockRuleSourceImporter,
     });
 
     expect(result).toEqual([
@@ -89,7 +87,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient,
-      prebuiltRulesImportHelper,
+      ruleSourceImporter: mockRuleSourceImporter,
     });
 
     expect(result).toEqual([
@@ -129,7 +127,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient,
-      prebuiltRulesImportHelper,
+      ruleSourceImporter: mockRuleSourceImporter,
     });
 
     expect(result).toEqual([
@@ -171,7 +169,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient,
-      prebuiltRulesImportHelper,
+      ruleSourceImporter: mockRuleSourceImporter,
     });
 
     expect(result).toEqual([
@@ -206,7 +204,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient,
-      prebuiltRulesImportHelper,
+      ruleSourceImporter: mockRuleSourceImporter,
     });
 
     expect(result).toEqual([

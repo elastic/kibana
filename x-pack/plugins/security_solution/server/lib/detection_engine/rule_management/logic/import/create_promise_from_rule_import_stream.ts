@@ -14,7 +14,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { createRulesAndExceptionsStreamFromNdJson } from './create_rules_stream_from_ndjson';
-import type { RuleFromImportStream } from './types';
+import type { RuleFromImportStream } from './utils';
 
 export interface RuleImportStreamResult {
   rules: RuleFromImportStream[];

@@ -10,14 +10,13 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { RuleResponse, RuleToImport } from '../../../../../../../common/api/detection_engine';
 import { ruleToImportHasVersion } from '../../../../../../../common/api/detection_engine/rule_management';
-import type { PrebuiltRulesImportHelper } from '../../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
+import type { IRuleSourceImporter } from '../../../../prebuilt_rules/logic/rule_source_importer';
 import {
   type RuleImportErrorObject,
   createRuleImportErrorObject,
   isRuleImportError,
 } from '../../import/errors';
 import { checkRuleExceptionReferences } from '../../import/check_rule_exception_references';
-import { calculateRuleSourceForImport } from '../../import/calculate_rule_source_for_import';
 import { getReferencedExceptionLists } from '../../import/gather_referenced_exceptions';
 import type { IDetectionRulesClient } from '../detection_rules_client_interface';
 
@@ -29,14 +28,14 @@ export const importRules = async ({
   allowMissingConnectorSecrets,
   detectionRulesClient,
   overwriteRules,
-  prebuiltRulesImportHelper,
+  ruleSourceImporter,
   rules,
   savedObjectsClient,
 }: {
   allowMissingConnectorSecrets?: boolean;
   detectionRulesClient: IDetectionRulesClient;
   overwriteRules: boolean;
-  prebuiltRulesImportHelper: PrebuiltRulesImportHelper;
+  ruleSourceImporter: IRuleSourceImporter;
   rules: RuleToImport[];
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<Array<RuleResponse | RuleImportErrorObject>> => {
@@ -44,38 +43,33 @@ export const importRules = async ({
     rules,
     savedObjectsClient,
   });
-  const prebuiltRuleAssets = await prebuiltRulesImportHelper.fetchMatchingAssets({
-    rules,
-  });
-
-  const installedRuleIds = await prebuiltRulesImportHelper.fetchAssetRuleIds({
-    rules,
-  });
+  await ruleSourceImporter.setup({ rules });
 
   return Promise.all(
     rules.map(async (rule) => {
-      if (!ruleToImportHasVersion(rule)) {
-        return createRuleImportErrorObject({
-          message: i18n.translate(
-            'xpack.securitySolution.detectionEngine.rules.cannotImportRuleWithoutVersion',
-            {
-              defaultMessage: 'Rules must specify a "version" to be imported. [rule_id: {ruleId}]',
-              values: { ruleId: rule.rule_id },
-            }
-          ),
-          ruleId: rule.rule_id,
-        });
-      }
-
       const errors: RuleImportErrorObject[] = [];
 
-      const { immutable, ruleSource } = calculateRuleSourceForImport({
-        rule,
-        prebuiltRuleAssets,
-        installedRuleIds,
-      });
-
       try {
+        if (!ruleSourceImporter.isPrebuiltRule(rule)) {
+          rule.version = rule.version ?? 1;
+        }
+
+        if (!ruleToImportHasVersion(rule)) {
+          return createRuleImportErrorObject({
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.rules.cannotImportPrebuiltRuleWithoutVersion',
+              {
+                defaultMessage:
+                  'Prebuilt rules must specify a "version" to be imported. [rule_id: {ruleId}]',
+                values: { ruleId: rule.rule_id },
+              }
+            ),
+            ruleId: rule.rule_id,
+          });
+        }
+
+        const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
+
         const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
           rule,
           existingLists,

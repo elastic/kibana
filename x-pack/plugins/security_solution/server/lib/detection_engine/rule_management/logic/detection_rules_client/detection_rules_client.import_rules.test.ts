@@ -12,7 +12,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { buildMlAuthz } from '../../../../machine_learning/__mocks__/authz';
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { prebuiltRulesImportHelperMock } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper.mock';
+import { ruleSourceImporterMock } from '../../../prebuilt_rules/logic/rule_source_importer/rule_source_importer.mock';
 import { createDetectionRulesClient } from './detection_rules_client';
 import { importRuleWithSource } from './methods/import_rule_with_source';
 import { createRuleImportErrorObject } from '../import/errors';
@@ -24,7 +24,7 @@ jest.mock('../import/check_rule_exception_references');
 describe('detectionRulesClient.importRules', () => {
   let subject: ReturnType<typeof createDetectionRulesClient>;
   let ruleToImport: ReturnType<typeof getImportRulesSchemaMock>;
-  let prebuiltRulesImportHelper: ReturnType<typeof prebuiltRulesImportHelperMock.create>;
+  let mockRuleSourceImporter: ReturnType<typeof ruleSourceImporterMock.create>;
 
   beforeEach(() => {
     subject = createDetectionRulesClient({
@@ -38,16 +38,18 @@ describe('detectionRulesClient.importRules', () => {
     (importRuleWithSource as jest.Mock).mockResolvedValue(getRulesSchemaMock());
 
     ruleToImport = getImportRulesSchemaMock();
-    prebuiltRulesImportHelper = prebuiltRulesImportHelperMock.create();
-    prebuiltRulesImportHelper.fetchAssetRuleIds.mockResolvedValue([]);
-    prebuiltRulesImportHelper.fetchMatchingAssets.mockResolvedValue([]);
+    mockRuleSourceImporter = ruleSourceImporterMock.create();
+    mockRuleSourceImporter.calculateRuleSource.mockReturnValue({
+      ruleSource: { type: 'internal' },
+      immutable: false,
+    });
   });
 
   it('returns imported rules as RuleResponses if import was successful', async () => {
     const result = await subject.importRules({
       allowMissingConnectorSecrets: false,
       overwriteRules: false,
-      prebuiltRulesImportHelper,
+      ruleSourceImporter: mockRuleSourceImporter,
       rules: [ruleToImport, ruleToImport],
     });
 
@@ -64,7 +66,7 @@ describe('detectionRulesClient.importRules', () => {
     const result = await subject.importRules({
       allowMissingConnectorSecrets: false,
       overwriteRules: false,
-      prebuiltRulesImportHelper,
+      ruleSourceImporter: mockRuleSourceImporter,
       rules: [ruleToImport],
     });
 
@@ -78,7 +80,7 @@ describe('detectionRulesClient.importRules', () => {
     const result = await subject.importRules({
       allowMissingConnectorSecrets: false,
       overwriteRules: false,
-      prebuiltRulesImportHelper,
+      ruleSourceImporter: mockRuleSourceImporter,
       rules: [ruleToImport],
     });
 
@@ -110,7 +112,7 @@ describe('detectionRulesClient.importRules', () => {
       const result = await subject.importRules({
         allowMissingConnectorSecrets: false,
         overwriteRules: false,
-        prebuiltRulesImportHelper,
+        ruleSourceImporter: mockRuleSourceImporter,
         rules: [ruleToImport],
       });
 
@@ -136,7 +138,7 @@ describe('detectionRulesClient.importRules', () => {
       const result = await subject.importRules({
         allowMissingConnectorSecrets: false,
         overwriteRules: false,
-        prebuiltRulesImportHelper,
+        ruleSourceImporter: mockRuleSourceImporter,
         rules: [ruleToImport],
       });
 

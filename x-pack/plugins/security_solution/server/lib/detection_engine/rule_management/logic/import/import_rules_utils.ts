@@ -13,7 +13,7 @@ import { createBulkErrorObject } from '../../../routes/utils';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import { getReferencedExceptionLists } from './gather_referenced_exceptions';
-import type { RuleFromImportStream } from './types';
+import type { RuleFromImportStream } from './utils';
 
 /**
  * Takes rules to be imported and either creates or updates rules
