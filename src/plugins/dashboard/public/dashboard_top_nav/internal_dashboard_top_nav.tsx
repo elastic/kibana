@@ -55,7 +55,10 @@ import {
   serverlessService,
 } from '../services/kibana_services';
 import './_dashboard_top_nav.scss';
-import { capabilitiesService, recentlyAccessedService } from '../services/dashboard_services';
+import {
+  dashboardCapabilitiesService,
+  dashboardRecentlyAccessedService,
+} from '../services/dashboard_services';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -149,7 +152,7 @@ export function InternalDashboardTopNav({
         title,
         lastSavedId
       );
-      recentlyAccessedService.add(
+      dashboardRecentlyAccessedService.add(
         getFullEditPath(lastSavedId, viewMode === 'edit'),
         title,
         lastSavedId
@@ -311,7 +314,7 @@ export function InternalDashboardTopNav({
       });
     }
 
-    const { showWriteControls } = capabilitiesService.dashboardCapabilities;
+    const { showWriteControls } = dashboardCapabilitiesService.dashboardCapabilities;
     if (showWriteControls && managed) {
       const badgeProps = {
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
@@ -387,7 +390,7 @@ export function InternalDashboardTopNav({
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews ?? []}
         saveQueryMenuVisibility={
-          capabilitiesService.dashboardCapabilities.saveQuery
+          dashboardCapabilitiesService.dashboardCapabilities.saveQuery
             ? 'allowed_by_app_privilege'
             : 'globally_managed'
         }

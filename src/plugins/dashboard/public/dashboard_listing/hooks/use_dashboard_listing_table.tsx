@@ -22,7 +22,10 @@ import {
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../dashboard_constants';
-import { capabilitiesService, recentlyAccessedService } from '../../services/dashboard_services';
+import {
+  dashboardCapabilitiesService,
+  dashboardRecentlyAccessedService,
+} from '../../services/dashboard_services';
 import { coreServices } from '../../services/kibana_services';
 import { pluginServices } from '../../services/plugin_services';
 import {
@@ -277,7 +280,7 @@ export const useDashboardListingTable = ({
   );
 
   const tableListViewTableProps: DashboardListingViewTableProps = useMemo(() => {
-    const { showWriteControls } = capabilitiesService.dashboardCapabilities;
+    const { showWriteControls } = dashboardCapabilitiesService.dashboardCapabilities;
     return {
       contentEditor: {
         isReadonly: !showWriteControls,
@@ -302,7 +305,7 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
-      recentlyAccessed: recentlyAccessedService,
+      recentlyAccessed: dashboardRecentlyAccessedService,
     };
   }, [
     contentEditorValidators,

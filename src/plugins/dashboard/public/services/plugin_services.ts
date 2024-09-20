@@ -17,7 +17,6 @@ import {
 import { DashboardPluginServiceParams, DashboardServices } from './types';
 
 import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup_service';
-import { dashboardContentInsightsServiceFactory } from './dashboard_content_insights/dashboard_content_insights_service';
 import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
@@ -25,7 +24,6 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
     'dashboardBackup',
   ]),
   dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory),
-  dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

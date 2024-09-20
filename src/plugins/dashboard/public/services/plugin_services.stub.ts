@@ -16,13 +16,11 @@ import {
 import { DashboardServices } from './types';
 
 import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup.stub';
-import { dashboardContentInsightsServiceFactory } from './dashboard_content_insights/dashboard_content_insights.stub';
 import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),
   dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory),
-  dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<DashboardServices>(providers);

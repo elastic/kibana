@@ -16,8 +16,8 @@ import {
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
+import { dashboardInsightsService } from '../services/dashboard_services';
 import { coreServices, savedObjectsTaggingService } from '../services/kibana_services';
-import { pluginServices } from '../services/plugin_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
 import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
@@ -31,10 +31,6 @@ export const DashboardListingTable = ({
   urlStateEnabled,
   showCreateDashboardButton = true,
 }: DashboardListingProps) => {
-  const {
-    dashboardContentInsights: { contentInsightsClient },
-  } = pluginServices.getServices();
-
   useExecutionContext(coreServices.executionContext, {
     type: 'application',
     page: 'list',
@@ -60,7 +56,7 @@ export const DashboardListingTable = ({
         core={coreServices}
         savedObjectsTagging={savedObjectsTaggingService?.getTaggingApi()}
         FormattedRelative={FormattedRelative}
-        contentInsightsClient={contentInsightsClient}
+        contentInsightsClient={dashboardInsightsService.contentInsightsClient}
       >
         <>
           <DashboardUnsavedListing

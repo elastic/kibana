@@ -34,10 +34,10 @@ import {
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
 import {
-  capabilitiesService,
-  dataService,
-  embeddableService,
-} from '../../../services/kibana_services';
+  dashboardCapabilitiesService,
+  dashboardInsightsService,
+} from '../../../services/dashboard_services';
+import { dataService, embeddableService } from '../../../services/kibana_services';
 import { pluginServices } from '../../../services/plugin_services';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
@@ -146,7 +146,7 @@ export const initializeDashboard = async ({
   untilDashboardReady: () => Promise<DashboardContainer>;
   creationOptions?: DashboardCreationOptions;
 }) => {
-  const { dashboardBackup, dashboardContentInsights } = pluginServices.getServices();
+  const { dashboardBackup } = pluginServices.getServices();
 
   const {
     queryString,
@@ -187,7 +187,10 @@ export const initializeDashboard = async ({
     return dashboardBackupState?.dashboardState;
   })();
   const initialViewMode = (() => {
-    if (loadDashboardReturn.managed || !capabilitiesService.dashboardCapabilities.showWriteControls)
+    if (
+      loadDashboardReturn.managed ||
+      !dashboardCapabilitiesService.dashboardCapabilities.showWriteControls
+    )
       return ViewMode.VIEW;
     if (
       loadDashboardReturn.newDashboardCreated ||
@@ -512,7 +515,7 @@ export const initializeDashboard = async ({
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
     // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
     // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
-    dashboardContentInsights.trackDashboardView(loadDashboardReturn.dashboardId);
+    dashboardInsightsService.trackDashboardView(loadDashboardReturn.dashboardId);
   }
 
   return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };

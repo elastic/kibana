@@ -7,29 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import type { CoreStart } from '@kbn/core/public';
-import { type RecentlyAccessed, RecentlyAccessedService } from '@kbn/recently-accessed';
+import { RecentlyAccessedService, type RecentlyAccessed } from '@kbn/recently-accessed';
 
 import type { DashboardCapabilities } from '../../common';
 import { DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID } from '../dashboard_constants';
 import type { DashboardStartDependencies } from '../plugin';
-import { getDashboardCapabilities } from './utils/get_dashboard_capabilities';
 
-export let capabilitiesService: { dashboardCapabilities: DashboardCapabilities };
-export let favoritesService: FavoritesClient;
-export let recentlyAccessedService: RecentlyAccessed;
+export let dashboardCapabilitiesService: { dashboardCapabilities: DashboardCapabilities };
+export let dashboardFavoritesService: FavoritesClient;
+export let dashboardInsightsService: ReturnType<typeof getDashboardInsightsService>;
+export let dashboardRecentlyAccessedService: RecentlyAccessed;
 
 export const setDashboardServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
-  capabilitiesService = {
+  dashboardCapabilitiesService = {
     dashboardCapabilities: getDashboardCapabilities(kibanaCore),
   };
-  favoritesService = new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
+  dashboardFavoritesService = new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
     http: kibanaCore.http,
     usageCollection: deps.usageCollection,
   });
-  recentlyAccessedService = new RecentlyAccessedService().start({
+  dashboardInsightsService = getDashboardInsightsService(kibanaCore);
+  dashboardRecentlyAccessedService = new RecentlyAccessedService().start({
     http: kibanaCore.http,
     key: 'dashboardRecentlyAccessed',
   });
+};
+
+const getDashboardInsightsService = (kibanaCore: CoreStart) => {
+  const contentInsightsClient = new ContentInsightsClient(
+    { http: kibanaCore.http },
+    { domainId: 'dashboard' }
+  );
+
+  return {
+    trackDashboardView: (dashboardId: string) => {
+      contentInsightsClient.track(dashboardId, 'viewed');
+    },
+    contentInsightsClient,
+  };
+};
+
+const getDashboardCapabilities = (coreStart: CoreStart): DashboardCapabilities => {
+  const {
+    application: {
+      capabilities: { dashboard },
+    },
+  } = coreStart;
+
+  return {
+    show: Boolean(dashboard.show),
+    saveQuery: Boolean(dashboard.saveQuery),
+    createNew: Boolean(dashboard.createNew),
+    createShortUrl: Boolean(dashboard.createShortUrl),
+    showWriteControls: Boolean(dashboard.showWriteControls),
+    storeSearchSession: Boolean(dashboard.storeSearchSession),
+  };
 };

@@ -12,7 +12,6 @@ import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public'
 
 import { DashboardStartDependencies } from '../plugin';
 import { DashboardBackupServiceType } from './dashboard_backup/types';
-import { DashboardContentInsightsService } from './dashboard_content_insights/types';
 import { DashboardContentManagementService } from './dashboard_content_management/types';
 
 export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardStartDependencies> & {
@@ -21,5 +20,4 @@ export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardSt
 export interface DashboardServices {
   dashboardBackup: DashboardBackupServiceType;
   dashboardContentManagement: DashboardContentManagementService;
-  dashboardContentInsights: DashboardContentInsightsService;
 }
