@@ -179,10 +179,11 @@ export function ContextAppContent({
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
     return getCellRenderers({
+      dataView,
       density: DataGridDensity.COMPACT,
       rowHeight: ROWS_HEIGHT_OPTIONS.single,
     });
-  }, [getCellRenderersAccessor]);
+  }, [dataView, getCellRenderersAccessor]);
 
   const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
   const { filters } = useQuerySubscriber({ data: services.data });

@@ -10,8 +10,13 @@
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { ComposableProfile, getMergedAccessor } from './composable_profile';
 import { Profile } from './types';
+import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 
-const getCellRenderersParams = { density: DataGridDensity.COMPACT, rowHeight: 0 };
+const getCellRenderersParams = {
+  dataView: dataViewWithTimefieldMock,
+  density: DataGridDensity.COMPACT,
+  rowHeight: 0,
+};
 
 describe('getMergedAccessor', () => {
   it('should return the base implementation if no profiles are provided', () => {

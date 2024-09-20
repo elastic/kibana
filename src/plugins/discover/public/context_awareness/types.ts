@@ -104,7 +104,17 @@ export interface DefaultAppStateExtension {
  * Parameters passed to the cell renderers extension
  */
 export interface CellRenderersExtensionParams {
+  /**
+   * The current data view
+   */
+  dataView: DataView;
+  /**
+   * The current density applied to the data grid component
+   */
   density: DataGridDensity | undefined;
+  /**
+   * The current row height mode applied to the data grid component
+   */
   rowHeight: number | undefined;
 }
 

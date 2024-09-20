@@ -11,9 +11,9 @@ import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import {
+  ShouldShowFieldInTableHandler,
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
-  getShouldShowFieldHandler,
 } from '@kbn/discover-utils';
 import * as constants from '../../../../../common/data_types/logs/constants';
 import { formatJsonDocumentForContent } from './utils';
@@ -21,6 +21,7 @@ import { formatJsonDocumentForContent } from './utils';
 interface ContentProps extends DataGridCellValueElementProps {
   isCompressed: boolean;
   isSingleLine: boolean;
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }
 
 const LogMessage = ({
@@ -50,15 +51,11 @@ export const Content = ({
   columnId,
   isCompressed,
   isSingleLine,
+  shouldShowFieldHandler,
 }: ContentProps) => {
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
   const { field, value } = getMessageFieldWithFallbacks(documentOverview);
   const shouldRenderContent = !!field && !!value;
-
-  const shouldShowFieldHandler = useMemo(() => {
-    const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
-    return getShouldShowFieldHandler(dataViewFields, dataView, true);
-  }, [dataView]);
 
   const formattedRow = useMemo(() => formatJsonDocumentForContent(row), [row]);
 

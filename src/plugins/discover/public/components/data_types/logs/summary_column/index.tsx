@@ -9,11 +9,29 @@
 
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { SummaryColumnFactoryDeps, SummaryColumnProps } from './summary_column';
 
 const SummaryColumn = dynamic(() => import('./summary_column'));
 
-export const getSummaryColumn =
-  ({ data, params }: SummaryColumnFactoryDeps) =>
-  (props: SummaryColumnProps) =>
-    <SummaryColumn data={data} params={params} {...props} />;
+export type SummaryColumnGetterDeps = Omit<SummaryColumnFactoryDeps, 'shouldShowFieldHandler'>;
+
+export const getSummaryColumn = ({ data, params }: SummaryColumnGetterDeps) => {
+  const { dataView } = params;
+  const shouldShowFieldHandler = createGetShouldShowFieldHandler(dataView);
+
+  return (props: SummaryColumnProps) => (
+    <SummaryColumn
+      data={data}
+      params={params}
+      shouldShowFieldHandler={shouldShowFieldHandler}
+      {...props}
+    />
+  );
+};
+
+const createGetShouldShowFieldHandler = (dataView: DataView) => {
+  const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
+  return getShouldShowFieldHandler(dataViewFields, dataView, true);
+};

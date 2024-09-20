@@ -15,8 +15,13 @@ import {
 import React from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import { getLogDocumentOverview, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
+import {
+  ShouldShowFieldInTableHandler,
+  getLogDocumentOverview,
+  getMessageFieldWithFallbacks,
+} from '@kbn/discover-utils';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataGridCellServicesProvider } from '../../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
 import { Resource, StaticResource } from './resource';
 import { Content } from './content';
@@ -26,11 +31,13 @@ import { createResourceFields, formatJsonDocumentForContent } from './utils';
 export interface SummaryColumnFactoryDeps {
   data: DataPublicPluginStart;
   params: SummaryColumnsGridParams;
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }
 
 export type SummaryColumnProps = DataGridCellValueElementProps;
 
 export interface SummaryColumnsGridParams {
+  dataView: DataView;
   density: DataGridDensity | undefined;
   rowHeight: number | undefined;
 }
@@ -42,7 +49,7 @@ const SummaryColumn = (props: SummaryColumnProps & SummaryColumnFactoryDeps) => 
     return <SummaryCellPopover {...props} />;
   }
 
-  return <SummaryCell {...props} {...params} />;
+  return <SummaryCell {...props} density={params.density} rowHeight={params.rowHeight} />;
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -52,7 +59,7 @@ const SummaryCell = ({
   density: maybeNullishDensity,
   rowHeight: maybeNullishRowHeight,
   ...props
-}: SummaryColumnProps & SummaryColumnsGridParams & SummaryColumnFactoryDeps) => {
+}: SummaryColumnProps & SummaryColumnFactoryDeps & Omit<SummaryColumnsGridParams, 'dataView'>) => {
   const { data, dataView, row } = props;
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;

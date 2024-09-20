@@ -96,10 +96,16 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
     return getCellRenderers({
+      dataView: props.dataView,
       density: gridProps.dataGridDensityState,
       rowHeight: gridProps.rowHeightState,
     });
-  }, [getCellRenderersAccessor, gridProps.dataGridDensityState, gridProps.rowHeightState]);
+  }, [
+    getCellRenderersAccessor,
+    props.dataView,
+    gridProps.dataGridDensityState,
+    gridProps.rowHeightState,
+  ]);
 
   return (
     <SavedSearchEmbeddableBase
