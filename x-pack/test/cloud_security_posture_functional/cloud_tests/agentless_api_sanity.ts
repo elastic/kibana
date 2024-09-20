@@ -22,13 +22,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     //   cisIntegrationAws = pageObjects.cisAddIntegration.cisAws; // Start the usage api mock server on port 8081
     // });
 
-    it(`should have agentless agent findings`, async () => {
+    it(`should have agentless agent findings for AWS provider`, async () => {
       const findings = pageObjects.findings;
 
       await findings.navigateToLatestFindingsPage();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      await queryBar.setQuery('agent.name : *agentless*');
+      await queryBar.setQuery('agent.name: *agentless* and cloud.provider : "aws"');
+      await queryBar.submitQuery();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      const agentlessFindingsRowsCount = await findings
+        .createDataTableObject('latest_findings_table')
+        .getRowsCount();
+
+      expect(agentlessFindingsRowsCount).to.be.greaterThan(0);
+    });
+
+    it(`should have agentless agent findings for Azure provider`, async () => {
+      const findings = pageObjects.findings;
+
+      await findings.navigateToLatestFindingsPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await queryBar.setQuery('agent.name: *agentless* and cloud.provider : "gcp"');
       await queryBar.submitQuery();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
