@@ -77,12 +77,14 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
             startColumn = Number(encodedColumn);
             startLineNumber = Number(encodedLine.replace('Line ', ''));
           }
-          // extract the length of the "expression" within the message
-          // and try to guess the correct size for the editor marker to highlight
-          if (/\[.*\]/.test(warningMessage)) {
-            const [_, wordWithError] = warningMessage.split('[');
-            if (wordWithError) {
-              errorLength = wordWithError.length;
+          const openingSquareBracketIndex = warningMessage.indexOf('[');
+          if (openingSquareBracketIndex !== -1) {
+            const closingSquareBracketIndex = warningMessage.indexOf(
+              ']',
+              openingSquareBracketIndex
+            );
+            if (closingSquareBracketIndex !== -1) {
+              errorLength = warningMessage.length - openingSquareBracketIndex - 1;
             }
           }
         }
@@ -157,43 +159,6 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
       };
     }
   });
-};
-
-export const getDocumentationSections = async (language: string) => {
-  const groups: Array<{
-    label: string;
-    description?: string;
-    items: Array<{ label: string; description?: JSX.Element }>;
-  }> = [];
-  if (language === 'esql') {
-    const {
-      sourceCommands,
-      processingCommands,
-      initialSection,
-      scalarFunctions,
-      aggregationFunctions,
-      groupingFunctions,
-      operators,
-    } = await import('./inline_documentation/esql_documentation_sections');
-    groups.push({
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.esql', {
-        defaultMessage: 'ES|QL',
-      }),
-      items: [],
-    });
-    groups.push(
-      sourceCommands,
-      processingCommands,
-      scalarFunctions,
-      aggregationFunctions,
-      groupingFunctions,
-      operators
-    );
-    return {
-      groups,
-      initialSection,
-    };
-  }
 };
 
 export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {

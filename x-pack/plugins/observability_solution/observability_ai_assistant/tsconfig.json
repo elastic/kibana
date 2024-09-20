@@ -42,6 +42,10 @@
     "@kbn/features-plugin",
     "@kbn/cloud-plugin",
     "@kbn/serverless",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-ui-settings-server",
+    "@kbn/inference-plugin",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }

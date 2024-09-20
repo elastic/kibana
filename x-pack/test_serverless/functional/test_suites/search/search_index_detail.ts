@@ -61,14 +61,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
         });
         await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-
         await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappingsToHaveVectorFields();
+      });
+
+      it('should show code examples for adding documents', async () => {
+        await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
       });
 
       it('back to indices button should redirect to list page', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonExists();
         await pageObjects.svlSearchIndexDetailPage.clickBackToIndicesButton();
         await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonRedirectsToListPage();
+      });
+      describe('With data', () => {
+        before(async () => {
+          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+          await es.index({
+            index: indexName,
+            body: {
+              my_field: [1, 0, 1],
+            },
+          });
+        });
+        it('should have index documents', async () => {
+          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+          await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
+        });
+        it('should have with data tabs', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectWithDataTabsExists();
+          await pageObjects.svlSearchIndexDetailPage.expectShouldDefaultToDataTab();
+        });
+        it('should be able to change tabs', async () => {
+          await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('mappingsTab');
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings');
+        });
       });
 
       describe('page loading error', () => {

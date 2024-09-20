@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataControlApi, DefaultDataControlState } from '../types';
+import type { DefaultDataControlState } from '../../../../../common';
+import type { DataControlApi } from '../types';
 
 export type RangeValue = [string, string];
 
