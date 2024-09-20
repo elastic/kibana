@@ -28,7 +28,7 @@ exports[`Header should render normally 1`] = `
         class="euiText emotion-euiText-s-euiTextColor-default"
       >
         <span>
-          Use
+          Use 
           <button
             class="euiLink emotion-euiLink-primary"
             type="button"
