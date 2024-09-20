@@ -13,15 +13,19 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function monitoringAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('monitoring', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     const run = async (id: string) => {
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${id}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(response.status).to.eql(204);
+      await retry.try(async () => {
+        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${id}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(response.status).to.eql(204);
+      });
     };
 
     after(async () => await objectRemover.removeAll());
