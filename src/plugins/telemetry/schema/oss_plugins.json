@@ -10630,15 +10630,6 @@
           "_meta": {
             "description": "Non-default value of setting."
           }
-        },
-        "observability:searchExcludedDataTiers": {
-          "type": "array",
-          "items": {
-            "type": "keyword",
-            "_meta": {
-              "description": "Non-default value of setting."
-            }
-          }
         }
       }
     },
