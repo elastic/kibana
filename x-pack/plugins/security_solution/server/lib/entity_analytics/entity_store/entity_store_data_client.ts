@@ -134,7 +134,7 @@ export class EntityStoreDataClient {
   }> {
     const { page, perPage, sortField, sortOrder, filterQuery, entityTypes } = params;
 
-    const index = entityTypes.map(getEntitiesIndexName);
+    const index = entityTypes.map((type) => getEntitiesIndexName(type, this.options.namespace));
     const from = (page - 1) * perPage;
     const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
 
