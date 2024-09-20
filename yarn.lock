@@ -4675,6 +4675,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-usage-plugin@link:x-pack/plugins/data_usage":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-view-editor-plugin@link:src/plugins/data_view_editor":
   version "0.0.0"
   uid ""
