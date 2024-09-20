@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -14,6 +15,8 @@ import { DataTableRecord, LogDocumentOverview, fieldConstants } from '@kbn/disco
 import { HighlightField } from './sub_components/highlight_field';
 import { HighlightSection } from './sub_components/highlight_section';
 import { getUnifiedDocViewerServices } from '../../plugin';
+import { ServiceNameHighlightField } from './sub_components/service_name_highlight_field';
+import { TraceIdHighlightField } from './sub_components/trace_id_highlight_field';
 
 export function LogsOverviewHighlights({
   formattedDoc,
@@ -64,7 +67,7 @@ export function LogsOverviewHighlights({
         data-test-subj="unifiedDocViewLogsOverviewHighlightSectionServiceInfra"
       >
         {shouldRenderHighlight(fieldConstants.SERVICE_NAME_FIELD) && (
-          <HighlightField
+          <ServiceNameHighlightField
             data-test-subj="unifiedDocViewLogsOverviewService"
             label={serviceLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.SERVICE_NAME_FIELD]}
@@ -80,7 +83,7 @@ export function LogsOverviewHighlights({
           />
         )}
         {shouldRenderHighlight(fieldConstants.TRACE_ID_FIELD) && (
-          <HighlightField
+          <TraceIdHighlightField
             data-test-subj="unifiedDocViewLogsOverviewTrace"
             label={traceLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.TRACE_ID_FIELD]}

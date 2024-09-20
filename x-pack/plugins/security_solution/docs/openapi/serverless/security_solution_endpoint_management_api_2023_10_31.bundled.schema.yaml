@@ -4,7 +4,7 @@ info:
   title: Security Solution Endpoint Management API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -31,7 +31,7 @@ paths:
       summary: Get response actions
       tags:
         - Security Solution Endpoint Management API
-  '/api/endpoint/action_log/{agent_id}':
+  /api/endpoint/action_log/{agent_id}:
     get:
       deprecated: true
       description: Get an action request log for the specified agent ID.
@@ -80,7 +80,7 @@ paths:
       summary: Get response actions status
       tags:
         - Security Solution Endpoint Management API
-  '/api/endpoint/action/{action_id}':
+  /api/endpoint/action/{action_id}:
     get:
       description: Get the details of a response action using the action ID.
       operationId: EndpointGetActionsDetails
@@ -100,7 +100,7 @@ paths:
       summary: Get action details
       tags:
         - Security Solution Endpoint Management API
-  '/api/endpoint/action/{action_id}/file/{file_id}':
+  /api/endpoint/action/{action_id}/file/{file_id}:
     get:
       description: Get information for the specified file using the file ID.
       operationId: EndpointFileInfo
@@ -125,7 +125,7 @@ paths:
       summary: Get file information
       tags:
         - Security Solution Endpoint Management API
-  '/api/endpoint/action/{action_id}/file/{file_id}/download':
+  /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
       description: Download a file from an endpoint.
       operationId: EndpointFileDownload
@@ -220,7 +220,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KillOrSuspendActionSchema'
+              $ref: '#/components/schemas/KillProcessRouteRequestBody'
         required: true
       responses:
         '200':
@@ -296,7 +296,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KillOrSuspendActionSchema'
+              $ref: '#/components/schemas/SuspendProcessRouteRequestBody'
         required: true
       responses:
         '200':
@@ -310,7 +310,7 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/unisolate:
     post:
-      description: 'Release an isolated endpoint, allowing it to rejoin a network.'
+      description: Release an isolated endpoint, allowing it to rejoin a network.
       operationId: EndpointUnisolateAction
       requestBody:
         content:
@@ -367,7 +367,7 @@ paths:
       summary: Get a metadata list
       tags:
         - Security Solution Endpoint Management API
-  '/api/endpoint/metadata/{id}':
+  /api/endpoint/metadata/{id}:
     get:
       operationId: GetEndpointMetadata
       parameters:
@@ -447,7 +447,7 @@ paths:
       summary: Get an agent policy summary
       tags:
         - Security Solution Endpoint Management API
-  '/api/endpoint/protection_updates_note/{package_policy_id}':
+  /api/endpoint/protection_updates_note/{package_policy_id}:
     get:
       operationId: GetProtectionUpdatesNote
       parameters:
@@ -493,7 +493,7 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Solution Endpoint Management API
-  '/api/endpoint/suggestions/{suggestion_type}':
+  /api/endpoint/suggestions/{suggestion_type}:
     post:
       operationId: GetEndpointSuggestions
       parameters:
@@ -641,6 +641,12 @@ components:
         type: string
       minItems: 1
       type: array
+    EntityId:
+      type: object
+      properties:
+        entity_id:
+          minLength: 1
+          type: string
     ExecuteRouteRequestBody:
       allOf:
         - type: object
@@ -732,7 +738,7 @@ components:
       $ref: '#/components/schemas/NoParametersRequestSchema'
     IsolateRouteRequestBody:
       $ref: '#/components/schemas/NoParametersRequestSchema'
-    KillOrSuspendActionSchema:
+    KillProcessRouteRequestBody:
       allOf:
         - type: object
           properties:
@@ -754,14 +760,12 @@ components:
           properties:
             parameters:
               oneOf:
+                - $ref: '#/components/schemas/Pid'
+                - $ref: '#/components/schemas/EntityId'
                 - type: object
                   properties:
-                    pid:
-                      minimum: 1
-                      type: integer
-                - type: object
-                  properties:
-                    entity_id:
+                    process_name:
+                      description: Valid for SentinelOne agent type only
                       minLength: 1
                       type: string
           required:
@@ -880,6 +884,12 @@ components:
               $ref: '#/components/schemas/PendingActionDataType'
         - additionalProperties: true
           type: object
+    Pid:
+      type: object
+      properties:
+        pid:
+          minimum: 1
+          type: integer
     ProtectionUpdatesNoteResponse:
       type: object
       properties:
@@ -920,6 +930,32 @@ components:
     SuccessResponse:
       type: object
       properties: {}
+    SuspendProcessRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - $ref: '#/components/schemas/Pid'
+                - $ref: '#/components/schemas/EntityId'
+          required:
+            - parameters
     Timeout:
       description: The maximum timeout value in milliseconds (optional)
       minimum: 1

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -41,6 +42,7 @@ import type {
   ESQLNumericLiteralType,
   FunctionSubtype,
   ESQLNumericLiteral,
+  ESQLOrderExpression,
 } from './types';
 import { parseIdentifier } from './parser/helpers';
 
@@ -221,6 +223,26 @@ export function createFunction<Subtype extends FunctionSubtype>(
   return node;
 }
 
+export const createOrderExpression = (
+  ctx: ParserRuleContext,
+  arg: ESQLAstItem,
+  order: ESQLOrderExpression['order'],
+  nulls: ESQLOrderExpression['nulls']
+) => {
+  const node: ESQLOrderExpression = {
+    type: 'order',
+    name: '',
+    order,
+    nulls,
+    args: [arg],
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  };
+
+  return node;
+};
+
 function walkFunctionStructure(
   args: ESQLAstItem[],
   initialLocation: ESQLLocation,
@@ -269,13 +291,13 @@ export function computeLocationExtends(fn: ESQLFunction) {
 
 /* SCRIPT_MARKER_START */
 function getQuotedText(ctx: ParserRuleContext) {
-  return [27 /* esql_parser.QUOTED_STRING */, 68 /* esql_parser.QUOTED_IDENTIFIER */]
+  return [27 /* esql_parser.QUOTED_STRING */, 69 /* esql_parser.QUOTED_IDENTIFIER */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
-  return [67 /* esql_parser.UNQUOTED_IDENTIFIER */, 73 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */]
+  return [68 /* esql_parser.UNQUOTED_IDENTIFIER */, 77 /* esql_parser.UNQUOTED_SOURCE */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
@@ -404,9 +426,9 @@ export function createSource(
     index,
     name: text,
     sourceType: type,
-    text,
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception || text === ''),
+    text: ctx?.getText(),
   };
 }
 

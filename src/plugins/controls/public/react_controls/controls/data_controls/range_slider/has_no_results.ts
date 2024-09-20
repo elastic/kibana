@@ -1,31 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesDataViews } from '@kbn/presentation-publishing';
-import { combineLatest, lastValueFrom, Observable, switchMap, tap } from 'rxjs';
+import { Observable, combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import { dataService } from '../../../../services/kibana_services';
 import { ControlFetchContext } from '../../../control_group/control_fetch';
 import { ControlGroupApi } from '../../../control_group/types';
 import { DataControlApi } from '../types';
 
 export function hasNoResults$({
   controlFetch$,
-  data,
   dataViews$,
   rangeFilters$,
   ignoreParentSettings$,
   setIsLoading,
 }: {
   controlFetch$: Observable<ControlFetchContext>;
-  data: DataPublicPluginStart;
   dataViews$?: PublishesDataViews['dataViews'];
   rangeFilters$: DataControlApi['filters$'];
   ignoreParentSettings$: ControlGroupApi['ignoreParentSettings$'];
@@ -52,7 +51,6 @@ export function hasNoResults$({
         prevRequestAbortController = abortController;
         return await hasNoResults({
           abortSignal: abortController.signal,
-          data,
           dataView,
           rangeFilter,
           ...controlFetchContext,
@@ -70,7 +68,6 @@ export function hasNoResults$({
 
 async function hasNoResults({
   abortSignal,
-  data,
   dataView,
   filters,
   query,
@@ -78,14 +75,13 @@ async function hasNoResults({
   timeRange,
 }: {
   abortSignal: AbortSignal;
-  data: DataPublicPluginStart;
   dataView: DataView;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
 }): Promise<boolean> {
-  const searchSource = await data.search.searchSource.create();
+  const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);
   searchSource.setField('index', dataView);
   // Tracking total hits accurately has a performance cost
@@ -96,7 +92,7 @@ async function hasNoResults({
   const allFilters = filters ? [...filters] : [];
   allFilters.push(rangeFilter);
   if (timeRange) {
-    const timeFilter = data.query.timefilter.timefilter.createFilter(dataView, timeRange);
+    const timeFilter = dataService.query.timefilter.timefilter.createFilter(dataView, timeRange);
     if (timeFilter) allFilters.push(timeFilter);
   }
   if (allFilters.length) {

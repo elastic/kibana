@@ -169,6 +169,10 @@ export type {
   StacktracesLocator,
   TopNFunctionsLocatorParams,
   TopNFunctionsLocator,
+  ServiceEntityLocator,
+  ServiceEntityLocatorParams,
+  TransactionDetailsByTraceIdLocator,
+  TransactionDetailsByTraceIdLocatorParams,
 } from './locators';
 
 export {
@@ -178,6 +182,7 @@ export {
   AssetDetailsFlyoutLocatorDefinition,
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorDefinition,
+  SupportedAssetTypes,
   HostsLocatorDefinition,
   INVENTORY_LOCATOR_ID,
   InventoryLocatorDefinition,
@@ -187,4 +192,10 @@ export {
   StacktracesLocatorDefinition,
   TopNFunctionsLocatorDefinition,
   HOSTS_LOCATOR_ID,
+  ServiceEntityLocatorDefinition,
+  SERVICE_ENTITY_LOCATOR,
+  TransactionDetailsByTraceIdLocatorDefinition,
+  TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
 } from './locators';
+
+export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';

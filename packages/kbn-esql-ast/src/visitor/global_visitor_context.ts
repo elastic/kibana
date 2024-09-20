@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as contexts from './contexts';
@@ -15,6 +16,7 @@ import type {
   ESQLInlineCast,
   ESQLList,
   ESQLLiteral,
+  ESQLOrderExpression,
   ESQLSource,
   ESQLTimeInterval,
 } from '../types';
@@ -399,6 +401,10 @@ export class GlobalVisitorContext<
         if (!this.methods.visitInlineCastExpression) break;
         return this.visitInlineCastExpression(parent, expressionNode, input as any);
       }
+      case 'order': {
+        if (!this.methods.visitOrderExpression) break;
+        return this.visitOrderExpression(parent, expressionNode, input as any);
+      }
       case 'option': {
         switch (expressionNode.name) {
           case 'as': {
@@ -485,5 +491,14 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitRenameExpression'> {
     const context = new contexts.RenameExpressionVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitRenameExpression', context, input);
+  }
+
+  public visitOrderExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLOrderExpression,
+    input: types.VisitorInput<Methods, 'visitOrderExpression'>
+  ): types.VisitorOutput<Methods, 'visitOrderExpression'> {
+    const context = new contexts.OrderExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitOrderExpression', context, input);
   }
 }

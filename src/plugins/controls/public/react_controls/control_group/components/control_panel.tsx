@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import classNames from 'classnames';
@@ -37,12 +38,10 @@ import './control_panel.scss';
 const DragHandle = ({
   isEditable,
   controlTitle,
-  hideEmptyDragHandle,
   ...rest // drag info is contained here
 }: {
   isEditable: boolean;
   controlTitle?: string;
-  hideEmptyDragHandle: boolean;
 }) =>
   isEditable ? (
     <button
@@ -55,9 +54,7 @@ const DragHandle = ({
     >
       <EuiIcon type="grabHorizontal" />
     </button>
-  ) : hideEmptyDragHandle ? null : (
-    <EuiIcon size="s" type="empty" />
-  );
+  ) : null;
 
 export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlApi>({
   Component,
@@ -100,6 +97,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     grow,
     width,
     labelPosition,
+    disabledActionIds,
     rawViewMode,
   ] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading,
@@ -109,9 +107,11 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     api?.grow,
     api?.width,
     api?.parentApi?.labelPosition,
+    api?.parentApi?.disabledActionIds,
     viewModeSubject
   );
   const usingTwoLineLayout = labelPosition === 'twoLine';
+  const controlType = api ? api.type : undefined;
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
   if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
@@ -132,7 +132,6 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
       data-test-subj="control-frame"
       data-render-complete="true"
       className={classNames('controlFrameWrapper', {
-        'controlFrameWrapper--grow': controlGrow,
         'controlFrameWrapper--small': controlWidth === 'small',
         'controlFrameWrapper--medium': controlWidth === 'medium',
         'controlFrameWrapper--large': controlWidth === 'large',
@@ -148,7 +147,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
         })}
         viewMode={viewMode}
-        disabledActions={[]}
+        disabledActions={disabledActionIds}
         isEnabled={true}
       >
         <EuiFormRow
@@ -161,13 +160,19 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
             fullWidth
             isLoading={Boolean(dataLoading)}
             compressed
-            className="controlFrame__formControlLayout"
+            className={classNames(
+              'controlFrame__formControlLayout',
+              {
+                'controlFrame__formControlLayout--twoLine': usingTwoLineLayout,
+                'controlFrame__formControlLayout--edit': isEditable,
+              },
+              `${controlType}`
+            )}
             prepend={
               <>
                 <DragHandle
                   isEditable={isEditable}
                   controlTitle={panelTitle || defaultPanelTitle}
-                  hideEmptyDragHandle={usingTwoLineLayout || Boolean(api?.CustomPrependComponent)}
                   {...attributes}
                   {...listeners}
                 />

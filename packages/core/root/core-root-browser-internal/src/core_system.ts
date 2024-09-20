@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { filter, firstValueFrom } from 'rxjs';
@@ -21,6 +22,7 @@ import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
+import { FeatureFlagsService } from '@kbn/core-feature-flags-browser-internal';
 import { HttpService } from '@kbn/core-http-browser-internal';
 import { SettingsService, UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
@@ -84,6 +86,7 @@ export class CoreSystem {
   private readonly loggingSystem: BrowserLoggingSystem;
   private readonly analytics: AnalyticsService;
   private readonly fatalErrors: FatalErrorsService;
+  private readonly featureFlags: FeatureFlagsService;
   private readonly injectedMetadata: InjectedMetadataService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
@@ -131,6 +134,7 @@ export class CoreSystem {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
+    this.featureFlags = new FeatureFlagsService(this.coreContext);
     this.security = new SecurityService(this.coreContext);
     this.userProfile = new UserProfileService(this.coreContext);
     this.theme = new ThemeService();
@@ -250,11 +254,13 @@ export class CoreSystem {
 
       const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
+      const featureFlags = this.featureFlags.setup({ injectedMetadata });
 
       const core: InternalCoreSetup = {
         analytics,
         application,
         fatalErrors: this.fatalErrorsSetup,
+        featureFlags,
         http,
         injectedMetadata,
         notifications,
@@ -356,12 +362,15 @@ export class CoreSystem {
         theme,
       });
 
+      const featureFlags = await this.featureFlags.start();
+
       const core: InternalCoreStart = {
         analytics,
         application,
         chrome,
         docLinks,
         executionContext,
+        featureFlags,
         http,
         theme,
         savedObjects,
@@ -438,6 +447,7 @@ export class CoreSystem {
     this.deprecations.stop();
     this.theme.stop();
     this.analytics.stop();
+    this.featureFlags.stop();
     this.security.stop();
     this.userProfile.stop();
     this.rootDomElement.textContent = '';

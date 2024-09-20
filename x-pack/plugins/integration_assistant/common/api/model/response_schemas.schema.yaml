@@ -4,7 +4,7 @@ info:
   version: "not applicable"
 paths: {}
 components:
-  x-codegen-enabled: false
+  x-codegen-enabled: true
   schemas:
     EcsMappingAPIResponse:
       type: object
@@ -72,10 +72,15 @@ components:
       required:
         - results
       properties:
+        additionalProcessors:
+          type: array
+          items:
+            $ref: "./processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
         results:
           type: object
           required:
             - parsedSamples
+            - samplesFormat
           properties:
             samplesFormat:
               $ref: "./common_attributes.schema.yaml#/components/schemas/SamplesFormat"

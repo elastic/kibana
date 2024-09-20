@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityMetrics, SignalTypes } from '../../../../common/entities/types';
+import { EntityMetrics, EntityDataStreamType } from '../../../../common/entities/types';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateAvgMetrics, mergeMetrics } from './calculate_avg_metrics';
 
@@ -14,7 +14,7 @@ describe('calculateAverageMetrics', () => {
     const entities = [
       {
         agentName: 'nodejs' as AgentName,
-        signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
+        dataStreamTypes: [EntityDataStreamType.METRICS, EntityDataStreamType.LOGS],
         environments: [],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: [
@@ -38,7 +38,7 @@ describe('calculateAverageMetrics', () => {
       },
       {
         agentName: 'java' as AgentName,
-        signalTypes: [SignalTypes.METRICS],
+        dataStreamTypes: [EntityDataStreamType.METRICS],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: [
@@ -67,7 +67,7 @@ describe('calculateAverageMetrics', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
+        dataStreamTypes: [EntityDataStreamType.METRICS, EntityDataStreamType.LOGS],
         environments: [],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: {
@@ -82,7 +82,7 @@ describe('calculateAverageMetrics', () => {
       },
       {
         agentName: 'java' as AgentName,
-        signalTypes: [SignalTypes.METRICS],
+        dataStreamTypes: [EntityDataStreamType.METRICS],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: {
@@ -101,7 +101,7 @@ describe('calculateAverageMetrics', () => {
     const entities = [
       {
         agentName: 'nodejs' as AgentName,
-        signalTypes: [SignalTypes.METRICS],
+        dataStreamTypes: [EntityDataStreamType.METRICS],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: [
@@ -130,7 +130,7 @@ describe('calculateAverageMetrics', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        signalTypes: [SignalTypes.METRICS],
+        dataStreamTypes: [EntityDataStreamType.METRICS],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: {

@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { first, skip } from 'rxjs';
+import { dataViewsService } from '../../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
 import { initializeDataControl } from './initialize_data_control';
 
@@ -20,9 +20,8 @@ describe('initializeDataControl', () => {
   };
   const editorStateManager = {};
   const controlGroupApi = {} as unknown as ControlGroupApi;
-  const mockDataViews = dataViewPluginMocks.createStartContract();
-  // @ts-ignore
-  mockDataViews.get = async (id: string): Promise<DataView> => {
+
+  dataViewsService.get = async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
       throw new Error(`Simulated error: no data view found for id ${id}`);
     }
@@ -39,10 +38,6 @@ describe('initializeDataControl', () => {
       },
     } as unknown as DataView;
   };
-  const services = {
-    core: coreMock.createStart(),
-    dataViews: mockDataViews,
-  };
 
   describe('dataViewId subscription', () => {
     describe('no blocking errors', () => {
@@ -54,8 +49,7 @@ describe('initializeDataControl', () => {
           'referenceNameSuffix',
           dataControlState,
           editorStateManager,
-          controlGroupApi,
-          services
+          controlGroupApi
         );
 
         dataControl.api.defaultPanelTitle!.pipe(skip(1), first()).subscribe(() => {
@@ -89,8 +83,7 @@ describe('initializeDataControl', () => {
             dataViewId: 'notGonnaFindMeDataViewId',
           },
           editorStateManager,
-          controlGroupApi,
-          services
+          controlGroupApi
         );
 
         dataControl.api.dataViews.pipe(skip(1), first()).subscribe(() => {
@@ -128,8 +121,7 @@ describe('initializeDataControl', () => {
             fieldName: 'notGonnaFindMeFieldName',
           },
           editorStateManager,
-          controlGroupApi,
-          services
+          controlGroupApi
         );
 
         dataControl.api.defaultPanelTitle!.pipe(skip(1), first()).subscribe(() => {
