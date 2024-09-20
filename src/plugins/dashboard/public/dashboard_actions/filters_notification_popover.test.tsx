@@ -60,10 +60,6 @@ describe('filters notification popover', () => {
     api = {
       uuid: 'testId',
       viewMode: new BehaviorSubject<ViewMode>('edit'),
-      parentApi: {
-        getAllDataViews: jest.fn(),
-        getDashboardPanelFromId: jest.fn(),
-      },
       filters$: filtersSubject,
       query$: querySubject,
     };
@@ -78,11 +74,6 @@ describe('filters notification popover', () => {
     await userEvent.click(await screen.findByTestId(`embeddablePanelNotification-${api.uuid}`));
     await waitForEuiPopoverOpen();
   };
-
-  it('calls get all dataviews from the parent', async () => {
-    render(<FiltersNotificationPopover api={api} />);
-    expect(api.parentApi?.getAllDataViews).toHaveBeenCalled();
-  });
 
   it('renders the filter section when given filters', async () => {
     updateFilters([getMockPhraseFilter('ay', 'oh')]);

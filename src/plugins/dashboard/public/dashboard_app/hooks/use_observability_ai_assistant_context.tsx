@@ -9,7 +9,6 @@
 
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { useEffect } from 'react';
-import type { Embeddable } from '@kbn/embeddable-plugin/public';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import {
@@ -29,7 +28,7 @@ import {
 } from '@kbn/lens-embeddable-utils/config_builder';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import type { AwaitingDashboardAPI } from '../../dashboard_container';
+import { DashboardApi } from '../../dashboard_api/types';
 
 const chartTypes = [
   'xy',
@@ -47,12 +46,12 @@ const chartTypes = [
 
 export function useObservabilityAIAssistantContext({
   observabilityAIAssistant,
-  dashboardAPI,
+  dashboardApi,
   search,
   dataViews,
 }: {
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart | undefined;
-  dashboardAPI: AwaitingDashboardAPI;
+  dashboardApi: DashboardApi | undefined;
   search: ISearchStart;
   dataViews: DataViewsPublicPluginStart;
 }) {
@@ -69,7 +68,7 @@ export function useObservabilityAIAssistantContext({
     return setScreenContext({
       screenDescription:
         'The user is looking at the dashboard app. Here they can add visualizations to a dashboard and save them',
-      actions: dashboardAPI
+      actions: dashboardApi
         ? [
             createScreenContextAction(
               {
@@ -361,8 +360,8 @@ export function useObservabilityAIAssistantContext({
                   query: dataset,
                 })) as LensEmbeddableInput;
 
-                return dashboardAPI
-                  .addNewPanel<Embeddable>({
+                return dashboardApi
+                  .addNewPanel({
                     panelType: 'lens',
                     initialState: embeddableInput,
                   })
@@ -383,5 +382,5 @@ export function useObservabilityAIAssistantContext({
           ]
         : [],
     });
-  }, [observabilityAIAssistant, dashboardAPI, search, dataViews]);
+  }, [observabilityAIAssistant, dashboardApi, search, dataViews]);
 }

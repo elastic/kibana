@@ -7,27 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, filter, skip } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
+import React, { useEffect } from 'react';
+import { BehaviorSubject, combineLatest, debounceTime, filter, map, skip } from 'rxjs';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import {
-  OPTIONS_LIST_CONTROL,
+import { OPTIONS_LIST_CONTROL } from '../../../../../common';
+import type {
+  OptionsListControlState,
+  OptionsListSearchTechnique,
+  OptionsListSelection,
+  OptionsListSortingType,
   OptionsListSuccessResponse,
   OptionsListSuggestions,
-} from '../../../../../common/options_list/types';
-import {
-  getSelectionAsFieldType,
-  OptionsListSelection,
-} from '../../../../../common/options_list/options_list_selections';
-import { isValidSearch } from '../../../../../common/options_list/is_valid_search';
-import { OptionsListSearchTechnique } from '../../../../../common/options_list/suggestions_searching';
-import { OptionsListSortingType } from '../../../../../common/options_list/suggestions_sorting';
+} from '../../../../../common/options_list';
+import { getSelectionAsFieldType, isValidSearch } from '../../../../../common/options_list';
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory, DataControlServices } from '../types';
+import type { DataControlFactory } from '../types';
 import { OptionsListControl } from './components/options_list_control';
 import { OptionsListEditorOptions } from './components/options_list_editor_options';
 import {
@@ -37,13 +35,14 @@ import {
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
-import { OptionsListStrings } from './options_list_strings';
-import { OptionsListControlApi, OptionsListControlState } from './types';
 import { initializeOptionsListSelections } from './options_list_control_selections';
+import { OptionsListStrings } from './options_list_strings';
+import type { OptionsListControlApi } from './types';
 
-export const getOptionsListControlFactory = (
-  services: DataControlServices
-): DataControlFactory<OptionsListControlState, OptionsListControlApi> => {
+export const getOptionsListControlFactory = (): DataControlFactory<
+  OptionsListControlState,
+  OptionsListControlApi
+> => {
   return {
     type: OPTIONS_LIST_CONTROL,
     order: 3, // should always be first, since this is the most popular control
@@ -80,6 +79,7 @@ export const getOptionsListControlFactory = (
       const searchStringValid$ = new BehaviorSubject<boolean>(true);
       const requestSize$ = new BehaviorSubject<number>(MIN_OPTIONS_LIST_REQUEST_SIZE);
 
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
       const availableOptions$ = new BehaviorSubject<OptionsListSuggestions | undefined>(undefined);
       const invalidSelections$ = new BehaviorSubject<Set<OptionsListSelection>>(new Set());
       const totalCardinality$ = new BehaviorSubject<number>(0);
@@ -92,8 +92,7 @@ export const getOptionsListControlFactory = (
         'optionsListDataView',
         initialState,
         { searchTechnique: searchTechnique$, singleSelect: singleSelect$ },
-        controlGroupApi,
-        services
+        controlGroupApi
       );
 
       const selections = initializeOptionsListSelections(
@@ -117,12 +116,16 @@ export const getOptionsListControlFactory = (
 
       /** Handle loading state; since suggestion fetching and validation are tied, only need one loading subject */
       const loadingSuggestions$ = new BehaviorSubject<boolean>(false);
-      const dataLoadingSubscription = loadingSuggestions$
+      const dataLoadingSubscription = combineLatest([
+        loadingSuggestions$,
+        dataControl.api.dataLoading,
+      ])
         .pipe(
-          debounceTime(100) // debounce set loading so that it doesn't flash as the user types
+          debounceTime(100), // debounce set loading so that it doesn't flash as the user types
+          map((values) => values.some((value) => value))
         )
         .subscribe((isLoading) => {
-          dataControl.api.setDataLoading(isLoading);
+          dataLoading$.next(isLoading);
         });
 
       /** Debounce the search string changes to reduce the number of fetch requests */
@@ -163,7 +166,6 @@ export const getOptionsListControlFactory = (
       /** Fetch the suggestions and perform validation */
       const loadMoreSubject = new BehaviorSubject<null>(null);
       const fetchSubscription = fetchAndValidate$({
-        services,
         api: {
           ...dataControl.api,
           loadMoreSubject,
@@ -237,6 +239,7 @@ export const getOptionsListControlFactory = (
       const api = buildApi(
         {
           ...dataControl.api,
+          dataLoading: dataLoading$,
           getTypeDisplayName: OptionsListStrings.control.getDisplayName,
           serializeState: () => {
             const { rawState: dataControlState, references } = dataControl.serialize();
