@@ -559,7 +559,6 @@ async function getExpressionSuggestionsByType(
   const canHaveAssignments = ['eval', 'stats', 'row'].includes(command.name);
 
   const references = { fields: fieldsMap, variables: anyVariables };
-
   if (command.name === 'sort') {
     return await suggestForSortCmd(innerText, getFieldsByType, (col) =>
       Boolean(getColumnByName(col, references))
@@ -2020,17 +2019,33 @@ export const suggestForSortCmd = async (
   const fieldSuggestions = await getFieldsByType('any', [], {
     openSuggestions: true,
   });
+  const functionSuggestions = await getFieldsOrFunctionsSuggestions(
+    ['any'],
+    'sort',
+    undefined,
+    getFieldsByType,
+    {
+      functions: true,
+      fields: false,
+    }
+  );
 
   return await handleFragment(
     innerText,
     columnExists,
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // SORT fie<suggest>
-      return fieldSuggestions.map((suggestion) => ({
-        ...suggestion,
-        command: TRIGGER_SUGGESTION_COMMAND,
-        rangeToReplace,
-      }));
+      return [
+        ...pushItUpInTheList(
+          fieldSuggestions.map((suggestion) => ({
+            ...suggestion,
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace,
+          })),
+          true
+        ),
+        ...functionSuggestions,
+      ];
     },
     (fragment: string, rangeToReplace: { start: number; end: number }) => {
       // SORT field<suggest>

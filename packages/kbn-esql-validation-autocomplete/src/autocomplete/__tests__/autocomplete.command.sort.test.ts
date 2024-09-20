@@ -7,22 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setup, getFieldNamesByType, attachTriggerCommand } from './helpers';
+import {
+  setup,
+  getFieldNamesByType,
+  attachTriggerCommand,
+  getFunctionSignaturesByReturnType,
+} from './helpers';
 
 describe('autocomplete.suggest', () => {
   describe('SORT ( <column> [ ASC / DESC ] [ NULLS FIST / NULLS LAST ] )+', () => {
     describe('SORT <column> ...', () => {
+      const expectedFieldSuggestions = getFieldNamesByType('any').map(attachTriggerCommand);
+      const expectedFunctionSuggestions = getFunctionSignaturesByReturnType('sort', 'any', {
+        scalar: true,
+      }).map(attachTriggerCommand);
+
       test('suggests column', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions(
-          'from a | sort /',
-          [...getFieldNamesByType('any')].map(attachTriggerCommand)
-        );
-        await assertSuggestions(
-          'from a | sort keyw/',
-          [...getFieldNamesByType('any')].map(attachTriggerCommand)
-        );
+        await assertSuggestions('from a | sort /', [
+          ...expectedFieldSuggestions,
+          ...expectedFunctionSuggestions,
+        ]);
+        await assertSuggestions('from a | sort keyw/', [
+          ...expectedFieldSuggestions,
+          ...expectedFunctionSuggestions,
+        ]);
         await assertSuggestions(
           'from a | sort keywordField/',
           [
@@ -56,14 +66,14 @@ describe('autocomplete.suggest', () => {
       it('suggests subsequent column after comma', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions(
-          'from a | sort keywordField, /',
-          [...getFieldNamesByType('any')].map(attachTriggerCommand)
-        );
-        await assertSuggestions(
-          'from a | sort keywordField, doubl/',
-          [...getFieldNamesByType('any')].map(attachTriggerCommand)
-        );
+        await assertSuggestions('from a | sort keywordField, /', [
+          ...expectedFieldSuggestions,
+          ...expectedFunctionSuggestions,
+        ]);
+        await assertSuggestions('from a | sort keywordField, doubl/', [
+          ...expectedFieldSuggestions,
+          ...expectedFunctionSuggestions,
+        ]);
         await assertSuggestions(
           'from a | sort keywordField, doubleField/',
           [
