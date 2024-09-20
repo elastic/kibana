@@ -38,6 +38,7 @@ describe('Header', () => {
     isSideNavCollapsed$: Rx.of(false),
     prependBasePath: (str) => `hello/world/${str}`,
     toggleSideNav: jest.fn(),
+    isServerless: false,
   };
 
   it('renders', async () => {
