@@ -216,23 +216,23 @@ const EndpointsEmptyState = React.memo<{
 
                 <EuiSpacer size="s" />
 
-                {policyItemsWithoutAgentPolicy.map((policyItem) => (
-                  <li key={policyItem.id} data-test-subj="integrationWithoutAgentPolicyListItem">
-                    <EuiLink
-                      target="_blank"
-                      href={getAppUrl({
-                        appId: INTEGRATIONS_PLUGIN_ID,
-                        path: pagePathGetters.integration_policy_edit({
-                          packagePolicyId: policyItem.id,
-                        })[1],
-                      })}
-                    >
-                      {policyItem.name}
-                    </EuiLink>
-                  </li>
-                ))}
-
-                <EuiSpacer size="m" />
+                <ul>
+                  {policyItemsWithoutAgentPolicy.map((policyItem) => (
+                    <li key={policyItem.id}>
+                      <EuiLink
+                        target="_blank"
+                        href={getAppUrl({
+                          appId: INTEGRATIONS_PLUGIN_ID,
+                          path: pagePathGetters.integration_policy_edit({
+                            packagePolicyId: policyItem.id,
+                          })[1],
+                        })}
+                      >
+                        {policyItem.name}
+                      </EuiLink>
+                    </li>
+                  ))}
+                </ul>
 
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.list.notAddedIntegrations.visitIntegrations"
