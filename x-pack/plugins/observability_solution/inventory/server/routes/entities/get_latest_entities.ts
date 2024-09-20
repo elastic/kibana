@@ -6,6 +6,7 @@
  */
 
 import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
 import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
 import {
   ENTITIES_LATEST_ALIAS,
@@ -38,11 +39,13 @@ export async function getLatestEntities({
   sortDirection,
   sortField,
   entityTypes,
+  kuery,
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
   sortDirection: 'asc' | 'desc';
   sortField: string;
   entityTypes?: EntityType[];
+  kuery?: string;
 }) {
   const entityTypesFilter = entityTypes?.length ? entityTypes : DEFAULT_ENTITY_TYPES;
   const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
@@ -59,6 +62,11 @@ export async function getLatestEntities({
      | LIMIT ${MAX_NUMBER_OF_ENTITIES}
      | KEEP ${ENTITY_LAST_SEEN}, ${ENTITY_TYPE}, ${ENTITY_DISPLAY_NAME}, ${ENTITY_ID}
     `,
+    filter: {
+      bool: {
+        filter: [...kqlQuery(kuery)],
+      },
+    },
   });
 
   return esqlResultToPlainObjects<LatestEntity>(latestEntitiesEsqlResponse);

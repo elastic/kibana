@@ -12,7 +12,8 @@
       "entityManager",
       "inference",
       "dataViews",
-      "unifiedSearch"
+      "unifiedSearch",
+      "data"
     ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": [],

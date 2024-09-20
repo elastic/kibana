@@ -14,9 +14,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 
-// TODO: remove it
-const DEFAULT_ENTITY_TYPES: EntityType[] = ['service', 'host', 'container'];
-
 interface Props {
   onChange: (entityTypes: EntityType[]) => void;
 }
@@ -42,8 +39,7 @@ export function EntityTypesControls({ onChange }: Props) {
     [inventoryAPIClient]
   );
 
-  // const options = value?.entityTypes.map(toComboBoxOption);
-  const options = DEFAULT_ENTITY_TYPES.map(toComboBoxOption);
+  const options = value?.entityTypes.map(toComboBoxOption);
   const selectedOptions = entityTypes.map(toComboBoxOption);
 
   return (
@@ -58,7 +54,7 @@ export function EntityTypesControls({ onChange }: Props) {
       )}
       placeholder={i18n.translate(
         'xpack.inventory.entityTypesControls.euiComboBox.placeHolderLabel',
-        { defaultMessage: 'Entity types' }
+        { defaultMessage: 'Types' }
       )}
       options={options}
       selectedOptions={selectedOptions}

@@ -41,6 +41,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       }),
       t.partial({
         entityTypes: jsonRt.pipe(t.array(entityTypeRt)),
+        kuery: t.string,
       }),
     ]),
   }),
@@ -55,13 +56,14 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       plugin: `@kbn/${INVENTORY_APP_ID}-plugin`,
     });
 
-    const { sortDirection, sortField, entityTypes } = params.query;
+    const { sortDirection, sortField, entityTypes, kuery } = params.query;
 
     const latestEntities = await getLatestEntities({
       inventoryEsClient,
       sortDirection,
       sortField,
       entityTypes,
+      kuery,
     });
 
     return { entities: latestEntities };

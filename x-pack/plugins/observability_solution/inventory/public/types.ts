@@ -11,6 +11,7 @@ import type {
 import type { InferencePublicStart, InferencePublicSetup } from '@kbn/inference-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -19,6 +20,7 @@ export interface ConfigSchema {}
 export interface InventorySetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   inference: InferencePublicSetup;
+  data: DataPublicPluginSetup;
 }
 
 export interface InventoryStartDependencies {
@@ -26,6 +28,7 @@ export interface InventoryStartDependencies {
   inference: InferencePublicStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
 }
 
 export interface InventoryPublicSetup {}

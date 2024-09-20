@@ -6,7 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
+import { SearchBar } from '../search_bar';
 
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
@@ -25,7 +27,12 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
         }),
       }}
     >
-      {children}
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <SearchBar />
+        </EuiFlexItem>
+        <EuiFlexItem>{children}</EuiFlexItem>
+      </EuiFlexGroup>
     </ObservabilityPageTemplate>
   );
 }

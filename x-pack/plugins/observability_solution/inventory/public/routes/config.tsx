@@ -33,6 +33,7 @@ const inventoryRoutes = {
         }),
         t.partial({
           entityTypes: entityTypesRt,
+          kuery: t.string,
         }),
       ]),
     }),

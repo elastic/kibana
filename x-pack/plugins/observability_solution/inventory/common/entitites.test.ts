@@ -52,13 +52,10 @@ describe('entityTypesRt codec', () => {
     expect(isLeft(result)).toBe(true);
   });
 
-  it('should validate an empty string as an empty array', () => {
+  it('should fail validation an empty string', () => {
     const input = '';
     const result = validate(input);
-    expect(isRight(result)).toBe(true);
-    if (isRight(result)) {
-      expect(result.right).toEqual([]);
-    }
+    expect(isLeft(result)).toBe(true);
   });
 
   it('should validate an empty array as valid', () => {

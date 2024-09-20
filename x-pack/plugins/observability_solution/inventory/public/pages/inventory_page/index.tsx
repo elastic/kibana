@@ -4,39 +4,61 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import { EuiDataGridSorting } from '@elastic/eui';
 import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
-import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EntitiesGrid } from '../../components/entities_grid';
-import { useKibana } from '../../hooks/use_kibana';
+import { searchBarContentSubject$ } from '../../components/search_bar';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
-import { SearchBar } from '../../components/search_bar';
-import { EntityType } from '../../../common/entities';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function InventoryPage() {
   const {
     services: { inventoryAPIClient },
   } = useKibana();
   const { query } = useInventoryParams('/');
-  const { sortDirection, sortField, pageIndex } = query;
+  const { sortDirection, sortField, pageIndex, kuery, entityTypes } = query;
 
   const inventoryRoute = useInventoryRouter();
 
-  const { value = { entities: [] }, loading } = useAbortableAsync(
+  const {
+    value = { entities: [] },
+    loading,
+    refresh,
+  } = useAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
         params: {
           query: {
             sortDirection,
             sortField,
+            entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
+            kuery,
           },
         },
         signal,
       });
     },
-    [inventoryAPIClient, sortDirection, sortField]
+    [entityTypes, inventoryAPIClient, kuery, sortDirection, sortField]
   );
+
+  useEffectOnce(() => {
+    const searchBarContentSubscription = searchBarContentSubject$.subscribe((searchBar) => {
+      if (searchBar.refresh) {
+        refresh();
+      } else {
+        inventoryRoute.push('/', {
+          path: {},
+          query: { ...query, ...searchBar },
+        });
+      }
+    });
+    return () => {
+      searchBarContentSubscription.unsubscribe();
+    };
+  });
 
   function handlePageChange(nextPage: number) {
     inventoryRoute.push('/', {
@@ -56,32 +78,15 @@ export function InventoryPage() {
     });
   }
 
-  function handleEntityTypesFilter(newEntityTypes: EntityType[]) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...query,
-        entityTypes: newEntityTypes,
-      },
-    });
-  }
-
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <SearchBar onChangeEntyTypes={handleEntityTypesFilter} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EntitiesGrid
-          entities={value.entities}
-          loading={loading}
-          sortDirection={sortDirection}
-          sortField={sortField}
-          onChangePage={handlePageChange}
-          onChangeSort={handleSortChange}
-          pageIndex={pageIndex}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EntitiesGrid
+      entities={value.entities}
+      loading={loading}
+      sortDirection={sortDirection}
+      sortField={sortField}
+      onChangePage={handlePageChange}
+      onChangeSort={handleSortChange}
+      pageIndex={pageIndex}
+    />
   );
 }

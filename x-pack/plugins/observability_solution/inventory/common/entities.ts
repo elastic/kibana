@@ -30,9 +30,6 @@ export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
   (input, context) => {
     if (typeof input === 'string') {
       const arr = input.split(',');
-      if (arr.length === 1 && arr[0] === '') {
-        return t.success([]);
-      }
       const validation = entityArrayRt.decode(arr);
       if (isRight(validation)) {
         return t.success(validation.right);
