@@ -42,7 +42,6 @@ import type {
   MetricVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor, HJsonLang } from '@kbn/code-editor';
 import type { StartDependencies } from './plugin';
 import {
