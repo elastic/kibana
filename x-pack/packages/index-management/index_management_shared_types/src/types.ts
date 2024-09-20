@@ -28,7 +28,6 @@ export interface IndexManagementPluginStart {
   getIndexSettingsComponent: (deps: {
     history: ScopedHistory<unknown>;
   }) => React.FC<IndexSettingProps>;
-
 }
 
 export interface Index {
