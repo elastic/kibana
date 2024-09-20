@@ -2502,7 +2502,7 @@ describe('TaskManagerRunner', () => {
       }),
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
       strategy: opts.strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY,
-      pollIntervalConfiguration$: new BehaviorSubject(500),
+      getPollInterval: () => 500,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {
