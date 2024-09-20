@@ -96,15 +96,6 @@ export class InventoryPlugin
       status: isEntityCentricExperienceSettingEnabled
         ? AppStatus.accessible
         : AppStatus.inaccessible,
-      deepLinks: [
-        {
-          id: 'inventory',
-          title: i18n.translate('xpack.inventory.inventoryDeepLinkTitle', {
-            defaultMessage: 'Inventory',
-          }),
-          path: '/',
-        },
-      ],
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
