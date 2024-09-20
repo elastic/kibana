@@ -102,6 +102,7 @@ import {
   removeQuoteForSuggestedSources,
   getValidSignaturesAndTypesToSuggestNext,
 } from './helper';
+import { getSortPos } from './commands/sort/helper';
 import {
   FunctionParameter,
   FunctionReturnType,
@@ -111,6 +112,7 @@ import {
 } from '../definitions/types';
 import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
+import { countBracketsUnclosed } from '../shared/helpers';
 
 type GetFieldsByTypeFn = (
   type: string | string[],
@@ -192,6 +194,10 @@ export async function suggest(
   }
 
   if (astContext.type === 'expression') {
+    if (astContext.command.name === 'sort') {
+      return await suggestForSortCmd(innerText, getFieldsByType);
+    }
+
     // suggest next possible argument, or option
     // otherwise a variable
     return getExpressionSuggestionsByType(
@@ -554,8 +560,11 @@ async function getExpressionSuggestionsByType(
   const fieldsMap: Map<string, ESQLRealField> = await (argDef ? getFieldsMap() : new Map());
   const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
+  const previousWord = findPreviousWord(innerText);
   // enrich with assignment has some special rules who are handled somewhere else
-  const canHaveAssignments = ['eval', 'stats', 'row'].includes(command.name);
+  const canHaveAssignments =
+    ['eval', 'stats', 'row'].includes(command.name) &&
+    !comparisonFunctions.map((fn) => fn.name).includes(previousWord);
 
   const references = { fields: fieldsMap, variables: anyVariables };
 
@@ -1422,10 +1431,9 @@ async function getFunctionArgsSuggestions(
       suggestions.push(
         ...comparisonFunctions.map<SuggestionRawDefinition>(({ name, description }) => ({
           label: name,
-          text: name + ' ',
+          text: name,
           kind: 'Function' as ItemKind,
           detail: description,
-          command: TRIGGER_SUGGESTION_COMMAND,
         }))
       );
     }
@@ -1786,10 +1794,13 @@ async function getOptionArgsSuggestions(
             openSuggestions: true,
           }))
         );
+        // Checks if cursor is still within function ()
+        // by checking if the marker editor/cursor is within an unclosed parenthesis
+        const canHaveAssignment = countBracketsUnclosed('(', innerText) === 0;
 
         if (option.name === 'by') {
           // Add quick snippet for for stats ... by bucket(<>)
-          if (command.name === 'stats') {
+          if (command.name === 'stats' && canHaveAssignment) {
             suggestions.push({
               label: i18n.translate(
                 'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogram',
@@ -1820,12 +1831,13 @@ async function getOptionArgsSuggestions(
               {
                 functions: true,
                 fields: false,
-              }
+              },
+              { ignoreFn: canHaveAssignment ? [] : ['bucket', 'case'] }
             ))
           );
         }
 
-        if (command.name === 'stats' && isNewExpression) {
+        if (command.name === 'stats' && isNewExpression && canHaveAssignment) {
           suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
         }
       }
@@ -1833,3 +1845,100 @@ async function getOptionArgsSuggestions(
   }
   return suggestions;
 }
+
+const sortModifierSuggestions = {
+  ASC: {
+    label: 'ASC',
+    text: 'ASC ',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-ASC',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  DESC: {
+    label: 'DESC',
+    text: 'DESC ',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-DESC',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  NULLS_FIRST: {
+    label: 'NULLS FIRST',
+    text: 'NULLS FIRST ',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS FIRST',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  NULLS_LAST: {
+    label: 'NULLS LAST',
+    text: 'NULLS LAST ',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS LAST',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+};
+
+export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetFieldsByTypeFn) => {
+  const { pos, order, nulls } = getSortPos(innerText);
+
+  switch (pos) {
+    case 'space2': {
+      return [
+        sortModifierSuggestions.ASC,
+        sortModifierSuggestions.DESC,
+        sortModifierSuggestions.NULLS_FIRST,
+        sortModifierSuggestions.NULLS_LAST,
+        ...getFinalSuggestions({
+          comma: true,
+        }),
+      ];
+    }
+    case 'order': {
+      const suggestions: SuggestionRawDefinition[] = [];
+      for (const modifier of Object.values(sortModifierSuggestions)) {
+        if (modifier.label.startsWith(order)) {
+          suggestions.push(modifier);
+        }
+      }
+      return suggestions;
+    }
+    case 'space3': {
+      return [
+        sortModifierSuggestions.NULLS_FIRST,
+        sortModifierSuggestions.NULLS_LAST,
+        ...getFinalSuggestions({
+          comma: true,
+        }),
+      ];
+    }
+    case 'nulls': {
+      const end = innerText.length + 1;
+      const start = end - nulls.length;
+      const suggestions: SuggestionRawDefinition[] = [];
+      for (const modifier of Object.values(sortModifierSuggestions)) {
+        if (modifier.label.startsWith(nulls)) {
+          suggestions.push({
+            ...modifier,
+            rangeToReplace: {
+              start,
+              end,
+            },
+          });
+        }
+      }
+      return suggestions;
+    }
+    case 'space4': {
+      return [
+        ...getFinalSuggestions({
+          comma: true,
+        }),
+      ];
+    }
+  }
+
+  return (await getFieldsByType('any', [], { advanceCursor: true })) as SuggestionRawDefinition[];
+};

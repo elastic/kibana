@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, ComponentProps } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
@@ -23,12 +23,12 @@ export interface INewsfeedContext {
 
 export const NewsfeedContext = React.createContext({} as INewsfeedContext);
 
-export interface Props {
+export interface Props extends Pick<ComponentProps<typeof NewsfeedFlyout>, 'isServerless'> {
   newsfeedApi: NewsfeedApi;
   hasCustomBranding$: Observable<boolean>;
 }
 
-export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$ }: Props) => {
+export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$, isServerless }: Props) => {
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
   const hasCustomBranding = useObservable(hasCustomBranding$, false);
@@ -78,6 +78,7 @@ export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$ }: Props) =>
         </EuiHeaderSectionItemButton>
         {flyoutVisible ? (
           <NewsfeedFlyout
+            isServerless={isServerless}
             focusTrapProps={{ shards: [buttonRef] }}
             showPlainSpinner={hasCustomBranding}
           />

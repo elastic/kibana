@@ -50,18 +50,22 @@ describe('single line query', () => {
         expect(text).toBe('FROM a | SORT b');
       });
 
-      /** @todo Enable once order expressions are supported.  */
-      test.skip('order expression with ASC modifier', () => {
+      test('order expression with ASC modifier', () => {
         const { text } = reprint('FROM a | SORT b ASC');
 
         expect(text).toBe('FROM a | SORT b ASC');
       });
 
-      /** @todo Enable once order expressions are supported.  */
-      test.skip('order expression with ASC and NULLS FIRST modifier', () => {
-        const { text } = reprint('FROM a | SORT b ASC NULLS FIRST');
+      test('order expression with NULLS LAST modifier', () => {
+        const { text } = reprint('FROM a | SORT b NULLS LAST');
 
-        expect(text).toBe('FROM a | SORT b ASC NULLS FIRST');
+        expect(text).toBe('FROM a | SORT b NULLS LAST');
+      });
+
+      test('order expression with DESC and NULLS FIRST modifier', () => {
+        const { text } = reprint('FROM a | SORT b DESC NULLS FIRST');
+
+        expect(text).toBe('FROM a | SORT b DESC NULLS FIRST');
       });
     });
 

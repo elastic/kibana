@@ -11,7 +11,6 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
@@ -37,7 +36,6 @@ export interface PluginsDependencies {
   dataViews: DataViewsPublicPluginStart;
   management: ManagementSetup;
   home: HomePublicPluginSetup;
-  savedObjects: SavedObjectsStart;
   savedSearch: SavedSearchPublicPluginStart;
   share: SharePluginStart;
   spaces?: SpacesApi;
