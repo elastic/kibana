@@ -239,8 +239,6 @@ export interface SettingsSOAttributes {
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
-  use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
-  use_space_awareness_migration_started_at?: string | null;
 }
 
 export interface SpaceSettingsSOAttributes {

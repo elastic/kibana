@@ -360,6 +360,18 @@
       "@kbn/core-fatal-errors-browser-internal/*": ["packages/core/fatal-errors/core-fatal-errors-browser-internal/*"],
       "@kbn/core-fatal-errors-browser-mocks": ["packages/core/fatal-errors/core-fatal-errors-browser-mocks"],
       "@kbn/core-fatal-errors-browser-mocks/*": ["packages/core/fatal-errors/core-fatal-errors-browser-mocks/*"],
+      "@kbn/core-feature-flags-browser": ["packages/core/feature-flags/core-feature-flags-browser"],
+      "@kbn/core-feature-flags-browser/*": ["packages/core/feature-flags/core-feature-flags-browser/*"],
+      "@kbn/core-feature-flags-browser-internal": ["packages/core/feature-flags/core-feature-flags-browser-internal"],
+      "@kbn/core-feature-flags-browser-internal/*": ["packages/core/feature-flags/core-feature-flags-browser-internal/*"],
+      "@kbn/core-feature-flags-browser-mocks": ["packages/core/feature-flags/core-feature-flags-browser-mocks"],
+      "@kbn/core-feature-flags-browser-mocks/*": ["packages/core/feature-flags/core-feature-flags-browser-mocks/*"],
+      "@kbn/core-feature-flags-server": ["packages/core/feature-flags/core-feature-flags-server"],
+      "@kbn/core-feature-flags-server/*": ["packages/core/feature-flags/core-feature-flags-server/*"],
+      "@kbn/core-feature-flags-server-internal": ["packages/core/feature-flags/core-feature-flags-server-internal"],
+      "@kbn/core-feature-flags-server-internal/*": ["packages/core/feature-flags/core-feature-flags-server-internal/*"],
+      "@kbn/core-feature-flags-server-mocks": ["packages/core/feature-flags/core-feature-flags-server-mocks"],
+      "@kbn/core-feature-flags-server-mocks/*": ["packages/core/feature-flags/core-feature-flags-server-mocks/*"],
       "@kbn/core-history-block-plugin": ["test/plugin_functional/plugins/core_history_block"],
       "@kbn/core-history-block-plugin/*": ["test/plugin_functional/plugins/core_history_block/*"],
       "@kbn/core-http-browser": ["packages/core/http/core-http-browser"],
@@ -900,6 +912,8 @@
       "@kbn/failed-test-reporter-cli/*": ["packages/kbn-failed-test-reporter-cli/*"],
       "@kbn/feature-controls-examples-plugin": ["examples/feature_control_examples"],
       "@kbn/feature-controls-examples-plugin/*": ["examples/feature_control_examples/*"],
+      "@kbn/feature-flags-example-plugin": ["examples/feature_flags_example"],
+      "@kbn/feature-flags-example-plugin/*": ["examples/feature_flags_example/*"],
       "@kbn/feature-usage-test-plugin": ["x-pack/test/plugin_api_integration/plugins/feature_usage_test"],
       "@kbn/feature-usage-test-plugin/*": ["x-pack/test/plugin_api_integration/plugins/feature_usage_test/*"],
       "@kbn/features-plugin": ["x-pack/plugins/features"],
@@ -1982,11 +1996,8 @@
     "useUnknownInCatchVariables": false,
     // enabled to point out not supported features when emitting in an isolated module environment
     "isolatedModules": true,
-    // TODO(jbudz): should be uncommented when upgrading to TS@4.8
-    //
     // ensures every non-declaration file is treated as a module
-    // "moduleDetection": "force",
-    //
+    "moduleDetection": "force",
     // disabled for better IDE support, enabled when running the type_check script
     "composite": false,
     // enabled for improved performance

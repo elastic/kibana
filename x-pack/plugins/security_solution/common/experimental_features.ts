@@ -89,6 +89,16 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
+   * Space awareness for Elastic Defend management.
+   * Feature depends on Fleet's corresponding features also being enabled:
+   * - `subfeaturePrivileges`
+   * - `useSpaceAwareness`
+   * and Fleet must set it runtime mode to spaces by calling the following API:
+   * - `POST /internal/fleet/enable_space_awareness`
+   */
+  endpointManagementSpaceAwarenessEnabled: false,
+
+  /**
    * Enables new notes
    */
   securitySolutionNotesEnabled: false,
@@ -132,6 +142,11 @@ export const allowedExperimentalValues = Object.freeze({
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
+
+  /**
+   * enables logging requests during rule preview
+   */
+  loggingRequestsEnabled: false,
 
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
@@ -187,6 +202,11 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   analyzerDatePickersAndSourcererDisabled: false,
+
+  /**
+   * Enables visualization: session viewer and analyzer in expandable flyout
+   */
+  visualizationInFlyoutEnabled: false,
 
   /**
    * Enables an ability to customize Elastic prebuilt rules.
