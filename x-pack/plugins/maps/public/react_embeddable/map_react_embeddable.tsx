@@ -40,6 +40,9 @@ import { initializeDataViews } from './initialize_data_views';
 import { initializeFetch } from './initialize_fetch';
 import { initializeEditApi } from './initialize_edit_api';
 import { extractReferences } from '../../common/migrations/references';
+import { MapAttributes } from '../../common/content_management';
+import { MapSettings } from '../../common/descriptor_types';
+import { isMapRendererApi } from './map_renderer/types';
 
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
@@ -64,6 +67,10 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
       mapSerializedState: state,
     });
     await savedMap.whenReady();
+
+    const attributes$ = new BehaviorSubject<MapAttributes | undefined>(state.attributes);
+    const mapSettings$ = new BehaviorSubject<Partial<MapSettings> | undefined>(state.mapSettings);
+    const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
 
     // eslint bug, eslint thinks api is never reassigned even though it is
     // eslint-disable-next-line prefer-const
@@ -171,14 +178,14 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
         }),
         ...crossPanelActions.comparators,
         ...reduxSync.comparators,
+        attributes: [attributes$, (next: MapAttributes | undefined) => attributes$.next(next)],
+        mapSettings: [
+          mapSettings$,
+          (next: Partial<MapSettings> | undefined) => mapSettings$.next(next),
+        ],
+        savedObjectId: [savedObjectId$, (next: string | undefined) => savedObjectId$.next(next)],
         // readonly comparators
-        attributes: getUnchangingComparator(),
         mapBuffer: getUnchangingComparator(),
-        savedObjectId: getUnchangingComparator(),
-        mapSettings: getUnchangingComparator(),
-        hideFilterActions: getUnchangingComparator(),
-        isSharable: getUnchangingComparator(),
-        tooltipRenderer: getUnchangingComparator(),
       }
     );
 
@@ -229,17 +236,21 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
             <MapContainer
               onSingleValueTrigger={actionHandlers.onSingleValueTrigger}
               addFilters={
-                state.hideFilterActions || areTriggersDisabled(api)
+                (isMapRendererApi(parent) && parent.hideFilterActions) || areTriggersDisabled(api)
                   ? null
                   : actionHandlers.addFilters
               }
               getFilterActions={actionHandlers.getFilterActions}
               getActionContext={actionHandlers.getActionContext}
-              renderTooltipContent={state.tooltipRenderer}
+              renderTooltipContent={
+                isMapRendererApi(parent) && parent.getTooltipRenderer
+                  ? parent.getTooltipRenderer()
+                  : undefined
+              }
               title={panelTitle ?? defaultPanelTitle}
               description={panelDescription ?? defaultPanelDescription}
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
-              isSharable={state.isSharable ?? true}
+              isSharable={apiIsOfType(parent, 'dashboard') || apiIsOfType(parent, 'canvas')}
             />
           </Provider>
         );
