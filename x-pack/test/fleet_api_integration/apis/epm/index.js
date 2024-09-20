@@ -12,6 +12,7 @@ export default function loadTests({ loadTestFile, getService }) {
     before(async () => {
       await setupTestUsers(getService('security'));
     });
+    loadTestFile(require.resolve('./test_upgrade_tsdb'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./list'));
     loadTestFile(require.resolve('./setup'));
