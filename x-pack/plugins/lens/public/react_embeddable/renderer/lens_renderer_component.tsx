@@ -7,7 +7,7 @@
 
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { LensApi, LensRendererProps, LensRuntimeState, LensSerializedState } from '../types';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 
@@ -55,13 +55,18 @@ export function LensRenderer({
 
   const showPanelChrome = Boolean(withDefaultActions) || (extraActions && extraActions?.length > 0);
 
-  // useEffect(() => {
-  //   const lensApi = apiRef.current;
-  //   // trigger a re-render if the attributes change
-  //   if (lensApi && lensApi) {
-  //     lensApi.updateState({ ...initialStateRef.current, attributes: props.attributes });
-  //   }
-  // }, [props.attributes]);
+  // Re-render on changes
+  // internally the embeddable will evaluate whether it is worth to actual render or not
+  useEffect(() => {
+    const lensApi = apiRef.current;
+    // trigger a re-render if the attributes change
+    if (lensApi && lensApi) {
+      lensApi.updateState({
+        overrides: props.overrides,
+        attributes: { ...initialStateRef.current, ...props.attributes },
+      });
+    }
+  }, [props.attributes, props.overrides]);
 
   return (
     <ReactEmbeddableRenderer<LensSerializedState, LensRuntimeState, LensApi>

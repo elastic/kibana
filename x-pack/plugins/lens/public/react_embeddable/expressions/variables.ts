@@ -26,7 +26,7 @@ export function getVariables(api: LensApi, state: LensRuntimeState) {
   return {
     embeddableTitle: api.defaultPanelTitle?.getValue(),
     ...(state.palette ? { theme: { palette: state.palette } } : {}),
-    ...('overrides' in api ? { overrides: api.overrides } : {}),
+    ...('overrides' in state ? { overrides: state.overrides } : {}),
     ...getInternalTables(state.attributes.state.datasourceStates),
   };
 }

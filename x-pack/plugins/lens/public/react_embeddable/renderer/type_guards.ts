@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensComponentProps, LensPublicCallbacks } from '../types';
+import type { LensComponentForwardedProps, LensPublicCallbacks } from '../types';
 
 function isObject(api: unknown): api is object {
   return Boolean(api && typeof api === 'object');
@@ -23,7 +23,7 @@ export function apiHasLensComponentCallbacks(api: unknown): api is LensPublicCal
   );
 }
 
-export function apiHasLensComponentProps(api: unknown): api is LensComponentProps {
+export function apiHasLensComponentProps(api: unknown): api is LensComponentForwardedProps {
   return (
     isObject(api) &&
     ['style', 'className', 'noPadding', 'viewModets'].some((prop) => Object.hasOwn(api, prop))

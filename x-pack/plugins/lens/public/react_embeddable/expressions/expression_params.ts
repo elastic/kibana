@@ -209,7 +209,6 @@ export async function getExpressionRendererParams(
       hasCompatibleActions: buildHasCompatibleActions(api, services),
       getCompatibleCellValueActions: buildGetCompatibleCellValueActions(api, services),
       variables: getVariables(api, state),
-      /** TODO: fix these */
       style: state.style,
       className: state.className,
       noPadding: state.noPadding,
