@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
         );
         supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-          withInternalHeaders: true,
+          withCommonHeaders: true,
         });
       });
       after(async () => {

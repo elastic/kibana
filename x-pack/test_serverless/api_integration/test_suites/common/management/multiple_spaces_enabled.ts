@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('spaces', function () {
     before(async () => {
       supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-        withInternalHeaders: true,
+        withCommonHeaders: true,
       });
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
@@ -242,42 +242,48 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // These tests just test access to API endpoints
+    // These tests just test access to API endpoints, in this case
+    // when accessed without internal headers they will return 400
     // They will be included in deployment agnostic testing once spaces
     // are enabled in production.
     describe(`Access`, () => {
-      it('#copyToSpace', async () => {
-        const { body, status } = await supertestAdminWithApiKey.post(
-          '/api/spaces/_copy_saved_objects'
-        );
-        svlCommonApi.assertResponseStatusCode(400, status, body);
+      describe(`internal`, () => {
+        it('#copyToSpace', async () => {
+          const { body, status } = await supertestAdminWithApiKey.post(
+            '/api/spaces/_copy_saved_objects'
+          );
+          svlCommonApi.assertResponseStatusCode(400, status, body);
+        });
+        it('#resolveCopyToSpaceErrors', async () => {
+          const { body, status } = await supertestAdminWithApiKey.post(
+            '/api/spaces/_resolve_copy_saved_objects_errors'
+          );
+          svlCommonApi.assertResponseStatusCode(400, status, body);
+        });
+        it('#updateObjectsSpaces', async () => {
+          const { body, status } = await supertestAdminWithApiKey.post(
+            '/api/spaces/_update_objects_spaces'
+          );
+          svlCommonApi.assertResponseStatusCode(400, status, body);
+        });
+        it('#getShareableReferences', async () => {
+          const { body, status } = await supertestAdminWithApiKey
+            .post('/api/spaces/_get_shareable_references')
+            .send({
+              objects: [{ type: 'a', id: 'a' }],
+            });
+          svlCommonApi.assertResponseStatusCode(400, status, body);
+        });
       });
-      it('#resolveCopyToSpaceErrors', async () => {
-        const { body, status } = await supertestAdminWithApiKey.post(
-          '/api/spaces/_resolve_copy_saved_objects_errors'
-        );
-        svlCommonApi.assertResponseStatusCode(400, status, body);
-      });
-      it('#updateObjectsSpaces', async () => {
-        const { body, status } = await supertestAdminWithApiKey.post(
-          '/api/spaces/_update_objects_spaces'
-        );
-        svlCommonApi.assertResponseStatusCode(400, status, body);
-      });
-      it('#getShareableReferences', async () => {
-        const { body, status } = await supertestAdminWithApiKey
-          .post('/api/spaces/_get_shareable_references')
-          .send({
-            objects: [{ type: 'a', id: 'a' }],
-          });
-        svlCommonApi.assertResponseStatusCode(200, status, body);
-      });
-      it('#disableLegacyUrlAliases', async () => {
-        const { body, status } = await supertestAdminWithApiKey.post(
-          '/api/spaces/_disable_legacy_url_aliases'
-        );
-        // without a request body we would normally a 400 bad request if the endpoint was registered
-        svlCommonApi.assertApiNotFound(body, status);
+
+      describe(`disabled`, () => {
+        it('#disableLegacyUrlAliases', async () => {
+          const { body, status } = await supertestAdminWithApiKey.post(
+            '/api/spaces/_disable_legacy_url_aliases'
+          );
+          // without a request body we would normally a 400 bad request if the endpoint was registered
+          svlCommonApi.assertApiNotFound(body, status);
+        });
       });
     });
   });

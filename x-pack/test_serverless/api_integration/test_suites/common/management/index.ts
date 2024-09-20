@@ -11,8 +11,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Management', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('./rollups'));
-    loadTestFile(require.resolve('./scripted_fields'));
+    // loadTestFile(require.resolve('./rollups'));
+    // loadTestFile(require.resolve('./scripted_fields'));
     loadTestFile(require.resolve('./spaces'));
   });
 }

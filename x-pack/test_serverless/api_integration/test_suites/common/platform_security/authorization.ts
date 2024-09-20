@@ -37,65 +37,66 @@ export default function ({ getService }: FtrProviderContext) {
         'admin',
         {
           useCookieHeader: true,
-          withInternalHeaders: true,
         }
       );
       supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-        withInternalHeaders: true,
+        withCommonHeaders: true,
       });
     });
     after(async () => {
       await supertestAdminWithApiKey.destroy();
     });
     describe('route access', () => {
-      describe('internal', () => {
-        describe('disabled', () => {
-          // Skipped due to change in QA environment for role management and spaces
-          // TODO: revisit once the change is rolled out to all environments
-          it.skip('get all privileges', async () => {
-            const { body, status } = await supertestAdminWithApiKey.get('/api/security/privileges');
-            svlCommonApi.assertApiNotFound(body, status);
-          });
+      describe('disabled', () => {
+        // Skipped due to change in QA environment for role management and spaces
+        // TODO: revisit once the change is rolled out to all environments
+        it.skip('get all privileges', async () => {
+          const { body, status } = await supertestAdminWithApiKey.get('/api/security/privileges');
+          svlCommonApi.assertApiNotFound(body, status);
+        });
 
-          // Skipped due to change in QA environment for role management and spaces
-          // TODO: revisit once the change is rolled out to all environments
-          it.skip('get built-in elasticsearch privileges', async () => {
-            const { body, status } = await supertestAdminWithCookieCredentials.get(
-              '/internal/security/esPrivileges/builtin'
-            );
-            svlCommonApi.assertApiNotFound(body, status);
-          });
+        // Skipped due to change in QA environment for role management and spaces
+        // TODO: revisit once the change is rolled out to all environments
+        it.skip('get built-in elasticsearch privileges', async () => {
+          const { body, status } = await supertestAdminWithCookieCredentials.get(
+            '/internal/security/esPrivileges/builtin'
+          );
+          svlCommonApi.assertApiNotFound(body, status);
+        });
 
-          it('create/update roleAuthc', async () => {
-            const { body, status } = await supertestAdminWithApiKey.put('/api/security/role/test');
-            svlCommonApi.assertApiNotFound(body, status);
-          });
+        // Role CRUD APIs are gated behind the xpack.security.roleManagementEnabled config
+        // setting. This setting is false by default on serverless. When the custom roles
+        // feature is enabled, this setting will be true, and the tests from
+        // roles_routes_feature_flag.ts can be moved here to replace these.
+        it('create/update roleAuthc', async () => {
+          const { body, status } = await supertestAdminWithApiKey.put('/api/security/role/test');
+          svlCommonApi.assertApiNotFound(body, status);
+        });
 
-          it('get roleAuthc', async () => {
-            const { body, status } = await supertestAdminWithApiKey.get(
-              '/api/security/role/superuser'
-            );
-            svlCommonApi.assertApiNotFound(body, status);
-          });
+        it('get role', async () => {
+          const { body, status } = await supertestAdminWithApiKey.get(
+            '/api/security/role/superuser'
+          );
+          svlCommonApi.assertApiNotFound(body, status);
+        });
 
-          it('get all roles', async () => {
-            const { body, status } = await supertestAdminWithApiKey.get('/api/security/role');
-            svlCommonApi.assertApiNotFound(body, status);
-          });
+        it('get all roles', async () => {
+          const { body, status } = await supertestAdminWithApiKey.get('/api/security/role');
+          svlCommonApi.assertApiNotFound(body, status);
+        });
 
-          it('delete roleAuthc', async () => {
-            const { body, status } = await supertestAdminWithApiKey.delete(
-              '/api/security/role/superuser'
-            );
-            svlCommonApi.assertApiNotFound(body, status);
-          });
+        it('delete roleAuthc', async () => {
+          const { body, status } = await supertestAdminWithApiKey.delete(
+            '/api/security/role/superuser'
+          );
+          svlCommonApi.assertApiNotFound(body, status);
+        });
 
-          it('get shared saved object permissions', async () => {
-            const { body, status } = await supertestAdminWithCookieCredentials.get(
-              '/internal/security/_share_saved_object_permissions'
-            );
-            svlCommonApi.assertApiNotFound(body, status);
-          });
+        it('get shared saved object permissions', async () => {
+          const { body, status } = await supertestAdminWithCookieCredentials.get(
+            '/internal/security/_share_saved_object_permissions'
+          );
+          svlCommonApi.assertApiNotFound(body, status);
         });
       });
 
