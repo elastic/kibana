@@ -14,7 +14,7 @@ import { KibanaServerProvider } from './services/kibana_server';
 export { KibanaServerProvider } from './services/kibana_server';
 export type KibanaServer = ProvidedType<typeof KibanaServerProvider>;
 
-export { RetryService } from './services/retry';
+export { RetryService, type TryWithRetriesOptions } from './services/retry';
 
 import { EsArchiverProvider } from './services/es_archiver';
 export type EsArchiver = ProvidedType<typeof EsArchiverProvider>;
@@ -26,7 +26,11 @@ export type Es = ProvidedType<typeof EsProvider>;
 import { SupertestWithoutAuthProvider } from './services/supertest_without_auth';
 export type SupertestWithoutAuthProviderType = ProvidedType<typeof SupertestWithoutAuthProvider>;
 
-export type { InternalRequestHeader, RoleCredentials } from './services/saml_auth';
+export type {
+  InternalRequestHeader,
+  RoleCredentials,
+  CookieCredentials,
+} from './services/saml_auth';
 
 import { SamlAuthProvider } from './services/saml_auth/saml_auth_provider';
 export type SamlAuthProviderType = ProvidedType<typeof SamlAuthProvider>;

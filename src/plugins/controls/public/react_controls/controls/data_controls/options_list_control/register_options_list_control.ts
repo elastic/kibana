@@ -7,21 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup } from '@kbn/core/public';
-import type { ControlsPluginStartDeps } from '../../../../types';
-import { registerControlFactory } from '../../../control_factory_registry';
 import { OPTIONS_LIST_CONTROL } from '../../../../../common';
+import { untilPluginStartServicesReady } from '../../../../services/kibana_services';
+import { registerControlFactory } from '../../../control_factory_registry';
 
-export function registerOptionsListControl(coreSetup: CoreSetup<ControlsPluginStartDeps>) {
+export function registerOptionsListControl() {
   registerControlFactory(OPTIONS_LIST_CONTROL, async () => {
-    const [{ getOptionsListControlFactory }, [coreStart, depsStart]] = await Promise.all([
+    const [{ getOptionsListControlFactory }] = await Promise.all([
       import('./get_options_list_control_factory'),
-      coreSetup.getStartServices(),
+      untilPluginStartServicesReady(),
     ]);
-    return getOptionsListControlFactory({
-      core: coreStart,
-      data: depsStart.data,
-      dataViews: depsStart.data.dataViews,
-    });
+    return getOptionsListControlFactory();
   });
 }
