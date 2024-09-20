@@ -34,6 +34,9 @@ describe('getScheduleFrequencyRoute', () => {
 
     expect(config).toMatchInlineSnapshot(`
       Object {
+        "options": Object {
+          "access": "internal",
+        },
         "path": "/internal/alerting/rules/_schedule_frequency",
         "validate": Object {},
       }
