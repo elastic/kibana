@@ -19,7 +19,8 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: ScheduleRiskEngineNow
-      summary: Schedule the risk engine to run as soon as possible
+      summary: Run the risk scoring engine
+      description: Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
       requestBody:
         content:
           application/json: {}
