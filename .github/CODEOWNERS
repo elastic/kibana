@@ -1678,6 +1678,8 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
+/x-pack/test/functional/es_archives/asset_criticality @elastic/security-detection-engine
+/x-pack/test/functional/es_archives/security_solution @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
