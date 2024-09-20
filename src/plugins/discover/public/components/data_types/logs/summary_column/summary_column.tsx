@@ -20,7 +20,7 @@ import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { DataGridCellServicesProvider } from '../../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
 import { Resource, StaticResource } from './resource';
 import { Content } from './content';
-import { contentLabel, documentLabel, resourceLabel } from '../translations';
+import { contentLabel, jsonLabel, resourceLabel } from '../translations';
 import { createResourceFields, formatJsonDocumentForContent } from './utils';
 
 export interface SummaryColumnFactoryDeps {
@@ -53,15 +53,17 @@ const SummaryCell = ({
   rowHeight: maybeNullishRowHeight,
   ...props
 }: SummaryColumnProps & SummaryColumnsGridParams & SummaryColumnFactoryDeps) => {
-  const { data, dataView } = props;
+  const { data, dataView, row } = props;
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
 
   const rowHeight = maybeNullishRowHeight ?? ROWS_HEIGHT_OPTIONS.single;
   const isSingleLine = rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === 1;
-  const shouldCenter =
-    rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === ROWS_HEIGHT_OPTIONS.auto;
+  const shouldCenter = isSingleLine || rowHeight === ROWS_HEIGHT_OPTIONS.auto;
+
+  const resourceFields = createResourceFields(row);
+  const shouldRenderResource = resourceFields.length > 0;
 
   return (
     <DataGridCellServicesProvider services={{ data, dataView }}>
@@ -71,13 +73,15 @@ const SummaryCell = ({
         style={{ height: '100%' }}
         {...(shouldCenter && { alignItems: 'center' })}
       >
-        <EuiFlexItem grow={false}>
-          <Resource
-            limited={isSingleLine}
-            {...(shouldCenter && { alignItems: 'center' })}
-            {...props}
-          />
-        </EuiFlexItem>
+        {shouldRenderResource && (
+          <EuiFlexItem grow={false}>
+            <Resource
+              fields={resourceFields}
+              limited={isSingleLine}
+              {...(shouldCenter && { alignItems: 'center' })}
+            />
+          </EuiFlexItem>
+        )}
         <Content {...props} isSingleLine={isSingleLine} isCompressed={isCompressed} />
       </EuiFlexGroup>
     </DataGridCellServicesProvider>
@@ -130,7 +134,7 @@ const SummaryCellPopover = (props: SummaryColumnProps & SummaryColumnFactoryDeps
           {shouldRenderSource && (
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiText color="subdued" size="xs">
-                {documentLabel}
+                {jsonLabel}
               </EuiText>
               <JsonCodeEditor json={formatJsonDocumentForContent(row).raw} height={300} />
             </EuiFlexGroup>

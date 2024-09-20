@@ -8,25 +8,21 @@
  */
 
 import React from 'react';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { EuiBadge, EuiBadgeGroup, EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
-import { ResourceFieldDescriptor, createResourceFields } from './utils';
+import { ResourceFieldDescriptor } from './utils';
 
 const MAX_LIMITED_FIELDS_VISIBLE = 3;
 
-interface ResourceProps extends DataGridCellValueElementProps {
+interface ResourceProps {
+  fields: ResourceFieldDescriptor[];
   /* When true, the column will render a predefined number of resources and indicates with a badge how many more we have */
   limited?: boolean;
   alignItems?: EuiFlexGroupProps['alignItems'];
 }
 
-export const Resource = ({ row, limited = false, alignItems = 'stretch' }: ResourceProps) => {
-  const resourceFields = createResourceFields(row);
-
-  const displayedFields = limited
-    ? resourceFields.slice(0, MAX_LIMITED_FIELDS_VISIBLE)
-    : resourceFields;
-  const extraFieldsCount = limited ? resourceFields.length - MAX_LIMITED_FIELDS_VISIBLE : 0;
+export const Resource = ({ fields, limited = false, alignItems = 'stretch' }: ResourceProps) => {
+  const displayedFields = limited ? fields.slice(0, MAX_LIMITED_FIELDS_VISIBLE) : fields;
+  const extraFieldsCount = limited ? fields.length - MAX_LIMITED_FIELDS_VISIBLE : 0;
 
   return (
     <EuiFlexGroup gutterSize="s" css={{ height: '100%' }} alignItems={alignItems}>
@@ -42,7 +38,7 @@ export const Resource = ({ row, limited = false, alignItems = 'stretch' }: Resou
   );
 };
 
-export const StaticResource = ({ fields }: { fields: ResourceFieldDescriptor[] }) => {
+export const StaticResource = ({ fields }: Pick<ResourceProps, 'fields'>) => {
   return (
     <EuiBadgeGroup gutterSize="s">
       {fields.map(({ name, value, Icon }) => (
