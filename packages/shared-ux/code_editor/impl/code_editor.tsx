@@ -8,9 +8,10 @@
  */
 
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent, FC } from 'react';
-import ReactMonacoEditor, {
+import {
+  MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
-} from 'react-monaco-editor';
+} from './monaco_editor';
 import {
   htmlIdGenerator,
   EuiToolTip,
