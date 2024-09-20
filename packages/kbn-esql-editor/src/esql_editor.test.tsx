@@ -53,21 +53,19 @@ describe('ESQLEditor', () => {
   });
   it('should  render the editor component', async () => {
     const component = mount(renderESQLEditorComponent({ ...props }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor"]').length).not.toBe(0);
+    expect(component.find('[data-test-subj="ESQLEditor"]').length).not.toBe(0);
   });
 
   it('should  render the date info with no @timestamp found', async () => {
     const component = mount(renderESQLEditorComponent({ ...props }));
-    expect(
-      component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
-    ).toStrictEqual('@timestamp not found');
+    expect(component.find('[data-test-subj="ESQLEditor-date-info"]').at(0).text()).toStrictEqual(
+      '@timestamp not found'
+    );
   });
 
   it('should  render the feedback link', async () => {
     const component = mount(renderESQLEditorComponent({ ...props }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor-feedback-link"]').length).not.toBe(
-      0
-    );
+    expect(component.find('[data-test-subj="ESQLEditor-feedback-link"]').length).not.toBe(0);
   });
 
   it('should not render the date info if hideTimeFilterInfo is set to true', async () => {
@@ -76,7 +74,7 @@ describe('ESQLEditor', () => {
       hideTimeFilterInfo: true,
     };
     const component = mount(renderESQLEditorComponent({ ...newProps }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor-date-info"]').length).toBe(0);
+    expect(component.find('[data-test-subj="ESQLEditor-date-info"]').length).toBe(0);
   });
 
   it('should render the date info with @timestamp found if detectedTimestamp is given', async () => {
@@ -85,16 +83,16 @@ describe('ESQLEditor', () => {
       detectedTimestamp: '@timestamp',
     };
     const component = mount(renderESQLEditorComponent({ ...newProps }));
-    expect(
-      component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
-    ).toStrictEqual('@timestamp found');
+    expect(component.find('[data-test-subj="ESQLEditor-date-info"]').at(0).text()).toStrictEqual(
+      '@timestamp found'
+    );
   });
 
   it('should  render the limit information', async () => {
     const component = mount(renderESQLEditorComponent({ ...props }));
-    expect(
-      component.find('[data-test-subj="TextBasedLangEditor-limit-info"]').at(0).text()
-    ).toStrictEqual('LIMIT 1000 rows');
+    expect(component.find('[data-test-subj="ESQLEditor-limit-info"]').at(0).text()).toStrictEqual(
+      'LIMIT 1000 rows'
+    );
   });
 
   it('should not render the query history action if hideQueryHistory is set to true', async () => {
@@ -104,8 +102,7 @@ describe('ESQLEditor', () => {
     };
     const component = mount(renderESQLEditorComponent({ ...newProps }));
     expect(
-      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
-        .length
+      component.find('[data-test-subj="ESQLEditor-toggle-query-history-button-container"]').length
     ).toBe(0);
   });
 
@@ -115,27 +112,25 @@ describe('ESQLEditor', () => {
       component = mount(renderESQLEditorComponent({ ...props }));
     });
     component!.update();
-    expect(
-      component!.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
-    ).not.toBe(0);
+    expect(component!.find('[data-test-subj="ESQLEditor-toggleWordWrap"]').length).not.toBe(0);
   });
 
   it('should render the resize for the expanded code editor mode', async () => {
     const component = mount(renderESQLEditorComponent({ ...props }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor-resize"]').length).not.toBe(0);
+    expect(component.find('[data-test-subj="ESQLEditor-resize"]').length).not.toBe(0);
   });
 
   it('should render the footer for the expanded code editor mode', async () => {
     const component = mount(renderESQLEditorComponent({ ...props }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor-footer"]').length).not.toBe(0);
-    expect(component.find('[data-test-subj="TextBasedLangEditor-footer-lines"]').at(0).text()).toBe(
+    expect(component.find('[data-test-subj="ESQLEditor-footer"]').length).not.toBe(0);
+    expect(component.find('[data-test-subj="ESQLEditor-footer-lines"]').at(0).text()).toBe(
       '1 line'
     );
   });
 
   it('should render the run query text', async () => {
     const component = mount(renderESQLEditorComponent({ ...props }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).not.toBe(0);
+    expect(component.find('[data-test-subj="ESQLEditor-run-query"]').length).not.toBe(0);
   });
 
   it('should render the doc icon if the displayDocumentationAsFlyout is true', async () => {
@@ -145,9 +140,7 @@ describe('ESQLEditor', () => {
       editorIsInline: false,
     };
     const component = mount(renderESQLEditorComponent({ ...newProps }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor-documentation"]').length).not.toBe(
-      0
-    );
+    expect(component.find('[data-test-subj="ESQLEditor-documentation"]').length).not.toBe(0);
   });
 
   it('should not render the run query text if the hideRunQueryText prop is set to true', async () => {
@@ -156,7 +149,7 @@ describe('ESQLEditor', () => {
       hideRunQueryText: true,
     };
     const component = mount(renderESQLEditorComponent({ ...newProps }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).toBe(0);
+    expect(component.find('[data-test-subj="ESQLEditor-run-query"]').length).toBe(0);
   });
 
   it('should render correctly if editorIsInline prop is set to true', async () => {
@@ -168,11 +161,9 @@ describe('ESQLEditor', () => {
       onTextLangQuerySubmit,
     };
     const component = mount(renderESQLEditorComponent({ ...newProps }));
-    expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).toBe(0);
-    expect(
-      component.find('[data-test-subj="TextBasedLangEditor-run-query-button"]').length
-    ).not.toBe(1);
-    findTestSubject(component, 'TextBasedLangEditor-run-query-button').simulate('click');
+    expect(component.find('[data-test-subj="ESQLEditor-run-query"]').length).toBe(0);
+    expect(component.find('[data-test-subj="ESQLEditor-run-query-button"]').length).not.toBe(1);
+    findTestSubject(component, 'ESQLEditor-run-query-button').simulate('click');
     expect(onTextLangQuerySubmit).toHaveBeenCalled();
   });
 });

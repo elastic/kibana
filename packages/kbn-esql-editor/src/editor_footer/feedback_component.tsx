@@ -23,11 +23,11 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
             href={FEEDBACK_LINK}
             external={false}
             target="_blank"
-            data-test-subj="TextBasedLangEditor-feedback-link"
+            data-test-subj="ESQLEditor-feedback-link"
           >
             <EuiToolTip
               position="top"
-              content={i18n.translate('esqlEditor.query.textBasedLanguagesEditor.feedback', {
+              content={i18n.translate('esqlEditor.query.feedback', {
                 defaultMessage: 'Feedback',
               })}
             >
@@ -57,9 +57,9 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
                 font-size: 12px;
                 margin-right: ${euiTheme.size.m};
               `}
-              data-test-subj="TextBasedLangEditor-feedback-link"
+              data-test-subj="ESQLEditor-feedback-link"
             >
-              {i18n.translate('esqlEditor.query.textBasedLanguagesEditor.submitFeedback', {
+              {i18n.translate('esqlEditor.query.submitFeedback', {
                 defaultMessage: 'Submit feedback',
               })}
             </EuiLink>

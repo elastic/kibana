@@ -396,7 +396,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
       return {
-        label: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.cancel', {
+        label: i18n.translate('esqlEditor.query.cancel', {
           defaultMessage: 'Cancel',
         }),
         iconType: 'cross',
@@ -405,7 +405,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     }
     if (code !== codeWhenSubmitted) {
       return {
-        label: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.runQuery', {
+        label: i18n.translate('esqlEditor.query.runQuery', {
           defaultMessage: 'Run query',
         }),
         iconType: 'play',
@@ -413,7 +413,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       };
     }
     return {
-      label: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.refreshLabel', {
+      label: i18n.translate('esqlEditor.query.refreshLabel', {
         defaultMessage: 'Refresh',
       }),
       iconType: 'refresh',
@@ -611,7 +611,7 @@ export const ESQLEditor = memo(function ESQLEditor({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
-              content={i18n.translate('esqlEditor.query.textBasedLanguagesEditor.runQuery', {
+              content={i18n.translate('esqlEditor.query.runQuery', {
                 defaultMessage: 'Run query',
               })}
             >
@@ -622,7 +622,7 @@ export const ESQLEditor = memo(function ESQLEditor({
                 size="s"
                 isLoading={isLoading && !allowQueryCancellation}
                 isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-                data-test-subj="TextBasedLangEditor-run-query-button"
+                data-test-subj="ESQLEditor-run-query-button"
                 aria-label={queryRunButtonProperties.label}
               >
                 {queryRunButtonProperties.label}
@@ -639,8 +639,8 @@ export const ESQLEditor = memo(function ESQLEditor({
         >
           <div css={styles.resizableContainer}>
             <EuiFlexItem
-              data-test-subj={dataTestSubj ?? 'TextBasedLangEditor'}
-              className="TextBasedLangEditor"
+              data-test-subj={dataTestSubj ?? 'ESQLEditor'}
+              className="ESQLEditor"
               css={css`
                 max-width: 100%;
                 position: relative;
@@ -757,7 +757,7 @@ export const ESQLEditor = memo(function ESQLEditor({
               overflow: 'auto',
             }}
             ref={popoverRef}
-            data-test-subj="TextBasedLangEditor-timepicker-popover"
+            data-test-subj="ESQLEditor-timepicker-popover"
           >
             <EuiDatePicker
               selected={timePickerDate}

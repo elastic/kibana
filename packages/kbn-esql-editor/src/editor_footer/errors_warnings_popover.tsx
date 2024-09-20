@@ -26,22 +26,22 @@ const getConstsByType = (type: 'error' | 'warning', count: number) => {
   if (type === 'error') {
     return {
       color: 'danger',
-      message: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.errorCount', {
+      message: i18n.translate('esqlEditor.query.errorCount', {
         defaultMessage: '{count} {count, plural, one {error} other {errors}}',
         values: { count },
       }),
-      label: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.errorsTitle', {
+      label: i18n.translate('esqlEditor.query.errorsTitle', {
         defaultMessage: 'Errors',
       }),
     };
   } else {
     return {
       color: 'warning',
-      message: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.warningCount', {
+      message: i18n.translate('esqlEditor.query.warningCount', {
         defaultMessage: '{count} {count, plural, one {warning} other {warnings}}',
         values: { count },
       }),
-      label: i18n.translate('esqlEditor.query.textBasedLanguagesEditor.warningsTitle', {
+      label: i18n.translate('esqlEditor.query.warningsTitle', {
         defaultMessage: 'Warnings',
       }),
     };
@@ -79,14 +79,14 @@ function ErrorsWarningsContent({
                       <EuiIcon type={type} color={color} size="s" />
                     </EuiFlexItem>
                     <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
-                      {i18n.translate('esqlEditor.query.textBasedLanguagesEditor.lineNumber', {
+                      {i18n.translate('esqlEditor.query.lineNumber', {
                         defaultMessage: 'Line {lineNumber}',
                         values: { lineNumber: item.startLineNumber },
                       })}
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} className="TextBasedLangEditor_errorMessage">
+                <EuiFlexItem grow={false} className="ESQLEditor_errorMessage">
                   {item.message}
                 </EuiFlexItem>
               </EuiFlexGroup>

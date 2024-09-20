@@ -849,7 +849,7 @@ export function FormulaEditor({
                       buttonProps={{
                         color: 'text',
                         className: 'lnsFormula__editorHelp lnsFormula__editorHelp--overlay',
-                        'data-test-subj': 'TextBasedLangEditor-documentation',
+                        'data-test-subj': 'ESQLEditor-documentation',
                         'aria-label': i18n.translate(
                           'xpack.lens.formula.editorHelpInlineShowToolTip',
                           {

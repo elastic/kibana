@@ -30,4 +30,4 @@ function createEditor() {
   };
 }
 
-export const TextBasedLangEditor = createEditor();
+export const ESQLEditor = createEditor();

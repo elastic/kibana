@@ -29,13 +29,10 @@ export function QueryWrapComponent({
         position="top"
         content={
           isWrappedByPipes
-            ? i18n.translate(
-                'esqlEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                {
-                  defaultMessage: 'Remove line breaks on pipes',
-                }
-              )
-            : i18n.translate('esqlEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel', {
+            ? i18n.translate('esqlEditor.query.disableWordWrapLabel', {
+                defaultMessage: 'Remove line breaks on pipes',
+              })
+            : i18n.translate('esqlEditor.query.EnableWordWrapLabel', {
                 defaultMessage: 'Add line breaks on pipes',
               })
         }
@@ -44,21 +41,15 @@ export function QueryWrapComponent({
           iconType={isWrappedByPipes ? 'pipeNoBreaks' : 'pipeBreaks'}
           color="text"
           size="xs"
-          data-test-subj="TextBasedLangEditor-toggleWordWrap"
+          data-test-subj="ESQLEditor-toggleWordWrap"
           aria-label={
             isWrappedByPipes
-              ? i18n.translate(
-                  'esqlEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                  {
-                    defaultMessage: 'Remove line breaks on pipes',
-                  }
-                )
-              : i18n.translate(
-                  'esqlEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
-                  {
-                    defaultMessage: 'Add line breaks on pipes',
-                  }
-                )
+              ? i18n.translate('esqlEditor.query.disableWordWrapLabel', {
+                  defaultMessage: 'Remove line breaks on pipes',
+                })
+              : i18n.translate('esqlEditor.query.EnableWordWrapLabel', {
+                  defaultMessage: 'Add line breaks on pipes',
+                })
           }
           onClick={() => {
             const updatedCode = prettifyQuery(code, isWrappedByPipes);

@@ -126,7 +126,7 @@ export const EditorFooter = memo(function EditorFooter({
         <EuiFlexGroup
           gutterSize="s"
           justifyContent="spaceBetween"
-          data-test-subj="TextBasedLangEditor-footer"
+          data-test-subj="ESQLEditor-footer"
           css={styles.bottomContainer}
           responsive={false}
         >
@@ -141,13 +141,9 @@ export const EditorFooter = memo(function EditorFooter({
             >
               <QueryWrapComponent code={code} updateQuery={updateQuery} />
               <EuiFlexItem grow={false}>
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  data-test-subj="TextBasedLangEditor-footer-lines"
-                >
+                <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-footer-lines">
                   <p>
-                    {i18n.translate('esqlEditor.query.textBasedLanguagesEditor.lineCount', {
+                    {i18n.translate('esqlEditor.query.lineCount', {
                       defaultMessage: '{count} {count, plural, one {line} other {lines}}',
                       values: { count: lines },
                     })}
@@ -159,28 +155,18 @@ export const EditorFooter = memo(function EditorFooter({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiText
-                        size="xs"
-                        color="subdued"
-                        data-test-subj="TextBasedLangEditor-date-info"
-                      >
+                      <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-date-info">
                         <p>
                           {isSpaceReduced
                             ? '@timestamp'
                             : detectedTimestamp
-                            ? i18n.translate(
-                                'esqlEditor.query.textBasedLanguagesEditor.timestampDetected',
-                                {
-                                  defaultMessage: '{detectedTimestamp} found',
-                                  values: { detectedTimestamp },
-                                }
-                              )
-                            : i18n.translate(
-                                'esqlEditor.query.textBasedLanguagesEditor.timestampNotDetected',
-                                {
-                                  defaultMessage: '@timestamp not found',
-                                }
-                              )}
+                            ? i18n.translate('esqlEditor.query.timestampDetected', {
+                                defaultMessage: '{detectedTimestamp} found',
+                                values: { detectedTimestamp },
+                              })
+                            : i18n.translate('esqlEditor.query.timestampNotDetected', {
+                                defaultMessage: '@timestamp not found',
+                              })}
                         </p>
                       </EuiText>
                     </EuiFlexItem>
@@ -190,27 +176,17 @@ export const EditorFooter = memo(function EditorFooter({
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiText
-                      size="xs"
-                      color="subdued"
-                      data-test-subj="TextBasedLangEditor-limit-info"
-                    >
+                    <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-limit-info">
                       <p>
                         {isSpaceReduced
-                          ? i18n.translate(
-                              'esqlEditor.query.textBasedLanguagesEditor.limitInfoReduced',
-                              {
-                                defaultMessage: 'LIMIT {limit}',
-                                values: { limit },
-                              }
-                            )
-                          : i18n.translate(
-                              'esqlEditor.query.textBasedLanguagesEditor.limitInfo',
-                              {
-                                defaultMessage: 'LIMIT {limit} rows',
-                                values: { limit },
-                              }
-                            )}
+                          ? i18n.translate('esqlEditor.query.limitInfoReduced', {
+                              defaultMessage: 'LIMIT {limit}',
+                              values: { limit },
+                            })
+                          : i18n.translate('esqlEditor.query.limitInfo', {
+                              defaultMessage: 'LIMIT {limit} rows',
+                              values: { limit },
+                            })}
                       </p>
                     </EuiText>
                   </EuiFlexItem>
@@ -263,18 +239,11 @@ export const EditorFooter = memo(function EditorFooter({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiText
-                        size="xs"
-                        color="subdued"
-                        data-test-subj="TextBasedLangEditor-run-query"
-                      >
+                      <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-run-query">
                         <p>
-                          {i18n.translate(
-                            'esqlEditor.query.textBasedLanguagesEditor.runQuery',
-                            {
-                              defaultMessage: 'Run query',
-                            }
-                          )}
+                          {i18n.translate('esqlEditor.query.runQuery', {
+                            defaultMessage: 'Run query',
+                          })}
                         </p>
                       </EuiText>
                     </EuiFlexItem>
@@ -294,7 +263,7 @@ export const EditorFooter = memo(function EditorFooter({
                   <EuiButtonEmpty
                     iconType="documentation"
                     color="text"
-                    data-test-subj="TextBasedLangEditor-documentation"
+                    data-test-subj="ESQLEditor-documentation"
                     size="m"
                     onClick={() => toggleLanguageComponent()}
                     css={css`
