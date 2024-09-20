@@ -85,7 +85,6 @@ export async function mountManagementSection(
     uiSettings,
     settings,
     history,
-    savedObjectsPlugin: plugins.savedObjects,
     share,
     spaces,
     ml: await getMlSharedImports(),
