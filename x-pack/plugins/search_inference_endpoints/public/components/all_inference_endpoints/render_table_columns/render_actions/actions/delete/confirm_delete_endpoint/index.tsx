@@ -51,7 +51,7 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
         <EuiFlexItem grow={false}>{inferenceEndpoint.endpoint}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           {isLoading ? (
-            <EuiButtonEmpty size="xs" onClick={() => { }} isLoading>
+            <EuiButtonEmpty size="xs" onClick={() => {}} isLoading>
               Scanning for usage&hellip;
             </EuiButtonEmpty>
           ) : (
