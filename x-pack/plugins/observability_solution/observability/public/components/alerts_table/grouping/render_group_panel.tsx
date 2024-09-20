@@ -10,8 +10,8 @@ import { isArray } from 'lodash/fp';
 import { EuiFlexGroup, EuiIconTip, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { firstNonNullValue, GroupPanelRenderer } from '@kbn/grouping/src';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertsByGroupingAgg } from '../../../components/alerts_table/types';
-import { Tags } from '../../../components/tags';
+import { AlertsByGroupingAgg } from '../types';
+import { Tags } from '../../tags';
 import { ungrouped } from './constants';
 
 export const renderGroupPanel: GroupPanelRenderer<AlertsByGroupingAgg> = (
