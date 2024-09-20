@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
+import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 
 export const EntityInsight = <T,>({
   name,
@@ -25,10 +26,11 @@ export const EntityInsight = <T,>({
   const { euiTheme } = useEuiTheme();
   const getSetupStatus = useCspSetupStatusApi();
   const hasMisconfigurationFindings = getSetupStatus.data?.hasMisconfigurationsFindings;
+  const hasVulnerabilitiesFindings = getSetupStatus.data?.hasVulnerabilitiesFindings;
 
   return (
     <>
-      {hasMisconfigurationFindings && (
+      {(hasMisconfigurationFindings || hasVulnerabilitiesFindings) && (
         <>
           <EuiAccordion
             initialIsOpen={true}
@@ -52,12 +54,22 @@ export const EntityInsight = <T,>({
             }
           >
             <EuiSpacer size="m" />
-            <MisconfigurationsPreview
-              name={name}
-              fieldName={fieldName}
-              isPreviewMode={isPreviewMode}
-            />
-            <EuiSpacer size="m" />
+            {hasMisconfigurationFindings && (
+              <>
+                <MisconfigurationsPreview
+                  name={name}
+                  fieldName={fieldName}
+                  isPreviewMode={isPreviewMode}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
+            {hasVulnerabilitiesFindings && (
+              <>
+                <VulnerabilitiesPreview hostName={name} />
+                <EuiSpacer size="m" />
+              </>
+            )}
           </EuiAccordion>
           <EuiHorizontalRule />
         </>

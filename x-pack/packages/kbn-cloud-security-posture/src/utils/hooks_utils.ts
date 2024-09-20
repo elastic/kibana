@@ -27,6 +27,14 @@ const RESULT_EVALUATION = {
   UNKNOWN: 'unknown',
 };
 
+const VULNERABILITIES_RESULT_EVALUATION = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL',
+  UNKNOWN: 'UNKNOWN',
+};
+
 export const getFindingsCountAggQueryMisconfiguration = () => ({
   count: {
     filters: {
@@ -38,6 +46,8 @@ export const getFindingsCountAggQueryMisconfiguration = () => ({
     },
   },
 });
+
+// export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
 
 export const getMisconfigurationAggregationCount = (
   buckets?: estypes.AggregationsBuckets<estypes.AggregationsStringRareTermsBucketKeys>
@@ -103,3 +113,53 @@ const buildMisconfigurationsFindingsQueryWithFilters = (
     },
   };
 };
+
+export const getVulnerabilitiesAggregationCount = (
+  buckets?: estypes.AggregationsBuckets<estypes.AggregationsStringRareTermsBucketKeys>
+) => {
+  const defaultBuckets: AggregationBuckets = {
+    [VULNERABILITIES_RESULT_EVALUATION.LOW]: { doc_count: 0 },
+    [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: { doc_count: 0 },
+    [VULNERABILITIES_RESULT_EVALUATION.HIGH]: { doc_count: 0 },
+    [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: { doc_count: 0 },
+    [VULNERABILITIES_RESULT_EVALUATION.UNKNOWN]: { doc_count: 0 },
+  };
+
+  // if buckets are undefined we will use default buckets
+  const usedBuckets = buckets || defaultBuckets;
+  return Object.entries(usedBuckets).reduce(
+    (evaluation, [key, value]) => {
+      evaluation[key] = (evaluation[key] || 0) + (value.doc_count || 0);
+      return evaluation;
+    },
+    {
+      [VULNERABILITIES_RESULT_EVALUATION.LOW]: 0,
+      [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: 0,
+      [VULNERABILITIES_RESULT_EVALUATION.HIGH]: 0,
+      [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: 0,
+      [VULNERABILITIES_RESULT_EVALUATION.UNKNOWN]: 0,
+    }
+  );
+};
+
+export const getFindingsCountAggQueryVulnerabilities = () => ({
+  count: {
+    filters: {
+      other_bucket_key: VULNERABILITIES_RESULT_EVALUATION.UNKNOWN,
+      filters: {
+        [VULNERABILITIES_RESULT_EVALUATION.LOW]: {
+          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.LOW },
+        },
+        [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: {
+          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.MEDIUM },
+        },
+        [VULNERABILITIES_RESULT_EVALUATION.HIGH]: {
+          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.HIGH },
+        },
+        [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: {
+          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.CRITICAL },
+        },
+      },
+    },
+  },
+});
