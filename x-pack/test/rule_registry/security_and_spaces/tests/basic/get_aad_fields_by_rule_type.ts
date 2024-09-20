@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Users:', () => {
-      it(`${obsOnlySpacesAll.username} should be able to get browser fields for o11y featureIds`, async () => {
+      it(`${obsOnlySpacesAll.username} should be able to get browser fields for o11y rule type ids`, async () => {
         await retry.try(async () => {
           const aadFields = await getAADFieldsByRuleType(
             obsOnlySpacesAll,

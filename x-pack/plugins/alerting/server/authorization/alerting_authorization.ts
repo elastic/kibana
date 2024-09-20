@@ -382,7 +382,7 @@ export class AlertingAuthorization {
       for (const ruleTypeId of ruleTypeIds) {
         /**
          * Skip if the ruleTypeId is not configured in any feature
-         * or it is not set int the rule type registry.
+         * or it is not set in the rule type registry.
          */
         if (!this.ruleTypesConsumersMap.has(ruleTypeId) || !this.ruleTypeRegistry.has(ruleTypeId)) {
           continue;
