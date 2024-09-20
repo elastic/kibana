@@ -13,13 +13,13 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import React, { useMemo, useState } from 'react';
-import { uniqBy } from 'lodash';
-import { css } from '@emotion/css';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
+import { orderBy, uniqBy } from 'lodash';
+import React, { useMemo, useState } from 'react';
 import type { Entity, EntityDefinition } from '../../../common/entities';
 import { useInventoryBreadcrumbs } from '../../hooks/use_inventory_breadcrumbs';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
@@ -63,7 +63,9 @@ export function EntityDetailViewWithoutParams({
     },
   } = useKibana();
 
-  const { absoluteTimeRange } = useDateRange({ data });
+  const {
+    absoluteTimeRange: { start, end },
+  } = useDateRange({ data });
 
   const router = useInventoryRouter();
 
@@ -152,20 +154,13 @@ export function EntityDetailViewWithoutParams({
         entity,
         inventoryAPIClient,
         signal,
-        start: absoluteTimeRange.start,
-        end: absoluteTimeRange.end,
+        start,
+        end,
         identityFields: typeDefinition.identityFields,
         sources: typeDefinition.sources,
       });
     },
-    [
-      entity,
-      typeDefinition,
-      inventoryAPIClient,
-      absoluteTimeRange.start,
-      absoluteTimeRange.end,
-      displayName,
-    ]
+    [entity, typeDefinition, inventoryAPIClient, start, end, displayName]
   );
 
   const integrationsFetch = useAbortableAsync(
@@ -191,9 +186,54 @@ export function EntityDetailViewWithoutParams({
             },
           },
         })
-        .then((response) => response.dataStreams);
+        .then((response) => {
+          return response.dataStreams;
+        });
     },
     [datasetQuality, entityDataStreamsFetch.value]
+  );
+
+  const dashboardsWithDataFetch = useAbortableAsync(
+    async ({ signal }) => {
+      if (!integrationsFetch.value || !entity) {
+        return undefined;
+      }
+
+      const dataStreams = integrationsFetch.value;
+
+      const allDashboards = uniqBy(
+        dataStreams.flatMap((dataStream) => dataStream.dashboards ?? []),
+        (dashboard) => dashboard.id
+      );
+
+      const { dashboards } = await inventoryAPIClient.fetch(
+        'POST /internal/inventory/entities/check_dashboards_for_data',
+        {
+          signal,
+          params: {
+            body: {
+              dashboardIds: allDashboards.map((db) => db.id),
+              entity: {
+                type: entity.type,
+                displayName: entity.displayName,
+              },
+              start,
+              end,
+            },
+          },
+        }
+      );
+
+      return Object.fromEntries(
+        dashboards.map((check) => {
+          const withData = check.panels.filter((panel) => panel.check === 'has_data');
+          const withoutData = check.panels.filter((panel) => panel.check === 'has_no_data');
+          const unknown = check.panels.filter((panel) => panel.check === 'unknown');
+          return [check.id, withData.length / (withoutData.length + unknown.length)];
+        })
+      );
+    },
+    [inventoryAPIClient, integrationsFetch.value, entity, start, end]
   );
 
   const dataStreams = entityDataStreamsFetch.value?.dataStreams;
@@ -226,20 +266,34 @@ export function EntityDetailViewWithoutParams({
           query: query ? { query, language: 'kuery' } : undefined,
         });
 
+        const coverage = dashboardsWithDataFetch.value?.[dashboard.id];
+
         return {
           group: i18n.translate('xpack.inventory.entityDetailView.quickLinks.dashboards', {
             defaultMessage: 'Dashboards',
           }),
           label: dashboard.title,
           href,
+          coverage: dashboardsWithDataFetch.value?.[dashboard.id],
+          subdued: coverage === 0,
         };
       });
     });
 
-    const quickLinks = await await Promise.all(allPromises);
+    const quickLinks = await Promise.all(allPromises);
 
-    return uniqBy(quickLinks, (link) => link.label);
-  }, [dataStreamsWithIntegrations, dashboardLocator, entity, typeDefinition]);
+    return orderBy(
+      uniqBy(quickLinks, (link) => link.label),
+      (link) => link.coverage,
+      'desc'
+    );
+  }, [
+    dataStreamsWithIntegrations,
+    dashboardLocator,
+    entity,
+    typeDefinition,
+    dashboardsWithDataFetch.value,
+  ]);
 
   const [isQuickLinksPopoverOpen, setIsQuickLinksPopoverOpen] = useState(false);
 
@@ -348,6 +402,9 @@ export function EntityDetailViewWithoutParams({
                       label={quickLink.label}
                       href={quickLink.href}
                       size="xs"
+                      className={css`
+                        opacity: ${quickLink.subdued ? 0.5 : 1};
+                      `}
                     />
                   );
                 })}

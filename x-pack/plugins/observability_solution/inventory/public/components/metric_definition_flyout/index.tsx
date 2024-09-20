@@ -18,7 +18,6 @@ import {
   EuiPanel,
   EuiTitle,
   useDeepEqual,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
@@ -90,8 +89,6 @@ export function MetricDefinitionFlyout({
     },
     [indexPatterns, dataViews]
   );
-
-  const formId = useGeneratedHtmlId();
 
   function isValidDefinition(
     definition: Partial<MetricDefinition>

@@ -9,7 +9,6 @@ import type { Entity } from '../entities';
 
 export function toEntity(result: Record<string, any>): Entity {
   return {
-    id: result['entity.id'],
     type: result['entity.type'],
     displayName: result['entity.displayName'],
     properties: result,

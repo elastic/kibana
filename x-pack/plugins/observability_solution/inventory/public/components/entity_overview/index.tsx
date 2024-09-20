@@ -18,7 +18,7 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { compact, partition, take, uniqueId } from 'lodash';
+import { partition, take, uniqueId } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
 import { Entity, EntityDefinition } from '../../../common/entities';
@@ -55,7 +55,7 @@ export function EntityOverview({
   dataStreams: Array<{ name: string }>;
   dataStreamsWithIntegrations?: Array<{
     name: string;
-    integration?: { name: string };
+    integration?: string;
     dashboards?: unknown[];
   }>;
 }) {

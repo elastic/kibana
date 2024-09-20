@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { notFound } from '@hapi/boom';
+import { SavedObject } from '@kbn/core/server';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import * as t from 'io-ts';
 import type {
@@ -15,12 +17,16 @@ import type {
 import { esqlResultToPlainObjects } from '../../../common/utils/esql_result_to_plain_objects';
 import { getEntitySourceDslFilter } from '../../../common/utils/get_entity_source_dsl_filter';
 import { getEsqlRequest } from '../../../common/utils/get_esql_request';
-import { toEntity } from '../../../common/utils/to_entity';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { InventoryRouteHandlerResources } from '../types';
+import {
+  DashboardWithEntityDataCheck,
+  checkDashboardsForEntityData,
+} from './check_dashboards_for_entity_data';
 import { eemToInventoryDefinition } from './eem_to_inventory_definition';
 import { getDataStreamsForFilter } from './get_data_streams_for_filter';
 import { getEntitiesFromSource } from './get_entities_from_source';
+import { getEntityById } from './get_entity_by_id';
 import { getLatestEntities } from './get_latest_entities';
 
 export async function fetchEntityDefinitions({
@@ -265,18 +271,90 @@ const getEntityRoute = createInventoryServerRoute({
       path: { type, displayName },
     } = params;
 
-    const response = await esClient.esql('get_entity', {
-      query: `FROM entities-*-latest | WHERE entity.type == "${type}" AND entity.displayName.keyword == "${displayName}" | LIMIT 1`,
+    return {
+      entity: await getEntityById({
+        displayName,
+        type,
+        esClient,
+      }),
+    };
+  },
+});
+
+const checkDashboardsForDataRoute = createInventoryServerRoute({
+  endpoint: 'POST /internal/inventory/entities/check_dashboards_for_data',
+  options: {
+    tags: ['access:inventory'],
+  },
+  params: t.type({
+    body: t.type({
+      dashboardIds: t.array(t.string),
+      entity: t.type({
+        displayName: t.string,
+        type: t.string,
+      }),
+      start: t.number,
+      end: t.number,
+    }),
+  }),
+  handler: async ({
+    request,
+    plugins,
+    logger,
+    context,
+    params,
+  }): Promise<{
+    dashboards: DashboardWithEntityDataCheck[];
+  }> => {
+    const {
+      body: {
+        dashboardIds,
+        entity: { type, displayName },
+        start,
+        end,
+      },
+    } = params;
+
+    const coreContext = await context.core;
+
+    const esClient = createObservabilityEsClient({
+      client: coreContext.elasticsearch.client.asCurrentUser,
+      logger,
+      plugin: 'inventory',
     });
 
-    if (response.values.length === 0) {
+    const [dashboardsSoBulkResponse, definition, entity] = await Promise.all([
+      coreContext.savedObjects.client.bulkGet(
+        dashboardIds.map((dashboardId) => ({ id: dashboardId, type: 'dashboard' }))
+      ),
+      fetchEntityDefinitions({
+        plugins,
+        request,
+      }).then(({ definitions }) => {
+        return definitions.find((def) => def.type === type);
+      }),
+      getEntityById({
+        esClient,
+        type,
+        displayName,
+      }),
+    ]);
+
+    if (!definition) {
       throw notFound();
     }
-
-    const result = esqlResultToPlainObjects(response)[0];
-
     return {
-      entity: toEntity(result),
+      dashboards: await checkDashboardsForEntityData({
+        dashboards: dashboardsSoBulkResponse.saved_objects as Array<
+          SavedObject<DashboardAttributes>
+        >,
+        entity,
+        esClient,
+        identityFields: definition.identityFields,
+        logger,
+        start,
+        end,
+      }),
     };
   },
 });
@@ -331,4 +409,5 @@ export const entitiesRoutes = {
   ...getEntityRoute,
   ...listEntitiesRoute,
   ...listRelationshipsRoute,
+  ...checkDashboardsForDataRoute,
 };

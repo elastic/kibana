@@ -5,33 +5,23 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ESQLSearchResponse, ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { withSpan } from '@kbn/apm-utils';
 import type {
   EsqlQueryRequest,
   FieldCapsRequest,
   FieldCapsResponse,
-  MsearchMultisearchHeader,
   MsearchRequest,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { Required, ValuesType } from 'utility-types';
+import { withSpan } from '@kbn/apm-utils';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ESQLSearchResponse, ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import { Required } from 'utility-types';
 
 type SearchRequest = ESSearchRequest & {
   index: string | string[];
   track_total_hits: number | boolean;
   size: number | boolean;
 };
-
-type MsearchRequestPair =
-  | Required<MsearchMultisearchHeader, 'index'>
-  | Omit<SearchRequest, 'index'>;
-
-type TypedMsearchRequest = MsearchRequest & {
-  searches: MsearchRequestPair[];
-};
-
 /**
  * An Elasticsearch Client with a fully typed `search` method and built-in
  * APM instrumentation.
@@ -41,11 +31,11 @@ export interface ObservabilityElasticsearchClient {
     operationName: string,
     parameters: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>>;
-  msearch<TDocument = unknown, TMSearchRequest extends TypedMsearchRequest = TypedMsearchRequest>(
+  msearch<TDocument = unknown>(
     operationName: string,
-    parameters: TMSearchRequest
+    parameters: MsearchRequest
   ): Promise<{
-    responses: SearchResponse[];
+    responses: Array<SearchResponse<TDocument>>;
   }>;
   fieldCaps(
     operationName: string,
@@ -128,19 +118,10 @@ export function createObservabilityEsClient({
         >;
       });
     },
-    msearch<TDocument = unknown, TSearchRequest extends TypedMsearchRequest = TypedMsearchRequest>(
-      operationName: string,
-      parameters: TSearchRequest
-    ) {
+    msearch<TDocument = unknown>(operationName: string, parameters: MsearchRequest) {
       return callWithLogger(operationName, parameters, () => {
         return client.msearch<TDocument>(parameters) as unknown as Promise<{
-          responses: Array<
-            InferSearchResponseOf<
-              TDocument,
-              Exclude<ValuesType<TSearchRequest['searches']>, MsearchMultisearchHeader>,
-              { restTotalHitsAsInt: false }
-            >
-          >;
+          responses: Array<SearchResponse<TDocument>>;
         }>;
       });
     },
