@@ -17,6 +17,13 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
   describe('monitoring', () => {
     const objectRemover = new ObjectRemover(supertest);
 
+    const run = async (id: string) => {
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${id}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(response.status).to.eql(204);
+    };
+
     after(async () => await objectRemover.removeAll());
 
     it('should return an accurate history for a single success', async () => {
@@ -44,19 +51,25 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ schedule: { interval: '3s' } }));
+        .send(getTestRuleData({ schedule: { interval: '1h' } }));
       expect(createResponse.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
+      const ruleId = createResponse.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      await waitForExecutionCount(1, ruleId);
+      await run(ruleId);
+      await waitForExecutionCount(2, ruleId);
+      await run(ruleId);
       // Allow at least three executions
-      await waitForExecutionCount(3, createResponse.body.id);
+      await waitForExecutionCount(3, ruleId);
 
       const getResponse = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createResponse.body.id}`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}`
       );
       expect(getResponse.status).to.eql(200);
 
-      expect(getResponse.body.monitoring.run.history.length >= 3).to.be(true);
+      expect(getResponse.body.monitoring.run.history.length).to.be(3);
       expect(getResponse.body.monitoring.run.history[0].success).to.be(true);
       expect(getResponse.body.monitoring.run.history[1].success).to.be(true);
       expect(getResponse.body.monitoring.run.history[2].success).to.be(true);
@@ -78,17 +91,27 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
           })
         );
       expect(createResponse.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
-      // Allow at least three executions
-      await waitForExecutionCount(5, createResponse.body.id);
+      const ruleId = createResponse.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      await waitForExecutionCount(1, ruleId);
+      await run(ruleId);
+      await waitForExecutionCount(2, ruleId);
+      await run(ruleId);
+      await waitForExecutionCount(3, ruleId);
+      await run(ruleId);
+      await waitForExecutionCount(4, ruleId);
+      await run(ruleId);
+      // Allow at least five executions
+      await waitForExecutionCount(5, ruleId);
 
       const getResponse = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createResponse.body.id}`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}`
       );
       expect(getResponse.status).to.eql(200);
 
-      expect(getResponse.body.monitoring.run.history.length >= 5).to.be(true);
+      expect(getResponse.body.monitoring.run.history.length).to.be(5);
       expect(getResponse.body.monitoring.run.history[0].success).to.be(true);
       expect(getResponse.body.monitoring.run.history[1].success).to.be(true);
       expect(getResponse.body.monitoring.run.history[2].success).to.be(true);
