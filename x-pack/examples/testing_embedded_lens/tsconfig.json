@@ -24,5 +24,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/core-ui-settings-browser",
     "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
   ]
 }
