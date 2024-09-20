@@ -17,6 +17,7 @@ import type {
   HttpServiceSetup,
   HttpServiceStart,
 } from '@kbn/core-http-server';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { HttpServerSetup } from './http_server';
 import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
@@ -65,6 +66,7 @@ export interface InternalHttpServiceSetup
     contextName: ContextName,
     provider: IContextProvider<Context, ContextName>
   ) => IContextContainer;
+  registerOnPostValidation(cb: (req: CoreKibanaRequest) => void): void;
 }
 
 /** @internal */

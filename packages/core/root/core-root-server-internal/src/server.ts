@@ -58,6 +58,7 @@ import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
 import { registerRootEvents, reportKibanaStartedEvent, type UptimeSteps } from './events';
+import { createRouteDeprecationsHandler } from './route_deprecations';
 
 const coreId = Symbol('core');
 
@@ -98,6 +99,7 @@ export class Server {
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
+  private coreSetup?: InternalCoreSetup;
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
   private nodeRoles?: NodeRoles;
@@ -372,6 +374,7 @@ export class Server {
     this.#pluginsInitialized = pluginsSetup.initialized;
 
     this.registerCoreContext(coreSetup);
+    this.registerApiRouteDeprecationsLogger(coreSetup);
     await this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction.end();
@@ -519,10 +522,15 @@ export class Server {
         return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
-
-    coreSetup.http.registerOnPostAuth((req, res, toolkit) => {
-      return toolkit.next();
-    });
+  }
+  private registerApiRouteDeprecationsLogger(coreSetup: InternalCoreSetup) {
+    coreSetup.http.registerOnPostValidation(
+      createRouteDeprecationsHandler({
+        coreUsageData: coreSetup.coreUsageData,
+        log: this.logger.get('http.route-deprecations'),
+        logRouteApiDeprecations: true,
+      })
+    );
   }
 
   public setupCoreConfig() {

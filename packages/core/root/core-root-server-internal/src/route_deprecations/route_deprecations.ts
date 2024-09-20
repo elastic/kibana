@@ -7,26 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OnPostAuthHandler } from '@kbn/core-http-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-server-internal';
 import type { Logger } from '@kbn/logging';
 
-import { buildDeprecations } from '@kbn/core-http-router-server-internal';
+import { CoreKibanaRequest, buildDeprecations } from '@kbn/core-http-router-server-internal';
 
 interface Dependencies {
-  logRouteApiDeprecations: boolean;
+  logRouteApiDeprecations: boolean; // TODO(jloleysens) use this
   log: Logger;
   coreUsageData: InternalCoreUsageDataSetup;
 }
 
-export function createRouteDeprecationsHandler({ coreUsageData }: Dependencies): OnPostAuthHandler {
-  return (req, res, toolkit) => {
+export function createRouteDeprecationsHandler({ coreUsageData }: Dependencies) {
+  return (req: CoreKibanaRequest) => {
     const {
       route: {
         options: { deprecated: deprecatedInput },
       },
     } = req;
-    const messages = [];
+    const messages: string[] = [];
     if (typeof deprecatedInput === 'boolean' && deprecatedInput === true) {
       // Log route level deprecation
       messages.push(`${req.route.method} ${req.route.path} is deprecated.`);
@@ -43,6 +42,5 @@ export function createRouteDeprecationsHandler({ coreUsageData }: Dependencies):
     for (const message of messages) {
       coreUsageData.incrementUsageCounter({ counterName: message }); // TODO(jloleysens) figure this part out
     }
-    return toolkit.next();
   };
 }

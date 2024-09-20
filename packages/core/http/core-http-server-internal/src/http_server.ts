@@ -694,12 +694,13 @@ export class HttpServer {
     this.log.debug(`registering route handler for [${route.path}]`);
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-    const { authRequired, tags, body = {}, timeout } = route.options;
+    const { authRequired, tags, body = {}, timeout, deprecated } = route.options;
     const { accepts: allow, override, maxBytes, output, parse } = body;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
       access: route.options.access ?? 'internal',
+      deprecated,
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(
