@@ -12,19 +12,14 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataGridDensity } from '@kbn/unified-data-table';
+import { CellRenderersExtensionParams } from '../../../../context_awareness';
 import type { SummaryColumnProps } from './summary_column';
 
 const SummaryColumn = dynamic(() => import('./summary_column'));
 
-export interface SummaryColumnGetterParams {
-  dataView: DataView;
-  density: DataGridDensity | undefined;
-  rowHeight: number | undefined;
-}
 export interface SummaryColumnGetterDeps {
   data: DataPublicPluginStart;
-  params: SummaryColumnGetterParams;
+  params: CellRenderersExtensionParams;
 }
 
 export const getSummaryColumn = ({ data, params }: SummaryColumnGetterDeps) => {

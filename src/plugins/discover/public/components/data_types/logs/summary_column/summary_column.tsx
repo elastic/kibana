@@ -34,11 +34,9 @@ export interface SummaryColumnFactoryDeps {
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }
 
-export interface SummaryColumnProps
-  extends DataGridCellValueElementProps,
-    SummaryColumnFactoryDeps {}
+export type SummaryColumnProps = DataGridCellValueElementProps;
 
-const SummaryColumn = (props: SummaryColumnProps) => {
+const SummaryColumn = (props: SummaryColumnProps & SummaryColumnFactoryDeps) => {
   const { isDetails } = props;
 
   if (isDetails) {
@@ -55,7 +53,7 @@ const SummaryCell = ({
   density: maybeNullishDensity,
   rowHeight: maybeNullishRowHeight,
   ...props
-}: SummaryColumnProps) => {
+}: SummaryColumnProps & SummaryColumnFactoryDeps) => {
   const { data, dataView, row } = props;
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
@@ -91,7 +89,7 @@ const SummaryCell = ({
   );
 };
 
-const SummaryCellPopover = (props: SummaryColumnProps) => {
+const SummaryCellPopover = (props: SummaryColumnProps & SummaryColumnFactoryDeps) => {
   const { row, data, dataView, fieldFormats } = props;
 
   const resourceFields = createResourceFields(row);

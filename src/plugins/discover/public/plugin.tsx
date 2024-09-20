@@ -310,7 +310,7 @@ export class DiscoverPlugin
     return { rootProfileService, dataSourceProfileService, documentProfileService };
   }
 
-  private createProfilesManager = once(async (core: CoreStart, plugins: DiscoverStartPlugins) => {
+  private createProfilesManager = async (core: CoreStart, plugins: DiscoverStartPlugins) => {
     const { registerProfileProviders } = await import('./context_awareness/profile_providers');
     const { rootProfileService, dataSourceProfileService, documentProfileService } =
       this.createProfileServices();
@@ -332,7 +332,7 @@ export class DiscoverPlugin
     });
 
     return profilesManager;
-  });
+  };
 
   private createEmptyProfilesManager() {
     const { rootProfileService, dataSourceProfileService, documentProfileService } =
