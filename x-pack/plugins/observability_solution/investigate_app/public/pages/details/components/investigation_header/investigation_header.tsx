@@ -9,9 +9,9 @@ import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { alertOriginSchema } from '@kbn/investigation-shared';
 import { ALERT_RULE_CATEGORY } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import React from 'react';
-import { useFetchAlert } from '../../../../hooks/use_get_alert_details';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useInvestigation } from '../../contexts/investigation_context';
+import { useFetchAlert } from '../../hooks/use_fetch_alert';
 
 export function InvestigationHeader() {
   const {
