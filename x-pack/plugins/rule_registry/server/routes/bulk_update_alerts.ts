@@ -46,6 +46,7 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
         ),
       },
       options: {
+        access: 'internal',
         tags: ['access:rac'],
       },
     },

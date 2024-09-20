@@ -26,6 +26,9 @@ export function createHealthRoute(
     {
       path,
       validate: false,
+      options: {
+        access: 'internal',
+      },
     },
     handler
   );

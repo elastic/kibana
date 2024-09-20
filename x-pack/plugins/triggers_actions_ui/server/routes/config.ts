@@ -39,6 +39,9 @@ export function createConfigRoute({
     {
       path,
       validate: false,
+      options: {
+        access: 'internal',
+      },
     },
     handler
   );
