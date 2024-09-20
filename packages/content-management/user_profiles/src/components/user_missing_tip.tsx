@@ -16,7 +16,7 @@ export const NoCreatorTip = (props: { iconType?: IconType }) => (
     content={
       <FormattedMessage
         id="contentManagement.userProfiles.noCreatorTip"
-        defaultMessage="Creators are assigned when objects are created (after version 8.14)"
+        defaultMessage="Creators are assigned when objects are created"
       />
     }
     {...props}
@@ -28,7 +28,7 @@ export const NoUpdaterTip = (props: { iconType?: string }) => (
     content={
       <FormattedMessage
         id="contentManagement.userProfiles.noUpdaterTip"
-        defaultMessage="Updated by is set when objects are updated (after version 8.14)"
+        defaultMessage="Updated by is set when objects are updated"
       />
     }
     {...props}
