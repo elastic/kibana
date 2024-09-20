@@ -102,6 +102,46 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async waitForDocumentInIndexForTime({
+      esClient,
+      indexName,
+      ruleId,
+      num = 1,
+      sort = 'desc',
+      timeout = 1000,
+    }: {
+      esClient: Client;
+      indexName: string;
+      ruleId: string;
+      num?: number;
+      sort?: 'asc' | 'desc';
+      timeout?: number;
+    }): Promise<SearchResponse> {
+      return await retry.tryForTime(timeout, async () => {
+        const response = await esClient.search({
+          index: indexName,
+          sort: `date:${sort}`,
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'ruleId.keyword': ruleId,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        if (response.hits.hits.length < num) {
+          throw new Error(`Only found ${response.hits.hits.length} / ${num} documents`);
+        }
+        return response;
+      });
+    },
+
     async waitForDocumentInIndex({
       esClient,
       indexName,
