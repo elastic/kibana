@@ -7,6 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
+import { getEntityManagerEnablement } from './no_data_config';
+import { useEntityManager } from '../../hooks/use_entity_manager';
+import { Welcome } from '../entity_enablement/welcome_modal';
 
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
@@ -16,9 +19,26 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
   } = useKibana();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
+  const {
+    isEntityManagerEnabled,
+    isEnablementPending,
+    refresh,
+    showWelcomedModal,
+    toggleWelcomedModal,
+  } = useEntityManager();
+
+  const handleSuccess = () => {
+    refresh();
+    toggleWelcomedModal();
+  };
 
   return (
     <ObservabilityPageTemplate
+      noDataConfig={getEntityManagerEnablement({
+        enabled: isEntityManagerEnabled,
+        loading: isEnablementPending,
+        onSuccess: handleSuccess,
+      })}
       pageHeader={{
         pageTitle: i18n.translate('xpack.inventory.inventoryPageHeaderLabel', {
           defaultMessage: 'Inventory',
@@ -26,6 +46,11 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
       }}
     >
       {children}
+      <Welcome
+        showModal={showWelcomedModal}
+        onClose={toggleWelcomedModal}
+        onConfirm={toggleWelcomedModal}
+      />
     </ObservabilityPageTemplate>
   );
 }
