@@ -7,6 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { serviceMetadataIcons } from '../../utils/es_fields_mappings';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
@@ -21,13 +22,9 @@ import {
   SERVICE_FRAMEWORK_NAME,
 } from '../../../common/es_fields/apm';
 import { ContainerType } from '../../../common/service_metadata';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
-import { normalizeFields } from '../../utils/normalize_fields';
-
-type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
 
 export interface ServiceMetadataIcons {
   agentName?: string;
@@ -89,9 +86,9 @@ export async function getServiceMetadataIcons({
     };
   }
 
-  const { kubernetes, cloud, container, agent } = normalizeFields(
+  const { kubernetes, cloud, container, agent } = serviceMetadataIcons(
     response.hits.hits[0].fields
-  ) as ServiceMetadataIconsRaw;
+  );
 
   let containerType: ContainerType;
   if (!!kubernetes) {

@@ -64,7 +64,13 @@ import {
   ERROR_ID,
   ERROR_LOG_MESSAGE,
   HOST_NAME,
+  Container,
+  Kubernetes,
+  CLOUD_PROVIDER,
+  CONTAINER,
+  KUBERNETES,
 } from '@kbn/apm-types';
+import { TransactionRaw } from '../../typings/es_schemas/raw/transaction_raw';
 import {
   WaterfallError,
   WaterfallSpan,
@@ -72,6 +78,8 @@ import {
 } from '../../common/waterfall/typings';
 import { EventOutcome } from '../../common/event_outcome';
 import { Exception } from '../../typings/es_schemas/raw/error_raw';
+
+type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
 
 export const metadataForDependencyMapping = (fields: Partial<Record<string, unknown[]>>) => {
   return {
@@ -453,6 +461,25 @@ export const errorSampleDetails = (fields: Partial<Record<string, unknown[]>>): 
     timestamp: {
       us: normalizeValue<number>(fields[TIMESTAMP]),
     },
+  };
+};
+
+export const serviceMetadataIcons = (
+  fields: Partial<Record<string, unknown[]>>
+): ServiceMetadataIconsRaw => {
+  return {
+    agent: {
+      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
+      version: '',
+    },
+    cloud: {
+      provider: normalizeValue<string>(fields[CLOUD_PROVIDER]),
+      service: {
+        name: normalizeValue<string>(fields[CLOUD_PROVIDER]),
+      },
+    },
+    container: normalizeValue<Container>(fields[CONTAINER]),
+    kubernetes: normalizeValue<Kubernetes>(fields[KUBERNETES]),
   };
 };
 
