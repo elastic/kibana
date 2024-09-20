@@ -12,18 +12,20 @@ import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 
 export async function getDataStreams(options: {
   esClient: ElasticsearchClient;
-  types: DataStreamType[];
+  types?: DataStreamType[];
   datasetQuery?: string;
-  uncategorisedOnly: boolean;
+  uncategorisedOnly?: boolean;
 }) {
-  const { esClient, types, datasetQuery, uncategorisedOnly } = options;
+  const { esClient, types = [], datasetQuery, uncategorisedOnly } = options;
 
-  const datasetNames = types.map((type) =>
-    streamPartsToIndexPattern({
-      typePattern: type,
-      datasetPattern: datasetQuery ? `${datasetQuery}` : '*-*',
-    })
-  );
+  const datasetNames = datasetQuery
+    ? [datasetQuery]
+    : types.map((type) =>
+        streamPartsToIndexPattern({
+          typePattern: type,
+          datasetPattern: '*-*',
+        })
+      );
 
   const datasetUserPrivileges = await datasetQualityPrivileges.getDatasetPrivileges(
     esClient,
@@ -32,7 +34,7 @@ export async function getDataStreams(options: {
 
   if (!datasetUserPrivileges.canMonitor) {
     return {
-      items: [],
+      dataStreams: [],
       datasetUserPrivileges,
     };
   }
@@ -59,13 +61,15 @@ export async function getDataStreams(options: {
   const mappedDataStreams = filteredDataStreams.map((dataStream) => ({
     name: dataStream.name,
     integration: dataStream._meta?.package?.name,
+    // @ts-expect-error
+    lastActivity: dataStream.maximum_timestamp,
     userPrivileges: {
       canMonitor: dataStreamsPrivileges[dataStream.name],
     },
   }));
 
   return {
-    items: mappedDataStreams,
+    dataStreams: mappedDataStreams,
     datasetUserPrivileges,
   };
 }
