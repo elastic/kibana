@@ -631,7 +631,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
           await ml.jobSelection.assertJobSelection([testData.jobConfig.job_id]);
 
-          await ml.testExecution.logTestStep('displays the influencers list');
+          await ml.testExecution.logTestStep('does not display the influencers list');
           await ml.anomalyExplorer.assertInfluencerListDoesNotExist();
         });
       }
