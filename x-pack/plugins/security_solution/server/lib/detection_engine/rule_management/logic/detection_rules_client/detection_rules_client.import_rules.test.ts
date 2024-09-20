@@ -14,11 +14,11 @@ import { getImportRulesSchemaMock } from '../../../../../../common/api/detection
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { ruleSourceImporterMock } from '../../../prebuilt_rules/logic/rule_source_importer/rule_source_importer.mock';
 import { createDetectionRulesClient } from './detection_rules_client';
-import { importRuleWithSource } from './methods/import_rule_with_source';
+import { importRule } from './methods/import_rule';
 import { createRuleImportErrorObject } from '../import/errors';
 import { checkRuleExceptionReferences } from '../import/check_rule_exception_references';
 
-jest.mock('./methods/import_rule_with_source');
+jest.mock('./methods/import_rule');
 jest.mock('../import/check_rule_exception_references');
 
 describe('detectionRulesClient.importRules', () => {
@@ -35,7 +35,7 @@ describe('detectionRulesClient.importRules', () => {
     });
 
     (checkRuleExceptionReferences as jest.Mock).mockReturnValue([[], []]);
-    (importRuleWithSource as jest.Mock).mockResolvedValue(getRulesSchemaMock());
+    (importRule as jest.Mock).mockResolvedValue(getRulesSchemaMock());
 
     ruleToImport = getImportRulesSchemaMock();
     mockRuleSourceImporter = ruleSourceImporterMock.create();
@@ -61,7 +61,7 @@ describe('detectionRulesClient.importRules', () => {
       ruleId: 'rule-id',
       message: 'an error occurred',
     });
-    (importRuleWithSource as jest.Mock).mockReset().mockRejectedValueOnce(importError);
+    (importRule as jest.Mock).mockReset().mockRejectedValueOnce(importError);
 
     const result = await subject.importRules({
       allowMissingConnectorSecrets: false,
@@ -75,7 +75,7 @@ describe('detectionRulesClient.importRules', () => {
 
   it('returns a generic error if rule import throws unexpectedly', async () => {
     const genericError = new Error('an unexpected error occurred');
-    (importRuleWithSource as jest.Mock).mockReset().mockRejectedValueOnce(genericError);
+    (importRule as jest.Mock).mockReset().mockRejectedValueOnce(genericError);
 
     const result = await subject.importRules({
       allowMissingConnectorSecrets: false,
@@ -133,7 +133,7 @@ describe('detectionRulesClient.importRules', () => {
         ruleId: 'rule-id',
         message: 'an error occurred',
       });
-      (importRuleWithSource as jest.Mock).mockReset().mockRejectedValueOnce(importError);
+      (importRule as jest.Mock).mockReset().mockRejectedValueOnce(importError);
 
       const result = await subject.importRules({
         allowMissingConnectorSecrets: false,

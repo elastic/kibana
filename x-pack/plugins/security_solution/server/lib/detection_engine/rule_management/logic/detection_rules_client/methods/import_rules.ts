@@ -79,10 +79,9 @@ export const importRules = async ({
         const importedRule = await detectionRulesClient.importRule({
           ruleToImport: {
             ...rule,
-            rule_source: ruleSource,
-            immutable,
             exceptions_list: [...exceptions],
           },
+          overrideFields: { rule_source: ruleSource, immutable },
           overwriteRules,
           allowMissingConnectorSecrets,
         });

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RuleToImport,
-  ValidatedRuleToImport,
-  ValidatedRuleToImportWithSource,
-} from './rule_to_import';
+import type { RuleToImport, ValidatedRuleToImport } from './rule_to_import';
 
 export const getImportRulesSchemaMock = (rewrites?: Partial<RuleToImport>): RuleToImport =>
   ({
@@ -30,16 +26,6 @@ export const getValidatedRuleToImportMock = (
 ): ValidatedRuleToImport => ({
   version: 1,
   ...getImportRulesSchemaMock(overrides),
-});
-
-export const getValidatedRuleToImportWithSourceMock = (
-  overrides?: Partial<ValidatedRuleToImportWithSource>
-): ValidatedRuleToImportWithSource => ({
-  rule_source: {
-    type: 'internal',
-  },
-  immutable: false,
-  ...getValidatedRuleToImportMock(overrides),
 });
 
 export const getImportRulesWithIdSchemaMock = (ruleId = 'rule-1'): RuleToImport => ({

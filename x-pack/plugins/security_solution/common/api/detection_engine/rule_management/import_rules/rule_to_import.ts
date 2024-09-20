@@ -13,7 +13,6 @@ import {
   RuleSignatureId,
   TypeSpecificCreateProps,
   RuleVersion,
-  RuleSource,
 } from '../../model/rule_schema';
 
 /**
@@ -56,20 +55,5 @@ export type ValidatedRuleToImportInput = z.input<typeof ValidatedRuleToImport>;
 export const ValidatedRuleToImport = RuleToImport.and(
   z.object({
     version: RuleVersion,
-  })
-);
-
-/**
- * This type represents new rules being imported once the prebuilt rule
- * customization work is complete. In addition to having been validated to have
- * `version`, they've also had their `rule_source` and `immutable` fields
- * calculated, and are ready to be persisted.
- */
-export type ValidatedRuleToImportWithSource = z.infer<typeof ValidatedRuleToImportWithSource>;
-export type ValidatedRuleToImportWithSourceInput = z.input<typeof ValidatedRuleToImportWithSource>;
-export const ValidatedRuleToImportWithSource = ValidatedRuleToImport.and(
-  z.object({
-    rule_source: RuleSource,
-    immutable: z.boolean(),
   })
 );

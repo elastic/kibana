@@ -56,7 +56,7 @@ describe('Import rules route', () => {
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
-    clients.detectionRulesClient.legacyImportRule.mockResolvedValue(getRulesSchemaMock());
+    clients.detectionRulesClient.importRule.mockResolvedValue(getRulesSchemaMock());
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
@@ -90,7 +90,7 @@ describe('Import rules route', () => {
 
   describe('unhappy paths', () => {
     test('returns a 403 error object if ML Authz fails', async () => {
-      clients.detectionRulesClient.legacyImportRule.mockImplementationOnce(async () => {
+      clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
 
@@ -219,7 +219,7 @@ describe('Import rules route', () => {
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
-        clients.detectionRulesClient.legacyImportRule.mockRejectedValue({
+        clients.detectionRulesClient.importRule.mockRejectedValue({
           message: 'rule_id: "rule-1" already exists',
           statusCode: 409,
         });
@@ -437,7 +437,7 @@ describe('Import rules route', () => {
       });
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.detectionRulesClient.legacyImportRule.mockRejectedValueOnce({
+        clients.detectionRulesClient.importRule.mockRejectedValueOnce({
           message: 'rule_id: "rule-1" already exists',
           statusCode: 409,
         });

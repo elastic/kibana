@@ -12,7 +12,7 @@ import { getRulesSchemaMock } from '../../../../../../common/api/detection_engin
 import { requestContextMock } from '../../../routes/__mocks__';
 
 import { importRules } from './import_rules_utils';
-import { createBulkErrorObject } from '../../../routes/utils';
+import { createRuleImportErrorObject } from './errors';
 
 describe('importRules', () => {
   const { clients, context } = requestContextMock.createTools();
@@ -59,10 +59,10 @@ describe('importRules', () => {
   });
 
   it('returns 409 error if DetectionRulesClient throws with 409 - existing rule', async () => {
-    clients.detectionRulesClient.legacyImportRule.mockImplementationOnce(async () => {
-      throw createBulkErrorObject({
+    clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
+      throw createRuleImportErrorObject({
         ruleId: ruleToImport.rule_id,
-        statusCode: 409,
+        type: 'conflict',
         message: `rule_id: "${ruleToImport.rule_id}" already exists`,
       });
     });
@@ -88,7 +88,7 @@ describe('importRules', () => {
   });
 
   it('creates rule if no matching existing rule found', async () => {
-    clients.detectionRulesClient.legacyImportRule.mockResolvedValue({
+    clients.detectionRulesClient.importRule.mockResolvedValue({
       ...getRulesSchemaMock(),
       rule_id: ruleToImport.rule_id,
     });

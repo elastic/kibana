@@ -14,6 +14,7 @@ import { checkRuleExceptionReferences } from './check_rule_exception_references'
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import { getReferencedExceptionLists } from './gather_referenced_exceptions';
 import type { RuleFromImportStream } from './utils';
+import { isRuleConflictError, isRuleImportError } from './errors';
 
 /**
  * Takes rules to be imported and either creates or updates rules
@@ -109,7 +110,7 @@ export const importRules = async ({
 
               importRuleResponse = [...importRuleResponse, ...exceptionBulkErrors];
 
-              const importedRule = await detectionRulesClient.legacyImportRule({
+              const importedRule = await detectionRulesClient.importRule({
                 ruleToImport: {
                   ...parsedRule,
                   exceptions_list: [...exceptions],
@@ -124,6 +125,17 @@ export const importRules = async ({
               });
             } catch (err) {
               const { error, statusCode, message } = err;
+              if (isRuleImportError(err)) {
+                resolve(
+                  createBulkErrorObject({
+                    message: err.error.message,
+                    statusCode: isRuleConflictError(err) ? 409 : 400,
+                    ruleId: err.error.ruleId,
+                  })
+                );
+                return null;
+              }
+
               resolve(
                 createBulkErrorObject({
                   ruleId: parsedRule.rule_id,

@@ -11,7 +11,6 @@ import type {
   RulePatchProps,
   RuleObjectId,
   RuleResponse,
-  ValidatedRuleToImport,
   RuleToImport,
   RuleSource,
 } from '../../../../../../common/api/detection_engine';
@@ -26,7 +25,6 @@ export interface IDetectionRulesClient {
   patchRule: (args: PatchRuleArgs) => Promise<RuleResponse>;
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
-  legacyImportRule: (args: LegacyImportRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
 }
@@ -55,14 +53,9 @@ export interface UpgradePrebuiltRuleArgs {
   ruleAsset: PrebuiltRuleAsset;
 }
 
-export interface LegacyImportRuleArgs {
-  ruleToImport: RuleToImport;
-  overwriteRules?: boolean;
-  allowMissingConnectorSecrets?: boolean;
-}
-
 export interface ImportRuleArgs {
-  ruleToImport: ValidatedRuleToImport & { rule_source: RuleSource; immutable: boolean };
+  ruleToImport: RuleToImport;
+  overrideFields?: { rule_source: RuleSource; immutable: boolean };
   overwriteRules?: boolean;
   allowMissingConnectorSecrets?: boolean;
 }

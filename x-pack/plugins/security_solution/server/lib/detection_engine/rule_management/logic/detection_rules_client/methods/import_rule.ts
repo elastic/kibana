@@ -11,20 +11,20 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { createBulkErrorObject } from '../../../../routes/utils';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
-import type { LegacyImportRuleArgs } from '../detection_rules_client_interface';
+import type { ImportRuleArgs } from '../detection_rules_client_interface';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { validateMlAuth, toggleRuleEnabledOnUpdate } from '../utils';
 import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
+import { createRuleImportErrorObject } from '../../import/errors';
 
 interface ImportRuleOptions {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  importRulePayload: LegacyImportRuleArgs;
+  importRulePayload: ImportRuleArgs;
   mlAuthz: MlAuthz;
 }
 
@@ -35,9 +35,10 @@ export const importRule = async ({
   prebuiltRuleAssetClient,
   mlAuthz,
 }: ImportRuleOptions): Promise<RuleResponse> => {
-  const { ruleToImport, overwriteRules, allowMissingConnectorSecrets } = importRulePayload;
-  // For backwards compatibility in this legacy path, immutable is always false.
-  const rule = { ...ruleToImport, immutable: false };
+  const { ruleToImport, overwriteRules, overrideFields, allowMissingConnectorSecrets } =
+    importRulePayload;
+  // For backwards compatibility, immutable is false by default
+  const rule = { ...ruleToImport, immutable: false, ...overrideFields };
 
   await validateMlAuth(mlAuthz, ruleToImport.type);
 
@@ -47,19 +48,21 @@ export const importRule = async ({
   });
 
   if (existingRule && !overwriteRules) {
-    throw createBulkErrorObject({
+    throw createRuleImportErrorObject({
       ruleId: existingRule.rule_id,
-      statusCode: 409,
+      type: 'conflict',
       message: `rule_id: "${existingRule.rule_id}" already exists`,
     });
   }
 
   if (existingRule && overwriteRules) {
-    const ruleWithUpdates = await applyRuleUpdate({
+    let ruleWithUpdates = await applyRuleUpdate({
       prebuiltRuleAssetClient,
       existingRule,
       ruleUpdate: rule,
     });
+    // applyRuleUpdate prefers the existing rule's values for `rule_source` and `immutable`, but we want to use the importing rule's calculated values
+    ruleWithUpdates = { ...ruleWithUpdates, ...overrideFields };
 
     const updatedRule = await rulesClient.update({
       id: existingRule.id,

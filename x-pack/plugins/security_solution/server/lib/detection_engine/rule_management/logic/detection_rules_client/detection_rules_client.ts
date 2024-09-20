@@ -21,7 +21,6 @@ import type {
   IDetectionRulesClient,
   ImportRuleArgs,
   ImportRulesArgs,
-  LegacyImportRuleArgs,
   PatchRuleArgs,
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
@@ -32,7 +31,6 @@ import { importRule } from './methods/import_rule';
 import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
-import { importRuleWithSource } from './methods/import_rule_with_source';
 import { importRules } from './methods/import_rules';
 
 interface DetectionRulesClientParams {
@@ -125,21 +123,9 @@ export const createDetectionRulesClient = ({
       });
     },
 
-    async legacyImportRule(args: LegacyImportRuleArgs): Promise<RuleResponse> {
-      return withSecuritySpan('DetectionRulesClient.legacyImportRule', async () => {
-        return importRule({
-          actionsClient,
-          rulesClient,
-          importRulePayload: args,
-          mlAuthz,
-          prebuiltRuleAssetClient,
-        });
-      });
-    },
-
     async importRule(args: ImportRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.importRule', async () => {
-        return importRuleWithSource({
+        return importRule({
           actionsClient,
           rulesClient,
           importRulePayload: args,

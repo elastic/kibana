@@ -17,10 +17,7 @@ import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
-import {
-  getValidatedRuleToImportMock,
-  getValidatedRuleToImportWithSourceMock,
-} from '../../../../../../common/api/detection_engine/rule_management/mocks';
+import { getValidatedRuleToImportMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -36,7 +33,7 @@ describe('DetectionRulesClient.importRule', () => {
 
   const allowMissingConnectorSecrets = true;
   const ruleToImport = {
-    ...getValidatedRuleToImportWithSourceMock(),
+    ...getValidatedRuleToImportMock(),
     tags: ['import-tag'],
     rule_id: 'rule-id',
     version: 1,
@@ -74,7 +71,7 @@ describe('DetectionRulesClient.importRule', () => {
             immutable: ruleToImport.immutable,
             ruleId: ruleToImport.rule_id,
             version: ruleToImport.version,
-            ruleSource: ruleToImport.rule_source,
+            ruleSource: { type: 'internal' },
           }),
         }),
         allowMissingConnectorSecrets,
@@ -119,7 +116,7 @@ describe('DetectionRulesClient.importRule', () => {
               immutable: ruleToImport.immutable,
               ruleId: ruleToImport.rule_id,
               version: ruleToImport.version,
-              ruleSource: ruleToImport.rule_source,
+              ruleSource: { type: 'internal' },
             }),
           }),
           id: existingRule.id,
@@ -230,6 +227,39 @@ describe('DetectionRulesClient.importRule', () => {
       );
     });
 
+    it('preserves the passed "rule_source" and "immutable" values', async () => {
+      const rule = {
+        ...getValidatedRuleToImportMock(),
+      };
+
+      await detectionRulesClient.importRule({
+        ruleToImport: rule,
+        overwriteRules: true,
+        overrideFields: {
+          immutable: true,
+          rule_source: {
+            type: 'external' as const,
+            is_customized: true,
+          },
+        },
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({
+              immutable: true,
+              ruleSource: {
+                isCustomized: true,
+                type: 'external',
+              },
+            }),
+          }),
+        })
+      );
+    });
+
     it('rejects when overwriteRules is false', async () => {
       (getRuleByRuleId as jest.Mock).mockResolvedValue(existingRule);
       await expect(
@@ -250,12 +280,7 @@ describe('DetectionRulesClient.importRule', () => {
     it("always uses the existing rule's 'id' value", async () => {
       const rule = {
         ...getValidatedRuleToImportMock(),
-        immutable: true,
         id: 'some-id',
-        rule_source: {
-          type: 'external' as const,
-          is_customized: true,
-        },
       };
 
       await detectionRulesClient.importRule({
@@ -275,11 +300,7 @@ describe('DetectionRulesClient.importRule', () => {
     it("uses the existing rule's 'version' value if not unspecified", async () => {
       const rule = {
         ...getValidatedRuleToImportMock(),
-        immutable: true,
-        rule_source: {
-          type: 'external' as const,
-          is_customized: true,
-        },
+        version: undefined,
       };
 
       await detectionRulesClient.importRule({
@@ -303,12 +324,7 @@ describe('DetectionRulesClient.importRule', () => {
     it("uses the specified 'version' value", async () => {
       const rule = {
         ...getValidatedRuleToImportMock(),
-        immutable: true,
         version: 42,
-        rule_source: {
-          type: 'external' as const,
-          is_customized: true,
-        },
       };
 
       await detectionRulesClient.importRule({
@@ -338,16 +354,18 @@ describe('DetectionRulesClient.importRule', () => {
     it('preserves the passed "rule_source" and "immutable" values', async () => {
       const rule = {
         ...getValidatedRuleToImportMock(),
-        immutable: true,
-        rule_source: {
-          type: 'external' as const,
-          is_customized: true,
-        },
       };
 
       await detectionRulesClient.importRule({
         ruleToImport: rule,
         overwriteRules: true,
+        overrideFields: {
+          immutable: true,
+          rule_source: {
+            type: 'external' as const,
+            is_customized: true,
+          },
+        },
         allowMissingConnectorSecrets,
       });
 
@@ -370,11 +388,6 @@ describe('DetectionRulesClient.importRule', () => {
       const rule = {
         ...getValidatedRuleToImportMock(),
         enabled: true,
-        immutable: true,
-        rule_source: {
-          type: 'external' as const,
-          is_customized: true,
-        },
       };
 
       await detectionRulesClient.importRule({
@@ -395,11 +408,6 @@ describe('DetectionRulesClient.importRule', () => {
     it('defaults defaultable values', async () => {
       const rule = {
         ...getValidatedRuleToImportMock(),
-        immutable: true,
-        rule_source: {
-          type: 'external' as const,
-          is_customized: true,
-        },
       };
 
       await detectionRulesClient.importRule({
