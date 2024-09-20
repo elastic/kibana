@@ -15,6 +15,9 @@ import {
   DATA_STEAM_TYPE,
   DATA_STREAM_DATASET,
   DATA_STREAM_NAMESPACE,
+  ERROR_CULPRIT,
+  ERROR_EXC_HANDLED,
+  ERROR_EXC_TYPE,
   EVENT_OUTCOME,
   EVENT_SUCCESS_COUNT,
   FAAS_COLDSTART,
@@ -30,6 +33,7 @@ import {
   SERVICE_FRAMEWORK_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
+  SPAN_ACTION,
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
@@ -42,6 +46,7 @@ import {
   SPAN_SUBTYPE,
   SPAN_SYNC,
   SPAN_TYPE,
+  SPAN_LINKS,
   TIMESTAMP,
   TRACE_ID,
   TRANSACTION_DURATION,
@@ -51,21 +56,18 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_SAMPLED,
   TRANSACTION_TYPE,
-} from '@kbn/apm-types/src/es_fields/apm';
-import { SpanLink } from '@kbn/apm-types/src/es_schemas/raw/fields/span_links';
-import {
+  ERROR_EXC_MESSAGE,
   ERROR_EXCEPTION,
   ERROR_GROUP_ID,
   ERROR_ID,
   ERROR_LOG_MESSAGE,
-} from '../../common/es_fields/apm';
+} from '@kbn/apm-types/src/es_fields/apm';
+import { SpanLink } from '@kbn/apm-types/src/es_schemas/raw/fields/span_links';
 import {
   WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../common/waterfall/typings';
-import { SPAN_LINKS } from '../../common/es_fields/apm';
-import { SPAN_ACTION } from '../../common/es_fields/apm';
 import { EventOutcome } from '../../common/event_outcome';
 import { Exception } from '../../typings/es_schemas/raw/error_raw';
 
@@ -375,6 +377,30 @@ export const errorDocsMapping = (fields: Partial<Record<string, unknown[]>>): Wa
       exception: normalizeValue<Exception[]>(fields[ERROR_EXCEPTION]),
       grouping_key: normalizeValue<string>(fields[ERROR_GROUP_ID]),
     },
+  };
+};
+
+export const errorGroupMainStatisticsMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  return {
+    trace: {
+      id: normalizeValue<string>(fields[TRACE_ID]),
+    },
+    error: {
+      id: normalizeValue<string>(fields[ERROR_ID]),
+      log: {
+        message: normalizeValue<string>(fields[ERROR_LOG_MESSAGE]),
+      },
+      exception: [
+        {
+          message: normalizeValue<string>(fields[ERROR_EXC_MESSAGE]),
+          handled: normalizeValue<boolean>(fields[ERROR_EXC_HANDLED]),
+          type: normalizeValue<string>(fields[ERROR_EXC_TYPE]),
+        },
+      ],
+      culprit: normalizeValue<string>(fields[ERROR_CULPRIT]),
+      grouping_key: normalizeValue<string>(fields[ERROR_GROUP_ID]),
+    },
+    '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
   };
 };
 

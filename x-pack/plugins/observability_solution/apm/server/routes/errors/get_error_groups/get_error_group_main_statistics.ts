@@ -7,8 +7,6 @@
 
 import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
-import type { ErrorRaw } from '@kbn/apm-types/es_schemas_raw';
-import { normalizeFields } from '../../../utils/normalize_fields';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -27,6 +25,7 @@ import { getErrorName } from '../../../lib/helpers/get_error_name';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
+import { errorGroupMainStatisticsMapping } from '../../../utils/es_fields_mappings';
 
 export interface ErrorGroupMainStatisticsResponse {
   errorGroups: Array<{
@@ -159,8 +158,7 @@ export async function getErrorGroupMainStatistics({
 
   const errorGroups =
     response.aggregations?.error_groups.buckets.map((bucket) => {
-      const fields = bucket.sample.hits.hits[0]?.fields;
-      const fieldsNorm = normalizeFields(fields) as unknown as ErrorRaw;
+      const fieldsNorm = errorGroupMainStatisticsMapping(bucket.sample.hits.hits[0]?.fields);
       return {
         groupId: bucket.key as string,
         name: getErrorName(fieldsNorm),
