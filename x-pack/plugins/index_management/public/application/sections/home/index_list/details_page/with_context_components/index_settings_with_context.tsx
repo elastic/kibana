@@ -13,11 +13,13 @@ import { UiMetricService } from '../../../../../services/ui_metric';
 import { AppDependencies, IndexManagementAppContext } from '../../../../..';
 import { DetailsPageSettings } from '../details_page_settings';
 import { IndexSettingWithContextProps } from './index_settings_with_context_types';
+import { setUiMetricService } from '../../../../../services/api';
 
 export const IndexSettingsWithContext: React.FC<IndexSettingWithContextProps> = ({
   core,
   dependencies,
   indexName,
+  usageCollection,
 }) => {
   // this normally happens when the index management app is rendered
   // but if components are embedded elsewhere that setup is skipped, so we have to do it here
@@ -29,13 +31,17 @@ export const IndexSettingsWithContext: React.FC<IndexSettingWithContextProps> = 
   }
   documentationService.setup(core.docLinks);
 
+  const uiMetricService = new UiMetricService(UIM_APP_NAME);
+  setUiMetricService(uiMetricService);
+  uiMetricService.setup(usageCollection);
+
   const newDependencies: AppDependencies = {
     ...dependencies,
     services: {
       ...(dependencies.services || {}),
       httpService,
       notificationService,
-      uiMetricService: new UiMetricService(UIM_APP_NAME),
+      uiMetricService,
     },
   };
   return (
