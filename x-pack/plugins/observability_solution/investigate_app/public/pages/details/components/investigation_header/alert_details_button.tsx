@@ -22,9 +22,7 @@ export function AlertDetailsButton() {
   const { investigation } = useInvestigation();
 
   const alertOriginInvestigation = alertOriginSchema.safeParse(investigation?.origin);
-  const alertId = alertOriginInvestigation.success
-    ? alertOriginInvestigation.data.id
-    : '2ad3ff76-43ef-4b3d-b97a-baa2bfd21853';
+  const alertId = alertOriginInvestigation.success ? alertOriginInvestigation.data.id : undefined;
   const { data: alertDetails } = useFetchAlert({ id: alertId });
 
   if (!alertDetails) {

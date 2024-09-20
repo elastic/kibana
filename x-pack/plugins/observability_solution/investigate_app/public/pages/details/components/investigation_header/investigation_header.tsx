@@ -30,7 +30,7 @@ export function InvestigationHeader() {
 
       <EuiFlexItem>{investigation.title}</EuiFlexItem>
 
-      <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+      <EuiFlexGroup direction="row" gutterSize="m" alignItems="center" wrap responsive={false}>
         <EuiFlexItem grow={false}>
           <InvestigationStatusBadge status={investigation.status} />
         </EuiFlexItem>
