@@ -13,6 +13,7 @@ import {
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
   SyntheticsSynthtraceEsClient,
+  AlertsSynthtraceEsClient,
 } from '../..';
 import { AssetsSynthtraceEsClient } from '../lib/assets/assets_synthtrace_es_client';
 import { Logger } from '../lib/utils/create_logger';
@@ -25,6 +26,7 @@ interface EsClients {
   infraEsClient: InfraSynthtraceEsClient;
   assetsEsClient: AssetsSynthtraceEsClient;
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
+  alertsEsClient: AlertsSynthtraceEsClient;
 }
 
 type Generate<TFields> = (options: {
