@@ -288,7 +288,10 @@ describe('autocomplete', () => {
       'from a | grok key/',
       getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
     );
-    testSuggestions('from a | grok keywordField/', []);
+    testSuggestions(
+      'from a | grok keywordField/',
+      ['keywordField ', 'textField '].map(attachTriggerCommand)
+    );
   });
 
   describe('dissect', () => {
@@ -328,7 +331,10 @@ describe('autocomplete', () => {
       'from a | dissect key/',
       getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
     );
-    testSuggestions('from a | dissect keywordField/', []);
+    testSuggestions(
+      'from a | dissect keywordField/',
+      ['keywordField ', 'textField '].map(attachTriggerCommand)
+    );
   });
 
   describe('limit', () => {
