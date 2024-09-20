@@ -79,7 +79,7 @@ export class DefaultAlertService {
     if (this.settings?.defaultStatusRuleEnabled === false) {
       return;
     }
-    return this.createDefaultAlertIfNotExist(
+    return this.createDefaultRuleIfNotExist(
       SYNTHETICS_STATUS_RULE,
       `Synthetics status internal rule`,
       minimumRuleInterval
@@ -91,7 +91,7 @@ export class DefaultAlertService {
     if (this.settings?.defaultTLSRuleEnabled === false) {
       return;
     }
-    return this.createDefaultAlertIfNotExist(
+    return this.createDefaultRuleIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS rule`,
       minimumRuleInterval
@@ -116,7 +116,7 @@ export class DefaultAlertService {
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
 
-  async createDefaultAlertIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
+  async createDefaultRuleIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
       return alert;
@@ -213,7 +213,7 @@ export class DefaultAlertService {
       };
     }
 
-    return await this.createDefaultAlertIfNotExist(ruleType, name, interval);
+    return await this.createDefaultRuleIfNotExist(ruleType, name, interval);
   }
 
   async getAlertActions(ruleType: DefaultRuleType) {

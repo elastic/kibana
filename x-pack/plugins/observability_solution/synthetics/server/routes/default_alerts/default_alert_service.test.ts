@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SanitizedRule } from '@kbn/alerting-types';
+import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-types';
 import { omit } from 'lodash';
 import {
   SYNTHETICS_STATUS_RULE,
@@ -123,13 +123,13 @@ describe('DefaultAlertService', () => {
     it('creates status rule if enabled', async () => {
       const service = new DefaultAlertService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
-      service.createDefaultAlertIfNotExist = jest.fn();
+      service.createDefaultRuleIfNotExist = jest.fn();
       service.settings = { defaultStatusRuleEnabled: true } as any;
       service.getSettings = jest.fn().mockResolvedValue({
         defaultStatusRuleEnabled: true,
       });
       await service.setupStatusRule();
-      expect(service.createDefaultAlertIfNotExist).toHaveBeenCalledWith(
+      expect(service.createDefaultRuleIfNotExist).toHaveBeenCalledWith(
         SYNTHETICS_STATUS_RULE,
         'Synthetics status internal rule',
         '1m'
@@ -139,10 +139,10 @@ describe('DefaultAlertService', () => {
     it('does not create status rule if disabled', async () => {
       const service = new DefaultAlertService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
-      service.createDefaultAlertIfNotExist = jest.fn();
+      service.createDefaultRuleIfNotExist = jest.fn();
       service.settings = { defaultStatusRuleEnabled: false } as any;
       const result = await service.setupStatusRule();
-      expect(service.createDefaultAlertIfNotExist).not.toHaveBeenCalled();
+      expect(service.createDefaultRuleIfNotExist).not.toHaveBeenCalled();
       expect(result).toBeUndefined();
     });
   });
@@ -151,13 +151,13 @@ describe('DefaultAlertService', () => {
     it('creates tls rule if enabled', async () => {
       const service = new DefaultAlertService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
-      service.createDefaultAlertIfNotExist = jest.fn();
+      service.createDefaultRuleIfNotExist = jest.fn();
       service.settings = { defaultTlsRuleEnabled: true } as any;
       service.getSettings = jest.fn().mockResolvedValue({
         defaultTlsRuleEnabled: true,
       });
       await service.setupTlsRule();
-      expect(service.createDefaultAlertIfNotExist).toHaveBeenCalledWith(
+      expect(service.createDefaultRuleIfNotExist).toHaveBeenCalledWith(
         SYNTHETICS_TLS_RULE,
         'Synthetics internal TLS rule',
         '1m'
@@ -167,21 +167,21 @@ describe('DefaultAlertService', () => {
     it('does not create tls rule if disabled', async () => {
       const service = new DefaultAlertService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
-      service.createDefaultAlertIfNotExist = jest.fn();
+      service.createDefaultRuleIfNotExist = jest.fn();
       service.settings = { defaultTLSRuleEnabled: false } as any;
       const result = await service.setupTlsRule();
-      expect(service.createDefaultAlertIfNotExist).not.toHaveBeenCalled();
+      expect(service.createDefaultRuleIfNotExist).not.toHaveBeenCalled();
       expect(result).toBeUndefined();
     });
   });
 
   describe('existing alerts', () => {
-    function setUpExistingAlerts<T>(
-      alertOverride?: Partial<SanitizedRule<T>>,
+    function setUpExistingRules<T>(
+      ruleOverride?: Partial<SanitizedRule<T extends RuleTypeParams>>,
       getRulesClientMocks = {}
     ) {
       const getRulesClient = jest.fn();
-      const mockAlert: any = alertOverride ?? {
+      const mockRule: any = ruleOverride ?? {
         actions: [{ alertsFilter: { query: { kql: 'some kql', filters: [] } } }],
         systemActions: [{ id: 'some system action', actionTypeId: 'actionTypeId', params: {} }],
         ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
@@ -190,35 +190,35 @@ describe('DefaultAlertService', () => {
       };
       const find = jest.fn();
       find.mockResolvedValue({
-        data: [mockAlert],
+        data: [mockRule],
       });
       getRulesClient.mockReturnValue({ find, ...getRulesClientMocks });
 
-      return { getRulesClient, mockAlert };
+      return { getRulesClient, mockRule };
     }
 
-    function formatMockAlertResult(mockAlert: any) {
+    function formatMockRuleResult(mockRule: any) {
       return {
-        ...omit(mockAlert, 'systemActions'),
-        actions: [...mockAlert.actions, ...mockAlert.systemActions],
+        ...omit(mockRule, 'systemActions'),
+        actions: [...mockRule.actions, ...mockRule.systemActions],
       };
     }
 
     afterEach(() => jest.resetAllMocks());
 
     describe('getExistingAlert', () => {
-      it('returns alert if exists', async () => {
-        const { getRulesClient, mockAlert } = setUpExistingAlerts();
+      it('returns rule if exists', async () => {
+        const { getRulesClient, mockRule } = setUpExistingRules();
         const service = new DefaultAlertService(
           { alerting: { getRulesClient } } as any,
           {} as any,
           {} as any
         );
         const result = await service.getExistingAlert('xpack.synthetics.alerts.monitorStatus');
-        expect(result).toEqual(formatMockAlertResult(mockAlert));
+        expect(result).toEqual(formatMockRuleResult(mockRule));
       });
 
-      it('returns undefined if alert does not exist', async () => {
+      it('returns undefined if rule does not exist', async () => {
         const find = jest.fn().mockResolvedValue({ data: [] });
         const getRulesClient = jest.fn();
         getRulesClient.mockReturnValue({ find });
@@ -232,23 +232,23 @@ describe('DefaultAlertService', () => {
       });
     });
     describe('createDefaultAlertIfNotExist', () => {
-      it('returns alert if exists', async () => {
-        const { getRulesClient, mockAlert } = setUpExistingAlerts();
+      it('returns rule if exists', async () => {
+        const { getRulesClient, mockRule } = setUpExistingRules();
         const service = new DefaultAlertService(
           { alerting: { getRulesClient } } as any,
           {} as any,
           {} as any
         );
-        const alert = await service.createDefaultAlertIfNotExist(
+        const alert = await service.createDefaultRuleIfNotExist(
           'xpack.synthetics.alerts.monitorStatus',
           'name',
           '1m'
         );
-        expect(alert).toEqual(formatMockAlertResult(mockAlert));
+        expect(alert).toEqual(formatMockRuleResult(mockRule));
         expect(getRulesClient).toHaveBeenCalled();
       });
 
-      it('creates alert if does not exist', async () => {
+      it('creates rule if does not exist', async () => {
         const sampleAction = { alertsFilter: { query: { kql: 'some kql', filters: [] } } };
         const find = jest.fn().mockResolvedValue({ data: [] });
         const create = jest.fn().mockResolvedValue({
@@ -271,7 +271,7 @@ describe('DefaultAlertService', () => {
           {} as any
         );
         service.settings = { defaultConnectors: ['slack', 'email'] } as any;
-        const result = await service.createDefaultAlertIfNotExist(
+        const result = await service.createDefaultRuleIfNotExist(
           'xpack.synthetics.alerts.monitorStatus',
           'name',
           '1m'
@@ -285,17 +285,16 @@ describe('DefaultAlertService', () => {
       });
     });
 
-    function setUpUpdateTest<T>(mockAlert?: Partial<SanitizedRule<T>>) {
+    function setUpUpdateTest<T>(mockRule?: Partial<SanitizedRule<T extends RuleTypeParams>>) {
       const update = jest.fn().mockResolvedValue({
         alertTypeId: 'test-alert-type-id',
         actions: [{ id: 'id', actionTypeId: 'actionTypeId', name: 'action name' }],
         systemActions: [{ id: 'sys-id', actionTypeId: 'actionTypeId', name: 'action name' }],
         updatedAlertField: 'value',
       });
-      const { getRulesClient } = setUpExistingAlerts(
-        mockAlert ?? { schedule: { interval: '1m' } },
-        { update }
-      );
+      const { getRulesClient } = setUpExistingRules(mockRule ?? { schedule: { interval: '1m' } }, {
+        update,
+      });
       const getConfig = jest.fn().mockReturnValue({ minimumScheduleInterval: { value: '3m' } });
       const server = {
         alerting: {
@@ -364,7 +363,7 @@ describe('DefaultAlertService', () => {
           },
         } as any;
         const bulkDeleteRules = jest.fn();
-        const { getRulesClient } = setUpExistingAlerts(undefined, { bulkDeleteRules });
+        const { getRulesClient } = setUpExistingRules(undefined, { bulkDeleteRules });
         const service = new DefaultAlertService(
           { alerting: { getRulesClient } } as any,
           server as any,
@@ -403,11 +402,11 @@ describe('DefaultAlertService', () => {
         const getExistingAlertMock = jest.fn().mockResolvedValue(undefined);
         service.getExistingAlert = getExistingAlertMock;
         const createDefaultAlertIfNotExistMock = jest.fn();
-        service.createDefaultAlertIfNotExist = createDefaultAlertIfNotExistMock;
+        service.createDefaultRuleIfNotExist = createDefaultAlertIfNotExistMock;
         const result = await service.updateTlsRule(true);
         expect(result).toBeUndefined();
         expect(service.getExistingAlert).toHaveBeenCalled();
-        expect(service.createDefaultAlertIfNotExist).toHaveBeenCalled();
+        expect(service.createDefaultRuleIfNotExist).toHaveBeenCalled();
         expect(getExistingAlertMock.mock.calls[0][0]).toBe('xpack.synthetics.alerts.tls');
         expect(createDefaultAlertIfNotExistMock.mock.calls[0]).toStrictEqual([
           'xpack.synthetics.alerts.tls',
@@ -423,7 +422,7 @@ describe('DefaultAlertService', () => {
           },
         } as any;
         const bulkDeleteRules = jest.fn();
-        const { getRulesClient } = setUpExistingAlerts(undefined, { bulkDeleteRules });
+        const { getRulesClient } = setUpExistingRules(undefined, { bulkDeleteRules });
         const service = new DefaultAlertService(
           { alerting: { getRulesClient } } as any,
           server as any,
