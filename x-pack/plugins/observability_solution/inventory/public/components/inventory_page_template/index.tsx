@@ -46,11 +46,9 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
       }}
     >
       {children}
-      <Welcome
-        showModal={showWelcomedModal}
-        onClose={toggleWelcomedModal}
-        onConfirm={toggleWelcomedModal}
-      />
+      {showWelcomedModal ? (
+        <Welcome onClose={toggleWelcomedModal} onConfirm={toggleWelcomedModal} />
+      ) : null}
     </ObservabilityPageTemplate>
   );
 }

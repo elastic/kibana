@@ -20,20 +20,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import inventoryLight from '../../assets/entities_intentory_light.png';
+import inventoryLight from '../../assets/entities_inventory_light.png';
+import inventoryDark from '../../assets/entities_inventory_dark.png';
+import { useTheme } from '../../hooks/use_theme';
 
-export function Welcome({
-  showModal = false,
-  onClose,
-  onConfirm,
-}: {
-  showModal: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  if (!showModal) {
-    return null;
-  }
+export function Welcome({ onClose, onConfirm }: { onClose: () => void; onConfirm: () => void }) {
+  const { darkMode } = useTheme();
 
   return (
     <EuiConfirmModal
@@ -94,7 +86,7 @@ export function Welcome({
       <EuiPanel hasBorder paddingSize="none">
         <EuiImage
           size="xl"
-          src={inventoryLight}
+          src={darkMode ? inventoryDark : inventoryLight}
           allowFullScreen
           alt={i18n.translate('xpack.inventory.welcome.image.alt', {
             defaultMessage:

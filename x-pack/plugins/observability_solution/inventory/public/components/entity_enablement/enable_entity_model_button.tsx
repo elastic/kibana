@@ -65,7 +65,7 @@ export function EnableEntityModelButton({ onSuccess }: { onSuccess: () => void }
           defaultMessage: 'Enable',
         })}
       </EuiButton>
-      <Unauthorized showModal={showModal} onClose={() => setModalVisible(false)} />
+      {showModal ? <Unauthorized onClose={() => setModalVisible(false)} /> : null}
     </>
   );
 }
