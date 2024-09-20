@@ -265,7 +265,7 @@ export const getDatatableVisualization = ({
   getConfiguration({ state, frame }) {
     const isDarkMode = kibanaTheme.getTheme().darkMode;
     const { sortedColumns, datasource } =
-      getDataSourceAndSortedColumns(state, frame.datasourceLayers) || {};
+      getDatasourceAndSortedColumns(state, frame.datasourceLayers) || {};
 
     const columnMap: Record<string, ColumnState> = {};
     state.columns.forEach((column) => {
@@ -497,7 +497,7 @@ export const getDatatableVisualization = ({
     datasourceExpressionsByLayers = {}
   ): Ast | null {
     const { sortedColumns, datasource } =
-      getDataSourceAndSortedColumns(state, datasourceLayers) || {};
+      getDatasourceAndSortedColumns(state, datasourceLayers) || {};
     const isTextBasedLanguage = datasource?.isTextBasedLanguage();
 
     if (
@@ -731,8 +731,20 @@ export const getDatatableVisualization = ({
   },
 
   getSortedColumns(state, datasourceLayers) {
-    const { sortedColumns } = getDataSourceAndSortedColumns(state, datasourceLayers || {}) || {};
+    const { sortedColumns } =
+      getDatasourceAndSortedColumns(state, datasourceLayers || {}, true) || {};
     return sortedColumns;
+  },
+
+  getColumnSorting(state) {
+    if (!state.sorting?.columnId || state.sorting.direction === 'none') return [];
+
+    return [
+      {
+        id: state.sorting.columnId,
+        direction: state.sorting.direction,
+      },
+    ];
   },
 
   getVisualizationInfo(state) {
@@ -782,15 +794,21 @@ export const getDatatableVisualization = ({
   },
 });
 
-function getDataSourceAndSortedColumns(
+function getDatasourceAndSortedColumns(
   state: DatatableVisualizationState,
-  datasourceLayers: DatasourceLayers
+  datasourceLayers: DatasourceLayers,
+  excludeHidden = false
 ) {
+  const columnMap = new Map(state.columns.map((c) => [c.columnId, c]));
   const datasource = datasourceLayers[state.layerId];
   const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
   // When we add a column it could be empty, and therefore have no order
   const sortedColumns = Array.from(
     new Set(originalOrder?.concat(state.columns.map(({ columnId }) => columnId)))
-  );
+  ).flatMap((id) => {
+    const col = columnMap.get(id);
+    if (excludeHidden && col?.hidden) return [];
+    return [id];
+  });
   return { datasource, sortedColumns };
 }

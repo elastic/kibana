@@ -598,11 +598,21 @@ export const LensTopNavMenu = ({
               isCurrentStateDirty
             );
 
+            const datasourceLayers = getDatasourceLayers(
+              datasourceStates,
+              datasourceMap,
+              dataViews.indexPatterns
+            );
+
             const sharingData = {
               activeData,
-              columnsSorting: visualizationMap[visualization.activeId].getSortedColumns?.(
+              sortedColumns: visualizationMap[visualization.activeId].getSortedColumns?.(
                 visualization.state,
-                getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns)
+                datasourceLayers
+              ),
+              columnSorting: visualizationMap[visualization.activeId].getColumnSorting?.(
+                visualization.state,
+                datasourceLayers
               ),
               csvEnabled,
               reportingDisabled: !csvEnabled,

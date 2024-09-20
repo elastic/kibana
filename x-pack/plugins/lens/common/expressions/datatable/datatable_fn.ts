@@ -14,6 +14,14 @@ import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
 import type { DatatableExpressionFunction } from './types';
 
+/**
+ * Available datatables logged to inspector
+ */
+export const DatatableInspectorTables = {
+  Default: 'default',
+  Transpose: 'transpose',
+};
+
 export const datatableFn =
   (
     getFormatFactory: (context: ExecutionContext) => FormatFactory | Promise<FormatFactory>
@@ -36,7 +44,7 @@ export const datatableFn =
         true
       );
 
-      context.inspectorAdapters.tables.logDatatable('default', logTable);
+      context.inspectorAdapters.tables.logDatatable(DatatableInspectorTables.Default, logTable);
     }
 
     let untransposedData: Datatable | undefined;
@@ -56,7 +64,7 @@ export const datatableFn =
       transposeTable(args, table, formatters);
 
       if (context?.inspectorAdapters?.tables) {
-        context.inspectorAdapters.tables.logDatatable('transpose', table);
+        context.inspectorAdapters.tables.logDatatable(DatatableInspectorTables.Transpose, table);
       }
     }
 

@@ -38,7 +38,7 @@ import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/c
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { EuiButtonIconProps } from '@elastic/eui';
+import type { EuiButtonIconProps, EuiDataGridColumnSortingConfig } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
@@ -1354,6 +1354,13 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * A visualization can share how columns are visually sorted
    */
   getSortedColumns?: (state: T, datasourceLayers?: DatasourceLayers) => string[];
+  /**
+   * A visualization can share how rows are sorted per column
+   */
+  getColumnSorting?: (
+    state: T,
+    datasourceLayers?: DatasourceLayers
+  ) => EuiDataGridColumnSortingConfig[];
   /**
    * returns array of telemetry events for the visualization on save
    */

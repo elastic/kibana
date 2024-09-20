@@ -52,8 +52,7 @@ export function transposeTable(
 ) {
   args.columns
     .filter((columnArgs) => columnArgs.isTransposed)
-    // start with the inner nested transposed column and work up to preserve column grouping
-    .reverse()
+    .reverse() // start with the inner nested transposed column and work up to preserve column grouping
     .forEach(({ columnId: transposedColumnId }) => {
       const datatableColumnIndex = firstTable.columns.findIndex((c) => c.id === transposedColumnId);
       const datatableColumn = firstTable.columns[datatableColumnIndex];
@@ -86,6 +85,11 @@ export function transposeTable(
         transposedColumnId,
         metricsColumnArgs
       );
+
+      const colOrderMap = new Map(args.columns.map((c, i) => [c.columnId, i]));
+      firstTable.columns.sort((a, b) => {
+        return (colOrderMap.get(a.id) ?? 0) - (colOrderMap.get(b.id) ?? 0);
+      });
     });
 }
 
