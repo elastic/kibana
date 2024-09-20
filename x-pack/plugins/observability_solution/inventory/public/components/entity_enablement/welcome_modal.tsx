@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -52,7 +44,7 @@ export function Welcome({
       onConfirm={onConfirm}
       confirmButtonText={
         <EuiButton data-test-subj="xpack.inventory.welcome.button.open" fill size="s">
-          {i18n.translate('xpack.inventory.welcome.button.openSurvey', {
+          {i18n.translate('xpack.inventory.welcome.button', {
             defaultMessage: 'OK',
           })}
         </EuiButton>
