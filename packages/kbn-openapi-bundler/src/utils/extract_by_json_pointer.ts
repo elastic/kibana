@@ -8,7 +8,6 @@
  */
 
 import chalk from 'chalk';
-import { dump } from 'js-yaml';
 import { isPlainObjectType } from './is_plain_object_type';
 
 /**

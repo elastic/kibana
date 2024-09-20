@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { load } from 'js-yaml';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load as loadYaml } from 'js-yaml';
+import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 import { cloneDeep, merge } from 'lodash';

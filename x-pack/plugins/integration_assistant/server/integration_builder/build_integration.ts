@@ -9,7 +9,6 @@ import AdmZip from 'adm-zip';
 import nunjucks from 'nunjucks';
 import { getDataPath } from '@kbn/utils';
 import { join as joinPath } from 'path';
-import { dump } from 'js-yaml';
 import type { DataStream, Integration } from '../../common';
 import { createSync, ensureDirSync, generateUniqueId, removeDirSync } from '../util';
 import { createAgentInput } from './agent';

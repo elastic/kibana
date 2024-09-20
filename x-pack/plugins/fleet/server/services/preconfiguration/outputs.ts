@@ -9,7 +9,6 @@ import crypto from 'crypto';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
-import { dump } from 'js-yaml';
 
 import type {
   PreconfiguredOutput,

@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import path from 'path';
-import { load as loadYaml } from 'js-yaml';
+import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import type { YamlRoleDefinitions } from '@kbn/test-suites-serverless/shared/lib';
 import { setupUserDataLoader } from '@kbn/test-suites-serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';

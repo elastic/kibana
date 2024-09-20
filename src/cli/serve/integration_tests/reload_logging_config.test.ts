@@ -15,7 +15,6 @@ import Del from 'del';
 
 import * as Rx from 'rxjs';
 import { map, filter, take } from 'rxjs';
-import { dump } from 'js-yaml';
 import { getConfigFromFiles } from '@kbn/config';
 
 const configFileLogConsole = follow(

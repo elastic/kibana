@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { dump } from 'js-yaml';
 import { generateCustomLogsYml } from './generate_custom_logs_yml';
 
 const baseMockConfig = {

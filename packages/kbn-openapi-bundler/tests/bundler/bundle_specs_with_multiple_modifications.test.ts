@@ -8,7 +8,6 @@
  */
 
 import { readFileSync } from 'fs';
-import { load } from 'js-yaml';
 import { join } from 'path';
 import { bundleFolder, readBundledSpecs } from './bundle_specs';
 

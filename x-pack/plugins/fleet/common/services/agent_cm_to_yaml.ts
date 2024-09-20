@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { dump } from 'js-yaml';
-
 import type { FullAgentConfigMap } from '../types/models/agent_cm';
 
 const CM_KEYS_ORDER = ['apiVersion', 'kind', 'metadata', 'data'];

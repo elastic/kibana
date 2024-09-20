@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import { extname } from 'path';
-import { load as loadYaml } from 'js-yaml';
+import { safeLoad as loadYaml } from 'js-yaml';
 
 export const readRolesFromResource = (resourcePath: string) => {
   if (!fs.existsSync(resourcePath) || extname(resourcePath) !== '.yml') {

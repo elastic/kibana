@@ -11,7 +11,6 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import execa from 'execa';
-import { dump } from 'js-yaml';
 import {
   fetchFleetServerUrl,
   getAgentVersionMatchingCurrentStack,

@@ -8,7 +8,6 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { dump } from 'js-yaml';
 import {
   EuiCodeBlock,
   EuiFlexGroup,

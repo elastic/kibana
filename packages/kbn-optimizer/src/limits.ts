@@ -32,7 +32,7 @@ export function readLimits(path: string): Limits {
     }
   }
 
-  return yaml ? Yaml.load(yaml) : {};
+  return yaml ? Yaml.safeLoad(yaml) : {};
 }
 
 export function validateLimitsForAllBundles(
@@ -136,6 +136,6 @@ export function updateBundleLimits({
     pageLoadAssetSize,
   };
 
-  Fs.writeFileSync(limitsPath, Yaml.dump(newLimits));
+  Fs.writeFileSync(limitsPath, Yaml.safeDump(newLimits));
   log.success(`wrote updated limits to ${limitsPath}`);
 }

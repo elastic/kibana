@@ -9,7 +9,6 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 import globby from 'globby';
-import { load } from 'js-yaml';
 
 import { getField, processFields, processFieldsWithWildcard } from './field';
 import type { Field, Fields } from './field';

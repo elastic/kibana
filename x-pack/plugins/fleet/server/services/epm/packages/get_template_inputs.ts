@@ -7,7 +7,6 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { merge } from 'lodash';
-import { dump } from 'js-yaml';
 
 import { packageToPackagePolicy } from '../../../../common/services/package_to_package_policy';
 import { getInputsWithStreamIds, _compilePackagePolicyInputs } from '../../package_policy';

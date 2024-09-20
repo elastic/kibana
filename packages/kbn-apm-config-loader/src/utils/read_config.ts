@@ -8,7 +8,6 @@
  */
 
 import { readFileSync } from 'fs';
-import { load } from 'js-yaml';
 
 import { set } from '@kbn/safer-lodash-set';
 import { ensureDeepObject } from '@kbn/std';

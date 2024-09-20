@@ -9,8 +9,6 @@ import { withSpan } from '@kbn/apm-utils';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import type { ExtractedDatasetFields } from '@kbn/fields-metadata-plugin/server';
 
-import { load } from 'js-yaml';
-
 import type { RegistryDataStream } from '../../../../common';
 import type { AssetsMap } from '../../../../common/types';
 import { appContextService } from '../../app_context';

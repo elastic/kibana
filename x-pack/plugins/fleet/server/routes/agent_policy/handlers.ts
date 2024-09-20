@@ -8,7 +8,6 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import pMap from 'p-map';
-import { dump } from 'js-yaml';
 
 import { isEmpty } from 'lodash';
 

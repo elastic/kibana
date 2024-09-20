@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { load, dump } from 'js-yaml';
-
 import type { ESAssetMetadata } from '../../../../common/types';
 
 const MANAGED_BY_DEFAULT = 'fleet';

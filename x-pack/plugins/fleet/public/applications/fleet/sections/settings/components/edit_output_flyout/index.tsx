@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { load } from 'js-yaml';
 
 import {
   EuiFlyout,

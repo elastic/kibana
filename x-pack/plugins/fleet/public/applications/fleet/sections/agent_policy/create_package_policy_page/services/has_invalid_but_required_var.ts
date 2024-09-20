@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
-
 import type { PackagePolicyConfigRecord, RegistryVarsEntry } from '../../../../types';
 
 import { validatePackagePolicyConfig } from '.';

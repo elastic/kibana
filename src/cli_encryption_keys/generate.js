@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dump } from 'js-yaml';
 import { isEmpty } from 'lodash';
 import { interactive } from './interactive';
 import { Logger } from '../cli/logger';

@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { load } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { dump, load } from 'js-yaml';
-
 export const generateCustomLogsYml = ({
   datasetName = '',
   serviceName,

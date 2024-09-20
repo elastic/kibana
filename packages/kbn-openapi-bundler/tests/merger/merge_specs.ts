@@ -17,7 +17,6 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'fs';
-import { dump, load } from 'js-yaml';
 import { OpenAPIV3 } from 'openapi-types';
 import { merge, MergerConfig } from '../../src/openapi_merger';
 

@@ -6,7 +6,6 @@
  */
 import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
-import { load } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
 import { indexBy } from 'lodash/fp';
 

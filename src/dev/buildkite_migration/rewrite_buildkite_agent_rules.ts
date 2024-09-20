@@ -142,7 +142,7 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
   let file = await readFile(resolve(REPO_ROOT, ymlPath), 'utf-8');
 
   log.info('Loading: ' + ymlPath);
-  const doc = yaml.load(file);
+  const doc = yaml.safeLoad(file);
 
   if (!doc.steps) {
     log.info('No steps, skipping: ' + ymlPath);
@@ -153,7 +153,7 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
     if (isQueueTargetingRule(step) && !step.agents.queue.startsWith('kb-static')) {
       log.info('Rewriting: ' + ymlPath, step);
       file = editYmlInPlace(file, ['agents:', `queue: ${step.agents.queue}`], () => {
-        return yaml.dump({ agents: getFullAgentTargetingRule(step.agents.queue) }).split('\n');
+        return yaml.safeDump({ agents: getFullAgentTargetingRule(step.agents.queue) }).split('\n');
       });
     }
   }

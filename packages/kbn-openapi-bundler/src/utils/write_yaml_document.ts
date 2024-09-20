@@ -8,7 +8,6 @@
  */
 
 import fs from 'fs/promises';
-import { dump } from 'js-yaml';
 import { dirname } from 'path';
 
 export async function writeYamlDocument(filePath: string, document: unknown): Promise<void> {

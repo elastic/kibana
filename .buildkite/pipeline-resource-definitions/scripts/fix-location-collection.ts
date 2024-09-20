@@ -38,14 +38,14 @@ async function main() {
 
   const preamble = locationFileLines.slice(0, 1);
 
-  const locationObj = jsYaml.load(
+  const locationObj = jsYaml.safeLoad(
     locationFileLines.slice(1).join('\n')
   ) as BackstageLocationResource;
   locationObj.spec.targets = pipelines.map(
     (fileName) => `${resourceDefinitionsBaseUrl}/${fileName}`
   );
 
-  const locationYaml = jsYaml.dump(locationObj, { lineWidth: 400 });
+  const locationYaml = jsYaml.safeDump(locationObj, { lineWidth: 400 });
 
   fs.writeFileSync(locationFile, `${preamble.join('\n')}\n${locationYaml}`);
 
