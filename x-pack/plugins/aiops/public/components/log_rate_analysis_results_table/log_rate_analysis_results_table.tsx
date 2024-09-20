@@ -193,7 +193,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       pagination={pagination}
       sorting={sorting}
       loading={false}
-      onTableChange={onTableChange}
+      onChange={onTableChange}
       rowProps={(significantItem) => {
         return {
           'data-test-subj': `aiopsLogRateAnalysisResultsTableRow row-${significantItem.fieldName}-${significantItem.fieldValue}`,

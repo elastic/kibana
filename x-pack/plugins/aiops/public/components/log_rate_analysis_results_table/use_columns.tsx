@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   type EuiBasicTableColumn,
   EuiBadge,
@@ -112,18 +112,6 @@ const groupLogRateHelpMessage = i18n.translate(
       'A visual representation of the impact of the group on the message rate difference.',
   }
 );
-const groupImpactMessage = i18n.translate(
-  'xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabelColumnTooltip',
-  {
-    defaultMessage: 'The level of impact of the group on the message rate difference',
-  }
-);
-const impactMessage = i18n.translate(
-  'xpack.aiops.logRateAnalysis.resultsTable.impactLabelColumnTooltip',
-  {
-    defaultMessage: 'The level of impact of the field on the message rate difference.',
-  }
-);
 const logRateChangeMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateChangeLabelColumnTooltip',
   {
@@ -142,6 +130,69 @@ const deviationRateMessage = i18n.translate(
   {
     defaultMessage: 'The average number of documents per deviation bucket.',
   }
+);
+
+// EuiInMemoryTable stores column `name` in its own memory as an object and computed columns may be updating dynamically which means the reference is no longer ===.
+// Need to declare name react node outside to keep it static and maintain reference equality.
+const LogRateColumnName = (
+  <>
+    <FormattedMessage
+      id="xpack.aiops.logRateAnalysis.resultsTable.logRateChangeLabel"
+      defaultMessage="Log rate change"
+    />
+    &nbsp;
+    <EuiIconTip
+      size="s"
+      position="top"
+      color="subdued"
+      type="questionInCircle"
+      className="eui-alignTop"
+      content={logRateChangeMessage}
+    />
+  </>
+);
+
+const ImpactColumnName = (
+  <>
+    <FormattedMessage
+      id="xpack.aiops.logRateAnalysis.resultsTable.impactLabel"
+      defaultMessage="Impact"
+    />
+    &nbsp;
+    <EuiIconTip
+      size="s"
+      position="top"
+      color="subdued"
+      type="questionInCircle"
+      className="eui-alignTop"
+      content={i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.impactLabelColumnTooltip', {
+        defaultMessage: 'The level of impact of the field on the message rate difference.',
+      })}
+    />
+  </>
+);
+
+const GroupImpactColumnName = (
+  <>
+    <FormattedMessage
+      id="xpack.aiops.logRateAnalysis.resultsTable.impactLabel"
+      defaultMessage="Impact"
+    />
+    &nbsp;
+    <EuiIconTip
+      size="s"
+      position="top"
+      color="subdued"
+      type="questionInCircle"
+      className="eui-alignTop"
+      content={i18n.translate(
+        'xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabelColumnTooltip',
+        {
+          defaultMessage: 'The level of impact of the group on the message rate difference',
+        }
+      )}
+    />
+  </>
 );
 
 export const useColumns = (
@@ -194,6 +245,31 @@ export const useColumns = (
 
     return { baselineBuckets, deviationBuckets };
   }, [currentAnalysisWindowParameters, interval]);
+
+  const logRateChangeNotAvailable = useMemo(
+    () =>
+      interval === 0 ||
+      currentAnalysisType === undefined ||
+      currentAnalysisWindowParameters === undefined ||
+      buckets === undefined ||
+      isGroupsTable,
+    [interval, currentAnalysisType, currentAnalysisWindowParameters, buckets, isGroupsTable]
+  );
+
+  const getLogRateChangeValues = useCallback(
+    (docCount: number, bgCount: number) => {
+      const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
+        currentAnalysisType!,
+        buckets!.baselineBuckets,
+        buckets!.deviationBuckets,
+        docCount,
+        bgCount
+      );
+
+      return getLogRateChange(currentAnalysisType!, baselineBucketRate, deviationBucketRate);
+    },
+    [currentAnalysisType, buckets]
+  );
 
   const columnsMap: Record<ColumnNames, EuiBasicTableColumn<SignificantItem>> = useMemo(
     () => ({
@@ -321,30 +397,13 @@ export const useColumns = (
       ['Impact']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnImpact',
         width: '8%',
-        field: 'pValue',
-        name: (
-          <>
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.resultsTable.impactLabel"
-              defaultMessage="Impact"
-            />
-            &nbsp;
-            <EuiIconTip
-              size="s"
-              position="top"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignTop"
-              content={isGroupsTable ? groupImpactMessage : impactMessage}
-            />
-          </>
-        ),
-        render: (_, { pValue }) => {
+        name: isGroupsTable ? GroupImpactColumnName : ImpactColumnName, // content={isGroupsTable ? groupImpactMessage : impactMessage}
+        render: ({ pValue }: SignificantItem) => {
           if (typeof pValue !== 'number') return NOT_AVAILABLE;
           const label = getFailedTransactionsCorrelationImpactLabel(pValue);
           return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
         },
-        sortable: true,
+        sortable: ({ pValue }) => pValue,
         valign: 'middle',
       },
       ['Baseline rate']: {
@@ -435,72 +494,17 @@ export const useColumns = (
       },
       ['Log rate change']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnLogRateChange',
-        name: (
-          <>
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.resultsTable.logRateChangeLabel"
-              defaultMessage="Log rate change"
-            />
-            &nbsp;
-            <EuiIconTip
-              size="s"
-              position="top"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignTop"
-              content={logRateChangeMessage}
-            />
-          </>
-        ),
-        sortable: ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
-          // TODO: Move this duplicated calculation into a separate function
-          if (
-            interval === 0 ||
-            currentAnalysisType === undefined ||
-            currentAnalysisWindowParameters === undefined ||
-            buckets === undefined ||
-            isGroupsTable
-          )
-            return NOT_AVAILABLE;
-
-          const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
-            currentAnalysisType,
-            buckets.baselineBuckets,
-            buckets.deviationBuckets,
-            docCount,
-            bgCount
-          );
-
-          const logRateChange = getLogRateChange(
-            currentAnalysisType,
-            baselineBucketRate,
-            deviationBucketRate
-          );
-          return logRateChange.factor;
-        },
+        name: LogRateColumnName,
+        sortable: isGroupsTable
+          ? undefined
+          : ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
+              if (logRateChangeNotAvailable) return NOT_AVAILABLE;
+              const logRateChange = getLogRateChangeValues(docCount, bgCount);
+              return logRateChange.sortableValue ?? logRateChange.factor;
+            },
         render: ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
-          if (
-            interval === 0 ||
-            currentAnalysisType === undefined ||
-            currentAnalysisWindowParameters === undefined ||
-            buckets === undefined ||
-            isGroupsTable
-          )
-            return NOT_AVAILABLE;
-
-          const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
-            currentAnalysisType,
-            buckets.baselineBuckets,
-            buckets.deviationBuckets,
-            docCount,
-            bgCount
-          );
-
-          const logRateChange = getLogRateChange(
-            currentAnalysisType,
-            baselineBucketRate,
-            deviationBucketRate
-          );
+          if (logRateChangeNotAvailable) return NOT_AVAILABLE;
+          const logRateChange = getLogRateChangeValues(docCount, bgCount);
 
           return (
             <>

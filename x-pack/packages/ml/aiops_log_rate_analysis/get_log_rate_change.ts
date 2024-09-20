@@ -22,7 +22,7 @@ export function getLogRateChange(
   analysisType: LogRateAnalysisType,
   baselineBucketRate: number,
   deviationBucketRate: number
-): { message: string; factor?: number } {
+): { message: string; factor: number; sortableValue?: number } {
   if (analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE) {
     if (baselineBucketRate > 0) {
       const factor = deviationBucketRate / baselineBucketRate;
@@ -38,7 +38,12 @@ export function getLogRateChange(
         }
       );
 
-      return { message, factor: roundedFactor };
+      return {
+        message,
+        factor: roundedFactor,
+        // ensure factor change is always higher in sorting value than just docs up from 0
+        sortableValue: deviationBucketRate + baselineBucketRate,
+      };
     } else {
       return {
         message: i18n.translate(
@@ -67,7 +72,11 @@ export function getLogRateChange(
         }
       );
 
-      return { message, factor: roundedFactor };
+      return {
+        message,
+        factor: roundedFactor,
+        sortableValue: baselineBucketRate - deviationBucketRate,
+      };
     } else {
       return {
         message: i18n.translate(
