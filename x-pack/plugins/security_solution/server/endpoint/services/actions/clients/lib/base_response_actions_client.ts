@@ -13,7 +13,11 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT } from '../../../../../lib/telemetry/event_based/events';
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
+  ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+} from '../../../../../lib/telemetry/event_based/events';
 import { NotFoundError } from '../../../../errors';
 import { fetchActionRequestById } from '../../utils/fetch_action_request_by_id';
 import { SimpleMemCache } from './simple_mem_cache';
@@ -514,8 +518,16 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         );
       }
 
+      if (this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+        this.sendActionCreationTelemetry(doc);
+      }
+
       return doc;
     } catch (err) {
+      if (this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+        this.sendActionCreationErrorTelemetry(actionRequest.command, err);
+      }
+
       if (!(err instanceof ResponseActionsClientError)) {
         throw new ResponseActionsClientError(
           `Failed to create action request document: ${err.message}`,
@@ -710,7 +722,38 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     });
   }
 
-  protected sendTelemetry(responseList: LogsEndpointActionResponse[]): void {
+  protected sendActionCreationTelemetry(actionRequest: LogsEndpointAction): void {
+    const isAutomated =
+      actionRequest.EndpointActions.data.alert_id &&
+      actionRequest.EndpointActions.data.alert_id.length > 0;
+    this.options.endpointService
+      .getTelemetryService()
+      .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+        responseActions: {
+          actionId: actionRequest.EndpointActions.action_id,
+          agentType: this.agentType,
+          command: actionRequest.EndpointActions.data.command,
+          isAutomated,
+        },
+      });
+  }
+
+  protected sendActionCreationErrorTelemetry(
+    command: ResponseActionsApiCommandNames,
+    error: Error
+  ): void {
+    this.options.endpointService
+      .getTelemetryService()
+      .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
+        responseActions: {
+          agentType: this.agentType,
+          command,
+          error,
+        },
+      });
+  }
+
+  protected sendActionResponseTelemetry(responseList: LogsEndpointActionResponse[]): void {
     for (const response of responseList) {
       this.options.endpointService
         .getTelemetryService()
@@ -720,8 +763,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
             agentType: this.agentType,
             actionStatus: response.error ? 'failed' : 'successful',
             command: response.EndpointActions.data.command,
-            endpointIds:
-              typeof response.agent.id === 'string' ? [response.agent.id] : response.agent.id,
           },
         });
     }

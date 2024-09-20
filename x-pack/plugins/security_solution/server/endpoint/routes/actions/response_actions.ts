@@ -66,7 +66,6 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
-import { sendActionCreationErrorTelemetry, sendActionCreationTelemetry } from './utils';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -338,7 +337,6 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       );
     }
 
-    const isResponseActionsTelemetryEnabled = experimentalFeatures.responseActionsTelemetryEnabled;
     const coreContext = await context.core;
     const user = coreContext.security.authc.getCurrentUser();
     const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -368,16 +366,6 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
           }
         : {};
 
-      if (isResponseActionsTelemetryEnabled) {
-        sendActionCreationTelemetry(
-          endpointContext.service.getTelemetryService().reportEvent,
-          data.id,
-          data,
-          command,
-          false
-        );
-      }
-
       return res.ok({
         body: {
           ...legacyResponseData,
@@ -385,15 +373,6 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         },
       });
     } catch (err) {
-      if (isResponseActionsTelemetryEnabled) {
-        sendActionCreationErrorTelemetry(
-          endpointContext.service.getTelemetryService().reportEvent,
-          req.body.agent_type,
-          command,
-          err
-        );
-      }
-
       return errorHandler(logger, res, err);
     }
   };

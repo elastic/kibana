@@ -296,7 +296,6 @@ export const ENDPOINT_RESPONSE_ACTION_SENT_EVENT: EventTypeOpts<{
     actionId: string;
     agentType: ResponseActionAgentType;
     command: ResponseActionsApiCommandNames;
-    endpointIds: string[];
     isAutomated: boolean;
   };
 }> = {
@@ -325,16 +324,6 @@ export const ENDPOINT_RESPONSE_ACTION_SENT_EVENT: EventTypeOpts<{
             optional: false,
           },
         },
-        endpointIds: {
-          type: 'array',
-          items: {
-            type: 'keyword',
-            _meta: {
-              description: 'The endpoint IDs that the action were sent to',
-              optional: false,
-            },
-          },
-        },
         isAutomated: {
           type: 'boolean',
           _meta: {
@@ -353,7 +342,6 @@ export const ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT: EventTypeOpts<{
     agentType: ResponseActionAgentType;
     actionStatus: ResponseActionStatus;
     command: ResponseActionsApiCommandNames;
-    endpointIds: string[];
   };
 }> = {
   eventType: 'endpoint_response_action_status_change_event',
@@ -386,16 +374,6 @@ export const ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT: EventTypeOpts<{
           _meta: {
             description: 'The command that was sent to the endpoint',
             optional: false,
-          },
-        },
-        endpointIds: {
-          type: 'array',
-          items: {
-            type: 'keyword',
-            _meta: {
-              description: 'The endpoint IDs that the action were sent to',
-              optional: false,
-            },
           },
         },
       },
