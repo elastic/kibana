@@ -180,8 +180,8 @@ export class HeadlessChromiumDriver {
       captureBeyondViewport: false, // workaround for an internal resize. See: https://github.com/puppeteer/puppeteer/issues/7043
     });
 
-    if (Buffer.isBuffer(screenshot)) {
-      return screenshot;
+    if (screenshot.byteLength) {
+      return Buffer.from(screenshot);
     }
 
     if (typeof screenshot === 'string') {
