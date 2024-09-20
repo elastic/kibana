@@ -5,40 +5,25 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IndexLifeCycleDataTier } from '@kbn/observability-shared-plugin/common';
-
-export function getExcludedDataTiersFilter(
-  excludedDataTiers: IndexLifeCycleDataTier[]
-): QueryDslQueryContainer {
-  return {
-    bool: {
-      must_not: [
-        {
-          terms: {
-            _tier: excludedDataTiers,
-          },
-        },
-      ],
-    },
-  };
-}
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
+import { excludeTiersQuery } from '@kbn/observability-utils/es/queries/exclude_tiers_query';
 
 export function getDataTierFilterCombined({
   filter,
   excludedDataTiers,
 }: {
   filter?: QueryDslQueryContainer;
-  excludedDataTiers?: IndexLifeCycleDataTier[];
+  excludedDataTiers?: DataTier[];
 }): QueryDslQueryContainer | undefined {
   if (!filter) {
-    return excludedDataTiers ? getExcludedDataTiersFilter(excludedDataTiers) : undefined;
+    return excludedDataTiers ? excludeTiersQuery(excludedDataTiers)[0] : undefined;
   }
 
   return !excludedDataTiers
     ? filter
     : {
         bool: {
-          must: [filter, getExcludedDataTiersFilter(excludedDataTiers)],
+          must: [filter, ...excludeTiersQuery(excludedDataTiers)],
         },
       };
 }

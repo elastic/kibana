@@ -11,7 +11,6 @@ export {
   cancelEsRequestOnAbort,
   getDebugBody,
   getDebugTitle,
-  getExcludedDataTiersFilter,
   getDataTierFilterCombined,
 } from './lib/helpers';
 

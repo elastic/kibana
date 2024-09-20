@@ -22,7 +22,8 @@ import { compact, omit } from 'lodash';
 import { ValuesType } from 'utility-types';
 import type { APMError, Metric, Span, Transaction, Event } from '@kbn/apm-types/es_schemas_ui';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
-import type { IndexLifeCycleDataTier } from '@kbn/observability-shared-plugin/common';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
+import { excludeTiersQuery } from '@kbn/observability-utils/es/queries/exclude_tiers_query';
 import { withApmSpan } from '../../../../utils';
 import type { ApmDataSource } from '../../../../../common/data_source';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
@@ -30,7 +31,7 @@ import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_w
 import type { ProcessorEventOfDocumentType } from '../document_type';
 import type { APMIndices } from '../../../..';
 import { getRequestBase, processorEventsToIndex } from './get_request_base';
-import { getExcludedDataTiersFilter, getDataTierFilterCombined } from '../../tier_filter';
+import { getDataTierFilterCombined } from '../../tier_filter';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -90,7 +91,7 @@ export interface APMEventClientConfig {
   options: {
     includeFrozen: boolean;
     inspectableEsQueriesMap?: WeakMap<KibanaRequest, InspectResponse>;
-    excludedDataTiers?: IndexLifeCycleDataTier[];
+    excludedDataTiers?: DataTier[];
   };
 }
 
@@ -102,7 +103,7 @@ export class APMEventClient {
   /** @deprecated Use {@link excludedDataTiers} instead.
    * See https://www.elastic.co/guide/en/kibana/current/advanced-options.html **/
   private readonly includeFrozen: boolean;
-  private readonly excludedDataTiers?: IndexLifeCycleDataTier[];
+  private readonly excludedDataTiers?: DataTier[];
   private readonly inspectableEsQueriesMap?: WeakMap<KibanaRequest, InspectResponse>;
 
   constructor(config: APMEventClientConfig) {
@@ -167,7 +168,7 @@ export class APMEventClient {
     });
 
     if (this.excludedDataTiers) {
-      filters.push(getExcludedDataTiersFilter(this.excludedDataTiers));
+      filters.push(...excludeTiersQuery(this.excludedDataTiers));
     }
 
     const searchParams = {
@@ -206,9 +207,7 @@ export class APMEventClient {
     // Reusing indices configured for errors since both events and errors are stored as logs.
     const index = processorEventsToIndex([ProcessorEvent.error], this.indices);
 
-    const filter = this.excludedDataTiers
-      ? getExcludedDataTiersFilter(this.excludedDataTiers)
-      : undefined;
+    const filter = this.excludedDataTiers ? excludeTiersQuery(this.excludedDataTiers) : undefined;
 
     const searchParams = {
       ...omit(params, 'body'),
@@ -251,7 +250,7 @@ export class APMEventClient {
         });
 
         if (this.excludedDataTiers) {
-          filters.push(getExcludedDataTiersFilter(this.excludedDataTiers));
+          filters.push(...excludeTiersQuery(this.excludedDataTiers));
         }
 
         const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [

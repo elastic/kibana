@@ -6,7 +6,7 @@
  */
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { IndexLifeCycleDataTier } from '@kbn/observability-shared-plugin/common';
+import { DataTier } from '@kbn/observability-shared-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -30,7 +30,7 @@ export async function getApmEventClient({
         const includeFrozen = await coreContext.uiSettings.client.get<boolean>(
           UI_SETTINGS.SEARCH_INCLUDE_FROZEN
         );
-        const excludedDataTiers = await coreContext.uiSettings.client.get<IndexLifeCycleDataTier[]>(
+        const excludedDataTiers = await coreContext.uiSettings.client.get<DataTier[]>(
           searchExcludedDataTiers
         );
 

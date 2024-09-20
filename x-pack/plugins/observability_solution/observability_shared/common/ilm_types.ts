@@ -20,5 +20,5 @@ export const indexLifeCyclePhaseToDataTier = {
   [IndexLifecyclePhaseSelectOption.Frozen]: 'data_frozen',
 } as const;
 
-export type IndexLifeCycleDataTier =
+export type DataTier =
   (typeof indexLifeCyclePhaseToDataTier)[keyof typeof indexLifeCyclePhaseToDataTier];

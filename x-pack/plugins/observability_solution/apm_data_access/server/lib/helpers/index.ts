@@ -22,4 +22,4 @@ export {
 
 export { cancelEsRequestOnAbort } from './create_es_client/cancel_es_request_on_abort';
 
-export { getExcludedDataTiersFilter, getDataTierFilterCombined } from './tier_filter';
+export { getDataTierFilterCombined } from './tier_filter';
