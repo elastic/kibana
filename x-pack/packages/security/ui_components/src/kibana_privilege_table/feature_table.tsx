@@ -148,6 +148,7 @@ export class FeatureTable extends Component<Props, State> {
           arrowDisplay={canExpandCategory ? 'left' : 'none'}
           forceState={canExpandCategory ? undefined : 'closed'}
           buttonContent={buttonContent}
+          buttonProps={{ 'data-test-subj': `featureCategory_${category.id}_accordionToggle` }}
           extraAction={canExpandCategory ? extraAction : undefined}
         >
           <div>
@@ -162,7 +163,10 @@ export class FeatureTable extends Component<Props, State> {
             )}
             <EuiFlexGroup direction="column" gutterSize="s">
               {featuresInCategory.map((feature) => (
-                <EuiFlexItem key={feature.id}>
+                <EuiFlexItem
+                  key={feature.id}
+                  data-test-subj={`featureCategory_${category.id}_${feature.id}`}
+                >
                   {this.renderPrivilegeControlsForFeature(feature)}
                 </EuiFlexItem>
               ))}
@@ -229,6 +233,9 @@ export class FeatureTable extends Component<Props, State> {
               data-test-subj="featurePrivilegeControls"
               buttonContent={buttonContent}
               buttonClassName="euiAccordionWithDescription"
+              buttonProps={{
+                'data-test-subj': `featurePrivilegeControls_${feature.category.id}_${feature.id}_accordionToggle`,
+              }}
               extraAction={extraAction}
               forceState={hasSubFeaturePrivileges ? undefined : 'closed'}
               arrowDisplay={hasSubFeaturePrivileges ? 'left' : 'none'}
