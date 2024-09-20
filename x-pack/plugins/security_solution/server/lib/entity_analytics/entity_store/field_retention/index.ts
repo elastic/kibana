@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export const SCOPE = ['securitySolution'];
-export const TYPE = 'asset_criticality:enrichment';
-export const VERSION = '1.0.0';
-export const INTERVAL = '1h';
-export const TIMEOUT = '10m';
+export * from './field_retention_enrich_policy';

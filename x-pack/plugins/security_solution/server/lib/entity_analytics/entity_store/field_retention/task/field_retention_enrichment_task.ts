@@ -13,14 +13,16 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import {
   defaultState,
   stateSchemaByVersion,
-  type LatestTaskStateSchema as AssetCriticalityTaskState,
+  type LatestTaskStateSchema as EntityStoreFieldRetentionTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import { AssetCriticalityDataClient } from '..';
-import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { EntityStoreDataClient } from '../../entity_store_data_client';
+import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { buildScopedInternalSavedObjectsClientUnsafe } from '../../../risk_score/tasks/helpers';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -31,9 +33,9 @@ const getTaskName = (): string => TYPE;
 
 const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION}`;
 
-type GetAssetCriticalityDataClient = (namespace: string) => Promise<AssetCriticalityDataClient>;
+type GetEntityStoreDataClient = (namespace: string) => Promise<EntityStoreDataClient>;
 
-export const registerAssetCriticalityEnrichTask = ({
+export const registerEntityStoreEnrichTask = ({
   getStartServices,
   logger,
   auditLogger,
@@ -45,37 +47,42 @@ export const registerAssetCriticalityEnrichTask = ({
   taskManager: TaskManagerSetupContract | undefined;
 }): void => {
   if (!taskManager) {
-    logger.info('Task Manager is unavailable; skipping asset criticality task registration.');
+    logger.info('Task Manager is unavailable; skipping entity store enrich policy registration.');
     return;
   }
 
-  const getAssetCriticalityDataClient: GetAssetCriticalityDataClient = async (
-    namespace: string
-  ) => {
+  const getEntityStoreDataClient: GetEntityStoreDataClient = async (namespace: string) => {
     const [coreStart, _] = await getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    return new AssetCriticalityDataClient({
+    const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+    const entityClient = new EntityClient({
+      esClient,
+      soClient,
+      logger,
+    });
+    return new EntityStoreDataClient({
       esClient,
       logger,
-      auditLogger,
       namespace,
+      entityClient,
+      soClient,
     });
   };
 
   taskManager.registerTaskDefinitions({
     [getTaskName()]: {
-      title: 'Entity Analytics Asset Criticality - Execute Enrich Policy Task',
+      title: 'Entity Analytics Entity Store - Execute Enrich Policy Task',
       timeout: TIMEOUT,
       stateSchemaByVersion,
       createTaskRunner: createTaskRunnerFactory({
         logger,
-        getAssetCriticalityDataClient,
+        getEntityStoreDataClient,
       }),
     },
   });
 };
 
-export const startAssetCriticalityEnrichTask = async ({
+export const startEntityStoreEnrichTask = async ({
   logger,
   namespace,
   taskManager,
@@ -106,7 +113,7 @@ export const startAssetCriticalityEnrichTask = async ({
   }
 };
 
-export const removeAssetCriticalityEnrichTask = async ({
+export const removeEntityStoreEnrichTask = async ({
   logger,
   namespace,
   taskManager,
@@ -119,26 +126,26 @@ export const removeAssetCriticalityEnrichTask = async ({
     await taskManager.remove(getTaskId(namespace));
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      logger.error(`Failed to remove asset criticality Enrich task: ${err.message}`);
+      logger.error(`Failed to remove  entity store enrich policy task: ${err.message}`);
       throw err;
     }
   }
 };
 
 export const runTask = async ({
-  getAssetCriticalityDataClient,
+  getEntityStoreDataClient,
   isCancelled,
   logger,
   taskInstance,
 }: {
   logger: Logger;
   isCancelled: () => boolean;
-  getAssetCriticalityDataClient: GetAssetCriticalityDataClient;
+  getEntityStoreDataClient: GetEntityStoreDataClient;
   taskInstance: ConcreteTaskInstance;
 }): Promise<{
-  state: AssetCriticalityTaskState;
+  state: EntityStoreFieldRetentionTaskState;
 }> => {
-  const state = taskInstance.state as AssetCriticalityTaskState;
+  const state = taskInstance.state as EntityStoreFieldRetentionTaskState;
   const taskId = taskInstance.id;
   const log = logFactory(logger, taskId);
   try {
@@ -156,14 +163,25 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    const assetCriticalityDataClient = await getAssetCriticalityDataClient(state.namespace);
-    if (!assetCriticalityDataClient) {
-      log('asset criticality client is not available; exiting task');
+    const entityStoreDataClient = await getEntityStoreDataClient(state.namespace);
+    if (!EntityStoreDataClient) {
+      log('entity store data client is not available; exiting task');
       return { state: updatedState };
     }
 
-    await assetCriticalityDataClient.ensureEnrichPolicies();
-    await assetCriticalityDataClient.executeEnrichPolicies();
+    const { engines } = await entityStoreDataClient.list();
+
+    for (const engine of engines) {
+      if (engine.type) {
+        // TODO: why is this optional?
+        const start = Date.now();
+        await entityStoreDataClient.executeFieldRetentionEnrichPolicy({
+          spaceId: state.namespace,
+          entityType: engine.type,
+        });
+        log(`executed field retention enrich policy for ${engine.type} in ${Date.now() - start}ms`);
+      }
+    }
 
     const taskCompletionTime = moment().utc().toISOString();
     const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
@@ -201,10 +219,10 @@ export const scheduleNow = async ({
 const createTaskRunnerFactory =
   ({
     logger,
-    getAssetCriticalityDataClient,
+    getEntityStoreDataClient,
   }: {
     logger: Logger;
-    getAssetCriticalityDataClient: GetAssetCriticalityDataClient;
+    getEntityStoreDataClient: GetEntityStoreDataClient;
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     let cancelled = false;
@@ -212,7 +230,7 @@ const createTaskRunnerFactory =
     return {
       run: async () =>
         runTask({
-          getAssetCriticalityDataClient,
+          getEntityStoreDataClient,
           isCancelled,
           logger,
           taskInstance,

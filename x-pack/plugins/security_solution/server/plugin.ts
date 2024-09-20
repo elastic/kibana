@@ -115,6 +115,7 @@ import {
 
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
+import { registerEntityStoreEnrichTask } from './lib/entity_analytics/entity_store/field_retention/task/field_retention_enrichment_task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   latestRiskScoreIndexPattern,
@@ -222,6 +223,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
+
+    if (experimentalFeatures.entityStoreEnabled) {
+      registerEntityStoreEnrichTask({
+        getStartServices: core.getStartServices,
+        logger: this.logger,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        taskManager: plugins.taskManager,
+      });
+    }
 
     const requestContextFactory = new RequestContextFactory({
       config,
