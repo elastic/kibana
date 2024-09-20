@@ -310,7 +310,7 @@ export class AssetCriticalityDataClient {
       return undefined;
     }
 
-    if (record.id_value === 'deleted') {
+    if (record.id_value === CRITICALITY_VALUES.DELETED) {
       return undefined;
     }
 
