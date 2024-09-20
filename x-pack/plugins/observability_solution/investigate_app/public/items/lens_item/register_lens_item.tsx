@@ -148,7 +148,7 @@ export function LensWidget({
           interval,
         },
       },
-      seriesType: 'bar',
+      seriesType: 'bar_stacked',
     };
 
     if (groupBy && groupBy?.length) {
@@ -178,17 +178,6 @@ export function LensWidget({
 
     const attributesLens = new LensAttributesBuilder({
       visualization: new XYChart({
-        visualOptions: {
-          axisTitlesVisibilitySettings: {
-            x: false,
-            yLeft: false,
-            yRight: false,
-          },
-          legend: {
-            isVisible: false,
-            position: 'right',
-          },
-        },
         layers,
         formulaAPI: formulaAsync.value.formula,
         dataView,
@@ -221,12 +210,17 @@ export function LensWidget({
       <lens.EmbeddableComponent
         onLoad={setChartLoading}
         id="alertDefaultChart"
-        style={{ height: 180 }}
+        style={{ height: 128 }}
         timeRange={timeRange}
         attributes={attributes}
         query={(searchConfiguration?.query as Query) || defaultQuery}
         disableTriggers={true}
         filters={filters}
+        overrides={{
+          axisX: { hide: true },
+          axisLeft: { style: { axisTitle: { visible: false } } },
+          settings: { showLegend: false },
+        }}
       />
     </div>
   );

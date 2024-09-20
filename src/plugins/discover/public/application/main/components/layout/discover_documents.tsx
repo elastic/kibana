@@ -46,6 +46,8 @@ import {
 import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import { useQuerySubscriber } from '@kbn/unified-field-list';
+import { map } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
@@ -56,11 +58,6 @@ import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
-import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
-import {
-  DISCOVER_TOUR_STEP_ANCHOR_IDS,
-  DiscoverTourProvider,
-} from '../../../../components/discover_tour';
 import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
@@ -74,7 +71,11 @@ import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
-import { useProfileAccessor } from '../../../../context_awareness';
+import {
+  DISCOVER_CELL_ACTIONS_TRIGGER,
+  useAdditionalCellActions,
+  useProfileAccessor,
+} from '../../../../context_awareness';
 
 const containerStyles = css`
   position: relative;
@@ -83,8 +84,6 @@ const containerStyles = css`
 const progressStyle = css`
   z-index: 2;
 `;
-
-const TOUR_STEPS = { expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument };
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
@@ -117,6 +116,7 @@ function DiscoverDocumentsComponent({
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
   const [
+    dataSource,
     query,
     sort,
     rowHeight,
@@ -128,6 +128,7 @@ function DiscoverDocumentsComponent({
     density,
   ] = useAppStateSelector((state) => {
     return [
+      state.dataSource,
       state.query,
       state.sort,
       state.rowHeight,
@@ -264,6 +265,21 @@ function DiscoverDocumentsComponent({
     [documentState.esqlQueryColumns]
   );
 
+  const { filters } = useQuerySubscriber({ data: services.data });
+
+  const timeRange = useObservable(
+    services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
+    services.timefilter.getTime()
+  );
+
+  const cellActionsMetadata = useAdditionalCellActions({
+    dataSource,
+    dataView,
+    query,
+    filters,
+    timeRange,
+  });
+
   const renderDocumentView = useCallback(
     (
       hit: DataTableRecord,
@@ -317,18 +333,6 @@ function DiscoverDocumentsComponent({
     [currentColumns, documents?.esqlQueryColumns, documentState.interceptedWarnings]
   );
 
-  const gridAnnouncementCallout = useMemo(() => {
-    if (hideAnnouncements || isLegacy) {
-      return null;
-    }
-
-    return !isEsqlMode ? (
-      <DiscoverTourProvider>
-        <DocumentExplorerUpdateCallout />
-      </DiscoverTourProvider>
-    ) : null;
-  }, [hideAnnouncements, isLegacy, isEsqlMode]);
-
   const loadingIndicator = useMemo(
     () =>
       isDataLoading ? (
@@ -350,12 +354,11 @@ function DiscoverDocumentsComponent({
         bottomSection: (
           <>
             {callouts}
-            {gridAnnouncementCallout}
             {loadingIndicator}
           </>
         ),
       }),
-    [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
+    [viewModeToggle, callouts, loadingIndicator]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -463,13 +466,16 @@ function DiscoverDocumentsComponent({
                 services={services}
                 totalHits={totalHits}
                 onFetchMoreRecords={onFetchMoreRecords}
-                componentsTourSteps={TOUR_STEPS}
                 externalCustomRenderers={cellRenderers}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 additionalFieldGroups={additionalFieldGroups}
                 dataGridDensityState={density}
                 onUpdateDataGridDensity={onUpdateDensity}
+                query={query}
+                cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+                cellActionsMetadata={cellActionsMetadata}
+                cellActionsHandling="append"
               />
             </CellActionsProvider>
           </div>

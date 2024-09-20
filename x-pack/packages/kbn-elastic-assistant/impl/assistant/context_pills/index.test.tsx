@@ -68,7 +68,7 @@ describe('ContextPills', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId(`pillButton-${context.id}`));
+    await userEvent.click(screen.getByTestId(`pillButton-${context.id}`));
 
     await waitFor(() => {
       expect(setSelectedPromptContexts).toBeCalled();

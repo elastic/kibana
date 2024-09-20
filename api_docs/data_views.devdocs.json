@@ -14080,14 +14080,6 @@
               },
               {
                 "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
                 "path": "src/plugins/controls/public/react_controls/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
               },
               {
@@ -14397,10 +14389,6 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "dataViewManagement",

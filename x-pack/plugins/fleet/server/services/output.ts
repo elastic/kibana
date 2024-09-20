@@ -6,7 +6,7 @@
  */
 import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
 import { indexBy } from 'lodash/fp';
 
@@ -153,6 +153,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const directAgentPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
     kuery: agentPoliciesKuery,
     perPage: SO_SEARCH_LIMIT,
+    spaceId: '*',
   });
   const directAgentPolicyIds = directAgentPolicies?.items.map((policy) => policy.id);
 
@@ -162,6 +163,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const packagePolicySOs = await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
     kuery: packagePoliciesKuery,
     perPage: SO_SEARCH_LIMIT,
+    spaceId: '*',
   });
   const agentPolicyIdsFromPackagePolicies = [
     ...new Set(
@@ -234,6 +236,7 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
       internalSoClientWithoutSpaceExtension,
       {
         fields: ['policy_ids', 'package.name'],
+        spaceId: '*',
         kuery: [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE, FLEET_SERVER_PACKAGE]
           .map((packageName) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`)
           .join(' or '),
@@ -521,7 +524,7 @@ class OutputService {
     if (outputTypeSupportPresets(data.type)) {
       if (
         data.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', safeLoad)
+        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', load)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -597,11 +600,11 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', safeLoad);
+      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
     }
 
     if (output.config_yaml) {
-      const configJs = safeLoad(output.config_yaml);
+      const configJs = load(output.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && output.shipper) {
@@ -820,20 +823,9 @@ class OutputService {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
 
-    const internalSoClientWithoutSpaceExtension =
-      appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    await packagePolicyService.removeOutputFromAll(appContextService.getInternalUserESClient(), id);
 
-    await packagePolicyService.removeOutputFromAll(
-      internalSoClientWithoutSpaceExtension,
-      appContextService.getInternalUserESClient(),
-      id
-    );
-
-    await agentPolicyService.removeOutputFromAll(
-      internalSoClientWithoutSpaceExtension,
-      appContextService.getInternalUserESClient(),
-      id
-    );
+    await agentPolicyService.removeOutputFromAll(appContextService.getInternalUserESClient(), id);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
@@ -884,7 +876,7 @@ class OutputService {
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
         updateData.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', safeLoad)
+        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', load)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -1072,7 +1064,7 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', safeLoad);
+      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
     }
 
     // Remove the shipper data if the shipper is not enabled from the yaml config
@@ -1080,7 +1072,7 @@ class OutputService {
       updateData.shipper = null;
     }
     if (data.config_yaml) {
-      const configJs = safeLoad(data.config_yaml);
+      const configJs = load(data.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && data.shipper) {
@@ -1158,7 +1150,7 @@ class OutputService {
     await pMap(
       outputs.items.filter((output) => outputTypeSupportPresets(output.type) && !output.preset),
       async (output) => {
-        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', safeLoad);
+        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', load);
 
         await outputService.update(
           soClient,

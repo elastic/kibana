@@ -94,7 +94,7 @@ export default function (providerContext: FtrProviderContext) {
         metricsets:
           - status
         hosts:
-          - 'http://127.0.0.1'
+          - http://127.0.0.1
         period: 10s
         server_status_path: /server-status
 `;

@@ -21,8 +21,8 @@ import {
   RootProfileService,
   SolutionType,
 } from '../profiles';
-import { createProfileProviderServices } from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
+import { createLogsContextServiceMock } from '@kbn/discover-utils/src/__mocks__';
 
 export const createContextAwarenessMocks = ({
   shouldRegisterProviders = true,
@@ -34,6 +34,18 @@ export const createContextAwarenessMocks = ({
         ...prev(),
         rootProfile: () => <>root-profile</>,
       })),
+      getAdditionalCellActions: jest.fn((prev) => () => [
+        ...prev(),
+        {
+          id: 'root-action',
+          getDisplayName: () => 'Root action',
+          getIconType: () => 'minus',
+          isCompatible: () => false,
+          execute: () => {
+            alert('Root action executed');
+          },
+        },
+      ]),
     },
     resolve: jest.fn(() => ({
       isMatch: true,
@@ -71,6 +83,17 @@ export const createContextAwarenessMocks = ({
         ],
         rowHeight: 3,
       })),
+      getAdditionalCellActions: jest.fn((prev) => () => [
+        ...prev(),
+        {
+          id: 'data-source-action',
+          getDisplayName: () => 'Data source action',
+          getIconType: () => 'plus',
+          execute: () => {
+            alert('Data source action executed');
+          },
+        },
+      ]),
     },
     resolve: jest.fn(() => ({
       isMatch: true,
@@ -133,7 +156,7 @@ export const createContextAwarenessMocks = ({
     documentProfileServiceMock
   );
 
-  const profileProviderServices = createProfileProviderServices();
+  const profileProviderServices = createProfileProviderServicesMock();
 
   return {
     rootProfileProviderMock,
@@ -146,5 +169,11 @@ export const createContextAwarenessMocks = ({
     contextRecordMock2,
     profilesManagerMock,
     profileProviderServices,
+  };
+};
+
+const createProfileProviderServicesMock = () => {
+  return {
+    logsContextService: createLogsContextServiceMock(),
   };
 };
