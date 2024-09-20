@@ -17,11 +17,11 @@ import { css } from '@emotion/react';
 import { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { getCloudProviderNameFromAbbreviation } from '../../../common/utils/helpers';
 import { VulnerabilitiesGroupingAggregation } from './hooks/use_grouped_vulnerabilities';
 import { VULNERABILITIES_GROUPING_COUNTER } from './test_subjects';
 import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT, VULNERABILITIES } from './translations';
-import { getAbbreviatedNumber } from '../../common/utils/get_abbreviated_number';
 import {
   firstNonNullValue,
   LoadingGroup,
