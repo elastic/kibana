@@ -8,23 +8,26 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, debounceTime, map, skip } from 'rxjs';
+
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+
+import { RANGE_SLIDER_CONTROL } from '../../../../../common';
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory, DataControlServices } from '../types';
+import type { DataControlFactory } from '../types';
 import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
-import { RangeSliderStrings } from './range_slider_strings';
-import { RangesliderControlApi, RangesliderControlState } from './types';
 import { initializeRangeControlSelections } from './range_control_selections';
-import { RANGE_SLIDER_CONTROL } from '../../../../../common';
+import { RangeSliderStrings } from './range_slider_strings';
+import type { RangesliderControlApi, RangesliderControlState } from './types';
 
-export const getRangesliderControlFactory = (
-  services: DataControlServices
-): DataControlFactory<RangesliderControlState, RangesliderControlApi> => {
+export const getRangesliderControlFactory = (): DataControlFactory<
+  RangesliderControlState,
+  RangesliderControlApi
+> => {
   return {
     type: RANGE_SLIDER_CONTROL,
     getIconType: () => 'controlsHorizontal',
@@ -69,8 +72,7 @@ export const getRangesliderControlFactory = (
         {
           step: step$,
         },
-        controlGroupApi,
-        services
+        controlGroupApi
       );
 
       const selections = initializeRangeControlSelections(
@@ -109,13 +111,14 @@ export const getRangesliderControlFactory = (
         }
       );
 
-      const dataLoadingSubscription = combineLatest([loadingMinMax$, loadingHasNoResults$])
+      const dataLoadingSubscription = combineLatest([
+        loadingMinMax$,
+        loadingHasNoResults$,
+        dataControl.api.dataLoading,
+      ])
         .pipe(
-          map((values) => {
-            return values.some((value) => {
-              return value;
-            });
-          })
+          debounceTime(100),
+          map((values) => values.some((value) => value))
         )
         .subscribe((isLoading) => {
           dataLoading$.next(isLoading);
@@ -136,7 +139,6 @@ export const getRangesliderControlFactory = (
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({
         controlFetch$,
-        data: services.data,
         dataViews$: dataControl.api.dataViews,
         fieldName$: dataControl.stateManager.fieldName,
         setIsLoading: (isLoading: boolean) => {
@@ -196,7 +198,6 @@ export const getRangesliderControlFactory = (
       const selectionHasNoResults$ = new BehaviorSubject(false);
       const hasNotResultsSubscription = hasNoResults$({
         controlFetch$,
-        data: services.data,
         dataViews$: dataControl.api.dataViews,
         rangeFilters$: dataControl.api.filters$,
         ignoreParentSettings$: controlGroupApi.ignoreParentSettings$,

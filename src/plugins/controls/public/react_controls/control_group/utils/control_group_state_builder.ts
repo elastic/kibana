@@ -13,13 +13,14 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
+  type ControlGroupRuntimeState,
+  type ControlPanelsState,
+  type DefaultDataControlState,
 } from '../../../../common';
-import { ControlGroupRuntimeState, ControlPanelsState } from '../types';
-import { pluginServices } from '../../../services';
-import { OptionsListControlState } from '../../controls/data_controls/options_list_control/types';
-import { RangesliderControlState } from '../../controls/data_controls/range_slider/types';
-import { DefaultDataControlState } from '../../controls/data_controls/types';
+import type { OptionsListControlState } from '../../../../common/options_list';
+import { dataViewsService } from '../../../services/kibana_services';
 import { getDataControlFieldRegistry } from '../../controls/data_controls/data_control_editor_utils';
+import type { RangesliderControlState } from '../../controls/data_controls/range_slider/types';
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;
 
@@ -82,7 +83,7 @@ export const controlGroupStateBuilder = {
 };
 
 async function getCompatibleControlType(dataViewId: string, fieldName: string) {
-  const dataView = await pluginServices.getServices().dataViews.get(dataViewId);
+  const dataView = await dataViewsService.get(dataViewId);
   const fieldRegistry = await getDataControlFieldRegistry(dataView);
   const field = fieldRegistry[fieldName];
   if (field.compatibleControlTypes.length === 0) {
