@@ -1,5 +1,9 @@
 [[console-kibana]]
-== Run API requests
+== Run API requests with Console
+
+Console lets you interact with {es} and {kib} APIs from within {kib}.
+
+It's available on the **Dev Tools** page, that you can access from the navigation menu or the <<kibana-navigation-search,global search field>>.
 
 Interact with the REST APIs of {es} and {kib} with *Console*. With *Console*, you can:
 
