@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Query } from '@elastic/eui';
+import { Ast, Query } from '@elastic/eui';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { FieldDefinition } from '@kbn/management-settings-types';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
@@ -28,8 +28,22 @@ export const useFields = (scope: UiSettingsScope, query?: Query): FieldDefinitio
     isCustom: (key) => isCustomSetting(key, scope),
     isOverridden: (key) => isOverriddenSetting(key, scope),
   });
-  if (query) {
-    return Query.execute(query, fields);
+  if (query && fields.length) {
+    let ast = Ast.create([]);
+
+    query.ast.clauses.forEach((clause) => {
+      if (clause.type !== 'field' || Object.keys(fields[0]).includes(clause.field)) {
+        ast = ast.addClause(clause);
+      } else {
+        ast = ast.addClause({
+          type: 'term',
+          match: 'must',
+          value: `${clause.field}:${clause.value}`,
+        });
+      }
+    });
+
+    return Query.execute(new Query(ast, undefined, query.text), fields);
   }
   return fields;
 };
