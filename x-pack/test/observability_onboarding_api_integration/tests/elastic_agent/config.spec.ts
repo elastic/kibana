@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { load } from 'js-yaml';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
