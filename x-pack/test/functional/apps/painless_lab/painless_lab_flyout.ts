@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -24,6 +25,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('btnViewRequest');
 
       await testSubjects.existOrFail('painlessLabRequestFlyoutHeader', { timeout: 10 * 1000 });
+    });
+
+    it('validate request body is not empty', async () => {
+      const requestText = await testSubjects.getVisibleText('painlessLabFlyoutRequest');
+      expect(requestText.length === 0).to.be(false);
+    });
+
+    it('validate response body is not empty', async () => {
+      await testSubjects.findService.clickByCssSelector('#response');
+      const requestText = await testSubjects.getVisibleText('painlessLabFlyoutResponse');
+      expect(requestText.length === 0).to.be(false);
     });
   });
 }

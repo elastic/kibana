@@ -74,7 +74,7 @@ export const RequestFlyout: FunctionComponent<Props> = ({
               id: 'request',
               name: 'Request',
               content: (
-                <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+                <EuiCodeBlock language="json" paddingSize="s" data-test-subj="painlessLabFlyoutRequest" isCopyable>
                   {'POST _scripts/painless/_execute\n'}
                   {requestBody}
                 </EuiCodeBlock>
@@ -84,7 +84,7 @@ export const RequestFlyout: FunctionComponent<Props> = ({
               id: 'response',
               name: 'Response',
               content: (
-                <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+                <EuiCodeBlock language="json" paddingSize="s" data-test-subj="painlessLabFlyoutResponse" isCopyable>
                   {response}
                 </EuiCodeBlock>
               ),
