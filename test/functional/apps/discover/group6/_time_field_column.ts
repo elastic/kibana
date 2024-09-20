@@ -308,7 +308,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
           });
 
-          it('should render selected columns correctly', async () => {
+          // Fails in chrome 129+: https://github.com/elastic/kibana-operations/issues/199
+          it.skip('should render selected columns correctly', async () => {
             await discover.selectTextBaseLang();
 
             await checkSelectedColumns({

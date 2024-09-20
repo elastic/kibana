@@ -85,6 +85,90 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "description": "Total number of services utilizing the otlp agent within the last day"
                           }
                         },
+                        "otlp/cpp": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/cpp agent within the last day"
+                          }
+                        },
+                        "otlp/dotnet": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/dotnet agent within the last day"
+                          }
+                        },
+                        "otlp/erlang": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/erlang agent within the last day"
+                          }
+                        },
+                        "otlp/go": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/go agent within the last day"
+                          }
+                        },
+                        "otlp/java": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/java agent within the last day"
+                          }
+                        },
+                        "otlp/nodejs": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/nodejs agent within the last day"
+                          }
+                        },
+                        "otlp/php": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/php agent within the last day"
+                          }
+                        },
+                        "otlp/python": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/python agent within the last day"
+                          }
+                        },
+                        "otlp/ruby": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/ruby agent within the last day"
+                          }
+                        },
+                        "otlp/rust": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/rust agent within the last day"
+                          }
+                        },
+                        "otlp/swift": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/swift agent within the last day"
+                          }
+                        },
+                        "otlp/android": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/android agent within the last day"
+                          }
+                        },
+                        "otlp/webjs": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp/webjs agent within the last day"
+                          }
+                        },
+                        "opentelemetry": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry agent within the last day"
+                          }
+                        },
                         "opentelemetry/cpp": {
                           "type": "long",
                           "_meta": {
@@ -161,6 +245,12 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                           "type": "long",
                           "_meta": {
                             "description": "Total number of services utilizing the opentelemetry/webjs agent within the last day"
+                          }
+                        },
+                        "ios/swift": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the ios/swift agent within the last day"
                           }
                         }
                       }

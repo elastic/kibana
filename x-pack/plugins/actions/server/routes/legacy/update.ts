@@ -12,6 +12,7 @@ import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from
 import { BASE_ACTION_API_PATH } from '../../../common';
 import { ActionsRequestHandlerContext } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { connectorResponseSchemaV1 } from '../../../common/routes/connector/response';
 
 const paramSchema = schema.object({
   id: schema.string({
@@ -47,6 +48,7 @@ export const updateActionRoute = (
         response: {
           200: {
             description: 'Indicates a successful call.',
+            body: () => connectorResponseSchemaV1,
           },
         },
       },
