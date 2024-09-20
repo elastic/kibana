@@ -17,10 +17,10 @@ import type { Logger } from '@kbn/logging';
 
 import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import { StorageContext } from '@kbn/content-management-plugin/server';
-import { DASHBOARD_SAVED_OBJECT_ID } from './dashboard_saved_object';
-import { cmServicesDefinition } from './content_management/cm_services';
-import { DashboardSavedObjectAttributes } from './dashboard_saved_object';
-import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from './content_management/latest';
+import { DASHBOARD_SAVED_OBJECT_ID } from '../dashboard_saved_object';
+import { cmServicesDefinition } from './cm_services';
+import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
+import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from './latest';
 import type {
   DashboardAttributes,
   DashboardItem,
@@ -31,7 +31,7 @@ import type {
   DashboardUpdateOptions,
   DashboardUpdateOut,
   DashboardSearchOptions,
-} from './content_management/latest';
+} from './latest';
 
 const searchArgsToSOFindOptions = (
   query: SearchQuery,

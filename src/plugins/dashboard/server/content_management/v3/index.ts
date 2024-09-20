@@ -25,7 +25,14 @@ export type {
   DashboardUpdateOut,
   DashboardUpdateOptions,
 } from './types';
-export { serviceDefinition, dashboardAttributesSchema } from './cm_services';
+export {
+  serviceDefinition,
+  dashboardAttributesSchema,
+  dashboardGetResultSchema,
+  dashboardCreateResultSchema,
+  dashboardItemSchema,
+  dashboardSearchResultsSchema,
+} from './cm_services';
 export {
   dashboardAttributesOut,
   itemAttrsToSavedObjectAttrs,

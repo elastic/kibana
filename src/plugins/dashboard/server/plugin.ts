@@ -23,14 +23,14 @@ import {
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
-import { DashboardStorage } from './dashboard_storage';
+import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { registerAPIRoutes, v2023_10_31 } from './api';
+import { registerAPIRoutes } from './api';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -115,16 +115,7 @@ export class DashboardPlugin
     registerAPIRoutes({
       http: core.http,
       contentManagement: plugins.contentManagement,
-      appName: 'dashboards',
-      contentId: CONTENT_ID,
       logger: this.logger,
-      getSchemas: () => {
-        return {
-          '2023-10-31': {
-            schema: v2023_10_31,
-          },
-        };
-      },
     });
 
     return {};
