@@ -452,6 +452,32 @@ export const useColumns = (
             />
           </>
         ),
+        sortable: ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
+          // TODO: Move this duplicated calculation into a separate function
+          if (
+            interval === 0 ||
+            currentAnalysisType === undefined ||
+            currentAnalysisWindowParameters === undefined ||
+            buckets === undefined ||
+            isGroupsTable
+          )
+            return NOT_AVAILABLE;
+
+          const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
+            currentAnalysisType,
+            buckets.baselineBuckets,
+            buckets.deviationBuckets,
+            docCount,
+            bgCount
+          );
+
+          const logRateChange = getLogRateChange(
+            currentAnalysisType,
+            baselineBucketRate,
+            deviationBucketRate
+          );
+          return logRateChange.factor;
+        },
         render: ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
           if (
             interval === 0 ||

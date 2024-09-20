@@ -6,14 +6,14 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { orderBy, isEqual } from 'lodash';
+import React, { useEffect, useMemo } from 'react';
+import { isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { EuiTableSortingType } from '@elastic/eui';
-import { useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';
+import { useEuiBackgroundColor, EuiInMemoryTable } from '@elastic/eui';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
+import { useTableState } from '@kbn/ml-in-memory-table';
 import {
   setPinnedSignificantItem,
   setSelectedSignificantItem,
@@ -86,13 +86,15 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
 
   const dispatch = useAppDispatch();
 
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<keyof SignificantItem>(
-    zeroDocsFallback ? DEFAULT_SORT_FIELD_ZERO_DOCS_FALLBACK : DEFAULT_SORT_FIELD
-  );
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
-    zeroDocsFallback ? DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK : DEFAULT_SORT_DIRECTION
+  const { onTableChange, pagination, sorting } = useTableState<SignificantItem>(
+    significantItems ?? [],
+    zeroDocsFallback ? DEFAULT_SORT_FIELD_ZERO_DOCS_FALLBACK : DEFAULT_SORT_FIELD,
+    zeroDocsFallback ? DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK : DEFAULT_SORT_DIRECTION,
+    {
+      pageIndex: 0,
+      pageSize: 10,
+      pageSizeOptions: PAGINATION_SIZE_OPTIONS,
+    }
   );
 
   const columns = useColumns(
@@ -104,82 +106,26 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     groupFilter !== undefined
   );
 
-  const onChange = useCallback((tableSettings: any) => {
-    if (tableSettings.page) {
-      const { index, size } = tableSettings.page;
-      setPageIndex(index);
-      setPageSize(size);
-    }
-
-    if (tableSettings.sort) {
-      const { field, direction } = tableSettings.sort;
-      setSortField(field);
-      setSortDirection(direction);
-    }
-  }, []);
-
-  const { pagination, pageOfItems, sorting } = useMemo(() => {
-    const pageStart = pageIndex * pageSize;
-    const itemCount = significantItems?.length ?? 0;
-
-    let items: SignificantItem[] = significantItems ?? [];
-
-    const sortIteratees = [
-      (item: SignificantItem) => {
-        if (item && typeof item[sortField] === 'string') {
-          // @ts-ignore Object is possibly null or undefined
-          return item[sortField].toLowerCase();
-        }
-        return item[sortField];
-      },
-    ];
-    const sortDirections = [sortDirection];
-
-    // Only if the table is sorted by p-value, add a secondary sort by doc count.
-    if (sortField === 'pValue') {
-      sortIteratees.push((item: SignificantItem) => item.doc_count);
-      sortDirections.push(sortDirection);
-    }
-
-    items = orderBy(significantItems, sortIteratees, sortDirections);
-
-    return {
-      pageOfItems: items.slice(pageStart, pageStart + pageSize),
-      pagination: {
-        pageIndex,
-        pageSize,
-        totalItemCount: itemCount,
-        pageSizeOptions: PAGINATION_SIZE_OPTIONS,
-      },
-      sorting: {
-        sort: {
-          field: sortField,
-          direction: sortDirection,
-        },
-      },
-    };
-  }, [pageIndex, pageSize, sortField, sortDirection, significantItems]);
-
   useEffect(() => {
     // If no row is hovered or pinned or the user switched to a new page,
     // fall back to set the first row into a hovered state to make the
     // main document count chart show a comparison view by default.
     if (
       (selectedSignificantItem === null ||
-        !pageOfItems.some((item) => isEqual(item, selectedSignificantItem))) &&
+        !significantItems.some((item) => isEqual(item, selectedSignificantItem))) &&
       pinnedSignificantItem === null &&
-      pageOfItems.length > 0 &&
+      significantItems.length > 0 &&
       selectedGroup === null &&
       pinnedGroup === null
     ) {
-      dispatch(setSelectedSignificantItem(pageOfItems[0]));
+      dispatch(setSelectedSignificantItem(significantItems[0]));
     }
 
     // If a user switched pages and a pinned row is no longer visible
     // on the current page, set the status of pinned rows back to `null`.
     if (
       pinnedSignificantItem !== null &&
-      !pageOfItems.some((item) => isEqual(item, pinnedSignificantItem)) &&
+      !significantItems.some((item) => isEqual(item, pinnedSignificantItem)) &&
       selectedGroup === null &&
       pinnedGroup === null
     ) {
@@ -189,7 +135,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     dispatch,
     selectedGroup,
     selectedSignificantItem,
-    pageOfItems,
+    significantItems,
     pinnedGroup,
     pinnedSignificantItem,
   ]);
@@ -239,15 +185,15 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   // running the analysis and will hide this table.
 
   return (
-    <EuiBasicTable
+    <EuiInMemoryTable<SignificantItem>
       data-test-subj="aiopsLogRateAnalysisResultsTable"
       compressed
+      items={significantItems}
       columns={columns}
-      items={pageOfItems}
-      onChange={onChange}
-      pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}
+      pagination={pagination}
+      sorting={sorting}
       loading={false}
-      sorting={sorting as EuiTableSortingType<SignificantItem>}
+      onTableChange={onTableChange}
       rowProps={(significantItem) => {
         return {
           'data-test-subj': `aiopsLogRateAnalysisResultsTableRow row-${significantItem.fieldName}-${significantItem.fieldValue}`,

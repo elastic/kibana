@@ -48,6 +48,7 @@ export function getLogRateChange(
             values: { deviationBucketRate },
           }
         ),
+        factor: deviationBucketRate,
       };
     }
   } else {
@@ -76,6 +77,7 @@ export function getLogRateChange(
             values: { baselineBucketRate },
           }
         ),
+        factor: baselineBucketRate,
       };
     }
   }
