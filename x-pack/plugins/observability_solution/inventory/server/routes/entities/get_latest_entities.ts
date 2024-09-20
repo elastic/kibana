@@ -14,16 +14,12 @@ import {
   type EntityType,
 } from '../../../common/entities';
 import {
-  ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '../../../common/es_fields/entities';
-
-export const BUILTIN_SERVICES_FROM_ECS_DATA = 'builtin_services_from_ecs_data';
-export const BUILTIN_HOSTS_FROM_ECS_DATA = 'builtin_hosts_from_ecs_data';
-export const BUILTIN_CONTAINERS_FROM_ECS_DATA = 'builtin_containers_from_ecs_data';
+import { getEntityDefinitionIdWhereClause, getEntityTypesWhereClause } from './query_helper';
 
 export interface LatestEntity {
   [ENTITY_LAST_SEEN]: string;
@@ -31,8 +27,6 @@ export interface LatestEntity {
   [ENTITY_DISPLAY_NAME]: string;
   [ENTITY_ID]: string;
 }
-
-export const DEFAULT_ENTITY_TYPES: EntityType[] = ['service', 'host', 'container'];
 
 export async function getLatestEntities({
   inventoryEsClient,
@@ -47,17 +41,10 @@ export async function getLatestEntities({
   entityTypes?: EntityType[];
   kuery?: string;
 }) {
-  const entityTypesFilter = entityTypes?.length ? entityTypes : DEFAULT_ENTITY_TYPES;
   const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
     query: `FROM ${ENTITIES_LATEST_ALIAS}
-     | WHERE ${ENTITY_TYPE} IN (${entityTypesFilter.map((entityType) => `"${entityType}"`).join()}) 
-     | WHERE ${ENTITY_DEFINITION_ID} IN (${[
-      BUILTIN_SERVICES_FROM_ECS_DATA,
-      BUILTIN_HOSTS_FROM_ECS_DATA,
-      BUILTIN_CONTAINERS_FROM_ECS_DATA,
-    ]
-      .map((buildin) => `"${buildin}"`)
-      .join()})
+     | ${getEntityTypesWhereClause(entityTypes)}
+     | ${getEntityDefinitionIdWhereClause()}
      | SORT ${sortField} ${sortDirection}
      | LIMIT ${MAX_NUMBER_OF_ENTITIES}
      | KEEP ${ENTITY_LAST_SEEN}, ${ENTITY_TYPE}, ${ENTITY_DISPLAY_NAME}, ${ENTITY_ID}
