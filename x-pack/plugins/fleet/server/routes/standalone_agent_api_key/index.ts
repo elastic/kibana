@@ -27,9 +27,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
-        validate: {
-          request: PostStandaloneAgentAPIKeyRequestSchema,
-        },
+        validate: { request: PostStandaloneAgentAPIKeyRequestSchema },
       },
       createStandaloneAgentApiKeyHandler
     );
