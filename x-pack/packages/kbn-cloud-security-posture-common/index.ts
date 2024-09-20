@@ -26,3 +26,4 @@ export {
   buildMutedRulesFilter,
   buildEntityFlyoutPreviewQuery,
 } from './utils/helpers';
+export { getAbbreviatedNumber } from './utils/get_abbreviated_number';
