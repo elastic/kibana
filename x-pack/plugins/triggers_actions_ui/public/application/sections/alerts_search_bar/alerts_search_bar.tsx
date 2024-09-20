@@ -53,6 +53,7 @@ export function AlertsSearchBar({
     unifiedSearch: {
       ui: { SearchBar },
     },
+    data: dataService,
   } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
@@ -183,7 +184,11 @@ export function AlertsSearchBar({
       displayStyle="inPage"
       showFilterBar={showFilterBar}
       onQuerySubmit={onSearchQuerySubmit}
-      onFiltersUpdated={onFiltersUpdated}
+      onFiltersUpdated={(newFilters) => {
+        // filterManager.setFilters populates filter.meta so filter pill has pretty title
+        dataService.query.filterManager.setFilters(newFilters);
+        onFiltersUpdated?.(newFilters);
+      }}
       onRefresh={onRefresh}
       showDatePicker={showDatePicker}
       showQueryInput={true}
