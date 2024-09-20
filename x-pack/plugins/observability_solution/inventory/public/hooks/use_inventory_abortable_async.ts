@@ -14,7 +14,7 @@ const getDetailsFromErrorResponse = (error: IHttpFetchError<ResponseErrorBody>) 
 
 export function useInventoryAbortableAsync<T>(...args: Parameters<typeof useAbortableAsync<T>>) {
   const {
-    core: { notifications },
+    services: { notifications },
   } = useKibana();
   const response = useAbortableAsync(...args);
 
