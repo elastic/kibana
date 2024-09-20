@@ -9,8 +9,11 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InventoryContextProvider } from '../inventory_context_provider';
 import { inventoryRouter } from '../../routes/config';
+import { HeaderActionMenuItems } from './header_action_menu';
 import { InventoryStartDependencies } from '../../types';
 import { InventoryServices } from '../../services/types';
 
@@ -38,9 +41,28 @@ export function AppRoot({
         <coreStart.i18n.Context>
           <RouterProvider history={history} router={inventoryRouter}>
             <RouteRenderer />
+            <InventoryHeaderActionMenu appMountParameters={appMountParameters} />
           </RouterProvider>
         </coreStart.i18n.Context>
       </RedirectAppLinks>
     </InventoryContextProvider>
+  );
+}
+
+export function InventoryHeaderActionMenu({
+  appMountParameters,
+}: {
+  appMountParameters: AppMountParameters;
+}) {
+  const { setHeaderActionMenu, theme$ } = appMountParameters;
+
+  return (
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexItem>
+          <HeaderActionMenuItems />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </HeaderMenuPortal>
   );
 }
