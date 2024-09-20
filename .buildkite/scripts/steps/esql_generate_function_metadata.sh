@@ -2,7 +2,7 @@
 set -euo pipefail
 
 VALIDATION_PACKAGE_DIR="packages/kbn-esql-validation-autocomplete"
-EDITOR_PACKAGE_DIR="packages/kbn-text-based-editor"
+EDITOR_PACKAGE_DIR="packages/kbn-language-documentation-popover"
 GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
 
 report_main_step () {
@@ -28,10 +28,6 @@ main () {
   report_main_step "Generate function definitions"
 
   yarn make:defs $PARENT_DIR/elasticsearch
-
-  report_main_step "Generate function validation tests"
-  
-  yarn make:tests
 
   report_main_step "Generate inline function docs"
 

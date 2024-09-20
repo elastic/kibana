@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,29 +12,33 @@ import { BehaviorSubject } from 'rxjs';
 
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act, fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
 
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+  type DefaultDataControlState,
+} from '../../../../common';
+import { dataViewsService } from '../../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
-jest.mock('../../control_factory_registry', () => ({
-  ...jest.requireActual('../../control_factory_registry'),
-  getAllControlTypes: jest.fn(),
-  getControlFactory: jest.fn(),
-}));
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
-import { ControlGroupApi } from '../../control_group/types';
+import type { ControlGroupApi } from '../../control_group/types';
+import type { ControlFactory } from '../types';
 import { DataControlEditor } from './data_control_editor';
 import {
   getMockedOptionsListControlFactory,
   getMockedRangeSliderControlFactory,
   getMockedSearchControlFactory,
 } from './mocks/factory_mocks';
-import { ControlFactory } from '../types';
-import { DataControlApi, DataControlFactory, DefaultDataControlState } from './types';
+import type { DataControlApi, DataControlFactory } from './types';
 
-const mockDataViews = dataViewPluginMocks.createStartContract();
+jest.mock('../../control_factory_registry', () => ({
+  ...jest.requireActual('../../control_factory_registry'),
+  getAllControlTypes: jest.fn(),
+  getControlFactory: jest.fn(),
+}));
+
 const mockDataView = createStubDataView({
   spec: {
     id: 'logstash-*',
@@ -52,7 +57,6 @@ const mockDataView = createStubDataView({
     timeFieldName: '@timestamp',
   },
 });
-mockDataViews.get = jest.fn().mockResolvedValue(mockDataView);
 
 const dashboardApi = {
   timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
@@ -61,6 +65,7 @@ const controlGroupApi = {
   parentApi: dashboardApi,
   grow: new BehaviorSubject(DEFAULT_CONTROL_GROW),
   width: new BehaviorSubject(DEFAULT_CONTROL_WIDTH),
+  getEditorConfig: () => undefined,
 } as unknown as ControlGroupApi;
 
 describe('Data control editor', () => {
@@ -75,7 +80,7 @@ describe('Data control editor', () => {
     controlType?: string;
     initialDefaultPanelTitle?: string;
   }) => {
-    mockDataViews.get = jest.fn().mockResolvedValue(mockDataView);
+    dataViewsService.get = jest.fn().mockResolvedValue(mockDataView);
 
     const controlEditor = render(
       <I18nProvider>
@@ -90,13 +95,12 @@ describe('Data control editor', () => {
           controlId={controlId}
           controlType={controlType}
           initialDefaultPanelTitle={initialDefaultPanelTitle}
-          services={{ dataViews: mockDataViews }}
         />
       </I18nProvider>
     );
 
     await waitFor(() => {
-      expect(mockDataViews.get).toHaveBeenCalledTimes(1);
+      expect(dataViewsService.get).toHaveBeenCalledTimes(1);
     });
 
     return controlEditor;
@@ -287,6 +291,56 @@ describe('Data control editor', () => {
       expect(getPressedAttribute(controlEditor, 'create__optionsList')).toBe('false');
       expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('true');
       expect(getPressedAttribute(controlEditor, 'create__search')).toBe('false');
+    });
+  });
+
+  describe('control editor config', () => {
+    const getEditorConfig = jest.fn().mockImplementation(() => undefined);
+
+    beforeAll(() => {
+      controlGroupApi.getEditorConfig = getEditorConfig;
+    });
+
+    test('all elements are visible when no editor config', async () => {
+      const controlEditor = await mountComponent({
+        initialState: {
+          fieldName: 'machine.os.raw',
+        },
+        controlType: 'optionsList',
+        controlId: 'testId',
+        initialDefaultPanelTitle: 'OS',
+      });
+
+      const dataViewPicker = controlEditor.queryByTestId('control-editor-data-view-picker');
+      expect(dataViewPicker).toBeInTheDocument();
+      const widthSettings = controlEditor.queryByTestId('control-editor-width-settings');
+      expect(widthSettings).toBeInTheDocument();
+      const customSettings = controlEditor.queryByTestId('control-editor-custom-settings');
+      expect(customSettings).toBeInTheDocument();
+    });
+
+    test('can hide elements with the editor config', async () => {
+      getEditorConfig.mockImplementationOnce(() => ({
+        hideDataViewSelector: true,
+        hideWidthSettings: true,
+        hideAdditionalSettings: true,
+      }));
+
+      const controlEditor = await mountComponent({
+        initialState: {
+          fieldName: 'machine.os.raw',
+        },
+        controlType: 'optionsList',
+        controlId: 'testId',
+        initialDefaultPanelTitle: 'OS',
+      });
+
+      const dataViewPicker = controlEditor.queryByTestId('control-editor-data-view-picker');
+      expect(dataViewPicker).not.toBeInTheDocument();
+      const widthSettings = controlEditor.queryByTestId('control-editor-width-settings');
+      expect(widthSettings).not.toBeInTheDocument();
+      const customSettings = controlEditor.queryByTestId('control-editor-custom-settings');
+      expect(customSettings).not.toBeInTheDocument();
     });
   });
 });

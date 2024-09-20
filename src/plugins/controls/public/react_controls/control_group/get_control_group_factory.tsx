@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
-import { CoreStart } from '@kbn/core/public';
+
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,31 +19,35 @@ import {
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
 import {
-  apiPublishesDataViews,
   PublishesDataViews,
+  apiPublishesDataViews,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { ControlStyle, ParentIgnoreSettings } from '../..';
-import {
+
+import type {
   ControlGroupChainingSystem,
-  CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_STYLE,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlLabelPosition,
+  ControlPanelsState,
+  ParentIgnoreSettings,
 } from '../../../common';
+import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_LABEL_POSITION } from '../../../common';
+import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
+import { ControlGroup } from './components/control_group';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
+import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
-import { deserializeControlGroup } from './serialization_utils';
-import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
-import { ControlGroup } from './components/control_group';
 import { initSelectionsManager } from './selections_manager';
-import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
-import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
+import type { ControlGroupApi } from './types';
+import { deserializeControlGroup } from './utils/serialization_utils';
+import { coreServices, dataViewsService } from '../../services/kibana_services';
 
-export const getControlGroupEmbeddableFactory = (services: {
-  core: CoreStart;
-  dataViews: DataViewsPublicPluginStart;
-}) => {
+const DEFAULT_CHAINING_SYSTEM = 'HIERARCHICAL';
+
+export const getControlGroupEmbeddableFactory = () => {
   const controlGroupEmbeddableFactory: ReactEmbeddableFactory<
     ControlGroupSerializedState,
     ControlGroupRuntimeState,
@@ -60,7 +64,6 @@ export const getControlGroupEmbeddableFactory = (services: {
       lastSavedRuntimeState
     ) => {
       const {
-        initialChildControlState,
         labelPosition: initialLabelPosition,
         chainingSystem,
         autoApplySelections,
@@ -68,29 +71,30 @@ export const getControlGroupEmbeddableFactory = (services: {
       } = initialRuntimeState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
-      const parentDataViewId = apiPublishesDataViews(parentApi)
-        ? parentApi.dataViews.value?.[0]?.id
-        : undefined;
+      const defaultDataViewId = await dataViewsService.getDefaultId();
+      const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(
+        lastSavedRuntimeState.initialChildControlState
+      );
       const controlsManager = initControlsManager(
-        initialChildControlState,
-        parentDataViewId ?? (await services.dataViews.getDefaultId())
+        initialRuntimeState.initialChildControlState,
+        lastSavedControlsState$
       );
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,
         autoApplySelections$,
       });
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
-      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
+      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(
+        chainingSystem ?? DEFAULT_CHAINING_SYSTEM
+      );
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         ignoreParentSettings
       );
-      const labelPosition$ = new BehaviorSubject<ControlStyle>( // TODO: Rename `ControlStyle`
-        initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
+      const labelPosition$ = new BehaviorSubject<ControlLabelPosition>(
+        initialLabelPosition ?? DEFAULT_CONTROL_LABEL_POSITION
       );
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
-
-      /** TODO: Handle loading; loading should be true if any child is loading */
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+      const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
 
       const unsavedChanges = initializeControlGroupUnsavedChanges(
         selectionsManager.applySelections,
@@ -104,24 +108,27 @@ export const getControlGroupEmbeddableFactory = (services: {
           chainingSystem: [
             chainingSystem$,
             (next: ControlGroupChainingSystem) => chainingSystem$.next(next),
+            (a, b) => (a ?? DEFAULT_CHAINING_SYSTEM) === (b ?? DEFAULT_CHAINING_SYSTEM),
           ],
           ignoreParentSettings: [
             ignoreParentSettings$,
             (next: ParentIgnoreSettings | undefined) => ignoreParentSettings$.next(next),
             fastIsEqual,
           ],
-          labelPosition: [labelPosition$, (next: ControlStyle) => labelPosition$.next(next)],
+          labelPosition: [
+            labelPosition$,
+            (next: ControlLabelPosition) => labelPosition$.next(next),
+          ],
         },
         controlsManager.snapshotControlsRuntimeState,
+        controlsManager.resetControlsUnsavedChanges,
         parentApi,
         lastSavedRuntimeState
       );
 
       const api = setApi({
         ...controlsManager.api,
-        getLastSavedControlState: (controlUuid: string) => {
-          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
-        },
+        disabledActionIds: disabledActionIds$,
         ...unsavedChanges.api,
         ...selectionsManager.api,
         controlFetch$: (controlUuid: string) =>
@@ -138,44 +145,45 @@ export const getControlGroupEmbeddableFactory = (services: {
         autoApplySelections$,
         allowExpensiveQueries$,
         snapshotRuntimeState: () => {
-          // TODO: Remove this if it ends up being unnecessary
-          return {} as unknown as ControlGroupRuntimeState;
+          return {
+            chainingSystem: chainingSystem$.getValue(),
+            labelPosition: labelPosition$.getValue(),
+            autoApplySelections: autoApplySelections$.getValue(),
+            ignoreParentSettings: ignoreParentSettings$.getValue(),
+            initialChildControlState: controlsManager.snapshotControlsRuntimeState(),
+          };
         },
-        dataLoading: dataLoading$,
         onEdit: async () => {
-          openEditControlGroupFlyout(
-            api,
-            {
-              chainingSystem: chainingSystem$,
-              labelPosition: labelPosition$,
-              autoApplySelections: autoApplySelections$,
-              ignoreParentSettings: ignoreParentSettings$,
-            },
-            { core: services.core }
-          );
+          openEditControlGroupFlyout(api, {
+            chainingSystem: chainingSystem$,
+            labelPosition: labelPosition$,
+            autoApplySelections: autoApplySelections$,
+            ignoreParentSettings: ignoreParentSettings$,
+          });
         },
         isEditingEnabled: () => true,
-        getTypeDisplayName: () =>
-          i18n.translate('controls.controlGroup.displayName', {
-            defaultMessage: 'Controls',
-          }),
         openAddDataControlFlyout: (settings) => {
-          const { controlInputTransform } = settings ?? {
-            controlInputTransform: (state) => state,
-          };
+          const parentDataViewId = apiPublishesDataViews(parentApi)
+            ? parentApi.dataViews.value?.[0]?.id
+            : undefined;
+          const newControlState = controlsManager.getNewControlState();
+
           openDataControlEditor({
-            initialState: controlsManager.getNewControlState(),
+            initialState: {
+              ...newControlState,
+              dataViewId:
+                newControlState.dataViewId ?? parentDataViewId ?? defaultDataViewId ?? undefined,
+            },
             onSave: ({ type: controlType, state: initialState }) => {
               controlsManager.api.addNewPanel({
                 panelType: controlType,
-                initialState: controlInputTransform!(
-                  initialState as Partial<ControlGroupSerializedState>,
-                  controlType
-                ),
+                initialState: settings?.controlStateTransform
+                  ? settings.controlStateTransform(initialState, controlType)
+                  : initialState,
               });
+              settings?.onSave?.();
             },
             controlGroupApi: api,
-            services,
           });
         },
         serializeState: () => {
@@ -183,7 +191,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           return {
             rawState: {
               chainingSystem: chainingSystem$.getValue(),
-              controlStyle: labelPosition$.getValue(), // Rename "labelPosition" to "controlStyle"
+              controlStyle: labelPosition$.getValue(),
               showApplySelections: !autoApplySelections$.getValue(),
               ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings$.getValue()),
               panelsJSON,
@@ -197,6 +205,20 @@ export const getControlGroupEmbeddableFactory = (services: {
           ? parentApi.saveNotification$
           : undefined,
         reload$: apiPublishesReload(parentApi) ? parentApi.reload$ : undefined,
+
+        /** Public getters */
+        getTypeDisplayName: () =>
+          i18n.translate('controls.controlGroup.displayName', {
+            defaultMessage: 'Controls',
+          }),
+        getEditorConfig: () => initialRuntimeState.editorConfig,
+        getLastSavedControlState: (controlUuid: string) => {
+          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
+        },
+
+        /** Public setters */
+        setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
+        setChainingSystem: (newChainingSystem) => chainingSystem$.next(newChainingSystem),
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */
@@ -207,21 +229,19 @@ export const getControlGroupEmbeddableFactory = (services: {
         dataViews.next(newDataViews)
       );
 
-      /** Fetch the allowExpensiveQuries setting for the children to use if necessary */
-      try {
-        const { allowExpensiveQueries } = await services.core.http.get<{
-          allowExpensiveQueries: boolean;
-          // TODO: Rename this route as part of https://github.com/elastic/kibana/issues/174961
-        }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
-          version: '1',
-        });
-        if (!allowExpensiveQueries) {
-          // only set if this returns false, since it defaults to true
-          allowExpensiveQueries$.next(allowExpensiveQueries);
-        }
-      } catch {
-        // do nothing - default to true on error (which it was initialized to)
-      }
+      const saveNotificationSubscription = apiHasSaveNotification(parentApi)
+        ? parentApi.saveNotification$.subscribe(() => {
+            lastSavedControlsState$.next(controlsManager.snapshotControlsRuntimeState());
+
+            if (
+              typeof autoApplySelections$.value === 'boolean' &&
+              !autoApplySelections$.value &&
+              selectionsManager.hasUnappliedSelections$.value
+            ) {
+              selectionsManager.applySelections();
+            }
+          })
+        : undefined;
 
       return {
         api,
@@ -232,9 +252,28 @@ export const getControlGroupEmbeddableFactory = (services: {
           );
 
           useEffect(() => {
+            /** Fetch the allowExpensiveQuries setting for the children to use if necessary */
+            const fetchAllowExpensiveQueries = async () => {
+              try {
+                const { allowExpensiveQueries } = await coreServices.http.get<{
+                  allowExpensiveQueries: boolean;
+                }>('/internal/controls/getExpensiveQueriesSetting', {
+                  version: '1',
+                });
+                if (!allowExpensiveQueries) {
+                  // only set if this returns false, since it defaults to true
+                  allowExpensiveQueries$.next(allowExpensiveQueries);
+                }
+              } catch {
+                // do nothing - default to true on error (which it was initialized to)
+              }
+            };
+            fetchAllowExpensiveQueries(); // no need to await - don't want to block anything waiting for this
+
             return () => {
               selectionsManager.cleanup();
               childrenDataViewsSubscription.unsubscribe();
+              saveNotificationSubscription?.unsubscribe();
             };
           }, []);
 

@@ -22,7 +22,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -118,7 +118,6 @@ import {
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
 } from './package_policies';
-import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type {
   PackagePolicyClient,
   PackagePolicyClientFetchAllItemsOptions,
@@ -1370,7 +1369,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const secretsToDelete: string[] = [];
     if (idsToDelete.length > 0) {
       const { statuses } = await soClient.bulkDelete(
-        idsToDelete.map((id) => ({ id, type: savedObjectType }))
+        idsToDelete.map((id) => ({ id, type: savedObjectType })),
+        {
+          force: true, // need to delete through multiple space
+        }
       );
 
       statuses.forEach(({ id, success, error }) => {
@@ -1650,13 +1652,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     };
 
     await this.update(soClient, esClient, id, updatePackagePolicy, updateOptions);
-
-    // Persist any experimental feature opt-ins that come through the upgrade process to the Installation SO
-    await updateDatastreamExperimentalFeatures(
-      soClient,
-      packagePolicy.package!.name,
-      experimentalDataStreamFeatures
-    );
 
     result.push({
       id,
@@ -2038,20 +2033,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
   }
 
-  public async removeOutputFromAll(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    outputId: string
-  ) {
+  public async removeOutputFromAll(esClient: ElasticsearchClient, outputId: string) {
     const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicies = (
-      await soClient.find<PackagePolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['name', 'enabled', 'policy_ids', 'inputs', 'output_id'],
-        searchFields: ['output_id'],
-        search: escapeSearchQueryPhrase(outputId),
-        perPage: SO_SEARCH_LIMIT,
-      })
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<PackagePolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['name', 'enabled', 'policy_ids', 'inputs', 'output_id'],
+          searchFields: ['output_id'],
+          search: escapeSearchQueryPhrase(outputId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
     ).saved_objects.map(mapPackagePolicySavedObjectToPackagePolicy);
 
     if (packagePolicies.length > 0) {
@@ -2068,6 +2062,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await pMap(
         packagePolicies,
         async (packagePolicy) => {
+          const soClient = appContextService.getInternalUserSOClientForSpaceId(
+            packagePolicy.spaceIds?.[0]
+          );
           const existingPackagePolicy = await this.get(soClient, packagePolicy.id);
 
           if (!existingPackagePolicy) {
@@ -2095,6 +2092,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await pMap(
         packagePolicies,
         (packagePolicy) => {
+          const soClient = appContextService.getInternalUserSOClientForSpaceId(
+            packagePolicy.spaceIds?.[0]
+          );
           return this.update(
             soClient,
             esClient,
@@ -2287,7 +2287,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 }
 
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
-  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, safeLoad);
+  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, load);
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
       .map(([key, value]) => ({
@@ -2784,7 +2784,7 @@ export function updatePackageInputs(
     inputs,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, safeLoad);
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, load);
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))

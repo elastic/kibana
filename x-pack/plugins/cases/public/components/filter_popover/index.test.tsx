@@ -15,8 +15,7 @@ import { createAppMockRenderer } from '../../common/mock';
 
 import { FilterPopover } from '.';
 
-// FLAKY: https://github.com/elastic/kibana/issues/176679
-describe.skip('FilterPopover ', () => {
+describe('FilterPopover ', () => {
   let appMockRender: AppMockRenderer;
   const onSelectedOptionsChanged = jest.fn();
   const tags: string[] = ['coke', 'pepsi'];
@@ -24,6 +23,10 @@ describe.skip('FilterPopover ', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('renders button label correctly', async () => {
@@ -50,7 +53,7 @@ describe.skip('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
@@ -67,7 +70,7 @@ describe.skip('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
@@ -85,11 +88,11 @@ describe.skip('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId(`options-filter-popover-item-${tags[0]}`));
+    await userEvent.click(await screen.findByTestId(`options-filter-popover-item-${tags[0]}`));
 
     await waitFor(() => {
       expect(onSelectedOptionsChanged).toHaveBeenCalledWith([tags[0]]);
@@ -106,11 +109,11 @@ describe.skip('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId(`options-filter-popover-item-${tags[0]}`));
+    await userEvent.click(await screen.findByTestId(`options-filter-popover-item-${tags[0]}`));
 
     await waitFor(() => {
       expect(onSelectedOptionsChanged).toHaveBeenCalledWith([]);
@@ -134,7 +137,7 @@ describe.skip('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
@@ -159,7 +162,7 @@ describe.skip('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
@@ -183,7 +186,7 @@ describe.skip('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
@@ -204,11 +207,11 @@ describe.skip('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(await screen.findByTestId(`options-filter-popover-item-${newTags[1]}`));
+      await userEvent.click(await screen.findByTestId(`options-filter-popover-item-${newTags[1]}`));
 
       await waitFor(() => {
         expect(onSelectedOptionsChanged).toHaveBeenCalledWith([newTags[0], newTags[2], newTags[1]]);

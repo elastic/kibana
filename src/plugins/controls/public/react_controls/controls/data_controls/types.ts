@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import {
   HasEditCapabilities,
@@ -17,8 +15,10 @@ import {
   PublishesPanelTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
+
+import { DefaultDataControlState } from '../../../../common';
 import { ControlGroupApi } from '../../control_group/types';
-import { ControlFactory, DefaultControlApi, DefaultControlState } from '../types';
+import { ControlFactory, DefaultControlApi } from '../types';
 import { PublishesAsyncFilters } from './publishes_async_filters';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
@@ -59,14 +59,11 @@ export const isDataControlFactory = (
   return typeof (factory as DataControlFactory).isFieldCompatible === 'function';
 };
 
-export interface DefaultDataControlState extends DefaultControlState {
-  dataViewId: string;
-  fieldName: string;
-  title?: string; // custom control label
+interface DataControlField {
+  field: DataViewField;
+  compatibleControlTypes: string[];
 }
 
-export interface DataControlServices {
-  core: CoreStart;
-  data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
+export interface DataControlFieldRegistry {
+  [fieldName: string]: DataControlField;
 }

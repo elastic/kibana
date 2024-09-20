@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  description: 'Run live queries, manage packs and saved queries.'
+  description: Run live queries, manage packs and saved queries.
   title: Security Solution Osquery API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -13,6 +13,7 @@ servers:
 paths:
   /api/osquery/live_queries:
     get:
+      description: Get a list of all live queries.
       operationId: OsqueryFindLiveQueries
       parameters:
         - in: query
@@ -27,10 +28,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
-      summary: Find live queries
+      summary: Get live queries
       tags:
         - Security Solution Osquery API
     post:
+      description: Create and run a live query.
       operationId: OsqueryCreateLiveQuery
       requestBody:
         content:
@@ -48,8 +50,9 @@ paths:
       summary: Create a live query
       tags:
         - Security Solution Osquery API
-  '/api/osquery/live_queries/{id}':
+  /api/osquery/live_queries/{id}:
     get:
+      description: Get the details of a live query using the query ID.
       operationId: OsqueryGetLiveQueryDetails
       parameters:
         - in: path
@@ -72,8 +75,9 @@ paths:
       summary: Get live query details
       tags:
         - Security Solution Osquery API
-  '/api/osquery/live_queries/{id}/results/{actionId}':
+  /api/osquery/live_queries/{id}/results/{actionId}:
     get:
+      description: Get the results of a live query using the query action ID.
       operationId: OsqueryGetLiveQueryResults
       parameters:
         - in: path
@@ -103,6 +107,7 @@ paths:
         - Security Solution Osquery API
   /api/osquery/packs:
     get:
+      description: Get a list of all query packs.
       operationId: OsqueryFindPacks
       parameters:
         - in: query
@@ -117,10 +122,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
-      summary: Find packs
+      summary: Get packs
       tags:
         - Security Solution Osquery API
     post:
+      description: Create a query pack.
       operationId: OsqueryCreatePacks
       requestBody:
         content:
@@ -135,11 +141,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
-      summary: Create a packs
+      summary: Create a pack
       tags:
         - Security Solution Osquery API
-  '/api/osquery/packs/{id}':
+  /api/osquery/packs/{id}:
     delete:
+      description: Delete a query pack using the pack ID.
       operationId: OsqueryDeletePacks
       parameters:
         - in: path
@@ -154,10 +161,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
-      summary: Delete packs
+      summary: Delete a pack
       tags:
         - Security Solution Osquery API
     get:
+      description: Get the details of a query pack using the pack ID.
       operationId: OsqueryGetPacksDetails
       parameters:
         - in: path
@@ -172,10 +180,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
-      summary: Get packs details
+      summary: Get pack details
       tags:
         - Security Solution Osquery API
     put:
+      description: |
+        Update a query pack using the pack ID.
+        > info
+        > You cannot update a prebuilt pack.
       operationId: OsqueryUpdatePacks
       parameters:
         - in: path
@@ -196,11 +208,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
-      summary: Update packs
+      summary: Update a pack
       tags:
         - Security Solution Osquery API
   /api/osquery/saved_queries:
     get:
+      description: Get a list of all saved queries.
       operationId: OsqueryFindSavedQueries
       parameters:
         - in: query
@@ -215,10 +228,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
-      summary: Find saved queries
+      summary: Get saved queries
       tags:
         - Security Solution Osquery API
     post:
+      description: Create and run a saved query.
       operationId: OsqueryCreateSavedQuery
       requestBody:
         content:
@@ -236,8 +250,9 @@ paths:
       summary: Create a saved query
       tags:
         - Security Solution Osquery API
-  '/api/osquery/saved_queries/{id}':
+  /api/osquery/saved_queries/{id}:
     delete:
+      description: Delete a saved query using the query ID.
       operationId: OsqueryDeleteSavedQuery
       parameters:
         - in: path
@@ -252,10 +267,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
-      summary: Delete saved query
+      summary: Delete a saved query
       tags:
         - Security Solution Osquery API
     get:
+      description: Get the details of a saved query using the query ID.
       operationId: OsqueryGetSavedQueryDetails
       parameters:
         - in: path
@@ -274,6 +290,10 @@ paths:
       tags:
         - Security Solution Osquery API
     put:
+      description: |
+        Update a saved query using the query ID.
+        > info
+        > You cannot update a prebuilt saved query.
       operationId: OsqueryUpdateSavedQuery
       parameters:
         - in: path
@@ -294,7 +314,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
-      summary: Update saved query
+      summary: Update a saved query
       tags:
         - Security Solution Osquery API
 components:
@@ -617,5 +637,5 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: 'Run live queries, manage packs and saved queries.'
+  - description: Run live queries, manage packs and saved queries.
     name: Security Solution Osquery API

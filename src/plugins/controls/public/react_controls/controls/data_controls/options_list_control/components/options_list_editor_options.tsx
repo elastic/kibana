@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -11,14 +12,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
-import {
-  getCompatibleSearchTechniques,
+import type {
+  OptionsListControlState,
   OptionsListSearchTechnique,
-} from '../../../../../../common/options_list/suggestions_searching';
+} from '../../../../../../common/options_list';
+import { getCompatibleSearchTechniques } from '../../../../../../common/options_list/suggestions_searching';
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
 import { CustomOptionsComponentProps } from '../../types';
 import { DEFAULT_SEARCH_TECHNIQUE } from '../constants';
-import { OptionsListControlState } from '../types';
 import { OptionsListStrings } from '../options_list_strings';
 
 const selectionOptions = [

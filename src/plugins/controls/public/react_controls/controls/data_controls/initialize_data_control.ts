@@ -1,46 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, debounceTime, first, skip, switchMap, tap } from 'rxjs';
 
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
   DataView,
   DataViewField,
-  DATA_VIEW_SAVED_OBJECT_TYPE,
 } from '@kbn/data-views-plugin/common';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
 
 import { i18n } from '@kbn/i18n';
-import { ControlGroupApi } from '../../control_group/types';
+import type { DefaultControlState, DefaultDataControlState } from '../../../../common';
+import { dataViewsService } from '../../../services/kibana_services';
+import type { ControlGroupApi } from '../../control_group/types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
-import { ControlApiInitialization, ControlStateManager, DefaultControlState } from '../types';
+import type { ControlApiInitialization, ControlStateManager } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
-import { DataControlApi, DataControlFieldFormatter, DefaultDataControlState } from './types';
+import { getReferenceName } from './reference_name_utils';
+import type { DataControlApi, DataControlFieldFormatter } from './types';
 
 export const initializeDataControl = <EditorState extends object = {}>(
   controlId: string,
   controlType: string,
+  referenceNameSuffix: string,
   state: DefaultDataControlState,
   /**
    * `This state manager` should only include the state that the data control editor is
    * responsible for managing
    */
   editorStateManager: ControlStateManager<EditorState>,
-  controlGroupApi: ControlGroupApi,
-  services: {
-    core: CoreStart;
-    dataViews: DataViewsPublicPluginStart;
-  }
+  controlGroupApi: ControlGroupApi
 ): {
   api: ControlApiInitialization<DataControlApi>;
   cleanup: () => void;
@@ -84,7 +83,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
       switchMap(async (currentDataViewId) => {
         let dataView: DataView | undefined;
         try {
-          dataView = await services.dataViews.get(currentDataViewId);
+          dataView = await dataViewsService.get(currentDataViewId);
           return { dataView };
         } catch (error) {
           return { error };
@@ -152,7 +151,6 @@ export const initializeDataControl = <EditorState extends object = {}>(
 
     // open the editor to get the new state
     openDataControlEditor<DefaultDataControlState & EditorState>({
-      services,
       onSave: ({ type: newType, state: newState }) => {
         if (newType === controlType) {
           // apply the changes from the new state via the state manager
@@ -242,7 +240,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
         },
         references: [
           {
-            name: `controlGroup_${controlId}:${controlType}DataView`,
+            name: getReferenceName(controlId, referenceNameSuffix),
             type: DATA_VIEW_SAVED_OBJECT_TYPE,
             id: dataViewId.getValue(),
           },

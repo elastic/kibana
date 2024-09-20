@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SamplesFormatName } from '../../common';
 import type { Pipeline } from '../../common';
 
 export const relatedInitialPipeline: Pipeline = {
@@ -149,6 +150,7 @@ export const relatedTestState = {
   pipelineResults: [{ test: 'testresult' }],
   finalized: false,
   reviewed: false,
+  hasTriedOnce: false,
   currentPipeline: { test: 'testpipeline' },
   currentProcessors: [
     {
@@ -165,6 +167,7 @@ export const relatedTestState = {
   initialPipeline: relatedInitialPipeline,
   results: { test: 'testresults' },
   lastExecutedChain: 'testchain',
+  samplesFormat: { name: SamplesFormatName.Values.json },
 };
 
 export const relatedMockProcessors = [

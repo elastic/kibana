@@ -59,4 +59,20 @@ export const entityDefinitionSchema = z.object({
   installStartedAt: z.optional(z.string()),
 });
 
+export const entityDefinitionUpdateSchema = entityDefinitionSchema
+  .omit({
+    id: true,
+    managed: true,
+    installStatus: true,
+    installStartedAt: true,
+  })
+  .partial()
+  .merge(
+    z.object({
+      history: z.optional(entityDefinitionSchema.shape.history.partial()),
+      version: semVerSchema,
+    })
+  );
+
 export type EntityDefinition = z.infer<typeof entityDefinitionSchema>;
+export type EntityDefinitionUpdate = z.infer<typeof entityDefinitionUpdateSchema>;

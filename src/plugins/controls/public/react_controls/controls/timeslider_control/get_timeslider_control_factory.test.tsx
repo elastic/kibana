@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import React from 'react';
+import { BehaviorSubject } from 'rxjs';
+
 import dateMath from '@kbn/datemath';
 import { TimeRange } from '@kbn/es-query';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { fireEvent, render } from '@testing-library/react';
-import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+
+import { dataService } from '../../../services/kibana_services';
 import { getMockedControlGroupApi } from '../mocks/control_mocks';
 import { ControlApiRegistration } from '../types';
 import { getTimesliderControlFactory } from './get_timeslider_control_factory';
@@ -27,18 +29,14 @@ describe('TimesliderControlApi', () => {
   };
   const controlGroupApi = getMockedControlGroupApi(dashboardApi);
 
-  const dataStartServiceMock = dataPluginMock.createStartContract();
-  dataStartServiceMock.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
+  dataService.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
     const now = new Date();
     return {
       min: dateMath.parse(timeRange.from, { forceNow: now }),
       max: dateMath.parse(timeRange.to, { roundUp: true, forceNow: now }),
     };
   };
-  const factory = getTimesliderControlFactory({
-    core: coreMock.createStart(),
-    data: dataStartServiceMock,
-  });
+  const factory = getTimesliderControlFactory();
   let comparators: StateComparators<TimesliderControlState> | undefined;
   function buildApiMock(
     api: ControlApiRegistration<TimesliderControlApi>,

@@ -54,6 +54,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       message: {
         role: MessageRole.User,
         content: 'Good morning, bot!',
+        // make sure it doesn't 400 on `data` being set
+        data: '{}',
       },
     },
   ];
@@ -82,6 +84,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             connectorId,
             persist: true,
             screenContexts: params.screenContexts || [],
+            scope: 'all',
           })
           .then((response) => resolve(response))
           .catch((err) => reject(err));
@@ -134,6 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           connectorId,
           persist: false,
           screenContexts: [],
+          scope: 'all',
         })
         .pipe(passThrough);
 
@@ -218,7 +222,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when creating a new conversation', async () => {
+    describe('when creating a new conversation', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -298,7 +302,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('after executing a screen context action', async () => {
+    describe('after executing a screen context action', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -371,7 +375,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when updating an existing conversation', async () => {
+    describe('when updating an existing conversation', () => {
       let conversationCreatedEvent: ConversationCreateEvent;
       let conversationUpdatedEvent: ConversationUpdateEvent;
 
@@ -400,6 +404,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 connectorId,
                 persist: true,
                 screenContexts: [],
+                scope: 'observability',
               },
             },
           })
@@ -442,6 +447,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 persist: true,
                 screenContexts: [],
                 conversationId,
+                scope: 'observability',
               },
             },
           })

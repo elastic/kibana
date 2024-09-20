@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import deepEqual from 'react-fast-compare';
 
-import { CoreStart, OverlayRef } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiHasParentApi } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { ControlGroupApi } from '../../control_group/types';
+import type { DefaultDataControlState } from '../../../../common';
+import { coreServices } from '../../../services/kibana_services';
+import type { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditor } from './data_control_editor';
-import { DefaultDataControlState } from './types';
 
 export const openDataControlEditor = <
   State extends DefaultDataControlState = DefaultDataControlState
@@ -29,7 +30,6 @@ export const openDataControlEditor = <
   initialDefaultPanelTitle,
   onSave,
   controlGroupApi,
-  services,
 }: {
   initialState: Partial<State>;
   controlType?: string;
@@ -37,10 +37,6 @@ export const openDataControlEditor = <
   initialDefaultPanelTitle?: string;
   onSave: ({ type, state }: { type: string; state: Partial<State> }) => void;
   controlGroupApi: ControlGroupApi;
-  services: {
-    core: CoreStart;
-    dataViews: DataViewsPublicPluginStart;
-  };
 }): void => {
   const closeOverlay = (overlayRef: OverlayRef) => {
     if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
@@ -54,7 +50,7 @@ export const openDataControlEditor = <
       closeOverlay(overlay);
       return;
     }
-    services.core.overlays
+    coreServices.overlays
       .openConfirm(
         i18n.translate('controls.controlGroup.management.discard.sub', {
           defaultMessage: `Changes that you've made to this control will be discarded, are you sure you want to continue?`,
@@ -79,7 +75,7 @@ export const openDataControlEditor = <
       });
   };
 
-  const overlay = services.core.overlays.openFlyout(
+  const overlay = coreServices.overlays.openFlyout(
     toMountPoint(
       <DataControlEditor<State>
         controlGroupApi={controlGroupApi}
@@ -94,11 +90,10 @@ export const openDataControlEditor = <
           closeOverlay(overlay);
           onSave({ type: selectedControlType, state });
         }}
-        services={{ dataViews: services.dataViews }}
       />,
       {
-        theme: services.core.theme,
-        i18n: services.core.i18n,
+        theme: coreServices.theme,
+        i18n: coreServices.i18n,
       }
     ),
     {

@@ -19,7 +19,6 @@ import type {
   ScopedHistory,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import type { SavedObjectsStart as SavedObjectsPluginStart } from '@kbn/saved-objects-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -60,7 +59,6 @@ export interface AppDependencies {
   overlays: OverlayStart;
   theme: ThemeServiceStart;
   history: ScopedHistory;
-  savedObjectsPlugin: SavedObjectsPluginStart;
   share: SharePluginStart;
   ml: GetMlSharedImportsReturnType;
   spaces?: SpacesPluginStart;

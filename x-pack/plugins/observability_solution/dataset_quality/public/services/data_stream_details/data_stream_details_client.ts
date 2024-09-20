@@ -8,6 +8,8 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
+  DegradedFieldValues,
+  degradedFieldValuesRt,
   getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
   getDataStreamsSettingsResponseRt,
@@ -21,6 +23,7 @@ import {
   DataStreamSettings,
   DegradedFieldResponse,
   GetDataStreamDegradedFieldsParams,
+  GetDataStreamDegradedFieldValuesPathParams,
   GetDataStreamDetailsParams,
   GetDataStreamDetailsResponse,
   GetDataStreamSettingsParams,
@@ -98,6 +101,30 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       (message: string) =>
         new DatasetQualityError(
           `Failed to decode data stream degraded fields response: ${message}"`
+        )
+    )(response);
+  }
+
+  public async getDataStreamDegradedFieldValues({
+    dataStream,
+    degradedField,
+  }: GetDataStreamDegradedFieldValuesPathParams): Promise<DegradedFieldValues> {
+    const response = await this.http
+      .get<DegradedFieldValues>(
+        `/internal/dataset_quality/data_streams/${dataStream}/degraded_field/${degradedField}/values`
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(
+          `Failed to fetch data stream degraded field Value": ${error}`,
+          error
+        );
+      });
+
+    return decodeOrThrow(
+      degradedFieldValuesRt,
+      (message: string) =>
+        new DatasetQualityError(
+          `Failed to decode data stream degraded field values response: ${message}"`
         )
     )(response);
   }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -45,9 +46,10 @@ export const IGNORE_FILE_GLOBS = [
   'test/package/Vagrantfile',
   'x-pack/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
   '**/test/**/fixtures/**/*',
+  'packages/kbn-router-to-openapispec/openapi-types.d.ts',
 
   // Required to match the name in the docs.elastic.dev repo.
-  'nav-kibana-dev.docnav.json',
+  'dev_docs/nav-kibana-dev.docnav.json',
 
   // Match elastic wide naming convention for catalog-info.yaml
   'catalog-info.yaml',
@@ -82,6 +84,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // ecs templates
   '**/ecs/fields/**/*',
+
+  // Support for including http-client.env.json configurations
+  '**/http-client.env.json',
 ];
 
 /**
@@ -116,6 +121,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
   'typings/*',
+  'typings/**/*',
 ];
 
 /**

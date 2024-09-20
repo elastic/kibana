@@ -35,8 +35,8 @@ export const FillOpacityOption: React.FC<FillOpacityOptionProps> = ({
     <>
       <EuiFormRow
         display="columnCompressed"
-        label={i18n.translate('xpack.lens.xyChart.fillOpacityLabel', {
-          defaultMessage: 'Fill opacity',
+        label={i18n.translate('xpack.lens.xyChart.areaFillOpacityLabel', {
+          defaultMessage: 'Area fill opacity',
         })}
         fullWidth
       >

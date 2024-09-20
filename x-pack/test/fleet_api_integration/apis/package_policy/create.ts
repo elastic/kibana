@@ -33,15 +33,6 @@ export default function (providerContext: FtrProviderContext) {
       await getService('esArchiver').load(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
-    });
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await getService('esArchiver').unload(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
-    });
-
-    before(async function () {
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -62,8 +53,11 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       agentPolicyId2 = agentPolicyResponse2.item.id;
     });
-
-    after(async function () {
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await getService('esArchiver').unload(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
       await supertest
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
@@ -204,7 +198,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-      expect(response.body.item.policy_id).to.eql(null);
+      expect(response.body.item.policy_id).to.eql(undefined);
       expect(response.body.item.policy_ids).to.eql([]);
     });
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -15,21 +16,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TextBasedLanguagesEditor } from './text_based_languages_editor';
 import type { TextBasedLanguagesEditorProps } from './types';
 import { ReactWrapper } from 'enzyme';
-
-jest.mock('./helpers', () => {
-  const module = jest.requireActual('./helpers');
-  return {
-    ...module,
-    getDocumentationSections: () => ({
-      groups: [
-        {
-          label: 'How it works',
-          items: [],
-        },
-      ],
-    }),
-  };
-});
 import { of } from 'rxjs';
 
 describe('TextBasedLanguagesEditor', () => {
@@ -111,26 +97,6 @@ describe('TextBasedLanguagesEditor', () => {
     ).toStrictEqual('LIMIT 1000 rows');
   });
 
-  it('should render the query history action if isLoading is defined', async () => {
-    const newProps = {
-      ...props,
-      isLoading: true,
-    };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
-    expect(
-      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
-        .length
-    ).not.toBe(0);
-  });
-
-  it('should not render the query history action if isLoading is undefined', async () => {
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
-    expect(
-      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
-        .length
-    ).toBe(0);
-  });
-
   it('should not render the query history action if hideQueryHistory is set to true', async () => {
     const newProps = {
       ...props,
@@ -152,9 +118,6 @@ describe('TextBasedLanguagesEditor', () => {
     expect(
       component!.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
     ).not.toBe(0);
-    expect(component!.find('[data-test-subj="TextBasedLangEditor-documentation"]').length).not.toBe(
-      0
-    );
   });
 
   it('should render the resize for the expanded code editor mode', async () => {
@@ -173,6 +136,18 @@ describe('TextBasedLanguagesEditor', () => {
   it('should render the run query text', async () => {
     const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).not.toBe(0);
+  });
+
+  it('should render the doc icon if the displayDocumentationAsFlyout is true', async () => {
+    const newProps = {
+      ...props,
+      displayDocumentationAsFlyout: true,
+      editorIsInline: false,
+    };
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    expect(component.find('[data-test-subj="TextBasedLangEditor-documentation"]').length).not.toBe(
+      0
+    );
   });
 
   it('should not render the run query text if the hideRunQueryText prop is set to true', async () => {

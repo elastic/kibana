@@ -8,6 +8,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { differenceBy, isEqual } from 'lodash';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
+import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
+
 import type { Agent } from '../../../types';
 
 import {
@@ -101,7 +103,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedStatus,
     selectedTags,
     setSelectedTags,
-    agentPolicies,
+    allAgentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
     pagination,
@@ -286,14 +288,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
             setSelectedStatus={setSelectedStatus}
-            agentPolicies={agentPolicies}
+            agentPolicies={allAgentPolicies}
           />
         </EuiPortal>
       ) : null}
       {enrollmentFlyout.isOpen ? (
         <EuiPortal>
           <AgentEnrollmentFlyout
-            agentPolicy={agentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
+            agentPolicy={allAgentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
             onClose={() => {
               setEnrollmentFlyoutState({ isOpen: false });
               fetchData();
@@ -348,7 +350,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               setAgentToUpgrade(undefined);
               refreshAgents();
             }}
-            isUpdating={Boolean(agentToUpgrade.upgrade_started_at && !agentToUpgrade.upgraded_at)}
+            isUpdating={isStuckInUpdating(agentToUpgrade)}
           />
         </EuiPortal>
       )}
@@ -401,7 +403,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       )}
       {/* Search and filter bar */}
       <SearchAndFilterBar
-        agentPolicies={agentPolicies}
+        agentPolicies={allAgentPolicies}
         draftKuery={draftKuery}
         onDraftKueryChange={setDraftKuery}
         onSubmitSearch={onSubmitSearch}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { set } from '@kbn/safer-lodash-set';
@@ -128,6 +129,8 @@ describe('checking all opted-in dynamic config settings', () => {
    */
   test('detecting all the settings that have opted-in for dynamic in-memory updates', () => {
     expect(getListOfDynamicConfigPaths()).toStrictEqual([
+      // Making testing easier by having the ability of overriding the feature flags without the need to restart
+      'feature_flags.overrides',
       // We need this for enriching our Perf tests with more valuable data regarding the steps of the test
       // Also helpful in Cloud & Serverless testing because we can't control the labels in those offerings
       'telemetry.labels',

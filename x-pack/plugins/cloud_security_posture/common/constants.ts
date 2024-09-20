@@ -37,16 +37,6 @@ export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 
-export const CDR_MISCONFIGURATIONS_DATA_VIEW_NAME = 'Latest Cloud Security Misconfigurations';
-export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
-  'security_solution_cdr_latest_misconfigurations';
-
-export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';
-export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX =
-  'security_solution_cdr_latest_vulnerabilities';
-export const CDR_VULNERABILITIES_INDEX_PATTERN =
-  'logs-*_latest_vulnerabilities_cdr,logs-cloud_security_posture.vulnerabilities_latest-default';
-
 export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
 export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
@@ -59,6 +49,10 @@ export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';
 
+export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';
+export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX =
+  'security_solution_cdr_latest_vulnerabilities';
+
 export const VULNERABILITIES_INDEX_NAME = 'logs-cloud_security_posture.vulnerabilities';
 export const VULNERABILITIES_INDEX_PATTERN = 'logs-cloud_security_posture.vulnerabilities-default*';
 export const VULNERABILITIES_INDEX_DEFAULT_NS =
@@ -66,10 +60,13 @@ export const VULNERABILITIES_INDEX_DEFAULT_NS =
 
 export const LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME =
   'logs-cloud_security_posture.vulnerabilities_latest';
-export const LATEST_VULNERABILITIES_INDEX_PATTERN =
-  'logs-cloud_security_posture.vulnerabilities_latest*';
-export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
+
+export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
+export const CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN =
+  'security_solution-*.vulnerability_latest';
+export const CDR_VULNERABILITIES_INDEX_PATTERN = `${CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`;
+
 export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
 export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';

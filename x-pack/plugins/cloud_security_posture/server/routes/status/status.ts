@@ -36,10 +36,11 @@ import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_PATTERN,
   POSTURE_TYPES,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULN_MGMT_POLICY_TEMPLATE,
   POSTURE_TYPE_ALL,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
+  CDR_VULNERABILITIES_INDEX_PATTERN,
 } from '../../../common/constants';
 import type {
   CspApiRequestHandlerContext,
@@ -169,6 +170,7 @@ const checkIndexHasFindings = async (
           ],
         },
       },
+      ignore_unavailable: true,
     });
 
     // Check the number of hits
@@ -194,6 +196,7 @@ export const getCspStatus = async ({
 }: CspStatusDependencies): Promise<CspSetupStatus> => {
   const [
     hasMisconfigurationsFindings,
+    hasVulnerabilitiesFindings,
     findingsLatestIndexStatus,
     findingsIndexStatus,
     scoreIndexStatus,
@@ -216,6 +219,12 @@ export const getCspStatus = async ({
       esClient,
       CDR_MISCONFIGURATIONS_INDEX_PATTERN,
       LATEST_FINDINGS_RETENTION_POLICY,
+      logger
+    ),
+    checkIndexHasFindings(
+      esClient,
+      CDR_VULNERABILITIES_INDEX_PATTERN,
+      LATEST_VULNERABILITIES_RETENTION_POLICY,
       logger
     ),
     checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
@@ -257,7 +266,7 @@ export const getCspStatus = async ({
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
 
-    checkIndexStatus(esClient, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, logger, {
+    checkIndexStatus(esClient, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, logger, {
       postureType: VULN_MGMT_POLICY_TEMPLATE,
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
     }),
@@ -342,7 +351,7 @@ export const getCspStatus = async ({
       status: scoreIndexStatus,
     },
     {
-      index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+      index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
       status: vulnerabilitiesLatestIndexStatus,
     },
   ];
@@ -405,6 +414,7 @@ export const getCspStatus = async ({
     ...statusResponseInfo,
     installedPackageVersion: installation?.install_version,
     hasMisconfigurationsFindings,
+    hasVulnerabilitiesFindings,
   };
 
   assertResponse(response, logger);

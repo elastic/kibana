@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
@@ -132,19 +133,19 @@ export const getMonitorFilters = async ({
 
   const filtersStr = [
     filter,
-    getKqlFilter({ field: 'tags', values: tags }),
-    getKqlFilter({ field: 'project_id', values: projects }),
-    getKqlFilter({ field: 'type', values: monitorTypes }),
-    getKqlFilter({ field: 'locations.id', values: locationFilter }),
-    getKqlFilter({ field: 'schedule.number', values: schedules }),
-    getKqlFilter({ field: 'id', values: monitorQueryIds }),
+    getSavedObjectKqlFilter({ field: 'tags', values: tags }),
+    getSavedObjectKqlFilter({ field: 'project_id', values: projects }),
+    getSavedObjectKqlFilter({ field: 'type', values: monitorTypes }),
+    getSavedObjectKqlFilter({ field: 'locations.id', values: locationFilter }),
+    getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules }),
+    getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
   return { filtersStr, locationFilter };
 };
 
-export const getKqlFilter = ({
+export const getSavedObjectKqlFilter = ({
   field,
   values,
   operator = 'OR',
@@ -166,10 +167,12 @@ export const getKqlFilter = ({
   }
 
   if (Array.isArray(values)) {
-    return ` (${fieldKey}:"${values.join(`" ${operator} ${fieldKey}:"`)}" )`;
+    return `${fieldKey}:(${values
+      .map((value) => `"${escapeQuotes(value)}"`)
+      .join(` ${operator} `)})`;
   }
 
-  return `${fieldKey}:"${values}"`;
+  return `${fieldKey}:"${escapeQuotes(values)}"`;
 };
 
 const parseLocationFilter = async (context: RouteContext, locations?: string | string[]) => {

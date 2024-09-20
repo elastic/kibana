@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 require('../../../src/setup_node_env');
@@ -26,6 +27,13 @@ const ROOT = resolve(__dirname, '..');
           title: 'Security Solution Endpoint Exceptions API (Elastic Cloud Serverless)',
           description: 'Endpoint Exceptions API allow you to manage Endpoint lists.',
         },
+        tags: [
+          {
+            name: 'Security Solution Endpoint Exceptions API',
+            description:
+              "Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
+          },
+        ],
       },
     },
   });
@@ -43,6 +51,13 @@ const ROOT = resolve(__dirname, '..');
           title: 'Security Solution Endpoint Exceptions API (Elastic Cloud and self-hosted)',
           description: 'Endpoint Exceptions API allow you to manage Endpoint lists.',
         },
+        tags: [
+          {
+            name: 'Security Solution Endpoint Exceptions API',
+            description:
+              "Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
+          },
+        ],
       },
     },
   });
