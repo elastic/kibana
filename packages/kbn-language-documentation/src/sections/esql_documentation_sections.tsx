@@ -39,12 +39,9 @@ export const sourceCommands = {
   label: i18n.translate('languageDocumentation.documentationESQL.sourceCommands', {
     defaultMessage: 'Source commands',
   }),
-  description: i18n.translate(
-    'languageDocumentation.documentationESQL.commandsDescription',
-    {
-      defaultMessage: `A source command produces a table, typically with data from Elasticsearch. ES|QL supports the following source commands.`,
-    }
-  ),
+  description: i18n.translate('languageDocumentation.documentationESQL.commandsDescription', {
+    defaultMessage: `A source command produces a table, typically with data from Elasticsearch. ES|QL supports the following source commands.`,
+  }),
   items: [
     {
       label: i18n.translate('languageDocumentation.documentationESQL.from', {
@@ -53,10 +50,8 @@ export const sourceCommands = {
       description: (
         <Markdown
           openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.from.markdown',
-            {
-              defaultMessage: `### FROM
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.from.markdown', {
+            defaultMessage: `### FROM
 The \`FROM\` source command returns a table with up to 10,000 documents from a data stream, index, or alias. Each row in the resulting table represents a document. Each column corresponds to a field, and can be accessed by the name of that field.
 
 \`\`\`
@@ -104,10 +99,9 @@ FROM employees [METADATA _index, _id]
 | STATS max = MAX(emp_no) BY _index
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
@@ -117,10 +111,8 @@ FROM employees [METADATA _index, _id]
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.row.markdown',
-            {
-              defaultMessage: `### ROW
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.row.markdown', {
+            defaultMessage: `### ROW
 The \`ROW\` source command produces a row with one or more columns with values that you specify. This can be useful for testing.
               
 \`\`\`
@@ -139,10 +131,9 @@ ROW supports the use of functions:
 ROW a = ROUND(1.23, 0)
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
@@ -152,20 +143,17 @@ ROW a = ROUND(1.23, 0)
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.show.markdown',
-            {
-              defaultMessage: `### SHOW
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.show.markdown', {
+            defaultMessage: `### SHOW
 The \`SHOW <item>\` source command returns information about the deployment and its capabilities:
 
 * Use \`SHOW INFO\` to return the deployment's version, build date and hash.
 * Use \`SHOW FUNCTIONS\` to return a list of all supported functions and a synopsis of each function.
             `,
-              ignoreTag: true,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            ignoreTag: true,
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
@@ -216,10 +204,8 @@ ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.drop.markdown',
-            {
-              defaultMessage: `### DROP
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.drop.markdown', {
+            defaultMessage: `### DROP
 Use \`DROP\` to remove columns from a table:
               
 \`\`\`
@@ -234,10 +220,9 @@ FROM employees
 | DROP height*
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
@@ -300,10 +285,8 @@ In case of name collisions, the newly created fields will override the existing 
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.eval.markdown',
-            {
-              defaultMessage: `### EVAL
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.eval.markdown', {
+            defaultMessage: `### EVAL
 \`EVAL\` enables you to add new columns:
 
 \`\`\`
@@ -323,10 +306,9 @@ FROM employees
 #### Functions
 \`EVAL\` supports various functions for calculating values. Refer to Functions for more information.
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
@@ -337,10 +319,8 @@ FROM employees
       description: (
         <Markdown
           openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.grok.markdown',
-            {
-              defaultMessage: `### GROK
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.grok.markdown', {
+            defaultMessage: `### GROK
 \`GROK\` enables you to extract structured data out of a string. \`GROK\` matches the string against patterns, based on regular expressions, and extracts the specified patterns as columns.
 
 Refer to the [grok processor documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/grok-processor.html) for the syntax of grok patterns.
@@ -350,10 +330,9 @@ ROW a = "12 15.5 15.6 true"
 | GROK a "%'{NUMBER:b:int}' %'{NUMBER:c:float}' %'{NUMBER:d:double}' %'{WORD:e:boolean}'"
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
@@ -363,10 +342,8 @@ ROW a = "12 15.5 15.6 true"
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.keep.markdown',
-            {
-              defaultMessage: `### KEEP
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.keep.markdown', {
+            defaultMessage: `### KEEP
 The \`KEEP\` command enables you to specify what columns are returned and the order in which they are returned.
 
 To limit the columns that are returned, use a comma-separated list of column names. The columns are returned in the specified order:
@@ -390,10 +367,9 @@ FROM employees
 | KEEP h*, *
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
@@ -492,10 +468,8 @@ FROM employees
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.sort.markdown',
-            {
-              defaultMessage: `### SORT
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.sort.markdown', {
+            defaultMessage: `### SORT
 Use the \`SORT\` command to sort rows on one or more fields:
 
 \`\`\`
@@ -529,10 +503,9 @@ FROM employees
 | SORT first_name ASC NULLS FIRST
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
