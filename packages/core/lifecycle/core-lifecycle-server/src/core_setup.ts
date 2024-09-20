@@ -13,6 +13,7 @@ import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { ElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
+import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { HttpResources } from '@kbn/core-http-resources-server';
 import type { HttpServiceSetup } from '@kbn/core-http-server';
@@ -52,6 +53,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link ExecutionContextSetup} */
   executionContext: ExecutionContextSetup;
+  /** {@link FeatureFlagsSetup} */
+  featureFlags: FeatureFlagsSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup<RequestHandlerContext> & {
     /** {@link HttpResources} */

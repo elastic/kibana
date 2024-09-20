@@ -11,6 +11,8 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { MappingPropertyBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
@@ -36,6 +38,7 @@ export interface SearchIndicesServicesContextDeps {
 export type SearchIndicesServicesContext = CoreStart &
   SearchIndicesAppPluginStartDependencies & {
     history: AppMountParameters['history'];
+    indexManagement: IndexManagementPluginStart;
   };
 
 export interface AppUsageTracker {
@@ -44,11 +47,18 @@ export interface AppUsageTracker {
   load: (eventName: string | string[]) => void;
 }
 
+export interface Mappings {
+  mappings: {
+    properties: MappingPropertyBase['properties'];
+  };
+}
+
 export interface CodeSnippetParameters {
   indexName?: string;
   apiKey?: string;
   elasticsearchURL: string;
 }
+
 export type CodeSnippetFunction = (params: CodeSnippetParameters) => string;
 
 export interface CodeLanguage {

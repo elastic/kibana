@@ -99,6 +99,7 @@ import type {
   GetRuleExecutionResultsResponse,
 } from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import type {
+  RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
   RulePreviewResponse,
 } from './detection_engine/rule_preview/rule_preview.gen';
@@ -242,6 +243,37 @@ import type {
   InternalUploadAssetCriticalityRecordsResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type {
+  DeleteEntityStoreRequestQueryInput,
+  DeleteEntityStoreRequestParamsInput,
+  DeleteEntityStoreResponse,
+} from './entity_analytics/entity_store/engine/delete.gen';
+import type {
+  GetEntityStoreEngineRequestParamsInput,
+  GetEntityStoreEngineResponse,
+} from './entity_analytics/entity_store/engine/get.gen';
+import type {
+  InitEntityStoreRequestParamsInput,
+  InitEntityStoreRequestBodyInput,
+  InitEntityStoreResponse,
+} from './entity_analytics/entity_store/engine/init.gen';
+import type { ListEntityStoreEnginesResponse } from './entity_analytics/entity_store/engine/list.gen';
+import type {
+  StartEntityStoreRequestParamsInput,
+  StartEntityStoreResponse,
+} from './entity_analytics/entity_store/engine/start.gen';
+import type {
+  GetEntityStoreStatsRequestParamsInput,
+  GetEntityStoreStatsResponse,
+} from './entity_analytics/entity_store/engine/stats.gen';
+import type {
+  StopEntityStoreRequestParamsInput,
+  StopEntityStoreResponse,
+} from './entity_analytics/entity_store/engine/stop.gen';
+import type {
+  ListEntitiesRequestQueryInput,
+  ListEntitiesResponse,
+} from './entity_analytics/entity_store/entities/list_entities.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
@@ -484,7 +516,9 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+    * Create a clean draft Timeline or Timeline template for the current user.
+> info
+> If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
 
     */
   async cleanDraftTimelines(props: CleanDraftTimelinesProps) {
@@ -562,6 +596,9 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Create a new Timeline or Timeline template.
+   */
   async createTimelines(props: CreateTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateTimelines`);
     return this.kbnClient
@@ -620,6 +657,23 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async deleteEntityStore(props: DeleteEntityStoreProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteEntityStore`);
+    return this.kbnClient
+      .request<DeleteEntityStoreResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Delete a note from a Timeline using the note ID.
+   */
   async deleteNote(props: DeleteNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteNote`);
     return this.kbnClient
@@ -650,6 +704,9 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Delete one or more Timelines or Timeline templates.
+   */
   async deleteTimelines(props: DeleteTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteTimelines`);
     return this.kbnClient
@@ -1004,6 +1061,9 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Export Timelines as an NDJSON file.
+   */
   async exportTimelines(props: ExportTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API ExportTimelines`);
     return this.kbnClient
@@ -1114,6 +1174,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
+   */
   async getDraftTimelines(props: GetDraftTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetDraftTimelines`);
     return this.kbnClient
@@ -1155,8 +1218,32 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getEntityStoreEngine(props: GetEntityStoreEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreEngine`);
+    return this.kbnClient
+      .request<GetEntityStoreEngineResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getEntityStoreStats(props: GetEntityStoreStatsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStats`);
+    return this.kbnClient
+      .request<GetEntityStoreStatsResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}/stats', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
-   * Gets notes
+   * Get all notes for a given document.
    */
   async getNotes(props: GetNotesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetNotes`);
@@ -1250,6 +1337,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the details of an existing saved Timeline or Timeline template.
+   */
   async getTimeline(props: GetTimelineProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetTimeline`);
     return this.kbnClient
@@ -1264,6 +1354,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a list of all saved Timelines or Timeline templates.
+   */
   async getTimelines(props: GetTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetTimelines`);
     return this.kbnClient
@@ -1298,11 +1391,27 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Import Timelines.
+   */
   async importTimelines(props: ImportTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API ImportTimelines`);
     return this.kbnClient
       .request<ImportTimelinesResponse>({
         path: '/api/timeline/_import',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async initEntityStore(props: InitEntityStoreProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InitEntityStore`);
+    return this.kbnClient
+      .request<InitEntityStoreResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1341,6 +1450,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Install or update prepackaged Timelines.
+   */
   async installPrepackedTimelines(props: InstallPrepackedTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API InstallPrepackedTimelines`);
     return this.kbnClient
@@ -1368,6 +1480,35 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * List entities records, paging, sorting and filtering as needed.
+   */
+  async listEntities(props: ListEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListEntities`);
+    return this.kbnClient
+      .request<ListEntitiesResponse>({
+        path: '/api/entity_store/entities/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async listEntityStoreEngines() {
+    this.log.info(`${new Date().toISOString()} Calling API ListEntityStoreEngines`);
+    return this.kbnClient
+      .request<ListEntityStoreEnginesResponse>({
+        path: '/api/entity_store/engines',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
    */
   async patchRule(props: PatchRuleProps) {
@@ -1384,7 +1525,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+   * Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
    */
   async patchTimeline(props: PatchTimelineProps) {
     this.log.info(`${new Date().toISOString()} Calling API PatchTimeline`);
@@ -1416,6 +1557,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Favorite a Timeline or Timeline template for the current user.
+   */
   async persistFavoriteRoute(props: PersistFavoriteRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistFavoriteRoute`);
     return this.kbnClient
@@ -1429,6 +1573,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Add a note to a Timeline or update an existing note.
+   */
   async persistNoteRoute(props: PersistNoteRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistNoteRoute`);
     return this.kbnClient
@@ -1442,6 +1589,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Pin an event to an existing Timeline.
+   */
   async persistPinnedEventRoute(props: PersistPinnedEventRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistPinnedEventRoute`);
     return this.kbnClient
@@ -1614,6 +1764,7 @@ detection engine rules.
         },
         method: 'POST',
         body: props.body,
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1696,6 +1847,30 @@ detection engine rules.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async startEntityStore(props: StartEntityStoreProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StartEntityStore`);
+    return this.kbnClient
+      .request<StartEntityStoreResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async stopEntityStore(props: StopEntityStoreProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StopEntityStore`);
+    return this.kbnClient
+      .request<StopEntityStoreResponse>({
+        path: replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1809,6 +1984,10 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
+export interface DeleteEntityStoreProps {
+  query: DeleteEntityStoreRequestQueryInput;
+  params: DeleteEntityStoreRequestParamsInput;
+}
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
 }
@@ -1902,6 +2081,12 @@ export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
 }
+export interface GetEntityStoreEngineProps {
+  params: GetEntityStoreEngineRequestParamsInput;
+}
+export interface GetEntityStoreStatsProps {
+  params: GetEntityStoreStatsRequestParamsInput;
+}
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
 }
@@ -1932,11 +2117,18 @@ export interface ImportRulesProps {
 export interface ImportTimelinesProps {
   body: ImportTimelinesRequestBodyInput;
 }
+export interface InitEntityStoreProps {
+  params: InitEntityStoreRequestParamsInput;
+  body: InitEntityStoreRequestBodyInput;
+}
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
 export interface InternalUploadAssetCriticalityRecordsProps {
   attachment: FormData;
+}
+export interface ListEntitiesProps {
+  query: ListEntitiesRequestQueryInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
@@ -1970,6 +2162,7 @@ export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
 export interface RulePreviewProps {
+  query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
 }
 export interface SearchAlertsProps {
@@ -1983,6 +2176,12 @@ export interface SetAlertsStatusProps {
 }
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
+}
+export interface StartEntityStoreProps {
+  params: StartEntityStoreRequestParamsInput;
+}
+export interface StopEntityStoreProps {
+  params: StopEntityStoreRequestParamsInput;
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;

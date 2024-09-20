@@ -16,7 +16,7 @@ import type { ConfigType } from '../../../../config';
 import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import type { SignalSource } from '../types';
 import { generateAlertId } from './utils';
 
@@ -55,20 +55,21 @@ export const wrapEsqlAlerts = ({
       index: i,
     });
 
-    const baseAlert: BaseFieldsLatest = buildBulkBody(
+    const baseAlert: BaseFieldsLatest = transformHitToAlert({
       spaceId,
       completeRule,
-      event,
+      doc: event,
       mergeStrategy,
-      [],
-      true,
-      buildReasonMessageForNewTermsAlert,
-      [],
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
+      buildReasonMessage: buildReasonMessageForNewTermsAlert,
+      indicesToQuery: [],
       alertTimestampOverride,
       ruleExecutionLogger,
-      id,
-      publicBaseUrl
-    );
+      alertUuid: id,
+      publicBaseUrl,
+    });
 
     return {
       _id: id,
