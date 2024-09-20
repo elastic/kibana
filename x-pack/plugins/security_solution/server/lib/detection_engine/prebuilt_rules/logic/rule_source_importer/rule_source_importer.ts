@@ -145,7 +145,9 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private validateRuleInput(rule: RuleToImport) {
     if (
       !this.knownRules.some(
-        (knownRule) => knownRule.rule_id === rule.rule_id && knownRule.version === rule.version
+        (knownRule) =>
+          knownRule.rule_id === rule.rule_id &&
+          (knownRule.version === rule.version || knownRule.version == null)
       )
     ) {
       throw new Error(`Rule ${rule.rule_id} was not registered during setup.`);

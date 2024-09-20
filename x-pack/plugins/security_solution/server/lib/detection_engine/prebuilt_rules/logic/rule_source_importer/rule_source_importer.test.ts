@@ -21,6 +21,7 @@ describe('ruleSourceImporter', () => {
   let subject: ReturnType<typeof createRuleSourceImporter>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     config = createMockConfig();
     config = configMock.withExperimentalFeature(config, 'prebuiltRulesCustomizationEnabled');
     context = requestContextMock.create().securitySolution;
@@ -108,15 +109,16 @@ describe('ruleSourceImporter', () => {
 
     beforeEach(() => {
       rule = { rule_id: 'validated-rule', version: 1 } as ValidatedRuleToImport;
-    });
-
-    it('invokes calculateRuleSourceForImport with the correct arguments', async () => {
       ruleAssetsClientMock.fetchAssetsByVersion.mockResolvedValue([
         getPrebuiltRuleMock({ rule_id: 'rule-1' }),
       ]);
       ruleAssetsClientMock.fetchLatestAssetsByRuleId.mockResolvedValue([
+        getPrebuiltRuleMock({ rule_id: 'rule-1' }),
         getPrebuiltRuleMock({ rule_id: 'rule-2' }),
       ]);
+    });
+
+    it('invokes calculateRuleSourceForImport with the correct arguments', async () => {
       const calculatorSpy = jest
         .spyOn(calculateRuleSourceModule, 'calculateRuleSourceForImport')
         .mockReturnValue({ ruleSource: { type: 'internal' }, immutable: false });
@@ -128,7 +130,7 @@ describe('ruleSourceImporter', () => {
       expect(calculatorSpy).toHaveBeenCalledWith({
         rule,
         prebuiltRuleAssets: [expect.objectContaining({ rule_id: 'rule-1' })],
-        installedRuleIds: ['rule-2'],
+        installedRuleIds: ['rule-1', 'rule-2'],
       });
     });
 
@@ -145,6 +147,24 @@ describe('ruleSourceImporter', () => {
       expect(() => subject.calculateRuleSource(rule)).toThrowErrorMatchingInlineSnapshot(
         `"Rule validated-rule was not registered during setup."`
       );
+    });
+
+    describe('for rules set up without a version', () => {
+      it('invokes the calculator with the correct arguments', async () => {
+        const calculatorSpy = jest
+          .spyOn(calculateRuleSourceModule, 'calculateRuleSourceForImport')
+          .mockReturnValue({ ruleSource: { type: 'internal' }, immutable: false });
+
+        await subject.setup({ rules: [{ ...rule, version: undefined }] });
+        await subject.calculateRuleSource(rule);
+
+        expect(calculatorSpy).toHaveBeenCalledTimes(1);
+        expect(calculatorSpy).toHaveBeenCalledWith({
+          rule,
+          prebuiltRuleAssets: [expect.objectContaining({ rule_id: 'rule-1' })],
+          installedRuleIds: ['rule-1', 'rule-2'],
+        });
+      });
     });
   });
 });
