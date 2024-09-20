@@ -14,7 +14,7 @@ import {
   DatasetQualityApiError,
 } from './common/dataset_quality_api_supertest';
 import { DatasetQualityFtrContextProvider } from './common/services';
-import { getBackingIndexNameWithoutLastPart } from './utils';
+import { createBackingIndexNameWithoutVersion } from './utils';
 
 export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const datasetQualityApiClient: DatasetQualityApiClient = getService('datasetQualityApiClient');
@@ -106,7 +106,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
       expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
       expect(resp.body.lastBackingIndexName).to.be(
-        `${getBackingIndexNameWithoutLastPart({
+        `${createBackingIndexNameWithoutVersion({
           type,
           dataset,
           namespace,
@@ -123,7 +123,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
       expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
       expect(resp.body.lastBackingIndexName).to.be(
-        `${getBackingIndexNameWithoutLastPart({ type, dataset, namespace })}-000002`
+        `${createBackingIndexNameWithoutVersion({ type, dataset, namespace })}-000002`
       );
     });
   });

@@ -35,7 +35,7 @@ function getCurrentDateFormatted() {
   return `${year}.${month}.${day}`;
 }
 
-export function getBackingIndexNameWithoutLastPart({
+export function createBackingIndexNameWithoutVersion({
   type,
   dataset,
   namespace = 'default',

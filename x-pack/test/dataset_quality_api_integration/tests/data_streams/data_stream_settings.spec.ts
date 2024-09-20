@@ -15,7 +15,7 @@ import {
   getDataStreamSettingsOfEarliestIndex,
   rolloverDataStream,
 } from '../../utils';
-import { getBackingIndexNameWithoutLastPart } from './es_utils';
+import { createBackingIndexNameWithoutVersion } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -123,7 +123,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
         expect(resp.body.integration).to.be('apache');
         expect(resp.body.lastBackingIndexName).to.be(
-          `${getBackingIndexNameWithoutLastPart({
+          `${createBackingIndexNameWithoutVersion({
             type,
             dataset: integrationDataset,
             namespace,
@@ -146,7 +146,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
         expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
         expect(resp.body.lastBackingIndexName).to.be(
-          `${getBackingIndexNameWithoutLastPart({ type, dataset, namespace })}-000002`
+          `${createBackingIndexNameWithoutVersion({ type, dataset, namespace })}-000002`
         );
       });
 
