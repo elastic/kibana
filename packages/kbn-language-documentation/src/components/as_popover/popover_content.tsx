@@ -70,7 +70,7 @@ function DocumentationContent({
           justifyContent="spaceBetween"
         >
           <EuiFlexItem grow={false}>
-            {i18n.translate('languageDocumentationPopover.header', {
+            {i18n.translate('languageDocumentation.header', {
               defaultMessage: '{language} reference',
               values: { language },
             })}
@@ -78,7 +78,7 @@ function DocumentationContent({
           {linkToDocumentation && (
             <EuiFlexItem grow={false}>
               <EuiLink external href={linkToDocumentation} target="_blank">
-                {i18n.translate('languageDocumentationPopover.documentationLinkLabel', {
+                {i18n.translate('languageDocumentation.documentationLinkLabel', {
                   defaultMessage: 'View full documentation',
                 })}
               </EuiLink>
@@ -106,7 +106,7 @@ function DocumentationContent({
                   setSearchText(e.target.value);
                 }}
                 data-test-subj="language-documentation-navigation-search"
-                placeholder={i18n.translate('languageDocumentationPopover.searchPlaceholder', {
+                placeholder={i18n.translate('languageDocumentation.searchPlaceholder', {
                   defaultMessage: 'Search',
                 })}
               />

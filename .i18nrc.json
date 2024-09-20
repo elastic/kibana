@@ -118,7 +118,7 @@
     "serverlessPackages": "packages/serverless",
     "sse": [ "packages/kbn-sse-utils" ],
     "coloring": "packages/kbn-coloring/src",
-    "languageDocumentationPopover": "packages/kbn-language-documentation/src",
+    "languageDocumentation": "packages/kbn-language-documentation/src",
     "esql": "src/plugins/esql",
     "esqlDataGrid": "src/plugins/esql_datagrid",
     "statusPage": "src/legacy/core_plugins/status_page",

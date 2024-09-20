@@ -85,7 +85,7 @@ function DocumentationFlyout({
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
               <h3>
-                {i18n.translate('languageDocumentationPopover.documentationFlyoutTitle', {
+                {i18n.translate('languageDocumentation.documentationFlyoutTitle', {
                   defaultMessage: 'ES|QL quick reference',
                 })}
               </h3>
