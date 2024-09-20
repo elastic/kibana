@@ -60,8 +60,6 @@ import { RootPrivilegesCallout } from '../create_package_policy_page/single_page
 
 import { StepsWithLessPadding } from '../create_package_policy_page/single_page_layout';
 
-import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
-
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
@@ -104,8 +102,6 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { isAgentlessEnabled } = useAgentless();
-
   const {
     // data
     agentPolicies: existingAgentPolicies,
@@ -452,7 +448,7 @@ export const EditPackagePolicyForm = memo<{
         onChange={handleExtensionViewOnChange}
         validationResults={validationResults}
         isEditPage={true}
-        isAgentlessEnabled={isAgentlessEnabled}
+        isAgentlessEnabled={hasAgentlessAgentPolicy}
       />
     </ExtensionWrapper>
   );
