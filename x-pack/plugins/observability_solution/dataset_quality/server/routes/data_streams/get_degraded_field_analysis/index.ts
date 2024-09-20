@@ -11,7 +11,7 @@ import { createDatasetQualityESClient } from '../../../utils';
 import { getDataStreamMapping } from './get_datastream_mappings';
 import { getDataStreamSettings } from './get_datastream_settings';
 
-// TODO: The API should also in future return some analysis around the ignore_above check.
+// TODO: The API should also in future return some analysis around the ignore_malformed check.
 // As this check is expensive and steps are not very concrete, its not done for the initial iteration
 export async function analyzeDegradedField({
   esClient,
