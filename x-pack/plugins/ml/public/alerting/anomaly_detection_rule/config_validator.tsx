@@ -38,7 +38,9 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
       !!alertParams.lookbackInterval && parseInterval(alertParams.lookbackInterval)?.asSeconds();
 
     const isAlertIntervalTooHigh =
-      lookbackIntervalInSeconds && lookbackIntervalInSeconds < alertIntervalInSeconds;
+      lookbackIntervalInSeconds &&
+      alertIntervalInSeconds &&
+      lookbackIntervalInSeconds < alertIntervalInSeconds;
 
     const jobWithoutStartedDatafeed = jobConfigs
       .filter((job) => job.datafeed_config.state !== DATAFEED_STATE.STARTED)
@@ -49,6 +51,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
     const notifyWhenWarning =
       alertNotifyWhen === 'onActiveAlert' &&
       lookbackIntervalInSeconds &&
+      alertIntervalInSeconds &&
       alertIntervalInSeconds < lookbackIntervalInSeconds;
 
     const bucketSpanDuration = parseInterval(jobConfigs[0].analysis_config.bucket_span!);
