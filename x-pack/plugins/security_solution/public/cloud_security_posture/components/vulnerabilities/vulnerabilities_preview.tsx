@@ -53,16 +53,28 @@ const getVulnerabilityStats = (
       count: unknown,
       color: euiThemeVars.euiColorSuccess,
     });
-  if (critical > 0)
+  if (low > 0)
     vulnPropsArray.push({
       key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.CriticalVulnerabilitiesText',
+        'xpack.securitySolution.flyout.right.insights.vulnerabilities.lowVulnerabilitiesText',
         {
-          defaultMessage: 'Critical',
+          defaultMessage: 'Low',
         }
       ),
-      count: critical,
-      color: euiThemeVars.euiColorDanger,
+      count: low,
+      color: euiThemeVars.euiColorVis0,
+    });
+
+  if (medium > 0)
+    vulnPropsArray.push({
+      key: i18n.translate(
+        'xpack.securitySolution.flyout.right.insights.vulnerabilities.mediumVulnerabilitiesText',
+        {
+          defaultMessage: 'Medium',
+        }
+      ),
+      count: medium,
+      color: euiThemeVars.euiColorVis5_behindText,
     });
   if (high > 0)
     vulnPropsArray.push({
@@ -75,28 +87,18 @@ const getVulnerabilityStats = (
       count: high,
       color: euiThemeVars.euiColorVis9_behindText,
     });
-  if (medium > 0)
+  if (critical > 0)
     vulnPropsArray.push({
       key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.mediumVulnerabilitiesText',
+        'xpack.securitySolution.flyout.right.insights.vulnerabilities.CriticalVulnerabilitiesText',
         {
-          defaultMessage: 'Medium',
+          defaultMessage: 'Critical',
         }
       ),
-      count: medium,
-      color: euiThemeVars.euiColorVis5_behindText,
+      count: critical,
+      color: euiThemeVars.euiColorDanger,
     });
-  if (low > 0)
-    vulnPropsArray.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.lowVulnerabilitiesText',
-        {
-          defaultMessage: 'Low',
-        }
-      ),
-      count: low,
-      color: euiThemeVars.euiColorVis0,
-    });
+
   return vulnPropsArray;
 };
 
