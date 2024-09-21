@@ -10,7 +10,6 @@ import { getClientsFromAPIKey } from './utils';
 import { EntityManagerServerSetup } from '../types';
 
 export async function getScopedClients(server: EntityManagerServerSetup) {
-  const { logger } = server;
   const apiKey = await readEntityDiscoveryAPIKey(server);
   if (!apiKey) {
     throw new Error('Missing API key');

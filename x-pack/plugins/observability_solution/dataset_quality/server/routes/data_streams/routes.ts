@@ -308,7 +308,7 @@ const dataStreamsIntegrationsRoute = createDatasetQualityServerRoute({
       dashboards?: Dashboard[];
     }>;
   }> {
-    const { context, params, plugins, logger } = resources;
+    const { context, params, plugins } = resources;
     const { dataStreams } = params.body;
     const coreContext = await context.core;
 

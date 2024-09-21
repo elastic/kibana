@@ -10,7 +10,7 @@ import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { getEsqlRequest } from '../../../common/utils/get_esql_request';
 
-const LATEST_ENTITIES_INDEX = `entities-*-latest`;
+const LATEST_ENTITIES_INDEX = `.entities*instance*`;
 
 const MAX_NUMBER_OF_ENTITIES = 500;
 

@@ -34,7 +34,7 @@ export function EntityTable({
   } = useDateRange({ data });
 
   const query = useMemo(() => {
-    const commands = ['FROM entities-*-latest'];
+    const commands = ['FROM .entities*instance*'];
 
     if (type !== 'all') {
       commands.push(`WHERE entity.type == "${type}"`);
@@ -131,7 +131,7 @@ export function EntityTable({
     return dataViews
       .create(
         {
-          title: `entities-*-latest`,
+          title: `.entities*instance*`,
           timeFieldName: '@timestamp',
         },
         false, // skip fetch fields

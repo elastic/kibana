@@ -455,7 +455,7 @@ const listEntitiesRoute = createInventoryServerRoute({
 
     const response = await esClient.esql('get_entity', {
       ...getEsqlRequest({
-        query: `FROM entities-*-latest`,
+        query: `FROM .entities*instance*`,
         kuery,
         start,
         end,

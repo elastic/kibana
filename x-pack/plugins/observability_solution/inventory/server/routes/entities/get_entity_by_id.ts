@@ -21,7 +21,7 @@ export async function getEntityById({
   displayName: string;
 }): Promise<Entity> {
   const response = await esClient.esql('get_entity', {
-    query: `FROM entities-*-latest | WHERE entity.type == "${type}" AND entity.displayName.keyword == "${displayName}" | LIMIT 1`,
+    query: `FROM .entities*instance* | WHERE entity.type == "${type}" AND entity.displayName.keyword == "${displayName}" | LIMIT 1`,
   });
 
   if (response.values.length === 0) {
