@@ -24,7 +24,6 @@
     "@kbn/alerting-plugin",
     "@kbn/data-views-plugin",
     "@kbn/home-plugin",
-    "@kbn/saved-objects-plugin",
     "@kbn/management-plugin",
     "@kbn/share-plugin",
     "@kbn/spaces-plugin",

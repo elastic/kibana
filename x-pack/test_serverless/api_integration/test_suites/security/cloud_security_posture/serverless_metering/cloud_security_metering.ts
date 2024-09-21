@@ -6,10 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
+import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import {
   deleteIndex,
