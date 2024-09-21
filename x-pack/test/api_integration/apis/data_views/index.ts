@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should be able to create data view WITHOUT space access', async () => {
-      spacesService.create({
+      await spacesService.create({
         id: 'test',
         name: 'Test-Space',
         disabledFeatures: ['indexPatterns'],
