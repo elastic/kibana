@@ -17,13 +17,13 @@ import { css } from '@emotion/react';
 import { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import {
   firstNonNullValue,
   LoadingGroup,
   NullGroup,
 } from '../../../components/cloud_security_grouping';
-import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_number';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import { FindingsGroupingAggregation } from './use_grouped_findings';

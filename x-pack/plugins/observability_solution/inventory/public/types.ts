@@ -9,6 +9,7 @@ import type {
   ObservabilitySharedPluginSetup,
 } from '@kbn/observability-shared-plugin/public';
 import type { InferencePublicStart, InferencePublicSetup } from '@kbn/inference-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -22,6 +23,7 @@ export interface InventorySetupDependencies {
 export interface InventoryStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   inference: InferencePublicStart;
+  share: SharePluginStart;
 }
 
 export interface InventoryPublicSetup {}
