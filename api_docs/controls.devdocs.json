@@ -21,7 +21,7 @@
           },
           ") => JSX.Element"
         ],
-        "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer_lazy.tsx",
+        "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer_lazy.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
                 "text": "ControlGroupRendererProps"
               }
             ],
-            "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer_lazy.tsx",
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer_lazy.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -59,7 +59,7 @@
         "tags": [],
         "label": "ControlGroupCreationOptions",
         "description": [],
-        "path": "src/plugins/controls/public/react_controls/external_api/types.ts",
+        "path": "src/plugins/controls/public/control_group/control_group_renderer/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -89,7 +89,7 @@
               },
               ">> | undefined"
             ],
-            "path": "src/plugins/controls/public/react_controls/external_api/types.ts",
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,7 +110,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/public/react_controls/external_api/types.ts",
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -124,7 +124,7 @@
         "tags": [],
         "label": "ControlGroupRendererProps",
         "description": [],
-        "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer.tsx",
+        "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,7 +146,7 @@
               },
               ") => void"
             ],
-            "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer.tsx",
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -166,7 +166,7 @@
                     "text": "ControlGroupRendererApi"
                   }
                 ],
-                "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer.tsx",
+                "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -284,7 +284,7 @@
               },
               ">>) | undefined"
             ],
-            "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer.tsx",
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -314,7 +314,7 @@
                   },
                   ">>"
                 ],
-                "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer.tsx",
+                "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -405,7 +405,7 @@
                   },
                   ">>, controlId?: string | undefined) => void; }"
                 ],
-                "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer.tsx",
+                "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -430,7 +430,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer.tsx",
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -451,7 +451,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer.tsx",
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -472,7 +472,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer.tsx",
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -493,7 +493,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer.tsx",
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -507,7 +507,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer.tsx",
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -797,7 +797,7 @@
           "ControlFactory",
           "<State, Api>"
         ],
-        "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+        "path": "src/plugins/controls/public/controls/data_controls/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -819,7 +819,7 @@
               },
               ") => boolean"
             ],
-            "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+            "path": "src/plugins/controls/public/controls/data_controls/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -839,7 +839,7 @@
                     "text": "DataViewField"
                   }
                 ],
-                "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+                "path": "src/plugins/controls/public/controls/data_controls/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -859,7 +859,7 @@
               "CustomOptionsComponentProps",
               "<State>> | undefined"
             ],
-            "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+            "path": "src/plugins/controls/public/controls/data_controls/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1373,7 +1373,7 @@
           },
           ") => void; }"
         ],
-        "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+        "path": "src/plugins/controls/public/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1659,7 +1659,7 @@
           },
           ">>; }"
         ],
-        "path": "src/plugins/controls/public/react_controls/external_api/types.ts",
+        "path": "src/plugins/controls/public/control_group/control_group_renderer/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1750,7 +1750,7 @@
           },
           ">>, controlId?: string | undefined) => void; }"
         ],
-        "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+        "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1780,7 +1780,7 @@
         "signature": [
           "(newState: Partial<State>, controlType: string) => Partial<State>"
         ],
-        "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+        "path": "src/plugins/controls/public/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1795,7 +1795,7 @@
             "signature": [
               "{ [P in keyof State]?: State[P] | undefined; }"
             ],
-            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "path": "src/plugins/controls/public/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1806,7 +1806,7 @@
             "tags": [],
             "label": "controlType",
             "description": [],
-            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
+            "path": "src/plugins/controls/public/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1972,7 +1972,7 @@
           },
           " & { untilFiltersReady: () => Promise<void>; }"
         ],
-        "path": "src/plugins/controls/public/react_controls/controls/data_controls/types.ts",
+        "path": "src/plugins/controls/public/controls/data_controls/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2031,7 +2031,7 @@
         "tags": [],
         "label": "controlGroupStateBuilder",
         "description": [],
-        "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+        "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2069,7 +2069,7 @@
               },
               ", controlId?: string | undefined) => Promise<void>"
             ],
-            "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+            "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2099,7 +2099,7 @@
                   },
                   ">>"
                 ],
-                "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2120,7 +2120,7 @@
                     "text": "DefaultDataControlState"
                   }
                 ],
-                "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2135,7 +2135,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2171,7 +2171,7 @@
               "OptionsListControlState",
               ", controlId?: string | undefined) => void"
             ],
-            "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+            "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2201,7 +2201,7 @@
                   },
                   ">>"
                 ],
-                "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2216,7 +2216,7 @@
                 "signature": [
                   "OptionsListControlState"
                 ],
-                "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2231,7 +2231,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2267,7 +2267,7 @@
               "RangesliderControlState",
               ", controlId?: string | undefined) => void"
             ],
-            "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+            "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2297,7 +2297,7 @@
                   },
                   ">>"
                 ],
-                "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2312,7 +2312,7 @@
                 "signature": [
                   "RangesliderControlState"
                 ],
-                "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2327,7 +2327,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2361,7 +2361,7 @@
               },
               ">>, controlId?: string | undefined) => void"
             ],
-            "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+            "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2391,7 +2391,7 @@
                   },
                   ">>"
                 ],
-                "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2406,7 +2406,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/controls/public/react_controls/control_group/utils/control_group_state_builder.ts",
+                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false

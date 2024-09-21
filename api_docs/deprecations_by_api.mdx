@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2024-09-20
+date: 2024-09-21
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -21,10 +21,10 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authc" text="authc"/> | ml, securitySolution | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authz" text="authz"/> | actions, savedObjectsTagging, ml, enterpriseSearch | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SimpleSavedObject" text="SimpleSavedObject"/> | @kbn/core-saved-objects-browser-internal, @kbn/core, savedObjects, visualizations, aiops, dataVisualizer, ml, dashboardEnhanced, graph, lens, securitySolution, eventAnnotation, @kbn/core-saved-objects-browser-mocks | - |
-| <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectAttributes" text="SavedObjectAttributes"/> | @kbn/core, savedObjects, embeddable, visualizations, canvas, graph, ml | - |
+| <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectAttributes" text="SavedObjectAttributes"/> | @kbn/core, embeddable, savedObjects, visualizations, canvas, graph, ml | - |
 | <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-server.SavedObjectsType.migrations" text="migrations"/> | @kbn/core-saved-objects-base-server-internal, @kbn/core-saved-objects-migration-server-internal, @kbn/core-saved-objects-server-internal, @kbn/core-ui-settings-server-internal, @kbn/core-usage-data-server-internal, taskManager, spaces, actions, @kbn/core-saved-objects-migration-server-mocks, share, dataViews, data, alerting, lens, cases, savedSearch, canvas, fleet, cloudSecurityPosture, ml, logsShared, graph, lists, maps, visualizations, infra, apmDataAccess, securitySolution, apm, slo, synthetics, uptime, dashboard, eventAnnotation, links, savedObjectsManagement, @kbn/core-test-helpers-so-type-serializer, @kbn/core-saved-objects-api-server-internal | - |
 | <DocLink id="kibDataPluginApi" section="def-public.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | - |
-| <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.indexPatterns" text="indexPatterns"/> | graph, stackAlerts, inputControlVis, securitySolution, savedObjects | - |
+| <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.indexPatterns" text="indexPatterns"/> | graph, stackAlerts, inputControlVis, securitySolution | - |
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.fieldFormats" text="fieldFormats"/> | dashboard, dataVisualizer, stackAlerts, expressionPartitionVis | - |
 | <DocLink id="kibDataPluginApi" section="def-common.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | - |
 | <DocLink id="kibAlertingPluginApi" section="def-common.MaintenanceWindow" text="MaintenanceWindow"/> | triggersActionsUi | - |
@@ -69,18 +69,18 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginStart.authc" text="authc"/> | alerting, observabilityAIAssistant, fleet, cloudSecurityPosture, entityManager, serverlessSearch, transform, upgradeAssistant, apm, synthetics, security | - |
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.TaskManagerSetupContract.index" text="index"/> | actions, alerting | - |
 | <DocLink id="kibDataPluginApi" section="def-public.syncQueryStateWithUrl" text="syncQueryStateWithUrl"/> | monitoring | - |
-| <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectReference" text="SavedObjectReference"/> | @kbn/core-saved-objects-api-browser, @kbn/core, savedObjects, savedObjectsManagement, visualizations, savedObjectsTagging, eventAnnotation, lens, maps, graph, dashboard, savedObjectsTaggingOss, kibanaUtils, expressions, data, embeddable, uiActionsEnhanced, canvas, dashboardEnhanced, globalSearchProviders, controls | - |
+| <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectReference" text="SavedObjectReference"/> | @kbn/core-saved-objects-api-browser, @kbn/core, savedObjectsManagement, savedObjects, visualizations, savedObjectsTagging, eventAnnotation, lens, maps, graph, dashboard, kibanaUtils, expressions, data, savedObjectsTaggingOss, embeddable, uiActionsEnhanced, canvas, dashboardEnhanced, globalSearchProviders, controls | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract" text="SavedObjectsClientContract"/> | @kbn/core-saved-objects-browser, @kbn/core-saved-objects-browser-internal, @kbn/core, home, savedObjects, visualizations, lens, visTypeTimeseries, @kbn/core-saved-objects-browser-mocks | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.create" text="create"/> | @kbn/core-saved-objects-browser-internal, @kbn/core-saved-objects-browser-mocks, savedObjects | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.bulkCreate" text="bulkCreate"/> | @kbn/core-saved-objects-browser-mocks, home, @kbn/core-saved-objects-browser-internal | - |
-| <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.delete" text="delete"/> | @kbn/core-saved-objects-browser-internal, @kbn/core-saved-objects-browser-mocks, savedObjects, visualizations | - |
+| <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.delete" text="delete"/> | @kbn/core-saved-objects-browser-internal, @kbn/core-saved-objects-browser-mocks, visualizations | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.bulkDelete" text="bulkDelete"/> | @kbn/core-saved-objects-browser-mocks, @kbn/core-saved-objects-browser-internal | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.find" text="find"/> | @kbn/core-saved-objects-browser-mocks, savedObjects, dashboardEnhanced, @kbn/core-saved-objects-browser-internal | - |
-| <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.get" text="get"/> | @kbn/core-saved-objects-browser-mocks, savedObjects, dashboardEnhanced, @kbn/core-saved-objects-browser-internal | - |
-| <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.bulkGet" text="bulkGet"/> | @kbn/core-saved-objects-browser-mocks, savedObjects, @kbn/core-saved-objects-browser-internal | - |
+| <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.get" text="get"/> | @kbn/core-saved-objects-browser-mocks, dashboardEnhanced, savedObjects, @kbn/core-saved-objects-browser-internal | - |
+| <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.bulkGet" text="bulkGet"/> | @kbn/core-saved-objects-browser-mocks, @kbn/core-saved-objects-browser-internal | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.resolve" text="resolve"/> | @kbn/core-saved-objects-browser-mocks, discover, @kbn/core-saved-objects-browser-internal | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.bulkResolve" text="bulkResolve"/> | @kbn/core-saved-objects-browser-mocks, @kbn/core-saved-objects-browser-internal | - |
-| <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.update" text="update"/> | @kbn/core-saved-objects-browser-internal, @kbn/core-saved-objects-browser-mocks, savedObjects | - |
+| <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.update" text="update"/> | @kbn/core-saved-objects-browser-internal, @kbn/core-saved-objects-browser-mocks | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SavedObjectsClientContract.bulkUpdate" text="bulkUpdate"/> | @kbn/core-saved-objects-browser-mocks, @kbn/core-saved-objects-browser-internal | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SimpleSavedObject.migrationVersion" text="migrationVersion"/> | @kbn/core-saved-objects-browser-mocks, @kbn/core-saved-objects-browser-internal | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SimpleSavedObject.save" text="save"/> | @kbn/core-saved-objects-browser-internal | - |
@@ -109,8 +109,6 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | graph, visTypeTimeseries, dataViewManagement | - |
 | <DocLink id="kibSavedObjectsFinderPluginApi" section="def-public.SavedObjectMetaData.includeFields" text="includeFields"/> | visualizations, graph | - |
 | <DocLink id="kibTimelinesPluginApi" section="def-public.TimelinesUIStart.getHoverActions" text="getHoverActions"/> | kubernetesSecurity, osquery, threatIntelligence | - |
-| <DocLink id="kibKbnCoreLifecycleBrowserPluginApi" section="def-public.CoreStart.savedObjects" text="savedObjects"/> | @kbn/core-plugins-browser-internal, @kbn/core-root-browser-internal, home, savedObjects, unifiedSearch, visualizations, fileUpload, dashboardEnhanced, transform, discover, dataVisualizer | - |
-| <DocLink id="kibKbnCoreSavedObjectsBrowserMocksPluginApi" section="def-public.simpleSavedObjectMock" text="simpleSavedObjectMock"/> | @kbn/core, lens, savedObjects | - |
 | <DocLink id="kibEmbeddablePluginApi" section="def-public.EmbeddablePanel" text="EmbeddablePanel"/> | lens, dashboard, canvas | - |
 | <DocLink id="kibEmbeddablePluginApi" section="def-public.EmbeddableSetup.registerEmbeddableFactory" text="registerEmbeddableFactory"/> | lens, dashboard | - |
 | <DocLink id="kibEmbeddablePluginApi" section="def-public.EmbeddableStart.getEmbeddableFactory" text="getEmbeddableFactory"/> | lens, dashboard, investigateApp | - |
@@ -118,6 +116,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnPresentationPublishingPluginApi" section="def-public.apiHasLegacyLibraryTransforms" text="apiHasLegacyLibraryTransforms"/> | dashboard | - |
 | <DocLink id="kibKbnPresentationPublishingPluginApi" section="def-public.HasLegacyLibraryTransforms" text="HasLegacyLibraryTransforms"/> | embeddable, dashboard | - |
 | <DocLink id="kibKbnPresentationPublishingPluginApi" section="def-public.HasLibraryTransforms" text="HasLibraryTransforms"/> | dashboard, maps | - |
+| <DocLink id="kibKbnCoreLifecycleBrowserPluginApi" section="def-public.CoreStart.savedObjects" text="savedObjects"/> | @kbn/core-plugins-browser-internal, @kbn/core-root-browser-internal, home, unifiedSearch, visualizations, fileUpload, dashboardEnhanced, transform, discover, dataVisualizer | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.flattenHit" text="flattenHit"/> | dataViews, maps | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.removeScriptedField" text="removeScriptedField"/> | dataViews, dataViewManagement | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.getScriptedFields" text="getScriptedFields"/> | dataViews, dataViewManagement | - |
@@ -133,6 +132,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibDataViewsPluginApi" section="def-server.getFieldByName" text="getFieldByName"/> | unifiedSearch | - |
 | <DocLink id="kibDataViewsPluginApi" section="def-server.findIndexPatternById" text="findIndexPatternById"/> | unifiedSearch | - |
 | <DocLink id="kibEmbeddablePluginApi" section="def-public.EmbeddableSetup.registerSavedObjectToPanelMethod" text="registerSavedObjectToPanelMethod"/> | lens | - |
+| <DocLink id="kibKbnCoreSavedObjectsBrowserMocksPluginApi" section="def-public.simpleSavedObjectMock" text="simpleSavedObjectMock"/> | @kbn/core, lens, savedObjects | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-public.ExpressionFunctionDefinition.context" text="context"/> | canvas | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-public.ExpressionsServiceSetup.getFunction" text="getFunction"/> | canvas | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-public.ExpressionsServiceSetup.getFunctions" text="getFunctions"/> | canvas | - |
@@ -182,7 +182,6 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibFeaturesPluginApi" section="def-server.FeaturesPluginSetup.getElasticsearchFeatures" text="getElasticsearchFeatures"/> | security, @kbn/security-role-management-model | 8.8.0 |
 | <DocLink id="kibHomePluginApi" section="def-public.HomePublicPluginSetup.environment" text="environment"/> | apm | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-server.LicensingPluginSetup.refresh" text="refresh"/> | mapsEms | 8.8.0 |
-| <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObject" text="SavedObject"/> | savedObjectsTaggingOss | 8.8.0 |
 | <DocLink id="kibKbnCorePluginsServerPluginApi" section="def-server.AsyncPlugin" text="AsyncPlugin"/> | @kbn/core-plugins-server-internal, @kbn/core | 8.8.0 |
 | <DocLink id="kibFeaturesPluginApi" section="def-common.FeatureElasticsearchPrivileges.requiredRoles" text="requiredRoles"/> | security | 8.8.0
 
@@ -236,7 +235,7 @@ Safe to remove.
 | <DocLink id="kibListsPluginApi" section="def-server.ListClient.createListItemBootStrapIndex" text="createListItemBootStrapIndex"/> | lists | 
 | <DocLink id="kibListsPluginApi" section="def-server.ListClient.setListPolicy" text="setListPolicy"/> | lists | 
 | <DocLink id="kibListsPluginApi" section="def-server.ListClient.setListItemPolicy" text="setListItemPolicy"/> | lists | 
-| <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectsStart.SavedObjectClass" text="SavedObjectClass"/> | savedObjects | 
+| <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObject" text="SavedObject"/> | savedObjects | 
 | <DocLink id="kibSecurityPluginApi" section="def-public.SecurityPluginSetup.authc" text="authc"/> | security | 
 | <DocLink id="kibServerlessPluginApi" section="def-public.ServerlessPluginStart.setSideNavComponentDeprecated" text="setSideNavComponentDeprecated"/> | serverless | 
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.ConcreteTaskInstance.interval" text="interval"/> | taskManager | 
