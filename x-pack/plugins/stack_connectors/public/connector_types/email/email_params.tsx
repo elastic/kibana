@@ -18,6 +18,22 @@ import { EmailActionParams } from '../types';
 
 const noop = () => {};
 
+export const getFormattedEmailOptions = (
+  searchValue: string,
+  previousOptions: Array<{ label: string }>
+): Array<{ label: string }> => {
+  if (!searchValue.trim()) return previousOptions;
+  const previousEmails: string[] = previousOptions.map((option) => option.label);
+  const newEmails: string[] = searchValue.split(',').reduce((result, email) => {
+    const trimmedEmail: string = email.trim();
+    if (trimmedEmail) result.push(trimmedEmail);
+    return result;
+  }, [] as string[]);
+  const allUniqueEmails: string[] = Array.from(new Set([...previousEmails, ...newEmails]));
+  const formattedOptions = allUniqueEmails.map((email) => ({ label: email }));
+  return formattedOptions;
+};
+
 export const EmailParamsFields = ({
   actionParams,
   editAction,
@@ -63,16 +79,6 @@ export const EmailParamsFields = ({
     errors.cc !== undefined && Number(errors.cc.length) > 0 && cc !== undefined;
   const isBCCInvalid: boolean =
     errors.bcc !== undefined && Number(errors.bcc.length) > 0 && bcc !== undefined;
-
-  const getFormattedEmailOptions = (
-    searchValue: string,
-    previousOptions: Array<{ label: string }>
-  ): Array<{ label: string }> => {
-    const formattedOptions: Array<{ label: string }> = searchValue
-      .split(',')
-      .map((value) => ({ label: value.trim() }));
-    return [...previousOptions, ...formattedOptions];
-  };
 
   return (
     <>

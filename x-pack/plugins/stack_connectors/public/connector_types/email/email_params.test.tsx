@@ -13,6 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import EmailParamsFields from './email_params';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
+import { getFormattedEmailOptions } from './email_params';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -232,5 +233,50 @@ describe('EmailParamsFields renders', () => {
     });
 
     expect(editAction).not.toHaveBeenCalled();
+  });
+});
+
+describe('getFormattedEmailOptions', () => {
+  test('should return new options added to previous options', () => {
+    const searchValue = 'test@test.com, other@test.com';
+    const previousOptions = [{ label: 'existing@test.com' }];
+    const newOptions = getFormattedEmailOptions(searchValue, previousOptions);
+
+    expect(newOptions).toEqual([
+      { label: 'existing@test.com' },
+      { label: 'test@test.com' },
+      { label: 'other@test.com' },
+    ]);
+  });
+
+  test('should trim extra spaces in search value', () => {
+    const searchValue = ' test@test.com ,  other@test.com   ,   ';
+    const previousOptions: Array<{ label: string }> = [];
+    const newOptions = getFormattedEmailOptions(searchValue, previousOptions);
+
+    expect(newOptions).toEqual([{ label: 'test@test.com' }, { label: 'other@test.com' }]);
+  });
+
+  test('should prevent duplicate email addresses', () => {
+    const searchValue = 'duplicate@test.com, duplicate@test.com';
+    const previousOptions = [{ label: 'existing@test.com' }, { label: 'duplicate@test.com' }];
+    const newOptions = getFormattedEmailOptions(searchValue, previousOptions);
+
+    expect(newOptions).toEqual([{ label: 'existing@test.com' }, { label: 'duplicate@test.com' }]);
+  });
+
+  test('should return previous options if search value is empty', () => {
+    const searchValue = '';
+    const previousOptions = [{ label: 'existing@test.com' }];
+    const newOptions = getFormattedEmailOptions(searchValue, previousOptions);
+    expect(newOptions).toEqual([{ label: 'existing@test.com' }]);
+  });
+
+  test('should handle single email without comma', () => {
+    const searchValue = 'single@test.com';
+    const previousOptions = [{ label: 'existing@test.com' }];
+    const newOptions = getFormattedEmailOptions(searchValue, previousOptions);
+
+    expect(newOptions).toEqual([{ label: 'existing@test.com' }, { label: 'single@test.com' }]);
   });
 });
