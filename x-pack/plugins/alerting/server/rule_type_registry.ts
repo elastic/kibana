@@ -72,6 +72,7 @@ export interface RegistryRuleType
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
     | 'fieldsForAAD'
+    | 'getDataScope'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -402,6 +403,7 @@ export class RuleTypeRegistry {
           alerts,
           fieldsForAAD,
           validLegacyConsumers,
+          getDataScope,
         },
       ]) => {
         // KEEP the type here to be safe if not the map is  ignoring it for some reason
@@ -428,6 +430,7 @@ export class RuleTypeRegistry {
           hasFieldsForAAD: Boolean(fieldsForAAD),
           hasAlertsMappings: !!alerts,
           validLegacyConsumers,
+          getDataScope,
           ...(alerts ? { alerts } : {}),
         };
         return ruleType;

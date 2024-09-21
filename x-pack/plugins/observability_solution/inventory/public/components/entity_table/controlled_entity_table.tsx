@@ -21,7 +21,7 @@ import type { TimeRange } from '@kbn/data-plugin/common';
 import { css } from '@emotion/css';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { InventorySearchBar } from '../inventory_search_bar';
-import { Entity } from '../../../common/entities';
+import { EntityWithSignals } from '../../../common/entities';
 
 export function ControlledEntityTable({
   rows,
@@ -41,8 +41,8 @@ export function ControlledEntityTable({
   availableTypes,
   onSelectedTypeChange,
 }: {
-  rows: Entity[];
-  columns: Array<EuiBasicTableColumn<Entity>>;
+  rows: EntityWithSignals[];
+  columns: Array<EuiBasicTableColumn<EntityWithSignals>>;
   kqlFilter: string;
   timeRange: TimeRange;
   onTimeRangeChange: (nextTimeRange: TimeRange) => void;
@@ -60,7 +60,7 @@ export function ControlledEntityTable({
 }) {
   const router = useInventoryRouter();
 
-  const displayedColumns = useMemo<Array<EuiBasicTableColumn<Entity>>>(() => {
+  const displayedColumns = useMemo<Array<EuiBasicTableColumn<EntityWithSignals>>>(() => {
     return [
       {
         field: 'type',
@@ -91,6 +91,21 @@ export function ControlledEntityTable({
               {displayName}
             </EuiLink>
           );
+        },
+      },
+      {
+        field: 'alerts',
+        name: i18n.translate('xpack.inventory.entityTable.alertsColumnLabel', {
+          defaultMessage: 'Alerts',
+        }),
+        width: '96px',
+        render: (_, { signals }) => {
+          const alerts = signals.filter((signal) => signal.type === 'alert');
+          if (!alerts.length) {
+            return <></>;
+          }
+
+          return <EuiBadge color="danger">{alerts.length}</EuiBadge>;
         },
       },
     ];
@@ -143,7 +158,7 @@ export function ControlledEntityTable({
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-      <EuiBasicTable<Entity>
+      <EuiBasicTable<EntityWithSignals>
         columns={displayedColumns}
         items={displayedRows}
         itemId="name"
@@ -156,7 +171,7 @@ export function ControlledEntityTable({
         noItemsMessage={i18n.translate('xpack.inventory.entityTable.noItemsMessage', {
           defaultMessage: `No entities found`,
         })}
-        onChange={(criteria: CriteriaWithPagination<Entity>) => {
+        onChange={(criteria: CriteriaWithPagination<EntityWithSignals>) => {
           const { size, index } = criteria.page;
           onPaginationChange({ pageIndex: index, pageSize: size });
         }}

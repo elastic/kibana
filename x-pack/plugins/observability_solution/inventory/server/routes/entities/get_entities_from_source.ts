@@ -141,6 +141,8 @@ export async function getEntitiesFromSource({
       .map((field) => `${field} = TO_STRING(${field})`)
       .join(',')}`;
 
+  console.log(JSON.stringify(withRequiredFieldsFilter));
+
   const searchSourceRequest = getEsqlRequest({
     query: entitiesFromSourceQuery,
     start,

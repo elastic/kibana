@@ -29,6 +29,7 @@ import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { AlertsHealth } from '@kbn/alerting-types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -69,6 +70,7 @@ import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertsClient } from './alerts_client/types';
 import { GetTimeRangeResult } from './lib/get_time_range';
+
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -307,6 +309,13 @@ export interface RuleType<
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];
   recoveryActionGroup?: ActionGroup<RecoveryActionGroupId>;
+  getDataScope?: (params: Params) =>
+    | {
+        index: string[];
+        query: QueryDslQueryContainer;
+        groupingFields?: string[];
+      }
+    | undefined;
   executor: ExecutorType<
     Params,
     State,

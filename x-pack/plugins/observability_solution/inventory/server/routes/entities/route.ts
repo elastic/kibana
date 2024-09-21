@@ -9,8 +9,10 @@ import { SavedObject } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import * as t from 'io-ts';
+import { partition } from 'lodash';
 import type {
   Entity,
+  EntityWithSignals,
   InventoryEntityDefinition,
   VirtualEntityDefinition,
 } from '../../../common/entities';
@@ -30,10 +32,15 @@ import { getEntityById } from './get_entity_by_id';
 import { getLatestEntities } from './get_latest_entities';
 
 export async function fetchEntityDefinitions({
-  plugins,
   request,
-}: Pick<InventoryRouteHandlerResources, 'plugins' | 'request'>) {
-  const entityManagerStart = await plugins.entityManager.start();
+  plugins: { entityManager },
+}: {
+  request: InventoryRouteHandlerResources['request'];
+  plugins: {
+    entityManager: InventoryRouteHandlerResources['plugins']['entityManager'];
+  };
+}) {
+  const entityManagerStart = await entityManager.start();
   const client = await entityManagerStart.getScopedClient({ request });
 
   return await client.getEntityDefinitions({
@@ -81,7 +88,7 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
     params,
     plugins,
     request,
-  }): Promise<{ entities: Entity[] }> => {
+  }): Promise<{ entities: EntityWithSignals[] }> => {
     const esClient = createObservabilityEsClient({
       client: (await context.core).elasticsearch.client.asCurrentUser,
       logger,
@@ -92,9 +99,15 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
       body: { start, end, kuery, type, fromSourceIfEmpty, dslFilter },
     } = params;
 
-    const { definitions } = fromSourceIfEmpty
-      ? await fetchEntityDefinitions({ plugins, request })
-      : { definitions: [] };
+    const [rulesClient, alertsClient, { definitions }] = await Promise.all([
+      plugins.alerting
+        .start()
+        .then((alertingStart) => alertingStart.getRulesClientWithRequest(request)),
+      plugins.ruleRegistry
+        .start()
+        .then((ruleRegistryStart) => ruleRegistryStart.getRacClientWithRequest(request)),
+      fetchEntityDefinitions({ plugins, request }),
+    ]);
 
     return {
       entities: await getLatestEntities({
@@ -109,6 +122,8 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
         ).map(eemToInventoryDefinition),
         logger,
         dslFilter,
+        rulesClient,
+        alertsClient,
       }),
     };
   },
@@ -147,15 +162,10 @@ const listRelationshipsRoute = createInventoryServerRoute({
 
     const [{ definitions }, entity] = await Promise.all([
       fetchEntityDefinitions({ plugins, request }),
-      getLatestEntities({
+      getEntityById({
         esClient,
-        start,
-        end,
-        kuery: `entity.type:"${type}" AND entity.displayName:"${displayName}"`,
-        logger,
-        fromSourceIfEmpty: false,
-      }).then((response) => {
-        return response[0];
+        displayName,
+        type,
       }),
     ]);
 
@@ -165,7 +175,14 @@ const listRelationshipsRoute = createInventoryServerRoute({
 
     const allDefinitions = definitions.map(eemToInventoryDefinition);
 
-    const allOtherDefinitions = allDefinitions.filter((definition) => definition.type !== type);
+    const [[ownDefinition], allOtherDefinitions] = partition(
+      allDefinitions,
+      (definition) => definition.type === type
+    );
+    const entitySourceDslFilter = getEntitySourceDslFilter({
+      entity,
+      identityFields: ownDefinition.identityFields,
+    });
 
     const relatedEntitiesFromSource = await Promise.all(
       allOtherDefinitions.map((definition) =>
@@ -177,12 +194,7 @@ const listRelationshipsRoute = createInventoryServerRoute({
           indexPatterns,
           logger,
           kuery: '',
-          dslFilter: [
-            ...getEntitySourceDslFilter({
-              entity,
-              identityFields: definition.identityFields,
-            }),
-          ],
+          dslFilter: entitySourceDslFilter,
         })
       )
     );

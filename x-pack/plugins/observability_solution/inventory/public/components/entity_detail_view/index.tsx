@@ -4,28 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiLoadingSpinner,
-  EuiPopover,
-} from '@elastic/eui';
-import { css } from '@emotion/css';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { orderBy, uniqBy } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import { uniqBy } from 'lodash';
+import React, { useMemo } from 'react';
 import type { Entity, EntityDefinition } from '../../../common/entities';
 import { useInventoryBreadcrumbs } from '../../hooks/use_inventory_breadcrumbs';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { getDataStreamsForEntity } from '../../util/entities/get_data_streams_for_entity';
+import { EntityAssetView } from '../entity_asset_view';
 import { EntityMetadata } from '../entity_metadata';
 import { EntityOverview } from '../entity_overview';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -72,7 +63,7 @@ export function EntityDetailViewWithoutParams({
   const {
     services: { inventoryAPIClient },
     dependencies: {
-      start: { datasetQuality, share },
+      start: { datasetQuality },
     },
   } = useKibana();
 
@@ -89,11 +80,6 @@ export function EntityDetailViewWithoutParams({
       });
     },
     [type, displayName, inventoryAPIClient]
-  );
-
-  const dashboardLocator = useMemo(
-    () => share.url.locators.get(DASHBOARD_APP_LOCATOR),
-    [share.url.locators]
   );
 
   const typeDefinitionsFetch = useAbortableAsync(
@@ -240,63 +226,6 @@ export function EntityDetailViewWithoutParams({
 
   const dataStreamsWithIntegrations = integrationsFetch.value;
 
-  const quickLinksAsync = useAbortableAsync(async () => {
-    if (!entity || !typeDefinition || !dataStreamsWithIntegrations?.length) {
-      return [];
-    }
-
-    const allPromises = dataStreamsWithIntegrations.flatMap((dataStream) => {
-      if (!dataStream.integration || !dataStream.dashboards?.length) {
-        return [];
-      }
-      return dataStream.dashboards.map(async (dashboard) => {
-        const query =
-          typeDefinition.identityFields
-            .map((identityField) => {
-              const value = entity.properties[identityField.field];
-              if (!value) {
-                return `(NOT ${identityField.field}:*)`;
-              }
-              return `(${identityField.field}:${value})`;
-            })
-            .join(' AND ') ?? '';
-
-        const href = await dashboardLocator?.getRedirectUrl({
-          dashboardId: dashboard.id,
-          query: query ? { query, language: 'kuery' } : undefined,
-        });
-
-        const coverage = dashboardsWithDataFetch.value?.[dashboard.id];
-
-        return {
-          group: i18n.translate('xpack.inventory.entityDetailView.quickLinks.dashboards', {
-            defaultMessage: 'Dashboards',
-          }),
-          label: dashboard.title,
-          href,
-          coverage: dashboardsWithDataFetch.value?.[dashboard.id],
-          subdued: coverage === 0,
-        };
-      });
-    });
-
-    const quickLinks = await Promise.all(allPromises);
-
-    return orderBy(
-      uniqBy(quickLinks, (link) => link.label),
-      (link) => link.coverage,
-      'desc'
-    );
-  }, [
-    dataStreamsWithIntegrations,
-    dashboardLocator,
-    entity,
-    typeDefinition,
-    dashboardsWithDataFetch.value,
-  ]);
-
-  const [isQuickLinksPopoverOpen, setIsQuickLinksPopoverOpen] = useState(false);
-
   if (!entity || !typeDefinition || !dataStreams) {
     return <LoadingPanel />;
   }
@@ -327,6 +256,15 @@ export function EntityDetailViewWithoutParams({
         defaultMessage: 'Metadata',
       }),
       content: <EntityMetadata entity={entity} />,
+    },
+    assets: {
+      href: router.link('/{type}/{displayName}/{tab}', {
+        path: { type, displayName, tab: 'assets' },
+      }),
+      label: i18n.translate('xpack.inventory.entityDetailView.assets', {
+        defaultMessage: 'Assets',
+      }),
+      content: <EntityAssetView entity={entity} identityFields={typeDefinition.identityFields} />,
     },
     relationships: {
       href: router.link('/{type}/{displayName}/{tab}', {
@@ -359,60 +297,11 @@ export function EntityDetailViewWithoutParams({
   };
 
   const selectedTab = tabs[tab as keyof typeof tabs];
-
-  const quickLinksLoading = quickLinksAsync.loading || integrationsFetch.loading;
-
-  const quickLinks = quickLinksAsync.value ?? [];
-
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <InventoryPageHeader>
         <InventoryPageHeaderTitle title={displayName}>
           <EuiBadge>{type}</EuiBadge>
-          {quickLinks.length ? (
-            <EuiPopover
-              button={
-                <EuiButtonEmpty
-                  data-test-subj="inventoryEntityDetailViewQuickLinksButton"
-                  iconType="link"
-                  onClick={() => {
-                    setIsQuickLinksPopoverOpen((prev) => !prev);
-                  }}
-                >
-                  {i18n.translate('xpack.inventory.entityDetailView.quickLinksButtonLabel', {
-                    defaultMessage: 'Dashboards',
-                  })}
-                </EuiButtonEmpty>
-              }
-              isOpen={isQuickLinksPopoverOpen}
-              closePopover={() => {
-                setIsQuickLinksPopoverOpen(() => false);
-              }}
-            >
-              <EuiListGroup
-                className={css`
-                  max-height: 256px;
-                  overflow-y: auto;
-                `}
-              >
-                {quickLinks.map((quickLink) => {
-                  return (
-                    <EuiListGroupItem
-                      key={quickLink.label}
-                      label={quickLink.label}
-                      href={quickLink.href}
-                      size="xs"
-                      className={css`
-                        opacity: ${quickLink.subdued ? 0.5 : 1};
-                      `}
-                    />
-                  );
-                })}
-              </EuiListGroup>
-            </EuiPopover>
-          ) : quickLinksLoading ? (
-            <EuiLoadingSpinner size="s" />
-          ) : null}
         </InventoryPageHeaderTitle>
       </InventoryPageHeader>
       <EntityOverviewTabList

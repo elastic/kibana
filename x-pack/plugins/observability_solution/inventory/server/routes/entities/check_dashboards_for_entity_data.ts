@@ -23,6 +23,7 @@ import { getEntitySourceDslFilter } from '../../../common/utils/get_entity_sourc
 
 export interface DashboardWithEntityDataCheck {
   id: string;
+  title: string;
   panels: Array<{ id?: string; title?: string; check: 'has_data' | 'has_no_data' | 'unknown' }>;
 }
 
@@ -86,6 +87,7 @@ export async function checkDashboardsForEntityData({
 
     return {
       id: so.id,
+      title: so.attributes.title,
       panelRequests,
     };
   });
@@ -166,6 +168,7 @@ export async function checkDashboardsForEntityData({
   return dashboardsWithRequests.map((dashboard) => {
     return {
       id: dashboard.id,
+      title: dashboard.title,
       panels: dashboard.panelRequests.map(({ panel: { id, title }, request }) => {
         const requestId = request?.id;
         const hasDataBool = requestId ? resultsByRequestId.get(requestId) : undefined;

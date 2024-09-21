@@ -16,7 +16,9 @@
       "fieldFormats",
       "unifiedSearch",
       "datasetQuality",
-      "share"
+      "share",
+      "alerting",
+      "ruleRegistry"
     ],
     "requiredBundles": [
       "kibanaReact",

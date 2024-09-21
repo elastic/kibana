@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import pLimit from 'p-limit';
-import { Logger } from '@kbn/logging';
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { InventoryEntityDefinition } from '../../../common/entities';
+import type { Logger } from '@kbn/logging';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import type { EntityWithSignals, InventoryEntityDefinition } from '../../../common/entities';
 import { getEntitiesFromSource } from './get_entities_from_source';
 import { lookupEntitiesById } from './lookup_entities_by_id';
 import { searchLatestEntitiesIndex } from './search_latest_entities_index';
 import { esqlResponseToEntities } from '../../../common/utils/esql_response_to_entities';
+import { getEntitySignals } from '../signals/get_entity_signals';
 
 export async function getLatestEntities({
   esClient,
@@ -24,6 +27,8 @@ export async function getLatestEntities({
   typeDefinitions,
   logger,
   dslFilter,
+  rulesClient,
+  alertsClient,
 }: {
   esClient: ObservabilityElasticsearchClient;
   kuery: string;
@@ -33,7 +38,9 @@ export async function getLatestEntities({
   typeDefinitions?: InventoryEntityDefinition[];
   logger: Logger;
   dslFilter?: QueryDslQueryContainer[];
-}) {
+  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
+}): Promise<EntityWithSignals[]> {
   const response = await searchLatestEntitiesIndex({
     esClient,
     start,
@@ -54,7 +61,17 @@ export async function getLatestEntities({
   });
 
   if (response.values.length || !fromSourceIfEmpty || !typeDefinitions?.length) {
-    return esqlResponseToEntities(response);
+    const entities = esqlResponseToEntities(response);
+
+    return getEntitySignals({
+      entities: entities.map((entity) => ({ ...entity, links: [] })),
+      alertsClient,
+      rulesClient,
+      typeDefinitions,
+      logger,
+      start,
+      end,
+    });
   }
 
   const limiter = pLimit(10);
@@ -76,12 +93,20 @@ export async function getLatestEntities({
     })
   );
 
-  return esqlResponseToEntities(
-    await lookupEntitiesById({
-      esClient,
-      start,
-      end,
-      entities: entitiesFromSourceResults.flat(),
-    })
-  );
+  return getEntitySignals({
+    alertsClient,
+    logger,
+    rulesClient,
+    typeDefinitions,
+    entities: esqlResponseToEntities(
+      await lookupEntitiesById({
+        esClient,
+        start,
+        end,
+        entities: entitiesFromSourceResults.flat(),
+      })
+    ).map((entity) => ({ ...entity, links: [] })),
+    start,
+    end,
+  });
 }
