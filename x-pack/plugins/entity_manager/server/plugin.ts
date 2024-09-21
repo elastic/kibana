@@ -54,7 +54,6 @@ export class EntityManagerServerPlugin
   public config: EntityManagerConfig;
   public logger: Logger;
   public server?: EntityManagerServerSetup;
-  private entityMergeTask?: EntityMergeTask;
 
   constructor(context: PluginInitializerContext<EntityManagerConfig>) {
     this.config = context.config.get();
@@ -107,7 +106,7 @@ export class EntityManagerServerPlugin
     request: KibanaRequest;
     coreStart: CoreStart;
   }) {
-    const esClient = coreStart.elasticsearch.client.asScoped(request).asSecondaryAuthUser;
+    const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
     const soClient = coreStart.savedObjects.getScopedClient(request);
     return new EntityClient({ esClient, soClient, logger: this.logger });
   }

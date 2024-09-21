@@ -60,6 +60,14 @@ export function generateLatestIndexName(definition: EntityDefinition) {
   });
 }
 
+export function generateInstanceIndexName(definition: EntityDefinition) {
+  return entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+    dataset: ENTITY_INSTANCE,
+    definitionId: definition.id,
+  });
+}
+
 export const generateLatestIndexTemplateId = (definition: EntityDefinition) =>
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_LATEST}_${definition.id}_index_template` as const;
 

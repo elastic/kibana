@@ -12,6 +12,7 @@ import { updateEntityDefinitionRoute } from './definition/update';
 import { getEntityDefinitionRoute } from './definition/get';
 
 import { findEntitiesRoute } from './find';
+import { updateEntityRoute } from './update';
 
 export const entitiesRoutes = {
   ...createEntityDefinitionRoute,
@@ -20,4 +21,5 @@ export const entitiesRoutes = {
   ...updateEntityDefinitionRoute,
   ...getEntityDefinitionRoute,
   ...findEntitiesRoute,
+  ...updateEntityRoute,
 };

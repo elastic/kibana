@@ -66,7 +66,7 @@ export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
       const entityDiscoveryState = await Promise.all(
         builtInDefinitions.map(async (builtInDefinition) => {
           const definitions = await findEntityDefinitions({
-            esClient,
+            esClient: esClient.asCurrentUser,
             soClient,
             id: builtInDefinition.id,
             includeState: true,

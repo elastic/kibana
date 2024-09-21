@@ -81,7 +81,7 @@ export const createEntityDefinitionRoute = createEntityManagerServerRoute({
       // I'm defering this for now since this is just a prototype and we can
       // invest more later in this area.
       await setupApiKeys(context, request, server, definition.id, apiKeyId);
-      await tasks.entityMergeTask.start(definition, request, server);
+      await tasks.entityMergeTask.start(definition, server);
 
       return response.ok({ body: definition });
     } catch (e) {

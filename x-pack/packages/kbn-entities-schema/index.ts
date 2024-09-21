@@ -16,3 +16,4 @@ export * from './src/rest_spec/definition/find';
 export * from './src/rest_spec/definition/create';
 export * from './src/rest_spec/entities/find';
 export * from './src/rest_spec/enablement/check';
+export * from './src/rest_spec/entities/update';

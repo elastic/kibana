@@ -6,9 +6,14 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/entities-schema';
+import {
+  entitiesIndexPattern,
+  ENTITY_INSTANCE,
+  ENTITY_SCHEMA_VERSION_V1,
+  EntityDefinition,
+} from '@kbn/entities-schema';
 import { SearchRequest, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { generateHistoryIndexName, generateLatestIndexName } from './helpers/generate_component_id';
+import { generateLatestIndexName } from './helpers/generate_component_id';
 
 interface EntityCountAggregationResponse {
   entityCount: {
@@ -30,23 +35,27 @@ export async function getHistoryStats(esClient: ElasticsearchClient, definition:
     ignore_unavailable: true,
     allow_no_indices: true,
     track_total_hits: true,
-    index: `${generateHistoryIndexName(definition)}.*`,
+    index: entitiesIndexPattern({
+      schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+      dataset: ENTITY_INSTANCE,
+      definitionId: '*',
+    }),
     size: 1,
-    _source: ['@timestamp'],
+    _source: ['entity.lastSeenTimestamp'],
     sort: [
       {
-        '@timestamp': { order: 'desc' },
+        'entity.lastSeenTimestamp': { order: 'desc' },
       },
     ],
   };
 
-  const response = await esClient.search<{ '@timestamp': string }>(params);
+  const response = await esClient.search<{ entity: { lastSeenTimestamp: string } }>(params);
   const total = response.hits.total as SearchTotalHits;
   return {
     totalDocs: total.value,
     lastSeenTimestamp:
       total.value && response.hits.hits[0]._source
-        ? response.hits.hits[0]._source['@timestamp']
+        ? response.hits.hits[0]._source.entity.lastSeenTimestamp
         : null,
   };
 }

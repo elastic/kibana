@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { EntityDefinitionWithState, GetEntityDefinitionQuerySchema } from '@kbn/entities-schema';
+import { EntityDefintionResponse, GetEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { useKibana } from './use_kibana';
 import { entityManagerKeys } from './query_key_factory';
 
@@ -17,13 +17,16 @@ export function useFetchEntityDefinition({ id }: GetEntityDefinitionQuerySchema 
     queryKey: entityManagerKeys.definition(id),
     queryFn: async ({ signal }) => {
       try {
-        const response = await http.get<EntityDefinitionWithState>(
+        const response = await http.get<EntityDefintionResponse>(
           `/internal/entities/definition/${id}`,
           {
+            query: {
+              includeState: true,
+            },
             signal,
           }
         );
-        return response;
+        return response.definitions.length === 1 ? response.definitions[0] : undefined;
       } catch (e) {
         throw new Error(`Something went wrong: ${e}`);
       }

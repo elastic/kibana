@@ -17,6 +17,8 @@ import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 
 import { stopTransforms } from './entities/stop_transforms';
 import { findEntities } from './entities/find_entities';
+import { updateEntity } from './entities/update_entity';
+import { findEntity } from './entities/find_entity';
 
 export class EntityClient {
   constructor(
@@ -115,6 +117,30 @@ export class EntityClient {
       field: sortField,
       direction: sortDirection,
     });
+  }
+
+  async findEntity({ id, definitionId }: { definitionId: string; id: string }) {
+    const definition = await this.getEntityDefinition({ id: definitionId });
+    if (!definition) {
+      throw new EntityDefinitionNotFound(`Unable to find definition for ${definitionId}`);
+    }
+    return findEntity(this.options.esClient, definition, id);
+  }
+
+  async updateEntity({
+    definitionId,
+    id,
+    doc,
+  }: {
+    definitionId: string;
+    id: string;
+    doc: Record<string, any>;
+  }) {
+    const definition = await this.getEntityDefinition({ id: definitionId });
+    if (!definition) {
+      throw new EntityDefinitionNotFound(`Unable to find definition for ${definitionId}`);
+    }
+    return await updateEntity(this.options.esClient, definition, id, doc);
   }
 
   async startEntityDefinition(definition: EntityDefinition) {

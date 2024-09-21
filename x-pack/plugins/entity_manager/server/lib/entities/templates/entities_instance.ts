@@ -32,12 +32,12 @@ export const generateEntitiesInstanceIndexTemplateConfig = (
     managed: true,
     managed_by: 'elastic_entity_model',
   },
-  ignore_missing_component_templates: getCustomLatestTemplateComponents(definition.id),
+  ignore_missing_component_templates: getCustomLatestTemplateComponents(definition),
   composed_of: [
     ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
     ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
     ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
-    ...getCustomLatestTemplateComponents(definition.id),
+    ...getCustomLatestTemplateComponents(definition),
   ],
   index_patterns: [
     entitiesIndexPattern({

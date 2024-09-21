@@ -12,6 +12,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   entitiesIndexPattern,
+  ENTITY_INSTANCE,
   ENTITY_SCHEMA_VERSION_V1,
   EntityLatestDoc,
 } from '@kbn/entities-schema';
@@ -54,7 +55,7 @@ export async function findEntities(
   const params: SearchRequest = {
     index: entitiesIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V1,
-      dataset: 'latest',
+      dataset: ENTITY_INSTANCE,
       definitionId: '*',
     }),
     allow_no_indices: true,
