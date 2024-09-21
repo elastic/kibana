@@ -13,6 +13,7 @@ import {
   checkDashboardsForEntityData,
 } from '../entities/check_dashboards_for_entity_data';
 import type { Entity, IdentityField } from '../../../common/entities';
+import { withInventorySpan } from '../../lib/with_inventory_span';
 
 export async function getSuggestedDashboards({
   esClient,
@@ -50,7 +51,11 @@ export async function getSuggestedDashboards({
     return [...response.saved_objects, ...(await getDashboards(page + 1))];
   }
 
-  const allDashboards = await getDashboards(1);
+  const allDashboards = await withInventorySpan(
+    'get_all_dashboards',
+    () => getDashboards(1),
+    logger
+  );
 
   return await checkDashboardsForEntityData({
     esClient,

@@ -20,6 +20,7 @@ import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_que
 import { excludeFrozenQuery } from '@kbn/observability-utils-common/es/queries/exclude_frozen_query';
 import type { Entity, IdentityField } from '../../../common/entities';
 import { getEntitySourceDslFilter } from '../../../common/utils/get_entity_source_dsl_filter';
+import { withInventorySpan } from '../../lib/with_inventory_span';
 
 export interface DashboardWithEntityDataCheck {
   id: string;
@@ -44,151 +45,164 @@ export async function checkDashboardsForEntityData({
   start: number;
   end: number;
 }): Promise<DashboardWithEntityDataCheck[]> {
-  const dashboardsWithRequests = dashboards.map((so) => {
-    const attrs = so.attributes as DashboardAttributes;
+  return withInventorySpan(
+    'check_dashboards_for_entity_data',
+    async () => {
+      const dashboardsWithRequests = dashboards.map((so) => {
+        const attrs = so.attributes as DashboardAttributes;
 
-    const referencedIndexPatterns = Object.fromEntries(
-      so.references.filter((ref) => ref.type === 'index-pattern').map((ref) => [ref.name, ref.id])
-    );
+        const referencedIndexPatterns = Object.fromEntries(
+          so.references
+            .filter((ref) => ref.type === 'index-pattern')
+            .map((ref) => [ref.name, ref.id])
+        );
 
-    const topLevelSearchSource = JSON.parse(
-      attrs.kibanaSavedObjectMeta.searchSourceJSON
-    ) as SearchSource;
+        const topLevelSearchSource = JSON.parse(
+          attrs.kibanaSavedObjectMeta.searchSourceJSON
+        ) as SearchSource;
 
-    const panels: SavedDashboardPanel[] = JSON.parse(attrs.panelsJSON);
+        const panels: SavedDashboardPanel[] = JSON.parse(attrs.panelsJSON);
 
-    const panelRequests = panels.map((panel) => {
-      const request = getRequestForPanel({
-        panel,
-        logger,
-        referencedIndexPatterns,
-      });
+        const panelRequests = panels.map((panel) => {
+          const request = getRequestForPanel({
+            panel,
+            logger,
+            referencedIndexPatterns,
+          });
 
-      const query = request ? withSearchSource(request.query, topLevelSearchSource) : undefined;
+          const query = request ? withSearchSource(request.query, topLevelSearchSource) : undefined;
 
-      const requestWithSearchSource =
-        request && query
-          ? {
-              ...request,
-              query,
-            }
-          : undefined;
-
-      return {
-        panel: {
-          id: panel.id,
-          title: panel.title,
-        },
-        ...(requestWithSearchSource
-          ? { request: { ...requestWithSearchSource, id: objectHash(requestWithSearchSource) } }
-          : {}),
-      };
-    });
-
-    return {
-      id: so.id,
-      title: so.attributes.title,
-      panelRequests,
-    };
-  });
-
-  const allPanelRequests = dashboardsWithRequests.flatMap((dashboard) =>
-    dashboard.panelRequests.flatMap((request) => (request.request ? [request.request] : []))
-  );
-
-  const deduplicatedRequests = Array.from(
-    new Map(
-      allPanelRequests.map((request) => [
-        request.id,
-        { id: request.id, query: request.query, index: request.indexPatterns },
-      ])
-    ).values()
-  );
-
-  const limiter = pLimit(5);
-
-  logger.debug(`Running ${deduplicatedRequests.length} requests`);
-
-  const requestChunks = chunk(deduplicatedRequests, 50);
-
-  const responses = await Promise.all(
-    requestChunks.map((requestsForChunk) => {
-      return limiter(async () => {
-        const searches = requestsForChunk.flatMap(({ query, index }) => {
-          return [
-            {
-              index,
-            },
-            {
-              terminate_after: 1,
-              timeout: '1ms',
-              track_total_hits: 1,
-              size: 0,
-              query: {
-                bool: {
-                  filter: [
-                    query,
-                    ...excludeFrozenQuery(),
-                    ...rangeQuery(start, end),
-                    ...getEntitySourceDslFilter({
-                      entity,
-                      identityFields,
-                    }),
-                  ],
-                },
-              },
-            },
-          ];
-        });
-
-        const allResponses = await esClient.msearch('check_queries_for_data', {
-          searches,
-        });
-
-        return requestsForChunk.map((request, index) => {
-          const response = allResponses.responses[index];
-          const total =
-            typeof response.hits.total === 'number'
-              ? response.hits.total
-              : response.hits.total?.value ?? 0;
+          const requestWithSearchSource =
+            request && query
+              ? {
+                  ...request,
+                  query,
+                }
+              : undefined;
 
           return {
-            ...request,
-            has_data: total > 0,
+            panel: {
+              id: panel.id,
+              title: panel.title,
+            },
+            ...(requestWithSearchSource
+              ? { request: { ...requestWithSearchSource, id: objectHash(requestWithSearchSource) } }
+              : {}),
           };
         });
-      });
-    })
-  );
-
-  const resultsByRequestId = new Map(
-    responses.flat().map((response) => [response.id, response.has_data])
-  );
-
-  return dashboardsWithRequests.map((dashboard) => {
-    return {
-      id: dashboard.id,
-      title: dashboard.title,
-      panels: dashboard.panelRequests.map(({ panel: { id, title }, request }) => {
-        const requestId = request?.id;
-        const hasDataBool = requestId ? resultsByRequestId.get(requestId) : undefined;
-        let hasDataEnum: 'has_data' | 'has_no_data' | 'unknown';
-        if (hasDataBool === true) {
-          hasDataEnum = 'has_data';
-        } else if (hasDataBool === false) {
-          hasDataEnum = 'has_no_data';
-        } else {
-          hasDataEnum = 'unknown';
-        }
 
         return {
-          id,
-          title,
-          check: hasDataEnum,
+          id: so.id,
+          title: so.attributes.title,
+          panelRequests,
         };
-      }),
-    };
-  });
+      });
+
+      const allPanelRequests = dashboardsWithRequests.flatMap((dashboard) =>
+        dashboard.panelRequests.flatMap((request) => (request.request ? [request.request] : []))
+      );
+
+      const deduplicatedRequests = Array.from(
+        new Map(
+          allPanelRequests.map((request) => [
+            request.id,
+            { id: request.id, query: request.query, index: request.indexPatterns },
+          ])
+        ).values()
+      );
+
+      const limiter = pLimit(5);
+
+      logger.debug(`Running ${deduplicatedRequests.length} requests`);
+
+      const requestChunks = chunk(deduplicatedRequests, 50);
+
+      const responses = await withInventorySpan(
+        'run_all_scope_requests',
+        () =>
+          Promise.all(
+            requestChunks.map((requestsForChunk) => {
+              return limiter(async () => {
+                const searches = requestsForChunk.flatMap(({ query, index }) => {
+                  return [
+                    {
+                      index,
+                    },
+                    {
+                      terminate_after: 1,
+                      timeout: '1ms',
+                      track_total_hits: 1,
+                      size: 0,
+                      query: {
+                        bool: {
+                          filter: [
+                            query,
+                            ...excludeFrozenQuery(),
+                            ...rangeQuery(start, end),
+                            ...getEntitySourceDslFilter({
+                              entity,
+                              identityFields,
+                            }),
+                          ],
+                        },
+                      },
+                    },
+                  ];
+                });
+
+                const allResponses = await esClient.msearch('check_queries_for_data', {
+                  searches,
+                });
+
+                return requestsForChunk.map((request, index) => {
+                  const response = allResponses.responses[index];
+                  const total =
+                    typeof response.hits.total === 'number'
+                      ? response.hits.total
+                      : response.hits.total?.value ?? 0;
+
+                  return {
+                    ...request,
+                    has_data: total > 0,
+                  };
+                });
+              });
+            })
+          ),
+        logger
+      );
+
+      const resultsByRequestId = new Map(
+        responses.flat().map((response) => [response.id, response.has_data])
+      );
+
+      return dashboardsWithRequests.map((dashboard) => {
+        return {
+          id: dashboard.id,
+          title: dashboard.title,
+          panels: dashboard.panelRequests.map(({ panel: { id, title }, request }) => {
+            const requestId = request?.id;
+            const hasDataBool = requestId ? resultsByRequestId.get(requestId) : undefined;
+            let hasDataEnum: 'has_data' | 'has_no_data' | 'unknown';
+            if (hasDataBool === true) {
+              hasDataEnum = 'has_data';
+            } else if (hasDataBool === false) {
+              hasDataEnum = 'has_no_data';
+            } else {
+              hasDataEnum = 'unknown';
+            }
+
+            return {
+              id,
+              title,
+              check: hasDataEnum,
+            };
+          }),
+        };
+      });
+    },
+    logger
+  );
 }
 
 interface SearchSource {

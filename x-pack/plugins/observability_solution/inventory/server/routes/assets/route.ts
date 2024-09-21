@@ -14,6 +14,7 @@ import { getEntityById } from '../entities/get_entity_by_id';
 import { getEntityDefinition } from '../entities/get_entity_definition';
 import { AssetSuggestion } from '../../../common/assets';
 import { getSuggestedRules } from './get_suggested_rules';
+import { withInventorySpan } from '../../lib/with_inventory_span';
 
 const getHardLinkedAssetsRoute = createInventoryServerRoute({
   endpoint: 'POST /internal/inventory/assets/entity',
@@ -84,6 +85,7 @@ const getSuggestedAssetsRoute = createInventoryServerRoute({
         type,
         plugins,
         request,
+        logger,
       }),
       alertingStart.listTypes(),
       alertingStart.getRulesClientWithRequest(request),
@@ -93,27 +95,32 @@ const getSuggestedAssetsRoute = createInventoryServerRoute({
       throw notFound();
     }
 
-    const [dashboardDataChecks, ruleSuggestions] = await Promise.all([
-      getSuggestedDashboards({
-        start,
-        end,
-        entity,
-        identityFields: definition.identityFields,
-        savedObjectsClient,
-        esClient,
-        logger,
-      }),
-      getSuggestedRules({
-        entity,
-        identityFields: definition.identityFields,
-        esClient,
-        start,
-        end,
-        rulesClient,
-        ruleTypes: Array.from(ruleTypes.values()),
-        logger,
-      }),
-    ]);
+    const [dashboardDataChecks, ruleSuggestions] = await withInventorySpan(
+      'get_suggestions',
+      () =>
+        Promise.all([
+          getSuggestedDashboards({
+            start,
+            end,
+            entity,
+            identityFields: definition.identityFields,
+            savedObjectsClient,
+            esClient,
+            logger,
+          }),
+          getSuggestedRules({
+            entity,
+            identityFields: definition.identityFields,
+            esClient,
+            start,
+            end,
+            rulesClient,
+            ruleTypes: Array.from(ruleTypes.values()),
+            logger,
+          }),
+        ]),
+      logger
+    );
 
     const dashboardsWithCounts = dashboardDataChecks.map((dashboard) => {
       const counts = {

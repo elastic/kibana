@@ -47,17 +47,11 @@ export function EntityOverview({
   typeDefinition,
   allTypeDefinitions,
   dataStreams,
-  dataStreamsWithIntegrations,
 }: {
   entity: Entity;
   typeDefinition: EntityDefinition;
   allTypeDefinitions: EntityDefinition[];
   dataStreams: Array<{ name: string }>;
-  dataStreamsWithIntegrations?: Array<{
-    name: string;
-    integration?: string;
-    dashboards?: unknown[];
-  }>;
 }) {
   const {
     services: { inventoryAPIClient },
@@ -342,7 +336,6 @@ export function EntityOverview({
                 })) ?? []),
               ]}
               valueOfSelected={selectedDataStream}
-              isLoading={!dataStreamsWithIntegrations}
               onChange={(next) => {
                 setSelectedDataStream(next);
               }}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import { InventoryEntityDefinition } from '../../../common/entities';
 import type { InventoryRouteHandlerResources } from '../types';
 import { eemToInventoryDefinition } from './eem_to_inventory_definition';
@@ -14,16 +15,19 @@ export function getEntityDefinition({
   request,
   plugins,
   type,
+  logger,
 }: {
   request: InventoryRouteHandlerResources['request'];
   plugins: {
     entityManager: InventoryRouteHandlerResources['plugins']['entityManager'];
   };
   type: string;
+  logger: Logger;
 }): Promise<InventoryEntityDefinition | undefined> {
   return fetchEntityDefinitions({
     plugins,
     request,
+    logger,
   }).then((response) => {
     const definition = response.definitions.find((def) => def.type === type);
     if (definition) {

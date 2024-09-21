@@ -17,6 +17,7 @@ import { lookupEntitiesById } from './lookup_entities_by_id';
 import { searchLatestEntitiesIndex } from './search_latest_entities_index';
 import { esqlResponseToEntities } from '../../../common/utils/esql_response_to_entities';
 import { getEntitySignals } from '../signals/get_entity_signals';
+import { withInventorySpan } from '../../lib/with_inventory_span';
 
 export async function getLatestEntities({
   esClient,
@@ -41,72 +42,78 @@ export async function getLatestEntities({
   rulesClient: RulesClient;
   alertsClient: AlertsClient;
 }): Promise<EntityWithSignals[]> {
-  const response = await searchLatestEntitiesIndex({
-    esClient,
-    start,
-    end,
-    kuery,
-    dslFilter: [
-      ...(dslFilter ?? []),
-      ...(typeDefinitions?.length
-        ? [
-            {
-              terms: {
-                'entity.type': typeDefinitions.map((definition) => definition.type),
-              },
-            },
-          ]
-        : []),
-    ],
-  });
-
-  if (response.values.length || !fromSourceIfEmpty || !typeDefinitions?.length) {
-    const entities = esqlResponseToEntities(response);
-
-    return getEntitySignals({
-      entities: entities.map((entity) => ({ ...entity, links: [] })),
-      alertsClient,
-      rulesClient,
-      typeDefinitions,
-      logger,
-      start,
-      end,
-    });
-  }
-
-  const limiter = pLimit(10);
-
-  const entitiesFromSourceResults = await Promise.all(
-    typeDefinitions.map((definition) => {
-      return limiter(() => {
-        return getEntitiesFromSource({
-          esClient,
-          start,
-          end,
-          kuery,
-          indexPatterns: definition.sources.flatMap((source) => source.indexPatterns),
-          definition,
-          logger,
-          dslFilter,
-        });
-      });
-    })
-  );
-
-  return getEntitySignals({
-    alertsClient,
-    logger,
-    rulesClient,
-    typeDefinitions,
-    entities: esqlResponseToEntities(
-      await lookupEntitiesById({
+  return withInventorySpan(
+    'get_latest_entities',
+    async () => {
+      const response = await searchLatestEntitiesIndex({
         esClient,
         start,
         end,
-        entities: entitiesFromSourceResults.flat(),
-      })
-    ).map((entity) => ({ ...entity, links: [] })),
-    start,
-    end,
-  });
+        kuery,
+        dslFilter: [
+          ...(dslFilter ?? []),
+          ...(typeDefinitions?.length
+            ? [
+                {
+                  terms: {
+                    'entity.type': typeDefinitions.map((definition) => definition.type),
+                  },
+                },
+              ]
+            : []),
+        ],
+      });
+
+      if (response.values.length || !fromSourceIfEmpty || !typeDefinitions?.length) {
+        const entities = esqlResponseToEntities(response);
+
+        return getEntitySignals({
+          entities: entities.map((entity) => ({ ...entity, links: [] })),
+          alertsClient,
+          rulesClient,
+          typeDefinitions,
+          logger,
+          start,
+          end,
+        });
+      }
+
+      const limiter = pLimit(10);
+
+      const entitiesFromSourceResults = await Promise.all(
+        typeDefinitions.map((definition) => {
+          return limiter(() => {
+            return getEntitiesFromSource({
+              esClient,
+              start,
+              end,
+              kuery,
+              indexPatterns: definition.sources.flatMap((source) => source.indexPatterns),
+              definition,
+              logger,
+              dslFilter,
+            });
+          });
+        })
+      );
+
+      return getEntitySignals({
+        alertsClient,
+        logger,
+        rulesClient,
+        typeDefinitions,
+        entities: esqlResponseToEntities(
+          await lookupEntitiesById({
+            esClient,
+            start,
+            end,
+            entities: entitiesFromSourceResults.flat(),
+          })
+        ).map((entity) => ({ ...entity, links: [] })),
+        start,
+        end,
+      });
+    },
+    logger
+  );
 }

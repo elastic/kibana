@@ -31,6 +31,7 @@ import type {
   IdentityField,
 } from '../../../common/entities';
 import { getEntitySourceDslFilter } from '../../../common/utils/get_entity_source_dsl_filter';
+import { withInventorySpan } from '../../lib/with_inventory_span';
 
 async function getActiveAlertsCountsByEntity({
   alertsClient,
@@ -127,12 +128,17 @@ export async function getEntitySignals({
 
   const limiter = pLimit(10);
 
-  const rules = await Promise.all(
-    ruleIdsToFetch.map((rule) => {
-      return limiter(() => {
-        return rulesClient.get<Record<string, unknown>>({ id: rule.id });
-      });
-    })
+  const rules = await withInventorySpan(
+    'get_rules',
+    () =>
+      Promise.all(
+        ruleIdsToFetch.map((rule) => {
+          return limiter(() => {
+            return rulesClient.get<Record<string, unknown>>({ id: rule.id });
+          });
+        })
+      ),
+    logger
   );
 
   const entityQueries = entities.map((entity) => {
@@ -172,13 +178,18 @@ export async function getEntitySignals({
       },
     };
 
-    const alertsResponse = await alertsClient.find({
-      query,
-      size: perPage,
-      track_total_hits: false,
-      search_after: searchAfter,
-      sort: [{ '@timestamp': 'desc' }, { [ALERT_UUID]: 'desc' }],
-    });
+    const alertsResponse = await withInventorySpan(
+      'get_alerts_page',
+      () =>
+        alertsClient.find({
+          query,
+          size: perPage,
+          track_total_hits: false,
+          search_after: searchAfter,
+          sort: [{ '@timestamp': 'desc' }, { [ALERT_UUID]: 'desc' }],
+        }),
+      logger
+    );
 
     const alerts = alertsResponse.hits.hits.map((hit) => hit._source!);
 
@@ -193,7 +204,7 @@ export async function getEntitySignals({
     return [...alerts, ...(await getAlerts(nextSearchAfter))];
   }
 
-  const allAlerts = await getAlerts();
+  const allAlerts = await withInventorySpan('get_all_alerts', () => getAlerts(), logger);
 
   const alertsByRuleId: Record<string, ParsedTechnicalFields[]> = groupBy(
     allAlerts,

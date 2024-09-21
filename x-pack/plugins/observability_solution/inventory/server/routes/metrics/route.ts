@@ -74,6 +74,7 @@ const suggestMetricsRoute = createInventoryServerRoute({
       fetchEntityDefinitions({
         plugins,
         request,
+        logger,
       }).then(({ definitions }) =>
         definitions.find((definition) => definition.type === entity.type)
       ),

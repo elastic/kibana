@@ -16,7 +16,7 @@ export function InventoryPageHeaderTitle({
 }) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiTitle>
           <h1>{title}</h1>
         </EuiTitle>

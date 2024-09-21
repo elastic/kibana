@@ -4,13 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { uniqBy } from 'lodash';
 import React, { useMemo } from 'react';
-import type { Entity, EntityDefinition } from '../../../common/entities';
+import { css } from '@emotion/css';
+import type { Entity, EntityDefinition, EntityWithSignals } from '../../../common/entities';
 import { useInventoryBreadcrumbs } from '../../hooks/use_inventory_breadcrumbs';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
@@ -24,6 +32,7 @@ import { EntityRelationshipsView } from '../entity_relationships_view';
 import { InventoryPageHeader } from '../inventory_page_header';
 import { InventoryPageHeaderTitle } from '../inventory_page_header/inventory_page_header_title';
 import { LoadingPanel } from '../loading_panel';
+import { EntityDetailViewHeaderSection } from '../entity_detail_view_header_section';
 
 interface TabDependencies {
   entity: Entity;
@@ -60,11 +69,10 @@ export function EntityDetailViewWithoutParams({
 
   const router = useInventoryRouter();
 
+  const theme = useEuiTheme().euiTheme;
+
   const {
     services: { inventoryAPIClient },
-    dependencies: {
-      start: { datasetQuality },
-    },
   } = useKibana();
 
   const entityFetch = useAbortableAsync(
@@ -76,10 +84,14 @@ export function EntityDetailViewWithoutParams({
             type,
             displayName,
           },
+          query: {
+            start,
+            end,
+          },
         },
       });
     },
-    [type, displayName, inventoryAPIClient]
+    [type, displayName, inventoryAPIClient, start, end]
   );
 
   const typeDefinitionsFetch = useAbortableAsync(
@@ -95,7 +107,7 @@ export function EntityDetailViewWithoutParams({
     (definition) => definition.type === type
   );
 
-  const entity = useMemo<Entity | undefined>(() => {
+  const entity = useMemo<EntityWithSignals | undefined>(() => {
     if (!entityFetch.value) {
       return undefined;
     }
@@ -149,82 +161,13 @@ export function EntityDetailViewWithoutParams({
     [entity, typeDefinition, inventoryAPIClient, start, end, displayName]
   );
 
-  const integrationsFetch = useAbortableAsync(
-    async ({ signal }) => {
-      if (!entityDataStreamsFetch.value) {
-        return undefined;
-      }
-
-      const dataStreams = entityDataStreamsFetch.value.dataStreams;
-
-      if (!dataStreams.length) {
-        return Promise.resolve([]);
-      }
-
-      return datasetQuality
-        .apiClient('POST /internal/dataset_quality/data_streams/integrations', {
-          signal,
-          params: {
-            body: {
-              dataStreams: dataStreams
-                .map((dataStream) => dataStream.name)
-                .filter((dataStream) => !dataStream.includes(':')),
-            },
-          },
-        })
-        .then((response) => {
-          return response.dataStreams;
-        });
-    },
-    [datasetQuality, entityDataStreamsFetch.value]
-  );
-
-  const dashboardsWithDataFetch = useAbortableAsync(
-    async ({ signal }) => {
-      if (!integrationsFetch.value || !entity) {
-        return undefined;
-      }
-
-      const dataStreams = integrationsFetch.value;
-
-      const allDashboards = uniqBy(
-        dataStreams.flatMap((dataStream) => dataStream.dashboards ?? []),
-        (dashboard) => dashboard.id
-      );
-
-      const { dashboards } = await inventoryAPIClient.fetch(
-        'POST /internal/inventory/entities/check_dashboards_for_data',
-        {
-          signal,
-          params: {
-            body: {
-              dashboardIds: allDashboards.map((db) => db.id),
-              entity: {
-                type: entity.type,
-                displayName: entity.displayName,
-              },
-              start,
-              end,
-            },
-          },
-        }
-      );
-
-      return Object.fromEntries(
-        dashboards.map((check) => {
-          const withData = check.panels.filter((panel) => panel.check === 'has_data');
-          const withoutData = check.panels.filter((panel) => panel.check === 'has_no_data');
-          const unknown = check.panels.filter((panel) => panel.check === 'unknown');
-          return [check.id, withData.length / (withoutData.length + unknown.length)];
-        })
-      );
-    },
-    [inventoryAPIClient, integrationsFetch.value, entity, start, end]
-  );
-
   const dataStreams = entityDataStreamsFetch.value?.dataStreams;
 
-  const dataStreamsWithIntegrations = integrationsFetch.value;
+  const { alerts } = useMemo(() => {
+    return {
+      alerts: entity?.signals.filter((signal) => signal.type === 'alert') ?? [],
+    };
+  }, [entity?.signals]);
 
   if (!entity || !typeDefinition || !dataStreams) {
     return <LoadingPanel />;
@@ -244,7 +187,6 @@ export function EntityDetailViewWithoutParams({
           typeDefinition={typeDefinition}
           allTypeDefinitions={typeDefinitionsFetch.value!.definitions}
           dataStreams={dataStreams}
-          dataStreamsWithIntegrations={dataStreamsWithIntegrations}
         />
       ),
     },
@@ -297,11 +239,86 @@ export function EntityDetailViewWithoutParams({
   };
 
   const selectedTab = tabs[tab as keyof typeof tabs];
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <InventoryPageHeader>
         <InventoryPageHeaderTitle title={displayName}>
-          <EuiBadge>{type}</EuiBadge>
+          <EuiHorizontalRule margin="s" />
+          <EuiPanel
+            hasBorder={false}
+            hasShadow={false}
+            className={css`
+              padding-top: 0;
+              padding-bottom: 0;
+            `}
+          >
+            <EuiFlexGroup
+              direction="row"
+              alignItems="flexStart"
+              className={css`
+                > div {
+                  border: 0px solid ${theme.colors.lightShade};
+                  border-right-width: 1px;
+                  width: 25%;
+                }
+                > div:last-child {
+                  border-right-width: 0;
+                }
+              `}
+            >
+              <EuiFlexItem grow={false}>
+                <EntityDetailViewHeaderSection
+                  title={i18n.translate('xpack.inventory.entityDetailView.typeSection', {
+                    defaultMessage: 'Type',
+                  })}
+                >
+                  <EuiFlexItem
+                    className={css`
+                      align-self: flex-start;
+                    `}
+                  >
+                    <EuiBadge>{type}</EuiBadge>
+                  </EuiFlexItem>
+                </EntityDetailViewHeaderSection>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EntityDetailViewHeaderSection
+                  title={i18n.translate('xpack.inventory.entityDetailView.quickLinksSection', {
+                    defaultMessage: 'Quick links',
+                  })}
+                >
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    <EuiText size="s">-</EuiText>
+                  </EuiFlexGroup>
+                </EntityDetailViewHeaderSection>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EntityDetailViewHeaderSection
+                  title={i18n.translate('xpack.inventory.entityDetailView.healthSection', {
+                    defaultMessage: 'Health',
+                  })}
+                >
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    <EuiFlexGroup direction="row">
+                      <EuiFlexItem grow>
+                        {i18n.translate('xpack.inventory.entityDetailView.healthSection.alerts', {
+                          defaultMessage: 'Alerts',
+                        })}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        {alerts.length > 0 ? (
+                          <EuiBadge color="danger">{alerts.length}</EuiBadge>
+                        ) : (
+                          <EuiText size="s">-</EuiText>
+                        )}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexGroup>
+                </EntityDetailViewHeaderSection>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
         </InventoryPageHeaderTitle>
       </InventoryPageHeader>
       <EntityOverviewTabList

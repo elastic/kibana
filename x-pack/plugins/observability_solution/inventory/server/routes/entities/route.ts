@@ -5,13 +5,15 @@
  * 2.0.
  */
 import { notFound } from '@hapi/boom';
-import { SavedObject } from '@kbn/core/server';
+import { Logger, SavedObject } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import * as t from 'io-ts';
 import { partition } from 'lodash';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import type {
   Entity,
+  EntityWithLinks,
   EntityWithSignals,
   InventoryEntityDefinition,
   VirtualEntityDefinition,
@@ -30,23 +32,33 @@ import { getDataStreamsForFilter } from './get_data_streams_for_filter';
 import { getEntitiesFromSource } from './get_entities_from_source';
 import { getEntityById } from './get_entity_by_id';
 import { getLatestEntities } from './get_latest_entities';
+import { getEntitySignals } from '../signals/get_entity_signals';
+import { getEntityDefinition } from './get_entity_definition';
+import { withInventorySpan } from '../../lib/with_inventory_span';
 
 export async function fetchEntityDefinitions({
   request,
   plugins: { entityManager },
+  logger,
 }: {
   request: InventoryRouteHandlerResources['request'];
   plugins: {
     entityManager: InventoryRouteHandlerResources['plugins']['entityManager'];
   };
+  logger: Logger;
 }) {
   const entityManagerStart = await entityManager.start();
   const client = await entityManagerStart.getScopedClient({ request });
 
-  return await client.getEntityDefinitions({
-    page: 1,
-    perPage: 10000,
-  });
+  return withInventorySpan(
+    'get_entity_definitions',
+    () =>
+      client.getEntityDefinitions({
+        page: 1,
+        perPage: 10000,
+      }),
+    logger
+  );
 }
 
 const listInventoryDefinitionsRoute = createInventoryServerRoute({
@@ -54,8 +66,12 @@ const listInventoryDefinitionsRoute = createInventoryServerRoute({
   options: {
     tags: ['access:inventory'],
   },
-  handler: async ({ plugins, request }): Promise<{ definitions: InventoryEntityDefinition[] }> => {
-    const { definitions } = await fetchEntityDefinitions({ plugins, request });
+  handler: async ({
+    plugins,
+    request,
+    logger,
+  }): Promise<{ definitions: InventoryEntityDefinition[] }> => {
+    const { definitions } = await fetchEntityDefinitions({ plugins, request, logger });
 
     return {
       definitions: definitions.map(eemToInventoryDefinition),
@@ -106,7 +122,7 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
       plugins.ruleRegistry
         .start()
         .then((ruleRegistryStart) => ruleRegistryStart.getRacClientWithRequest(request)),
-      fetchEntityDefinitions({ plugins, request }),
+      fetchEntityDefinitions({ plugins, request, logger }),
     ]);
 
     return {
@@ -161,7 +177,7 @@ const listRelationshipsRoute = createInventoryServerRoute({
     } = params;
 
     const [{ definitions }, entity] = await Promise.all([
-      fetchEntityDefinitions({ plugins, request }),
+      fetchEntityDefinitions({ plugins, request, logger }),
       getEntityById({
         esClient,
         displayName,
@@ -271,8 +287,18 @@ const getEntityRoute = createInventoryServerRoute({
       type: t.string,
       displayName: t.string,
     }),
+    query: t.type({
+      start: toNumberRt,
+      end: toNumberRt,
+    }),
   }),
-  handler: async ({ params, context, logger }): Promise<{ entity: Entity }> => {
+  handler: async ({
+    params,
+    context,
+    logger,
+    request,
+    plugins,
+  }): Promise<{ entity: EntityWithSignals & EntityWithLinks }> => {
     const esClient = createObservabilityEsClient({
       client: (await context.core).elasticsearch.client.asCurrentUser,
       logger,
@@ -281,14 +307,46 @@ const getEntityRoute = createInventoryServerRoute({
 
     const {
       path: { type, displayName },
+      query: { start, end },
     } = params;
 
-    return {
-      entity: await getEntityById({
-        displayName,
+    const [entity, typeDefinition, alertsClient, rulesClient] = await Promise.all([
+      getEntityById({ displayName, type, esClient }),
+      getEntityDefinition({
+        request,
+        plugins,
         type,
-        esClient,
+        logger,
       }),
+      plugins.ruleRegistry
+        .start()
+        .then((ruleRegistryStart) => ruleRegistryStart.getRacClientWithRequest(request)),
+      plugins.alerting
+        .start()
+        .then((alertingStart) => alertingStart.getRulesClientWithRequest(request)),
+    ]);
+
+    if (!entity || !typeDefinition) {
+      throw notFound();
+    }
+
+    const withLinks: EntityWithLinks = {
+      ...entity,
+      links: [],
+    };
+
+    const entityWithSignals = await getEntitySignals({
+      alertsClient,
+      rulesClient,
+      start,
+      end,
+      logger,
+      entities: [withLinks],
+      typeDefinitions: [typeDefinition],
+    });
+
+    return {
+      entity: entityWithSignals[0],
     };
   },
 });
@@ -342,6 +400,7 @@ const checkDashboardsForDataRoute = createInventoryServerRoute({
       fetchEntityDefinitions({
         plugins,
         request,
+        logger,
       }).then(({ definitions }) => {
         return definitions.find((def) => def.type === type);
       }),

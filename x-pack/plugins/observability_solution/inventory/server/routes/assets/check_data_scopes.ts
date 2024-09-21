@@ -14,6 +14,7 @@ import { Logger } from '@kbn/logging';
 import { excludeFrozenQuery } from '@kbn/observability-utils-common/es/queries/exclude_frozen_query';
 import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
 import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
+import { withInventorySpan } from '../../lib/with_inventory_span';
 
 export interface DataScope {
   id: string;
@@ -50,64 +51,72 @@ export async function checkDataScopes({
   kuery: string;
   logger: Logger;
 }): Promise<Map<string, DataScopeResult>> {
-  const deduplicatedScopes = Array.from(new Map(scopes.map((scope) => [scope.id, scope])).values());
+  return withInventorySpan(
+    'check_data_scopes',
+    async () => {
+      const deduplicatedScopes = Array.from(
+        new Map(scopes.map((scope) => [scope.id, scope])).values()
+      );
 
-  const limiter = pLimit(5);
+      const limiter = pLimit(5);
 
-  logger.debug(`Running ${deduplicatedScopes.length} requests`);
+      logger.debug(`Running ${deduplicatedScopes.length} requests`);
 
-  const scopeChunks = chunk(deduplicatedScopes, 50);
+      const scopeChunks = chunk(deduplicatedScopes, 50);
 
-  const responses = await Promise.all(
-    scopeChunks.map((scopesInChunk) => {
-      return limiter(async () => {
-        const searches = scopesInChunk.flatMap(({ query, index }) => {
-          return [
-            {
-              index,
-            },
-            {
-              terminate_after: 1,
-              timeout: '1ms',
-              track_total_hits: 1,
-              size: 0,
-              query: {
-                bool: {
-                  filter: [
-                    query,
-                    ...excludeFrozenQuery(),
-                    ...rangeQuery(start, end),
-                    ...kqlQuery(kuery),
-                  ],
+      const responses = await Promise.all(
+        scopeChunks.map((scopesInChunk) => {
+          return limiter(async () => {
+            const searches = scopesInChunk.flatMap(({ query, index }) => {
+              return [
+                {
+                  index,
                 },
-              },
-            },
-          ];
-        });
+                {
+                  terminate_after: 1,
+                  timeout: '1ms',
+                  track_total_hits: 1,
+                  size: 0,
+                  query: {
+                    bool: {
+                      filter: [
+                        query,
+                        ...excludeFrozenQuery(),
+                        ...rangeQuery(start, end),
+                        ...kqlQuery(kuery),
+                      ],
+                    },
+                  },
+                },
+              ];
+            });
 
-        const allResponses = await esClient.msearch('check_scopes_for_data', {
-          searches,
-        });
+            const allResponses = await esClient.msearch('check_scopes_for_data', {
+              searches,
+            });
 
-        return scopesInChunk.map((scope, index) => {
-          const response = allResponses.responses[index];
-          const total =
-            typeof response.hits.total === 'number'
-              ? response.hits.total
-              : response.hits.total?.value ?? 0;
+            return scopesInChunk.map((scope, index) => {
+              const response = allResponses.responses[index];
+              const total =
+                typeof response.hits.total === 'number'
+                  ? response.hits.total
+                  : response.hits.total?.value ?? 0;
 
-          return {
-            scope,
-            has_data: total > 0,
-          };
-        });
-      });
-    })
+              return {
+                scope,
+                has_data: total > 0,
+              };
+            });
+          });
+        })
+      );
+
+      const resultsByScopeId = new Map(
+        responses.flat().map((response) => [response.scope.id, response])
+      );
+
+      return resultsByScopeId;
+    },
+    logger
   );
-
-  const resultsByScopeId = new Map(
-    responses.flat().map((response) => [response.scope.id, response])
-  );
-
-  return resultsByScopeId;
 }

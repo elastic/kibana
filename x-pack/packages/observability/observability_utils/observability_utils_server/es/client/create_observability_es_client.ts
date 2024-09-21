@@ -62,10 +62,6 @@ export function createObservabilityEsClient({
     callback: () => Promise<T>
   ) => {
     logger.trace(() => `Request (${operationName}):\n${JSON.stringify(request, null, 2)}`);
-    let time: number | undefined;
-    if (logger.isLevelEnabled('debug')) {
-      time = performance.now();
-    }
     return withSpan(
       {
         name: operationName,
@@ -73,13 +69,9 @@ export function createObservabilityEsClient({
           plugin,
         },
       },
-      callback
+      callback,
+      logger
     ).then((response) => {
-      if (time) {
-        logger.debug(
-          () => `Operation ${operationName} took ${Math.round(performance.now() - time!) / 1000}s`
-        );
-      }
       logger.trace(() => `Response (${operationName}):\n${JSON.stringify(response, null, 2)}`);
       return response;
     });
