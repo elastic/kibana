@@ -16,15 +16,15 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
-import { MAX_FINDINGS_TO_LOAD, VULNERABILITY_FIELDS } from '../../../common/constants';
-import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import {
-  LATEST_VULNERABILITIES_INDEX_PATTERN,
+  MAX_FINDINGS_TO_LOAD,
+  CDR_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
-} from '../../../../common/constants';
+} from '@kbn/cloud-security-posture-common';
+import { FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
+import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
+import { VULNERABILITY_FIELDS } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { showErrorToast } from '../../../common/utils/show_error_toast';
-import { FindingsBaseEsQuery } from '../../../common/types';
 import { getCaseInsensitiveSortScript } from '../utils/custom_sort_script';
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
@@ -56,7 +56,7 @@ export const getVulnerabilitiesQuery = (
   { query, sort }: VulnerabilitiesQuery,
   pageParam: number
 ) => ({
-  index: LATEST_VULNERABILITIES_INDEX_PATTERN,
+  index: CDR_VULNERABILITIES_INDEX_PATTERN,
   sort: getMultiFieldsSort(sort),
   size: MAX_FINDINGS_TO_LOAD,
   query: {
@@ -91,7 +91,7 @@ export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
    * the last loaded record to be used as a from parameter to fetch the next chunk of data.
    */
   return useInfiniteQuery(
-    [LATEST_VULNERABILITIES_INDEX_PATTERN, options],
+    [CDR_VULNERABILITIES_INDEX_PATTERN, options],
     async ({ pageParam }) => {
       const {
         rawResponse: { hits },

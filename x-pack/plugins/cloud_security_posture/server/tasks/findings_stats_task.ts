@@ -14,6 +14,7 @@ import {
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { getMutedRulesFilterQuery } from '../routes/benchmark_rules/get_states/v1';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
@@ -24,7 +25,6 @@ import {
   CSPM_FINDINGS_STATS_INTERVAL,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_SEVERITY,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
@@ -227,7 +227,7 @@ const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest =
 });
 
 const getVulnStatsTrendQuery = (): SearchRequest => ({
-  index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   size: 0,
   query: {
     match_all: {},

@@ -83,8 +83,7 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
       async (context, request, response) => {
         try {
           const esClient = (await context.core).elasticsearch.client;
-          // @ts-expect-error types are wrong
-          const { endpoints } = await esClient.asCurrentUser.inference.getModel({
+          const { endpoints } = await esClient.asCurrentUser.inference.get({
             inference_id: '_all',
           });
 

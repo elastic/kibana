@@ -38,7 +38,13 @@ describe('getIndexTemplateAndPattern', () => {
       pattern: '.internal.alerts-test.alerts-default-*',
       basePattern: '.alerts-test.alerts-*',
       alias: '.alerts-test.alerts-default',
-      validPrefixes: ['.ds-.alerts-', '.internal.alerts-', '.alerts-'],
+      validPrefixes: [
+        '.ds-.alerts-',
+        '.internal.alerts-',
+        '.alerts-',
+        '.internal.preview.alerts-',
+        '.preview.alerts-',
+      ],
       name: '.internal.alerts-test.alerts-default-000001',
     });
   });
@@ -49,7 +55,13 @@ describe('getIndexTemplateAndPattern', () => {
       pattern: '.internal.alerts-test.alerts-special-*',
       basePattern: '.alerts-test.alerts-*',
       alias: '.alerts-test.alerts-special',
-      validPrefixes: ['.ds-.alerts-', '.internal.alerts-', '.alerts-'],
+      validPrefixes: [
+        '.ds-.alerts-',
+        '.internal.alerts-',
+        '.alerts-',
+        '.internal.preview.alerts-',
+        '.preview.alerts-',
+      ],
       name: '.internal.alerts-test.alerts-special-000001',
     });
   });
@@ -67,7 +79,13 @@ describe('getIndexTemplateAndPattern', () => {
       basePattern: '.alerts-test.alerts-*',
       alias: '.alerts-test.alerts-special',
       name: '.internal.alerts-test.alerts-special-000001',
-      validPrefixes: ['.ds-.alerts-', '.internal.alerts-', '.alerts-'],
+      validPrefixes: [
+        '.ds-.alerts-',
+        '.internal.alerts-',
+        '.alerts-',
+        '.internal.preview.alerts-',
+        '.preview.alerts-',
+      ],
       secondaryAlias: `siem.signals-special`,
     });
   });

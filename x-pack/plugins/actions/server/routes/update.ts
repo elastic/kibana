@@ -11,6 +11,7 @@ import { ILicenseState, validateEmptyStrings } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
 import { ActionResult, ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
+import { connectorResponseSchemaV1 } from '../../common/routes/connector/response';
 
 const paramSchema = schema.object({
   id: schema.string({
@@ -58,12 +59,18 @@ export const updateActionRoute = (
         access: 'public',
         summary: `Update a connector`,
         tags: ['oas-tag:connectors'],
-        // description:
-        //   'You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
       },
       validate: {
-        body: bodySchema,
-        params: paramSchema,
+        request: {
+          body: bodySchema,
+          params: paramSchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+            body: () => connectorResponseSchemaV1,
+          },
+        },
       },
     },
     router.handleLegacyErrors(

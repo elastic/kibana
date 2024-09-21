@@ -52,6 +52,7 @@ import {
   type KnowledgeBaseEntry,
   type Message,
   type AdHocInstruction,
+  AssistantScope,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
@@ -100,6 +101,7 @@ export class ObservabilityAIAssistantClient {
         name: string;
       };
       knowledgeBaseService: KnowledgeBaseService;
+      scope: AssistantScope;
     }
   ) {}
 
@@ -162,11 +164,10 @@ export class ObservabilityAIAssistantClient {
   complete = ({
     functionClient,
     connectorId,
-    simulateFunctionCalling,
+    simulateFunctionCalling = false,
     instructions: adHocInstructions = [],
     messages: initialMessages,
     signal,
-    responseLanguage = 'English',
     persist,
     kibanaPublicUrl,
     isPublic,
@@ -179,7 +180,6 @@ export class ObservabilityAIAssistantClient {
     signal: AbortSignal;
     functionClient: ChatFunctionClient;
     persist: boolean;
-    responseLanguage?: string;
     conversationId?: string;
     title?: string;
     isPublic?: boolean;
@@ -195,13 +195,6 @@ export class ObservabilityAIAssistantClient {
     return new LangTracer(context.active()).startActiveSpan(
       'complete',
       ({ tracer: completeTracer }) => {
-        if (responseLanguage) {
-          adHocInstructions.push({
-            instruction_type: 'application_instruction',
-            text: `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
-          });
-        }
-
         const isConversationUpdate = persist && !!predefinedConversationId;
 
         const conversationId = persist ? predefinedConversationId || v4() : '';
@@ -224,11 +217,11 @@ export class ObservabilityAIAssistantClient {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
-                applicationInstructions: functionClient.getInstructions(),
+                applicationInstructions: functionClient.getInstructions(this.dependencies.scope),
                 userInstructions,
                 adHocInstructions,
                 availableFunctionNames: functionClient
-                  .getFunctions()
+                  .getFunctions({ scope: this.dependencies.scope })
                   .map((fn) => fn.definition.name),
               }),
               initialMessages
@@ -252,7 +245,6 @@ export class ObservabilityAIAssistantClient {
                 switchMap((messages) =>
                   getGeneratedTitle({
                     messages,
-                    responseLanguage,
                     logger: this.dependencies.logger,
                     chat: (name, chatParams) => {
                       return this.chat(name, {
@@ -308,6 +300,9 @@ export class ObservabilityAIAssistantClient {
                 logger: this.dependencies.logger,
                 disableFunctions,
                 tracer: completeTracer,
+                connectorId,
+                scope: this.dependencies.scope,
+                useSimulatedFunctionCalling: simulateFunctionCalling === true,
               })
             );
           }),

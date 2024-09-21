@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { TakeActionDropdownProps } from './take_action_dropdown';
 import { TakeActionDropdown } from './take_action_dropdown';
-import { generateAlertDetailsDataMock } from '../../../../common/components/event_details/__mocks__';
+import { mockAlertDetailsData } from '../../../../common/components/event_details/mocks';
 import { getDetectionAlertMock } from '../../../../common/mock/mock_detection_alerts';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
@@ -77,7 +77,7 @@ describe('take action dropdown', () => {
 
   beforeEach(() => {
     defaultProps = {
-      dataFormattedForFieldBrowser: generateAlertDetailsDataMock() as TimelineEventsDetailsItem[],
+      dataFormattedForFieldBrowser: mockAlertDetailsData as TimelineEventsDetailsItem[],
       dataAsNestedObject: getDetectionAlertMock(),
       handleOnEventClosed: jest.fn(),
       isHostIsolationPanelOpen: false,

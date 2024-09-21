@@ -611,7 +611,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with exceptions', async () => {
+    describe('with exceptions', () => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);
       });
@@ -912,7 +912,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({
@@ -1406,6 +1406,64 @@ export default ({ getService }: FtrProviderContext) => {
           ...updatedAlerts.hits.hits[0]._source,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
+      });
+    });
+
+    // skipped on MKI since feature flags are not supported there
+    describe('@skipInServerlessMKI preview logged requests', () => {
+      let rule: EsqlRuleCreateProps;
+      let id: string;
+      beforeEach(async () => {
+        id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        rule = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+      });
+
+      it('should not return requests property when not enabled', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0]).not.toHaveProperty('requests');
+      });
+      it('should return requests property when enable_logged_requests set to true', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+        expect(requests).toHaveLength(2);
+
+        expect(requests).toHaveProperty('0.description', 'ES|QL request to find all matches');
+        expect(requests).toHaveProperty('0.duration', expect.any(Number));
+        expect(requests![0].request).toContain(
+          `"query": "from ecs_compliant metadata _id | where id==\\\"${id}\\\" | where agent.name==\\\"test-1\\\" | limit 101",`
+        );
+
+        expect(requests).toHaveProperty(
+          '1.description',
+          'Retrieve source documents when ES|QL query is not aggregable'
+        );
+        expect(requests).toHaveProperty('1.duration', expect.any(Number));
+        expect(requests![1].request).toContain(
+          'POST /ecs_compliant/_search?ignore_unavailable=true'
+        );
       });
     });
   });

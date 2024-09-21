@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/inventory-plugin",
+  "owner": "@elastic/obs-ux-infra_services-team",
+  "plugin": {
+    "id": "inventory",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "inventory"],
+    "requiredPlugins": [
+      "observabilityShared",
+      "entityManager",
+      "inference",
+      "dataViews",
+      "share"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

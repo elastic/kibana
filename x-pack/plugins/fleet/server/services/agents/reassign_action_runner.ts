@@ -89,7 +89,7 @@ export async function reassignBatch(
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
   const now = new Date().toISOString();
-  const namespaces = spaceId ? { namespaces: [spaceId] } : {};
+  const namespaces = spaceId ? [spaceId] : [];
 
   await createAgentAction(esClient, {
     id: actionId,
@@ -100,7 +100,7 @@ export async function reassignBatch(
     data: {
       policy_id: options.newAgentPolicyId,
     },
-    ...namespaces,
+    namespaces,
   });
 
   await createErrorActionResults(

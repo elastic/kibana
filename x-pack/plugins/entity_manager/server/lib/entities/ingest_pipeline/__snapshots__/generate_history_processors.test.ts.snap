@@ -1,0 +1,327 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateHistoryProcessors(definition) should generate a valid pipeline for builtin definition 1`] = `
+Array [
+  Object {
+    "set": Object {
+      "field": "event.ingested",
+      "value": "{{{_ingest.timestamp}}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.type",
+      "value": "service",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.definitionId",
+      "value": "builtin_mock_entity_definition",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.definitionVersion",
+      "value": "1.0.0",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.schemaVersion",
+      "value": "v1",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.identityFields",
+      "value": Array [
+        "log.logger",
+        "event.category",
+      ],
+    },
+  },
+  Object {
+    "script": Object {
+      "description": "Generated the entity.id field",
+      "source": "// This function will recursively collect all the values of a HashMap of HashMaps
+Collection collectValues(HashMap subject) {
+  Collection values = new ArrayList();
+  // Iterate through the values
+  for(Object value: subject.values()) {
+    // If the value is a HashMap, recurse
+    if (value instanceof HashMap) {
+      values.addAll(collectValues((HashMap) value));
+    } else {
+      values.add(String.valueOf(value));
+    }
+  }
+  return values;
+}
+// Create the string builder
+StringBuilder entityId = new StringBuilder();
+if (ctx[\\"entity\\"][\\"identity\\"] != null) {
+  // Get the values as a collection
+  Collection values = collectValues(ctx[\\"entity\\"][\\"identity\\"]);
+  // Convert to a list and sort
+  List sortedValues = new ArrayList(values);
+  Collections.sort(sortedValues);
+  // Create comma delimited string
+  for(String instanceValue: sortedValues) {
+    entityId.append(instanceValue);
+    entityId.append(\\":\\");
+  }
+  // Assign the entity.id
+  ctx[\\"entity\\"][\\"id\\"] = entityId.length() > 0 ? entityId.substring(0, entityId.length() - 1) : \\"unknown\\";
+}",
+    },
+  },
+  Object {
+    "fingerprint": Object {
+      "fields": Array [
+        "entity.id",
+      ],
+      "method": "MurmurHash3",
+      "target_field": "entity.id",
+    },
+  },
+  Object {
+    "script": Object {
+      "source": "if (ctx.entity?.metadata?.tags != null) {
+  ctx.tags = ctx.entity.metadata.tags.keySet();
+}
+if (ctx.entity?.metadata?.host?.name != null) {
+  if (ctx.host == null) {
+    ctx.host = new HashMap();
+  }
+  ctx.host.name = ctx.entity.metadata.host.name.keySet();
+}
+if (ctx.entity?.metadata?.host?.os?.name != null) {
+  if (ctx.host == null) {
+    ctx.host = new HashMap();
+  }
+  if (ctx.host.os == null) {
+    ctx.host.os = new HashMap();
+  }
+  ctx.host.os.name = ctx.entity.metadata.host.os.name.keySet();
+}
+if (ctx.entity?.metadata?.sourceIndex != null) {
+  ctx.sourceIndex = ctx.entity.metadata.sourceIndex.keySet();
+}",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.metadata",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "log.logger",
+      "if": "ctx.entity?.identity?.log?.logger != null",
+      "value": "{{entity.identity.log.logger}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "event.category",
+      "if": "ctx.entity?.identity?.event?.category != null",
+      "value": "{{entity.identity.event.category}}",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.identity",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "date_index_name": Object {
+      "date_formats": Array [
+        "UNIX_MS",
+        "ISO8601",
+        "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
+      ],
+      "date_rounding": "M",
+      "field": "@timestamp",
+      "index_name_prefix": ".entities.v1.history.builtin_mock_entity_definition.",
+    },
+  },
+]
+`;
+
+exports[`generateHistoryProcessors(definition) should generate a valid pipeline for custom definition 1`] = `
+Array [
+  Object {
+    "set": Object {
+      "field": "event.ingested",
+      "value": "{{{_ingest.timestamp}}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.type",
+      "value": "service",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.definitionId",
+      "value": "admin-console-services",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.definitionVersion",
+      "value": "1.0.0",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.schemaVersion",
+      "value": "v1",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.identityFields",
+      "value": Array [
+        "log.logger",
+        "event.category",
+      ],
+    },
+  },
+  Object {
+    "script": Object {
+      "description": "Generated the entity.id field",
+      "source": "// This function will recursively collect all the values of a HashMap of HashMaps
+Collection collectValues(HashMap subject) {
+  Collection values = new ArrayList();
+  // Iterate through the values
+  for(Object value: subject.values()) {
+    // If the value is a HashMap, recurse
+    if (value instanceof HashMap) {
+      values.addAll(collectValues((HashMap) value));
+    } else {
+      values.add(String.valueOf(value));
+    }
+  }
+  return values;
+}
+// Create the string builder
+StringBuilder entityId = new StringBuilder();
+if (ctx[\\"entity\\"][\\"identity\\"] != null) {
+  // Get the values as a collection
+  Collection values = collectValues(ctx[\\"entity\\"][\\"identity\\"]);
+  // Convert to a list and sort
+  List sortedValues = new ArrayList(values);
+  Collections.sort(sortedValues);
+  // Create comma delimited string
+  for(String instanceValue: sortedValues) {
+    entityId.append(instanceValue);
+    entityId.append(\\":\\");
+  }
+  // Assign the entity.id
+  ctx[\\"entity\\"][\\"id\\"] = entityId.length() > 0 ? entityId.substring(0, entityId.length() - 1) : \\"unknown\\";
+}",
+    },
+  },
+  Object {
+    "fingerprint": Object {
+      "fields": Array [
+        "entity.id",
+      ],
+      "method": "MurmurHash3",
+      "target_field": "entity.id",
+    },
+  },
+  Object {
+    "script": Object {
+      "source": "if (ctx.entity?.metadata?.tags != null) {
+  ctx.tags = ctx.entity.metadata.tags.keySet();
+}
+if (ctx.entity?.metadata?.host?.name != null) {
+  if (ctx.host == null) {
+    ctx.host = new HashMap();
+  }
+  ctx.host.name = ctx.entity.metadata.host.name.keySet();
+}
+if (ctx.entity?.metadata?.host?.os?.name != null) {
+  if (ctx.host == null) {
+    ctx.host = new HashMap();
+  }
+  if (ctx.host.os == null) {
+    ctx.host.os = new HashMap();
+  }
+  ctx.host.os.name = ctx.entity.metadata.host.os.name.keySet();
+}
+if (ctx.entity?.metadata?.sourceIndex != null) {
+  ctx.sourceIndex = ctx.entity.metadata.sourceIndex.keySet();
+}",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.metadata",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "log.logger",
+      "if": "ctx.entity?.identity?.log?.logger != null",
+      "value": "{{entity.identity.log.logger}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "event.category",
+      "if": "ctx.entity?.identity?.event?.category != null",
+      "value": "{{entity.identity.event.category}}",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.identity",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "date_index_name": Object {
+      "date_formats": Array [
+        "UNIX_MS",
+        "ISO8601",
+        "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
+      ],
+      "date_rounding": "M",
+      "field": "@timestamp",
+      "index_name_prefix": ".entities.v1.history.admin-console-services.",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services@platform",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services-history@platform",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services@custom",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services-history@custom",
+    },
+  },
+]
+`;

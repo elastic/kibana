@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 
 import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -45,7 +45,6 @@ import type {
   SavedObjectTaggingOssPluginStart,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plugin/public';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -103,6 +102,7 @@ export interface SetupPlugins {
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
   cases?: CasesPublicSetup;
+  data: DataPublicPluginSetup;
 }
 
 /**
@@ -142,7 +142,6 @@ export interface StartPlugins {
   cloudDefend: CloudDefendPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;
-  cloudExperiments?: CloudExperimentsPluginStart;
   dataViews: DataViewsServicePublic;
   fieldFormats: FieldFormatsStartCommon;
   discover: DiscoverStart;

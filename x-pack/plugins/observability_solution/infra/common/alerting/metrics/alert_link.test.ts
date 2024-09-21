@@ -18,6 +18,8 @@ import {
   AssetDetailsLocator,
   InventoryLocatorParams,
   AssetDetailsLocatorParams,
+  MetricsExplorerLocatorParams,
+  MetricsExplorerLocator,
 } from '@kbn/observability-shared-plugin/common';
 
 jest.mock('@kbn/observability-shared-plugin/common');
@@ -39,6 +41,12 @@ const mockAssetDetailsLocator = {
         `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     ),
 } as unknown as jest.Mocked<AssetDetailsLocator>;
+
+const mockMetricsExplorerLocator = {
+  getRedirectUrl: jest
+    .fn()
+    .mockImplementation(({}: MetricsExplorerLocatorParams) => `/metrics-mock`),
+} as unknown as jest.Mocked<MetricsExplorerLocator>;
 
 describe('Inventory Threshold Rule', () => {
   afterEach(() => {
@@ -260,6 +268,7 @@ describe('Metrics Rule', () => {
       const url = getMetricsViewInAppUrl({
         fields,
         assetDetailsLocator: mockAssetDetailsLocator,
+        metricsExplorerLocator: mockMetricsExplorerLocator,
         groupBy: ['host.name'],
       });
       expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
@@ -276,6 +285,7 @@ describe('Metrics Rule', () => {
       const url = getMetricsViewInAppUrl({
         fields,
         assetDetailsLocator: mockAssetDetailsLocator,
+        metricsExplorerLocator: mockMetricsExplorerLocator,
         groupBy: ['container.id'],
       });
       expect(mockAssetDetailsLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
@@ -292,17 +302,24 @@ describe('Metrics Rule', () => {
       const url = getMetricsViewInAppUrl({
         fields,
         assetDetailsLocator: mockAssetDetailsLocator,
+        metricsExplorerLocator: mockMetricsExplorerLocator,
         groupBy: ['kubernetes.pod.name'],
       });
-      expect(url).toEqual('/app/metrics/explorer');
+      expect(mockMetricsExplorerLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
+      expect(url).toEqual('/metrics-mock');
     });
 
     it('should point to metrics explorer', () => {
       const fields = {
         [TIMESTAMP]: '2022-01-01T00:00:00.000Z',
       } as unknown as ParsedTechnicalFields & Record<string, any>;
-      const url = getMetricsViewInAppUrl({ fields });
-      expect(url).toEqual('/app/metrics/explorer');
+      const url = getMetricsViewInAppUrl({
+        fields,
+        assetDetailsLocator: mockAssetDetailsLocator,
+        metricsExplorerLocator: mockMetricsExplorerLocator,
+      });
+      expect(mockMetricsExplorerLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
+      expect(url).toEqual('/metrics-mock');
     });
   });
 });

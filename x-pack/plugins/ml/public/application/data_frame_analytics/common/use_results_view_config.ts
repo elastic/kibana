@@ -19,14 +19,13 @@ import {
   type TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import { useMlKibana } from '../../contexts/kibana';
-import { ml } from '../../services/ml_api_service';
-import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { useMlApi, useMlKibana } from '../../contexts/kibana';
+import { useNewJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlIndexUtils } from '../../util/index_service';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
-import { getToastNotificationService } from '../../services/toast_notification_service';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 import { getDestinationIndex } from './get_destination_index';
 
 export const useResultsViewConfig = (jobId: string) => {
@@ -35,8 +34,11 @@ export const useResultsViewConfig = (jobId: string) => {
       data: { dataViews },
     },
   } = useMlKibana();
+  const toastNotificationService = useToastNotificationService();
+  const mlApi = useMlApi();
   const { getDataViewIdFromName } = useMlIndexUtils();
   const trainedModelsApiService = useTrainedModelsApiService();
+  const newJobCapsServiceAnalytics = useNewJobCapsServiceAnalytics();
 
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);
   const [dataViewErrorMessage, setDataViewErrorMessage] = useState<undefined | string>(undefined);
@@ -60,9 +62,9 @@ export const useResultsViewConfig = (jobId: string) => {
       setIsLoadingJobConfig(false);
 
       try {
-        const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+        const analyticsConfigs = await mlApi.dataFrameAnalytics.getDataFrameAnalytics(jobId);
 
-        const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
+        const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
         const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? analyticsStats.data_frame_analytics[0]
           : undefined;
@@ -92,7 +94,7 @@ export const useResultsViewConfig = (jobId: string) => {
                 setTotalFeatureImportance(inferenceModel?.metadata?.total_feature_importance);
               }
             } catch (e) {
-              getToastNotificationService().displayErrorToast(e);
+              toastNotificationService.displayErrorToast(e);
             }
           }
 

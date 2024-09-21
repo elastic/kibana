@@ -1,11 +1,13 @@
 #!/usr/bin/env ts-node-script
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import fs from 'fs';
 import jsYaml from 'js-yaml';
 import path from 'path';
@@ -36,7 +38,6 @@ async function main() {
 
   const preamble = locationFileLines.slice(0, 1);
 
-  // eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
   const locationObj = jsYaml.load(
     locationFileLines.slice(1).join('\n')
   ) as BackstageLocationResource;
@@ -44,7 +45,6 @@ async function main() {
     (fileName) => `${resourceDefinitionsBaseUrl}/${fileName}`
   );
 
-  // eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
   const locationYaml = jsYaml.dump(locationObj, { lineWidth: 400 });
 
   fs.writeFileSync(locationFile, `${preamble.join('\n')}\n${locationYaml}`);

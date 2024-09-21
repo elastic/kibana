@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
@@ -15,22 +16,32 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { HeaderHelpMenu } from './header_help_menu';
 
 describe('HeaderHelpMenu', () => {
-  test('it only renders the default content', () => {
-    const application = applicationServiceMock.createInternalStartContract();
-    const helpExtension$ = new BehaviorSubject(undefined);
-    const helpSupportUrl$ = new BehaviorSubject('');
+  const application = applicationServiceMock.createInternalStartContract();
 
+  const defaultComponentProps: Pick<
+    ComponentProps<typeof HeaderHelpMenu>,
+    | 'kibanaVersion'
+    | 'docLinks'
+    | 'navigateToUrl'
+    | 'defaultContentLinks$'
+    | 'helpExtension$'
+    | 'helpSupportUrl$'
+    | 'kibanaDocLink'
+    | 'isServerless'
+  > = {
+    navigateToUrl: application.navigateToUrl,
+    kibanaVersion: 'version',
+    docLinks: docLinksServiceMock.createStartContract(),
+    defaultContentLinks$: of([]),
+    helpExtension$: new BehaviorSubject(undefined),
+    helpSupportUrl$: new BehaviorSubject(''),
+    kibanaDocLink: '',
+    isServerless: false,
+  };
+
+  test('it only renders the default content', () => {
     const component = mountWithIntl(
-      <HeaderHelpMenu
-        navigateToUrl={application.navigateToUrl}
-        globalHelpExtensionMenuLinks$={of([])}
-        helpExtension$={helpExtension$}
-        helpSupportUrl$={helpSupportUrl$}
-        kibanaVersion={'version'}
-        kibanaDocLink={''}
-        docLinks={docLinksServiceMock.createStartContract()}
-        defaultContentLinks$={of([])}
-      />
+      <HeaderHelpMenu {...defaultComponentProps} globalHelpExtensionMenuLinks$={of([])} />
     );
 
     expect(component.find('EuiButtonEmpty').length).toBe(1); // only the toggle view on/off button
@@ -47,14 +58,22 @@ describe('HeaderHelpMenu', () => {
     ]);
   });
 
-  test('it renders the global custom content + the default content', () => {
-    const application = applicationServiceMock.createInternalStartContract();
-    const helpExtension$ = new BehaviorSubject(undefined);
-    const helpSupportUrl$ = new BehaviorSubject('');
-
+  test("it doesn't render the version details when the prop isServerless is true", () => {
     const component = mountWithIntl(
       <HeaderHelpMenu
-        navigateToUrl={application.navigateToUrl}
+        {...defaultComponentProps}
+        isServerless={true}
+        globalHelpExtensionMenuLinks$={of([])}
+      />
+    );
+
+    expect(component.find('[data-test-subj="kbnVersionString"]').exists()).toBeFalsy();
+  });
+
+  test('it renders the global custom content + the default content', () => {
+    const component = mountWithIntl(
+      <HeaderHelpMenu
+        {...defaultComponentProps}
         globalHelpExtensionMenuLinks$={of([
           {
             linkType: 'custom',
@@ -70,12 +89,6 @@ describe('HeaderHelpMenu', () => {
             priority: 100,
           },
         ])}
-        helpExtension$={helpExtension$}
-        helpSupportUrl$={helpSupportUrl$}
-        kibanaVersion={'version'}
-        kibanaDocLink={''}
-        docLinks={docLinksServiceMock.createStartContract()}
-        defaultContentLinks$={of([])}
       />
     );
 

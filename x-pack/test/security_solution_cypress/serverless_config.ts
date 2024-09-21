@@ -34,7 +34,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           { product_line: 'endpoint', product_tier: 'complete' },
           { product_line: 'cloud', product_tier: 'complete' },
         ])}`,
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['manualRuleRunEnabled'])}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'manualRuleRunEnabled',
+          'loggingRequestsEnabled',
+        ])}`,
+        '--csp.strict=false',
+        '--csp.warnLegacyBrowsers=false',
       ],
     },
     testRunner: SecuritySolutionConfigurableCypressTestRunner,

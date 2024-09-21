@@ -77,7 +77,10 @@ export const ProfileQueryEditor = memo(() => {
     }
   };
 
-  const onEditorReady = useCallback((editorInstance) => (editorRef.current = editorInstance), []);
+  const onEditorReady = useCallback(
+    (editorInstance: any) => (editorRef.current = editorInstance),
+    []
+  );
   const licenseEnabled = getLicenseStatus().valid;
 
   return (

@@ -34,12 +34,10 @@ export const getFunctionDescription = async (
   {
     selectedDetectorIndex,
     selectedEntities,
-    selectedJobId,
     selectedJob,
   }: {
     selectedDetectorIndex: number;
     selectedEntities: MlEntity | undefined;
-    selectedJobId: string;
     selectedJob: CombinedJob;
   },
   toastNotificationService: ToastNotificationService,
@@ -52,7 +50,7 @@ export const getFunctionDescription = async (
   const entityControls = getControlsForDetector(
     selectedDetectorIndex,
     selectedEntities,
-    selectedJobId
+    selectedJob
   );
   const criteriaFields = getCriteriaFields(selectedDetectorIndex, entityControls);
 

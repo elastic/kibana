@@ -114,6 +114,25 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.runGetOwnersForFileCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runGetOwnersForFileCli",
+        "description": [
+          "\nRun the getCodeOwnersForFile() method above.\nReport back to the cli with either success and the owner(s), or a failure.\n\nThis function depends on a --file param being passed on the cli, like this:\n$ node scripts/get_owners_for_file.js --file SOME-FILE"
+        ],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-code-owners/src/file_code_owner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [

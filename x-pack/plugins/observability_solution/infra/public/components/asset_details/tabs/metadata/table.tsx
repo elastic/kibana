@@ -126,7 +126,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
   );
 
   const searchBarOnChange = useCallback(
-    ({ queryText, error }) => {
+    ({ queryText, error }: any) => {
       if (error) {
         setSearchError(error);
       } else {

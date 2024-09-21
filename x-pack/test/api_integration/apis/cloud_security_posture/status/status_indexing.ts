@@ -6,11 +6,11 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
+import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -20,7 +20,7 @@ import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 const INDEX_ARRAY = [
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 ];
 

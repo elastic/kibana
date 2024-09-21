@@ -8733,7 +8733,7 @@
             "label": "renderingMode",
             "description": [],
             "signature": [
-              "\"2d\" | \"3d\" | undefined"
+              "\"3d\" | \"2d\" | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -9009,7 +9009,7 @@
             "label": "sourceDataType",
             "description": [],
             "signature": [
-              "\"content\" | \"metadata\" | \"visibility\" | \"idle\""
+              "\"metadata\" | \"content\" | \"visibility\" | \"idle\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,

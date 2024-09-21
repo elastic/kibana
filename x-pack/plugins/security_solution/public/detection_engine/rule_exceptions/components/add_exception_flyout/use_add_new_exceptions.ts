@@ -25,6 +25,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { Rule } from '../../../rule_management/logic/types';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useAddRuleDefaultException } from '../../logic/use_add_rule_exception';
+import { getSuccessToastText, getSuccessToastTitle } from './helpers';
 
 export interface AddNewExceptionItemHookProps {
   itemsToAdd: ExceptionsBuilderReturnExceptionItem[];
@@ -110,10 +111,12 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
           result = await addSharedExceptions(itemsToAdd);
 
           const sharedListNames = sharedLists.map(({ name }) => name);
+          const title = getSuccessToastTitle(listType);
+          const text = getSuccessToastText(listType, sharedListNames);
 
           addSuccess({
-            title: i18n.ADD_EXCEPTION_SUCCESS,
-            text: i18n.ADD_EXCEPTION_SUCCESS_DETAILS(sharedListNames.join(',')),
+            title,
+            text,
           });
         }
 

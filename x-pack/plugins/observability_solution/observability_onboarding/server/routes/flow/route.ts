@@ -12,7 +12,7 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 import { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -26,10 +26,11 @@ import { ElasticAgentStepPayload, InstalledIntegration, StepProgressPayloadRT } 
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
+import { makeTar, type Entry } from './make_tar';
 
 const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}',
-  options: { tags: [], xsrfRequired: false },
+  options: { tags: [] },
   params: t.type({
     path: t.type({
       onboardingId: t.string,
@@ -64,7 +65,7 @@ const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
-  options: { tags: [], xsrfRequired: false },
+  options: { tags: [] },
   params: t.type({
     path: t.type({
       id: t.string,
@@ -128,7 +129,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
 
 const getProgressRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
-  options: { tags: [], xsrfRequired: false },
+  options: { tags: [] },
   params: t.type({
     path: t.type({
       onboardingId: t.string,
@@ -185,7 +186,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
  *
  * This endpoint differs from the existing `POST /internal/observability_onboarding/logs/flow`
  * endpoint in that it caters for the auto-detect flow where integrations are detected and installed
- * on the host system, rather than in the Kiabana UI.
+ * on the host system, rather than in the Kibana UI.
  */
 const createFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow',
@@ -257,9 +258,13 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
 });
 
 /**
- * This endpoints installs the requested integrations and returns the corresponding config file for Elastic Agent.
+ * This endpoints installs the requested integrations and returns the corresponding config file for
+ * Elastic Agent.
  *
- * The request/response format is TSV (tab-separated values) to simplify parsing in bash.
+ * The request format is TSV (tab-separated values) to simplify parsing in bash.
+ *
+ * The response format is either a YAML file or a tarball containing the Elastic Agent
+ * configuration, depending on the `Accept` header.
  *
  * Example request:
  *
@@ -273,19 +278,32 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
  * checkout_service custom /path/to/error.log
  * ```
  *
+ * Example response (tarball):
+ *
+ * ```
+ * -rw-r--r--  113 elastic-agent.yml
+ * drwxr-xr-x    0 inputs.d/
+ * -rw-r--r-- 4890 inputs.d/system.yml
+ * -rw-r--r--  240 inputs.d/product_service.yml
+ * -rw-r--r--  243 inputs.d/checkout_service.yml
+ * ```
+ *
  * Example curl:
  *
  * ```bash
  * curl --request POST \
  *  --url "http://localhost:5601/internal/observability_onboarding/flow/${ONBOARDING_ID}/integrations/install" \
  *  --header "Authorization: ApiKey ${ENCODED_API_KEY}" \
+ *  --header "Accept: application/x-tar" \
  *  --header "Content-Type: text/tab-separated-values" \
- *  --data $'system\tregistry\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log'
+ *  --header "kbn-xsrf: true" \
+ *  --data $'system\tregistry\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log' \
+ *  --output - | tar -tvf -
  * ```
  */
 const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{onboardingId}/integrations/install',
-  options: { tags: [], xsrfRequired: false },
+  options: { tags: [] },
   params: t.type({
     path: t.type({
       onboardingId: t.string,
@@ -351,14 +369,20 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(services.esLegacyConfigService);
 
+    if (request.headers.accept === 'application/x-tar') {
+      return response.ok({
+        headers: {
+          'content-type': 'application/x-tar',
+        },
+        body: generateAgentConfigTar({ elasticsearchUrl, installedIntegrations }),
+      });
+    }
+
     return response.ok({
       headers: {
         'content-type': 'application/yaml',
       },
-      body: generateAgentConfig({
-        esHost: elasticsearchUrl,
-        inputs: installedIntegrations.map(({ inputs }) => inputs).flat(),
-      }),
+      body: generateAgentConfigYAML({ elasticsearchUrl, installedIntegrations }),
     });
   },
 });
@@ -500,17 +524,63 @@ function parseIntegrationsTSV(tsv: string) {
   );
 }
 
-const generateAgentConfig = ({ esHost, inputs = [] }: { esHost: string[]; inputs: unknown[] }) => {
-  return safeDump({
+const generateAgentConfigYAML = ({
+  elasticsearchUrl,
+  installedIntegrations,
+}: {
+  elasticsearchUrl: string[];
+  installedIntegrations: InstalledIntegration[];
+}) => {
+  return dump({
     outputs: {
       default: {
         type: 'elasticsearch',
-        hosts: esHost,
+        hosts: elasticsearchUrl,
         api_key: '${API_KEY}', // Placeholder to be replaced by bash script with the actual API key
       },
     },
-    inputs,
+    inputs: installedIntegrations.map(({ inputs }) => inputs).flat(),
   });
+};
+
+const generateAgentConfigTar = ({
+  elasticsearchUrl,
+  installedIntegrations,
+}: {
+  elasticsearchUrl: string[];
+  installedIntegrations: InstalledIntegration[];
+}) => {
+  const now = new Date();
+  return makeTar([
+    {
+      type: 'File',
+      path: 'elastic-agent.yml',
+      mode: 0o644,
+      mtime: now,
+      data: dump({
+        outputs: {
+          default: {
+            type: 'elasticsearch',
+            hosts: elasticsearchUrl,
+            api_key: '${API_KEY}', // Placeholder to be replaced by bash script with the actual API key
+          },
+        },
+      }),
+    },
+    {
+      type: 'Directory',
+      path: 'inputs.d/',
+      mode: 0o755,
+      mtime: now,
+    },
+    ...installedIntegrations.map<Entry>((integration) => ({
+      type: 'File',
+      path: `inputs.d/${integration.pkgName}.yml`,
+      mode: 0o644,
+      mtime: now,
+      data: dump({ inputs: integration.inputs }),
+    })),
+  ]);
 };
 
 export const flowRouteRepository = {

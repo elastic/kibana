@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './editor_menu.scss';
@@ -16,15 +17,15 @@ import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 
 import { useGetDashboardPanels, DashboardPanelSelectionListFlyout } from './add_new_panel';
 import { pluginServices } from '../../services/plugin_services';
-import { useDashboardAPI } from '../dashboard_app';
+import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 
 interface EditorMenuProps
-  extends Pick<Parameters<typeof useGetDashboardPanels>[0], 'api' | 'createNewVisType'> {
+  extends Pick<Parameters<typeof useGetDashboardPanels>[0], 'createNewVisType'> {
   isDisabled?: boolean;
 }
 
-export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProps) => {
-  const dashboardAPI = useDashboardAPI();
+export const EditorMenu = ({ createNewVisType, isDisabled }: EditorMenuProps) => {
+  const dashboardApi = useDashboardApi();
 
   const {
     overlays,
@@ -33,16 +34,16 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
   } = pluginServices.getServices();
 
   const fetchDashboardPanels = useGetDashboardPanels({
-    api,
+    api: dashboardApi,
     createNewVisType,
   });
 
   useEffect(() => {
     // ensure opened dashboard is closed if a navigation event happens;
     return () => {
-      dashboardAPI.clearOverlays();
+      dashboardApi.clearOverlays();
     };
-  }, [dashboardAPI]);
+  }, [dashboardApi]);
 
   const openDashboardPanelSelectionFlyout = useCallback(
     function openDashboardPanelSelectionFlyout() {
@@ -54,10 +55,10 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
         React.createElement(function () {
           return (
             <DashboardPanelSelectionListFlyout
-              close={dashboardAPI.clearOverlays}
+              close={dashboardApi.clearOverlays}
               {...{
                 paddingSize: flyoutPanelPaddingSize,
-                fetchDashboardPanels: fetchDashboardPanels.bind(null, dashboardAPI.clearOverlays),
+                fetchDashboardPanels: fetchDashboardPanels.bind(null, dashboardApi.clearOverlays),
               }}
             />
           );
@@ -65,7 +66,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
         { analytics, theme, i18n: i18nStart }
       );
 
-      dashboardAPI.openOverlay(
+      dashboardApi.openOverlay(
         overlays.openFlyout(mount, {
           size: 'm',
           maxWidth: 500,
@@ -73,13 +74,13 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
           'aria-labelledby': 'addPanelsFlyout',
           'data-test-subj': 'dashboardPanelSelectionFlyout',
           onClose(overlayRef) {
-            dashboardAPI.clearOverlays();
+            dashboardApi.clearOverlays();
             overlayRef.close();
           },
         })
       );
     },
-    [analytics, theme, i18nStart, dashboardAPI, overlays, fetchDashboardPanels]
+    [analytics, theme, i18nStart, dashboardApi, overlays, fetchDashboardPanels]
   );
 
   return (

@@ -143,28 +143,60 @@ describe("my test suite", async function() {
 
 #### API integration test example
 
+API Authentication in Kibana: Public vs. Internal APIs
+
+Kibana provides both public and internal APIs, each requiring authentication with the correct privileges. However, the method of testing these APIs varies, depending on how they are untilized by end users.
+
+- Public APIs: When testing HTTP requests to public APIs, API key-based authentication should be used. It reflects how an end user calls these APIs. Due to existing restrictions, we utilize `Admin` user credentials to generate API keys for various roles. While the API key permissions are correctly scoped according to the assigned role, the user will internally be recognized as `Admin` during authentication.
+
+- Internal APIs: Direct HTTP requests to internal APIs are generally not expected. However, for testing purposes, authentication should be performed using the Cookie header. This approach simulates client-side behavior during browser interactions, mirroring how internal APIs are indirectly invoked.
+
 Recommendations:
-- in each test file top level `describe` suite should start with `createM2mApiKeyWithRoleScope` call in `before` hook
-- don't forget to invalidate api key using `invalidateApiKeyWithRoleScope` in `after` hook
-- make api calls using `supertestWithoutAuth` with generated api key header
+- use `roleScopedSupertest` service to create a supertest instance scoped to a specific role and predefined request headers
+- `roleScopedSupertest.getSupertestWithRoleScope(<role>)` authenticates requests with an API key by default
+- pass `withCookieHeader: true` to use Cookie header for request authentication
+- don't forget to invalidate API keys by using `destroy()` on the supertest scoped instance in the `after` hook
 
 ```
-describe("my test suite", async function() {
+describe("my public APIs test suite", async function() {
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
-      commonRequestHeader = svlCommonApi.getCommonRequestHeader();
-      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
+      supertestViewerWithApiKey =
+        await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
+          withInternalHeaders: true,
+        });
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyWithRoleScope(roleAuthc);
+      await supertestViewerWithApiKey.destroy();
     });
 
     it(''test step', async () => {
-      const { body, status } = await supertestWithoutAuth
+      const { body, status } = await supertestViewerWithApiKey
         .delete('/api/spaces/space/default')
-        .set(commonRequestHeader)
-        .set(roleAuthc.apiKeyHeader);
+      ...
+    });
+});
+```
+
+```
+describe("my internal APIs test suite", async function() {
+    before(async () => {
+      supertestViewerWithCookieCredentials =
+        await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+          withCookieHeader: true, // to avoid generating API key and use Cookie header instead
+          withInternalHeaders: true,
+        });
+    });
+
+    after(async () => {
+      // no need to call '.destroy' since we didn't create API key and Cookie persist for the role within FTR run
+    });
+
+    it(''test step', async () => {
+      await supertestAdminWithCookieCredentials
+        .post(`/internal/kibana/settings`)
+        .send({ changes: { [TEST_SETTING]: 500 } })
+        .expect(200);
       ...
     });
 });
@@ -260,3 +292,19 @@ describe("my test suite", async function() {
 ```
 
 If you are running tests from your local against MKI projects, make sure to add `--exclude-tag=skipMKI` to your FTR command.
+
+## Run tests with dockerized package registry
+
+For tests using package registry we have enabled a configuration that uses a dockerized lite version to execute the tests in the CI, this will reduce the flakyness of them when calling the real endpoint.
+
+To be able to run this version locally you must have a docker daemon running in your system and set `FLEET_PACKAGE_REGISTRY_PORT` env var. In order to set this variable execute
+
+```
+export set FLEET_PACKAGE_REGISTRY_PORT=12345
+```
+
+To unset the variable, and run the tests against the real endpoint again, execute
+
+```
+unset FLEET_PACKAGE_REGISTRY_PORT 
+```

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "./config.ts"],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/licensing-plugin",

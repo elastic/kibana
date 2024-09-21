@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiSpacer } from '@elastic/eui';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import type { DeepPartial } from '../../../../../../../common/types/common';
+import type { DeepPartial } from '@kbn/utility-types';
 import { Description } from './description';
 import { CustomUrlsWrapper } from '../../../../../components/custom_urls';
 import {

@@ -65,6 +65,7 @@ import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
 import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
 import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explorer_service';
 import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
+import { mlJobServiceFactory } from '../../services/job_service';
 import { forecastServiceFactory } from '../../services/forecast_service';
 
 // Used to indicate the chart is being plotted across
@@ -272,7 +273,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     } = this.props;
     const entityControls = this.getControlsForDetector();
 
-    return this.context.services.mlServices.mlApiServices.results
+    return this.context.services.mlServices.mlApi.results
       .getAnomaliesTableData(
         [selectedJob.job_id],
         this.getCriteriaFields(selectedDetectorIndex, entityControls),
@@ -613,13 +614,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
    * @param callback to invoke after a state update.
    */
   getControlsForDetector = () => {
-    const { selectedDetectorIndex, selectedEntities, selectedJobId, selectedJob } = this.props;
-    return getControlsForDetector(
-      selectedDetectorIndex,
-      selectedEntities,
-      selectedJobId,
-      selectedJob
-    );
+    const { selectedDetectorIndex, selectedEntities, selectedJob } = this.props;
+    return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJob);
   };
 
   /**
@@ -646,10 +642,10 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
     this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       this.context.services.uiSettings,
-      this.context.services.mlServices.mlApiServices,
+      this.context.services.mlServices.mlApi,
       this.context.services.mlServices.mlResultsService
     );
-    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApiServices);
+    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApi);
 
     // Listen for context chart updates.
     this.subscriptions.add(
@@ -740,6 +736,10 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         this.props.selectedJob.job_id,
       ]);
     }
+
+    // Populate mlJobService to work with LinksMenuUI.
+    this.mlJobService = mlJobServiceFactory(undefined, this.context.services.mlServices.mlApi);
+    await this.mlJobService.loadJobsWrapper();
 
     this.componentDidUpdate();
   }

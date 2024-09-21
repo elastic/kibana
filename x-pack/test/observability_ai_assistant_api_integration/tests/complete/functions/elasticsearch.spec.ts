@@ -34,7 +34,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
 
       // intercept the LLM request and return a fixed response
-      proxy.intercept('conversation', () => true, 'Hello from LLM Proxy').completeAfterIntercept();
+      void proxy
+        .intercept('conversation', () => true, 'Hello from LLM Proxy')
+        .completeAfterIntercept();
 
       await generateApmData(apmSynthtraceEsClient);
 
