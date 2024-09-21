@@ -140,6 +140,17 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.apiReference",
+            "type": "string",
+            "tags": [],
+            "label": "apiReference",
+            "description": [],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.upgrade",
             "type": "Object",
             "tags": [],
