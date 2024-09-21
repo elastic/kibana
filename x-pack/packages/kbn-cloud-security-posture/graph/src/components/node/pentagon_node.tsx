@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { Handle, Position } from '@xyflow/react';
@@ -24,7 +24,7 @@ const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
   transform: translate(-50%, -51.5%);
 `;
 
-export const PentagonNode: React.FC<NodeProps> = (props: NodeProps) => {
+export const PentagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick } = props.data;
   const { euiTheme } = useEuiTheme();
   return (
@@ -66,9 +66,21 @@ export const PentagonNode: React.FC<NodeProps> = (props: NodeProps) => {
           y={`${(88 - NodeButton.ExpandButtonSize) / 2}px`}
         />
       )}
-      <Handle type="target" position={Position.Left} id="in" style={HandleStyleOverride} />
-      <Handle type="source" position={Position.Right} id="out" style={HandleStyleOverride} />
+      <Handle
+        type="target"
+        isConnectable={false}
+        position={Position.Left}
+        id="in"
+        style={HandleStyleOverride}
+      />
+      <Handle
+        type="source"
+        isConnectable={false}
+        position={Position.Right}
+        id="out"
+        style={HandleStyleOverride}
+      />
       <NodeLabel>{Boolean(label) ? label : id}</NodeLabel>
     </NodeContainer>
   );
-};
+});
