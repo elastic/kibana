@@ -270,14 +270,11 @@ import type {
   StopEntityStoreRequestParamsInput,
   StopEntityStoreResponse,
 } from './entity_analytics/entity_store/engine/stop.gen';
-<<<<<<< ea-66-api-delete-risk-engine-installation-data
-import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
-=======
 import type {
   ListEntitiesRequestQueryInput,
   ListEntitiesResponse,
 } from './entity_analytics/entity_store/entities/list_entities.gen';
->>>>>>> main
+import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';

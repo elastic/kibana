@@ -302,11 +302,8 @@ export const useEntityAnalyticsRoutes = () => {
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
-<<<<<<< ea-66-api-delete-risk-engine-installation-data
       cleanUpRiskEngine,
-=======
       fetchEntitiesList,
->>>>>>> main
     };
   }, [http]);
 };

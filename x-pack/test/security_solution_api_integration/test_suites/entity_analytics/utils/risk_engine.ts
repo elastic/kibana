@@ -579,7 +579,9 @@ export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namesp
     await supertest
       .delete(routeWithNamespace(RISK_ENGINE_CLEANUP_URL, namespace))
       .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '1'),
+      .set('elastic-api-version', '2023-10-31')
+      .send()
+      .expect(expectStatusCode),
 
   scheduleNow: async (expectStatusCode: number = 200) =>
     await supertest
