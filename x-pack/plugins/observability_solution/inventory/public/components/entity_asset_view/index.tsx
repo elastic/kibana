@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import {
+  CriteriaWithPagination,
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -173,11 +174,16 @@ export function EntityAssetView({
           defaultMessage: 'Name',
         }),
         field: 'displayName',
-        render: (_, { href, asset: { displayName } }) => {
+        render: (_, { href, description, asset: { displayName } }) => {
           return (
-            <EuiLink href={href} data-test-subj="inventoryColumnsLink">
-              {displayName}
-            </EuiLink>
+            <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+              <EuiLink href={href} data-test-subj="inventoryColumnsLink">
+                {displayName}
+              </EuiLink>
+              <EuiText size="xs" color="subdued">
+                {description}
+              </EuiText>
+            </EuiFlexGroup>
           );
         },
       },
@@ -205,6 +211,9 @@ export function EntityAssetView({
       },
     ];
   }, []);
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   return (
     <EuiPanel hasBorder>
@@ -234,6 +243,17 @@ export function EntityAssetView({
           items={suggestions}
           compressed={false}
           loading={suggestionsFetch.loading}
+          onChange={(
+            criteria: CriteriaWithPagination<AssetSuggestion & { icon: string; href: string }>
+          ) => {
+            setPageIndex(criteria.page.index);
+            setPageSize(criteria.page.size);
+          }}
+          pagination={{
+            pageIndex,
+            pageSize,
+            totalItemCount: suggestions.length,
+          }}
         />
       </EuiFlexGroup>
     </EuiPanel>

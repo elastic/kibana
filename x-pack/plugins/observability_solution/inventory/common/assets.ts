@@ -41,4 +41,5 @@ export type Asset = DashboardAsset | RuleAsset | SloAsset;
 
 export interface AssetSuggestion {
   asset: Asset;
+  description: string;
 }

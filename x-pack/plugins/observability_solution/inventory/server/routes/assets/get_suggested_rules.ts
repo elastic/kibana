@@ -11,6 +11,7 @@ import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_
 import type { FindResult } from '@kbn/alerting-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { i18n } from '@kbn/i18n';
 import type { Entity, IdentityField } from '../../../common/entities';
 import { checkDataScopes, getDataScopeWithId } from './check_data_scopes';
 import { getEntitySourceKql } from '../../../common/utils/get_entity_source_kql';
@@ -127,6 +128,12 @@ export async function getSuggestedRules({
             id: rule.id,
             type: 'rule',
           },
+          description: i18n.translate('xpack.inventory.suggestions.ruleSuggestion', {
+            defaultMessage: `This rule alerts on data that might belong to this {type}.`,
+            values: {
+              type: entity.type,
+            },
+          }),
         };
       });
     },

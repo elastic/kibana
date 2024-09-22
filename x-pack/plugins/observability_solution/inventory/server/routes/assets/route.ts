@@ -8,6 +8,8 @@
 import * as t from 'io-ts';
 import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { notFound } from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
+import { orderBy } from 'lodash';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { getSuggestedDashboards } from './get_suggested_dashboards';
 import { getEntityById } from '../entities/get_entity_by_id';
@@ -140,9 +142,13 @@ const getSuggestedAssetsRoute = createInventoryServerRoute({
       };
     });
 
-    const dashboardsWithAnyData = dashboardsWithCounts.filter(({ counts }) => {
-      return counts.has_data > 0;
-    });
+    const dashboardsWithAnyData = orderBy(
+      dashboardsWithCounts.filter(({ counts }) => {
+        return counts.has_data > 0;
+      }),
+      (dashboard) => dashboard.counts.has_data,
+      'desc'
+    );
 
     return {
       suggestions: dashboardsWithAnyData
@@ -153,6 +159,17 @@ const getSuggestedAssetsRoute = createInventoryServerRoute({
               displayName: dashboard.title,
               id: dashboard.id,
             },
+            description: i18n.translate('xpack.inventory.suggestions.dashboardSuggestion', {
+              defaultMessage: `At least {withDataCount, plural, one {# panel out of {totalCount} has} other {# panels out of {totalCount} have}} data for this {type}`,
+              values: {
+                withDataCount: dashboard.counts.has_data,
+                totalCount:
+                  dashboard.counts.has_no_data +
+                  dashboard.counts.has_data +
+                  dashboard.counts.unknown,
+                type: entity.type,
+              },
+            }),
           };
         })
         .concat(ruleSuggestions),
