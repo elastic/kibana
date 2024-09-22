@@ -7,9 +7,6 @@
 
 export { XJsonMode } from '@kbn/ace';
 
-export type { GetMlSharedImportsReturnType } from '@kbn/ml-plugin/public';
-export { getMlSharedImports } from '@kbn/ml-plugin/public';
-
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 const { expandLiteralStrings, collapseLiteralStrings } = XJson;
 export { expandLiteralStrings, collapseLiteralStrings };

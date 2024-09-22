@@ -5695,6 +5695,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-field-stats-flyout@link:x-pack/packages/ml/field_stats_flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-in-memory-table@link:x-pack/packages/ml/in_memory_table":
   version "0.0.0"
   uid ""

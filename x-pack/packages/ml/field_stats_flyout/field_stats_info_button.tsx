@@ -10,8 +10,19 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FieldIcon } from '@kbn/react-field';
 import { type Field } from '@kbn/ml-anomaly-utils';
-import { useCurrentThemeVars } from '../../contexts/kibana';
-import { getKbnFieldIconType } from '../../../../common/util/get_field_icon_types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
+import { getKbnFieldIconType } from './get_field_icon_types';
+
+function useThemeVars() {
+  const { theme } = useKibana().services;
+
+  if (!theme) {
+    throw new TypeError('theme service not available in kibana-react context.');
+  }
+
+  return useCurrentEuiThemeVars(theme);
+}
 
 export type FieldForStats = Pick<Field, 'id' | 'type'>;
 export const FieldStatsInfoButton = ({
@@ -30,7 +41,7 @@ export const FieldStatsInfoButton = ({
   onButtonClick?: (field: FieldForStats) => void;
   hideTrigger?: boolean;
 }) => {
-  const themeVars = useCurrentThemeVars();
+  const themeVars = useThemeVars();
   const emptyFieldMessage = isEmpty
     ? ' ' +
       i18n.translate('xpack.ml.newJob.wizard.fieldContextPopover.emptyFieldInSampleDocsMsg', {

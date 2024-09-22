@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-// actual mocks
-export const expandLiteralStrings = jest.fn();
-export const XJsonMode = jest.fn();
-export const getSavedSearch = jest.fn();
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/field_stats_flyout'],
+};

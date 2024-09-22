@@ -11,7 +11,7 @@ export { FieldStatsFlyoutProvider } from './field_stats_flyout_provider';
 export {
   MLFieldStatsFlyoutContext,
   useFieldStatsFlyoutContext,
-} from './use_field_stats_flytout_context';
-export { FieldStatsInfoButton } from './field_stats_info_button';
+} from './use_field_stats_flyout_context';
+export { FieldStatsInfoButton, type FieldForStats } from './field_stats_info_button';
 export { useFieldStatsTrigger } from './use_field_stats_trigger';
 export { EuiComboBoxWithFieldStats } from './eui_combo_box_with_field_stats';

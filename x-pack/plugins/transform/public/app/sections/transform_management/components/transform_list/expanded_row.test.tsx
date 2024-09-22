@@ -18,9 +18,6 @@ import transformListRow from '../../../../common/__mocks__/transform_list_row.js
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
-import { MlSharedContext } from '../../../../__mocks__/shared_context';
-import { getMlSharedImports } from '../../../../../shared_imports';
-
 const queryClient = new QueryClient();
 
 describe('Transform: Transform List <ExpandedRow />', () => {
@@ -35,15 +32,12 @@ describe('Transform: Transform List <ExpandedRow />', () => {
   });
 
   test('Minimal initialization', async () => {
-    const mlShared = await getMlSharedImports();
     // @ts-expect-error mock data is too loosely typed
     const item: TransformListRow = transformListRow;
 
     renderReactTestingLibraryWithI18n(
       <QueryClientProvider client={queryClient}>
-        <MlSharedContext.Provider value={mlShared}>
-          <ExpandedRow item={item} onAlertEdit={onAlertEdit} />
-        </MlSharedContext.Provider>
+        <ExpandedRow item={item} onAlertEdit={onAlertEdit} />
       </QueryClientProvider>
     );
 

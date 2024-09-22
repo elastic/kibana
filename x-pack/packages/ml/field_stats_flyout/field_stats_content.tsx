@@ -15,12 +15,11 @@ import { FieldStats } from '@kbn/unified-field-list/src/components/field_stats';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import moment from 'moment';
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { getDefaultDatafeedQuery } from '../../jobs/new_job/utils/new_job_utils';
-import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
+import { useFieldStatsFlyoutContext } from './use_field_stats_flyout_context';
 
-const DEFAULT_DSL_QUERY = getDefaultDatafeedQuery();
 const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 
 export const FieldStatsContent: FC<{
@@ -58,7 +57,7 @@ export const FieldStatsContent: FC<{
     <FieldStats
       key={fieldForStats.name}
       services={fieldStatsServices}
-      dslQuery={dslQuery ?? DEFAULT_DSL_QUERY}
+      dslQuery={dslQuery ?? getDefaultDSLQuery()}
       fromDate={timeRange.from}
       toDate={timeRange.to}
       dataViewOrDataViewId={selectedDataView}
