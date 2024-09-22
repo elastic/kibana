@@ -110,7 +110,7 @@ export class KibanaClient {
     const url = format({
       ...parsed,
       pathname: `/${[
-        baseUrl,
+        ...(baseUrl ? [baseUrl] : []),
         ...(props.ignoreSpaceId || !this.spaceId ? [] : ['s', this.spaceId]),
         props.pathname.startsWith('/') ? props.pathname.substring(1) : props.pathname,
       ].join('/')}`,

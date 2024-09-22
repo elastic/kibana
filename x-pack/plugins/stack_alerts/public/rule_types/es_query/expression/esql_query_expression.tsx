@@ -198,6 +198,7 @@ export const EsqlQueryExpression: React.FC<
           detectedTimestamp={detectedTimestamp}
           hideRunQueryText={true}
           isLoading={isLoading}
+          editorIsInline
           hasOutline
         />
       </EuiFormRow>
