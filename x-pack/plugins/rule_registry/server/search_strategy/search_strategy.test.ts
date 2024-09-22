@@ -210,6 +210,28 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     );
   });
 
+  it('should not throw an error with empty rule type ids', async () => {
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: [],
+    };
+
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue([]);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await expect(
+      lastValueFrom(
+        strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+      )
+    ).resolves.not.toThrow();
+  });
+
   it('should use internal user when requesting o11y alerts as RBAC is applied', async () => {
     const request: RuleRegistrySearchRequest = {
       ruleTypeIds: ['.es-query'],

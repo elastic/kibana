@@ -131,6 +131,29 @@ describe('useAlertsDataView', () => {
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
   });
 
+  it('does not fetch anything with empty array nor create a virtual data view', async () => {
+    const { result, waitFor } = renderHook(
+      () =>
+        useAlertsDataView({
+          ...mockServices,
+          ruleTypeIds: [],
+        }),
+      {
+        wrapper,
+      }
+    );
+
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        isLoading: false,
+        dataView: undefined,
+      })
+    );
+    expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(0);
+    expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
+    expect(mockServices.dataViewsService.create).not.toHaveBeenCalled();
+  });
+
   it('returns an undefined data view if any of the queries fails', async () => {
     mockFetchAlertsIndexNames.mockRejectedValue('error');
 

@@ -54,8 +54,8 @@ export const ruleRegistrySearchStrategyProvider = (
       // is different than every other solution so we need to special case
       // those requests.
       const isAnyRuleTypeESAuthorized = request.ruleTypeIds.some(isSiemRuleType);
-
-      const isEachRuleTypeESAuthorized = request.ruleTypeIds.every(isSiemRuleType);
+      const isEachRuleTypeESAuthorized =
+        request.ruleTypeIds.length > 0 && request.ruleTypeIds.every(isSiemRuleType);
 
       const registeredRuleTypes = alerting.listTypes();
 

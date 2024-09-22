@@ -86,8 +86,8 @@ const PageContent = () => {
   } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
 
   const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
-  const browsingSiem = ruleTypeIds.length === 1 && isSiemRuleType(ruleTypeIds[0]);
   const filteringBySolution = ruleTypeIds.length > 0;
+  const browsingSiem = filteringBySolution && ruleTypeIds.every(isSiemRuleType);
   const ruleTypeIdsByFeatureIdEntries = Object.entries(ruleTypeIdsByFeatureId);
 
   const quickFilters = useMemo(() => {

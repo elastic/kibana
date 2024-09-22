@@ -96,7 +96,7 @@ export const useAlertsDataView = ({
   ruleTypeIds,
 }: UseAlertsDataViewParams): UseAlertsDataViewResult => {
   const includesSecurity = ruleTypeIds.some(isSiemRuleType);
-  const isOnlySecurity = ruleTypeIds.every(isSiemRuleType);
+  const isOnlySecurity = ruleTypeIds.length > 0 && ruleTypeIds.every(isSiemRuleType);
   const hasMixedFeatureIds = !isOnlySecurity && includesSecurity;
 
   const {
