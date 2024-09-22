@@ -8,13 +8,8 @@
 import { ESQLSearchResponse } from '@kbn/es-types';
 import { Entity } from '../entities';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
+import { toEntity } from './to_entity';
 
 export function esqlResponseToEntities(response: ESQLSearchResponse): Entity[] {
-  return esqlResultToPlainObjects(response).map((obj) => {
-    return {
-      type: obj['entity.type'],
-      displayName: obj['entity.displayName'],
-      properties: obj,
-    };
-  });
+  return esqlResultToPlainObjects(response).map(toEntity);
 }

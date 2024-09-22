@@ -25,8 +25,8 @@ import { castArray, groupBy, last, memoize, uniq, uniqBy } from 'lodash';
 import pLimit from 'p-limit';
 import type { RuleAsset } from '../../../common/assets';
 import type {
+  Entity,
   EntityDefinition,
-  EntityWithLinks,
   EntityWithSignals,
   IdentityField,
 } from '../../../common/entities';
@@ -105,14 +105,14 @@ export async function getEntitySignals({
   start,
   end,
 }: {
-  entities: EntityWithLinks[];
+  entities: Entity[];
   typeDefinitions?: EntityDefinition[];
   rulesClient: RulesClient;
   alertsClient: AlertsClient;
   logger: Logger;
   start: number;
   end: number;
-}): Promise<Array<EntityWithSignals & EntityWithLinks>> {
+}): Promise<EntityWithSignals[]> {
   const usedTypes = uniq(entities.map((entity) => entity.type));
 
   const typeDefinitionsMap = new Map(typeDefinitions?.map((def) => [def.type, def]) ?? []);

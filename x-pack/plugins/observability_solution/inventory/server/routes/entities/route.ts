@@ -11,12 +11,12 @@ import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/
 import * as t from 'io-ts';
 import { partition } from 'lodash';
 import { toNumberRt } from '@kbn/io-ts-utils';
-import type {
-  Entity,
-  EntityWithLinks,
-  EntityWithSignals,
-  InventoryEntityDefinition,
-  VirtualEntityDefinition,
+import {
+  LATEST_ENTITIES_INDEX,
+  type Entity,
+  type EntityWithSignals,
+  type InventoryEntityDefinition,
+  type VirtualEntityDefinition,
 } from '../../../common/entities';
 import { esqlResultToPlainObjects } from '../../../common/utils/esql_result_to_plain_objects';
 import { getEntitySourceDslFilter } from '../../../common/utils/get_entity_source_dsl_filter';
@@ -35,6 +35,10 @@ import { getLatestEntities } from './get_latest_entities';
 import { getEntitySignals } from '../signals/get_entity_signals';
 import { getEntityDefinition } from './get_entity_definition';
 import { withInventorySpan } from '../../lib/with_inventory_span';
+import { createInventoryEsClient } from '../../lib/clients/create_inventory_es_client';
+import { createEntityClient } from '../../lib/clients/create_entity_client';
+import { serializeLink } from '../../../common/links';
+import { searchEntities } from './search_entities';
 
 export async function fetchEntityDefinitions({
   request,
@@ -298,7 +302,7 @@ const getEntityRoute = createInventoryServerRoute({
     logger,
     request,
     plugins,
-  }): Promise<{ entity: EntityWithSignals & EntityWithLinks }> => {
+  }): Promise<{ entity: EntityWithSignals }> => {
     const esClient = createObservabilityEsClient({
       client: (await context.core).elasticsearch.client.asCurrentUser,
       logger,
@@ -330,18 +334,13 @@ const getEntityRoute = createInventoryServerRoute({
       throw notFound();
     }
 
-    const withLinks: EntityWithLinks = {
-      ...entity,
-      links: [],
-    };
-
     const entityWithSignals = await getEntitySignals({
       alertsClient,
       rulesClient,
       start,
       end,
       logger,
-      entities: [withLinks],
+      entities: [entity],
       typeDefinitions: [typeDefinition],
     });
 
@@ -430,6 +429,75 @@ const checkDashboardsForDataRoute = createInventoryServerRoute({
   },
 });
 
+const updateEntityLinksRoute = createInventoryServerRoute({
+  endpoint: 'PUT /internal/inventory/entity/{type}/{displayName}/links',
+  options: {
+    tags: ['access:inventory'],
+  },
+  params: t.type({
+    body: t.type({
+      entity: t.type({
+        displayName: t.string,
+        type: t.string,
+      }),
+      links: t.array(
+        t.type({
+          type: t.literal('asset'),
+          asset: t.type({
+            type: t.union([t.literal('dashboard'), t.literal('sloDefinition'), t.literal('rule')]),
+            id: t.string,
+          }),
+        })
+      ),
+    }),
+  }),
+  handler: async ({ context, logger, plugins, request, params }): Promise<{ entity: Entity }> => {
+    const {
+      body: { entity, links },
+    } = params;
+
+    const [esClient, entityClient, definition] = await Promise.all([
+      createInventoryEsClient({ context, logger }),
+      createEntityClient({ plugins, request }),
+      getEntityDefinition({
+        type: entity.type,
+        request,
+        plugins,
+        logger,
+      }),
+    ]);
+
+    if (!definition) {
+      throw notFound(`Definition for ${entity.type} not found`);
+    }
+
+    const entityFromSource = await getEntityById({
+      esClient,
+      displayName: entity.displayName,
+      type: entity.type,
+    });
+
+    await entityClient.updateEntity({
+      definitionId: definition.id,
+      id: entityFromSource.properties['entity.id'] as string,
+      doc: {
+        ...entityFromSource.properties,
+        entity: {
+          links: links.map((link) => serializeLink(link)),
+        },
+      },
+    });
+
+    return {
+      entity: await getEntityById({
+        esClient,
+        type: entity.type,
+        displayName: entity.displayName,
+      }),
+    };
+  },
+});
+
 const listEntitiesRoute = createInventoryServerRoute({
   endpoint: 'POST /internal/inventory/entities',
   options: {
@@ -443,11 +511,7 @@ const listEntitiesRoute = createInventoryServerRoute({
     }),
   }),
   handler: async ({ params, context, logger }): Promise<{ entities: Entity[] }> => {
-    const esClient = createObservabilityEsClient({
-      client: (await context.core).elasticsearch.client.asCurrentUser,
-      logger,
-      plugin: 'inventory',
-    });
+    const esClient = await createInventoryEsClient({ context, logger });
 
     const {
       body: { kuery, start, end },
@@ -455,7 +519,7 @@ const listEntitiesRoute = createInventoryServerRoute({
 
     const response = await esClient.esql('get_entity', {
       ...getEsqlRequest({
-        query: `FROM .entities*instance*`,
+        query: `FROM ${LATEST_ENTITIES_INDEX}`,
         kuery,
         start,
         end,
@@ -472,6 +536,38 @@ const listEntitiesRoute = createInventoryServerRoute({
   },
 });
 
+const searchEntitiesRoute = createInventoryServerRoute({
+  endpoint: 'GET /internal/inventory/entities/search',
+  options: {
+    tags: ['access:inventory'],
+  },
+  params: t.type({
+    query: t.type({
+      displayName: t.string,
+      size: toNumberRt,
+    }),
+  }),
+  handler: async ({
+    params,
+    context,
+    logger,
+  }): Promise<{ entities: Array<{ score: number; entity: Entity }> }> => {
+    const esClient = await createInventoryEsClient({ context, logger });
+
+    const {
+      query: { displayName, size },
+    } = params;
+
+    return {
+      entities: await searchEntities({
+        displayName,
+        esClient,
+        size,
+      }),
+    };
+  },
+});
+
 export const entitiesRoutes = {
   ...listInventoryDefinitionsRoute,
   ...listVirtualEntityDefinitionsRoute,
@@ -481,4 +577,6 @@ export const entitiesRoutes = {
   ...listEntitiesRoute,
   ...listRelationshipsRoute,
   ...checkDashboardsForDataRoute,
+  ...updateEntityLinksRoute,
+  ...searchEntitiesRoute,
 };

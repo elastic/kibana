@@ -12,6 +12,7 @@ import { keyBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { ControlledEntityTable } from './controlled_entity_table';
+import { LATEST_ENTITIES_INDEX } from '../../../common/entities';
 
 export function EntityTable({
   type,
@@ -34,7 +35,7 @@ export function EntityTable({
   } = useDateRange({ data });
 
   const query = useMemo(() => {
-    const commands = ['FROM .entities*instance*'];
+    const commands = [`FROM ${LATEST_ENTITIES_INDEX}`];
 
     if (type !== 'all') {
       commands.push(`WHERE entity.type == "${type}"`);
@@ -131,7 +132,7 @@ export function EntityTable({
     return dataViews
       .create(
         {
-          title: `.entities*instance*`,
+          title: LATEST_ENTITIES_INDEX,
           timeFieldName: '@timestamp',
         },
         false, // skip fetch fields

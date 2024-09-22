@@ -6,9 +6,9 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { LATEST_ENTITIES_INDEX, type Entity } from '../../../common/entities';
 import { esqlResultToPlainObjects } from '../../../common/utils/esql_result_to_plain_objects';
-import { Entity } from '../../../common/entities';
 import { toEntity } from '../../../common/utils/to_entity';
 
 export async function getEntityById({
@@ -21,7 +21,7 @@ export async function getEntityById({
   displayName: string;
 }): Promise<Entity> {
   const response = await esClient.esql('get_entity', {
-    query: `FROM .entities*instance* | WHERE entity.type == "${type}" AND entity.displayName.keyword == "${displayName}" | LIMIT 1`,
+    query: `FROM ${LATEST_ENTITIES_INDEX} | WHERE entity.type == "${type}" AND entity.displayName.keyword == "${displayName}" | LIMIT 1`,
   });
 
   if (response.values.length === 0) {

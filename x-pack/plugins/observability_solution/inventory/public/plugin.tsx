@@ -7,7 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { from, map } from 'rxjs';
+import { from, map, of } from 'rxjs';
 import {
   AppMountParameters,
   APP_WRAPPER_CLASS,
@@ -20,6 +20,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import { ENTITY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { css } from '@emotion/css';
+import { GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import type {
   ConfigSchema,
   InventoryPublicSetup,
@@ -135,6 +136,54 @@ export class InventoryPlugin
     pluginsSetup.fieldFormats.register([
       createEntityFieldFormatterClass({ inventoryAPIClient, coreSetup }),
     ]);
+
+    const searchableTypes = ['service'];
+
+    pluginsSetup.globalSearch.registerResultProvider({
+      id: 'inventory_entities',
+      getSearchableTypes: async () => {
+        return searchableTypes;
+      },
+      find: ({ term, types }, { aborted$, maxResults, preference, client }) => {
+        if (!term || term.length < 2) {
+          return of();
+        }
+
+        if (types?.length && types.every((type) => !searchableTypes.includes(type))) {
+          return of();
+        }
+
+        const controller = new AbortController();
+        aborted$.subscribe(() => {
+          controller.abort();
+        });
+
+        return from(
+          inventoryAPIClient.fetch('GET /internal/inventory/entities/search', {
+            signal: controller.signal,
+            params: {
+              query: {
+                displayName: term,
+                size: 3,
+              },
+            },
+          })
+        ).pipe(
+          map(({ entities }): GlobalSearchResult[] => {
+            return entities.map(({ entity, score }): GlobalSearchResult => {
+              return {
+                id: `entity/${entity.type}/${entity.displayName}`,
+                score,
+                type: entity.type,
+                title: entity.displayName,
+                url: `/app/entities/${entity.type}/${entity.displayName}`,
+                icon: 'node',
+              };
+            });
+          })
+        );
+      },
+    });
 
     return {};
   }

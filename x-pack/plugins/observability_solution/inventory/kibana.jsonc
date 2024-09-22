@@ -18,7 +18,8 @@
       "datasetQuality",
       "share",
       "alerting",
-      "ruleRegistry"
+      "ruleRegistry",
+      "globalSearch"
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Asset } from './assets';
+import { Link } from './links';
 import { Signal } from './signals';
+
+export const LATEST_ENTITIES_INDEX = `.entities*instance*`;
 
 export interface IdentityField {
   field: string;
@@ -60,14 +62,9 @@ export interface Entity {
   type: string;
   displayName: string;
   properties: Record<string, unknown>;
+  links: Link[];
 }
 
 export interface EntityWithSignals extends Entity {
   signals: Signal[];
-}
-
-export interface EntityWithLinks extends Entity {
-  links: Array<{
-    asset: Asset;
-  }>;
 }

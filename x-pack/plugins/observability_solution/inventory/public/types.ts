@@ -28,6 +28,10 @@ import type {
   DatasetQualityPluginSetup,
 } from '@kbn/dataset-quality-plugin/public';
 import type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import type {
+  GlobalSearchPluginStart,
+  GlobalSearchPluginSetup,
+} from '@kbn/global-search-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -43,6 +47,7 @@ export interface InventorySetupDependencies {
   unifiedSearch: UnifiedSearchPluginSetup;
   datasetQuality: DatasetQualityPluginSetup;
   share: SharePluginSetup;
+  globalSearch: GlobalSearchPluginSetup;
 }
 
 export interface InventoryStartDependencies {
@@ -55,6 +60,7 @@ export interface InventoryStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   datasetQuality: DatasetQualityPluginStart;
   share: SharePluginStart;
+  globalSearch: GlobalSearchPluginStart;
 }
 
 export interface InventoryPublicSetup {}

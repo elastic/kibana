@@ -9,8 +9,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { getEsqlRequest } from '../../../common/utils/get_esql_request';
-
-const LATEST_ENTITIES_INDEX = `.entities*instance*`;
+import { LATEST_ENTITIES_INDEX } from '../../../common/entities';
 
 const MAX_NUMBER_OF_ENTITIES = 500;
 

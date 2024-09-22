@@ -6,11 +6,13 @@
  */
 
 import type { Entity } from '../entities';
+import { deserializeLink } from '../links';
 
 export function toEntity(result: Record<string, any>): Entity {
   return {
     type: result['entity.type'],
     displayName: result['entity.displayName'],
     properties: result,
+    links: result.links?.map((link: string) => deserializeLink(link)) ?? [],
   };
 }

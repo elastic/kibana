@@ -47,6 +47,10 @@ export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateR
             identityFields: {
               type: 'keyword',
             },
+            links: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
           },
         },
       },

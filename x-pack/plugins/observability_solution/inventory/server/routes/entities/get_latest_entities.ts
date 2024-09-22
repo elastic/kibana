@@ -68,7 +68,7 @@ export async function getLatestEntities({
         const entities = esqlResponseToEntities(response);
 
         return getEntitySignals({
-          entities: entities.map((entity) => ({ ...entity, links: [] })),
+          entities,
           alertsClient,
           rulesClient,
           typeDefinitions,
