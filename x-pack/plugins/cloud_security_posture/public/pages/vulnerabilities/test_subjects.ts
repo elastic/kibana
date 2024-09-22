@@ -12,7 +12,6 @@ export const OVERVIEW_TAB_VULNERABILITY_FLYOUT = 'vulnerability_overview_tab_fly
 export const DATA_SOURCE_VULNERABILITY_FLYOUT = 'vulnerability_flyout_data_source_display_box';
 export const PUBLISHED_DATE_VULNERABILITY_FLYOUT = 'vulnerability_flyout_date_display_box';
 export const VULNERABILITY_SCORES_FLYOUT = 'vulnerability_flyout_score';
-
 export const TAB_ID_VULNERABILITY_FLYOUT = (tabId: string) =>
   `vulnerability-finding-flyout-tab-${tabId}`;
 
