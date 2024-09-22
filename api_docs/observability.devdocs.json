@@ -2892,27 +2892,6 @@
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsSetup.inventory",
-            "type": "Object",
-            "tags": [],
-            "label": "inventory",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "inventory",
-                "scope": "public",
-                "docId": "kibInventoryPluginApi",
-                "section": "def-public.InventoryPublicSetup",
-                "text": "InventoryPublicSetup"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3857,27 +3836,6 @@
                 "docId": "kibInvestigatePluginApi",
                 "section": "def-public.InvestigatePublicStart",
                 "text": "InvestigatePublicStart"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.inventory",
-            "type": "Object",
-            "tags": [],
-            "label": "inventory",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "inventory",
-                "scope": "public",
-                "docId": "kibInventoryPluginApi",
-                "section": "def-public.InventoryPublicStart",
-                "text": "InventoryPublicStart"
               },
               " | undefined"
             ],
@@ -9190,7 +9148,7 @@
           "SearchNestedIdentity",
           " | undefined; _ignored?: string[] | undefined; ignored_field_values?: Record<string, string[]> | undefined; _shard?: string | undefined; _node?: string | undefined; _routing?: string | undefined; _rank?: number | undefined; _seq_no?: number | undefined; _primary_term?: number | undefined; _version?: number | undefined; sort?: ",
           "SortResults",
-          " | undefined; }>; find: (findParams: { query?: string | undefined; start?: string | undefined; end?: string | undefined; sloId?: string | undefined; sloInstanceId?: string | undefined; serviceName?: string | undefined; }) => Promise<{ items: { id: string | undefined; annotation: { title: string; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }[]; total: number; }>; delete: (deleteParams: { id: string; }) => Promise<",
+          " | undefined; }>; find: (findParams: { query?: string | undefined; start?: string | undefined; end?: string | undefined; sloId?: string | undefined; sloInstanceId?: string | undefined; serviceName?: string | undefined; filter?: string | undefined; size?: number | undefined; }) => Promise<{ items: { id: string | undefined; annotation: { title: string; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }[]; total: number; }>; delete: (deleteParams: { id: string; }) => Promise<",
           "DeleteByQueryResponse",
           ">; permissions: () => Promise<{ index: string; hasGoldLicense: boolean; }>; }"
         ],
@@ -13090,7 +13048,7 @@
         "SearchNestedIdentity",
         " | undefined; _ignored?: string[] | undefined; ignored_field_values?: Record<string, string[]> | undefined; _shard?: string | undefined; _node?: string | undefined; _routing?: string | undefined; _rank?: number | undefined; _seq_no?: number | undefined; _primary_term?: number | undefined; _version?: number | undefined; sort?: ",
         "SortResults",
-        " | undefined; }>; find: (findParams: { query?: string | undefined; start?: string | undefined; end?: string | undefined; sloId?: string | undefined; sloInstanceId?: string | undefined; serviceName?: string | undefined; }) => Promise<{ items: { id: string | undefined; annotation: { title: string; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }[]; total: number; }>; delete: (deleteParams: { id: string; }) => Promise<",
+        " | undefined; }>; find: (findParams: { query?: string | undefined; start?: string | undefined; end?: string | undefined; sloId?: string | undefined; sloInstanceId?: string | undefined; serviceName?: string | undefined; filter?: string | undefined; size?: number | undefined; }) => Promise<{ items: { id: string | undefined; annotation: { title: string; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }[]; total: number; }>; delete: (deleteParams: { id: string; }) => Promise<",
         "DeleteByQueryResponse",
         ">; permissions: () => Promise<{ index: string; hasGoldLicense: boolean; }>; } | undefined>; alertDetailsContextualInsightsService: ",
         "AlertDetailsContextualInsightsService",

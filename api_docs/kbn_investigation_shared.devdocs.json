@@ -159,6 +159,21 @@
       },
       {
         "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.EventResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "EventResponse",
+        "description": [],
+        "signature": [
+          "{ id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; } & ({ eventType: \"annotation\"; annotationType?: string | undefined; } | { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; })"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
         "id": "def-common.FindInvestigationsParams",
         "type": "Type",
         "tags": [],
@@ -213,6 +228,36 @@
           "string[]"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get_all_investigation_tags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.GetEventsParams",
+        "type": "Type",
+        "tags": [],
+        "label": "GetEventsParams",
+        "description": [],
+        "signature": [
+          "{ filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; } | undefined"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.GetEventsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetEventsResponse",
+        "description": [],
+        "signature": [
+          "({ id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; } & ({ eventType: \"annotation\"; annotationType?: string | undefined; } | { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }))[]"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -626,6 +671,36 @@
       },
       {
         "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.eventResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "eventResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; timestamp: Zod.ZodNumber; eventType: Zod.ZodUnion<[Zod.ZodLiteral<\"annotation\">, Zod.ZodLiteral<\"alert\">, Zod.ZodLiteral<\"error_rate\">, Zod.ZodLiteral<\"latency\">, Zod.ZodLiteral<\"anomaly\">]>; source: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; }, \"strip\", Zod.ZodTypeAny, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }>, Zod.ZodDiscriminatedUnion<\"eventType\", [Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"annotation\">; annotationType: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { eventType: \"annotation\"; annotationType?: string | undefined; }, { eventType: \"annotation\"; annotationType?: string | undefined; }>, Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"alert\">; alertStatus: Zod.ZodUnion<[Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"flapping\">, Zod.ZodLiteral<\"recovered\">, Zod.ZodLiteral<\"untracked\">]>; }, \"strip\", Zod.ZodTypeAny, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }>]>>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.eventSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "eventSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; timestamp: Zod.ZodNumber; eventType: Zod.ZodUnion<[Zod.ZodLiteral<\"annotation\">, Zod.ZodLiteral<\"alert\">, Zod.ZodLiteral<\"error_rate\">, Zod.ZodLiteral<\"latency\">, Zod.ZodLiteral<\"anomaly\">]>; source: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; }, \"strip\", Zod.ZodTypeAny, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }>, Zod.ZodDiscriminatedUnion<\"eventType\", [Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"annotation\">; annotationType: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { eventType: \"annotation\"; annotationType?: string | undefined; }, { eventType: \"annotation\"; annotationType?: string | undefined; }>, Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"alert\">; alertStatus: Zod.ZodUnion<[Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"flapping\">, Zod.ZodLiteral<\"recovered\">, Zod.ZodLiteral<\"untracked\">]>; }, \"strip\", Zod.ZodTypeAny, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }>]>>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/schema/event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
         "id": "def-common.findInvestigationsParamsSchema",
         "type": "Object",
         "tags": [],
@@ -710,6 +785,36 @@
           "Zod.ZodArray<Zod.ZodString, \"many\">"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get_all_investigation_tags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.getEventsParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getEventsParamsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ query: Zod.ZodOptional<Zod.ZodObject<{ rangeFrom: Zod.ZodOptional<Zod.ZodString>; rangeTo: Zod.ZodOptional<Zod.ZodString>; filter: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; }, { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { query?: { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; } | undefined; }, { query?: { filter?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; } | undefined; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.getEventsResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getEventsResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodArray<Zod.ZodIntersection<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; timestamp: Zod.ZodNumber; eventType: Zod.ZodUnion<[Zod.ZodLiteral<\"annotation\">, Zod.ZodLiteral<\"alert\">, Zod.ZodLiteral<\"error_rate\">, Zod.ZodLiteral<\"latency\">, Zod.ZodLiteral<\"anomaly\">]>; source: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; }, \"strip\", Zod.ZodTypeAny, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }, { id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; }>, Zod.ZodDiscriminatedUnion<\"eventType\", [Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"annotation\">; annotationType: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { eventType: \"annotation\"; annotationType?: string | undefined; }, { eventType: \"annotation\"; annotationType?: string | undefined; }>, Zod.ZodObject<{ eventType: Zod.ZodLiteral<\"alert\">; alertStatus: Zod.ZodUnion<[Zod.ZodLiteral<\"active\">, Zod.ZodLiteral<\"flapping\">, Zod.ZodLiteral<\"recovered\">, Zod.ZodLiteral<\"untracked\">]>; }, \"strip\", Zod.ZodTypeAny, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }, { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; }>]>>, \"many\">"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/get_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

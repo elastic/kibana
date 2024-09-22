@@ -78,7 +78,6 @@ import { pluginServices } from '../../services/plugin_services';
 import { placePanel } from '../panel_placement';
 import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
-import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
 import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
@@ -137,7 +136,6 @@ export const useDashboardContainer = (): DashboardContainer => {
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
   implements
-    DashboardExternallyAccessibleApi,
     TrackContentfulRender,
     TracksQueryPerformance,
     HasSaveNotification,
@@ -174,7 +172,6 @@ export class DashboardContainer
 
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
-  private allDataViews: DataView[] = [];
 
   // performance monitoring
   public lastLoadStartTime?: number;
@@ -393,7 +390,7 @@ export class DashboardContainer
       })
     );
 
-    this.dataViews = new BehaviorSubject<DataView[] | undefined>(this.getAllDataViews());
+    this.dataViews = new BehaviorSubject<DataView[] | undefined>([]);
 
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getInput().query);
     this.query$ = query$;
@@ -800,19 +797,10 @@ export class DashboardContainer
   };
 
   /**
-   * Gets all the dataviews that are actively being used in the dashboard
-   * @returns An array of dataviews
-   */
-  public getAllDataViews = () => {
-    return this.allDataViews;
-  };
-
-  /**
    * Use this to set the dataviews that are used in the dashboard when they change/update
    * @param newDataViews The new array of dataviews that will overwrite the old dataviews array
    */
   public setAllDataViews = (newDataViews: DataView[]) => {
-    this.allDataViews = newDataViews;
     (this.dataViews as BehaviorSubject<DataView[] | undefined>).next(newDataViews);
   };
 

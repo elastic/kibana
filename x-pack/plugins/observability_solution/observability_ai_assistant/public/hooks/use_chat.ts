@@ -10,6 +10,7 @@ import { merge } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { NotificationsStart } from '@kbn/core/public';
+import { AssistantScope } from '../../common/types';
 import {
   MessageRole,
   type Message,
@@ -55,6 +56,7 @@ interface UseChatPropsWithoutContext {
   disableFunctions?: boolean;
   onConversationUpdate?: (event: ConversationCreateEvent | ConversationUpdateEvent) => void;
   onChatComplete?: (messages: Message[]) => void;
+  scope: AssistantScope;
 }
 
 export type UseChatProps = Omit<UseChatPropsWithoutContext, 'notifications'>;
@@ -70,6 +72,7 @@ function useChatWithoutContext({
   onChatComplete,
   persist,
   disableFunctions,
+  scope,
 }: UseChatPropsWithoutContext): UseChatResult {
   const [chatState, setChatState] = useState(ChatState.Ready);
   const systemMessage = useMemo(() => {
@@ -161,6 +164,7 @@ function useChatWithoutContext({
         disableFunctions: disableFunctions ?? false,
         signal: abortControllerRef.current.signal,
         conversationId,
+        scope,
       });
 
       function getPendingMessages() {
@@ -259,6 +263,7 @@ function useChatWithoutContext({
       disableFunctions,
       service,
       systemMessage,
+      scope,
     ]
   );
 

@@ -8,12 +8,16 @@
  */
 
 import { getStatusCodeDecorations } from './status_code_decoration_utils';
-import {
-  SUCCESS_STATUS_BADGE_CLASSNAME,
-  WARNING_STATUS_BADGE_CLASSNAME,
-  DANGER_STATUS_BADGE_CLASSNAME,
-} from './constants';
+import { STATUS_CODE_LINE_CLASSNAME } from './constants';
 import { RequestResult } from '../../../hooks/use_send_current_request/send_request';
+
+const SUCCESS_STATUS_CODE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}--success`;
+const WARNING_STATUS_CODE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}--warning`;
+const DANGER_STATUS_CODE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}--danger`;
+
+const SUCCESS_STATUS_CODE_LINE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}_number--success`;
+const WARNING_STATUS_CODE_LINE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}_number--warning`;
+const DANGER_STATUS_CODE_LINE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}_number--danger`;
 
 describe('getStatusCodeDecorations', () => {
   it('correctly returns all decorations on full data', () => {
@@ -91,108 +95,45 @@ describe('getStatusCodeDecorations', () => {
     const EXPECTED_DECORATIONS = [
       {
         range: {
-          endColumn: 21,
+          endColumn: 1,
           endLineNumber: 1,
-          startColumn: 15,
+          startColumn: 1,
           startLineNumber: 1,
         },
         options: {
-          inlineClassName: SUCCESS_STATUS_BADGE_CLASSNAME,
+          isWholeLine: true,
+          blockClassName: SUCCESS_STATUS_CODE_CLASSNAME,
+          marginClassName: SUCCESS_STATUS_CODE_LINE_CLASSNAME,
         },
       },
       {
         range: {
-          endColumn: 28,
+          endColumn: 1,
           endLineNumber: 12,
-          startColumn: 13,
+          startColumn: 1,
           startLineNumber: 12,
         },
         options: {
-          inlineClassName: WARNING_STATUS_BADGE_CLASSNAME,
+          isWholeLine: true,
+          blockClassName: WARNING_STATUS_CODE_CLASSNAME,
+          marginClassName: WARNING_STATUS_CODE_LINE_CLASSNAME,
         },
       },
       {
         range: {
-          endColumn: 47,
+          endColumn: 1,
           endLineNumber: 18,
-          startColumn: 22,
+          startColumn: 1,
           startLineNumber: 18,
         },
         options: {
-          inlineClassName: DANGER_STATUS_BADGE_CLASSNAME,
+          isWholeLine: true,
+          blockClassName: DANGER_STATUS_CODE_CLASSNAME,
+          marginClassName: DANGER_STATUS_CODE_LINE_CLASSNAME,
         },
       },
     ];
 
     expect(getStatusCodeDecorations(SAMPLE_COMPLETE_DATA)).toEqual(EXPECTED_DECORATIONS);
-  });
-
-  it('only returns decorations for data with complete status code and text', () => {
-    // This sample data is same as in previous test but some of it has incomplete status code or status text
-    const SAMPLE_INCOMPLETE_DATA: RequestResult[] = [
-      {
-        response: {
-          timeMs: 50,
-          // @ts-ignore
-          statusCode: undefined,
-          statusText: 'OK',
-          contentType: 'application/json',
-          value:
-            '# GET _search OK\n{\n"took": 1,\n"timed_out": false,\n"hits": {\n"total": {\n"value": 0,\n"relation": "eq"\n}\n}\n}',
-        },
-        request: {
-          data: '',
-          method: 'GET',
-          path: '_search',
-        },
-      },
-      {
-        response: {
-          timeMs: 22,
-          statusCode: 400,
-          statusText: 'Bad Request',
-          contentType: 'application/json',
-          value: '# GET _test 400 Bad Request\n{\n"error": {\n"root_cause": [],\n"status": 400\n}',
-        },
-        request: {
-          data: '',
-          method: 'GET',
-          path: '_test',
-        },
-      },
-      {
-        response: {
-          timeMs: 23,
-          // @ts-ignore
-          statusCode: undefined,
-          // @ts-ignore
-          statusText: undefined,
-          contentType: 'application/json',
-          value: '# PUT /library/_bulk\n{\n"error": {\n"root_cause": [],\n"status": 500\n}',
-        },
-        request: {
-          data: '',
-          method: 'PUT',
-          path: '/library/_bulk?refresh',
-        },
-      },
-    ];
-
-    // Only the second response has complete status code and text
-    const EXPECTED_DECORATIONS = [
-      {
-        range: {
-          endColumn: 28,
-          endLineNumber: 12,
-          startColumn: 13,
-          startLineNumber: 12,
-        },
-        options: {
-          inlineClassName: WARNING_STATUS_BADGE_CLASSNAME,
-        },
-      },
-    ];
-
-    expect(getStatusCodeDecorations(SAMPLE_INCOMPLETE_DATA)).toEqual(EXPECTED_DECORATIONS);
   });
 });
