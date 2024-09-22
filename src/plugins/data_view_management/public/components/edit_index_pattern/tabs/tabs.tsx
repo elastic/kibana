@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
 import {
+  // DataViewLazy,
   DataView,
   DataViewField,
   DataViewsPublicPluginStart,
@@ -53,6 +54,8 @@ import { ScriptedFieldsTable } from '../scripted_fields_table';
 import { RelationshipsTable } from '../relationships_table';
 import { getTabs, getPath, convertToEuiFilterOptions } from './utils';
 import { getFieldInfo } from '../../utils';
+import { DataViewMgmtState } from '../../../management_app/data_view_management_service';
+import { useStateSelector } from '../../../management_app/state_utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: DataView;
@@ -162,10 +165,15 @@ const SCHEMA_ITEMS: FilterItems[] = [
   },
 ];
 
+// todo reuse
+const fieldsSelector = (state: DataViewMgmtState) => state.fields;
+const indexedFieldTypeSelector = (state: DataViewMgmtState) => state.indexedFieldTypes;
+const scriptedFieldLangsSelector = (state: DataViewMgmtState) => state.scriptedFieldLangs;
+// const scriptedFieldsSelector = (state: DataViewMgmtState) => state.scriptedFields;
+
 export const Tabs: React.FC<TabsProps> = ({
   indexPattern,
   saveIndexPattern,
-  fields,
   history,
   refreshFields,
   relationships,
@@ -183,6 +191,7 @@ export const Tabs: React.FC<TabsProps> = ({
     http,
     application,
     savedObjectsManagement,
+    dataViewMgmtService,
     ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
@@ -200,12 +209,18 @@ export const Tabs: React.FC<TabsProps> = ({
   }>({});
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string[]>([]);
   const [isScriptedFieldFilterOpen, setIsScriptedFieldFilterOpen] = useState(false);
-  const [scriptedFieldLanguages, setScriptedFieldLanguages] = useState<FilterItems[]>([]);
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string[]>([]);
   const [isIndexedFilterOpen, setIsIndexedFilterOpen] = useState(false);
-  const [indexedFieldTypes, setIndexedFieldTypes] = useState<FilterItems[]>([]);
   const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string[]>([]);
   const [isSchemaFilterOpen, setIsSchemaFilterOpen] = useState(false);
+  const fields = useStateSelector(dataViewMgmtService.state$, fieldsSelector);
+  // const scriptedFields = useStateSelector(dataViewMgmtService.state$, scriptedFieldsSelector);
+  const indexedFieldTypes = convertToEuiFilterOptions(
+    useStateSelector(dataViewMgmtService.state$, indexedFieldTypeSelector)
+  );
+  const scriptedFieldLanguages = convertToEuiFilterOptions(
+    useStateSelector(dataViewMgmtService.state$, scriptedFieldLangsSelector)
+  );
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
@@ -276,32 +291,6 @@ export const Tabs: React.FC<TabsProps> = ({
     updater(newItems);
   };
 
-  const refreshFilters = useCallback(() => {
-    const tempIndexedFieldTypes: string[] = [];
-    const tempScriptedFieldLanguages: string[] = [];
-    indexPattern.fields.getAll().forEach((field) => {
-      if (field.scripted) {
-        if (field.lang) {
-          tempScriptedFieldLanguages.push(field.lang);
-        }
-      } else {
-        // for conflicted fields, add conflict as a type
-        if (field.type === 'conflict') {
-          tempIndexedFieldTypes.push('conflict');
-        }
-        if (field.esTypes) {
-          // add all types, may be multiple
-          field.esTypes.forEach((item) => tempIndexedFieldTypes.push(item));
-        }
-      }
-    });
-
-    setIndexedFieldTypes(convertToEuiFilterOptions(tempIndexedFieldTypes));
-    setScriptedFieldLanguages(convertToEuiFilterOptions(tempScriptedFieldLanguages));
-    // need to reset based on changes to fields but indexPattern is the same
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPattern, fields]);
-
   const closeFieldEditor = useCallback(() => {
     if (closeEditorHandler.current) {
       closeEditorHandler.current();
@@ -320,10 +309,6 @@ export const Tabs: React.FC<TabsProps> = ({
     },
     [dataViewFieldEditor, indexPattern, refreshFields]
   );
-
-  useEffect(() => {
-    refreshFilters();
-  }, [indexPattern, indexPattern.fields, refreshFilters]);
 
   useEffect(() => {
     return () => {
@@ -522,7 +507,9 @@ export const Tabs: React.FC<TabsProps> = ({
                             ? scriptedFieldLanguageFilter.filter((f) => f !== item.value)
                             : [...scriptedFieldLanguageFilter, item.value]
                         );
-                        updateFilterItem(scriptedFieldLanguages, index, setScriptedFieldLanguages);
+                        // todo
+                        // updateFilterItem(scriptedFieldLanguages, index, setScriptedFieldLanguages);
+                        updateFilterItem(scriptedFieldLanguages, index, () => {});
                       }}
                       data-test-subj={`scriptedFieldLanguageFilterDropdown-option-${item.value}${
                         item.checked ? '-checked' : ''
@@ -606,7 +593,8 @@ export const Tabs: React.FC<TabsProps> = ({
                     history.push(getPath(field, indexPattern));
                   },
                 }}
-                onRemoveField={refreshFilters}
+                // todo - make something more specific to scripted fields
+                onRemoveField={() => dataViewMgmtService.refreshFields()}
                 painlessDocLink={docLinks.links.scriptedFields.painless}
                 userEditPermission={dataViews.getCanSaveSync()}
               />
@@ -621,9 +609,9 @@ export const Tabs: React.FC<TabsProps> = ({
               <SourceFiltersTable
                 saveIndexPattern={saveIndexPattern}
                 indexPattern={indexPattern}
+                // fields={fields}
                 filterFilter={fieldFilter}
                 fieldWildcardMatcher={fieldWildcardMatcherDecorated}
-                onAddOrRemoveFilter={refreshFilters}
               />
             </Fragment>
           );
@@ -655,7 +643,6 @@ export const Tabs: React.FC<TabsProps> = ({
       indexPattern,
       filteredIndexedFieldTypeFilter,
       filteredSchemaFieldTypeFilter,
-      refreshFilters,
       scriptedFieldLanguageFilter,
       saveIndexPattern,
       openFieldEditor,
@@ -670,20 +657,33 @@ export const Tabs: React.FC<TabsProps> = ({
       savedObjectsManagement,
       allowedTypes,
       relationships,
+      dataViewMgmtService,
     ]
   );
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(indexPattern, fieldFilter, relationships.length, dataViews.scriptedFieldsEnabled).map(
-        (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
-          return {
-            ...tab,
-            content: getContent(tab.id),
-          };
-        }
-      ),
-    [fieldFilter, getContent, indexPattern, relationships, dataViews.scriptedFieldsEnabled]
+      getTabs(
+        indexPattern,
+        // [...fields, ...scriptedFields],
+        fieldFilter,
+        relationships.length,
+        dataViews.scriptedFieldsEnabled
+      ).map((tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
+        return {
+          ...tab,
+          content: getContent(tab.id),
+        };
+      }),
+    [
+      fieldFilter,
+      getContent,
+      indexPattern,
+      relationships,
+      dataViews.scriptedFieldsEnabled,
+      // fields,
+      // scriptedFields,
+    ]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);
