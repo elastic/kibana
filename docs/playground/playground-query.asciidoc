@@ -12,7 +12,6 @@ The {x} UI enables you to view and modify these queries.
 
 * Click *View query* to open the visual query editor.
 * Modify the query by selecting fields to query per index.
-* Click *Save changes*.
 
 [TIP]
 ====

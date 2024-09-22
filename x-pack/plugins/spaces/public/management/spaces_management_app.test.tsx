@@ -31,6 +31,9 @@ const config: ConfigType = {
   maxSpaces: 1000,
   allowFeatureVisibility: true,
   allowSolutionVisibility: true,
+  experimental: {
+    forceSolutionVisibility: false,
+  },
 };
 
 const eventTracker = new EventTracker({ reportEvent: jest.fn() });

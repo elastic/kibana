@@ -187,9 +187,13 @@ export function calculateTextWidth(txt: string | number, isNumber: boolean) {
 }
 
 export function stringMatch(str: string | undefined, substr: any) {
-  return (
-    typeof str === 'string' &&
-    typeof substr === 'string' &&
-    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
-  );
+  try {
+    return (
+      typeof str === 'string' &&
+      typeof substr === 'string' &&
+      (str.toLowerCase().match(substr.toLowerCase()) === null) === false
+    );
+  } catch (error) {
+    return false;
+  }
 }
