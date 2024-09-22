@@ -19983,6 +19983,25 @@ components:
             collection will be disabled
           nullable: true
           type: boolean
+        monitoring_diagnostics:
+          type: object
+          properties:
+            limit:
+              type: object
+              properties:
+                burst:
+                  type: number
+                interval:
+                  type: string
+            uploader:
+              type: object
+              properties:
+                init_dur:
+                  type: string
+                max_dur:
+                  type: string
+                max_retries:
+                  type: number
         monitoring_enabled:
           items:
             enum:
@@ -19990,9 +20009,22 @@ components:
               - logs
             type: string
           type: array
+        monitoring_http:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            host:
+              type: string
+            port:
+              type: number
+          required:
+            - enabled
         monitoring_output_id:
           nullable: true
           type: string
+        monitoring_pprof_enabled:
+          type: boolean
         name:
           type: string
         namespace:
@@ -20464,6 +20496,63 @@ components:
           type: string
         inputs:
           type: string
+        monitoring:
+          type: object
+          properties:
+            diagnostics:
+              type: object
+              properties:
+                limit:
+                  type: object
+                  properties:
+                    burst:
+                      type: number
+                    interval:
+                      type: string
+                uploader:
+                  type: object
+                  properties:
+                    init_dur:
+                      type: string
+                    max_dur:
+                      type: string
+                    max_retries:
+                      type: number
+            enabled:
+              type: boolean
+            http:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                host:
+                  type: string
+                port:
+                  type: number
+              required:
+                - enabled
+            logs:
+              type: boolean
+            metrics:
+              type: boolean
+            namespace:
+              type: string
+            pprof:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+              required:
+                - enabled
+            traces:
+              type: boolean
+            use_output:
+              type: string
+          required:
+            - enabled
+            - metrics
+            - logs
+            - traces
         output_permissions:
           additionalProperties:
             type: object
