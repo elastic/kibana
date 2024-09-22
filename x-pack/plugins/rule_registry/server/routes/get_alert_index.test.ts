@@ -31,6 +31,28 @@ describe('getAlertsIndexRoute', () => {
     expect(response.body).toEqual({ index_name: ['alerts-security.alerts'] });
   });
 
+  test('accepts an array of string ', async () => {
+    const ruleTypeIds = ['foo', 'bar'];
+
+    await server.inject({ ...getReadIndexRequest(), query: { ruleTypeIds } }, context);
+
+    expect(clients.rac.getAuthorizedAlertsIndices).toHaveBeenCalledWith(ruleTypeIds);
+  });
+
+  test('accepts a single string', async () => {
+    const ruleTypeIds = 'foo';
+
+    await server.inject({ ...getReadIndexRequest(), query: { ruleTypeIds } }, context);
+
+    expect(clients.rac.getAuthorizedAlertsIndices).toHaveBeenCalledWith([ruleTypeIds]);
+  });
+
+  test('accepts not defined ryleTypeIds', async () => {
+    await server.inject({ ...getReadIndexRequest(), query: {} }, context);
+
+    expect(clients.rac.getAuthorizedAlertsIndices).toHaveBeenCalledWith(undefined);
+  });
+
   describe('request validation', () => {
     test('rejects invalid query params', async () => {
       await expect(

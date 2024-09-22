@@ -21,7 +21,7 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
         query: buildRouteValidation(
           t.exact(
             t.partial({
-              ruleTypeIds: t.string,
+              ruleTypeIds: t.union([t.string, t.array(t.string)]),
             })
           )
         ),
@@ -35,7 +35,16 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
         const { ruleTypeIds } = request.query;
-        const indexName = await alertsClient.getAuthorizedAlertsIndices(ruleTypeIds?.split(','));
+
+        const ruleTypeIdsAsArray =
+          ruleTypeIds != null
+            ? Array.isArray(ruleTypeIds)
+              ? ruleTypeIds
+              : [ruleTypeIds]
+            : ruleTypeIds;
+
+        const indexName = await alertsClient.getAuthorizedAlertsIndices(ruleTypeIdsAsArray);
+
         return response.ok({
           body: { index_name: indexName },
         });
