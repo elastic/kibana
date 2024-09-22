@@ -78,9 +78,7 @@ export async function mountManagementSection(
   const deps: IndexPatternManagmentContext = {
     dataViewMgmtService: new DataViewMgmtService({
       services: {
-        // todo
         dataViews,
-        http,
         application,
         savedObjectsManagement,
         uiSettings,

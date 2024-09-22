@@ -24,7 +24,7 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
 
   useEffect(() => {
     dataViews
-      .get(decodeURIComponent(props.match.params.id))
+      .get(decodeURIComponent(props.match.params.id), undefined, true)
       .then((ip: DataView) => {
         dataViewMgmtService.setDataView(ip);
         setIndexPattern(ip);

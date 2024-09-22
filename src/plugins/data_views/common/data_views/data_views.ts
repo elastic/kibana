@@ -638,6 +638,7 @@ export class DataViewsService {
       allowNoIndex: true,
       indexFilter: options.indexFilter,
       allowHidden: options.allowHidden,
+      forceRefresh: options.forceRefresh,
     });
   };
 
@@ -839,21 +840,24 @@ export class DataViewsService {
 
   private getSavedObjectAndInit = async (
     id: string,
-    displayErrors: boolean = true
+    displayErrors: boolean = true,
+    forceRefresh: boolean = false
   ): Promise<DataView> => {
     const savedObject = await this.savedObjectsClient.get(id);
 
-    return this.initFromSavedObject(savedObject, displayErrors);
+    return this.initFromSavedObject(savedObject, displayErrors, forceRefresh);
   };
 
   private initFromSavedObjectLoadFields = async ({
     savedObjectId,
     spec,
     displayErrors = true,
+    forceRefresh = false,
   }: {
     savedObjectId: string;
     spec: DataViewSpec;
     displayErrors?: boolean;
+    forceRefresh?: boolean;
   }) => {
     const { title, type, typeMeta, runtimeFieldMap } = spec;
     const { fields, indices, etag } = await this.refreshFieldSpecMap(
@@ -867,6 +871,7 @@ export class DataViewsService {
         rollupIndex: typeMeta?.params?.rollup_index,
         allowNoIndex: spec.allowNoIndex,
         allowHidden: spec.allowHidden,
+        forceRefresh,
       },
       spec.fieldAttrs,
       displayErrors
@@ -879,7 +884,8 @@ export class DataViewsService {
 
   private initFromSavedObject = async (
     savedObject: SavedObject<DataViewAttributes>,
-    displayErrors: boolean = true
+    displayErrors: boolean = true,
+    forceRefresh: boolean = false
   ): Promise<DataView> => {
     const spec = this.savedObjectToSpec(savedObject);
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
@@ -895,6 +901,7 @@ export class DataViewsService {
         savedObjectId: savedObject.id,
         spec,
         displayErrors,
+        forceRefresh,
       });
       fields = fieldsAndIndices.fields;
       indices = fieldsAndIndices.indices;
@@ -905,6 +912,7 @@ export class DataViewsService {
           savedObjectId: savedObject.id,
           spec,
           displayErrors,
+          forceRefresh,
         });
         fields = fieldsAndIndices.fields;
         indices = fieldsAndIndices.indices;
@@ -1028,10 +1036,10 @@ export class DataViewsService {
   get = async (
     id: string,
     displayErrors: boolean = true,
-    refreshFields = false
+    forceRefresh = false
   ): Promise<DataView> => {
     const dataViewFromCache = this.dataViewCache.get(id)?.then(async (dataView) => {
-      if (dataView && refreshFields) {
+      if (dataView && forceRefresh) {
         await this.refreshFields(dataView, displayErrors);
       }
       return dataView;
@@ -1041,7 +1049,7 @@ export class DataViewsService {
     if (dataViewFromCache) {
       indexPatternPromise = dataViewFromCache;
     } else {
-      indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors);
+      indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors, forceRefresh);
       this.dataViewCache.set(id, indexPatternPromise);
     }
 

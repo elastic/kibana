@@ -19,7 +19,7 @@ import {
 } from '@kbn/saved-objects-management-plugin/public';
 
 import {
-  DataViewsServicePublic,
+  DataViewsPublicPluginStart,
   INDEX_PATTERN_TYPE,
   DataViewField,
   // DataViewLazy,
@@ -54,7 +54,7 @@ export interface DataViewMgmtServiceConstructorArgs {
    */
   services: {
     application: ApplicationStart;
-    dataViews: DataViewsServicePublic;
+    dataViews: DataViewsPublicPluginStart;
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     uiSettings: IUiSettingsClient;
   };
@@ -142,7 +142,7 @@ export class DataViewMgmtService {
 
   private services: {
     application: ApplicationStart;
-    dataViews: DataViewsServicePublic;
+    dataViews: DataViewsPublicPluginStart;
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     uiSettings: IUiSettingsClient;
   };
@@ -262,9 +262,10 @@ export class DataViewMgmtService {
     });
   }
 
-  refreshFields() {
+  async refreshFields() {
     const dataView = this.state$.getValue().dataView;
     if (dataView) {
+      await this.services.dataViews.refreshFields(dataView, undefined, true);
       return this.setDataView(dataView);
     }
   }
