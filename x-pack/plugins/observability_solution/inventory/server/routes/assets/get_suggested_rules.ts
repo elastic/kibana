@@ -44,7 +44,7 @@ export async function getSuggestedRules({
         (consumer) => consumer !== AlertConsumers.SIEM && consumer !== AlertConsumers.EXAMPLE
       );
 
-      async function getNextRuleTypes(
+      async function getNextRules(
         page: number
       ): Promise<FindResult<Record<string, unknown>>['data']> {
         const perPage = 1000;
@@ -62,12 +62,12 @@ export async function getSuggestedRules({
           return response.data;
         }
 
-        return [...response.data, ...(await getNextRuleTypes(page + 1))];
+        return [...response.data, ...(await getNextRules(page + 1))];
       }
 
       const rulesForRuleTypes = await withInventorySpan(
         'get_all_rule_types',
-        () => getNextRuleTypes(1),
+        () => getNextRules(1),
         logger
       );
 

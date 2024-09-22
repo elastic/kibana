@@ -14,13 +14,15 @@ export async function updateEntity(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   id: string,
-  doc: Record<string, any>
+  doc: Record<string, any>,
+  refresh: boolean | 'wait_for' = 'wait_for'
 ) {
   const params: UpdateRequest = {
     id,
     index: generateInstanceIndexName(definition),
     doc,
     doc_as_upsert: true,
+    refresh,
   };
 
   return await esClient.update(params);

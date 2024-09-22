@@ -172,7 +172,18 @@ const getSuggestedAssetsRoute = createInventoryServerRoute({
             }),
           };
         })
-        .concat(ruleSuggestions),
+        .concat(ruleSuggestions)
+        .filter((suggestion) => {
+          const hasExistingLinkToSuggestion = entity.links.some((link) => {
+            return (
+              link.type === 'asset' &&
+              link.asset.id === suggestion.asset.id &&
+              link.asset.type === suggestion.asset.type
+            );
+          });
+
+          return !hasExistingLinkToSuggestion;
+        }),
     };
   },
 });

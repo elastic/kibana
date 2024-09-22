@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { castArray } from 'lodash';
 import type { Entity } from '../entities';
 import { deserializeLink } from '../links';
 
@@ -13,6 +14,8 @@ export function toEntity(result: Record<string, any>): Entity {
     type: result['entity.type'],
     displayName: result['entity.displayName'],
     properties: result,
-    links: result.links?.map((link: string) => deserializeLink(link)) ?? [],
+    links: result['entity.links']
+      ? castArray(result['entity.links']).map((link: string) => deserializeLink(link))
+      : [],
   };
 }

@@ -42,7 +42,7 @@ export function deserializeLink(linkSerialized: string): Link {
   const [type, ...parts] = linkSerialized.split('/');
 
   if (type === 'asset') {
-    const assetType = parts[1];
+    const assetType = parts[0];
     if (!ALLOWED_ASSET_TYPES.includes(assetType)) {
       throw new Error(`Unsupported asset type ${assetType}`);
     }

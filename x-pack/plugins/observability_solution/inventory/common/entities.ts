@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Asset } from './assets';
 import { Link } from './links';
 import { Signal } from './signals';
 
@@ -63,6 +64,10 @@ export interface Entity {
   displayName: string;
   properties: Record<string, unknown>;
   links: Link[];
+}
+
+export interface EntityLink extends Link {
+  asset: Asset;
 }
 
 export interface EntityWithSignals extends Entity {

@@ -267,7 +267,8 @@ export async function getEntitySignals({
     const alertsForEntity = alertsWithEntityLookupIds[entityLookupId] ?? [];
     const alertsForEntityViaRules = entity.links.flatMap((link) => {
       if (link.asset.type === 'rule') {
-        return alertsByRuleId[link.asset.id];
+        const alerts = alertsByRuleId[link.asset.id] ?? [];
+        return alerts;
       }
       return [];
     });

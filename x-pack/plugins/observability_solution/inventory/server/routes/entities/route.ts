@@ -7,21 +7,31 @@
 import { notFound } from '@hapi/boom';
 import { Logger, SavedObject } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import { toNumberRt } from '@kbn/io-ts-utils';
+import { mergePlainObjects } from '@kbn/observability-utils-common/object/merge_plain_objects';
 import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import * as t from 'io-ts';
-import { partition } from 'lodash';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { compact, partition } from 'lodash';
+import { Asset } from '../../../common/assets';
 import {
+  EntityLink,
   LATEST_ENTITIES_INDEX,
   type Entity,
   type EntityWithSignals,
   type InventoryEntityDefinition,
   type VirtualEntityDefinition,
 } from '../../../common/entities';
+import { serializeLink } from '../../../common/links';
 import { esqlResultToPlainObjects } from '../../../common/utils/esql_result_to_plain_objects';
 import { getEntitySourceDslFilter } from '../../../common/utils/get_entity_source_dsl_filter';
 import { getEsqlRequest } from '../../../common/utils/get_esql_request';
+import { createDashboardsClient } from '../../lib/clients/create_dashboards_client';
+import { createEntityClient } from '../../lib/clients/create_entity_client';
+import { createInventoryEsClient } from '../../lib/clients/create_inventory_es_client';
+import { createRulesClient } from '../../lib/clients/create_rules_client';
+import { withInventorySpan } from '../../lib/with_inventory_span';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
+import { getEntitySignals } from '../signals/get_entity_signals';
 import { InventoryRouteHandlerResources } from '../types';
 import {
   DashboardWithEntityDataCheck,
@@ -31,13 +41,8 @@ import { eemToInventoryDefinition } from './eem_to_inventory_definition';
 import { getDataStreamsForFilter } from './get_data_streams_for_filter';
 import { getEntitiesFromSource } from './get_entities_from_source';
 import { getEntityById } from './get_entity_by_id';
-import { getLatestEntities } from './get_latest_entities';
-import { getEntitySignals } from '../signals/get_entity_signals';
 import { getEntityDefinition } from './get_entity_definition';
-import { withInventorySpan } from '../../lib/with_inventory_span';
-import { createInventoryEsClient } from '../../lib/clients/create_inventory_es_client';
-import { createEntityClient } from '../../lib/clients/create_entity_client';
-import { serializeLink } from '../../../common/links';
+import { getLatestEntities } from './get_latest_entities';
 import { searchEntities } from './search_entities';
 
 export async function fetchEntityDefinitions({
@@ -435,11 +440,11 @@ const updateEntityLinksRoute = createInventoryServerRoute({
     tags: ['access:inventory'],
   },
   params: t.type({
+    path: t.type({
+      displayName: t.string,
+      type: t.string,
+    }),
     body: t.type({
-      entity: t.type({
-        displayName: t.string,
-        type: t.string,
-      }),
       links: t.array(
         t.type({
           type: t.literal('asset'),
@@ -453,14 +458,15 @@ const updateEntityLinksRoute = createInventoryServerRoute({
   }),
   handler: async ({ context, logger, plugins, request, params }): Promise<{ entity: Entity }> => {
     const {
-      body: { entity, links },
+      body: { links },
+      path: { displayName, type },
     } = params;
 
     const [esClient, entityClient, definition] = await Promise.all([
       createInventoryEsClient({ context, logger }),
       createEntityClient({ plugins, request }),
       getEntityDefinition({
-        type: entity.type,
+        type,
         request,
         plugins,
         logger,
@@ -468,32 +474,120 @@ const updateEntityLinksRoute = createInventoryServerRoute({
     ]);
 
     if (!definition) {
-      throw notFound(`Definition for ${entity.type} not found`);
+      throw notFound(`Definition for ${type} not found`);
     }
 
-    const entityFromSource = await getEntityById({
+    const entityFromIndex = await getEntityById({
       esClient,
-      displayName: entity.displayName,
-      type: entity.type,
+      displayName,
+      type,
     });
 
     await entityClient.updateEntity({
       definitionId: definition.id,
-      id: entityFromSource.properties['entity.id'] as string,
-      doc: {
-        ...entityFromSource.properties,
+      id: entityFromIndex.properties['entity.id'] as string,
+      doc: mergePlainObjects(entityFromIndex._source, {
         entity: {
           links: links.map((link) => serializeLink(link)),
         },
-      },
+      }),
+      refresh: true,
     });
 
     return {
       entity: await getEntityById({
         esClient,
-        type: entity.type,
-        displayName: entity.displayName,
+        type,
+        displayName,
       }),
+    };
+  },
+});
+
+const getEntityLinksRoute = createInventoryServerRoute({
+  endpoint: 'GET /internal/inventory/entity/{type}/{displayName}/links',
+  options: {
+    tags: ['access:inventory'],
+  },
+  params: t.type({
+    path: t.type({
+      type: t.string,
+      displayName: t.string,
+    }),
+  }),
+  handler: async (resources): Promise<{ links: EntityLink[] }> => {
+    const [esClient, rulesClient, dashboardsClient] = await Promise.all([
+      createInventoryEsClient(resources),
+      createRulesClient(resources),
+      createDashboardsClient(resources),
+    ]);
+
+    const {
+      path: { type, displayName },
+    } = resources.params;
+
+    const entity = await getEntityById({
+      type,
+      displayName,
+      esClient,
+    });
+
+    const assetsToFetch = entity.links.map((link) => link.asset);
+
+    const dashboardIds = assetsToFetch
+      .filter((asset) => asset.type === 'dashboard')
+      .map((asset) => asset.id);
+
+    const ruleIds = assetsToFetch.filter((asset) => asset.type === 'rule').map((asset) => asset.id);
+
+    const [dashboardAssetsById, ruleAssetsById] = await Promise.all([
+      dashboardsClient.getDashboardsById(dashboardIds).then((dashboards) => {
+        return new Map(
+          dashboards.map((dashboard) => [
+            dashboard.id,
+            {
+              id: dashboard.id,
+              displayName: dashboard.attributes.title,
+              type: 'dashboard' as const,
+            },
+          ])
+        );
+      }),
+      new Map(
+        await Promise.all(
+          ruleIds.map((id) =>
+            rulesClient.get({ id }).then((rule) => {
+              return [id, { id, type: 'rule' as const, displayName: rule.name }] as const;
+            })
+          )
+        )
+      ),
+    ]);
+
+    return {
+      links: compact(
+        entity.links.map((link) => {
+          if (link.type === 'asset') {
+            let asset: Asset | undefined;
+            switch (link.asset.type) {
+              case 'dashboard':
+                asset = dashboardAssetsById.get(link.asset.id);
+                break;
+
+              case 'rule':
+                asset = ruleAssetsById.get(link.asset.id);
+                break;
+            }
+            if (asset) {
+              return {
+                ...link,
+                asset,
+              };
+            }
+          }
+          return undefined;
+        })
+      ),
     };
   },
 });
@@ -578,5 +672,6 @@ export const entitiesRoutes = {
   ...listRelationshipsRoute,
   ...checkDashboardsForDataRoute,
   ...updateEntityLinksRoute,
+  ...getEntityLinksRoute,
   ...searchEntitiesRoute,
 };

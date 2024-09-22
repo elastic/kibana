@@ -40,7 +40,7 @@ export function createRepositoryClient<
 
     return requestCache.fetch(
       { pathname, body, method, query },
-      { mode: 'default', type: 'inMemory', ...caching },
+      { mode: 'never', type: 'inMemory', ...caching },
       () =>
         core.http[method](pathname, {
           ...otherOptions,

@@ -33,6 +33,7 @@ import { InventoryPageHeader } from '../inventory_page_header';
 import { InventoryPageHeaderTitle } from '../inventory_page_header/inventory_page_header_title';
 import { LoadingPanel } from '../loading_panel';
 import { EntityDetailViewHeaderSection } from '../entity_detail_view_header_section';
+import { QuickLinks } from './quick_links';
 
 interface TabDependencies {
   entity: Entity;
@@ -101,6 +102,23 @@ export function EntityDetailViewWithoutParams({
       });
     },
     [inventoryAPIClient]
+  );
+
+  const linksFetch = useAbortableAsync(
+    async ({ signal }) => {
+      return inventoryAPIClient
+        .fetch('GET /internal/inventory/entity/{type}/{displayName}/links', {
+          signal,
+          params: {
+            path: {
+              type,
+              displayName,
+            },
+          },
+        })
+        .then(({ links }) => links);
+    },
+    [inventoryAPIClient, type, displayName]
   );
 
   const typeDefinition = typeDefinitionsFetch.value?.definitions.find(
@@ -206,7 +224,18 @@ export function EntityDetailViewWithoutParams({
       label: i18n.translate('xpack.inventory.entityDetailView.assets', {
         defaultMessage: 'Assets',
       }),
-      content: <EntityAssetView entity={entity} identityFields={typeDefinition.identityFields} />,
+      content: (
+        <EntityAssetView
+          entity={entity}
+          identityFields={typeDefinition.identityFields}
+          linksFetch={linksFetch}
+          onEntityUpdate={() => {
+            linksFetch.refresh();
+            entityFetch.refresh();
+            return Promise.resolve();
+          }}
+        />
+      ),
     },
     relationships: {
       href: router.link('/{type}/{displayName}/{tab}', {
@@ -283,15 +312,11 @@ export function EntityDetailViewWithoutParams({
                 </EntityDetailViewHeaderSection>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EntityDetailViewHeaderSection
-                  title={i18n.translate('xpack.inventory.entityDetailView.quickLinksSection', {
-                    defaultMessage: 'Quick links',
-                  })}
-                >
-                  <EuiFlexGroup direction="column" gutterSize="s">
-                    <EuiText size="s">-</EuiText>
-                  </EuiFlexGroup>
-                </EntityDetailViewHeaderSection>
+                <QuickLinks
+                  entity={entity}
+                  identityFields={typeDefinition.identityFields}
+                  links={linksFetch.value}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EntityDetailViewHeaderSection

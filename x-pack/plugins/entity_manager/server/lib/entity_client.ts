@@ -131,16 +131,18 @@ export class EntityClient {
     definitionId,
     id,
     doc,
+    refresh = 'wait_for',
   }: {
     definitionId: string;
     id: string;
     doc: Record<string, any>;
+    refresh?: boolean | 'wait_for';
   }) {
     const definition = await this.getEntityDefinition({ id: definitionId });
     if (!definition) {
       throw new EntityDefinitionNotFound(`Unable to find definition for ${definitionId}`);
     }
-    return await updateEntity(this.options.esClient, definition, id, doc);
+    return await updateEntity(this.options.esClient, definition, id, doc, refresh);
   }
 
   async startEntityDefinition(definition: EntityDefinition) {
