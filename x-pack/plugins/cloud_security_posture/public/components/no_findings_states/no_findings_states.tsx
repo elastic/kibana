@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,7 @@ import { css } from '@emotion/react';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { IndexDetails, CspStatusCode } from '@kbn/cloud-security-posture-common';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
-import { useWizIntegrationRoute } from '../../common/api/use_wiz_integration_route';
+import { useAdd3PIntegrationRoute } from '../../common/api/use_wiz_integration_route';
 import { FullSizeCenteredPage } from '../full_size_centered_page';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import {
@@ -178,15 +179,16 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
 );
 
 const EmptySecurityFindingsPrompt = () => {
+  const { euiTheme } = useEuiTheme();
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
-  const wizIntegrationLink = useWizIntegrationRoute();
+  const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiEmptyPrompt
-          style={{ padding: 24 }}
+          style={{ padding: euiTheme.size.l }}
           data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
           icon={<EuiImage size="fullWidth" src={cloudsSVG} alt="clouds" role="presentation" />}
           title={
@@ -286,13 +288,13 @@ const EmptySecurityFindingsPrompt = () => {
                 <EuiButton
                   color="primary"
                   fill
-                  href={wizIntegrationLink}
-                  isDisabled={!wizIntegrationLink}
+                  href={wizAddIntegrationLink}
+                  isDisabled={!wizAddIntegrationLink}
                   data-test-subj={THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON}
                 >
                   <FormattedMessage
                     id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.addWizIntegrationButtonTitle"
-                    defaultMessage="Wiz Integration"
+                    defaultMessage="Add Wiz Integration"
                   />
                 </EuiButton>
               </EuiFlexItem>

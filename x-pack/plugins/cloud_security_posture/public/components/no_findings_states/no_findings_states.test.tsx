@@ -54,7 +54,7 @@ describe('NoFindingsStates', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByRole('link', { name: /wiz integration/i })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /add wiz integration/i })).toHaveAttribute(
         'href',
         '/app/integrations/detail/wiz/overview'
       );

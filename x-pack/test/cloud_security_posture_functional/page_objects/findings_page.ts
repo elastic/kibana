@@ -109,12 +109,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       return testSubjects.find(notInstalledSubject, 15 * 1000);
     },
 
-    async navigateToAction(actionTestSubject: string, elementIdToWaitFor: string) {
+    async navigateToAction(actionTestSubject: string) {
       return await retry.try(async () => {
         await testSubjects.click(actionTestSubject);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const result = await testSubjects.exists(elementIdToWaitFor);
+        const result = await testSubjects.exists('createPackagePolicy_pageTitle');
 
         if (!result) {
           throw new Error('Integration installation page not found');

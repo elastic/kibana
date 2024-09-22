@@ -5,32 +5,15 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import {
-  epmRouteService,
-  type GetInfoResponse,
-  type DefaultPackagesInstallationError,
-} from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
 
-const useWizIntegration = () => {
+export const useAdd3PIntegrationRoute = (pkgkey: string) => {
   const { http } = useKibana().services;
-
-  return useQuery<GetInfoResponse, DefaultPackagesInstallationError>(['integrations'], () =>
-    http.get<GetInfoResponse>(epmRouteService.getInfoPath('wiz'))
-  );
-};
-
-export const useWizIntegrationRoute = (): string | undefined => {
-  const { http } = useKibana().services;
-  const wizIntegration = useWizIntegration();
-
-  if (!wizIntegration.isSuccess) return;
 
   const path = pagePathGetters
-    .integration_details_overview({
-      pkgkey: 'wiz',
+    .add_integration_to_policy({
+      pkgkey,
     })
     .join('');
 

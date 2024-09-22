@@ -34,54 +34,44 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       const element = await notInstalledVulnerabilities.getElement();
       expect(element).to.not.be(null);
 
-      await notInstalledVulnerabilities.navigateToAction(
-        'cnvm-not-installed-action',
-        'createPackagePolicy_pageTitle'
-      );
+      await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
 
       await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
     });
 
-    it('clicking on the `No integrations installed` prompt action button - `install cloud posture intergation`: navigates to the CSPM integration installation page', async () => {
+    it('clicking on the `No integrations installed` prompt action button - `install cloud posture integration`: navigates to the CSPM integration installation page', async () => {
       await findings.navigateToMisconfigurations();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
-      await notInstalledCSP.navigateToAction(
-        'cspm-not-installed-action',
-        'createPackagePolicy_pageTitle'
-      );
+      await notInstalledCSP.navigateToAction('cspm-not-installed-action');
 
       await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
     });
 
-    it('clicking on the `No integrations installed` prompt action button - `install kubernetes posture intergation`: navigates to the KSPM integration installation page', async () => {
+    it('clicking on the `No integrations installed` prompt action button - `install kubernetes posture integration`: navigates to the KSPM integration installation page', async () => {
       await findings.navigateToMisconfigurations();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
-      await notInstalledCSP.navigateToAction(
-        'kspm-not-installed-action',
-        'createPackagePolicy_pageTitle'
-      );
+      await notInstalledCSP.navigateToAction('kspm-not-installed-action');
 
       await PageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
     });
 
-    it('clicking on the `Third party integrations` prompt action button - `Wiz Integration`: navigates to the Wiz integration overview page', async () => {
+    it('clicking on the `Third party integrations` prompt action button - `Wiz Integration`: navigates to the Wiz integration installation page', async () => {
       await findings.navigateToMisconfigurations();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const element = await thirdPartyIntegrationsNoFindingsPrompt.getElement();
       expect(element).to.not.be(null);
 
       await thirdPartyIntegrationsNoFindingsPrompt.navigateToAction(
-        '3p-no-findings-prompt-wiz-integration-button',
-        'headerLeft' // ID of the header element that is visible when the integration overview page is loaded
+        '3p-no-findings-prompt-wiz-integration-button'
       );
 
-      await PageObjects.common.waitUntilUrlIncludes('wiz/overview');
+      await PageObjects.common.waitUntilUrlIncludes('fleet/integrations/wiz/add-integration');
     });
   });
 };
