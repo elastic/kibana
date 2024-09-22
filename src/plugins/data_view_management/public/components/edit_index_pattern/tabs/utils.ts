@@ -122,7 +122,11 @@ export function getPath(field: DataViewField, indexPattern: AbstractDataView) {
   return `/dataView/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
-export function convertToEuiFilterOptions(options: string[]) {
+export function convertToEuiFilterOptions(options: string[]): Array<{
+  value: string;
+  name: string;
+  checked?: boolean;
+}> {
   return uniq(options).map((option) => {
     return {
       value: option,

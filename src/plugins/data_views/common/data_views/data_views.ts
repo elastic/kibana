@@ -1266,7 +1266,6 @@ export class DataViewsService {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPattern.id);
     }
-
     // get the list of attributes
     const body = indexPattern.getAsSavedObjectBody();
     const originalBody = indexPattern.getOriginalSavedObjectBody();
@@ -1284,9 +1283,17 @@ export class DataViewsService {
       .update(indexPattern.id, body, {
         version: indexPattern.version,
       })
-      .then((response) => {
-        indexPattern.id = response.id;
-        indexPattern.version = response.version;
+      .then(async (response) => {
+        if (indexPattern.id) {
+          await this.dataViewCache.get(indexPattern.id)?.then((dataView) => {
+            dataView.id = response.id;
+            dataView.version = response.version;
+          });
+          await this.dataViewLazyCache.get(indexPattern.id)?.then((dataViewLazy) => {
+            dataViewLazy.id = response.id;
+            dataViewLazy.version = response.version;
+          });
+        }
       })
       .catch(async (err) => {
         if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {

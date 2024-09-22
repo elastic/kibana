@@ -960,14 +960,16 @@ export const LensTopNavMenu = ({
               })
             );
           }
-          dispatchChangeIndexPattern(dataView);
-          setCurrentIndexPattern(dataView);
+          const dv = await dataViewsService.get(dataView.id);
+          dispatchChangeIndexPattern(dv);
+          setCurrentIndexPattern(dv);
         }
       },
       allowAdHocDataView: true,
     });
   }, [
     dataViewEditor,
+    dataViewsService,
     dispatch,
     dispatchChangeIndexPattern,
     isOnTextBasedMode,
