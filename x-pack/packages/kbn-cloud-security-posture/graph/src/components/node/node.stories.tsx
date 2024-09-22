@@ -17,6 +17,7 @@ import {
   EllipseNode,
   RectangleNode,
   DiamondNode,
+  LabelNode,
 } from '.';
 
 import '@xyflow/react/dist/style.css';
@@ -30,7 +31,7 @@ export default {
       control: { type: 'radio' },
     },
     shape: {
-      options: ['ellipse', 'hexagon', 'pentagon', 'rectangle', 'diamond'],
+      options: ['ellipse', 'hexagon', 'pentagon', 'rectangle', 'diamond', 'label'],
       control: { type: 'radio' },
     },
     expandButtonClick: { action: 'expandButtonClick' },
@@ -43,6 +44,7 @@ const nodeTypes = {
   ellipse: EllipseNode,
   rectangle: RectangleNode,
   diamond: DiamondNode,
+  label: LabelNode,
 };
 
 const Template: Story<NodeData> = (args: NodeData) => (

@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
-import { type NodeProps } from '.';
+import type { EntityNodeData, NodeProps } from '.';
 import {
   NodeContainer,
   NodeLabel,
@@ -20,7 +20,7 @@ import {
 } from './styles';
 
 export const DiamondNode: React.FC<NodeProps> = memo((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick } = props.data;
+  const { id, color, icon, label, interactive, expandButtonClick } = props.data as EntityNodeData;
   const { euiTheme } = useEuiTheme();
   return (
     <NodeContainer>

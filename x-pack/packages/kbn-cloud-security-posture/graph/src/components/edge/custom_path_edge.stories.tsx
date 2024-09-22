@@ -25,7 +25,7 @@ import { type EdgeData, CustomPathEdge } from '.';
 import '@xyflow/react/dist/style.css';
 
 export default {
-  title: 'Components/Graph Components',
+  title: 'Components/Graph Components/Custom Path Edge',
   description: 'CDR - Graph visualization',
   argTypes: {
     color: {
@@ -40,8 +40,8 @@ const nodeTypes = {
     const handleStyle = {
       width: 0,
       height: 0,
-      'min-width': 0,
-      'min-height': 0,
+      minWidth: 0,
+      minHeight: 0,
       border: 'none',
     };
     return (

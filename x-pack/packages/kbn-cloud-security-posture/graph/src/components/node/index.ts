@@ -13,18 +13,47 @@ export { EllipseNode } from './ellipse_node';
 export { HexagonNode } from './hexagon_node';
 export { PentagonNode } from './pentagon_node';
 export { RectangleNode } from './rectangle_node';
+export { LabelNode } from './label_node';
+export { EdgeGroupNode } from './edge_group_node';
 
-export type NodeShape = 'hexagon' | 'pentagon' | 'ellipse' | 'rectangle' | 'diamond';
+export type NodeShape =
+  | 'hexagon'
+  | 'pentagon'
+  | 'ellipse'
+  | 'rectangle'
+  | 'diamond'
+  | 'label'
+  | 'group';
 
-export interface NodeData extends Record<string, unknown> {
+interface BaseNodeData extends Record<string, unknown> {
   id: string;
   label?: string;
-  color?: 'primary' | 'danger' | 'warning';
-  shape: NodeShape;
   icon?: string;
-  interactive: boolean;
   position: PositionXY;
+}
+
+export interface EntityNodeData extends BaseNodeData {
+  color?: 'primary' | 'danger' | 'warning';
+  shape: 'hexagon' | 'pentagon' | 'ellipse' | 'rectangle' | 'diamond';
+  interactive: boolean;
   expandButtonClick?: (e: React.MouseEvent<HTMLElement>, node: NodeProps) => void;
 }
+
+export interface GroupNodeData extends BaseNodeData {
+  size?: { width: number; height: number };
+  shape: 'group';
+}
+
+export interface LabelNodeData extends BaseNodeData {
+  color?: 'primary' | 'danger' | 'warning';
+  source: string;
+  target: string;
+  shape: 'label';
+  parentId?: string;
+  interactive: boolean;
+  expandButtonClick?: (e: React.MouseEvent<HTMLElement>, node: NodeProps) => void;
+}
+
+export type NodeData = EntityNodeData | GroupNodeData | LabelNodeData;
 
 export type NodeProps = xyNodeProps<Node<NodeData>>;

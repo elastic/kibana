@@ -46,7 +46,10 @@ export interface EdgeLabelProps extends EuiTextProps {
 
 export const EdgeLabel = styled(EuiText)<EdgeLabelProps>`
   position: absolute;
-  transform: ${(props) => `translate(-50%, -50%) translate(${props.labelX}px,${props.labelY}px)`};
+  transform: ${(props) =>
+    `translate(-50%, -50%)${
+      props.labelX && props.labelY ? ` translate(${props.labelX}px,${props.labelY}px)` : ''
+    }`};
   background: ${(props) => useEuiBackgroundColor(props.color as _EuiBackgroundColor)};
   border: ${(props) => {
     const { euiTheme } = useEuiTheme();

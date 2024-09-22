@@ -17,10 +17,10 @@ import {
   NodeButton,
   HandleStyleOverride,
 } from './styles';
-import { NodeProps } from '.';
+import type { EntityNodeData, NodeProps } from '.';
 
 export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick } = props.data;
+  const { id, color, icon, label, interactive, expandButtonClick } = props.data as EntityNodeData;
   const { euiTheme } = useEuiTheme();
   return (
     <NodeContainer>

@@ -8,18 +8,83 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import {
-  EuiText,
-  EuiIcon,
   type EuiIconProps,
+  type _EuiBackgroundColor,
   EuiButtonIcon,
+  EuiIcon,
+  EuiText,
   useEuiBackgroundColor,
+  useEuiTheme,
 } from '@elastic/eui';
+import { rgba } from 'polished';
 import { getSpanIcon } from './get_span_icon';
+
+export const LABEL_PADDING_X = 15;
+export const LABEL_BORDER_WIDTH = 1;
+export const NODE_WIDTH = 90;
+export const NODE_HEIGHT = 90;
+
+export const LabelNodeContainer = styled.div`
+  text-wrap: nowrap;
+  min-width: 100px;
+  height: 24px;
+`;
+
+export const LabelShape = styled(EuiText)`
+  background: ${(props) => useEuiBackgroundColor(props.color as _EuiBackgroundColor)};
+  border: ${(props) => {
+    const { euiTheme } = useEuiTheme();
+    return `solid ${
+      euiTheme.colors[props.color as keyof typeof euiTheme.colors]
+    } ${LABEL_BORDER_WIDTH}px`;
+  }};
+
+  font-weight: ${(_props) => {
+    const { euiTheme } = useEuiTheme();
+    return `${euiTheme.font.weight.semiBold}`;
+  }};
+  font-size: ${(_props) => {
+    const { euiTheme } = useEuiTheme();
+    return `${euiTheme.font.scale.xs * 10.5}px`;
+  }};
+
+  line-height: 1.5;
+
+  padding: 5px ${LABEL_PADDING_X}px;
+  border-radius: 16px;
+  min-height: 100%;
+  min-width: 100%;
+`;
+
+export const LabelShapeOnHover = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.2s ease; /* Smooth transition */
+  border: ${(props) => {
+    const { euiTheme } = useEuiTheme();
+    return `dashed ${rgba(
+      euiTheme.colors[props.color as keyof typeof euiTheme.colors] as string,
+      0.5
+    )} 1px`;
+  }};
+  border-radius: 20px;
+  background: transparent;
+  width: 108%;
+  height: 134%;
+
+  ${LabelNodeContainer}:hover & {
+    opacity: 1; /* Show on hover */
+  }
+`;
 
 export const NodeContainer = styled.div`
   position: relative;
-  width: 90px;
-  height: 90px;
+  width: ${NODE_WIDTH}px;
+  height: ${NODE_HEIGHT}px;
 `;
 
 export const NodeShapeSvg = styled.svg`
@@ -140,3 +205,14 @@ export const HandleStyleOverride: React.CSSProperties = {
   background: 'none',
   border: 'none',
 };
+
+export const GroupStyleOverride = (size?: {
+  width: number;
+  height: number;
+}): React.CSSProperties => ({
+  backgroundColor: 'transparent',
+  border: '0px solid',
+  boxShadow: 'none',
+  width: size?.width ?? 140,
+  height: size?.height ?? 75,
+});

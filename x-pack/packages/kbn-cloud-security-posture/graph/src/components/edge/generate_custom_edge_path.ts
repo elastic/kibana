@@ -7,7 +7,7 @@
 
 import type { EdgeData } from '.';
 import type { PositionXY, GraphMetadata } from '..';
-import type { NodeShape } from '../node';
+import { getShapeHandlePosition } from './utils';
 import { EdgeLabelHeight, EdgeLabelWidth } from './styles';
 
 type LabelAlignment = 'right' | 'center' | 'left';
@@ -322,23 +322,6 @@ function calcAlignment({
   }
 
   return { alignment, isStackedEdge, stackSize, edgeIdx };
-}
-
-function getShapeHandlePosition(shape?: NodeShape) {
-  switch (shape) {
-    case 'hexagon':
-      return 14;
-    case 'pentagon':
-      return 14;
-    case 'ellipse':
-      return 13;
-    case 'rectangle':
-      return 16;
-    case 'diamond':
-      return 10;
-    default:
-      return 0;
-  }
 }
 
 function buildEdgeId(source: string, target: string) {

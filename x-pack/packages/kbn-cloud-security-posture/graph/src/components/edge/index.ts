@@ -10,6 +10,7 @@ import { NodeShape } from '../node';
 import { GraphMetadata } from '..';
 
 export { CustomPathEdge } from './custom_path_edge';
+export { DefaultEdge } from './default_edge';
 
 export interface EdgeData extends Record<string, unknown> {
   id: string;
