@@ -308,11 +308,7 @@ const getEntityRoute = createInventoryServerRoute({
     request,
     plugins,
   }): Promise<{ entity: EntityWithSignals }> => {
-    const esClient = createObservabilityEsClient({
-      client: (await context.core).elasticsearch.client.asCurrentUser,
-      logger,
-      plugin: 'inventory',
-    });
+    const esClient = await createInventoryEsClient({ context, logger });
 
     const {
       path: { type, displayName },
@@ -338,6 +334,8 @@ const getEntityRoute = createInventoryServerRoute({
     if (!entity || !typeDefinition) {
       throw notFound();
     }
+
+    console.log('getting entity with signals');
 
     const entityWithSignals = await getEntitySignals({
       alertsClient,

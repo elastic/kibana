@@ -16,7 +16,7 @@ import type { Logger } from '@kbn/logging';
 import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
-  ALERT_RULE_RULE_ID,
+  ALERT_RULE_UUID,
   ALERT_TIME_RANGE,
   ALERT_UUID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
@@ -159,7 +159,7 @@ export async function getEntitySignals({
     .map((rule): QueryDslQueryContainer => {
       return {
         term: {
-          [ALERT_RULE_RULE_ID]: rule.id,
+          [ALERT_RULE_UUID]: rule.id,
         },
       };
     })
@@ -208,7 +208,7 @@ export async function getEntitySignals({
 
   const alertsByRuleId: Record<string, ParsedTechnicalFields[]> = groupBy(
     allAlerts,
-    (alert) => alert[ALERT_RULE_RULE_ID]
+    (alert) => alert[ALERT_RULE_UUID]
   );
 
   const alertsWithEntityLookupIds: Record<string, ParsedTechnicalFields[]> = {};
