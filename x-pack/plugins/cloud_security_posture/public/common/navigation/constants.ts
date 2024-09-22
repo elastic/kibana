@@ -71,4 +71,7 @@ export const cspIntegrationDocsNavigation = {
     gcpGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
     azureGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
   },
+  cnvm: {
+    overviewPath: `${ELASTIC_BASE_SHORT_URL}/${CNVM_POLICY_TEMPLATE}`,
+  },
 };

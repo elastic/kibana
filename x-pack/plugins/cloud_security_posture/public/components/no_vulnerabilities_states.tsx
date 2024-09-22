@@ -17,23 +17,36 @@ import {
   EuiFlexItem,
   EuiImage,
   EuiLink,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { IndexDetails } from '@kbn/cloud-security-posture-common';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
+import { useLocation } from 'react-router-dom';
+import { findingsNavigation } from '@kbn/cloud-security-posture';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
-import { CloudPosturePage } from './cloud_posture_page';
+import {
+  CloudPosturePage,
+  THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT,
+} from './cloud_posture_page';
 import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
   CNVM_NOT_INSTALLED_ACTION_SUBJ,
+  CSPM_NOT_INSTALLED_ACTION_SUBJ,
+  KSPM_NOT_INSTALLED_ACTION_SUBJ,
+  THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
 } from './test_subjects';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
 import { PostureTypes } from '../../common/types_old';
+import { useAdd3PIntegrationRoute } from '../common/api/use_wiz_integration_route';
+import cloudsSVG from '../assets/illustrations/clouds.svg';
+import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
+import vendorsSVG from '../assets/illustrations/vendors.svg';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -66,6 +79,138 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
 }: {
   vulnMgmtIntegrationLink?: string;
 }) => {
+  const location = useLocation();
+  const { euiTheme } = useEuiTheme();
+  const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
+  const is3PSupportedPage = location.pathname.includes(findingsNavigation.vulnerabilities.path);
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiEmptyPrompt
+          style={{ padding: euiTheme.size.l }}
+          data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED}
+          icon={<EuiImage size="fullWidth" src={cloudsSVG} alt="clouds" role="presentation" />}
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
+                defaultMessage="Elastic’s Cloud Native {lineBreak} Vulnerability Management"
+                values={{
+                  lineBreak: <br />,
+                }}
+              />
+            </h2>
+          }
+          layout="vertical"
+          color="plain"
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
+                defaultMessage="
+                Detect and remediate potential vulnerabilities {lineBreak} in your cloud assets, with our Cloud Native {lineBreak} Vulnerability Management(CNVM) integration. {lineBreak} {learnMore}"
+                values={{
+                  lineBreak: <br />,
+                  learnMore: (
+                    <EuiLink
+                      href={cspIntegrationDocsNavigation.vulnerabilities.cnvm}
+                      target="_blank"
+                    >
+                      <FormattedMessage
+                        id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          }
+          actions={
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  fill
+                  href={cspmIntegrationLink}
+                  isDisabled={!cspmIntegrationLink}
+                  data-test-subj={CSPM_NOT_INSTALLED_ACTION_SUBJ}
+                >
+                  <FormattedMessage
+                    id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
+                    defaultMessage="Add CSPM Integration"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  fill
+                  href={kspmIntegrationLink}
+                  isDisabled={!kspmIntegrationLink}
+                  data-test-subj={KSPM_NOT_INSTALLED_ACTION_SUBJ}
+                >
+                  <FormattedMessage
+                    id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
+                    defaultMessage="Add KSPM Integration"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        />
+      </EuiFlexItem>
+      {is3PSupportedPage && (
+        <EuiFlexItem>
+          <EuiEmptyPrompt
+            style={{ padding: euiTheme.size.l }}
+            data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT}
+            icon={<EuiImage size="fullWidth" src={vendorsSVG} alt="vendors" role="presentation" />}
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptTitle"
+                  defaultMessage="Already using a {lineBreak} cloud security product?"
+                  values={{ lineBreak: <br /> }}
+                />
+              </h2>
+            }
+            layout="vertical"
+            color="plain"
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptDescription"
+                  defaultMessage="Ingest data from your existing CSPM solution {lineBreak} for centralized analytics, hunting, {lineBreak} investigations, visualizations, and more. {lineBreak} Other integrations coming soon."
+                  values={{ lineBreak: <br /> }}
+                />
+              </p>
+            }
+            actions={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="primary"
+                    fill
+                    href={wizAddIntegrationLink}
+                    isDisabled={!wizAddIntegrationLink}
+                    data-test-subj={THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON}
+                  >
+                    <FormattedMessage
+                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.addWizIntegrationButtonTitle"
+                      defaultMessage="Add Wiz Integration"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+
   return (
     <EuiEmptyPrompt
       data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED}

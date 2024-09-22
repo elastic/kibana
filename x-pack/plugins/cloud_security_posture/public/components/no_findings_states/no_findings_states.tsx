@@ -24,6 +24,8 @@ import { css } from '@emotion/react';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { IndexDetails, CspStatusCode } from '@kbn/cloud-security-posture-common';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
+import { useLocation } from 'react-router-dom';
+import { findingsNavigation } from '@kbn/cloud-security-posture';
 import { useAdd3PIntegrationRoute } from '../../common/api/use_wiz_integration_route';
 import { FullSizeCenteredPage } from '../full_size_centered_page';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
@@ -179,10 +181,12 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
 );
 
 const EmptySecurityFindingsPrompt = () => {
+  const location = useLocation();
   const { euiTheme } = useEuiTheme();
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
+  const is3PSupportedPage = location.pathname.includes(findingsNavigation.findings_default.path);
 
   return (
     <EuiFlexGroup>
@@ -257,51 +261,53 @@ const EmptySecurityFindingsPrompt = () => {
           }
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiEmptyPrompt
-          style={{ padding: 24 }}
-          data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT}
-          icon={<EuiImage size="fullWidth" src={vendorsSVG} alt="vendors" role="presentation" />}
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptTitle"
-                defaultMessage="Already using a {lineBreak} cloud security product?"
-                values={{ lineBreak: <br /> }}
-              />
-            </h2>
-          }
-          layout="vertical"
-          color="plain"
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptDescription"
-                defaultMessage="Ingest data from your existing CSPM solution {lineBreak} for centralized analytics, hunting, {lineBreak} investigations, visualizations, and more. {lineBreak} Other integrations coming soon."
-                values={{ lineBreak: <br /> }}
-              />
-            </p>
-          }
-          actions={
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="primary"
-                  fill
-                  href={wizAddIntegrationLink}
-                  isDisabled={!wizAddIntegrationLink}
-                  data-test-subj={THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON}
-                >
-                  <FormattedMessage
-                    id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.addWizIntegrationButtonTitle"
-                    defaultMessage="Add Wiz Integration"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        />
-      </EuiFlexItem>
+      {is3PSupportedPage && (
+        <EuiFlexItem>
+          <EuiEmptyPrompt
+            style={{ padding: euiTheme.size.l }}
+            data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT}
+            icon={<EuiImage size="fullWidth" src={vendorsSVG} alt="vendors" role="presentation" />}
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptTitle"
+                  defaultMessage="Already using a {lineBreak} cloud security product?"
+                  values={{ lineBreak: <br /> }}
+                />
+              </h2>
+            }
+            layout="vertical"
+            color="plain"
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptDescription"
+                  defaultMessage="Ingest data from your existing CSPM solution {lineBreak} for centralized analytics, hunting, {lineBreak} investigations, visualizations, and more. {lineBreak} Other integrations coming soon."
+                  values={{ lineBreak: <br /> }}
+                />
+              </p>
+            }
+            actions={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="primary"
+                    fill
+                    href={wizAddIntegrationLink}
+                    isDisabled={!wizAddIntegrationLink}
+                    data-test-subj={THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON}
+                  >
+                    <FormattedMessage
+                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.addWizIntegrationButtonTitle"
+                      defaultMessage="Add Wiz Integration"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
