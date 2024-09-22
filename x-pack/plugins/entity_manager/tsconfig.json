@@ -56,6 +56,7 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/presentation-util-plugin",
-    "@kbn/rison"
+    "@kbn/rison",
+    "@kbn/task-manager-plugin"
   ]
 }

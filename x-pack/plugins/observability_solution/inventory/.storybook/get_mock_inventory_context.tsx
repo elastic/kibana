@@ -15,7 +15,9 @@ import type { EntityManagerPublicPluginStart } from '@kbn/entityManager-plugin/p
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import type { InventoryKibanaContext } from '../public/hooks/use_kibana';
+import type { ITelemetryClient } from '../public/services/telemetry/types';
 
 export function getMockInventoryContext(): InventoryKibanaContext {
   const core = coreMock.createStart();
@@ -33,6 +35,7 @@ export function getMockInventoryContext(): InventoryKibanaContext {
         fieldFormats: {} as unknown as FieldFormatsStart,
         share: {} as unknown as SharePluginStart,
         unifiedSearch: {} as unknown as UnifiedSearchPublicPluginStart,
+        globalSearch: {} as unknown as GlobalSearchPluginStart,
       },
     },
     services: {
@@ -40,6 +43,7 @@ export function getMockInventoryContext(): InventoryKibanaContext {
         fetch: jest.fn(),
         stream: jest.fn(),
       },
+      telemetry: {} as unknown as ITelemetryClient,
     },
   };
 }

@@ -3015,4 +3015,5 @@ export const entitiesMock: InventoryEntitiesAPIReturnType['entities'] = [
   type: entity['entity.type'],
   displayName: entity['entity.displayName'],
   properties: {},
+  links: [],
 }));

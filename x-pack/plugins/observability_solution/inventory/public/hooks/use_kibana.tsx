@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useMemo } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { InventoryStartDependencies } from '../types';
 import type { InventoryServices } from '../services/types';
 
 export interface InventoryKibanaContext {
   core: CoreStart;
-  dependencies: { start: InventoryStartDependencies };
+  dependencies: {
+    start: InventoryStartDependencies;
+  };
   services: InventoryServices;
 }
 
