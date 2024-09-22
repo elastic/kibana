@@ -17,7 +17,6 @@
     "@kbn/cases-plugin",
     "@kbn/securitysolution-rules",
     "@kbn/securitysolution-list-constants",
-    "@kbn/alerting-plugin",
   ],
   "exclude": ["target/**/*"]
 }
