@@ -12,7 +12,6 @@ import {
   EuiIcon,
   EuiMarkdownFormat,
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
@@ -35,11 +34,8 @@ import {
 import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
   CNVM_NOT_INSTALLED_ACTION_SUBJ,
-  CSPM_NOT_INSTALLED_ACTION_SUBJ,
-  KSPM_NOT_INSTALLED_ACTION_SUBJ,
   THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
 } from './test_subjects';
-import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
 import { PostureTypes } from '../../common/types_old';
@@ -94,7 +90,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
           title={
             <h2>
               <FormattedMessage
-                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
+                id="xpack.csp.vulnerabilties.intergationNoInstalledEmptyPrompt.promptTitle"
                 defaultMessage="Elastic’s Cloud Native {lineBreak} Vulnerability Management"
                 values={{
                   lineBreak: <br />,
@@ -107,18 +103,15 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
           body={
             <p>
               <FormattedMessage
-                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
+                id="xpack.csp.vulnerabilties.intergationNoInstalledEmptyPrompt.promptDescription"
                 defaultMessage="
                 Detect and remediate potential vulnerabilities {lineBreak} in your cloud assets, with our Cloud Native {lineBreak} Vulnerability Management(CNVM) integration. {lineBreak} {learnMore}"
                 values={{
                   lineBreak: <br />,
                   learnMore: (
-                    <EuiLink
-                      href={cspIntegrationDocsNavigation.vulnerabilities.cnvm}
-                      target="_blank"
-                    >
+                    <EuiLink href={cspIntegrationDocsNavigation.cnvm.overviewPath} target="_blank">
                       <FormattedMessage
-                        id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
+                        id="xpack.csp.vulnerabilties.intergationNoInstalledEmptyPrompt.learnMoreButtonTitle"
                         defaultMessage="Learn more"
                       />
                     </EuiLink>
@@ -133,27 +126,13 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
                 <EuiButton
                   color="primary"
                   fill
-                  href={cspmIntegrationLink}
-                  isDisabled={!cspmIntegrationLink}
-                  data-test-subj={CSPM_NOT_INSTALLED_ACTION_SUBJ}
+                  href={vulnMgmtIntegrationLink}
+                  isDisabled={!vulnMgmtIntegrationLink}
+                  data-test-subj={CNVM_NOT_INSTALLED_ACTION_SUBJ}
                 >
                   <FormattedMessage
-                    id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
-                    defaultMessage="Add CSPM Integration"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="primary"
-                  fill
-                  href={kspmIntegrationLink}
-                  isDisabled={!kspmIntegrationLink}
-                  data-test-subj={KSPM_NOT_INSTALLED_ACTION_SUBJ}
-                >
-                  <FormattedMessage
-                    id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
-                    defaultMessage="Add KSPM Integration"
+                    id="xpack.csp.vulnerabilties.intergationNoInstalledEmptyPrompt.addVulMngtIntegrationButtonTitle"
+                    defaultMessage="Add CNVM Integration"
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -182,7 +161,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
               <p>
                 <FormattedMessage
                   id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptDescription"
-                  defaultMessage="Ingest data from your existing CSPM solution {lineBreak} for centralized analytics, hunting, {lineBreak} investigations, visualizations, and more. {lineBreak} Other integrations coming soon."
+                  defaultMessage="Ingest data from your existing vulnerability {lineBreak} solution for centralized analytics, hunting, {lineBreak} investigations, visualizations, and more. {lineBreak} Other integrations coming soon."
                   values={{ lineBreak: <br /> }}
                 />
               </p>
@@ -209,60 +188,6 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
-  );
-
-  return (
-    <EuiEmptyPrompt
-      data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED}
-      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="" role="presentation" />}
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptTitle"
-            defaultMessage="Detect vulnerabilities in your {lineBreak} cloud assets"
-            ignoreTag
-            values={{
-              lineBreak: <br />,
-            }}
-          />
-        </h2>
-      }
-      layout="horizontal"
-      color="plain"
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptDescription"
-            defaultMessage="Add the Cloud Native Vulnerability Management integration to begin"
-          />
-        </p>
-      }
-      actions={
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              fill
-              href={vulnMgmtIntegrationLink}
-              data-test-subj={CNVM_NOT_INSTALLED_ACTION_SUBJ}
-            >
-              <FormattedMessage
-                id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.addVulMngtIntegrationButtonTitle"
-                defaultMessage="Install Cloud Native Vulnerability Management"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="primary" href={'https://ela.st/cnvm'} target="_blank">
-              <FormattedMessage
-                id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.learnMoreButtonTitle"
-                defaultMessage="Learn more"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    />
   );
 };
 

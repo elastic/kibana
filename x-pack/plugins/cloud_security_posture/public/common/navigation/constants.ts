@@ -11,6 +11,7 @@ import {
   CLOUD_SECURITY_POSTURE_BASE_PATH,
 } from '@kbn/cloud-security-posture-common';
 import { NAV_ITEMS_NAMES } from '@kbn/cloud-security-posture/constants/navigation';
+import { CNVM_POLICY_TEMPLATE } from '../../../common/constants';
 import type { CspBenchmarksPage, CspPage, CspPageNavigationItem } from './types';
 
 const CSPM_DASHBOARD_TAB_NAME = 'Cloud';
