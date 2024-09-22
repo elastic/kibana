@@ -64,16 +64,16 @@ info:
   version: 1.0.2
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
-    url: https://creativecommons.org/licenses/by-nc-nd/4.0/
+    url: 'https://creativecommons.org/licenses/by-nc-nd/4.0/'
   x-feedbackLink:
     label: Feedback
     url: >-
       https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
 servers:
-  - url: https://{kibana_url}
+  - url: 'https://{kibana_url}'
     variables:
       kibana_url:
-        default: localhost:5601
+        default: 'localhost:5601'
 paths:
   /api/actions:
     get:
@@ -184,7 +184,7 @@ paths:
       summary: Create a connector
       tags:
         - connectors
-  /api/actions/action/{id}:
+  '/api/actions/action/{id}':
     delete:
       deprecated: true
       description: 'WARNING: When you delete a connector, it cannot be recovered.'
@@ -375,7 +375,7 @@ paths:
       summary: Update a connector
       tags:
         - connectors
-  /api/actions/action/{id}/_execute:
+  '/api/actions/action/{id}/_execute':
     post:
       deprecated: true
       operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D%2F_execute#0'
@@ -486,7 +486,7 @@ paths:
       summary: Get connector types
       tags:
         - connectors
-  /api/actions/connector/{id}:
+  '/api/actions/connector/{id}':
     delete:
       description: 'WARNING: When you delete a connector, it cannot be recovered.'
       operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#0'
@@ -771,7 +771,7 @@ paths:
       summary: Update a connector
       tags:
         - connectors
-  /api/actions/connector/{id}/_execute:
+  '/api/actions/connector/{id}/_execute':
     post:
       description: >-
         You can use this API to test an action that involves interaction with
@@ -968,7 +968,7 @@ paths:
                     example: true
                     type: boolean
                   is_sufficiently_secure:
-                    description: If `false`, security is enabled but TLS is not.
+                    description: 'If `false`, security is enabled but TLS is not.'
                     example: true
                     type: boolean
           description: Indicates a successful call.
@@ -1280,7 +1280,7 @@ paths:
       summary: Get the rule types
       tags:
         - alerting
-  /api/alerting/rule/{id}:
+  '/api/alerting/rule/{id}':
     delete:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D#2'
       parameters:
@@ -2068,7 +2068,7 @@ paths:
                               description: Recur the rule until this date.
                               type: string
                             wkst:
-                              description: Indicates the start of week, defaults to Monday.
+                              description: 'Indicates the start of week, defaults to Monday.'
                               enum:
                                 - MO
                                 - TU
@@ -3209,7 +3209,7 @@ paths:
                               description: Recur the rule until this date.
                               type: string
                             wkst:
-                              description: Indicates the start of week, defaults to Monday.
+                              description: 'Indicates the start of week, defaults to Monday.'
                               enum:
                                 - MO
                                 - TU
@@ -4321,7 +4321,7 @@ paths:
                               description: Recur the rule until this date.
                               type: string
                             wkst:
-                              description: Indicates the start of week, defaults to Monday.
+                              description: 'Indicates the start of week, defaults to Monday.'
                               enum:
                                 - MO
                                 - TU
@@ -4404,7 +4404,7 @@ paths:
       summary: Update a rule
       tags:
         - alerting
-  /api/alerting/rule/{id}/_disable:
+  '/api/alerting/rule/{id}/_disable':
     post:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_disable#0'
       parameters:
@@ -4453,7 +4453,7 @@ paths:
       summary: Disable a rule
       tags:
         - alerting
-  /api/alerting/rule/{id}/_enable:
+  '/api/alerting/rule/{id}/_enable':
     post:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_enable#0'
       parameters:
@@ -4490,7 +4490,7 @@ paths:
       summary: Enable a rule
       tags:
         - alerting
-  /api/alerting/rule/{id}/_mute_all:
+  '/api/alerting/rule/{id}/_mute_all':
     post:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_mute_all#0'
       parameters:
@@ -4521,7 +4521,7 @@ paths:
       summary: Mute all alerts
       tags:
         - alerting
-  /api/alerting/rule/{id}/_unmute_all:
+  '/api/alerting/rule/{id}/_unmute_all':
     post:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_unmute_all#0'
       parameters:
@@ -4552,7 +4552,7 @@ paths:
       summary: Unmute all alerts
       tags:
         - alerting
-  /api/alerting/rule/{id}/_update_api_key:
+  '/api/alerting/rule/{id}/_update_api_key':
     post:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_update_api_key#0'
       parameters:
@@ -4591,7 +4591,7 @@ paths:
       summary: Update the API key for a rule
       tags:
         - alerting
-  /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute:
+  '/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute':
     post:
       operationId: >-
         %2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_mute#0
@@ -4635,7 +4635,7 @@ paths:
       summary: Mute an alert
       tags:
         - alerting
-  /api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute:
+  '/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute':
     post:
       operationId: >-
         %2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_unmute#0
@@ -5531,7 +5531,7 @@ paths:
                               description: Recur the rule until this date.
                               type: string
                             wkst:
-                              description: Indicates the start of week, defaults to Monday.
+                              description: 'Indicates the start of week, defaults to Monday.'
                               enum:
                                 - MO
                                 - TU
@@ -5610,7 +5610,7 @@ paths:
       summary: Get information about rules
       tags:
         - alerting
-  /api/alerts/alert/{alertId}:
+  '/api/alerts/alert/{alertId}':
     delete:
       deprecated: true
       description: >
@@ -5912,7 +5912,7 @@ paths:
       summary: Update an alert
       tags:
         - alerting
-  /api/alerts/alert/{alertId}/_disable:
+  '/api/alerts/alert/{alertId}/_disable':
     post:
       deprecated: true
       description: Deprecated in 7.13.0. Use the disable rule API instead.
@@ -5938,7 +5938,7 @@ paths:
       summary: Disable an alert
       tags:
         - alerting
-  /api/alerts/alert/{alertId}/_enable:
+  '/api/alerts/alert/{alertId}/_enable':
     post:
       deprecated: true
       description: Deprecated in 7.13.0. Use the enable rule API instead.
@@ -5964,7 +5964,7 @@ paths:
       summary: Enable an alert
       tags:
         - alerting
-  /api/alerts/alert/{alertId}/_mute_all:
+  '/api/alerts/alert/{alertId}/_mute_all':
     post:
       deprecated: true
       description: Deprecated in 7.13.0. Use the mute all alerts API instead.
@@ -5990,7 +5990,7 @@ paths:
       summary: Mute all alert instances
       tags:
         - alerting
-  /api/alerts/alert/{alertId}/_unmute_all:
+  '/api/alerts/alert/{alertId}/_unmute_all':
     post:
       deprecated: true
       description: Deprecated in 7.13.0. Use the unmute all alerts API instead.
@@ -6016,7 +6016,7 @@ paths:
       summary: Unmute all alert instances
       tags:
         - alerting
-  /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute:
+  '/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute':
     post:
       deprecated: true
       description: Deprecated in 7.13.0. Use the mute alert API instead.
@@ -6049,7 +6049,7 @@ paths:
       summary: Mute an alert instance
       tags:
         - alerting
-  /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute:
+  '/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute':
     post:
       deprecated: true
       description: Deprecated in 7.13.0. Use the unmute alert API instead.
@@ -6276,7 +6276,7 @@ paths:
                     example: true
                     type: boolean
                   isSufficientlySecure:
-                    description: If `false`, security is enabled but TLS is not.
+                    description: 'If `false`, security is enabled but TLS is not.'
                     example: true
                     type: boolean
           description: Indicates a successful call.
@@ -6421,8 +6421,8 @@ paths:
                 privileges:
                   items:
                     enum:
-                      - event:write
-                      - config_agent:read
+                      - 'event:write'
+                      - 'config_agent:read'
                     type: string
                   type: array
         required: true
@@ -6448,7 +6448,7 @@ paths:
       summary: Create an APM agent key
       tags:
         - APM agent keys
-  /api/apm/services/{serviceName}/annotation:
+  '/api/apm/services/{serviceName}/annotation':
     post:
       description: Create a new annotation for a specific service.
       operationId: createAnnotation
@@ -6523,7 +6523,7 @@ paths:
       summary: Create a service annotation
       tags:
         - APM annotations
-  /api/apm/services/{serviceName}/annotation/search:
+  '/api/apm/services/{serviceName}/annotation/search':
     get:
       description: Search for annotations related to a specific service.
       operationId: getAnnotation
@@ -6737,7 +6737,7 @@ paths:
       summary: Search cases
       tags:
         - cases
-  /api/cases/{caseId}:
+  '/api/cases/{caseId}':
     get:
       description: >
         You must have `read` privileges for the **Cases** feature in the
@@ -6768,7 +6768,7 @@ paths:
       summary: Get case information
       tags:
         - cases
-  /api/cases/{caseId}/alerts:
+  '/api/cases/{caseId}/alerts':
     get:
       description: >
         You must have `read` privileges for the **Cases** feature in the
@@ -6799,7 +6799,7 @@ paths:
       tags:
         - cases
       x-technical-preview: true
-  /api/cases/{caseId}/comments:
+  '/api/cases/{caseId}/comments':
     delete:
       description: >
         Deletes all comments and alerts from a case. You must have `all`
@@ -6926,7 +6926,7 @@ paths:
       summary: Add a case comment or alert
       tags:
         - cases
-  /api/cases/{caseId}/comments/_find:
+  '/api/cases/{caseId}/comments/_find':
     get:
       description: >
         Retrieves a paginated list of comments for a case. You must have `read`
@@ -6956,7 +6956,7 @@ paths:
       summary: Find case comments and alerts
       tags:
         - cases
-  /api/cases/{caseId}/comments/{commentId}:
+  '/api/cases/{caseId}/comments/{commentId}':
     delete:
       description: >
         You must have `all` privileges for the **Cases** feature in the
@@ -7012,7 +7012,7 @@ paths:
       summary: Get a case comment or alert
       tags:
         - cases
-  /api/cases/{caseId}/connector/{connectorId}/_push:
+  '/api/cases/{caseId}/connector/{connectorId}/_push':
     post:
       description: >
         You must have `all` privileges for the **Actions and Connectors**
@@ -7050,7 +7050,7 @@ paths:
       summary: Push a case to an external service
       tags:
         - cases
-  /api/cases/{caseId}/user_actions:
+  '/api/cases/{caseId}/user_actions':
     get:
       deprecated: true
       description: >
@@ -7081,7 +7081,7 @@ paths:
       summary: Get case activity
       tags:
         - cases
-  /api/cases/{caseId}/user_actions/_find:
+  '/api/cases/{caseId}/user_actions/_find':
     get:
       description: >
         Retrives a paginated list of user activity for a case. You must have
@@ -7127,7 +7127,7 @@ paths:
       summary: Find case activity
       tags:
         - cases
-  /api/cases/alerts/{alertId}:
+  '/api/cases/alerts/{alertId}':
     get:
       description: >
         You must have `read` privileges for the **Cases** feature in the
@@ -7548,7 +7548,7 @@ paths:
       summary: Add case settings
       tags:
         - cases
-  /api/cases/configure/{configurationId}:
+  '/api/cases/configure/{configurationId}':
     patch:
       description: >
         Updates setting details such as the closure type, custom fields,
@@ -7990,7 +7990,7 @@ paths:
       summary: Create a data view
       tags:
         - data views
-  /api/data_views/data_view/{viewId}:
+  '/api/data_views/data_view/{viewId}':
     delete:
       description: |
         WARNING: When you delete a data view, it cannot be recovered.
@@ -8063,7 +8063,7 @@ paths:
       summary: Update a data view
       tags:
         - data views
-  /api/data_views/data_view/{viewId}/fields:
+  '/api/data_views/data_view/{viewId}/fields':
     post:
       description: >
         Update fields presentation metadata such as count, customLabel,
@@ -8106,7 +8106,7 @@ paths:
       summary: Update data view fields metadata
       tags:
         - data views
-  /api/data_views/data_view/{viewId}/runtime_field:
+  '/api/data_views/data_view/{viewId}/runtime_field':
     post:
       operationId: createRuntimeFieldDefault
       parameters:
@@ -8198,7 +8198,7 @@ paths:
       summary: Create or update a runtime field
       tags:
         - data views
-  /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
+  '/api/data_views/data_view/{viewId}/runtime_field/{fieldName}':
     delete:
       operationId: deleteRuntimeFieldDefault
       parameters:
@@ -8598,7 +8598,7 @@ paths:
       summary: Create agent binary download source
       tags:
         - Elastic Agent binary download sources
-  /api/fleet/agent_download_sources/{sourceId}:
+  '/api/fleet/agent_download_sources/{sourceId}':
     delete:
       operationId: delete-download-source
       parameters:
@@ -8801,7 +8801,7 @@ paths:
       summary: Bulk get agent policies
       tags:
         - Elastic Agent policies
-  /api/fleet/agent_policies/{agentPolicyId}:
+  '/api/fleet/agent_policies/{agentPolicyId}':
     get:
       description: Get one agent policy
       operationId: agent-policy-info
@@ -8856,7 +8856,7 @@ paths:
       summary: Update agent policy by ID
       tags:
         - Elastic Agent policies
-  /api/fleet/agent_policies/{agentPolicyId}/copy:
+  '/api/fleet/agent_policies/{agentPolicyId}/copy':
     parameters:
       - in: path
         name: agentPolicyId
@@ -8898,7 +8898,7 @@ paths:
       summary: Copy agent policy by ID
       tags:
         - Elastic Agent policies
-  /api/fleet/agent_policies/{agentPolicyId}/download:
+  '/api/fleet/agent_policies/{agentPolicyId}/download':
     get:
       operationId: agent-policy-download
       responses:
@@ -8937,7 +8937,7 @@ paths:
         required: false
         schema:
           type: string
-  /api/fleet/agent_policies/{agentPolicyId}/full:
+  '/api/fleet/agent_policies/{agentPolicyId}/full':
     get:
       operationId: agent-policy-full
       responses:
@@ -9220,7 +9220,7 @@ paths:
       summary: List agents by action ids
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}:
+  '/api/fleet/agents/{agentId}':
     delete:
       operationId: delete-agent
       parameters:
@@ -9305,7 +9305,7 @@ paths:
       summary: Update agent by ID
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}/actions:
+  '/api/fleet/agents/{agentId}/actions':
     parameters:
       - in: path
         name: agentId
@@ -9346,7 +9346,7 @@ paths:
       summary: Create agent action
       tags:
         - Elastic Agent actions
-  /api/fleet/agents/{agentId}/reassign:
+  '/api/fleet/agents/{agentId}/reassign':
     parameters:
       - in: path
         name: agentId
@@ -9408,7 +9408,7 @@ paths:
       summary: Reassign agent
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}/request_diagnostics:
+  '/api/fleet/agents/{agentId}/request_diagnostics':
     parameters:
       - in: path
         name: agentId
@@ -9447,7 +9447,7 @@ paths:
       summary: Request agent diagnostics
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}/unenroll:
+  '/api/fleet/agents/{agentId}/unenroll':
     parameters:
       - in: path
         name: agentId
@@ -9493,7 +9493,7 @@ paths:
       summary: Unenroll agent
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}/upgrade:
+  '/api/fleet/agents/{agentId}/upgrade':
     parameters:
       - in: path
         name: agentId
@@ -9522,7 +9522,7 @@ paths:
       summary: Upgrade agent
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}/uploads:
+  '/api/fleet/agents/{agentId}/uploads':
     get:
       operationId: list-agent-uploads
       responses:
@@ -9666,7 +9666,7 @@ paths:
       summary: Get agent action status
       tags:
         - Elastic Agent actions
-  /api/fleet/agents/actions/{actionId}/cancel:
+  '/api/fleet/agents/actions/{actionId}/cancel':
     parameters:
       - in: path
         name: actionId
@@ -9708,7 +9708,7 @@ paths:
               properties:
                 agents:
                   oneOf:
-                    - description: KQL query string, leave empty to action all agents
+                    - description: 'KQL query string, leave empty to action all agents'
                       type: string
                     - description: list of agent IDs
                       items:
@@ -9757,7 +9757,7 @@ paths:
                   type: array
                 agents:
                   oneOf:
-                    - description: KQL query string, leave empty to action all agents
+                    - description: 'KQL query string, leave empty to action all agents'
                       type: string
                     - description: list of agent IDs
                       items:
@@ -9801,7 +9801,7 @@ paths:
               properties:
                 agents:
                   oneOf:
-                    - description: KQL query string, leave empty to action all agents
+                    - description: 'KQL query string, leave empty to action all agents'
                       type: string
                     - description: list of agent IDs
                       items:
@@ -9856,7 +9856,7 @@ paths:
               properties:
                 agents:
                   oneOf:
-                    - description: KQL query string, leave empty to action all agents
+                    - description: 'KQL query string, leave empty to action all agents'
                       type: string
                     - description: list of agent IDs
                       items:
@@ -9902,7 +9902,7 @@ paths:
                 - agent1
                 - agent2
               rollout_duration_seconds: 3600
-              source_uri: https://artifacts.elastic.co/downloads/beats/elastic-agent
+              source_uri: 'https://artifacts.elastic.co/downloads/beats/elastic-agent'
               start_time: '2022-08-03T14:00:00.000Z'
               version: 8.4.0
             schema:
@@ -9923,7 +9923,7 @@ paths:
       summary: Bulk upgrade agents
       tags:
         - Elastic Agents
-  /api/fleet/agents/files/{fileId}:
+  '/api/fleet/agents/files/{fileId}':
     delete:
       operationId: delete-agent-upload-file
       responses:
@@ -9952,7 +9952,7 @@ paths:
         required: true
         schema:
           type: string
-  /api/fleet/agents/files/{fileId}/{fileName}:
+  '/api/fleet/agents/files/{fileId}/{fileName}':
     get:
       operationId: get-agent-upload-file
       responses:
@@ -10146,7 +10146,7 @@ paths:
       summary: Create enrollment API key
       tags:
         - Fleet enrollment API keys
-  /api/fleet/enrollment_api_keys/{keyId}:
+  '/api/fleet/enrollment_api_keys/{keyId}':
     delete:
       operationId: delete-enrollment-api-key
       parameters:
@@ -10257,7 +10257,7 @@ paths:
       summary: Create enrollment API key
       tags:
         - Fleet enrollment API keys
-  /api/fleet/enrollment-api-keys/{keyId}:
+  '/api/fleet/enrollment-api-keys/{keyId}':
     delete:
       deprecated: true
       operationId: delete-enrollment-api-key-deprecated
@@ -10542,7 +10542,7 @@ paths:
       summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
-  /api/fleet/epm/packages/{pkgkey}:
+  '/api/fleet/epm/packages/{pkgkey}':
     delete:
       deprecated: true
       operationId: delete-package-deprecated
@@ -10702,7 +10702,7 @@ paths:
       summary: Install package
       tags:
         - Elastic Package Manager (EPM)
-  /api/fleet/epm/packages/{pkgName}/{pkgVersion}:
+  '/api/fleet/epm/packages/{pkgName}/{pkgVersion}':
     delete:
       operationId: delete-package
       parameters:
@@ -10934,7 +10934,7 @@ paths:
       summary: Update package settings
       tags:
         - Elastic Package Manager (EPM)
-  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
+  '/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}':
     get:
       operationId: packages-get-file
       responses:
@@ -10972,7 +10972,7 @@ paths:
         required: true
         schema:
           type: string
-  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
+  '/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize':
     post:
       description: ''
       operationId: reauthorize-transforms
@@ -11038,7 +11038,7 @@ paths:
       summary: Authorize transforms
       tags:
         - Elastic Package Manager (EPM)
-  /api/fleet/epm/packages/{pkgName}/stats:
+  '/api/fleet/epm/packages/{pkgName}/stats':
     get:
       operationId: get-package-stats
       responses:
@@ -11085,7 +11085,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     parameters: []
-  /api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs:
+  '/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs':
     get:
       operationId: get-inputs-template
       responses:
@@ -11225,7 +11225,7 @@ paths:
       summary: Create Fleet Server host
       tags:
         - Fleet Server hosts
-  /api/fleet/fleet_server_hosts/{itemId}:
+  '/api/fleet/fleet_server_hosts/{itemId}':
     delete:
       operationId: delete-fleet-server-hosts
       parameters:
@@ -11458,7 +11458,7 @@ paths:
       summary: Create output
       tags:
         - Fleet outputs
-  /api/fleet/outputs/{outputId}:
+  '/api/fleet/outputs/{outputId}':
     delete:
       operationId: delete-output
       parameters:
@@ -11527,7 +11527,7 @@ paths:
       summary: Update output by ID
       tags:
         - Fleet outputs
-  /api/fleet/outputs/{outputId}/health:
+  '/api/fleet/outputs/{outputId}/health':
     get:
       operationId: get-output-health
       responses:
@@ -11541,7 +11541,7 @@ paths:
                     description: long message if unhealthy
                     type: string
                   state:
-                    description: state of output, HEALTHY or DEGRADED
+                    description: 'state of output, HEALTHY or DEGRADED'
                     type: string
                   timestamp:
                     description: timestamp of reported state
@@ -11663,7 +11663,7 @@ paths:
       summary: Bulk get package policies
       tags:
         - Fleet package policies
-  /api/fleet/package_policies/{packagePolicyId}:
+  '/api/fleet/package_policies/{packagePolicyId}':
     delete:
       operationId: delete-package-policy
       parameters:
@@ -11935,7 +11935,7 @@ paths:
       summary: Create proxy
       tags:
         - Fleet proxies
-  /api/fleet/proxies/{itemId}:
+  '/api/fleet/proxies/{itemId}':
     delete:
       operationId: delete-fleet-proxies
       parameters:
@@ -12194,7 +12194,7 @@ paths:
       summary: List metadata for latest uninstall tokens per agent policy
       tags:
         - Fleet uninstall tokens
-  /api/fleet/uninstall_tokens/{uninstallTokenId}:
+  '/api/fleet/uninstall_tokens/{uninstallTokenId}':
     get:
       operationId: get-uninstall-token
       parameters:
@@ -12270,7 +12270,7 @@ paths:
       operationId: bulkCreateSavedObjects
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
-        - description: When true, overwrites the document with the same identifier.
+        - description: 'When true, overwrites the document with the same identifier.'
           in: query
           name: overwrite
           schema:
@@ -12954,7 +12954,7 @@ paths:
       summary: Resolve import errors
       tags:
         - saved objects
-  /api/saved_objects/{type}:
+  '/api/saved_objects/{type}':
     post:
       deprecated: true
       description: Create a Kibana saved object with a randomly generated identifier.
@@ -12962,7 +12962,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
         - $ref: '#/components/parameters/Saved_objects_saved_object_type'
-        - description: If true, overwrites the document with the same identifier.
+        - description: 'If true, overwrites the document with the same identifier.'
           in: query
           name: overwrite
           schema:
@@ -12998,7 +12998,7 @@ paths:
       summary: Create a saved object
       tags:
         - saved objects
-  /api/saved_objects/{type}/{id}:
+  '/api/saved_objects/{type}/{id}':
     get:
       deprecated: true
       description: Retrieve a single Kibana saved object by identifier.
@@ -13032,7 +13032,7 @@ paths:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
         - $ref: '#/components/parameters/Saved_objects_saved_object_id'
         - $ref: '#/components/parameters/Saved_objects_saved_object_type'
-        - description: If true, overwrites the document with the same identifier.
+        - description: 'If true, overwrites the document with the same identifier.'
           in: query
           name: overwrite
           schema:
@@ -13104,7 +13104,7 @@ paths:
       summary: Update a saved object
       tags:
         - saved objects
-  /api/saved_objects/resolve/{type}/{id}:
+  '/api/saved_objects/resolve/{type}/{id}':
     get:
       deprecated: true
       description: >
@@ -13189,7 +13189,7 @@ paths:
       summary: Get Kibana's current status
       tags:
         - system
-  /s/{spaceId}/api/observability/slos:
+  '/s/{spaceId}/api/observability/slos':
     get:
       description: >
         You must have the `read` privileges for the **SLOs** feature in the
@@ -13204,7 +13204,7 @@ paths:
           name: kqlQuery
           schema:
             type: string
-        - description: The page to use for pagination, must be greater or equal than 1
+        - description: 'The page to use for pagination, must be greater or equal than 1'
           example: 1
           in: query
           name: page
@@ -13330,7 +13330,7 @@ paths:
       summary: Create an SLO
       tags:
         - slo
-  /s/{spaceId}/api/observability/slos/_delete_instances:
+  '/s/{spaceId}/api/observability/slos/_delete_instances':
     post:
       description: >
         The deletion occurs for the specified list of `sloId` and `instanceId`.
@@ -13370,7 +13370,7 @@ paths:
       summary: Batch delete rollup and summary data
       tags:
         - slo
-  /s/{spaceId}/api/observability/slos/{sloId}:
+  '/s/{spaceId}/api/observability/slos/{sloId}':
     delete:
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -13508,7 +13508,7 @@ paths:
       summary: Update an SLO
       tags:
         - slo
-  /s/{spaceId}/api/observability/slos/{sloId}/_reset:
+  '/s/{spaceId}/api/observability/slos/{sloId}/_reset':
     post:
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -13552,7 +13552,7 @@ paths:
       summary: Reset an SLO
       tags:
         - slo
-  /s/{spaceId}/api/observability/slos/{sloId}/disable:
+  '/s/{spaceId}/api/observability/slos/{sloId}/disable':
     post:
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -13592,7 +13592,7 @@ paths:
       summary: Disable an SLO
       tags:
         - slo
-  /s/{spaceId}/api/observability/slos/{sloId}/enable:
+  '/s/{spaceId}/api/observability/slos/{sloId}/enable':
     post:
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -14139,7 +14139,7 @@ components:
       value:
         - actionTypeId: .jira
           config:
-            apiUrl: https://elastic.atlassian.net/
+            apiUrl: 'https://elastic.atlassian.net/'
             projectKey: ES
           id: 61787f53-4eee-4741-8df6-8fe84fa616f7
           isDeprecated: false
@@ -14412,7 +14412,7 @@ components:
           connector_name: My connector
           external_id: '71926'
           external_title: ES-554
-          external_url: https://cases.jira.com
+          external_url: 'https://cases.jira.com'
           pushed_at: '2022-07-29T01:20:58.436Z'
           pushed_by:
             email: null
@@ -14482,7 +14482,7 @@ components:
           type: .jira
         created_at: '2024-07-01T17:07:17.767Z'
         created_by:
-          email: null,
+          email: 'null,'
           full_name: null
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
@@ -14599,7 +14599,7 @@ components:
           username: elastic
         version: WzI2LDNd
     Cases_update_case_request:
-      summary: Update the case description, tags, and connector.
+      summary: 'Update the case description, tags, and connector.'
       value:
         cases:
           - connector:
@@ -14662,7 +14662,7 @@ components:
             connector_name: Jira
             external_id: '10003'
             external_title: IS-4
-            external_url: https://hms.atlassian.net/browse/IS-4
+            external_url: 'https://hms.atlassian.net/browse/IS-4'
             pushed_at: '2023-10-13T09:20:40.672Z'
             pushed_by:
               email: null
@@ -14770,7 +14770,7 @@ components:
           runtimeFieldMap:
             runtime_shape_name:
               script:
-                source: emit(doc['shape_name'].value)
+                source: 'emit(doc[''shape_name''].value)'
               type: keyword
           title: logstash-*
     Data_views_create_runtime_field_request:
@@ -14779,7 +14779,7 @@ components:
         name: runtimeFoo
         runtimeField:
           script:
-            source: emit(doc["foo"].value)
+            source: 'emit(doc["foo"].value)'
           type: long
     Data_views_get_data_view_response:
       summary: >-
@@ -14801,35 +14801,35 @@ components:
             products.base_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             products.base_unit_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             products.min_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             products.price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             products.taxful_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             products.taxless_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             taxful_total_price:
               id: number
               params:
-                pattern: $0,0.[00]
+                pattern: '$0,0.[00]'
             taxless_total_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
           fields:
             _id:
               aggregatable: false
@@ -15305,7 +15305,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.base_price
               readFromDocValues: true
@@ -15321,7 +15321,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.base_unit_price
               readFromDocValues: true
@@ -15441,7 +15441,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.min_price
               readFromDocValues: true
@@ -15457,7 +15457,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.price
               readFromDocValues: true
@@ -15560,7 +15560,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.taxful_price
               readFromDocValues: true
@@ -15576,7 +15576,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.taxless_price
               readFromDocValues: true
@@ -15620,7 +15620,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.[00]
+                  pattern: '$0,0.[00]'
               isMapped: true
               name: taxful_total_price
               readFromDocValues: true
@@ -15636,7 +15636,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: taxless_total_price
               readFromDocValues: true
@@ -15747,7 +15747,7 @@ components:
             AvgTicketPrice:
               id: number
               params:
-                pattern: $0,0.[00]
+                pattern: '$0,0.[00]'
             hour_of_day:
               id: number
               params:
@@ -15815,7 +15815,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.[00]
+                  pattern: '$0,0.[00]'
               isMapped: true
               name: AvgTicketPrice
               readFromDocValues: true
@@ -16090,7 +16090,7 @@ components:
               readFromDocValues: false
               runtimeField:
                 script:
-                  source: emit(doc['timestamp'].value.getHour());
+                  source: 'emit(doc[''timestamp''].value.getHour());'
                 type: long
               scripted: false
               searchable: true
@@ -16215,7 +16215,7 @@ components:
           runtimeFieldMap:
             hour_of_day:
               script:
-                source: emit(doc['timestamp'].value.getHour());
+                source: 'emit(doc[''timestamp''].value.getHour());'
               type: long
           sourceFilters: []
           timeFieldName: timestamp
@@ -16230,7 +16230,7 @@ components:
             readFromDocValues: false
             runtimeField:
               script:
-                source: emit(doc['timestamp'].value.getHour());
+                source: 'emit(doc[''timestamp''].value.getHour());'
               type: long
             scripted: false
             searchable: true
@@ -16278,7 +16278,7 @@ components:
       value:
         runtimeField:
           script:
-            source: emit(doc["bar"].value)
+            source: 'emit(doc["bar"].value)'
     Machine_learning_APIs_mlSyncExample:
       summary: Two anomaly detection jobs required synchronization in this example.
       value:
@@ -16776,7 +16776,7 @@ components:
           - desc
         type: string
     Fleet_with_metrics:
-      description: Return agent metrics, false by default
+      description: 'Return agent metrics, false by default'
       in: query
       name: withMetrics
       required: false
@@ -17634,7 +17634,7 @@ components:
               nullable: true
               type: string
             parent:
-              description: The key of the parent issue, when the issue type is sub-task.
+              description: 'The key of the parent issue, when the issue type is sub-task.'
               nullable: true
               type: string
             priority:
@@ -19286,7 +19286,7 @@ components:
         - fromId
         - toId
     Data_views_timefieldname:
-      description: The timestamp field name, which you use for time-based data views.
+      description: 'The timestamp field name, which you use for time-based data views.'
       type: string
     Data_views_title:
       description: >-
@@ -19294,7 +19294,7 @@ components:
         to search. Supports wildcards (`*`).
       type: string
     Data_views_type:
-      description: When set to `rollup`, identifies the rollup data views.
+      description: 'When set to `rollup`, identifies the rollup data views.'
       type: string
     Data_views_typemeta:
       description: >-
@@ -19821,14 +19821,14 @@ components:
       properties:
         agents:
           oneOf:
-            - description: KQL query string, leave empty to action all agents
+            - description: 'KQL query string, leave empty to action all agents'
               type: string
             - description: list of agent IDs
               items:
                 type: string
               type: array
         force:
-          description: Force upgrade, skipping validation (should be used with caution)
+          description: 'Force upgrade, skipping validation (should be used with caution)'
           type: boolean
         rollout_duration_seconds:
           description: rolling upgrade window duration in seconds
@@ -21383,14 +21383,14 @@ components:
             type: object
             properties:
               enabled:
-                description: enable or disable that input, (default to true)
+                description: 'enable or disable that input, (default to true)'
                 type: boolean
               streams:
                 additionalProperties:
                   type: object
                   properties:
                     enabled:
-                      description: enable or disable that stream, (default to true)
+                      description: 'enable or disable that stream, (default to true)'
                       type: boolean
                     vars:
                       description: >-
@@ -21599,7 +21599,7 @@ components:
       type: object
       properties:
         force:
-          description: Force upgrade, skipping validation (should be used with caution)
+          description: 'Force upgrade, skipping validation (should be used with caution)'
           type: boolean
         skipRateLimitCheck:
           description: Skip rate limit check for upgrade
@@ -22005,7 +22005,7 @@ components:
           additionalProperties:
             $ref: >-
               #/components/schemas/Machine_learning_APIs_mlSyncResponseTrainedModels
-          description: If saved objects are missing for trained models, they are created.
+          description: 'If saved objects are missing for trained models, they are created.'
           type: object
       title: Sync API response for created saved objects
       type: object
@@ -22160,7 +22160,7 @@ components:
           example: Not Found
           type: string
         message:
-          example: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+          example: 'SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found'
           type: string
         statusCode:
           example: 404
@@ -22177,7 +22177,7 @@ components:
           example: Conflict
           type: string
         message:
-          example: SLO [d077e940-1515-11ee-9c50-9d096392f520] already exists
+          example: 'SLO [d077e940-1515-11ee-9c50-9d096392f520] already exists'
           type: string
         statusCode:
           example: 409
@@ -22286,11 +22286,11 @@ components:
       type: object
       properties:
         consumed:
-          description: The error budget consummed, as a percentage of the initial value.
+          description: 'The error budget consummed, as a percentage of the initial value.'
           example: 0.8
           type: number
         initial:
-          description: The initial error budget, as 1 - objective
+          description: 'The initial error budget, as 1 - objective'
           example: 0.02
           type: number
         isEstimated:
@@ -22300,7 +22300,7 @@ components:
           example: true
           type: boolean
         remaining:
-          description: The error budget remaining, as a percentage of the initial value.
+          description: 'The error budget remaining, as a percentage of the initial value.'
           example: 0.2
           type: number
       required:
@@ -22385,7 +22385,7 @@ components:
               type: string
             index:
               description: The index used by APM metrics
-              example: metrics-apm*,apm*
+              example: 'metrics-apm*,apm*'
               type: string
             service:
               description: The APM service name
@@ -22432,7 +22432,7 @@ components:
               type: string
             index:
               description: The index used by APM metrics
-              example: metrics-apm*,apm*
+              example: 'metrics-apm*,apm*'
               type: string
             service:
               description: The APM service name
@@ -22566,7 +22566,7 @@ components:
                       name:
                         description: The name of the metric. Only valid options are A-Z
                         example: A
-                        pattern: ^[A-Z]$
+                        pattern: '^[A-Z]$'
                         type: string
                     required:
                       - name
@@ -22620,7 +22620,7 @@ components:
                       name:
                         description: The name of the metric. Only valid options are A-Z
                         example: A
-                        pattern: ^[A-Z]$
+                        pattern: '^[A-Z]$'
                         type: string
                     required:
                       - name
@@ -22922,7 +22922,7 @@ components:
       properties:
         frequency:
           default: 1m
-          description: Configure how often the transform runs, default 1m
+          description: 'Configure how often the transform runs, default 1m'
           example: 5m
           type: string
         preventInitialBackfill:
@@ -23067,7 +23067,7 @@ components:
             - $ref: '#/components/schemas/SLOs_indicator_properties_histogram'
             - $ref: '#/components/schemas/SLOs_indicator_properties_timeslice_metric'
         instanceId:
-          description: the value derived from the groupBy field, if present, otherwise '*'
+          description: 'the value derived from the groupBy field, if present, otherwise ''*'''
           example: host-abcde
           type: string
         name:
@@ -23192,7 +23192,7 @@ components:
         name:
           description: The name of the metric. Only valid options are A-Z
           example: A
-          pattern: ^[A-Z]$
+          pattern: '^[A-Z]$'
           type: string
       required:
         - name
@@ -23215,7 +23215,7 @@ components:
         name:
           description: The name of the metric. Only valid options are A-Z
           example: A
-          pattern: ^[A-Z]$
+          pattern: '^[A-Z]$'
           type: string
       required:
         - name
@@ -23243,7 +23243,7 @@ components:
         name:
           description: The name of the metric. Only valid options are A-Z
           example: A
-          pattern: ^[A-Z]$
+          pattern: '^[A-Z]$'
           type: string
         percentile:
           description: The percentile value.
@@ -23364,6 +23364,6 @@ tags:
       permanently breaks future Kibana versions.
     name: saved objects
     x-displayName: Saved objects
-  - description: SLO APIs enable you to define, manage and track service-level objectives
+  - description: 'SLO APIs enable you to define, manage and track service-level objectives'
     name: slo
   - name: system

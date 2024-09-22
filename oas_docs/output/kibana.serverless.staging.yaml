@@ -61,27 +61,27 @@ info:
   version: 1.0.2
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
-    url: https://creativecommons.org/licenses/by-nc-nd/4.0/
+    url: 'https://creativecommons.org/licenses/by-nc-nd/4.0/'
   x-feedbackLink:
     label: Feedback
     url: >-
       https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
 servers:
-  - url: http://{kibana_host}:{port}
+  - url: 'http://{kibana_host}:{port}'
     variables:
       kibana_host:
         default: localhost
       port:
         default: '5601'
-  - url: http://localhost:5622
-  - url: https://{kibana_url}
+  - url: 'http://localhost:5622'
+  - url: 'https://{kibana_url}'
     variables:
       kibana_url:
-        default: localhost:5601
+        default: 'localhost:5601'
   - url: /
-  - url: http://KIBANA_HOST:5601
+  - url: 'http://KIBANA_HOST:5601'
   - description: local
-    url: http://localhost:5601
+    url: 'http://localhost:5601'
 paths:
   /api/actions:
     get:
@@ -192,7 +192,7 @@ paths:
       summary: Create a connector
       tags:
         - connectors
-  /api/actions/action/{id}:
+  '/api/actions/action/{id}':
     delete:
       deprecated: true
       description: 'WARNING: When you delete a connector, it cannot be recovered.'
@@ -383,7 +383,7 @@ paths:
       summary: Update a connector
       tags:
         - connectors
-  /api/actions/action/{id}/_execute:
+  '/api/actions/action/{id}/_execute':
     post:
       deprecated: true
       operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D%2F_execute#0'
@@ -494,7 +494,7 @@ paths:
       summary: Get connector types
       tags:
         - connectors
-  /api/actions/connector/{id}:
+  '/api/actions/connector/{id}':
     delete:
       description: 'WARNING: When you delete a connector, it cannot be recovered.'
       operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#0'
@@ -779,7 +779,7 @@ paths:
       summary: Update a connector
       tags:
         - connectors
-  /api/actions/connector/{id}/_execute:
+  '/api/actions/connector/{id}/_execute':
     post:
       description: >-
         You can use this API to test an action that involves interaction with
@@ -900,7 +900,7 @@ paths:
       summary: Get connector types
       tags:
         - connectors
-  /api/alerting/rule/{id}:
+  '/api/alerting/rule/{id}':
     delete:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D#2'
       parameters:
@@ -1688,7 +1688,7 @@ paths:
                               description: Recur the rule until this date.
                               type: string
                             wkst:
-                              description: Indicates the start of week, defaults to Monday.
+                              description: 'Indicates the start of week, defaults to Monday.'
                               enum:
                                 - MO
                                 - TU
@@ -2829,7 +2829,7 @@ paths:
                               description: Recur the rule until this date.
                               type: string
                             wkst:
-                              description: Indicates the start of week, defaults to Monday.
+                              description: 'Indicates the start of week, defaults to Monday.'
                               enum:
                                 - MO
                                 - TU
@@ -3941,7 +3941,7 @@ paths:
                               description: Recur the rule until this date.
                               type: string
                             wkst:
-                              description: Indicates the start of week, defaults to Monday.
+                              description: 'Indicates the start of week, defaults to Monday.'
                               enum:
                                 - MO
                                 - TU
@@ -4024,7 +4024,7 @@ paths:
       summary: Update a rule
       tags:
         - alerting
-  /api/alerting/rule/{id}/_disable:
+  '/api/alerting/rule/{id}/_disable':
     post:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_disable#0'
       parameters:
@@ -4073,7 +4073,7 @@ paths:
       summary: Disable a rule
       tags:
         - alerting
-  /api/alerting/rule/{id}/_enable:
+  '/api/alerting/rule/{id}/_enable':
     post:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_enable#0'
       parameters:
@@ -4110,7 +4110,7 @@ paths:
       summary: Enable a rule
       tags:
         - alerting
-  /api/alerting/rule/{id}/_mute_all:
+  '/api/alerting/rule/{id}/_mute_all':
     post:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_mute_all#0'
       parameters:
@@ -4141,7 +4141,7 @@ paths:
       summary: Mute all alerts
       tags:
         - alerting
-  /api/alerting/rule/{id}/_unmute_all:
+  '/api/alerting/rule/{id}/_unmute_all':
     post:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_unmute_all#0'
       parameters:
@@ -4172,7 +4172,7 @@ paths:
       summary: Unmute all alerts
       tags:
         - alerting
-  /api/alerting/rule/{id}/_update_api_key:
+  '/api/alerting/rule/{id}/_update_api_key':
     post:
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_update_api_key#0'
       parameters:
@@ -4211,7 +4211,7 @@ paths:
       summary: Update the API key for a rule
       tags:
         - alerting
-  /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute:
+  '/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute':
     post:
       operationId: >-
         %2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_mute#0
@@ -4255,7 +4255,7 @@ paths:
       summary: Mute an alert
       tags:
         - alerting
-  /api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute:
+  '/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute':
     post:
       operationId: >-
         %2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_unmute#0
@@ -5151,7 +5151,7 @@ paths:
                               description: Recur the rule until this date.
                               type: string
                             wkst:
-                              description: Indicates the start of week, defaults to Monday.
+                              description: 'Indicates the start of week, defaults to Monday.'
                               enum:
                                 - MO
                                 - TU
@@ -5245,8 +5245,8 @@ paths:
                 privileges:
                   items:
                     enum:
-                      - event:write
-                      - config_agent:read
+                      - 'event:write'
+                      - 'config_agent:read'
                     type: string
                   type: array
         required: true
@@ -5272,7 +5272,7 @@ paths:
       summary: Create an APM agent key
       tags:
         - APM agent keys
-  /api/apm/services/{serviceName}/annotation:
+  '/api/apm/services/{serviceName}/annotation':
     post:
       description: Create a new annotation for a specific service.
       operationId: createAnnotation
@@ -5347,7 +5347,7 @@ paths:
       summary: Create a service annotation
       tags:
         - APM annotations
-  /api/apm/services/{serviceName}/annotation/search:
+  '/api/apm/services/{serviceName}/annotation/search':
     get:
       description: Search for annotations related to a specific service.
       operationId: getAnnotation
@@ -5582,7 +5582,7 @@ paths:
         - Security Solution Entity Analytics API
   /api/asset_criticality/list:
     get:
-      description: List asset criticality records, paging, sorting and filtering as needed.
+      description: 'List asset criticality records, paging, sorting and filtering as needed.'
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -5727,7 +5727,7 @@ paths:
       summary: Create a data view
       tags:
         - data views
-  /api/data_views/data_view/{viewId}:
+  '/api/data_views/data_view/{viewId}':
     delete:
       description: |
         WARNING: When you delete a data view, it cannot be recovered.
@@ -5800,7 +5800,7 @@ paths:
       summary: Update a data view
       tags:
         - data views
-  /api/data_views/data_view/{viewId}/fields:
+  '/api/data_views/data_view/{viewId}/fields':
     post:
       description: >
         Update fields presentation metadata such as count, customLabel,
@@ -5843,7 +5843,7 @@ paths:
       summary: Update data view fields metadata
       tags:
         - data views
-  /api/data_views/data_view/{viewId}/runtime_field:
+  '/api/data_views/data_view/{viewId}/runtime_field':
     post:
       operationId: createRuntimeFieldDefault
       parameters:
@@ -5935,7 +5935,7 @@ paths:
       summary: Create or update a runtime field
       tags:
         - data views
-  /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
+  '/api/data_views/data_view/{viewId}/runtime_field/{fieldName}':
     delete:
       operationId: deleteRuntimeFieldDefault
       parameters:
@@ -6668,9 +6668,8 @@ paths:
       tags:
         - Security Solution Detections API
         - Import/Export API
-  /api/detection_engine/rules/{id}/exceptions:
+  '/api/detection_engine/rules/{id}/exceptions':
     post:
-      description: Create exception items that apply to a single detection rule.
       operationId: CreateRuleExceptionListItems
       parameters:
         - description: Detection rule's identifier
@@ -6735,7 +6734,7 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Create rule exception list items
+      summary: Creates rule exception list items
       tags:
         - Security Solution Exceptions API
   /api/detection_engine/rules/preview:
@@ -7095,10 +7094,7 @@ paths:
         - Tags API
   /api/endpoint_list:
     post:
-      description: >-
-        Create an endpoint exception list, which groups endpoint exception list
-        items. If an endpoint exception list already exists, an empty response
-        is returned.
+      description: Creates an endpoint list or does nothing if the list already exists
       operationId: CreateEndpointList
       responses:
         '200':
@@ -7139,14 +7135,9 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Endpoint_Exceptions_API_SiemErrorResponse
           description: Internal server error
-      summary: Create an endpoint exception list
-      tags:
-        - Security Solution Endpoint Exceptions API
+      summary: Creates an endpoint list
   /api/endpoint_list/items:
     delete:
-      description: >-
-        Delete an endpoint exception list item using the `id` or `item_id`
-        field.
       operationId: DeleteEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -7209,13 +7200,8 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Endpoint_Exceptions_API_SiemErrorResponse
           description: Internal server error
-      summary: Delete an endpoint exception list item
-      tags:
-        - Security Solution Endpoint Exceptions API
+      summary: Deletes an endpoint list item
     get:
-      description: >-
-        Get the details of an endpoint exception list item using the `id` or
-        `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -7280,13 +7266,8 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Endpoint_Exceptions_API_SiemErrorResponse
           description: Internal server error
-      summary: Get an endpoint exception list item
-      tags:
-        - Security Solution Endpoint Exceptions API
+      summary: Reads an endpoint list item
     post:
-      description: >-
-        Create an endpoint exception list item, and associate it with the
-        endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -7377,13 +7358,8 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Endpoint_Exceptions_API_SiemErrorResponse
           description: Internal server error
-      summary: Create an endpoint exception list item
-      tags:
-        - Security Solution Endpoint Exceptions API
+      summary: Creates an endpoint list item
     put:
-      description: >-
-        Update an endpoint exception list item using the `id` or `item_id`
-        field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -7480,12 +7456,9 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Endpoint_Exceptions_API_SiemErrorResponse
           description: Internal server error
-      summary: Update an endpoint exception list item
-      tags:
-        - Security Solution Endpoint Exceptions API
+      summary: Updates an endpoint list item
   /api/endpoint_list/items/_find:
     get:
-      description: Get a list of all endpoint exception list items.
       operationId: FindEndpointListItems
       parameters:
         - description: >
@@ -7520,7 +7493,7 @@ paths:
           schema:
             $ref: >-
               #/components/schemas/Security_Solution_Endpoint_Exceptions_API_NonEmptyString
-        - description: Determines the sort order, which can be `desc` or `asc`
+        - description: 'Determines the sort order, which can be `desc` or `asc`'
           in: query
           name: sort_order
           required: false
@@ -7596,9 +7569,7 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Endpoint_Exceptions_API_SiemErrorResponse
           description: Internal server error
-      summary: Get endpoint exception list items
-      tags:
-        - Security Solution Endpoint Exceptions API
+      summary: Finds endpoint list items
   /api/endpoint/action:
     get:
       description: Get a list of all response actions.
@@ -7621,7 +7592,7 @@ paths:
       summary: Get response actions
       tags:
         - Security Solution Endpoint Management API
-  /api/endpoint/action_log/{agent_id}:
+  '/api/endpoint/action_log/{agent_id}':
     get:
       deprecated: true
       description: Get an action request log for the specified agent ID.
@@ -7675,7 +7646,7 @@ paths:
       summary: Get response actions status
       tags:
         - Security Solution Endpoint Management API
-  /api/endpoint/action/{action_id}:
+  '/api/endpoint/action/{action_id}':
     get:
       description: Get the details of a response action using the action ID.
       operationId: EndpointGetActionsDetails
@@ -7696,7 +7667,7 @@ paths:
       summary: Get action details
       tags:
         - Security Solution Endpoint Management API
-  /api/endpoint/action/{action_id}/file/{file_id}:
+  '/api/endpoint/action/{action_id}/file/{file_id}':
     get:
       description: Get information for the specified file using the file ID.
       operationId: EndpointFileInfo
@@ -7722,7 +7693,7 @@ paths:
       summary: Get file information
       tags:
         - Security Solution Endpoint Management API
-  /api/endpoint/action/{action_id}/file/{file_id}/download:
+  '/api/endpoint/action/{action_id}/file/{file_id}/download':
     get:
       description: Download a file from an endpoint.
       operationId: EndpointFileDownload
@@ -7923,7 +7894,7 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/unisolate:
     post:
-      description: Release an isolated endpoint, allowing it to rejoin a network.
+      description: 'Release an isolated endpoint, allowing it to rejoin a network.'
       operationId: EndpointUnisolateAction
       requestBody:
         content:
@@ -7986,7 +7957,7 @@ paths:
       summary: Get a metadata list
       tags:
         - Security Solution Endpoint Management API
-  /api/endpoint/metadata/{id}:
+  '/api/endpoint/metadata/{id}':
     get:
       operationId: GetEndpointMetadata
       parameters:
@@ -8071,7 +8042,7 @@ paths:
       summary: Get an agent policy summary
       tags:
         - Security Solution Endpoint Management API
-  /api/endpoint/protection_updates_note/{package_policy_id}:
+  '/api/endpoint/protection_updates_note/{package_policy_id}':
     get:
       operationId: GetProtectionUpdatesNote
       parameters:
@@ -8119,7 +8090,7 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Solution Endpoint Management API
-  /api/endpoint/suggestions/{suggestion_type}:
+  '/api/endpoint/suggestions/{suggestion_type}':
     post:
       operationId: GetEndpointSuggestions
       parameters:
@@ -8177,7 +8148,7 @@ paths:
       summary: List the Entity Store engines
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}:
+  '/api/entity_store/engines/{entityType}':
     delete:
       operationId: DeleteEntityStore
       parameters:
@@ -8228,7 +8199,7 @@ paths:
       summary: Get the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/init:
+  '/api/entity_store/engines/{entityType}/init':
     post:
       operationId: InitEntityStore
       parameters:
@@ -8263,7 +8234,7 @@ paths:
       summary: Initialize the Entity Store
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/start:
+  '/api/entity_store/engines/{entityType}/start':
     post:
       operationId: StartEntityStore
       parameters:
@@ -8287,7 +8258,7 @@ paths:
       summary: Start the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/stats:
+  '/api/entity_store/engines/{entityType}/stats':
     post:
       operationId: GetEntityStoreStats
       parameters:
@@ -8326,7 +8297,7 @@ paths:
       summary: Get the Entity Store engine stats
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/stop:
+  '/api/entity_store/engines/{entityType}/stop':
     post:
       operationId: StopEntityStore
       parameters:
@@ -8350,88 +8321,8 @@ paths:
       summary: Stop the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/entities/list:
-    get:
-      description: List entities records, paging, sorting and filtering as needed.
-      operationId: ListEntities
-      parameters:
-        - in: query
-          name: sort_field
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: sort_order
-          required: false
-          schema:
-            enum:
-              - asc
-              - desc
-            type: string
-        - in: query
-          name: page
-          required: false
-          schema:
-            minimum: 1
-            type: integer
-        - in: query
-          name: per_page
-          required: false
-          schema:
-            maximum: 10000
-            minimum: 1
-            type: integer
-        - description: An ES query to filter by.
-          in: query
-          name: filterQuery
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: entities_types
-          required: true
-          schema:
-            items:
-              $ref: >-
-                #/components/schemas/Security_Solution_Entity_Analytics_API_EntityType
-            type: array
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  inspect:
-                    $ref: >-
-                      #/components/schemas/Security_Solution_Entity_Analytics_API_InspectQuery
-                  page:
-                    minimum: 1
-                    type: integer
-                  per_page:
-                    maximum: 1000
-                    minimum: 1
-                    type: integer
-                  records:
-                    items:
-                      $ref: >-
-                        #/components/schemas/Security_Solution_Entity_Analytics_API_Entity
-                    type: array
-                  total:
-                    minimum: 0
-                    type: integer
-                required:
-                  - records
-                  - page
-                  - per_page
-                  - total
-          description: Entities returned successfully
-      summary: List Entity Store Entities
-      tags:
-        - Security Solution Entity Analytics API
   /api/exception_lists:
     delete:
-      description: Delete an exception list using the `id` or `list_id` field.
       operationId: DeleteExceptionList
       parameters:
         - description: Either `id` or `list_id` must be specified
@@ -8501,11 +8392,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Delete an exception list
+      summary: Deletes an exception list
       tags:
         - Security Solution Exceptions API
     get:
-      description: Get the details of an exception list using the `id` or `list_id` field.
       operationId: ReadExceptionList
       parameters:
         - description: Either `id` or `list_id` must be specified
@@ -8575,23 +8465,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Get exception list details
+      summary: Retrieves an exception list using its `id` or `list_id` field
       tags:
         - Security Solution Exceptions API
     post:
-      description: >
-        An exception list groups exception items and can be associated with
-        detection rules. You can assign detection rules with multiple exception
-        lists.
-
-        > info
-
-        > All exception items added to the same list are evaluated using `OR`
-        logic. That is, if any of the items in a list evaluate to `true`, the
-        exception prevents the rule from generating an alert. Likewise, `OR`
-        logic is used for evaluating exceptions when more than one exception
-        list is assigned to a rule. To use the `AND` operator, you can define
-        multiple clauses (`entries`) in a single exception item.
       operationId: CreateExceptionList
       requestBody:
         content:
@@ -8681,11 +8558,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Create an exception list
+      summary: Creates an exception list
       tags:
         - Security Solution Exceptions API
     put:
-      description: Update an exception list using the `id` or `list_id` field.
       operationId: UpdateExceptionList
       requestBody:
         content:
@@ -8779,12 +8655,11 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Update an exception list
+      summary: Updates an exception list
       tags:
         - Security Solution Exceptions API
   /api/exception_lists/_duplicate:
     post:
-      description: Duplicate an existing exception list.
       operationId: DuplicateExceptionList
       parameters:
         - description: Exception list's human identifier
@@ -8858,12 +8733,12 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Duplicate an exception list
+      summary: Duplicates an exception list
       tags:
         - Security Solution Exceptions API
   /api/exception_lists/_export:
     post:
-      description: Export an exception list and its associated items to an NDJSON file.
+      description: Exports an exception list and its associated items to an .ndjson file
       operationId: ExportExceptionList
       parameters:
         - description: Exception list's identifier
@@ -8947,12 +8822,11 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Export an exception list
+      summary: Exports an exception list
       tags:
         - Security Solution Exceptions API
   /api/exception_lists/_find:
     get:
-      description: Get a list of all exception lists.
       operationId: FindExceptionLists
       parameters:
         - description: >
@@ -9009,7 +8883,7 @@ paths:
           required: false
           schema:
             type: string
-        - description: Determines the sort order, which can be `desc` or `asc`
+        - description: 'Determines the sort order, which can be `desc` or `asc`'
           in: query
           name: sort_order
           required: false
@@ -9076,12 +8950,12 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Get exception lists
+      summary: Finds exception lists
       tags:
         - Security Solution Exceptions API
   /api/exception_lists/_import:
     post:
-      description: Import an exception list and its associated items from an NDJSON file.
+      description: Imports an exception list and associated items
       operationId: ImportExceptionList
       parameters:
         - description: >
@@ -9198,12 +9072,11 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Import an exception list
+      summary: Imports an exception list
       tags:
         - Security Solution Exceptions API
   /api/exception_lists/items:
     delete:
-      description: Delete an exception list item using the `id` or `item_id` field.
       operationId: DeleteExceptionListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -9273,13 +9146,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Delete an exception list item
+      summary: Deletes an exception list item
       tags:
         - Security Solution Exceptions API
     get:
-      description: >-
-        Get the details of an exception list item using the `id` or `item_id`
-        field.
       operationId: ReadExceptionListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -9349,17 +9219,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Get an exception list item
+      summary: Gets an exception list item
       tags:
         - Security Solution Exceptions API
     post:
-      description: >
-        Create an exception item and associate it with the specified exception
-        list.
-
-        > info
-
-        > Before creating exception items, you must create an exception list.
       operationId: CreateExceptionListItem
       requestBody:
         content:
@@ -9461,11 +9324,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Create an exception list item
+      summary: Creates an exception list item
       tags:
         - Security Solution Exceptions API
     put:
-      description: Update an exception list item using the `id` or `item_id` field.
       operationId: UpdateExceptionListItem
       requestBody:
         content:
@@ -9572,12 +9434,11 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Update an exception list item
+      summary: Updates an exception list item
       tags:
         - Security Solution Exceptions API
   /api/exception_lists/items/_find:
     get:
-      description: Get a list of all exception list items in the specified list.
       operationId: FindExceptionListItems
       parameters:
         - description: List's id
@@ -9644,7 +9505,7 @@ paths:
           schema:
             $ref: >-
               #/components/schemas/Security_Solution_Exceptions_API_NonEmptyString
-        - description: Determines the sort order, which can be `desc` or `asc`
+        - description: 'Determines the sort order, which can be `desc` or `asc`'
           in: query
           name: sort_order
           required: false
@@ -9720,12 +9581,11 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Get exception list items
+      summary: Finds exception list items
       tags:
         - Security Solution Exceptions API
   /api/exception_lists/summary:
     get:
-      description: Get a summary of the specified exception list.
       operationId: ReadExceptionListSummary
       parameters:
         - description: Exception list's identifier generated upon creation
@@ -9813,24 +9673,11 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Get an exception list summary
+      summary: Retrieves an exception list summary
       tags:
         - Security Solution Exceptions API
   /api/exceptions/shared:
     post:
-      description: >
-        An exception list groups exception items and can be associated with
-        detection rules. A shared exception list can apply to multiple detection
-        rules.
-
-        > info
-
-        > All exception items added to the same list are evaluated using `OR`
-        logic. That is, if any of the items in a list evaluate to `true`, the
-        exception prevents the rule from generating an alert. Likewise, `OR`
-        logic is used for evaluating exceptions when more than one exception
-        list is assigned to a rule. To use the `AND` operator, you can define
-        multiple clauses (`entries`) in a single exception item.
       operationId: CreateSharedExceptionList
       requestBody:
         content:
@@ -9894,7 +9741,7 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Exceptions_API_SiemErrorResponse
           description: Internal server error response
-      summary: Create a shared exception list
+      summary: Creates a shared exception list
       tags:
         - Security Solution Exceptions API
   /api/fleet/agent_download_sources:
@@ -9958,7 +9805,7 @@ paths:
       summary: Create agent binary download source
       tags:
         - Elastic Agent binary download sources
-  /api/fleet/agent_download_sources/{sourceId}:
+  '/api/fleet/agent_download_sources/{sourceId}':
     delete:
       operationId: delete-download-source
       parameters:
@@ -10161,7 +10008,7 @@ paths:
       summary: Bulk get agent policies
       tags:
         - Elastic Agent policies
-  /api/fleet/agent_policies/{agentPolicyId}:
+  '/api/fleet/agent_policies/{agentPolicyId}':
     get:
       description: Get one agent policy
       operationId: agent-policy-info
@@ -10216,7 +10063,7 @@ paths:
       summary: Update agent policy by ID
       tags:
         - Elastic Agent policies
-  /api/fleet/agent_policies/{agentPolicyId}/copy:
+  '/api/fleet/agent_policies/{agentPolicyId}/copy':
     parameters:
       - in: path
         name: agentPolicyId
@@ -10258,7 +10105,7 @@ paths:
       summary: Copy agent policy by ID
       tags:
         - Elastic Agent policies
-  /api/fleet/agent_policies/{agentPolicyId}/download:
+  '/api/fleet/agent_policies/{agentPolicyId}/download':
     get:
       operationId: agent-policy-download
       responses:
@@ -10297,7 +10144,7 @@ paths:
         required: false
         schema:
           type: string
-  /api/fleet/agent_policies/{agentPolicyId}/full:
+  '/api/fleet/agent_policies/{agentPolicyId}/full':
     get:
       operationId: agent-policy-full
       responses:
@@ -10580,7 +10427,7 @@ paths:
       summary: List agents by action ids
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}:
+  '/api/fleet/agents/{agentId}':
     delete:
       operationId: delete-agent
       parameters:
@@ -10665,7 +10512,7 @@ paths:
       summary: Update agent by ID
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}/actions:
+  '/api/fleet/agents/{agentId}/actions':
     parameters:
       - in: path
         name: agentId
@@ -10706,7 +10553,7 @@ paths:
       summary: Create agent action
       tags:
         - Elastic Agent actions
-  /api/fleet/agents/{agentId}/reassign:
+  '/api/fleet/agents/{agentId}/reassign':
     parameters:
       - in: path
         name: agentId
@@ -10768,7 +10615,7 @@ paths:
       summary: Reassign agent
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}/request_diagnostics:
+  '/api/fleet/agents/{agentId}/request_diagnostics':
     parameters:
       - in: path
         name: agentId
@@ -10807,7 +10654,7 @@ paths:
       summary: Request agent diagnostics
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}/unenroll:
+  '/api/fleet/agents/{agentId}/unenroll':
     parameters:
       - in: path
         name: agentId
@@ -10853,7 +10700,7 @@ paths:
       summary: Unenroll agent
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}/upgrade:
+  '/api/fleet/agents/{agentId}/upgrade':
     parameters:
       - in: path
         name: agentId
@@ -10882,7 +10729,7 @@ paths:
       summary: Upgrade agent
       tags:
         - Elastic Agents
-  /api/fleet/agents/{agentId}/uploads:
+  '/api/fleet/agents/{agentId}/uploads':
     get:
       operationId: list-agent-uploads
       responses:
@@ -11026,7 +10873,7 @@ paths:
       summary: Get agent action status
       tags:
         - Elastic Agent actions
-  /api/fleet/agents/actions/{actionId}/cancel:
+  '/api/fleet/agents/actions/{actionId}/cancel':
     parameters:
       - in: path
         name: actionId
@@ -11068,7 +10915,7 @@ paths:
               properties:
                 agents:
                   oneOf:
-                    - description: KQL query string, leave empty to action all agents
+                    - description: 'KQL query string, leave empty to action all agents'
                       type: string
                     - description: list of agent IDs
                       items:
@@ -11117,7 +10964,7 @@ paths:
                   type: array
                 agents:
                   oneOf:
-                    - description: KQL query string, leave empty to action all agents
+                    - description: 'KQL query string, leave empty to action all agents'
                       type: string
                     - description: list of agent IDs
                       items:
@@ -11161,7 +11008,7 @@ paths:
               properties:
                 agents:
                   oneOf:
-                    - description: KQL query string, leave empty to action all agents
+                    - description: 'KQL query string, leave empty to action all agents'
                       type: string
                     - description: list of agent IDs
                       items:
@@ -11216,7 +11063,7 @@ paths:
               properties:
                 agents:
                   oneOf:
-                    - description: KQL query string, leave empty to action all agents
+                    - description: 'KQL query string, leave empty to action all agents'
                       type: string
                     - description: list of agent IDs
                       items:
@@ -11262,7 +11109,7 @@ paths:
                 - agent1
                 - agent2
               rollout_duration_seconds: 3600
-              source_uri: https://artifacts.elastic.co/downloads/beats/elastic-agent
+              source_uri: 'https://artifacts.elastic.co/downloads/beats/elastic-agent'
               start_time: '2022-08-03T14:00:00.000Z'
               version: 8.4.0
             schema:
@@ -11283,7 +11130,7 @@ paths:
       summary: Bulk upgrade agents
       tags:
         - Elastic Agents
-  /api/fleet/agents/files/{fileId}:
+  '/api/fleet/agents/files/{fileId}':
     delete:
       operationId: delete-agent-upload-file
       responses:
@@ -11312,7 +11159,7 @@ paths:
         required: true
         schema:
           type: string
-  /api/fleet/agents/files/{fileId}/{fileName}:
+  '/api/fleet/agents/files/{fileId}/{fileName}':
     get:
       operationId: get-agent-upload-file
       responses:
@@ -11506,7 +11353,7 @@ paths:
       summary: Create enrollment API key
       tags:
         - Fleet enrollment API keys
-  /api/fleet/enrollment_api_keys/{keyId}:
+  '/api/fleet/enrollment_api_keys/{keyId}':
     delete:
       operationId: delete-enrollment-api-key
       parameters:
@@ -11617,7 +11464,7 @@ paths:
       summary: Create enrollment API key
       tags:
         - Fleet enrollment API keys
-  /api/fleet/enrollment-api-keys/{keyId}:
+  '/api/fleet/enrollment-api-keys/{keyId}':
     delete:
       deprecated: true
       operationId: delete-enrollment-api-key-deprecated
@@ -11902,7 +11749,7 @@ paths:
       summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
-  /api/fleet/epm/packages/{pkgkey}:
+  '/api/fleet/epm/packages/{pkgkey}':
     delete:
       deprecated: true
       operationId: delete-package-deprecated
@@ -12062,7 +11909,7 @@ paths:
       summary: Install package
       tags:
         - Elastic Package Manager (EPM)
-  /api/fleet/epm/packages/{pkgName}/{pkgVersion}:
+  '/api/fleet/epm/packages/{pkgName}/{pkgVersion}':
     delete:
       operationId: delete-package
       parameters:
@@ -12294,7 +12141,7 @@ paths:
       summary: Update package settings
       tags:
         - Elastic Package Manager (EPM)
-  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
+  '/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}':
     get:
       operationId: packages-get-file
       responses:
@@ -12332,7 +12179,7 @@ paths:
         required: true
         schema:
           type: string
-  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
+  '/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize':
     post:
       description: ''
       operationId: reauthorize-transforms
@@ -12398,7 +12245,7 @@ paths:
       summary: Authorize transforms
       tags:
         - Elastic Package Manager (EPM)
-  /api/fleet/epm/packages/{pkgName}/stats:
+  '/api/fleet/epm/packages/{pkgName}/stats':
     get:
       operationId: get-package-stats
       responses:
@@ -12445,7 +12292,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     parameters: []
-  /api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs:
+  '/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs':
     get:
       operationId: get-inputs-template
       responses:
@@ -12585,7 +12432,7 @@ paths:
       summary: Create Fleet Server host
       tags:
         - Fleet Server hosts
-  /api/fleet/fleet_server_hosts/{itemId}:
+  '/api/fleet/fleet_server_hosts/{itemId}':
     delete:
       operationId: delete-fleet-server-hosts
       parameters:
@@ -12818,7 +12665,7 @@ paths:
       summary: Create output
       tags:
         - Fleet outputs
-  /api/fleet/outputs/{outputId}:
+  '/api/fleet/outputs/{outputId}':
     delete:
       operationId: delete-output
       parameters:
@@ -12887,7 +12734,7 @@ paths:
       summary: Update output by ID
       tags:
         - Fleet outputs
-  /api/fleet/outputs/{outputId}/health:
+  '/api/fleet/outputs/{outputId}/health':
     get:
       operationId: get-output-health
       responses:
@@ -12901,7 +12748,7 @@ paths:
                     description: long message if unhealthy
                     type: string
                   state:
-                    description: state of output, HEALTHY or DEGRADED
+                    description: 'state of output, HEALTHY or DEGRADED'
                     type: string
                   timestamp:
                     description: timestamp of reported state
@@ -13023,7 +12870,7 @@ paths:
       summary: Bulk get package policies
       tags:
         - Fleet package policies
-  /api/fleet/package_policies/{packagePolicyId}:
+  '/api/fleet/package_policies/{packagePolicyId}':
     delete:
       operationId: delete-package-policy
       parameters:
@@ -13295,7 +13142,7 @@ paths:
       summary: Create proxy
       tags:
         - Fleet proxies
-  /api/fleet/proxies/{itemId}:
+  '/api/fleet/proxies/{itemId}':
     delete:
       operationId: delete-fleet-proxies
       parameters:
@@ -13554,7 +13401,7 @@ paths:
       summary: List metadata for latest uninstall tokens per agent policy
       tags:
         - Fleet uninstall tokens
-  /api/fleet/uninstall_tokens/{uninstallTokenId}:
+  '/api/fleet/uninstall_tokens/{uninstallTokenId}':
     get:
       operationId: get-uninstall-token
       parameters:
@@ -13596,10 +13443,6 @@ paths:
         - Fleet uninstall tokens
   /api/lists:
     delete:
-      description: |
-        Delete a list using the list ID.
-        > info
-        > When you delete a list, all of its list items are also deleted.
       operationId: DeleteList
       parameters:
         - description: List's `id` value
@@ -13665,11 +13508,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Delete a list
+      summary: Deletes a list
       tags:
         - Security Solution Lists API
     get:
-      description: Get the details of a list using the list ID.
       operationId: ReadList
       parameters:
         - description: List's `id` value
@@ -13723,11 +13565,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Get list details
+      summary: Retrieves a list using its id field
       tags:
         - Security Solution Lists API
     patch:
-      description: Update specific fields of an existing list using the list ID.
       operationId: PatchList
       requestBody:
         content:
@@ -13799,11 +13640,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Patch a list
+      summary: Patches a list
       tags:
         - Security Solution Lists API
     post:
-      description: Create a new list.
       operationId: CreateList
       requestBody:
         content:
@@ -13882,17 +13722,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Create a list
+      summary: Creates a list
       tags:
         - Security Solution Lists API
     put:
-      description: >
-        Update a list using the list ID. The original list is replaced, and all
-        unspecified fields are deleted.
-
-        > info
-
-        > You cannot modify the `id` value.
       operationId: UpdateList
       requestBody:
         content:
@@ -13966,14 +13799,11 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Update a list
+      summary: Updates a list
       tags:
         - Security Solution Lists API
   /api/lists/_find:
     get:
-      description: >-
-        Get a paginated subset of lists. By default, the first page is returned,
-        with 20 results per page.
       operationId: FindLists
       parameters:
         - description: The page number to return
@@ -13994,7 +13824,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/Security_Solution_Lists_API_NonEmptyString'
-        - description: Determines the sort order, which can be `desc` or `asc`
+        - description: 'Determines the sort order, which can be `desc` or `asc`'
           in: query
           name: sort_order
           required: false
@@ -14088,12 +13918,11 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Get lists
+      summary: Finds lists
       tags:
         - Security Solution Lists API
   /api/lists/index:
     delete:
-      description: Delete the `.lists` and `.items` data streams.
       operationId: DeleteListIndex
       responses:
         '200':
@@ -14145,11 +13974,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Delete list data streams
+      summary: Deletes list data streams
       tags:
         - Security Solution Lists API
     get:
-      description: Verify that `.lists` and `.items` data streams exist.
       operationId: ReadListIndex
       responses:
         '200':
@@ -14204,11 +14032,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Get status of list data streams
+      summary: Get list data stream existence status
       tags:
         - Security Solution Lists API
     post:
-      description: Create `.lists` and `.items` data streams in the relevant space.
       operationId: CreateListIndex
       responses:
         '200':
@@ -14260,12 +14087,11 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Create list data streams
+      summary: Creates necessary list data streams
       tags:
         - Security Solution Lists API
   /api/lists/items:
     delete:
-      description: Delete a list item using its `id`, or its `list_id` and `value` fields.
       operationId: DeleteListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
@@ -14349,11 +14175,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Delete a list item
+      summary: Deletes a list item
       tags:
         - Security Solution Lists API
     get:
-      description: Get the details of a list item.
       operationId: ReadListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
@@ -14424,11 +14249,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Get a list item
+      summary: Gets a list item
       tags:
         - Security Solution Lists API
     patch:
-      description: Update specific fields of an existing list item using the list item ID.
       operationId: PatchListItem
       requestBody:
         content:
@@ -14504,20 +14328,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Patch a list item
+      summary: Patches a list item
       tags:
         - Security Solution Lists API
     post:
-      description: >
-        Create a list item and associate it with the specified list.
-
-
-        All list items in the same list must be the same type. For example, each
-        list item in an `ip` list must define a specific IP address.
-
-        > info
-
-        > Before creating a list item, you must create a list.
       operationId: CreateListItem
       requestBody:
         content:
@@ -14594,17 +14408,10 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Create a list item
+      summary: Creates a list item
       tags:
         - Security Solution Lists API
     put:
-      description: >
-        Update a list item using the list item ID. The original list item is
-        replaced, and all unspecified fields are deleted.
-
-        > info
-
-        > You cannot modify the `id` value.
       operationId: UpdateListItem
       requestBody:
         content:
@@ -14672,12 +14479,12 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Update a list item
+      summary: Updates a list item
       tags:
         - Security Solution Lists API
   /api/lists/items/_export:
     post:
-      description: Export list item values from the specified list.
+      description: Exports list item values from the specified list
       operationId: ExportListItems
       parameters:
         - description: List's id to export
@@ -14733,12 +14540,11 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Export list items
+      summary: Exports list items
       tags:
         - Security Solution Lists API
   /api/lists/items/_find:
     get:
-      description: Get all list items in the specified list.
       operationId: FindListItems
       parameters:
         - description: List's id
@@ -14765,7 +14571,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/Security_Solution_Lists_API_NonEmptyString'
-        - description: Determines the sort order, which can be `desc` or `asc`
+        - description: 'Determines the sort order, which can be `desc` or `asc`'
           in: query
           name: sort_order
           required: false
@@ -14862,14 +14668,14 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Get list items
+      summary: Finds list items
       tags:
         - Security Solution Lists API
   /api/lists/items/_import:
     post:
       description: >
-        Import list items from a TXT or CSV file. The maximum file size is 9
-        million bytes.
+        Imports a list of items from a `.txt` or `.csv` file. The maximum file
+        size is 9 million bytes.
 
 
         You can import items to a new or existing list.
@@ -14975,7 +14781,7 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Import list items
+      summary: Imports list items
       tags:
         - Security Solution Lists API
   /api/lists/privileges:
@@ -15032,7 +14838,7 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Lists_API_SiemErrorResponse
           description: Internal server error response
-      summary: Get list privileges
+      summary: Gets list privileges
       tags:
         - Security Solution Lists API
   /api/ml/saved_objects/sync:
@@ -15065,7 +14871,6 @@ paths:
         - ml
   /api/note:
     delete:
-      description: Delete a note from a Timeline using the note ID.
       operationId: DeleteNote
       requestBody:
         content:
@@ -15088,7 +14893,7 @@ paths:
                       type: array
                   required:
                     - noteIds
-        description: The ID of the note to delete.
+        description: The id of the note to delete.
         required: true
       responses:
         '200':
@@ -15100,12 +14905,12 @@ paths:
                   data:
                     type: object
           description: Indicates the note was successfully deleted.
-      summary: Delete a note
+      summary: Deletes a note from a timeline.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
     get:
-      description: Get all notes for a given document.
+      description: Gets notes
       operationId: GetNotes
       parameters:
         - in: query
@@ -15146,12 +14951,11 @@ paths:
       responses:
         '200':
           description: Indicates the requested notes were returned.
-      summary: Get notes
+      summary: Get all notes for a given document.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
     patch:
-      description: Add a note to a Timeline or update an existing note.
       operationId: PersistNoteRoute
       requestBody:
         content:
@@ -15181,7 +14985,7 @@ paths:
                   type: string
               required:
                 - note
-        description: The note to add or update, along with additional metadata.
+        description: The note to persist or update along with additional metadata.
         required: true
       responses:
         '200':
@@ -15212,10 +15016,10 @@ paths:
                 required:
                   - data
           description: Indicates the note was successfully created.
-      summary: Add or update a note
+      summary: Persists a note to a timeline.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
   /api/osquery/live_queries:
     get:
       description: Get a list of all live queries.
@@ -15259,7 +15063,7 @@ paths:
       summary: Create a live query
       tags:
         - Security Solution Osquery API
-  /api/osquery/live_queries/{id}:
+  '/api/osquery/live_queries/{id}':
     get:
       description: Get the details of a live query using the query ID.
       operationId: OsqueryGetLiveQueryDetails
@@ -15285,7 +15089,7 @@ paths:
       summary: Get live query details
       tags:
         - Security Solution Osquery API
-  /api/osquery/live_queries/{id}/results/{actionId}:
+  '/api/osquery/live_queries/{id}/results/{actionId}':
     get:
       description: Get the results of a live query using the query action ID.
       operationId: OsqueryGetLiveQueryResults
@@ -15360,7 +15164,7 @@ paths:
       summary: Create a pack
       tags:
         - Security Solution Osquery API
-  /api/osquery/packs/{id}:
+  '/api/osquery/packs/{id}':
     delete:
       description: Delete a query pack using the pack ID.
       operationId: OsqueryDeletePacks
@@ -15474,7 +15278,7 @@ paths:
       summary: Create a saved query
       tags:
         - Security Solution Osquery API
-  /api/osquery/saved_queries/{id}:
+  '/api/osquery/saved_queries/{id}':
     delete:
       description: Delete a saved query using the query ID.
       operationId: OsqueryDeleteSavedQuery
@@ -15547,7 +15351,6 @@ paths:
         - Security Solution Osquery API
   /api/pinned_event:
     patch:
-      description: Pin an event to an existing Timeline.
       operationId: PersistPinnedEventRoute
       requestBody:
         content:
@@ -15565,7 +15368,7 @@ paths:
               required:
                 - eventId
                 - timelineId
-        description: The pinned event to add or update, along with additional metadata.
+        description: The pinned event to persist or update along with additional metadata.
         required: true
       responses:
         '200':
@@ -15591,11 +15394,11 @@ paths:
                       - persistPinnedEventOnTimeline
                 required:
                   - data
-          description: Indicates the event was successfully pinned to the Timeline.
-      summary: Pin an event
+          description: Indicate the event was successfully pinned in the timeline.
+      summary: Persists a pinned event to a timeline.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
   /api/risk_score/engine/schedule_now:
     post:
       operationId: ScheduleRiskEngineNow
@@ -16146,7 +15949,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Conversations API
-  /api/security_ai_assistant/current_user/conversations/{id}:
+  '/api/security_ai_assistant/current_user/conversations/{id}':
     delete:
       description: Delete an existing conversation using the conversation ID.
       operationId: DeleteConversation
@@ -16463,7 +16266,6 @@ paths:
         - system
   /api/timeline:
     delete:
-      description: Delete one or more Timelines or Timeline templates.
       operationId: DeleteTimelines
       requestBody:
         content:
@@ -16484,7 +16286,7 @@ paths:
                   type: array
               required:
                 - savedObjectIds
-        description: The IDs of the Timelines or Timeline templates to delete.
+        description: The ids of the timelines or timeline templates to delete.
         required: true
       responses:
         '200':
@@ -16502,13 +16304,12 @@ paths:
                       - deleteTimeline
                 required:
                   - data
-          description: Indicates the Timeline was successfully deleted.
-      summary: Delete Timelines or Timeline templates
+          description: Indicates the timeline was successfully deleted.
+      summary: Deletes one or more timelines or timeline templates.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
     get:
-      description: Get the details of an existing saved Timeline or Timeline template.
       operationId: GetTimeline
       parameters:
         - description: The ID of the template timeline to retrieve
@@ -16516,7 +16317,7 @@ paths:
           name: template_timeline_id
           schema:
             type: string
-        - description: The ID of the Timeline to retrieve.
+        - description: The ID of the timeline to retrieve
           in: query
           name: id
           schema:
@@ -16539,16 +16340,18 @@ paths:
                       - getOneTimeline
                 required:
                   - data
-          description: Indicates that the (template) Timeline was found and returned.
-      summary: Get Timeline or Timeline template details
+          description: Indicates that the (template) timeline was found and returned.
+      summary: >-
+        Get an existing saved timeline or timeline template. This API is used to
+        retrieve an existing saved timeline or timeline template.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
     patch:
       description: >-
-        Update an existing Timeline. You can update the title, description, date
-        range, pinned events, pinned queries, and/or pinned saved queries of an
-        existing Timeline.
+        Updates an existing timeline. This API is used to update the title,
+        description, date range, pinned events, pinned queries, and/or pinned
+        saved queries of an existing timeline.
       operationId: PatchTimeline
       requestBody:
         content:
@@ -16569,7 +16372,7 @@ paths:
                 - timelineId
                 - version
                 - timeline
-        description: The Timeline updates, along with the Timeline ID and version.
+        description: The timeline updates along with the timeline ID and version.
         required: true
       responses:
         '200':
@@ -16594,9 +16397,9 @@ paths:
                 required:
                   - data
           description: >-
-            Indicates that the draft Timeline was successfully created. In the
-            event the user already has a draft Timeline, the existing draft
-            Timeline is cleared and returned.
+            Indicates that the draft timeline was successfully created. In the
+            event the user already has a draft timeline, the existing draft
+            timeline is cleared and returned.
         '405':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -16609,13 +16412,12 @@ paths:
                     type: number
           description: >-
             Indicates that the user does not have the required access to create
-            a draft Timeline.
-      summary: Update a Timeline
+            a draft timeline.
+      summary: Updates an existing timeline.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
     post:
-      description: Create a new Timeline or Timeline template.
       operationId: CreateTimelines
       requestBody:
         content:
@@ -16649,7 +16451,7 @@ paths:
               required:
                 - timeline
         description: >-
-          The required Timeline fields used to create a new Timeline, along with
+          The required timeline fields used to create a new timeline along with
           optional fields that will be created if not provided.
         required: true
       responses:
@@ -16672,7 +16474,7 @@ paths:
                       - persistTimeline
                 required:
                   - data
-          description: Indicates the Timeline was successfully created.
+          description: Indicates the timeline was successfully created.
         '405':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -16683,17 +16485,13 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that there was an error in the Timeline creation.
-      summary: Create a Timeline or Timeline template
+          description: Indicates that there was an error in the timeline creation.
+      summary: Creates a new timeline.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
   /api/timeline/_draft:
     get:
-      description: >-
-        Get the details of the draft Timeline  or Timeline template for the
-        current user. If the user doesn't have a draft Timeline, an empty
-        Timeline is returned.
       operationId: GetDraftTimelines
       parameters:
         - in: query
@@ -16723,10 +16521,10 @@ paths:
                       - persistTimeline
                 required:
                   - data
-          description: Indicates that the draft Timeline was successfully retrieved.
+          description: Indicates that the draft timeline was successfully retrieved.
         '403':
           content:
-            application:json; Elastic-Api-Version=2023-10-31:
+            'application:json; Elastic-Api-Version=2023-10-31':
               schema:
                 type: object
                 properties:
@@ -16735,12 +16533,12 @@ paths:
                   status_code:
                     type: number
           description: >-
-            If a draft Timeline was not found and we attempted to create one, it
+            If a draft timeline was not found and we attempted to create one, it
             indicates that the user does not have the required permissions to
-            create a draft Timeline.
+            create a draft timeline.
         '409':
           content:
-            application:json; Elastic-Api-Version=2023-10-31:
+            'application:json; Elastic-Api-Version=2023-10-31':
               schema:
                 type: object
                 properties:
@@ -16749,21 +16547,19 @@ paths:
                   status_code:
                     type: number
           description: >-
-            This should never happen, but if a draft Timeline was not found and
+            This should never happen, but if a draft timeline was not found and
             we attempted to create one, it indicates that there is already a
-            draft Timeline with the given `timelineId`.
-      summary: Get draft Timeline or Timeline template details
+            draft timeline with the given timelineId.
+      summary: >-
+        Retrieves the draft timeline for the current user. If the user does not
+        have a draft timeline, an empty timeline is returned.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
     post:
       description: >
-        Create a clean draft Timeline or Timeline template for the current user.
-
-        > info
-
-        > If the user already has a draft Timeline, the existing draft Timeline
-        is cleared and returned.
+        Retrieves a clean draft timeline. If a draft timeline does not exist, it
+        is created and returned.
       operationId: CleanDraftTimelines
       requestBody:
         content:
@@ -16777,7 +16573,7 @@ paths:
               required:
                 - timelineType
         description: >-
-          The type of Timeline to create. Valid values are `default` and
+          The type of timeline to create. Valid values are `default` and
           `template`.
         required: true
       responses:
@@ -16803,12 +16599,12 @@ paths:
                 required:
                   - data
           description: >-
-            Indicates that the draft Timeline was successfully created. In the
-            event the user already has a draft Timeline, the existing draft
-            Timeline is cleared and returned.
+            Indicates that the draft timeline was successfully created. In the
+            event the user already has a draft timeline, the existing draft
+            timeline is cleared and returned.
         '403':
           content:
-            application:json; Elastic-Api-Version=2023-10-31:
+            'application:json; Elastic-Api-Version=2023-10-31':
               schema:
                 type: object
                 properties:
@@ -16818,10 +16614,10 @@ paths:
                     type: number
           description: >-
             Indicates that the user does not have the required permissions to
-            create a draft Timeline.
+            create a draft timeline.
         '409':
           content:
-            application:json; Elastic-Api-Version=2023-10-31:
+            'application:json; Elastic-Api-Version=2023-10-31':
               schema:
                 type: object
                 properties:
@@ -16830,15 +16626,14 @@ paths:
                   status_code:
                     type: number
           description: >-
-            Indicates that there is already a draft Timeline with the given
-            `timelineId`.
-      summary: Create a clean draft Timeline or Timeline template
+            Indicates that there is already a draft timeline with the given
+            timelineId.
+      summary: Retrieves a draft timeline or timeline template.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
   /api/timeline/_export:
     post:
-      description: Export Timelines as an NDJSON file.
       operationId: ExportTimelines
       parameters:
         - description: The name of the file to export
@@ -16858,16 +16653,16 @@ paths:
                     type: string
                   nullable: true
                   type: array
-        description: The IDs of the Timelines to export.
+        description: The ids of the timelines to export
         required: true
       responses:
         '200':
           content:
             application/ndjson; Elastic-Api-Version=2023-10-31:
               schema:
-                description: NDJSON of the exported Timelines
+                description: NDJSON of the exported timelines
                 type: string
-          description: Indicates the Timelines were successfully exported.
+          description: Indicates the timelines were successfully exported
         '400':
           content:
             application/ndjson; Elastic-Api-Version=2023-10-31:
@@ -16878,14 +16673,13 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that the export size limit was exceeded.
-      summary: Export Timelines
+          description: Indicates that the export size limit was exceeded
+      summary: Exports timelines as an NDJSON file
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
   /api/timeline/_favorite:
     patch:
-      description: Favorite a Timeline or Timeline template for the current user.
       operationId: PersistFavoriteRoute
       requestBody:
         content:
@@ -16911,7 +16705,7 @@ paths:
                 - templateTimelineId
                 - templateTimelineVersion
                 - timelineType
-        description: The required fields used to favorite a (template) Timeline.
+        description: The required fields used to favorite a (template) timeline.
         required: true
       responses:
         '200':
@@ -16933,7 +16727,7 @@ paths:
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
-            application:json; Elastic-Api-Version=2023-10-31:
+            'application:json; Elastic-Api-Version=2023-10-31':
               schema:
                 type: object
                 properties:
@@ -16944,13 +16738,12 @@ paths:
           description: >-
             Indicates the user does not have the required permissions to persist
             the favorite status.
-      summary: Favorite a Timeline or Timeline template
+      summary: Persists a given users favorite status of a timeline.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
   /api/timeline/_import:
     post:
-      description: Import Timelines.
       operationId: ImportTimelines
       requestBody:
         content:
@@ -16981,7 +16774,7 @@ paths:
                             - headers
                       required:
                         - hapi
-        description: The Timelines to import as a readable stream.
+        description: The timelines to import as a readable stream.
         required: true
       responses:
         '200':
@@ -16995,7 +16788,7 @@ paths:
                       #/components/schemas/Security_Solution_Timeline_API_ImportTimelineResult
                 required:
                   - data
-          description: Indicates the import of Timelines was successful.
+          description: Indicates the import of timelines was successful.
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -17009,7 +16802,7 @@ paths:
                   statusCode:
                     type: number
           description: >-
-            Indicates the import of Timelines was unsuccessful because of an
+            Indicates the import of timelines was unsuccessful because of an
             invalid file extension.
         '404':
           content:
@@ -17036,14 +16829,13 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates the import of Timelines was unsuccessful.
-      summary: Import Timelines
+          description: Indicates the import of timelines was unsuccessful.
+      summary: Imports timelines.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
   /api/timeline/_prepackaged:
     post:
-      description: Install or update prepackaged Timelines.
       operationId: InstallPrepackedTimelines
       requestBody:
         content:
@@ -17072,7 +16864,7 @@ paths:
                 - timelinesToInstall
                 - timelinesToUpdate
                 - prepackagedTimelines
-        description: The Timelines to install or update.
+        description: The timelines to install or update.
         required: true
       responses:
         '200':
@@ -17086,10 +16878,10 @@ paths:
                       #/components/schemas/Security_Solution_Timeline_API_ImportTimelineResult
                 required:
                   - data
-          description: Indicates the installation of prepackaged Timelines was successful.
+          description: Indicates the installation of prepackaged timelines was successful.
         '500':
           content:
-            application:json; Elastic-Api-Version=2023-10-31:
+            'application:json; Elastic-Api-Version=2023-10-31':
               schema:
                 type: object
                 properties:
@@ -17098,12 +16890,12 @@ paths:
                   statusCode:
                     type: number
           description: >-
-            Indicates the installation of prepackaged Timelines was
+            Indicates the installation of prepackaged timelines was
             unsuccessful.
-      summary: Install prepackaged Timelines
+      summary: Installs prepackaged timelines.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
   /api/timeline/resolve:
     get:
       operationId: ResolveTimeline
@@ -17136,18 +16928,17 @@ paths:
                       - getOneTimeline
                 required:
                   - data
-          description: The (template) Timeline has been found
+          description: The (template) timeline has been found
         '400':
           description: The request is missing parameters
         '404':
-          description: The (template) Timeline was not found
-      summary: Get an existing saved Timeline or Timeline template
+          description: The (template) timeline was not found
+      summary: Get an existing saved timeline or timeline template.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
+        - 'access:securitySolution'
   /api/timelines:
     get:
-      description: Get a list of all saved Timelines or Timeline templates.
       operationId: GetTimelines
       parameters:
         - description: >-
@@ -17235,10 +17026,10 @@ paths:
                       - customTemplateTimelineCount
                 required:
                   - data
-          description: Indicates that the (template) Timelines were found and returned.
+          description: Indicates that the (template) timelines were found and returned.
         '400':
           content:
-            application:json; Elastic-Api-Version=2023-10-31:
+            'application:json; Elastic-Api-Version=2023-10-31':
               schema:
                 type: object
                 properties:
@@ -17247,11 +17038,13 @@ paths:
                   statusCode:
                     type: number
           description: Bad request. The user supplied invalid data.
-      summary: Get Timelines or Timeline templates
+      summary: >-
+        This API is used to retrieve a list of existing saved timelines or
+        timeline templates.
       tags:
         - Security Solution Timeline API
-        - access:securitySolution
-  /s/{spaceId}/api/observability/slos:
+        - 'access:securitySolution'
+  '/s/{spaceId}/api/observability/slos':
     get:
       description: >
         You must have the `read` privileges for the **SLOs** feature in the
@@ -17266,7 +17059,7 @@ paths:
           name: kqlQuery
           schema:
             type: string
-        - description: The page to use for pagination, must be greater or equal than 1
+        - description: 'The page to use for pagination, must be greater or equal than 1'
           example: 1
           in: query
           name: page
@@ -17390,11 +17183,11 @@ paths:
                 $ref: '#/components/schemas/SLOs_409_response'
           description: Conflict - The SLO id already exists
       servers:
-        - url: https://localhost:5601
+        - url: 'https://localhost:5601'
       summary: Create an SLO
       tags:
         - slo
-  /s/{spaceId}/api/observability/slos/_delete_instances:
+  '/s/{spaceId}/api/observability/slos/_delete_instances':
     post:
       description: >
         The deletion occurs for the specified list of `sloId` and `instanceId`.
@@ -17432,11 +17225,11 @@ paths:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
       servers:
-        - url: https://localhost:5601
+        - url: 'https://localhost:5601'
       summary: Batch delete rollup and summary data
       tags:
         - slo
-  /s/{spaceId}/api/observability/slos/{sloId}:
+  '/s/{spaceId}/api/observability/slos/{sloId}':
     delete:
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -17574,7 +17367,7 @@ paths:
       summary: Update an SLO
       tags:
         - slo
-  /s/{spaceId}/api/observability/slos/{sloId}/_reset:
+  '/s/{spaceId}/api/observability/slos/{sloId}/_reset':
     post:
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -17618,7 +17411,7 @@ paths:
       summary: Reset an SLO
       tags:
         - slo
-  /s/{spaceId}/api/observability/slos/{sloId}/disable:
+  '/s/{spaceId}/api/observability/slos/{sloId}/disable':
     post:
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -17658,7 +17451,7 @@ paths:
       summary: Disable an SLO
       tags:
         - slo
-  /s/{spaceId}/api/observability/slos/{sloId}/enable:
+  '/s/{spaceId}/api/observability/slos/{sloId}/enable':
     post:
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -17708,7 +17501,7 @@ components:
           runtimeFieldMap:
             runtime_shape_name:
               script:
-                source: emit(doc['shape_name'].value)
+                source: 'emit(doc[''shape_name''].value)'
               type: keyword
           title: logstash-*
     Data_views_create_runtime_field_request:
@@ -17717,7 +17510,7 @@ components:
         name: runtimeFoo
         runtimeField:
           script:
-            source: emit(doc["foo"].value)
+            source: 'emit(doc["foo"].value)'
           type: long
     Data_views_get_data_view_response:
       summary: >-
@@ -17739,35 +17532,35 @@ components:
             products.base_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             products.base_unit_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             products.min_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             products.price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             products.taxful_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             products.taxless_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
             taxful_total_price:
               id: number
               params:
-                pattern: $0,0.[00]
+                pattern: '$0,0.[00]'
             taxless_total_price:
               id: number
               params:
-                pattern: $0,0.00
+                pattern: '$0,0.00'
           fields:
             _id:
               aggregatable: false
@@ -18243,7 +18036,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.base_price
               readFromDocValues: true
@@ -18259,7 +18052,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.base_unit_price
               readFromDocValues: true
@@ -18379,7 +18172,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.min_price
               readFromDocValues: true
@@ -18395,7 +18188,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.price
               readFromDocValues: true
@@ -18498,7 +18291,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.taxful_price
               readFromDocValues: true
@@ -18514,7 +18307,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: products.taxless_price
               readFromDocValues: true
@@ -18558,7 +18351,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.[00]
+                  pattern: '$0,0.[00]'
               isMapped: true
               name: taxful_total_price
               readFromDocValues: true
@@ -18574,7 +18367,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.00
+                  pattern: '$0,0.00'
               isMapped: true
               name: taxless_total_price
               readFromDocValues: true
@@ -18685,7 +18478,7 @@ components:
             AvgTicketPrice:
               id: number
               params:
-                pattern: $0,0.[00]
+                pattern: '$0,0.[00]'
             hour_of_day:
               id: number
               params:
@@ -18753,7 +18546,7 @@ components:
               format:
                 id: number
                 params:
-                  pattern: $0,0.[00]
+                  pattern: '$0,0.[00]'
               isMapped: true
               name: AvgTicketPrice
               readFromDocValues: true
@@ -19028,7 +18821,7 @@ components:
               readFromDocValues: false
               runtimeField:
                 script:
-                  source: emit(doc['timestamp'].value.getHour());
+                  source: 'emit(doc[''timestamp''].value.getHour());'
                 type: long
               scripted: false
               searchable: true
@@ -19153,7 +18946,7 @@ components:
           runtimeFieldMap:
             hour_of_day:
               script:
-                source: emit(doc['timestamp'].value.getHour());
+                source: 'emit(doc[''timestamp''].value.getHour());'
               type: long
           sourceFilters: []
           timeFieldName: timestamp
@@ -19168,7 +18961,7 @@ components:
             readFromDocValues: false
             runtimeField:
               script:
-                source: emit(doc['timestamp'].value.getHour());
+                source: 'emit(doc[''timestamp''].value.getHour());'
               type: long
             scripted: false
             searchable: true
@@ -19216,7 +19009,7 @@ components:
       value:
         runtimeField:
           script:
-            source: emit(doc["bar"].value)
+            source: 'emit(doc["bar"].value)'
     Machine_learning_APIs_mlSyncExample:
       summary: Two anomaly detection jobs required synchronization in this example.
       value:
@@ -19387,7 +19180,7 @@ components:
           - desc
         type: string
     Fleet_with_metrics:
-      description: Return agent metrics, false by default
+      description: 'Return agent metrics, false by default'
       in: query
       name: withMetrics
       required: false
@@ -19661,7 +19454,7 @@ components:
         - fromId
         - toId
     Data_views_timefieldname:
-      description: The timestamp field name, which you use for time-based data views.
+      description: 'The timestamp field name, which you use for time-based data views.'
       type: string
     Data_views_title:
       description: >-
@@ -19669,7 +19462,7 @@ components:
         to search. Supports wildcards (`*`).
       type: string
     Data_views_type:
-      description: When set to `rollup`, identifies the rollup data views.
+      description: 'When set to `rollup`, identifies the rollup data views.'
       type: string
     Data_views_typemeta:
       description: >-
@@ -20196,14 +19989,14 @@ components:
       properties:
         agents:
           oneOf:
-            - description: KQL query string, leave empty to action all agents
+            - description: 'KQL query string, leave empty to action all agents'
               type: string
             - description: list of agent IDs
               items:
                 type: string
               type: array
         force:
-          description: Force upgrade, skipping validation (should be used with caution)
+          description: 'Force upgrade, skipping validation (should be used with caution)'
           type: boolean
         rollout_duration_seconds:
           description: rolling upgrade window duration in seconds
@@ -21758,14 +21551,14 @@ components:
             type: object
             properties:
               enabled:
-                description: enable or disable that input, (default to true)
+                description: 'enable or disable that input, (default to true)'
                 type: boolean
               streams:
                 additionalProperties:
                   type: object
                   properties:
                     enabled:
-                      description: enable or disable that stream, (default to true)
+                      description: 'enable or disable that stream, (default to true)'
                       type: boolean
                     vars:
                       description: >-
@@ -21974,7 +21767,7 @@ components:
       type: object
       properties:
         force:
-          description: Force upgrade, skipping validation (should be used with caution)
+          description: 'Force upgrade, skipping validation (should be used with caution)'
           type: boolean
         skipRateLimitCheck:
           description: Skip rate limit check for upgrade
@@ -22380,7 +22173,7 @@ components:
           additionalProperties:
             $ref: >-
               #/components/schemas/Machine_learning_APIs_mlSyncResponseTrainedModels
-          description: If saved objects are missing for trained models, they are created.
+          description: 'If saved objects are missing for trained models, they are created.'
           type: object
       title: Sync API response for created saved objects
       type: object
@@ -23095,13 +22888,13 @@ components:
       type: object
       properties:
         traceId:
-          description: Could be any string, not necessarily a UUID
+          description: 'Could be any string, not necessarily a UUID'
           type: string
         transactionId:
-          description: Could be any string, not necessarily a UUID
+          description: 'Could be any string, not necessarily a UUID'
           type: string
     Security_AI_Assistant_API_User:
-      description: Could be any string, not necessarily a UUID
+      description: 'Could be any string, not necessarily a UUID'
       type: object
       properties:
         id:
@@ -23310,12 +23103,12 @@ components:
                 Interval in which the rule runs. For example, `"1h"` means the
                 rule runs every hour.
               example: 1h
-              pattern: ^[1-9]\d*[smh]$
+              pattern: '^[1-9]\d*[smh]$'
               type: string
             lookback:
               description: Lookback time for the rule
               example: 1h
-              pattern: ^[1-9]\d*[smh]$
+              pattern: '^[1-9]\d*[smh]$'
               type: string
           required:
             - interval
@@ -27288,9 +27081,9 @@ components:
             - no_actions
             - rule
           type: string
-        - description: Time interval in seconds, minutes, hours, or days.
+        - description: 'Time interval in seconds, minutes, hours, or days.'
           example: 1h
-          pattern: ^[1-9]\d*[smhd]$
+          pattern: '^[1-9]\d*[smhd]$'
           type: string
     Security_Solution_Detections_API_RuleAuthorArray:
       items:
@@ -27566,7 +27359,7 @@ components:
       discriminator:
         propertyName: type
     Security_Solution_Detections_API_RuleSignatureId:
-      description: Could be any string, not necessarily a UUID
+      description: 'Could be any string, not necessarily a UUID'
       type: string
     Security_Solution_Detections_API_RuleSource:
       description: >-
@@ -29856,7 +29649,7 @@ components:
     Security_Solution_Endpoint_Exceptions_API_ExceptionListHumanId:
       $ref: >-
         #/components/schemas/Security_Solution_Endpoint_Exceptions_API_NonEmptyString
-      description: Human readable string identifier, e.g. `trusted-linux-processes`
+      description: 'Human readable string identifier, e.g. `trusted-linux-processes`'
     Security_Solution_Endpoint_Exceptions_API_ExceptionListId:
       $ref: >-
         #/components/schemas/Security_Solution_Endpoint_Exceptions_API_NonEmptyString
@@ -30922,92 +30715,11 @@ components:
         - started
         - stopped
       type: string
-    Security_Solution_Entity_Analytics_API_Entity:
-      oneOf:
-        - $ref: >-
-            #/components/schemas/Security_Solution_Entity_Analytics_API_UserEntity
-        - $ref: >-
-            #/components/schemas/Security_Solution_Entity_Analytics_API_HostEntity
     Security_Solution_Entity_Analytics_API_EntityType:
       enum:
         - user
         - host
       type: string
-    Security_Solution_Entity_Analytics_API_HostEntity:
-      type: object
-      properties:
-        entity:
-          type: object
-          properties:
-            definitionId:
-              type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
-              items:
-                type: string
-              type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            type:
-              enum:
-                - node
-              type: string
-          required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
-        host:
-          type: object
-          properties:
-            architecture:
-              items:
-                type: string
-              type: array
-            domain:
-              items:
-                type: string
-              type: array
-            hostname:
-              items:
-                type: string
-              type: array
-            id:
-              items:
-                type: string
-              type: array
-            ip:
-              items:
-                type: string
-              type: array
-            mac:
-              items:
-                type: string
-              type: array
-            name:
-              type: string
-            type:
-              items:
-                type: string
-              type: array
-          required:
-            - name
     Security_Solution_Entity_Analytics_API_IdField:
       enum:
         - host.name
@@ -31015,20 +30727,6 @@ components:
       type: string
     Security_Solution_Entity_Analytics_API_IndexPattern:
       type: string
-    Security_Solution_Entity_Analytics_API_InspectQuery:
-      type: object
-      properties:
-        dsl:
-          items:
-            type: string
-          type: array
-        response:
-          items:
-            type: string
-          type: array
-      required:
-        - dsl
-        - response
     Security_Solution_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -31056,77 +30754,6 @@ components:
       required:
         - status_code
         - message
-    Security_Solution_Entity_Analytics_API_UserEntity:
-      type: object
-      properties:
-        entity:
-          type: object
-          properties:
-            definitionId:
-              type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
-              items:
-                type: string
-              type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            type:
-              enum:
-                - node
-              type: string
-          required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
-        user:
-          type: object
-          properties:
-            domain:
-              items:
-                type: string
-              type: array
-            email:
-              items:
-                type: string
-              type: array
-            full_name:
-              items:
-                type: string
-              type: array
-            hash:
-              items:
-                type: string
-              type: array
-            id:
-              items:
-                type: string
-              type: array
-            name:
-              type: string
-            roles:
-              items:
-                type: string
-              type: array
-          required:
-            - name
     Security_Solution_Exceptions_API_CreateExceptionListItemComment:
       type: object
       properties:
@@ -31263,7 +30890,7 @@ components:
       type: string
     Security_Solution_Exceptions_API_ExceptionListHumanId:
       $ref: '#/components/schemas/Security_Solution_Exceptions_API_NonEmptyString'
-      description: Human readable string identifier, e.g. `trusted-linux-processes`
+      description: 'Human readable string identifier, e.g. `trusted-linux-processes`'
     Security_Solution_Exceptions_API_ExceptionListId:
       $ref: '#/components/schemas/Security_Solution_Exceptions_API_NonEmptyString'
     Security_Solution_Exceptions_API_ExceptionListItem:
@@ -32933,7 +32560,7 @@ components:
           example: Not Found
           type: string
         message:
-          example: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+          example: 'SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found'
           type: string
         statusCode:
           example: 404
@@ -32950,7 +32577,7 @@ components:
           example: Conflict
           type: string
         message:
-          example: SLO [d077e940-1515-11ee-9c50-9d096392f520] already exists
+          example: 'SLO [d077e940-1515-11ee-9c50-9d096392f520] already exists'
           type: string
         statusCode:
           example: 409
@@ -33059,11 +32686,11 @@ components:
       type: object
       properties:
         consumed:
-          description: The error budget consummed, as a percentage of the initial value.
+          description: 'The error budget consummed, as a percentage of the initial value.'
           example: 0.8
           type: number
         initial:
-          description: The initial error budget, as 1 - objective
+          description: 'The initial error budget, as 1 - objective'
           example: 0.02
           type: number
         isEstimated:
@@ -33073,7 +32700,7 @@ components:
           example: true
           type: boolean
         remaining:
-          description: The error budget remaining, as a percentage of the initial value.
+          description: 'The error budget remaining, as a percentage of the initial value.'
           example: 0.2
           type: number
       required:
@@ -33158,7 +32785,7 @@ components:
               type: string
             index:
               description: The index used by APM metrics
-              example: metrics-apm*,apm*
+              example: 'metrics-apm*,apm*'
               type: string
             service:
               description: The APM service name
@@ -33205,7 +32832,7 @@ components:
               type: string
             index:
               description: The index used by APM metrics
-              example: metrics-apm*,apm*
+              example: 'metrics-apm*,apm*'
               type: string
             service:
               description: The APM service name
@@ -33339,7 +32966,7 @@ components:
                       name:
                         description: The name of the metric. Only valid options are A-Z
                         example: A
-                        pattern: ^[A-Z]$
+                        pattern: '^[A-Z]$'
                         type: string
                     required:
                       - name
@@ -33393,7 +33020,7 @@ components:
                       name:
                         description: The name of the metric. Only valid options are A-Z
                         example: A
-                        pattern: ^[A-Z]$
+                        pattern: '^[A-Z]$'
                         type: string
                     required:
                       - name
@@ -33695,7 +33322,7 @@ components:
       properties:
         frequency:
           default: 1m
-          description: Configure how often the transform runs, default 1m
+          description: 'Configure how often the transform runs, default 1m'
           example: 5m
           type: string
         preventInitialBackfill:
@@ -33840,7 +33467,7 @@ components:
             - $ref: '#/components/schemas/SLOs_indicator_properties_histogram'
             - $ref: '#/components/schemas/SLOs_indicator_properties_timeslice_metric'
         instanceId:
-          description: the value derived from the groupBy field, if present, otherwise '*'
+          description: 'the value derived from the groupBy field, if present, otherwise ''*'''
           example: host-abcde
           type: string
         name:
@@ -33965,7 +33592,7 @@ components:
         name:
           description: The name of the metric. Only valid options are A-Z
           example: A
-          pattern: ^[A-Z]$
+          pattern: '^[A-Z]$'
           type: string
       required:
         - name
@@ -33988,7 +33615,7 @@ components:
         name:
           description: The name of the metric. Only valid options are A-Z
           example: A
-          pattern: ^[A-Z]$
+          pattern: '^[A-Z]$'
           type: string
       required:
         - name
@@ -34016,7 +33643,7 @@ components:
         name:
           description: The name of the metric. Only valid options are A-Z
           example: A
-          pattern: ^[A-Z]$
+          pattern: '^[A-Z]$'
           type: string
         percentile:
           description: The percentile value.
@@ -34133,11 +33760,6 @@ tags:
       sent to Elastic Security into detection alerts. These alerts are displayed
       on the Detections page.
     name: Security Solution Detections API
-  - description: >-
-      Endpoint Exceptions API allows you to manage detection rule endpoint
-      exceptions to prevent a rule from generating an alert from incoming events
-      even when the rule's other criteria are met.
-    name: Security Solution Endpoint Exceptions API
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Solution Endpoint Management API
   - description: ''
@@ -34147,14 +33769,14 @@ tags:
       rule from generating an alert from incoming events even when the rule's
       other criteria are met.
     name: Security Solution Exceptions API
-  - description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
+  - description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.'
     name: Security Solution Lists API
-  - description: Run live queries, manage packs and saved queries.
+  - description: 'Run live queries, manage packs and saved queries.'
     name: Security Solution Osquery API
   - description: >-
       You can create Timelines and Timeline templates via the API, as well as
       import new Timelines from an ndjson file.
     name: Security Solution Timeline API
-  - description: SLO APIs enable you to define, manage and track service-level objectives
+  - description: 'SLO APIs enable you to define, manage and track service-level objectives'
     name: slo
   - name: system
