@@ -53,10 +53,13 @@
     "@kbn/ebt-tools",
     "@kbn/fields-metadata-plugin",
     "@kbn/server-route-repository-utils",
+    "@kbn/core-analytics-server",
     "@kbn/core-analytics-browser",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-notifications-browser",
-    "@kbn/rison"
+    "@kbn/telemetry-plugin",
+    "@kbn/rison",
+    "@kbn/task-manager-plugin"
   ],
   "exclude": [
     "target/**/*"

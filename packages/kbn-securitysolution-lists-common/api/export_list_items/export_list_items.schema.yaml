@@ -8,8 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: ExportListItems
       x-codegen-enabled: true
-      summary: Exports list items
-      description: Exports list item values from the specified list
+      summary: Export list items
+      description: Export list item values from the specified list.
       parameters:
         - name: list_id
           in: query

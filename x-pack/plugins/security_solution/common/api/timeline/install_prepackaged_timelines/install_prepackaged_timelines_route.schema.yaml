@@ -15,11 +15,12 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: InstallPrepackedTimelines
-      summary: Installs prepackaged timelines.
+      summary: Install prepackaged Timelines
+      description: Install or update prepackaged Timelines.
       tags:
         - access:securitySolution
       requestBody:
-        description: The timelines to install or update.
+        description: The Timelines to install or update.
         required: true
         content:
           application/json:
@@ -43,7 +44,7 @@ paths:
                     $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
       responses:
         '200':
-          description: Indicates the installation of prepackaged timelines was successful.
+          description: Indicates the installation of prepackaged Timelines was successful.
           content:
             application/json:
               schema:
@@ -53,7 +54,7 @@ paths:
                   data:
                     $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
         '500':
-          description: Indicates the installation of prepackaged timelines was unsuccessful.
+          description: Indicates the installation of prepackaged Timelines was unsuccessful.
           content:
             application:json:
               schema:

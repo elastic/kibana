@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { MachineLearningJobList } from '../../../../rule_definition_section';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { MachineLearningJobId } from '../../../../../../../../../common/api/detection_engine';
 import * as ruleDetailsI18n from '../../../../translations';
 
 interface MachineLearningJobIdProps {
-  machineLearningJobId: DiffableAllFields['machine_learning_job_id'];
+  machineLearningJobId: MachineLearningJobId;
 }
 
 export function MachineLearningJobIdReadOnly({ machineLearningJobId }: MachineLearningJobIdProps) {

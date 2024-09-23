@@ -18,6 +18,8 @@ describe('AttackDiscoveryTab', () => {
   const mockReplacements: Replacements = {
     '5e454c38-439c-4096-8478-0a55511c76e3': 'foo.hostname',
     '3bdc7952-a334-4d95-8092-cd176546e18a': 'bar.username',
+    'c5ba13c4-2391-4045-962e-ec965fc1eb06': 'SRVWIN07',
+    '2da30969-4127-4ddb-ba0c-2d8ac44d15d7': 'Administrator',
   };
 
   describe('when showAnonymized is false', () => {
@@ -134,6 +136,41 @@ describe('AttackDiscoveryTab', () => {
       const investigateInTimelineButton = screen.getByTestId('investigateInTimelineButton');
 
       expect(investigateInTimelineButton).toBeInTheDocument();
+    });
+  });
+
+  describe('when multiple substitutions for the same replacement are required', () => {
+    it('replaces all occurrences', () => {
+      const detailsMarkdownRequiresMultipleSubstitutions =
+        '## Microsoft Office spawned PowerShell obfuscation on host {{ host.name c5ba13c4-2391-4045-962e-ec965fc1eb06 }} by user {{ user.name 2da30969-4127-4ddb-ba0c-2d8ac44d15d7 }}\n* **Tactic:** Initial Access, Execution\n* **Technique:** Phishing, Command and Scripting Interpreter\n* **Subtechnique:** Spearphishing Attachment, PowerShell\n\nThe user {{ user.name 2da30969-4127-4ddb-ba0c-2d8ac44d15d7 }} opened a malicious Microsoft Word document ({{ process.parent.executable C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE }}) that dropped and executed a VBScript file ({{ process.parent.args wscript C:\\ProgramData\\WindowsAppPool\\AppPool.vbs }}). This VBScript file then created a scheduled task ({{ process.command_line \\"C:\\Windows\\System32\\cmd.exe\\" /C schtasks /create /F /sc minute /mo 1 /tn \\"\\WindowsAppPool\\AppPool\\" /tr \\"wscript /b \\"C:\\ProgramData\\WindowsAppPool\\AppPool.vbs\\"\\" }}) to execute the VBScript every minute. The VBScript then spawned an obfuscated PowerShell process ({{ process.command_line \\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\\" -exec bypass -file C:\\ProgramData\\WindowsAppPool\\AppPool.ps1  }}). This sequence of events suggests an attempt to gain initial access to the host and establish persistence through scheduled tasks and obfuscated PowerShell scripts.';
+
+      const expected = `Microsoft Office spawned PowerShell obfuscation on host SRVWIN07 by user Administrator
+
+Tactic: Initial Access, Execution
+Technique: Phishing, Command and Scripting Interpreter
+Subtechnique: Spearphishing Attachment, PowerShell
+
+The user Administrator opened a malicious Microsoft Word document (C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE) that dropped and executed a VBScript file (wscript C:\\ProgramData\\WindowsAppPool\\AppPool.vbs). This VBScript file then created a scheduled task (\\"C:\\Windows\\System32\\cmd.exe\\" /C schtasks /create /F /sc minute /mo 1 /tn \\"\\WindowsAppPool\\AppPool\\" /tr \\"wscript /b \\"C:\\ProgramData\\WindowsAppPool\\AppPool.vbs\\"\\") to execute the VBScript every minute. The VBScript then spawned an obfuscated PowerShell process (\\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\\" -exec bypass -file C:\\ProgramData\\WindowsAppPool\\AppPool.ps1 ). This sequence of events suggests an attempt to gain initial access to the host and establish persistence through scheduled tasks and obfuscated PowerShell scripts.`;
+
+      const mockAttackDiscoveryWithMultipleSubstitutions = {
+        ...mockAttackDiscovery,
+        detailsMarkdown: detailsMarkdownRequiresMultipleSubstitutions,
+      };
+
+      render(
+        <TestProviders>
+          <AttackDiscoveryTab
+            attackDiscovery={mockAttackDiscoveryWithMultipleSubstitutions}
+            replacements={mockReplacements}
+            showAnonymized={false}
+          />
+        </TestProviders>
+      );
+
+      const markdownFormatters = screen.getAllByTestId('attackDiscoveryMarkdownFormatter');
+      const detailsMarkdown = markdownFormatters[1];
+
+      expect(detailsMarkdown.textContent).toEqual(expected);
     });
   });
 });

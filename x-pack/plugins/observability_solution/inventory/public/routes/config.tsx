@@ -7,7 +7,10 @@
 import * as t from 'io-ts';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
+import { InventoryPage } from '../pages/inventory_page';
+import { ENTITY_LAST_SEEN } from '../../common/es_fields/entities';
 
 /**
  * The array of route definitions to be used when the application
@@ -20,6 +23,20 @@ const inventoryRoutes = {
         <Outlet />
       </InventoryPageTemplate>
     ),
+    params: t.type({
+      query: t.type({
+        sortField: t.string,
+        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+        pageIndex: toNumberRt,
+      }),
+    }),
+    defaults: {
+      query: {
+        sortField: ENTITY_LAST_SEEN,
+        sortDirection: 'desc',
+        pageIndex: '0',
+      },
+    },
     children: {
       '/{type}': {
         element: <></>,
@@ -28,7 +45,7 @@ const inventoryRoutes = {
         }),
       },
       '/': {
-        element: <></>,
+        element: <InventoryPage />,
       },
     },
   },

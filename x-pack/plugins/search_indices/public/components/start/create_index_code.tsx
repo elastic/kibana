@@ -4,20 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
-import { useKibana } from '../../hooks/use_kibana';
-import { CodeSample } from './code_sample';
-import { CreateIndexFormState } from './types';
-
+import { AnalyticsEvents } from '../../analytics/constants';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 import { DenseVectorSeverlessCodeExamples } from '../../code_examples/create_index';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { useKibana } from '../../hooks/use_kibana';
+import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 import { LanguageSelector } from '../shared/language_selector';
-import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
+
+import { CodeSample } from './code_sample';
+import { CreateIndexFormState } from './types';
 
 export interface CreateIndexCodeViewProps {
   createIndexForm: CreateIndexFormState;
@@ -28,10 +30,21 @@ const SelectedCodeExamples = DenseVectorSeverlessCodeExamples;
 
 export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
+  const usageTracker = useUsageTracker();
+
   // TODO: initing this should be dynamic and possibly saved in the form state
   const [selectedLanguage, setSelectedLanguage] = useState<AvailableLanguages>('python');
+  const onSelectLanguage = useCallback(
+    (value: AvailableLanguages) => {
+      setSelectedLanguage(value);
+      usageTracker.count([
+        AnalyticsEvents.startCreateIndexLanguageSelect,
+        `${AnalyticsEvents.startCreateIndexLanguageSelect}_${value}`,
+      ]);
+    },
+    [usageTracker]
+  );
   const elasticsearchUrl = useElasticsearchUrl();
-
   const codeParams = useMemo(() => {
     return {
       indexName: createIndexForm.indexName || undefined,
@@ -49,7 +62,7 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
           <LanguageSelector
             options={LanguageOptions}
             selectedLanguage={selectedLanguage}
-            onSelectLanguage={(value) => setSelectedLanguage(value)}
+            onSelectLanguage={onSelectLanguage}
           />
         </EuiFlexItem>
         {selectedLanguage === 'curl' && (
@@ -70,6 +83,12 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
           })}
           language="shell"
           code={selectedCodeExample.installCommand}
+          onCodeCopyClick={() => {
+            usageTracker.click([
+              AnalyticsEvents.startCreateIndexCodeCopyInstall,
+              `${AnalyticsEvents.startCreateIndexCodeCopyInstall}_${selectedLanguage}`,
+            ]);
+          }}
         />
       )}
       <CodeSample
@@ -78,6 +97,14 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
         })}
         language={Languages[selectedLanguage].codeBlockLanguage}
         code={selectedCodeExample.createIndex(codeParams)}
+        onCodeCopyClick={() => {
+          usageTracker.click([
+            AnalyticsEvents.startCreateIndexCodeCopy,
+            `${AnalyticsEvents.startCreateIndexCodeCopy}_${selectedLanguage}`,
+            // TODO: vector should be a parameter when have multiple options
+            `${AnalyticsEvents.startCreateIndexCodeCopy}_${selectedLanguage}_vector`,
+          ]);
+        }}
       />
     </EuiFlexGroup>
   );

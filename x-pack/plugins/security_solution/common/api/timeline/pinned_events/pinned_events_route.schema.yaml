@@ -18,11 +18,12 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: PersistPinnedEventRoute
-      summary: Persists a pinned event to a timeline.
+      summary: Pin an event
+      description: Pin an event to an existing Timeline.
       tags:
         - access:securitySolution
       requestBody:
-        description: The pinned event to persist or update along with additional metadata.
+        description: The pinned event to add or update, along with additional metadata.
         required: true
         content:
           application/json:
@@ -39,7 +40,7 @@ paths:
                   type: string
       responses:
         '200':
-          description: Indicate the event was successfully pinned in the timeline.
+          description: Indicates the event was successfully pinned to the Timeline.
           content:
             application/json:
               schema:
