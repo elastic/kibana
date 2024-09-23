@@ -7,11 +7,14 @@
 
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getUserActionsTelemetryData } from './user_actions';
+import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
 describe('user_actions', () => {
   describe('getUserActionsTelemetryData', () => {
     const logger = loggingSystemMock.createLogger();
     const savedObjectsClient = savedObjectsRepositoryMock.create();
+    const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
+
     savedObjectsClient.find.mockResolvedValue({
       total: 5,
       saved_objects: [],
@@ -34,7 +37,10 @@ describe('user_actions', () => {
     });
 
     it('it returns the correct res', async () => {
-      const res = await getUserActionsTelemetryData({ savedObjectsClient, logger });
+      const res = await getUserActionsTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
       expect(res).toEqual({
         all: {
           total: 5,
@@ -47,7 +53,10 @@ describe('user_actions', () => {
     });
 
     it('should call find with correct arguments', async () => {
-      await getUserActionsTelemetryData({ savedObjectsClient, logger });
+      await getUserActionsTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
       expect(savedObjectsClient.find).toBeCalledWith({
         aggs: {
           counts: {
@@ -101,6 +110,7 @@ describe('user_actions', () => {
         page: 0,
         perPage: 0,
         type: 'cases-user-actions',
+        namespaces: ['*'],
       });
     });
   });

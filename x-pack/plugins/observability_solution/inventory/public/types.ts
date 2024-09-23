@@ -8,7 +8,15 @@ import type {
   ObservabilitySharedPluginStart,
   ObservabilitySharedPluginSetup,
 } from '@kbn/observability-shared-plugin/public';
+import {
+  EntityManagerPublicPluginSetup,
+  EntityManagerPublicPluginStart,
+} from '@kbn/entityManager-plugin/public';
 import type { InferencePublicStart, InferencePublicSetup } from '@kbn/inference-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -17,11 +25,18 @@ export interface ConfigSchema {}
 export interface InventorySetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   inference: InferencePublicSetup;
+  data: DataPublicPluginSetup;
+  entityManager: EntityManagerPublicPluginSetup;
 }
 
 export interface InventoryStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   inference: InferencePublicStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
+  entityManager: EntityManagerPublicPluginStart;
+  share: SharePluginStart;
 }
 
 export interface InventoryPublicSetup {}
