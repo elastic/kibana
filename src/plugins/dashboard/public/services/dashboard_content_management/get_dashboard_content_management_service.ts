@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardBackupServiceType } from '../dashboard_backup/types';
 import { DashboardStartDependencies } from '../../plugin';
 import { loadDashboardState } from './lib/load_dashboard_state';
 import { saveDashboardState } from './lib/save_dashboard_state';
@@ -23,7 +22,6 @@ import { deleteDashboards } from './lib/delete_dashboards';
 import { updateDashboardMeta } from './lib/update_dashboard_meta';
 
 export const getDashboardContentManagementService = (
-  dashboardBackup: DashboardBackupServiceType,
   deps: DashboardStartDependencies
 ): DashboardContentManagementService => {
   return {

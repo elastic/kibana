@@ -31,10 +31,7 @@ export const setDashboardServices = (kibanaCore: CoreStart, deps: DashboardStart
   dashboardCapabilitiesService = {
     dashboardCapabilities: getDashboardCapabilities(kibanaCore),
   };
-  dashboardContentManagementService = getDashboardContentManagementService(
-    dashboardBackupService,
-    deps
-  );
+  dashboardContentManagementService = getDashboardContentManagementService(deps);
   dashboardFavoritesService = new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
     http: kibanaCore.http,
     usageCollection: deps.usageCollection,

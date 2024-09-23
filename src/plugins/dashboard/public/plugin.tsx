@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, filter, map } from 'rxjs';
 
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import {
   APP_WRAPPER_CLASS,
   App,
@@ -29,7 +29,9 @@ import {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
@@ -40,6 +42,7 @@ import type {
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type {
   ScreenshotModePluginSetup,
@@ -57,9 +60,6 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import {
   DashboardAppLocatorDefinition,
@@ -78,7 +78,6 @@ import {
   registerDashboardPanelPlacementSetting,
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
-import { dashboardContentManagementService } from './services/dashboard_services';
 import { setServices, untilPluginStartServicesReady } from './services/services';
 
 export interface DashboardFeatureFlagConfig {
@@ -155,15 +154,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    {
-      share,
-      embeddable,
-      home,
-      urlForwarding,
-      data,
-      contentManagement,
-      uiActions,
-    }: DashboardSetupDependencies
+    { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
@@ -178,7 +169,10 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            await untilPluginStartServicesReady();
+            const [{ dashboardContentManagementService }] = await Promise.all([
+              import('./services/dashboard_services'),
+              untilPluginStartServicesReady(),
+            ]);
             return (
               (await dashboardContentManagementService.loadDashboardState({ id: dashboardId }))
                 .dashboardInput?.filters ?? []
@@ -351,7 +345,10 @@ export class DashboardPlugin
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
-        await untilPluginStartServicesReady(); // the services promise might not have resolved yet
+        const [{ dashboardContentManagementService }] = await Promise.all([
+          import('./services/dashboard_services'),
+          untilPluginStartServicesReady(), // the services promise might not have resolved yet
+        ]);
         return dashboardContentManagementService.findDashboards;
       },
     };

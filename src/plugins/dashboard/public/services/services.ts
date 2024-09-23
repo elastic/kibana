@@ -12,14 +12,15 @@ import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 
 import { DashboardStartDependencies } from '../plugin';
-import { setDashboardServices } from './dashboard_services';
 import { setKibanaServices } from './kibana_services';
 
 const servicesReady$ = new BehaviorSubject(false);
 
 export const setServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
   setKibanaServices(kibanaCore, deps);
-  setDashboardServices(kibanaCore, deps);
+  // import('./dashboard_services').then(({ setDashboardServices }) => {
+  //   setDashboardServices(kibanaCore, deps);
+  // });
   servicesReady$.next(true);
 };
 
