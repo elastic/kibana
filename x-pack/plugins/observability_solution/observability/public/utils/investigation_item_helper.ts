@@ -26,7 +26,7 @@ const genLensEqForCustomThresholdRule = (criterion: MetricExpression) => {
     (metric: CustomThresholdExpressionMetric) =>
       (metricNameResolver[metric.name] = `${
         AggMappingForLens[metric.aggType] ? AggMappingForLens[metric.aggType] : metric.aggType
-      }(${metric.field ? metric.field : metric.filter ? metric.filter : ''})`)
+      }(${metric.field ? metric.field : metric.filter ? `kql='${metric.filter}'` : ''})`)
   );
 
   let equation = criterion.equation
