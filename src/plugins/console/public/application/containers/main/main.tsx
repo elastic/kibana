@@ -322,7 +322,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           {currentTab === HISTORY_TAB_ID && <History isVerticalLayout={isVerticalLayout} />}
           {currentTab === CONFIG_TAB_ID && <Config isVerticalLayout={isVerticalLayout} />}
         </EuiSplitPanel.Inner>
-        <EuiHorizontalRule margin="none" className="consoleVariablesBottomBar" />
+        <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner
           paddingSize="xs"
           grow={false}

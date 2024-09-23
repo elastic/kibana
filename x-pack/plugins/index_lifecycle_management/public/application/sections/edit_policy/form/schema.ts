@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  PhaseExceptDelete,
-  PhaseWithDownsample,
-  PhaseWithTiming,
-} from '../../../../../common/types';
+import { PhaseWithDownsample, PhaseWithTiming } from '../../../../../common/types';
 import { fieldValidators, FormSchema } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
 import { CLOUD_DEFAULT_REPO, ROLLOVER_FORM_PATHS } from '../constants';
@@ -80,9 +76,7 @@ export const searchableSnapshotFields = {
 };
 
 const numberOfReplicasField = {
-  label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberOfReplicasLabel', {
-    defaultMessage: 'Number of replicas',
-  }),
+  label: i18nTexts.editPolicy.numberOfReplicasLabel,
   validations: [
     {
       validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
@@ -95,9 +89,7 @@ const numberOfReplicasField = {
 };
 
 const numberOfShardsField = {
-  label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
-    defaultMessage: 'Number of primary shards',
-  }),
+  label: i18nTexts.editPolicy.shrinkNumberOfShardsLabel,
   defaultValue: 1,
   validations: [
     {
@@ -133,7 +125,7 @@ const allowWriteAfterShrinkField = {
   defaultValue: false,
 };
 
-const getPriorityField = (phase: PhaseExceptDelete) => ({
+const getPriorityField = (phase: 'hot' | 'warm' | 'cold') => ({
   defaultValue: defaultIndexPriority[phase],
   label: i18nTexts.editPolicy.indexPriorityFieldLabel,
   validations: [
@@ -380,9 +372,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       actions: {
         rollover: {
           max_age: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel', {
-              defaultMessage: 'Maximum age',
-            }),
+            label: i18nTexts.editPolicy.maxAgeLabel,
             validations: [
               {
                 validator: rolloverThresholdsValidator,
@@ -397,9 +387,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
             fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_docs: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel', {
-              defaultMessage: 'Maximum documents',
-            }),
+            label: i18nTexts.editPolicy.maxDocsLabel,
             validations: [
               {
                 validator: rolloverThresholdsValidator,
@@ -443,9 +431,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
             fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_size: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
-              defaultMessage: 'Maximum index size',
-            }),
+            label: i18nTexts.editPolicy.maxSizeLabel,
             validations: [
               {
                 validator: rolloverThresholdsValidator,
@@ -505,12 +491,6 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
     frozen: {
       min_age: getMinAgeField('frozen'),
       actions: {
-        allocate: {
-          number_of_replicas: numberOfReplicasField,
-        },
-        set_priority: {
-          priority: getPriorityField('frozen'),
-        },
         searchable_snapshot: searchableSnapshotFields,
       },
     },
