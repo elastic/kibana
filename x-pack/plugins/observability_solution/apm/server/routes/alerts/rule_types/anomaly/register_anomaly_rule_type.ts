@@ -133,7 +133,7 @@ export function registerAnomalyRuleType({
       }
 
       const { params, services, spaceId, getTimeRange } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+      const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -287,6 +287,7 @@ export function registerAnomalyRuleType({
           apmIndices,
           scopedClusterClient,
           savedObjectsClient,
+          uiSettingsClient,
           serviceName,
           environment,
           transactionType,
