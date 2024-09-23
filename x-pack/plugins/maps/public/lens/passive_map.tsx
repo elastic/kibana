@@ -75,6 +75,7 @@ export function PassiveMap(props: Props) {
                   initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
                   autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
                 },
+                isSharable: false,
               },
               references: [],
             };

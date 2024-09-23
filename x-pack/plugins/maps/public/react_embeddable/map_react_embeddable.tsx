@@ -42,7 +42,7 @@ import { initializeEditApi } from './initialize_edit_api';
 import { extractReferences } from '../../common/migrations/references';
 import { MapAttributes } from '../../common/content_management';
 import { MapSettings } from '../../common/descriptor_types';
-import { apiHidesFilterActions, isMapRendererApi } from './map_renderer/types';
+import { isMapRendererApi } from './map_renderer/types';
 
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
@@ -236,7 +236,9 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
             <MapContainer
               onSingleValueTrigger={actionHandlers.onSingleValueTrigger}
               addFilters={
-                (apiHidesFilterActions(parentApi) && parentApi.hideFilterActions) ||
+                (isMapRendererApi(parentApi) &&
+                  typeof parentApi.isSharable === 'boolean' &&
+                  parentApi.hideFilterActions) ||
                 areTriggersDisabled(api)
                   ? null
                   : actionHandlers.addFilters
@@ -251,7 +253,11 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
               title={panelTitle ?? defaultPanelTitle}
               description={panelDescription ?? defaultPanelDescription}
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
-              isSharable={apiIsOfType(parentApi, 'dashboard') || apiIsOfType(parentApi, 'canvas')}
+              isSharable={
+                isMapRendererApi(parentApi) && typeof parentApi.isSharable === 'boolean'
+                  ? parentApi.isSharable
+                  : true
+              }
             />
           </Provider>
         );

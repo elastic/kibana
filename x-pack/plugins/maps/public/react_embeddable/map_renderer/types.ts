@@ -5,28 +5,17 @@
  * 2.0.
  */
 
-import { HasType, PublishesUnifiedSearch, apiIsOfType } from '@kbn/presentation-publishing';
-import { HasSerializedChildState } from '@kbn/presentation-containers';
+import { HasType, apiIsOfType } from '@kbn/presentation-publishing';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { MapSerializedState } from '../types';
 
 export const MAP_RENDERER_TYPE = 'mapRenderer';
 
-interface HidesFilterActions {
-  hideFilterActions: boolean;
-}
-
-export type MapRendererApi = HasType<typeof MAP_RENDERER_TYPE> &
-  HasSerializedChildState<MapSerializedState> &
-  HidesFilterActions &
-  PublishesUnifiedSearch & {
-    getTooltipRenderer?: () => RenderToolTipContent;
-  };
+export type MapRendererApi = HasType<typeof MAP_RENDERER_TYPE> & {
+  getTooltipRenderer?: () => RenderToolTipContent;
+  hideFilterActions?: boolean;
+  isSharable?: boolean;
+};
 
 export function isMapRendererApi(api: unknown): api is MapRendererApi {
-  return Boolean(api && apiIsOfType(api, MAP_RENDERER_TYPE) && apiHidesFilterActions(api));
-}
-
-export function apiHidesFilterActions(api: unknown): api is HidesFilterActions {
-  return Boolean(api && (api as HidesFilterActions).hideFilterActions !== undefined);
+  return Boolean(api && apiIsOfType(api, MAP_RENDERER_TYPE));
 }
