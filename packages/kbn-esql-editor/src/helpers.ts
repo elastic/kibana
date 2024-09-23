@@ -18,7 +18,7 @@ import {
   EDITOR_MIN_HEIGHT,
   EDITOR_MAX_HEIGHT,
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
-} from './text_based_languages_editor.styles';
+} from './esql_editor.styles';
 
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
