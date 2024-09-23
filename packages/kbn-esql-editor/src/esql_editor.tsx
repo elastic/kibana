@@ -711,6 +711,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                     });
 
                     editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
+
+                    // Auto-focus the editor and move the cursor to the end.
+                    editor.focus();
+                    editor.setPosition({ column: Infinity, lineNumber: Infinity });
                   }}
                 />
               </div>
