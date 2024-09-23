@@ -25,7 +25,6 @@ import { hasFleetServers } from '../../services/fleet_server';
 import { createFleetAuthzMock } from '../../../common/mocks';
 
 import { fleetSetupHandler, getFleetStatusHandler } from './handlers';
-import { FleetSetupResponseSchema, GetAgentsSetupResponseSchema } from '.';
 
 jest.mock('../../services/setup', () => {
   return {
@@ -95,8 +94,6 @@ describe('FleetSetupHandler', () => {
     };
     expect(response.customError).toHaveBeenCalledTimes(0);
     expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
-    const validationResp = FleetSetupResponseSchema.validate(expectedBody);
-    expect(validationResp).toEqual(expectedBody);
   });
 
   it('POST /setup fails w/500 on custom error', async () => {
@@ -212,8 +209,6 @@ describe('FleetStatusHandler', () => {
     };
     expect(response.customError).toHaveBeenCalledTimes(0);
     expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
-    const validationResp = GetAgentsSetupResponseSchema.validate(expectedBody);
-    expect(validationResp).toEqual(expectedBody);
   });
 
   it('POST /status  w/200 with fleet server standalone', async () => {

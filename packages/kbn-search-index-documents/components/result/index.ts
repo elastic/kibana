@@ -8,3 +8,4 @@
  */
 
 export { Result } from './result';
+export { resultMetaData, resultToField } from './result_metadata';

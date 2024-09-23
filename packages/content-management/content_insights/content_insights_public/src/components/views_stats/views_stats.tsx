@@ -86,7 +86,7 @@ const NoViewsTip = () => (
     content={
       <FormattedMessage
         id="contentManagement.contentEditor.viewsStats.noViewsTip"
-        defaultMessage="Views are counted everytime someone opens a dashboard (after version 8.16)"
+        defaultMessage="Views are counted every time someone opens a dashboard"
       />
     }
   />
