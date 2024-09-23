@@ -155,7 +155,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
     // Early return to prevent unnecessary looping through the default config
     if (!storageFieldsConfig) return defaultFieldConfig;
 
-    // Merge the default config with the one from the local storage without overriding the default values
+    // Override only the fields properties stored in the local storage
     for (const key of Object.keys(defaultFieldConfig) as MlEntityFieldType[]) {
       defaultFieldConfig[key] = {
         ...defaultFieldConfig[key],
@@ -297,9 +297,20 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
         }
       }
 
+      // Remove the value from the field config to avoid storing it in the local storage
+      const { value, ...updatedFieldConfigWithoutValue } = updatedFieldConfig;
+
+      // Remove the value from the result config to avoid storing it in the local storage
+      const updatedResultConfigWithoutValues = Object.fromEntries(
+        Object.entries(updatedResultConfig).map(([key, fieldValue]) => {
+          const { value: _, ...rest } = fieldValue;
+          return [key, rest];
+        })
+      );
+
       setStorageFieldsConfig({
-        ...updatedResultConfig,
-        [fieldType]: updatedFieldConfig,
+        ...updatedResultConfigWithoutValues,
+        [fieldType]: updatedFieldConfigWithoutValue,
       });
     },
     [resultFieldsConfig, setStorageFieldsConfig]
