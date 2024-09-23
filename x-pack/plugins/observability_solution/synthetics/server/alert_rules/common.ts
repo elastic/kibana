@@ -31,12 +31,12 @@ import { StatusCheckFilters } from '../../common/runtime_types';
 import { SyntheticsEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
 import {
+  AlertOverviewStatus,
   SyntheticsCommonState,
   SyntheticsCommonStateCodec,
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
-import { AlertOverviewStatus } from './status_rule/status_rule_executor';
 import type { MonitorSummaryStatusRule } from './status_rule/types';
 
 export const updateState = (
