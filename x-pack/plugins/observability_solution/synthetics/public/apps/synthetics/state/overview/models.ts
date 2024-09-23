@@ -7,9 +7,8 @@
 
 import type { TrendTable } from '../../../../../common/types';
 import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
-import { ConfigKey, MonitorOverviewResult } from '../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../common/runtime_types';
 
-import { IHttpSerializedFetchError } from '../utils/http_error';
 import { MonitorFilterState } from '../monitor_list';
 
 export interface MonitorOverviewPageState extends MonitorFilterState {
@@ -27,12 +26,8 @@ export type MonitorOverviewFlyoutConfig = {
 
 export interface MonitorOverviewState {
   flyoutConfig: MonitorOverviewFlyoutConfig;
-  data: MonitorOverviewResult;
   pageState: MonitorOverviewPageState;
-  loading: boolean;
-  loaded: boolean;
   isErrorPopoverOpen?: string | null;
-  error: IHttpSerializedFetchError | null;
   groupBy: GroupByState;
   trendStats: TrendTable;
 }

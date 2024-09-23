@@ -225,5 +225,6 @@
     "@kbn/presentation-publishing",
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
+    "@kbn/inference-plugin",
   ]
 }

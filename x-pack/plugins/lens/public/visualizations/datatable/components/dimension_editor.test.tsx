@@ -24,6 +24,7 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { TableDimensionEditor } from './dimension_editor';
 import { ColumnState } from '../../../../common/expressions';
 import { capitalize } from 'lodash';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('data table dimension editor', () => {
   let user: UserEvent;
@@ -60,7 +61,6 @@ describe('data table dimension editor', () => {
   });
 
   beforeEach(() => {
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     btnGroups = {
       colorMode: new EuiButtonGroupTestHarness('lnsDatatable_dynamicColoring_groups'),
@@ -123,10 +123,10 @@ describe('data table dimension editor', () => {
   ) => {
     return render(<TableDimensionEditor {...props} {...overrideProps} />, {
       wrapper: ({ children }) => (
-        <>
+        <I18nProvider>
           <div ref={props.panelRef} />
           {children}
-        </>
+        </I18nProvider>
       ),
     });
   };
@@ -243,6 +243,7 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       await user.click(screen.getByLabelText('Edit colors'));
+      act(() => jest.advanceTimersByTime(256));
 
       expect(screen.getByTestId(`lns-palettePanel-${flyout}`)).toBeInTheDocument();
     }
