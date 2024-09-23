@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`v2 migration with transform errors collects corrupt saved object documents across batches 1`] = `
+exports[`v2 migration to a newer stack version with transform errors collects corrupt saved object documents across batches 1`] = `
 "Error: Cannot convert 'complex' objects with values that are multiple of 100 41e28595-9710-4583-aeb3-41c5899aa2ce
 Error: Cannot convert 'complex' objects with values that are multiple of 100 a1f15bce-d9a2-4a4d-a280-c05f2eda99f1
 Error: Cannot convert 'complex' objects with values that are multiple of 100 06d3374e-193b-43d1-9c1a-0c8829cb0c51

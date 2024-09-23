@@ -156,6 +156,29 @@ export const getReindexingBaselineTypes = (filterDeprecated: boolean) =>
           },
         },
       };
+    } else if (type.name === 'task') {
+      return {
+        ...type,
+        mappings: {
+          properties: {
+            ...type.mappings.properties,
+            lastRun: { type: 'date' },
+          },
+        },
+        modelVersions: {
+          ...type.modelVersions,
+          2: {
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  lastRun: { type: 'date' },
+                },
+              },
+            ],
+          },
+        },
+      };
     } else {
       return type;
     }
