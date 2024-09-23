@@ -378,14 +378,12 @@ const getFieldsByQueryType = ({
   simpleQuerySearchFields: string[];
   nestedQueryFields: Map<string, string[]>;
 } => {
-  const simpleQueryTypes: Set<string> = new Set();
   const simpleQuerySearchFields: Set<string> = new Set();
   const nestedQueryFields: Map<string, string[]> = new Map();
 
   types.forEach((type) => {
     searchFields.forEach((rawSearchField) => {
       const searchField = trimBoostAndWildcardFromField(rawSearchField);
-      const isBoostedOrWildcard = rawSearchField !== searchField;
       const isFieldDefinedAsNested = searchField.split('.').length > 1;
       const absoluteFieldPath = `${type}.${searchField}`;
       const parentNode = absoluteFieldPath.split('.').slice(0, -1).join('.');
@@ -394,11 +392,10 @@ const getFieldsByQueryType = ({
       if (isFieldDefinedAsNested && parentNodeType === 'nested') {
         nestedQueryFields.set(parentNode, [
           ...(nestedQueryFields.get(parentNode) || []),
-          isBoostedOrWildcard ? `${type}.${rawSearchField}` : absoluteFieldPath,
+          `${type}.${rawSearchField}`,
         ]);
       } else {
         simpleQuerySearchFields.add(rawSearchField);
-        simpleQueryTypes.add(type);
       }
     });
   });
