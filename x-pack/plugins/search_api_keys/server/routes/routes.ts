@@ -32,7 +32,6 @@ export function registerRoutes(router: IRouter, logger: Logger) {
         const core = await context.core;
         const client = core.elasticsearch.client.asCurrentUser;
         const apiKey = await getAPIKeyById(request.body.id, client, logger);
-        logger.info('API KEY' + JSON.stringify(apiKey));
 
         if (!apiKey) {
           return response.customError({

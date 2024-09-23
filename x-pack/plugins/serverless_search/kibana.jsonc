@@ -32,8 +32,7 @@
       "searchHomepage",
       "searchIndices",
       "searchInferenceEndpoints",
-      "usageCollection",
-      "searchApiKeys"
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaReact"

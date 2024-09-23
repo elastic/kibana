@@ -8,8 +8,8 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/search_playground'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/search_playground',
+  roots: ['<rootDir>/x-pack/plugins/search_api_keys'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/search_api_keys',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/search_playground/{public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/search_api_keys/{public,server}/**/*.{ts,tsx}'],
 };

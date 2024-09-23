@@ -22,7 +22,7 @@ export async function createAPIKey(
 
     return apiKey;
   } catch (e) {
-    logger.error(`Error creating API Key for elasticsearch start`);
+    logger.error(`Search API Keys: Error during creating API Key`);
     logger.error(e);
     throw e;
   }

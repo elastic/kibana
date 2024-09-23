@@ -21,7 +21,7 @@ export async function getAPIKeyById(
 
     return apiKey.api_keys?.[0];
   } catch (e) {
-    logger.error(`Error getting API Key for elasticsearch start`);
+    logger.error(`Search API Keys: Error on getting API Key`);
     logger.error(e);
     throw e;
   }

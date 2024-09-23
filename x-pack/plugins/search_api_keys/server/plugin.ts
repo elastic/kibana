@@ -27,7 +27,6 @@ export class SearchApiKeysPlugin
 
   public setup(core: CoreSetup) {
     this.logger.debug('searchApiKeys: Setup');
-    this.logger.info('searchApiKeys test');
     const router = core.http.createRouter();
 
     // Register server side APIs

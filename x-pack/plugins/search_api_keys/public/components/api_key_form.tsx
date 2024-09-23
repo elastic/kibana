@@ -20,6 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { ApiKeyFlyoutWrapper } from './api_key_flyout_wrapper';
 import { useSearchApiKey, Status } from '../hooks/use_search_api_key';
 
+const hiddenKeyPreview = '•'.repeat(30);
+
 export const ApiKeyForm = () => {
   const { euiTheme } = useEuiTheme();
   const [showFlyout, setShowFlyout] = useState(false);
@@ -34,7 +36,7 @@ export const ApiKeyForm = () => {
       <EuiFlexItem grow={0}>
         <EuiTitle size="xxxs" css={{ whiteSpace: 'nowrap' }}>
           <h6>
-            <FormattedMessage id="xpack.searchIndices.apiKeyForm.title" defaultMessage="API Key" />
+            <FormattedMessage id="xpack.searchApiKeys.apiKeyForm.title" defaultMessage="API Key" />
           </h6>
         </EuiTitle>
       </EuiFlexItem>
@@ -42,7 +44,7 @@ export const ApiKeyForm = () => {
         <>
           <EuiFlexItem grow={0}>
             <EuiCode language="text" color="success" css={{ color: euiTheme.colors.successText }}>
-              {status === Status.showHiddenKey ? '•'.repeat(30) : apiKey}
+              {status === Status.showHiddenKey ? hiddenKeyPreview : apiKey}
             </EuiCode>
           </EuiFlexItem>
           {status === Status.showPreviewKey && (
@@ -51,7 +53,7 @@ export const ApiKeyForm = () => {
                 iconType="copy"
                 color="success"
                 onClick={handleAddToClipboard}
-                aria-label={i18n.translate('xpack.searchIndices.apiKeyForm.copyButton', {
+                aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.copyButton', {
                   defaultMessage: 'Copy button',
                 })}
               />
@@ -69,7 +71,7 @@ export const ApiKeyForm = () => {
             onClick={() => setShowFlyout(true)}
           >
             <FormattedMessage
-              id="xpack.searchIndices.apiKeyForm.createButton"
+              id="xpack.searchApiKeys.apiKeyForm.createButton"
               defaultMessage="Create an API Key"
             />
           </EuiButton>

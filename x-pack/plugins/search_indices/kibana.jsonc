@@ -12,12 +12,12 @@
     ],
     "requiredPlugins": [
       "share",
-      "searchApiKeys",
     ],
     "optionalPlugins": [
       "cloud",
       "console",
       "usageCollection",
+      "searchApiKeys"
     ],
     "requiredBundles": [
       "kibanaReact",
