@@ -1,0 +1,37 @@
+openapi: 3.0.0
+
+info:
+  title: Delete the entity store engine
+  version: '2023-10-31'
+paths:
+  /api/entity_store/engines/{entityType}:
+    delete:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: DeleteEntityStore
+      summary: Delete the Entity Store engine
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+          description: The entity type of the store (either 'user' or 'host').
+
+        - name: data
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Control flag to also delete the entity data.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:      
+                  deleted:
+                    type: boolean
+                 
