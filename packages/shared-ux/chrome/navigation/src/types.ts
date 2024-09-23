@@ -53,7 +53,9 @@ export interface NavigationKibanaDependencies {
       navLinks: {
         getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
       };
-      getIsSideNavCollapsed$: () => Observable<boolean>;
+      sideNav: {
+        getIsCollapsed$: () => Observable<boolean>;
+      };
     };
     http: {
       basePath: BasePathService;

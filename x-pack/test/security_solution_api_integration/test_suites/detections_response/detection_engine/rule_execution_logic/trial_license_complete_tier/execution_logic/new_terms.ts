@@ -160,14 +160,17 @@ export default ({ getService }: FtrProviderContext) => {
           name: expect.stringMatching(/(root|bob)/),
           terminal: 'pts/0',
         },
-        'event.action': 'user_login',
-        'event.category': 'authentication',
-        'event.dataset': 'login',
+        event: {
+          action: 'user_login',
+          category: 'authentication',
+          dataset: 'login',
+
+          module: 'system',
+          origin: '/var/log/wtmp',
+          outcome: 'success',
+          type: 'authentication_success',
+        },
         'event.kind': 'signal',
-        'event.module': 'system',
-        'event.origin': '/var/log/wtmp',
-        'event.outcome': 'success',
-        'event.type': 'authentication_success',
         'kibana.alert.original_time': '2019-02-19T20:42:08.230Z',
         'kibana.alert.ancestors': [
           {

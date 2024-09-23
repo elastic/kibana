@@ -11731,14 +11731,6 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/public/common/mock/endpoint/dependencies_start_mock.ts"
-            },
-            {
-              "plugin": "savedObjects",
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
-            },
-            {
-              "plugin": "savedObjects",
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
             }
           ]
         },

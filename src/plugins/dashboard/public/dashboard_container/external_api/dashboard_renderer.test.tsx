@@ -22,6 +22,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardCreationOptions } from '../embeddable/dashboard_container_factory';
 import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
+import { BehaviorSubject } from 'rxjs';
 
 describe('dashboard renderer', () => {
   let mockDashboardContainer: DashboardContainer;
@@ -246,6 +247,7 @@ describe('dashboard renderer', () => {
       navigateToDashboard: jest.fn(),
       select: jest.fn().mockReturnValue('WhatAnExpandedPanel'),
       getInput: jest.fn().mockResolvedValue({}),
+      expandedPanelId: new BehaviorSubject('panel1'),
     } as unknown as DashboardContainer;
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),

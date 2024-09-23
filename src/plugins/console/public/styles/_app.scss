@@ -203,29 +203,44 @@
   max-width: 100%;
 }
 
-.monaco__status_badge--primary {
-  @extend %monaco__status_badge;
-  background-color: $euiColorVis1;
+.monaco__status_code_line--primary {
+  background-color: transparentize($euiColorVis1, .9);
 }
 
-.monaco__status_badge--success {
-  @extend %monaco__status_badge;
-  background-color: $euiColorSuccess;
+.monaco__status_code_line_number--primary {
+  background-color: transparentize($euiColorVis1, .5);
 }
 
-.monaco__status_badge--default {
-  @extend %monaco__status_badge;
-  background-color: $euiColorLightShade;
+.monaco__status_code_line--success {
+  background-color: transparentize($euiColorSuccess, .9);
 }
 
-.monaco__status_badge--warning {
-  @extend %monaco__status_badge;
-  background-color: $euiColorWarning;
+.monaco__status_code_line_number--success {
+  background-color: transparentize($euiColorSuccess, .5);
 }
 
-.monaco__status_badge--danger {
-  @extend %monaco__status_badge;
-  background-color: $euiColorDanger;
+.monaco__status_code_line--default {
+  background-color: transparentize($euiColorLightShade, .9);
+}
+
+.monaco__status_code_line_number--default {
+  background-color: transparentize($euiColorLightShade, .5);
+}
+
+.monaco__status_code_line--warning {
+  background-color: transparentize($euiColorWarning, .9);
+}
+
+.monaco__status_code_line_number--warning {
+  background-color: transparentize($euiColorWarning, .5);
+}
+
+.monaco__status_code_line--danger {
+  background-color: transparentize($euiColorDanger, .9);
+}
+
+.monaco__status_code_line_number--danger {
+  background-color: transparentize($euiColorDanger, .5);
 }
 
 /*
