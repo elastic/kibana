@@ -702,6 +702,8 @@
       "@kbn/data-service/*": ["packages/kbn-data-service/*"],
       "@kbn/data-stream-adapter": ["packages/kbn-data-stream-adapter"],
       "@kbn/data-stream-adapter/*": ["packages/kbn-data-stream-adapter/*"],
+      "@kbn/data-usage-plugin": ["x-pack/plugins/data_usage"],
+      "@kbn/data-usage-plugin/*": ["x-pack/plugins/data_usage/*"],
       "@kbn/data-view-editor-plugin": ["src/plugins/data_view_editor"],
       "@kbn/data-view-editor-plugin/*": ["src/plugins/data_view_editor/*"],
       "@kbn/data-view-field-editor-example-plugin": ["examples/data_view_field_editor_example"],
@@ -850,6 +852,8 @@
       "@kbn/esql-ast-inspector-plugin/*": ["examples/esql_ast_inspector/*"],
       "@kbn/esql-datagrid": ["src/plugins/esql_datagrid"],
       "@kbn/esql-datagrid/*": ["src/plugins/esql_datagrid/*"],
+      "@kbn/esql-editor": ["packages/kbn-esql-editor"],
+      "@kbn/esql-editor/*": ["packages/kbn-esql-editor/*"],
       "@kbn/esql-utils": ["packages/kbn-esql-utils"],
       "@kbn/esql-utils/*": ["packages/kbn-esql-utils/*"],
       "@kbn/esql-validation-autocomplete": ["packages/kbn-esql-validation-autocomplete"],
@@ -1098,8 +1102,8 @@
       "@kbn/kubernetes-security-plugin/*": ["x-pack/plugins/kubernetes_security/*"],
       "@kbn/langchain": ["x-pack/packages/kbn-langchain"],
       "@kbn/langchain/*": ["x-pack/packages/kbn-langchain/*"],
-      "@kbn/language-documentation-popover": ["packages/kbn-language-documentation-popover"],
-      "@kbn/language-documentation-popover/*": ["packages/kbn-language-documentation-popover/*"],
+      "@kbn/language-documentation": ["packages/kbn-language-documentation"],
+      "@kbn/language-documentation/*": ["packages/kbn-language-documentation/*"],
       "@kbn/lens-config-builder-example-plugin": ["x-pack/examples/lens_config_builder_example"],
       "@kbn/lens-config-builder-example-plugin/*": ["x-pack/examples/lens_config_builder_example/*"],
       "@kbn/lens-embeddable-utils": ["packages/kbn-lens-embeddable-utils"],
@@ -1830,8 +1834,6 @@
       "@kbn/test-suites-xpack-performance/*": ["x-pack/performance/*"],
       "@kbn/testing-embedded-lens-plugin": ["x-pack/examples/testing_embedded_lens"],
       "@kbn/testing-embedded-lens-plugin/*": ["x-pack/examples/testing_embedded_lens/*"],
-      "@kbn/text-based-editor": ["packages/kbn-text-based-editor"],
-      "@kbn/text-based-editor/*": ["packages/kbn-text-based-editor/*"],
       "@kbn/third-party-lens-navigation-prompt-plugin": ["x-pack/examples/third_party_lens_navigation_prompt"],
       "@kbn/third-party-lens-navigation-prompt-plugin/*": ["x-pack/examples/third_party_lens_navigation_prompt/*"],
       "@kbn/third-party-vis-lens-example-plugin": ["x-pack/examples/third_party_vis_lens_example"],
@@ -1996,11 +1998,8 @@
     "useUnknownInCatchVariables": false,
     // enabled to point out not supported features when emitting in an isolated module environment
     "isolatedModules": true,
-    // TODO(jbudz): should be uncommented when upgrading to TS@4.8
-    //
     // ensures every non-declaration file is treated as a module
-    // "moduleDetection": "force",
-    //
+    "moduleDetection": "force",
     // disabled for better IDE support, enabled when running the type_check script
     "composite": false,
     // enabled for improved performance
