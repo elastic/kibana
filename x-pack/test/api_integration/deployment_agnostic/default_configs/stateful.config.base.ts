@@ -17,10 +17,12 @@ import {
   kbnTestConfig,
   systemIndicesSuperuser,
   FtrConfigProviderContext,
+  defineDockerServersConfig,
 } from '@kbn/test';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
+import { dockerImage } from '../../../fleet_api_integration/config.base';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
@@ -45,6 +47,17 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
 
     // if config is executed on CI or locally
     const isRunOnCI = process.env.CI;
+
+    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
+    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+
+    /**
+     * This is used by CI to set the docker registry port
+     * you can also define this environment variable locally when running tests which
+     * will spin up a local docker package registry locally for you
+     * if this is defined it takes precedence over the `packageRegistryOverride` variable
+     */
+    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
 
@@ -72,6 +85,17 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
 
     return {
       servers,
+      dockerServers: defineDockerServersConfig({
+        registry: {
+          enabled: !!dockerRegistryPort,
+          image: dockerImage,
+          portInContainer: 8080,
+          port: dockerRegistryPort,
+          args: dockerArgs,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+        },
+      }),
       testFiles: options.testFiles,
       security: { disableTestUser: true },
       // services can be customized, but must extend DeploymentAgnosticCommonServices

@@ -42,6 +42,8 @@ export const ResolverWithoutProviders = React.memo(
       indices,
       shouldUpdate,
       filters,
+      isSplitPanel = false,
+      showPanelOnClick,
     }: ResolverProps,
     refToForward
   ) {
@@ -162,14 +164,20 @@ export const ResolverWithoutProviders = React.memo(
                 );
               })}
             </GraphContainer>
-            <StyledPanel hasBorder>
-              <PanelRouter id={resolverComponentInstanceID} />
-            </StyledPanel>
+            {!isSplitPanel && (
+              <StyledPanel hasBorder>
+                <PanelRouter id={resolverComponentInstanceID} />
+              </StyledPanel>
+            )}
           </>
         ) : (
           <ResolverNoProcessEvents />
         )}
-        <GraphControls id={resolverComponentInstanceID} />
+        <GraphControls
+          id={resolverComponentInstanceID}
+          isSplitPanel={isSplitPanel}
+          showPanelOnClick={showPanelOnClick}
+        />
         <SymbolDefinitions id={resolverComponentInstanceID} />
       </StyledMapContainer>
     );

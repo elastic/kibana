@@ -27,8 +27,10 @@ const emptyPreviewRule: RulePreviewResponse = {
 
 export const usePreviewRule = ({
   timeframeOptions,
+  enableLoggedRequests,
 }: {
   timeframeOptions: TimeframePreviewOptions;
+  enableLoggedRequests?: boolean;
 }) => {
   const [rule, setRule] = useState<RuleCreateProps | null>(null);
   const [response, setResponse] = useState<RulePreviewResponse>(emptyPreviewRule);
@@ -66,6 +68,7 @@ export const usePreviewRule = ({
               invocationCount,
               timeframeEnd,
             },
+            enableLoggedRequests,
             signal: abortCtrl.signal,
           });
           if (isSubscribed) {
@@ -87,7 +90,7 @@ export const usePreviewRule = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError, invocationCount, from, interval, timeframeEnd]);
+  }, [rule, addError, invocationCount, from, interval, timeframeEnd, enableLoggedRequests]);
 
   return { isLoading, response, rule, setRule };
 };
