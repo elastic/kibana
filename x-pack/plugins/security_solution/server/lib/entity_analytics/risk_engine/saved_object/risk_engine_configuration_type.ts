@@ -45,6 +45,9 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
         },
       },
     },
+    excludeAlertStatuses: {
+      type: 'keyword',
+    },
   },
 };
 

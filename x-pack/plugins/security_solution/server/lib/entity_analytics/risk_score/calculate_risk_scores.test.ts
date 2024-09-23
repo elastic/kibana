@@ -9,13 +9,10 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { assetCriticalityServiceMock } from '../asset_criticality/asset_criticality_service.mock';
 
-import { calculateRiskScores, filterFromRange } from './calculate_risk_scores';
+import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 
-import {
-  ALERT_RISK_SCORE,
-  ALERT_WORKFLOW_STATUS,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 
 describe('calculateRiskScores()', () => {
   let params: Parameters<typeof calculateRiskScores>[0];
@@ -156,16 +153,16 @@ describe('calculateRiskScores()', () => {
       it('should not add the filter when excludeAlertStatuses is empty', async () => {
         params = { ...params, excludeAlertStatuses: [] };
         await calculateRiskScores(params);
-        expect(esClient.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            body: expect.objectContaining({
-              query: expect.objectContaining({
-                bool: expect.objectContaining({
-                  filter: [filterFromRange(params.range), { exists: { field: ALERT_RISK_SCORE } }],
-                }),
-              }),
-            }),
-          })
+        expect(
+          (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+        ).toEqual(
+          expect.not.arrayContaining([
+            {
+              bool: {
+                must_not: { terms: { [ALERT_WORKFLOW_STATUS]: params.excludeAlertStatuses } },
+              },
+            },
+          ])
         );
       });
 
@@ -173,26 +170,16 @@ describe('calculateRiskScores()', () => {
         esClient.search as jest.Mock;
         params = { ...params, excludeAlertStatuses: ['closed'] };
         await calculateRiskScores(params);
-        expect(esClient.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            body: expect.objectContaining({
-              query: expect.objectContaining({
-                bool: expect.objectContaining({
-                  filter: [
-                    filterFromRange(params.range),
-                    {
-                      bool: {
-                        must_not: {
-                          terms: { [ALERT_WORKFLOW_STATUS]: params.excludeAlertStatuses },
-                        },
-                      },
-                    },
-                    { exists: { field: ALERT_RISK_SCORE } },
-                  ],
-                }),
-              }),
-            }),
-          })
+        expect(
+          (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+        ).toEqual(
+          expect.arrayContaining([
+            {
+              bool: {
+                must_not: { terms: { [ALERT_WORKFLOW_STATUS]: params.excludeAlertStatuses } },
+              },
+            },
+          ])
         );
       });
     });
