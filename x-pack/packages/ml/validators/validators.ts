@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ALLOWED_DATA_UNITS } from '../constants/validation';
-import { parseInterval } from './parse_interval';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
+import { ALLOWED_DATA_UNITS } from './constants';
 
 /**
  * Provides a validator function for maximum allowed input length.
