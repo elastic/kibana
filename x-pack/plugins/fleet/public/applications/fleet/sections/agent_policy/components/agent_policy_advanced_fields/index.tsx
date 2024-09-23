@@ -121,7 +121,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
   const isManagedorAgentlessPolicy =
-    agentPolicy.is_managed === true || agentPolicy.supports_agentless === true;
+    agentPolicy.is_managed === true || agentPolicy?.supports_agentless === true;
 
   const AgentTamperProtectionSectionContent = useMemo(
     () => (

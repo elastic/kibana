@@ -1480,10 +1480,10 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'Agentless policy',
+            name: 'Agentless 1 policy',
             namespace: 'default',
-            is_managed: false,
             supports_agentless: true,
+            force: true,
           })
           .expect(200);
         const { body } = await supertest
@@ -1493,7 +1493,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body).to.eql({
           id: createdPolicy.id,
-          name: 'Agentless policy',
+          name: 'Agentless 1 policy',
         });
       });
 

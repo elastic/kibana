@@ -184,6 +184,10 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   );
 
   const renderModal = () => {
+    const isAgentlessPolicy = agentPolicies?.find((policy) => policy?.supports_agentless === true);
+    const packagePolicy = agentPolicies?.[0].package_policies?.find(
+      (policy) => policy.id === packagePolicies[0]
+    );
     if (!isModalOpen) {
       return null;
     }
@@ -191,11 +195,18 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     return (
       <EuiConfirmModal
         title={
-          <FormattedMessage
-            id="xpack.fleet.deletePackagePolicy.confirmModal.deleteMultipleTitle"
-            defaultMessage="Delete {count, plural, one {integration} other {# integrations}}?"
-            values={{ count: packagePolicies.length }}
-          />
+          isAgentlessPolicy ? (
+            <FormattedMessage
+              id="xpack.fleet.deletePackagePolicy.confirmModal.agentlessTitle"
+              defaultMessage="You’re about to delete an integration"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.deletePackagePolicy.confirmModal.deleteMultipleTitle"
+              defaultMessage="Delete {count, plural, one {integration} other {# integrations}}?"
+              values={{ count: packagePolicies.length }}
+            />
+          )
         }
         onCancel={closeModal}
         onConfirm={deletePackagePolicies}
@@ -249,14 +260,16 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
             <EuiCallOut
               color="danger"
               title={
-                <FormattedMessage
-                  id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsTitle"
-                  defaultMessage="This action will affect {agentsCount} {agentsCount, plural, one {agent} other {agents}}."
-                  values={{ agentsCount }}
-                />
+                !isAgentlessPolicy && (
+                  <FormattedMessage
+                    id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsTitle"
+                    defaultMessage="This action will affect {agentsCount} {agentsCount, plural, one {agent} other {agents}}."
+                    values={{ agentsCount }}
+                  />
+                )
               }
             >
-              {hasMultipleAgentPolicies ? (
+              {hasMultipleAgentPolicies && !isAgentlessPolicy && (
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentPoliciesMessage"
                   defaultMessage="Fleet has detected that the related agent policies {toolTip} are already in use by some of your agents."
@@ -279,7 +292,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                     ),
                   }}
                 />
-              ) : (
+              )}{' '}
+              {!hasMultipleAgentPolicies && !isAgentlessPolicy && (
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
                   defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
@@ -288,10 +302,20 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                   }}
                 />
               )}
+              {!hasMultipleAgentPolicies && isAgentlessPolicy && (
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.agentless.confirmModal.message"
+                  defaultMessage="Deleting {packagePolicyName} integration will stop data ingestion."
+                  values={{
+                    packagePolicyName: <strong>{packagePolicy?.name}</strong>,
+                  }}
+                />
+              )}
             </EuiCallOut>
             <EuiSpacer size="l" />
           </>
         ) : null}
+
         {!isLoadingAgentsCount && (
           <FormattedMessage
             id="xpack.fleet.deletePackagePolicy.confirmModal.generalMessage"
