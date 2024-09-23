@@ -21,6 +21,54 @@
     "functions": [
       {
         "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.hasOpenTelemetryPrefix",
+        "type": "Function",
+        "tags": [],
+        "label": "hasOpenTelemetryPrefix",
+        "description": [],
+        "signature": [
+          "(agentName: string | undefined, language: string) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.hasOpenTelemetryPrefix.$1",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.hasOpenTelemetryPrefix.$2",
+            "type": "string",
+            "tags": [],
+            "label": "language",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
         "id": "def-common.isAndroidAgentName",
         "type": "Function",
         "tags": [],
@@ -431,7 +479,7 @@
         "label": "AgentName",
         "description": [],
         "signature": [
-          "\"java\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"ruby\" | \"rum-js\" | \"android/java\" | \"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\""
+          "\"java\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"ruby\" | \"rum-js\" | \"android/java\" | \"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\" | \"otlp/cpp\" | \"otlp/dotnet\" | \"otlp/erlang\" | \"otlp/go\" | \"otlp/java\" | \"otlp/nodejs\" | \"otlp/php\" | \"otlp/python\" | \"otlp/ruby\" | \"otlp/rust\" | \"otlp/swift\" | \"otlp/android\" | \"otlp/webjs\" | \"ios/swift\""
         ],
         "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
@@ -507,7 +555,7 @@
         "label": "JavaAgentName",
         "description": [],
         "signature": [
-          "\"java\" | \"opentelemetry/java\""
+          "\"java\" | \"opentelemetry/java\" | \"otlp/java\""
         ],
         "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
@@ -544,7 +592,7 @@
         "label": "OpenTelemetryAgentName",
         "description": [],
         "signature": [
-          "\"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\""
+          "\"opentelemetry\" | \"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\" | \"otlp/cpp\" | \"otlp/dotnet\" | \"otlp/erlang\" | \"otlp/go\" | \"otlp/java\" | \"otlp/nodejs\" | \"otlp/php\" | \"otlp/python\" | \"otlp/ruby\" | \"otlp/rust\" | \"otlp/swift\" | \"otlp/android\" | \"otlp/webjs\""
         ],
         "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
@@ -581,7 +629,7 @@
         "label": "RumAgentName",
         "description": [],
         "signature": [
-          "\"js-base\" | \"rum-js\" | \"opentelemetry/webjs\""
+          "\"js-base\" | \"rum-js\" | \"opentelemetry/webjs\" | \"otlp/webjs\""
         ],
         "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
