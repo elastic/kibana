@@ -12,10 +12,6 @@ import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import { createQueryFilterClauses } from '../../../utils/build_query';
 import type {
-  HostEntityRecord,
-  UserEntityRecord,
-} from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-import type {
   InitEntityEngineRequestBody,
   InitEntityEngineResponse,
 } from '../../../../common/api/entity_analytics/entity_store/engine/init.gen';
@@ -59,7 +55,6 @@ export class EntityStoreDataClient {
     entityType: EntityType,
     { indexPattern = '', filter = '' }: InitEntityEngineRequestBody
   ): Promise<InitEntityEngineResponse> {
-      
     const definition = getEntityDefinition(entityType, this.options.namespace);
 
     this.options.logger.info(`Initializing entity store for ${entityType}`);
