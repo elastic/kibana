@@ -14,7 +14,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { buildMockDashboard } from '../../../mocks';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
 import { pluginServices } from '../../../services/plugin_services';
-import { DashboardContainerContext } from '../../embeddable/dashboard_container';
+import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
+import { DashboardApi } from '../../../dashboard_api/types';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 pluginServices.getServices().visualizations.getAliases = jest
@@ -23,11 +24,11 @@ pluginServices.getServices().visualizations.getAliases = jest
 
 describe('DashboardEmptyScreen', () => {
   function mountComponent(viewMode: ViewMode) {
-    const dashboardContainer = buildMockDashboard({ overrides: { viewMode } });
+    const dashboardApi = buildMockDashboard({ overrides: { viewMode } }) as DashboardApi;
     return mountWithIntl(
-      <DashboardContainerContext.Provider value={dashboardContainer}>
+      <DashboardContext.Provider value={dashboardApi}>
         <DashboardEmptyScreen />
-      </DashboardContainerContext.Provider>
+      </DashboardContext.Provider>
     );
   }
 
