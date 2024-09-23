@@ -25,6 +25,7 @@ const investigationSchema = z.object({
   title: z.string(),
   createdAt: z.number(),
   createdBy: z.string(),
+  updatedAt: z.number(),
   params: z.object({
     timeRange: z.object({ from: z.number(), to: z.number() }),
   }),
@@ -35,4 +36,7 @@ const investigationSchema = z.object({
   items: z.array(investigationItemSchema),
 });
 
+type Status = z.infer<typeof statusSchema>;
+
+export type { Status };
 export { investigationSchema, statusSchema };

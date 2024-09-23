@@ -53,10 +53,10 @@
       "notifications",
       "savedSearch",
       "unifiedDocViewer",
-      "charts"
+      "charts",
+      "entityManager"
     ],
     "optionalPlugins": [
-      "cloudExperiments",
       "encryptedSavedObjects",
       "fleet",
       "ml",
