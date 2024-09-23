@@ -92,6 +92,7 @@ import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { RuleResultService } from '../monitoring/rule_result_service';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ruleResultServiceMock } from '../monitoring/rule_result_service.mock';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -109,7 +110,6 @@ jest.mock('../lib/wrap_scoped_cluster_client', () => ({
 jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 
 jest.mock('../monitoring/rule_result_service');
-
 jest.spyOn(getExecutorServicesModule, 'getExecutorServices');
 
 let fakeTimer: sinon.SinonFakeTimers;
@@ -3477,6 +3477,45 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
 
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
+  });
+
+  test('when there is a gap, report it to alert event log', async () => {
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    jest.spyOn(RuleMonitoringService.prototype, 'getMonitoring').mockImplementation(() => {
+      return {
+        run: {
+          history: [],
+          calculated_metrics: {
+            success_ratio: 0,
+          },
+          last_run: {
+            timestamp: '2021-09-01T00:00:00.000Z',
+            metrics: {
+              gap_range: {
+                from: '2021-09-01T00:00:00.000Z',
+                to: '2021-09-01T00:00:00.000Z',
+              },
+            },
+          },
+        },
+      };
+    });
+
+    await taskRunner.run();
+
+    expect(alertingEventLogger.reportGap).toHaveBeenCalledWith({
+      gap: { from: '2021-09-01T00:00:00.000Z', to: '2021-09-01T00:00:00.000Z' },
+    });
   });
 
   function testAlertingEventLogCalls({
