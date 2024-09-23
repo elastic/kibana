@@ -11,9 +11,7 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
-    dependencies: {
-      start: { observabilityShared },
-    },
+    services: { observabilityShared },
   } = useKibana();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
