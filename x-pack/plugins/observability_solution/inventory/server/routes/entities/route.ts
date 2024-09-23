@@ -335,8 +335,6 @@ const getEntityRoute = createInventoryServerRoute({
       throw notFound();
     }
 
-    console.log('getting entity with signals');
-
     const entityWithSignals = await getEntitySignals({
       alertsClient,
       rulesClient,

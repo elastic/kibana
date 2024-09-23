@@ -156,6 +156,12 @@ export async function checkDashboardsForEntityData({
 
                 return requestsForChunk.map((request, index) => {
                   const response = allResponses.responses[index];
+                  if ('error' in response) {
+                    return {
+                      ...request,
+                      has_data: false,
+                    };
+                  }
                   const total =
                     typeof response.hits.total === 'number'
                       ? response.hits.total
