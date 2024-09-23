@@ -422,6 +422,7 @@ export class ChromeService {
 
             return (
               <ProjectHeader
+                isServerless={this.isServerless}
                 application={application}
                 globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                 actionMenu$={application.currentActionMenu$}
@@ -452,6 +453,7 @@ export class ChromeService {
 
         return (
           <Header
+            isServerless={this.isServerless}
             loadingCount$={http.getLoadingCount$()}
             application={application}
             headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
