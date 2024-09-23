@@ -18,10 +18,12 @@ import {
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
+import { TASK_MANAGER_UNAVAILABLE_ERROR } from '../../risk_engine/routes/translations';
 
 export const initEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .post({
@@ -45,22 +47,26 @@ export const initEntityEngineRoute = (
       async (context, request, response): Promise<IKibanaResponse<InitEntityEngineResponse>> => {
         // TODO: discuss this with the team
         await checkAndInitAssetCriticalityResources(context, logger);
-        const securtyContext = await context.securitySolution;
-        const riskScoreDataClient = securtyContext.getRiskScoreDataClient();
+        const secSol = await context.securitySolution;
+        const [_, { taskManager }] = await getStartServices();
+        const riskScoreDataClient = secSol.getRiskScoreDataClient();
         await riskScoreDataClient.createRiskScoreLatestIndex();
         const siemResponse = buildSiemResponse(response);
-
         try {
-          const secSol = await context.securitySolution;
-
+          if (!taskManager) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: TASK_MANAGER_UNAVAILABLE_ERROR,
+            });
+          }
           const body: InitEntityEngineResponse = await secSol
             .getEntityStoreDataClient()
-            .init(request.params.entityType, request.body);
+            .init(request.params.entityType, taskManager, request.body);
 
           return response.ok({ body });
         } catch (e) {
-          logger.error('Error in InitEntityEngine:', e);
           const error = transformError(e);
+          logger.error(`Error initialising entity engine: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

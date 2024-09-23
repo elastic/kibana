@@ -47,7 +47,6 @@ export const createFieldRetentionEnrichPolicy = async ({
   entityType: EntityType;
 }) => {
   const policy = getFieldRetentionEnrichPolicy(entityType, spaceId);
-  console.log('policy', JSON.stringify(policy));
   return esClient.enrich.putPolicy(policy);
 };
 
@@ -105,8 +104,6 @@ export const getFieldRetentionPipelineSteps = ({
       },
     });
   }
-
-  console.log('steps', JSON.stringify(steps));
 
   return steps;
 };

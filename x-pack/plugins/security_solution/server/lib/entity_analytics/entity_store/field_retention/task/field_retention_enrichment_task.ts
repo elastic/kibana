@@ -35,7 +35,7 @@ const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION
 
 type GetEntityStoreDataClient = (namespace: string) => Promise<EntityStoreDataClient>;
 
-export const registerEntityStoreEnrichTask = ({
+export const registerEntityStoreFieldRetentionEnrichTask = ({
   getStartServices,
   logger,
   auditLogger,
@@ -82,7 +82,7 @@ export const registerEntityStoreEnrichTask = ({
   });
 };
 
-export const startEntityStoreEnrichTask = async ({
+export const startEntityStoreFieldRetentionEnrichTask = async ({
   logger,
   namespace,
   taskManager,
@@ -113,7 +113,7 @@ export const startEntityStoreEnrichTask = async ({
   }
 };
 
-export const removeEntityStoreEnrichTask = async ({
+export const removeEntityStoreFieldRetentionEnrichTask = async ({
   logger,
   namespace,
   taskManager,
