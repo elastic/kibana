@@ -7,6 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import React from 'react';
+import { ScriptsCommand } from '../../builtin_commands/scripts_command';
 import { executionTranslations } from './translations';
 import type { ParsedCommandInterface } from '../../../service/types';
 import { ConsoleCodeBlock } from '../../console_code_block';
@@ -129,14 +130,17 @@ const createCommandHistoryEntry = (
 export const handleExecuteCommand: ConsoleStoreReducer<
   ConsoleDataAction & { type: 'executeCommand' }
 > = (state, action) => {
-  const { parsedInput, enteredCommand, input: fullInputText } = action.payload;
+  console.log({ state, action });
+  const { parsedInput, enteredCommand, input: fullInputText, agentMeta } = action.payload;
 
   if (parsedInput.name === '') {
     return state;
   }
 
+  console.log('test', parsedInput, enteredCommand, fullInputText);
   const commandDefinition: CommandDefinition | undefined = enteredCommand?.commandDefinition;
 
+  console.log({ commandDefinition });
   // Unknown command
   if (!commandDefinition) {
     return updateStateWithNewCommandHistoryItem(
@@ -162,6 +166,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     inputDisplay: fullInputText,
     args: parsedInput,
     commandDefinition,
+    agentMeta,
   };
   const requiredArgs = getRequiredArguments(commandDefinition.args);
   const exclusiveOrArgs = getExclusiveOrArgs(commandDefinition.args);
@@ -169,7 +174,18 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   const exclusiveOrErrorMessage = executionTranslations.onlyOneFromExclusiveOr(
     exclusiveOrArgs.map(toCliArgumentOption).join(', ')
   );
+  console.log({ parsedInput });
 
+  if (parsedInput.name === 'scripts') {
+    return updateStateWithNewCommandHistoryItem(
+      state,
+      createCommandHistoryEntry(
+        cloneCommandDefinitionWithNewRenderComponent(command, ScriptsCommand),
+        undefined,
+        false
+      )
+    );
+  }
   // If args were entered, then validate them
   if (parsedInput.hasArgs) {
     // Show command help

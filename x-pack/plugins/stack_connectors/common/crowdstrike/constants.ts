@@ -18,4 +18,5 @@ export enum SUB_ACTION {
   EXECUTE_RTR = 'executeRTR',
   BATCH_EXECUTE_RTR = 'batchExecuteRTR',
   GET_EXECUTE_RTR_DETAILS = 'getExecuteRTRDetails',
+  GET_SCRIPTS = 'getScripts',
 }

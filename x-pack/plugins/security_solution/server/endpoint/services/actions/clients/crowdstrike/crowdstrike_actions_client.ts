@@ -13,6 +13,7 @@ import {
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CrowdstrikeBaseApiResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { v4 as uuidv4 } from 'uuid';
+import { scriptsList } from './utils';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
@@ -98,6 +99,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     actionType: SUB_ACTION,
     actionParams: object
   ): Promise<ActionTypeExecutorResult<unknown>> {
+    console.log('czy to to?');
     const executeOptions: NormalizedExternalConnectorClientExecuteOptions = {
       params: {
         subAction: actionType,
@@ -347,7 +349,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
   private async completeInitAction(
     actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined,
-    doc: LogsEndpointAction
+    doc: LogsEndpointAction,
+    // temporary - init will be taken out from actions_client
+    scripts: any
   ): Promise<void> {
     interface Script {
       command: string;
@@ -365,7 +369,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         .join('\n');
     };
 
-    const stdout = generateStdout(actionResponse?.data?.resources?.[0]?.scripts || []);
+    const stdout = generateStdout(scripts);
     const options = {
       actionId: doc.EndpointActions.action_id,
       agentId: doc.agent.id,
@@ -399,15 +403,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     actionRequest: ExecuteActionRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
-    const [response, batchResponse] = await Promise.all([
-        // temporary initialise also single session because it returns list of available commands, but we should just hardcode them.
-      this.sendAction(SUB_ACTION.INIT_RTR_SESSION, {
-        endpoint_ids: actionRequest.endpoint_ids,
-      }) as Promise<ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>>,
-      this.sendAction(SUB_ACTION.BATCH_INIT_RTR_SESSION, {
-        endpoint_ids: actionRequest.endpoint_ids,
-      }) as Promise<ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>>,
-    ]);
+    const response = (await this.sendAction(SUB_ACTION.BATCH_INIT_RTR_SESSION, {
+      endpoint_ids: actionRequest.endpoint_ids,
+    })) as Promise<ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>>;
 
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...actionRequest,
@@ -415,9 +413,25 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       command: 'init',
     };
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
-    await this.completeInitAction(response, actionRequestDoc);
+    await this.completeInitAction(response, actionRequestDoc, scriptsList);
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
+
+  // either put the action here, or we can do it directly from scripts endpoint where we use scriptsActionClient etc
+  // async getScripts(
+  //   actionRequest: ExecuteActionRequestBody,
+  //   options: CommonResponseActionMethodOptions = {}
+  // ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
+  //   console.log({ actionRequest });
+  //   const [response, batchResponse] = await Promise.all([
+  //     this.sendAction(SUB_ACTION.GET_SCRIPTS, {
+  //       endpoint_ids: ['test'],
+  //     }) as Promise<ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>>,
+  //   ]);
+  //
+  //   console.log({ response });
+  //   return response;
+  // }
 
   async shell(
     actionRequest: ExecuteActionRequestBody,
@@ -443,27 +457,27 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     };
     let actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined;
     if (!reqIndexOptions.error) {
-      // let error = (await this.validateRequest(reqIndexOptions)).error;
-      // if (!error) {
-      // if (!reqIndexOptions.actionId) {
-      //   reqIndexOptions.actionId = uuidv4();
-      // }
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+      if (!error) {
+        if (!reqIndexOptions.actionId) {
+          reqIndexOptions.actionId = uuidv4();
+        }
 
-      try {
-        actionResponse = (await this.sendAction(SUB_ACTION.BATCH_EXECUTE_RTR, {
-          endpoint_ids: actionRequest.endpoint_ids,
-          command: actionRequest.parameters.command,
-        })) as ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>;
-      } catch (err) {
-        // error = err;
+        try {
+          actionResponse = (await this.sendAction(SUB_ACTION.BATCH_EXECUTE_RTR, {
+            endpoint_ids: actionRequest.endpoint_ids,
+            command: actionRequest.parameters.command,
+          })) as ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>;
+        } catch (err) {
+          error = err;
+        }
       }
-      // }
 
-      // reqIndexOptions.error = error?.message;
+      reqIndexOptions.error = error?.message;
 
-      // if (!this.options.isAutomated && error) {
-      //   throw error;
-      // }
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
     }
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);

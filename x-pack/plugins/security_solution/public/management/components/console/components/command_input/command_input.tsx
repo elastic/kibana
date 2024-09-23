@@ -98,11 +98,14 @@ export interface CommandInputProps extends CommonProps {
   prompt?: string;
   isWaiting?: boolean;
   focusRef?: InputCaptureProps['focusRef'];
-  agentType: string;
+  agent: {
+    agentId: string;
+    agentType: string;
+  };
 }
 
 export const CommandInput = memo<CommandInputProps>(
-  ({ prompt = '', focusRef, agentType, ...commonProps }) => {
+  ({ prompt = '', focusRef, agent, ...commonProps }) => {
     useInputHints();
     const getTestId = useTestIdGenerator(useDataTestSubj());
     const dispatch = useConsoleStateDispatch();
@@ -145,7 +148,8 @@ export const CommandInput = memo<CommandInputProps>(
     }, []);
 
     const handleSubmitButton = useCallback<MouseEventHandler>(() => {
-      if (!enteredCommand && agentType === 'crowdstrike') {
+      console.log('submit');
+      if (!enteredCommand && agent.agentType === 'crowdstrike') {
         setCommandToExecute({
           input: `shell --command "${userInput.getFullText(true)}"`,
           enteredCommand: {
@@ -153,6 +157,7 @@ export const CommandInput = memo<CommandInputProps>(
             argsWithValueSelectors: undefined,
             commandDefinition: commandList.filter((cmd) => cmd.name === 'shell')[0],
           },
+          agentMeta: agent,
           parsedInput: {
             name: 'shell',
             args: {
@@ -168,6 +173,7 @@ export const CommandInput = memo<CommandInputProps>(
           input: userInput.getFullText(true),
           enteredCommand,
           parsedInput,
+          agentMeta: agent,
         });
       }
     }, [commandList, enteredCommand, parsedInput, userInput]);
@@ -234,7 +240,7 @@ export const CommandInput = memo<CommandInputProps>(
 
               // ENTER  = Execute command and blank out the input area
               case 13:
-                if (!enteredCommand && agentType === 'crowdstrike') {
+                if (!enteredCommand && agent.agentType === 'crowdstrike') {
                   setCommandToExecute({
                     input: `shell --command "${inputText.getFullText(true)}"`,
                     enteredCommand: {
@@ -242,6 +248,7 @@ export const CommandInput = memo<CommandInputProps>(
                       argsWithValueSelectors: undefined,
                       commandDefinition: commandList.filter((cmd) => cmd.name === 'shell')[0],
                     },
+                    agentMeta: agent,
                     parsedInput: {
                       name: 'shell',
                       args: {
@@ -258,6 +265,7 @@ export const CommandInput = memo<CommandInputProps>(
                     enteredCommand:
                       prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
                     parsedInput: prevParsedInput,
+                    agentMeta: agent,
                   });
                 }
                 inputText.clear();

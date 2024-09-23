@@ -112,7 +112,7 @@ export const Console = memo<ConsoleProps>(
     TitleComponent,
     storagePrefix,
     managedKey,
-    agentType,
+    agent,
     ...commonProps
   }) => {
     const scrollingViewport = useRef<HTMLDivElement | null>(null);
@@ -197,11 +197,7 @@ export const Console = memo<ConsoleProps>(
                           className="layout-container layout-commandInput"
                           data-test-subj={getTestId('mainPanel-inputArea')}
                         >
-                          <CommandInput
-                            prompt={prompt}
-                            focusRef={inputFocusRef}
-                            agentType={agentType}
-                          />
+                          <CommandInput prompt={prompt} focusRef={inputFocusRef} agent={agent} />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false} className="layout-container layout-footer">
                           <ConsoleFooter />

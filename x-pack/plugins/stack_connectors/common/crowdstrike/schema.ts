@@ -294,6 +294,7 @@ export const CrowdstrikeExecuteRTRParamsSchema = schema.any();
 export const CrowdstrikeInitRTRParamsSchema = schema.object({
   endpoint_ids: schema.arrayOf(schema.string()),
 });
+export const CrowdstrikeGetScriptsSchema = schema.object({});
 export const CrowdstrikeGetAgentsParamsSchema = schema.object({
   ids: schema.arrayOf(schema.string()),
 });

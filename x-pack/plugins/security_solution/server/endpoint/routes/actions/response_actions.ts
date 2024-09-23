@@ -385,15 +385,16 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
     const connectorActions = (await context.actions).getActionsClient();
-    const agentType = command === 'execute' ? 'crowdstrike' : req.body.agent_type || 'endpoint';
-
-    const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {
-      esClient,
-      casesClient,
-      endpointService: endpointContext.service,
-      username: user?.username || 'unknown',
-      connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
-    });
+    const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
+      req.body.agent_type || 'endpoint',
+      {
+        esClient,
+        casesClient,
+        endpointService: endpointContext.service,
+        username: user?.username || 'unknown',
+        connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
+      }
+    );
 
     try {
       let action: ActionDetails;
@@ -462,6 +463,9 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
           }
         : {};
 
+      console.log({
+        action,
+      });
       return res.ok({
         body: {
           ...legacyResponseData,
@@ -469,6 +473,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         },
       });
     } catch (err) {
+      console.log({ err111: err });
       return errorHandler(logger, res, err);
     }
   };

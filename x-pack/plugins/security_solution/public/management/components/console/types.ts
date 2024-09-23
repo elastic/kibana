@@ -281,7 +281,10 @@ export interface ConsoleProps extends CommonProps {
   /**
    * The type of agent that will be used in the console.
    */
-  agentType: string;
+  agent: {
+    agentId: string;
+    agentType: string;
+  };
 
   /**
    * If defined, then the `help` builtin command will display this output instead of the default one

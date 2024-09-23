@@ -98,25 +98,13 @@ export const useInputHints = (isExecuteAsCliEnabled: boolean = false) => {
 
         dispatch({ type: 'setInputState', payload: { value: undefined } });
       } else {
-        // if execute with a shortcut is enabled, then show the parsed execute command hint
-        if (isExecuteAsCliEnabled) {
-          dispatch({
-            type: 'updateFooterContent',
-            payload: {
-              value: EXECUTE_AS_CLI_HINT(commandEntered),
-            },
-          });
-
-          dispatch({ type: 'setInputState', payload: { value: undefined } });
-        } else {
-          dispatch({
-            type: 'updateFooterContent',
-            payload: {
-              value: UNKNOWN_COMMAND_HINT(commandEntered),
-            },
-          });
-          dispatch({ type: 'setInputState', payload: { value: 'error' } });
-        }
+        dispatch({
+          type: 'updateFooterContent',
+          payload: {
+            value: UNKNOWN_COMMAND_HINT(commandEntered),
+          },
+        });
+        dispatch({ type: 'setInputState', payload: { value: 'error' } });
       }
     } else {
       dispatch({
