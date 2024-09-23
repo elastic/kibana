@@ -25,7 +25,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { DashboardPanelMap } from '../../common';
+import { DashboardPanelMap, DashboardPanelState } from '../../common';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
 
 export type DashboardApi = CanExpandPanels &
@@ -44,6 +44,7 @@ export type DashboardApi = CanExpandPanels &
     fullScreenMode$: PublishingSubject<boolean | undefined>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
+    getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
     getPanelsState: () => DashboardPanelMap;
     hasOverlays$: PublishingSubject<boolean | undefined>;
     hasRunMigrations$: PublishingSubject<boolean | undefined>;
