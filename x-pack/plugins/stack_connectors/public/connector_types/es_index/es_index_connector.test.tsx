@@ -354,6 +354,8 @@ describe('IndexActionConnectorFields', () => {
         </ConnectorFormTestProvider>
       );
 
+      await waitFor(() => null);
+
       await act(async () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
       });

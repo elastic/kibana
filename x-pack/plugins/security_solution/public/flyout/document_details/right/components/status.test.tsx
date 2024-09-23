@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { DocumentDetailsContext } from '../../shared/context';
 import { DocumentStatus } from './status';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
@@ -47,13 +47,14 @@ describe('<DocumentStatus />', () => {
       scopeId: 'scopeId',
     } as unknown as DocumentDetailsContext;
 
-    const { getByTestId, getByText } = renderStatus(contextValue);
+    renderStatus(contextValue);
 
-    expect(getByTestId(STATUS_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByText('open')).toBeInTheDocument();
+    expect(screen.getByTestId(STATUS_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByText('open')).toBeInTheDocument();
 
-    getByTestId(STATUS_BUTTON_TEST_ID).click();
-    expect(getByTestId('data-test-subj')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId(STATUS_BUTTON_TEST_ID));
+    // FIXME: evaluate if this particular assertion is actually doing anything
+    expect(screen.getByTestId('data-test-subj')).toBeInTheDocument();
   });
 
   it('should render empty tag when status is not available', () => {

@@ -233,6 +233,8 @@ describe('UpdateConnector renders', () => {
       </I18nProvider>
     );
 
+    await waitFor(() => null);
+
     expect(onConfirm).not.toHaveBeenCalled();
 
     await reactAct(async () => {

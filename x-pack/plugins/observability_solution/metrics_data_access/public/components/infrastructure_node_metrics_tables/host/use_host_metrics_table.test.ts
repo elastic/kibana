@@ -12,7 +12,7 @@ import { createMetricsClientMock } from '../test_helpers';
 
 jest.mock('../shared', () => ({
   ...jest.requireActual('../shared'),
-  useInfrastructureNodeMetrics: jest.fn(),
+  useInfrastructureNodeMetrics: jest.fn(() => ({ data: null, isLoading: false })),
 }));
 
 describe('useHostMetricsTable hook', () => {

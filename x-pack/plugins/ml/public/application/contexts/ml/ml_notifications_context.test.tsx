@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { reactRenderHook, act } from '@testing-library/react';
+import { renderHook as reactRenderHook, act } from '@testing-library/react';
 import { of, throwError } from 'rxjs';
 import { useMlNotifications, MlNotificationsContextProvider } from './ml_notifications_context';
 import { useStorage } from '@kbn/ml-local-storage';
