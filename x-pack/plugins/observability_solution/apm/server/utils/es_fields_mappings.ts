@@ -941,3 +941,11 @@ export const metaDataAppTransactionMetric = (fields: Partial<Record<string, unkn
     },
   };
 };
+
+export const serviceAgentName = (fields: Partial<Record<string, unknown[]>>) => {
+  return {
+    agent: {
+      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
+    },
+  };
+};
