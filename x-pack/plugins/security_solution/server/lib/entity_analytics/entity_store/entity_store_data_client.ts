@@ -19,12 +19,12 @@ import type {
   InitEntityEngineRequestBody,
   InitEntityEngineResponse,
 } from '../../../../common/api/entity_analytics/entity_store/engine/init.gen';
+
 import type {
-  EngineDescriptor,
   EntityType,
   InspectQuery,
 } from '../../../../common/api/entity_analytics/entity_store/common.gen';
-import { entityEngineDescriptorTypeName } from './saved_object';
+
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { getEntitiesIndexName, getEntityDefinition } from './utils/utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
@@ -49,14 +49,18 @@ interface SearchEntitiesParams {
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
   constructor(private readonly options: EntityStoreClientOpts) {
-    this.engineClient = new EngineDescriptorClient(options.soClient);
+    this.engineClient = new EngineDescriptorClient({
+      soClient: options.soClient,
+      namespace: options.namespace,
+    });
   }
 
   public async init(
     entityType: EntityType,
     { indexPattern = '', filter = '' }: InitEntityEngineRequestBody
   ): Promise<InitEntityEngineResponse> {
-    const definition = getEntityDefinition(entityType);
+      
+    const definition = getEntityDefinition(entityType, this.options.namespace);
 
     this.options.logger.info(`Initializing entity store for ${entityType}`);
 
@@ -76,7 +80,7 @@ export class EntityStoreDataClient {
   }
 
   public async start(entityType: EntityType) {
-    const definition = getEntityDefinition(entityType);
+    const definition = getEntityDefinition(entityType, this.options.namespace);
 
     const descriptor = await this.engineClient.get(entityType);
 
@@ -93,7 +97,7 @@ export class EntityStoreDataClient {
   }
 
   public async stop(entityType: EntityType) {
-    const definition = getEntityDefinition(entityType);
+    const definition = getEntityDefinition(entityType, this.options.namespace);
 
     const descriptor = await this.engineClient.get(entityType);
 
@@ -114,18 +118,11 @@ export class EntityStoreDataClient {
   }
 
   public async list() {
-    return this.options.soClient
-      .find<EngineDescriptor>({
-        type: entityEngineDescriptorTypeName,
-      })
-      .then(({ saved_objects: engines }) => ({
-        engines: engines.map((engine) => engine.attributes),
-        count: engines.length,
-      }));
+    return this.engineClient.list();
   }
 
   public async delete(entityType: EntityType, deleteData: boolean) {
-    const { id } = getEntityDefinition(entityType);
+    const { id } = getEntityDefinition(entityType, this.options.namespace);
 
     this.options.logger.info(`Deleting entity store for ${entityType}`);
 
@@ -142,7 +139,7 @@ export class EntityStoreDataClient {
   }> {
     const { page, perPage, sortField, sortOrder, filterQuery, entityTypes } = params;
 
-    const index = entityTypes.map(getEntitiesIndexName);
+    const index = entityTypes.map((type) => getEntitiesIndexName(type, this.options.namespace));
     const from = (page - 1) * perPage;
     const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
 
