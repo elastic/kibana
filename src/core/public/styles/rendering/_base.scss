@@ -67,7 +67,8 @@
 }
 
 .kbnBody--chromeHidden {
-  --euiFixedHeadersOffset: 0;
+  // stylelint-disable-next-line length-zero-no-unit
+  --euiFixedHeadersOffset: 0px;
 
   &.kbnBody--hasHeaderBanner {
     --euiFixedHeadersOffset: var(--kbnHeaderBannerHeight);
