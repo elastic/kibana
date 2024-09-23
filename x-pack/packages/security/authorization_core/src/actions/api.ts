@@ -28,14 +28,26 @@ export class ApiActions implements ApiActionsType {
     return this.get(operation, subject);
   }
 
-  public get(operation: ApiOperation, subject: string) {
-    if (!this.isValidOperation(operation)) {
+  public get(operation: string | ApiOperation, subject?: string) {
+    if (typeof operation === 'string' && !this.isValidOperation(operation)) {
+      if (!isString(operation)) {
+        throw new Error('operation is required and must be a string');
+      }
+
+      if (subject) {
+        throw new Error(
+          'Too many arguments. If you provide a subject, the operation must be an ApiOperation'
+        );
+      }
+
+      return `${this.prefix}${operation}`;
+    } else if (this.isValidOperation(operation)) {
+      if (!subject || !isString(subject)) {
+        throw new Error('subject is required and must be a string');
+      }
+      return `${this.prefix}${operation}_${subject}`;
+    } else {
       throw new Error('operation is required and must be a valid ApiOperation');
     }
-    if (!subject || !isString(subject)) {
-      throw new Error('subject is required and must be a string');
-    }
-
-    return `${this.prefix}${operation}_${subject}`;
   }
 }
