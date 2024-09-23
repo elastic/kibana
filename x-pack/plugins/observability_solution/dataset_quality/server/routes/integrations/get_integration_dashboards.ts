@@ -17,6 +17,7 @@ export async function getIntegrationDashboards(
 ): Promise<Dashboard[]> {
   // Retrieve integration savedObject
   const integrationSavedObjects = await packageClient.getInstallation(integration);
+
   if (!integrationSavedObjects) return [];
 
   // Extract dashboard ids

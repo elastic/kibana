@@ -9,7 +9,29 @@ import type {
   ObservabilitySharedPluginSetup,
 } from '@kbn/observability-shared-plugin/public';
 import type { InferencePublicStart, InferencePublicSetup } from '@kbn/inference-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type {
+  DataViewsPublicPluginStart,
+  DataViewsPublicPluginSetup,
+} from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart, DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type {
+  EntityManagerPublicPluginStart,
+  EntityManagerPublicPluginSetup,
+} from '@kbn/entityManager-plugin/public';
+import type {
+  UnifiedSearchPluginSetup,
+  UnifiedSearchPublicPluginStart,
+} from '@kbn/unified-search-plugin/public';
+import type {
+  DatasetQualityPluginStart,
+  DatasetQualityPluginSetup,
+} from '@kbn/dataset-quality-plugin/public';
+import type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import type {
+  GlobalSearchPluginStart,
+  GlobalSearchPluginSetup,
+} from '@kbn/global-search-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -18,12 +40,27 @@ export interface ConfigSchema {}
 export interface InventorySetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   inference: InferencePublicSetup;
+  dataViews: DataViewsPublicPluginSetup;
+  data: DataPublicPluginSetup;
+  fieldFormats: FieldFormatsSetup;
+  entityManager: EntityManagerPublicPluginSetup;
+  unifiedSearch: UnifiedSearchPluginSetup;
+  datasetQuality: DatasetQualityPluginSetup;
+  share: SharePluginSetup;
+  globalSearch: GlobalSearchPluginSetup;
 }
 
 export interface InventoryStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   inference: InferencePublicStart;
+  dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  entityManager: EntityManagerPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  datasetQuality: DatasetQualityPluginStart;
   share: SharePluginStart;
+  globalSearch: GlobalSearchPluginStart;
 }
 
 export interface InventoryPublicSetup {}

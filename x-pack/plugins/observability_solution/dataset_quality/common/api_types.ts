@@ -71,6 +71,7 @@ export const integrationRt = rt.intersection([
     version: rt.string,
     icons: rt.array(integrationIconRt),
     datasets: rt.record(rt.string, rt.string),
+    dataStreams: rt.array(rt.string),
   }),
 ]);
 

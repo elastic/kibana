@@ -6,7 +6,10 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { ENTITY_INTERNAL_INDICES_PATTERN } from '../../../common/constants_entities';
+import {
+  ENTITY_INTERNAL_INDICES_PATTERN,
+  UNIFIED_ENTITY_INDEX,
+} from '../../../common/constants_entities';
 import { SO_ENTITY_DEFINITION_TYPE, SO_ENTITY_DISCOVERY_API_KEY_TYPE } from '../../saved_objects';
 import { BUILT_IN_ALLOWED_INDICES } from '../entities/built_in/constants';
 
@@ -58,11 +61,11 @@ export const entityDefinitionRuntimePrivileges = {
   cluster: ['manage_transform', 'manage_ingest_pipelines', 'manage_index_templates'],
   index: [
     {
-      names: [ENTITY_INTERNAL_INDICES_PATTERN],
+      names: [ENTITY_INTERNAL_INDICES_PATTERN, UNIFIED_ENTITY_INDEX],
       privileges: ['create_index', 'index', 'create_doc', 'auto_configure', 'read'],
     },
     {
-      names: [...BUILT_IN_ALLOWED_INDICES, ENTITY_INTERNAL_INDICES_PATTERN],
+      names: [...BUILT_IN_ALLOWED_INDICES, ENTITY_INTERNAL_INDICES_PATTERN, UNIFIED_ENTITY_INDEX],
       privileges: ['read', 'view_index_metadata'],
     },
   ],

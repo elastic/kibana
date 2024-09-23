@@ -6,26 +6,30 @@
  */
 
 import * as t from 'io-ts';
+import { memoize } from 'lodash';
+import pLimit from 'p-limit';
 import {
+  Dashboard,
   DataStreamDetails,
   DataStreamSettings,
   DataStreamStat,
-  DegradedDocs,
-  NonAggregatableDatasets,
-  DegradedFieldResponse,
   DatasetUserPrivileges,
+  DegradedDocs,
+  DegradedFieldResponse,
   DegradedFieldValues,
+  NonAggregatableDatasets,
 } from '../../../common/api_types';
+import { datasetQualityPrivileges } from '../../services';
 import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
-import { datasetQualityPrivileges } from '../../services';
+import { getIntegrationDashboards } from '../integrations/get_integration_dashboards';
 import { getDataStreamDetails, getDataStreamSettings } from './get_data_stream_details';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
-import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
-import { getDegradedFields } from './get_degraded_fields';
 import { getDegradedFieldValues } from './get_degraded_field_values';
+import { getDegradedFields } from './get_degraded_fields';
+import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -287,6 +291,93 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
   },
 });
 
+const dataStreamsIntegrationsRoute = createDatasetQualityServerRoute({
+  endpoint: 'POST /internal/dataset_quality/data_streams/integrations',
+  params: t.type({
+    body: t.type({
+      dataStreams: t.array(t.string),
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<{
+    dataStreams: Array<{
+      name: string;
+      integration?: string;
+      dashboards?: Dashboard[];
+    }>;
+  }> {
+    const { context, params, plugins } = resources;
+    const { dataStreams } = params.body;
+    const coreContext = await context.core;
+
+    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const soClient = coreContext.savedObjects.client;
+
+    const [dataStreamsWithPackageNames, packageClient] = await Promise.all([
+      esClient.indices
+        .getDataStream({
+          name: dataStreams,
+        })
+        .then((response) => {
+          return new Map(
+            response.data_streams.map((dataStreamInfo) => {
+              const dataStreamMeta = dataStreamInfo._meta as
+                | undefined
+                | {
+                    package?: {
+                      name?: string;
+                    };
+                  };
+
+              const packageName = dataStreamMeta?.package?.name;
+
+              const name = dataStreamInfo.name;
+
+              return [
+                name,
+                {
+                  name,
+                  packageName,
+                },
+              ];
+            })
+          );
+        }),
+      plugins.fleet.start().then((fleetStart) => fleetStart.packageService.asInternalUser),
+    ]);
+
+    const limiter = pLimit(5);
+
+    const getDashboardsMemoized = memoize(async (name: string) => {
+      return await getIntegrationDashboards(packageClient, soClient, name);
+    });
+
+    const dataStreamsWithIntegrations = await Promise.all(
+      dataStreams.map(async (name) => {
+        return limiter(async () => {
+          const dataStreamMeta = dataStreamsWithPackageNames.get(name);
+          const packageName = dataStreamMeta?.packageName;
+
+          return packageName
+            ? {
+                name,
+                integration: packageName,
+                dashboards: await getDashboardsMemoized(packageName),
+              }
+            : { name };
+        });
+      })
+    );
+
+    return {
+      dataStreams: dataStreamsWithIntegrations,
+    };
+  },
+});
+
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
@@ -296,4 +387,5 @@ export const dataStreamsRouteRepository = {
   ...degradedFieldValuesRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
+  ...dataStreamsIntegrationsRoute,
 };

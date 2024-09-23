@@ -8,8 +8,26 @@
 import { Logger } from '@kbn/core/server';
 import { PackageClient } from '@kbn/fleet-plugin/server';
 import { PackageNotFoundError } from '@kbn/fleet-plugin/server/errors';
-import { PackageListItem, RegistryDataStream } from '@kbn/fleet-plugin/common';
+import type { RegistryDataStream, RegistrySearchResult } from '@kbn/fleet-plugin/common';
 import { IntegrationType } from '../../../common/api_types';
+
+export async function getIntegrationFromPackage({
+  pkg,
+  packageClient,
+  logger,
+}: {
+  pkg: RegistrySearchResult;
+  packageClient: PackageClient;
+  logger: Logger;
+}) {
+  return {
+    name: pkg.name,
+    title: pkg.title,
+    version: pkg.version,
+    icons: pkg.icons,
+    datasets: await getDatasets({ packageClient, logger, pkg }),
+  };
+}
 
 export async function getIntegrations(options: {
   packageClient: PackageClient;
@@ -21,13 +39,13 @@ export async function getIntegrations(options: {
   const installedPackages = packages.filter((p) => p.status === 'installed');
 
   const integrations = await Promise.all(
-    installedPackages.map(async (p) => ({
-      name: p.name,
-      title: p.title,
-      version: p.version,
-      icons: p.icons,
-      datasets: await getDatasets({ packageClient, logger, pkg: p }),
-    }))
+    installedPackages.map((pkg) =>
+      getIntegrationFromPackage({
+        pkg,
+        logger,
+        packageClient,
+      })
+    )
   );
 
   return integrations.filter((integration) => Object.keys(integration.datasets).length > 0);
@@ -36,7 +54,7 @@ export async function getIntegrations(options: {
 const getDatasets = async (options: {
   packageClient: PackageClient;
   logger: Logger;
-  pkg: PackageListItem;
+  pkg: RegistrySearchResult;
 }) => {
   const { packageClient, logger, pkg } = options;
 

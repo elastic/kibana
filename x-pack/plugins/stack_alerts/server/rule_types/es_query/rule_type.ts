@@ -24,6 +24,7 @@ import { ActionGroupId } from './constants';
 import { executor } from './executor';
 import { isSearchSourceRule } from './util';
 import { StackAlertType } from '../types';
+import { getDataScope } from './lib/get_data_scope';
 
 export function getRuleType(
   core: CoreSetup,
@@ -209,6 +210,9 @@ export function getRuleType(
         }
         return params;
       },
+    },
+    getDataScope: (params) => {
+      return getDataScope(params);
     },
     minimumLicenseRequired: 'basic',
     isExportable: true,

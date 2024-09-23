@@ -12,10 +12,18 @@
       "entityManager",
       "inference",
       "dataViews",
-      "share"
+      "data",
+      "fieldFormats",
+      "unifiedSearch",
+      "datasetQuality",
+      "share",
+      "alerting",
+      "ruleRegistry",
+      "globalSearch"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "esqlDataGrid"
     ],
     "optionalPlugins": [],
     "extraPublicDirs": []

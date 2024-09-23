@@ -29,6 +29,7 @@ import {
   EntityManagerPluginStartDependencies,
   EntityManagerServerSetup,
 } from './types';
+import { EntityMergeTask } from './lib/entities/tasks/entity_merge_task';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
@@ -65,6 +66,7 @@ export class EntityManagerServerPlugin
   ): EntityManagerServerPluginSetup {
     core.savedObjects.registerType(entityDefinition);
     core.savedObjects.registerType(EntityDiscoveryApiKeyType);
+
     plugins.encryptedSavedObjects.registerType({
       type: EntityDiscoveryApiKeyType.name,
       attributesToEncrypt: new Set(['apiKey']),
@@ -76,10 +78,15 @@ export class EntityManagerServerPlugin
       logger: this.logger,
     } as EntityManagerServerSetup;
 
+    const entityMergeTask = new EntityMergeTask(plugins.taskManager, this.server);
+
     registerRoutes<EntityManagerRouteDependencies>({
       repository: entityManagerRouteRepository,
       dependencies: {
         server: this.server,
+        tasks: {
+          entityMergeTask,
+        },
         getScopedClient: async ({ request }: { request: KibanaRequest }) => {
           const [coreStart] = await core.getStartServices();
           return this.getScopedClient({ request, coreStart });
@@ -99,7 +106,7 @@ export class EntityManagerServerPlugin
     request: KibanaRequest;
     coreStart: CoreStart;
   }) {
-    const esClient = coreStart.elasticsearch.client.asScoped(request).asSecondaryAuthUser;
+    const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
     const soClient = coreStart.savedObjects.getScopedClient(request);
     return new EntityClient({ esClient, soClient, logger: this.logger });
   }
@@ -113,6 +120,7 @@ export class EntityManagerServerPlugin
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
       this.server.security = plugins.security;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.taskManager = plugins.taskManager;
     }
 
     const esClient = core.elasticsearch.client.asInternalUser;

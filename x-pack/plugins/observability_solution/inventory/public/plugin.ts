@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { from, map } from 'rxjs';
+import { from, map, of } from 'rxjs';
 import {
   AppMountParameters,
   CoreSetup,
@@ -16,7 +16,8 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
+import { ENTITY_APP_ID } from '@kbn/deeplinks-observability/constants';
+import { GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import type {
   ConfigSchema,
   InventoryPublicSetup,
@@ -26,6 +27,7 @@ import type {
 } from './types';
 import { InventoryServices } from './services/types';
 import { createCallInventoryAPI } from './api';
+import { createEntityFieldFormatterClass } from './components/entity_field_formatter';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export class InventoryPlugin
@@ -61,9 +63,9 @@ export class InventoryPlugin
               entries: [
                 {
                   label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
-                    defaultMessage: 'Inventory',
+                    defaultMessage: 'Entities',
                   }),
-                  app: INVENTORY_APP_ID,
+                  app: ENTITY_APP_ID,
                   path: '/',
                   matchPath(currentPath: string) {
                     return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
@@ -79,20 +81,20 @@ export class InventoryPlugin
     const telemetry = this.telemetry.start();
 
     coreSetup.application.register({
-      id: INVENTORY_APP_ID,
+      id: ENTITY_APP_ID,
       title: i18n.translate('xpack.inventory.appTitle', {
-        defaultMessage: 'Inventory',
+        defaultMessage: 'Entities',
       }),
       euiIconType: 'logoObservability',
-      appRoute: '/app/observability/inventory',
+      appRoute: '/app/entities',
       category: DEFAULT_APP_CATEGORIES.observability,
       visibleIn: ['sideNav'],
       order: 8001,
       deepLinks: [
         {
-          id: 'inventory',
+          id: 'entities',
           title: i18n.translate('xpack.inventory.inventoryDeepLinkTitle', {
-            defaultMessage: 'Inventory',
+            defaultMessage: 'Entities',
           }),
           path: '/',
         },
@@ -115,6 +117,58 @@ export class InventoryPlugin
           services,
           appMountParameters,
         });
+      },
+    });
+
+    pluginsSetup.fieldFormats.register([
+      createEntityFieldFormatterClass({ inventoryAPIClient, coreSetup }),
+    ]);
+
+    const searchableTypes = ['service'];
+
+    pluginsSetup.globalSearch.registerResultProvider({
+      id: 'inventory_entities',
+      getSearchableTypes: async () => {
+        return searchableTypes;
+      },
+      find: ({ term, types }, { aborted$, maxResults, preference, client }) => {
+        if (!term || term.length < 2) {
+          return of();
+        }
+
+        if (types?.length && types.every((type) => !searchableTypes.includes(type))) {
+          return of();
+        }
+
+        const controller = new AbortController();
+        aborted$.subscribe(() => {
+          controller.abort();
+        });
+
+        return from(
+          inventoryAPIClient.fetch('GET /internal/inventory/entities/search', {
+            signal: controller.signal,
+            params: {
+              query: {
+                displayName: term,
+                size: 3,
+              },
+            },
+          })
+        ).pipe(
+          map(({ entities }): GlobalSearchResult[] => {
+            return entities.map(({ entity, score }): GlobalSearchResult => {
+              return {
+                id: `entity/${entity.type}/${entity.displayName}`,
+                score,
+                type: entity.type,
+                title: entity.displayName,
+                url: `/app/entities/${entity.type}/${entity.displayName}`,
+                icon: 'node',
+              };
+            });
+          })
+        );
       },
     });
 

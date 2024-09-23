@@ -27,7 +27,7 @@ import {
 } from '../../../common/es_fields/entities';
 import { APIReturnType } from '../../api';
 
-type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
+type InventoryEntitiesAPIReturnType = APIReturnType<'POST /internal/inventory/entities'>;
 
 type EntityColumnIds = typeof ENTITY_DISPLAY_NAME | typeof ENTITY_LAST_SEEN | typeof ENTITY_TYPE;
 
@@ -139,7 +139,7 @@ export function EntitiesGrid({
       const columnEntityTableId = columnId as EntityColumnIds;
       switch (columnEntityTableId) {
         case ENTITY_TYPE:
-          return <EuiBadge color="hollow">{entity[columnEntityTableId]}</EuiBadge>;
+          return <EuiBadge color="hollow">{entity.properties[columnEntityTableId]}</EuiBadge>;
         case ENTITY_LAST_SEEN:
           return (
             <FormattedMessage
@@ -148,7 +148,7 @@ export function EntitiesGrid({
               values={{
                 date: (
                   <FormattedDate
-                    value={entity[columnEntityTableId]}
+                    value={entity.properties[columnEntityTableId] as string | number | Date}
                     month="short"
                     day="numeric"
                     year="numeric"
@@ -156,7 +156,7 @@ export function EntitiesGrid({
                 ),
                 time: (
                   <FormattedTime
-                    value={entity[columnEntityTableId]}
+                    value={entity.properties[columnEntityTableId] as string | number | Date}
                     hour12={false}
                     hour="2-digit"
                     minute="2-digit"
@@ -170,11 +170,11 @@ export function EntitiesGrid({
           return (
             // TODO: link to the appropriate page based on entity type https://github.com/elastic/kibana/issues/192676
             <EuiLink data-test-subj="inventoryCellValueLink" className="eui-textTruncate">
-              {entity[columnEntityTableId]}
+              {entity.properties[columnEntityTableId]}
             </EuiLink>
           );
         default:
-          return entity[columnId as EntityColumnIds] || '';
+          return entity.properties[columnId as EntityColumnIds] || '';
       }
     },
     [entities]

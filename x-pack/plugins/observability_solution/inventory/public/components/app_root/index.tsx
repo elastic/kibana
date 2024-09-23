@@ -30,9 +30,11 @@ export function AppRoot({
   const { history } = appMountParameters;
 
   const context = {
-    ...coreStart,
-    ...pluginsStart,
-    ...services,
+    core: coreStart,
+    dependencies: {
+      start: pluginsStart,
+    },
+    services,
   };
 
   return (

@@ -5,63 +5,115 @@
  * 2.0.
  */
 
-import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
-import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
-import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
-import { MAX_NUMBER_OF_ENTITIES, type EntityType } from '../../../common/entities';
-import {
-  ENTITY_DEFINITION_ID,
-  ENTITY_DISPLAY_NAME,
-  ENTITY_ID,
-  ENTITY_LAST_SEEN,
-  ENTITY_TYPE,
-} from '../../../common/es_fields/entities';
-
-const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
-  type: '*',
-  dataset: ENTITY_LATEST,
-});
-
-const BUILTIN_SERVICES_FROM_ECS_DATA = 'builtin_services_from_ecs_data';
-const BUILTIN_HOSTS_FROM_ECS_DATA = 'builtin_hosts_from_ecs_data';
-const BUILTIN_CONTAINERS_FROM_ECS_DATA = 'builtin_containers_from_ecs_data';
-
-export interface LatestEntity {
-  [ENTITY_LAST_SEEN]: string;
-  [ENTITY_TYPE]: string;
-  [ENTITY_DISPLAY_NAME]: string;
-  [ENTITY_ID]: string;
-}
-
-const DEFAULT_ENTITY_TYPES = ['service', 'host', 'container'];
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import pLimit from 'p-limit';
+import type { Logger } from '@kbn/logging';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import type { EntityWithSignals, InventoryEntityDefinition } from '../../../common/entities';
+import { getEntitiesFromSource } from './get_entities_from_source';
+import { lookupEntitiesById } from './lookup_entities_by_id';
+import { searchLatestEntitiesIndex } from './search_latest_entities_index';
+import { esqlResponseToEntities } from '../../../common/utils/esql_response_to_entities';
+import { getEntitySignals } from '../signals/get_entity_signals';
+import { withInventorySpan } from '../../lib/with_inventory_span';
 
 export async function getLatestEntities({
-  inventoryEsClient,
-  sortDirection,
-  sortField,
-  entityTypes,
+  esClient,
+  kuery,
+  start,
+  end,
+  fromSourceIfEmpty,
+  typeDefinitions,
+  logger,
+  dslFilter,
+  rulesClient,
+  alertsClient,
 }: {
-  inventoryEsClient: ObservabilityElasticsearchClient;
-  sortDirection: 'asc' | 'desc';
-  sortField: string;
-  entityTypes?: EntityType[];
-}) {
-  const entityTypesFilter = entityTypes?.length ? entityTypes : DEFAULT_ENTITY_TYPES;
-  const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
-    query: `FROM ${ENTITIES_LATEST_ALIAS}
-     | WHERE ${ENTITY_TYPE} IN (${entityTypesFilter.map((entityType) => `"${entityType}"`).join()}) 
-     | WHERE ${ENTITY_DEFINITION_ID} IN (${[
-      BUILTIN_SERVICES_FROM_ECS_DATA,
-      BUILTIN_HOSTS_FROM_ECS_DATA,
-      BUILTIN_CONTAINERS_FROM_ECS_DATA,
-    ]
-      .map((buildin) => `"${buildin}"`)
-      .join()})
-     | SORT ${sortField} ${sortDirection}
-     | LIMIT ${MAX_NUMBER_OF_ENTITIES}
-     | KEEP ${ENTITY_LAST_SEEN}, ${ENTITY_TYPE}, ${ENTITY_DISPLAY_NAME}, ${ENTITY_ID}
-    `,
-  });
+  esClient: ObservabilityElasticsearchClient;
+  kuery: string;
+  start: number;
+  end: number;
+  fromSourceIfEmpty?: boolean;
+  typeDefinitions?: InventoryEntityDefinition[];
+  logger: Logger;
+  dslFilter?: QueryDslQueryContainer[];
+  rulesClient: RulesClient;
+  alertsClient: AlertsClient;
+}): Promise<EntityWithSignals[]> {
+  return withInventorySpan(
+    'get_latest_entities',
+    async () => {
+      const response = await searchLatestEntitiesIndex({
+        esClient,
+        start,
+        end,
+        kuery,
+        dslFilter: [
+          ...(dslFilter ?? []),
+          ...(typeDefinitions?.length
+            ? [
+                {
+                  terms: {
+                    'entity.type': typeDefinitions.map((definition) => definition.type),
+                  },
+                },
+              ]
+            : []),
+        ],
+      });
 
-  return esqlResultToPlainObjects<LatestEntity>(latestEntitiesEsqlResponse);
+      if (response.values.length || !fromSourceIfEmpty || !typeDefinitions?.length) {
+        const entities = esqlResponseToEntities(response);
+
+        return getEntitySignals({
+          entities,
+          alertsClient,
+          rulesClient,
+          typeDefinitions,
+          logger,
+          start,
+          end,
+        });
+      }
+
+      const limiter = pLimit(10);
+
+      const entitiesFromSourceResults = await Promise.all(
+        typeDefinitions.map((definition) => {
+          return limiter(() => {
+            return getEntitiesFromSource({
+              esClient,
+              start,
+              end,
+              kuery,
+              indexPatterns: definition.sources.flatMap((source) => source.indexPatterns),
+              definition,
+              logger,
+              dslFilter,
+            });
+          });
+        })
+      );
+
+      return getEntitySignals({
+        alertsClient,
+        logger,
+        rulesClient,
+        typeDefinitions,
+        entities: esqlResponseToEntities(
+          await lookupEntitiesById({
+            esClient,
+            start,
+            end,
+            entities: entitiesFromSourceResults.flat(),
+          })
+        ).map((entity) => ({ ...entity, links: [] })),
+        start,
+        end,
+      });
+    },
+    logger
+  );
 }

@@ -10,7 +10,7 @@ import { EntityDiscoveryApiKeyType } from '../../../saved_objects';
 import { EntityManagerServerSetup } from '../../../types';
 import { EntityDiscoveryAPIKey } from './api_key';
 
-const ENTITY_DISCOVERY_API_KEY_SO_ID = '19540C97-E35C-485B-8566-FB86EC8455E4';
+export const ENTITY_DISCOVERY_API_KEY_SO_ID = '19540C97-E35C-485B-8566-FB86EC8455E4';
 
 const getEncryptedSOClient = (server: EntityManagerServerSetup) => {
   return server.encryptedSavedObjects.getClient({
@@ -18,12 +18,15 @@ const getEncryptedSOClient = (server: EntityManagerServerSetup) => {
   });
 };
 
-export const readEntityDiscoveryAPIKey = async (server: EntityManagerServerSetup) => {
+export const readEntityDiscoveryAPIKey = async (
+  server: EntityManagerServerSetup,
+  id = ENTITY_DISCOVERY_API_KEY_SO_ID
+) => {
   try {
     const soClient = getEncryptedSOClient(server);
     const obj = await soClient.getDecryptedAsInternalUser<EntityDiscoveryAPIKey>(
       EntityDiscoveryApiKeyType.name,
-      ENTITY_DISCOVERY_API_KEY_SO_ID
+      id
     );
     return obj?.attributes;
   } catch (err) {
@@ -36,15 +39,19 @@ export const readEntityDiscoveryAPIKey = async (server: EntityManagerServerSetup
 
 export const saveEntityDiscoveryAPIKey = async (
   soClient: SavedObjectsClientContract,
-  apiKey: EntityDiscoveryAPIKey
+  apiKey: EntityDiscoveryAPIKey,
+  id = ENTITY_DISCOVERY_API_KEY_SO_ID
 ) => {
   await soClient.create(EntityDiscoveryApiKeyType.name, apiKey, {
-    id: ENTITY_DISCOVERY_API_KEY_SO_ID,
+    id,
     overwrite: true,
     managed: true,
   });
 };
 
-export const deleteEntityDiscoveryAPIKey = async (soClient: SavedObjectsClientContract) => {
-  await soClient.delete(EntityDiscoveryApiKeyType.name, ENTITY_DISCOVERY_API_KEY_SO_ID);
+export const deleteEntityDiscoveryAPIKey = async (
+  soClient: SavedObjectsClientContract,
+  id = ENTITY_DISCOVERY_API_KEY_SO_ID
+) => {
+  await soClient.delete(EntityDiscoveryApiKeyType.name, id);
 };

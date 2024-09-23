@@ -49,7 +49,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
       deleteData: z.optional(BooleanFromString).default(false),
     }),
   }),
-  handler: async ({ context, response, params, logger, server }) => {
+  handler: async ({ context, response, params, logger, server, tasks }) => {
     try {
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const canDisable = await canDisableEntityDiscovery(esClient);
@@ -66,7 +66,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
 
-      await uninstallBuiltInEntityDefinitions({
+      const definitions = await uninstallBuiltInEntityDefinitions({
         soClient,
         esClient,
         logger,
@@ -83,6 +83,8 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
           ids: [apiKey.id],
         });
       }
+
+      await Promise.all(definitions.map((def) => tasks.entityMergeTask.stop(def)));
 
       return response.ok({ body: { success: true } });
     } catch (err) {

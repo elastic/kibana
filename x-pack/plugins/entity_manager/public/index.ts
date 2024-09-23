@@ -18,6 +18,7 @@ export const plugin: PluginInitializer<
 
 export type { EntityManagerPublicPluginSetup, EntityManagerPublicPluginStart };
 export type EntityManagerAppId = 'entityManager';
+export type { EntityClient } from './lib/entity_client';
 
 export {
   ERROR_API_KEY_NOT_FOUND,

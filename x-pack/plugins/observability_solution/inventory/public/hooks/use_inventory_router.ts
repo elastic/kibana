@@ -24,7 +24,7 @@ interface StatefulInventoryRouter extends InventoryRouter {
 
 export function useInventoryRouter(): StatefulInventoryRouter {
   const {
-    services: {
+    core: {
       http,
       application: { navigateToApp },
     },
@@ -40,14 +40,14 @@ export function useInventoryRouter(): StatefulInventoryRouter {
       ...inventoryRouter,
       push: (...args) => {
         const next = link(...args);
-        navigateToApp('inventory', { path: next, replace: false });
+        navigateToApp('entities', { path: next, replace: false });
       },
       replace: (path, ...args) => {
         const next = link(path, ...args);
-        navigateToApp('inventory', { path: next, replace: true });
+        navigateToApp('entities', { path: next, replace: true });
       },
       link: (path, ...args) => {
-        return http.basePath.prepend('/app/observability/inventory' + link(path, ...args));
+        return http.basePath.prepend('/app/entities' + link(path, ...args));
       },
     }),
     [navigateToApp, http.basePath]

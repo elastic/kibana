@@ -15,6 +15,9 @@
   ],
   "priority": 1,
   "template": {
+    "aliases": {
+      "metrics-fake_hosts-default": {}
+    },
     "mappings": {
       "_meta": {
         "version": "1.6.0"

@@ -39,14 +39,16 @@ export async function upgradeBuiltInEntityDefinitions({
 
   logger.debug(`Starting built-in definitions upgrade`);
   const upgradedDefinitions = await installBuiltInEntityDefinitions({
-    esClient,
+    esClient: esClient.asSecondaryAuthUser,
     soClient,
     definitions,
     logger,
   });
 
   await Promise.all(
-    upgradedDefinitions.map((definition) => startTransforms(esClient, definition, logger))
+    upgradedDefinitions.map((definition) =>
+      startTransforms(esClient.asSecondaryAuthUser, definition, logger)
+    )
   );
 
   return { success: true, definitions: upgradedDefinitions };

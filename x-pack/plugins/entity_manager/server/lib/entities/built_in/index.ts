@@ -9,6 +9,7 @@ import { EntityDefinition } from '@kbn/entities-schema';
 import { builtInServicesFromEcsEntityDefinition } from './services_from_ecs_data';
 import { builtInHostsFromEcsEntityDefinition } from './hosts_from_ecs_data';
 import { builtInContainersFromEcsEntityDefinition } from './containers_from_ecs_data';
+import { builtInDataStreamsFromEcsDefinition } from './datastreams_from_ecs_data';
 
 export { BUILT_IN_ID_PREFIX } from './constants';
 
@@ -16,4 +17,5 @@ export const builtInDefinitions: EntityDefinition[] = [
   builtInServicesFromEcsEntityDefinition,
   builtInHostsFromEcsEntityDefinition,
   builtInContainersFromEcsEntityDefinition,
+  builtInDataStreamsFromEcsDefinition,
 ];

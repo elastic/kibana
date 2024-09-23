@@ -50,10 +50,11 @@ export const checkIfEntityDiscoveryAPIKeyIsValid = async (
 
 export const generateEntityDiscoveryAPIKey = async (
   server: EntityManagerServerSetup,
-  req: KibanaRequest
+  req: KibanaRequest,
+  definitionId = 'built-in definitions'
 ): Promise<EntityDiscoveryAPIKey | undefined> => {
   const apiKey = await server.security.authc.apiKeys.grantAsInternalUser(req, {
-    name: 'Entity discovery API key',
+    name: `Entity discovery API key for ${definitionId}`,
     role_descriptors: {
       entity_discovery_admin: entityDefinitionRuntimePrivileges,
     },

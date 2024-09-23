@@ -15,6 +15,8 @@ import {
 // Base constants
 export const ENTITY_INTERNAL_INDICES_PATTERN = `.${ENTITY_BASE_PREFIX}*` as const;
 
+export const UNIFIED_ENTITY_INDEX = 'entities';
+
 export const ENTITY_ENTITY_COMPONENT_TEMPLATE_V1 =
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_entity` as const;
 export const ENTITY_EVENT_COMPONENT_TEMPLATE_V1 =

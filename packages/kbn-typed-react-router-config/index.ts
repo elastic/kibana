@@ -17,3 +17,4 @@ export * from './src/use_match_routes';
 export * from './src/use_params';
 export * from './src/use_router';
 export * from './src/use_route_path';
+export * from './src/breadcrumbs';

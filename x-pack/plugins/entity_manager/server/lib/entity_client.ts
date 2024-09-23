@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import { EntityDefinition, FindEntitiesQuery } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
@@ -16,6 +16,9 @@ import { uninstallEntityDefinition } from './entities/uninstall_entity_definitio
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 
 import { stopTransforms } from './entities/stop_transforms';
+import { findEntities } from './entities/find_entities';
+import { updateEntity } from './entities/update_entity';
+import { findEntity } from './entities/find_entity';
 
 export class EntityClient {
   constructor(
@@ -91,6 +94,55 @@ export class EntityClient {
     });
 
     return { definitions };
+  }
+
+  async getEntityDefinition({ id }: { id: string }) {
+    const definitions = await findEntityDefinitions({
+      esClient: this.options.esClient,
+      soClient: this.options.soClient,
+      id,
+    });
+
+    return definitions[0] || null;
+  }
+
+  async findEntities({
+    perPage = 10,
+    query = '',
+    searchAfter,
+    sortField = 'entity.displayName.keyword',
+    sortDirection = 'asc',
+  }: FindEntitiesQuery) {
+    return await findEntities(this.options.esClient, perPage, query, searchAfter, {
+      field: sortField,
+      direction: sortDirection,
+    });
+  }
+
+  async findEntity({ id, definitionId }: { definitionId: string; id: string }) {
+    const definition = await this.getEntityDefinition({ id: definitionId });
+    if (!definition) {
+      throw new EntityDefinitionNotFound(`Unable to find definition for ${definitionId}`);
+    }
+    return findEntity(this.options.esClient, definition, id);
+  }
+
+  async updateEntity({
+    definitionId,
+    id,
+    doc,
+    refresh = 'wait_for',
+  }: {
+    definitionId: string;
+    id: string;
+    doc: Record<string, any>;
+    refresh?: boolean | 'wait_for';
+  }) {
+    const definition = await this.getEntityDefinition({ id: definitionId });
+    if (!definition) {
+      throw new EntityDefinitionNotFound(`Unable to find definition for ${definitionId}`);
+    }
+    return await updateEntity(this.options.esClient, definition, id, doc, refresh);
   }
 
   async startEntityDefinition(definition: EntityDefinition) {

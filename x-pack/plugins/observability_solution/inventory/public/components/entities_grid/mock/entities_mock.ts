@@ -7,7 +7,7 @@
 
 import { APIReturnType } from '../../../api';
 
-type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
+type InventoryEntitiesAPIReturnType = APIReturnType<'POST /internal/inventory/entities'>;
 
 export const entitiesMock: InventoryEntitiesAPIReturnType['entities'] = [
   {
@@ -3011,4 +3011,9 @@ export const entitiesMock: InventoryEntitiesAPIReturnType['entities'] = [
     'entity.displayName': 'Troy McClure',
     'entity.id': '499',
   },
-];
+].map((entity) => ({
+  type: entity['entity.type'],
+  displayName: entity['entity.displayName'],
+  properties: {},
+  links: [],
+}));

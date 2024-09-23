@@ -6,6 +6,7 @@
  */
 
 import semver from 'semver';
+import { EntityDefinitionWithState } from '@kbn/entities-schema';
 import {
   ERROR_API_KEY_NOT_FOUND,
   ERROR_API_KEY_NOT_VALID,
@@ -17,7 +18,6 @@ import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '
 import { builtInDefinitions } from '../../lib/entities/built_in';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 import { getClientsFromAPIKey } from '../../lib/utils';
-import { EntityDefinitionWithState } from '../../lib/entities/types';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
@@ -66,7 +66,7 @@ export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
       const entityDiscoveryState = await Promise.all(
         builtInDefinitions.map(async (builtInDefinition) => {
           const definitions = await findEntityDefinitions({
-            esClient,
+            esClient: esClient.asCurrentUser,
             soClient,
             id: builtInDefinition.id,
             includeState: true,

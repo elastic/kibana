@@ -39,7 +39,10 @@ const ASSOCIATE_LOGS_LINK = 'https://ela.st/new-experience-associate-service-log
 export function AddDataContextMenu() {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const {
-    services: { share, telemetry },
+    dependencies: {
+      start: { share },
+    },
+    services: { telemetry },
   } = useKibana();
 
   const onboardingLocator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(

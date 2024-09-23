@@ -57,6 +57,7 @@ export const entityDefinitionSchema = z.object({
     ])
   ),
   installStartedAt: z.optional(z.string()),
+  apiKeyId: z.optional(z.string()),
 });
 
 export const entityDefinitionUpdateSchema = entityDefinitionSchema

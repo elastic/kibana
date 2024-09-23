@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import agent from 'elastic-apm-node';
+import agent, { Logger } from 'elastic-apm-node';
 import asyncHooks from 'async_hooks';
 
 export interface SpanOptions {
@@ -34,14 +34,28 @@ const runInNewContext = <T extends (...args: any[]) => any>(cb: T): ReturnType<T
 
 export async function withSpan<T>(
   optionsOrName: SpanOptions | string,
-  cb: (span?: Span) => Promise<T>
+  cb: (span?: Span) => Promise<T>,
+  logger?: Logger
 ): Promise<T> {
   const options = parseSpanOptions(optionsOrName);
 
   const { name, type, subtype, labels, intercept } = options;
 
+  let time: number | undefined;
+  if (logger?.isLevelEnabled('debug')) {
+    time = performance.now();
+  }
+
+  function logTook() {
+    if (time) {
+      logger?.debug(
+        () => `Operation ${name} took ${Math.round(performance.now() - time!) / 1000}s`
+      );
+    }
+  }
+
   if (!agent.isStarted()) {
-    return cb();
+    return cb().finally(logTook);
   }
 
   let createdSpan: Span | undefined;
@@ -57,7 +71,7 @@ export async function withSpan<T>(
     createdSpan = agent.startSpan(name) ?? undefined;
 
     if (!createdSpan) {
-      return cb();
+      return cb().finally(logTook);
     }
   }
 
@@ -112,6 +126,7 @@ export async function withSpan<T>(
       })
       .finally(() => {
         targetedSpan.end();
+        logTook();
       });
   });
 }

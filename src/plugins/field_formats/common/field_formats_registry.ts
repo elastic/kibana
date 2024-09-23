@@ -59,6 +59,7 @@ export class FieldFormatsRegistry {
       string,
       FieldFormatConfig
     >;
+
     this.register(defaultFieldConverters);
     this.parseDefaultTypeMap(defaultTypeMap);
     this.getConfig = getConfig;
@@ -79,9 +80,10 @@ export class FieldFormatsRegistry {
   ): FieldFormatConfig => {
     const type = this.getDefaultTypeName(fieldType, esTypes);
 
-    return (
-      (this.defaultMap && this.defaultMap[type]) || { id: FIELD_FORMAT_IDS.STRING, params: {} }
-    );
+    const config = (this.defaultMap && this.defaultMap[type]) ||
+      this.defaultMap._default_ || { id: FIELD_FORMAT_IDS.STRING, params: {} };
+
+    return config;
   };
 
   /**

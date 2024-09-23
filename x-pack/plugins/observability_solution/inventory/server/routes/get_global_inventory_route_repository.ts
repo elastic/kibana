@@ -6,10 +6,18 @@
  */
 
 import { entitiesRoutes } from './entities/route';
+import { datasetsRoutes } from './datasets/route';
+import { esqlRoutes } from './esql/route';
+import { metricsRoutes } from './metrics/route';
+import { assetsRoutes } from './assets/route';
 
 export function getGlobalInventoryServerRouteRepository() {
   return {
     ...entitiesRoutes,
+    ...datasetsRoutes,
+    ...esqlRoutes,
+    ...metricsRoutes,
+    ...assetsRoutes,
   };
 }
 

@@ -4,14 +4,72 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 
-export const entityTypeRt = t.union([
-  t.literal('service'),
-  t.literal('host'),
-  t.literal('container'),
-]);
+import { Asset } from './assets';
+import { Link } from './links';
+import { Signal } from './signals';
 
-export type EntityType = t.TypeOf<typeof entityTypeRt>;
+export const LATEST_ENTITIES_INDEX = `.entities*instance*`;
 
-export const MAX_NUMBER_OF_ENTITIES = 500;
+export interface IdentityField {
+  field: string;
+  optional: boolean;
+}
+
+interface ExtractionMetadataField {
+  source: string;
+  destination: string;
+  limit: number;
+}
+interface MetadataField {
+  destination: string;
+  source: string;
+}
+
+export interface EntityDataSource {
+  indexPatterns: string[];
+}
+
+interface ExtractionDefinition {
+  source: EntityDataSource;
+  metadata: ExtractionMetadataField[];
+}
+
+interface EntityDefinitionBase {
+  id: string;
+  type: string;
+  label: string;
+  identityFields: IdentityField[];
+  metadata: MetadataField[];
+  displayNameTemplate: string;
+  managed: boolean;
+}
+
+export interface InventoryEntityDefinition extends EntityDefinitionBase {
+  definitionType: 'inventory';
+  extractionDefinitions: ExtractionDefinition[];
+  sources: EntityDataSource[];
+}
+
+export interface VirtualEntityDefinition extends EntityDefinitionBase {
+  definitionType: 'virtual';
+  parentTypeId: string;
+  parentEntityId?: string;
+}
+
+export type EntityDefinition = InventoryEntityDefinition | EntityDefinitionBase;
+
+export interface Entity {
+  type: string;
+  displayName: string;
+  properties: Record<string, unknown>;
+  links: Link[];
+}
+
+export interface EntityLink extends Link {
+  asset: Asset;
+}
+
+export interface EntityWithSignals extends Entity {
+  signals: Signal[];
+}

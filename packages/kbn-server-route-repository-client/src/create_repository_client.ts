@@ -9,32 +9,46 @@
 
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import {
+  DefaultClientOptions,
   RouteRepositoryClient,
   ServerRouteRepository,
   formatRequest,
 } from '@kbn/server-route-repository-utils';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { from } from 'rxjs';
-import { HttpFetchOptions, HttpFetchQuery, HttpResponse } from '@kbn/core-http-browser';
+import { HttpFetchQuery, HttpResponse } from '@kbn/core-http-browser';
 import { omit } from 'lodash';
+import { createRequestCache } from './request_cache';
 
 export function createRepositoryClient<
   TRepository extends ServerRouteRepository,
-  TClientOptions extends HttpFetchOptions = {}
+  TClientOptions extends Record<string, any> = {}
 >(core: CoreStart | CoreSetup): RouteRepositoryClient<TRepository, TClientOptions> {
+  const requestCache = createRequestCache();
+
   const fetch = (
     endpoint: string,
     params: { path?: Record<string, string>; body?: unknown; query?: HttpFetchQuery } | undefined,
-    options: TClientOptions
+    options: TClientOptions & DefaultClientOptions
   ) => {
     const { method, pathname, version } = formatRequest(endpoint, params?.path);
 
-    return core.http[method](pathname, {
-      ...options,
-      body: params && params.body ? JSON.stringify(params.body) : undefined,
-      query: params?.query,
-      version,
-    });
+    const { caching, ...otherOptions } = options;
+
+    const body = params && params.body ? JSON.stringify(params.body) : undefined;
+    const query = params?.query;
+
+    return requestCache.fetch(
+      { pathname, body, method, query },
+      { mode: 'never', type: 'inMemory', ...caching },
+      () =>
+        core.http[method](pathname, {
+          ...otherOptions,
+          body,
+          query,
+          version,
+        })
+    );
   };
 
   return {

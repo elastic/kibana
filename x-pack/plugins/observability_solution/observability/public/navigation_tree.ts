@@ -68,7 +68,7 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             link: 'slo',
           },
           {
-            link: 'inventory',
+            link: 'entities',
           },
           {
             id: 'aiMl',
