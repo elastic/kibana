@@ -9,6 +9,8 @@ import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from './use_kibana';
 
 export function useTheme() {
-  const { core } = useKibana();
-  return { euiTheme: useEuiTheme().euiTheme, darkMode: core.theme.getTheme().darkMode };
+  const {
+    services: { theme },
+  } = useKibana();
+  return { euiTheme: useEuiTheme().euiTheme, darkMode: theme.getTheme().darkMode };
 }

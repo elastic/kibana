@@ -15,10 +15,7 @@ import { Unauthorized } from './unauthorized_modal';
 
 export function EnableEntityModelButton({ onSuccess }: { onSuccess: () => void }) {
   const {
-    dependencies: {
-      start: { entityManager },
-    },
-    core: { notifications },
+    services: { entityManager, notifications },
   } = useKibana();
 
   const [isLoading, setIsLoading] = useState(false);

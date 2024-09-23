@@ -11,9 +11,7 @@ import { useKibana } from './use_kibana';
 
 export const useEntityManager = () => {
   const {
-    dependencies: {
-      start: { entityManager },
-    },
+    services: { entityManager },
   } = useKibana();
 
   const [showWelcomedModal, setWelcomedModal] = useState(false);
@@ -34,6 +32,6 @@ export const useEntityManager = () => {
     isEnablementLoading: loading,
     refresh,
     showWelcomedModal,
-    toggleWelcomedModal: () => setWelcomedModal(!showWelcomedModal),
+    toggleWelcomedModal: () => setWelcomedModal((state) => !state),
   };
 };
