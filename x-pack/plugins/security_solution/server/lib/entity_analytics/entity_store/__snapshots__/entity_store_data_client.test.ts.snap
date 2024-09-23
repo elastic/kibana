@@ -5,7 +5,7 @@ Object {
   "dsl": Array [
     "{
   \\"index\\": [
-    \\".entities.v1.latest.ea_host_entity_store\\"
+    \\".entities.v1.latest.ea_default_host_entity_store\\"
   ],
   \\"body\\": {
     \\"bool\\": {
