@@ -46,6 +46,9 @@ import type {
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import { logEqlRequest } from '../utils/logged_requests';
+import * as i18n from '../translations';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -67,6 +70,7 @@ interface EqlExecutorParams {
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
+  state?: Record<string, unknown>;
   scheduleNotificationResponseActionsService: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }
 
@@ -90,10 +94,17 @@ export const eqlExecutor = async ({
   alertWithSuppression,
   isAlertSuppressionActive,
   experimentalFeatures,
+  state,
   scheduleNotificationResponseActionsService,
-}: EqlExecutorParams): Promise<SearchAfterAndBulkCreateReturnType> => {
+}: EqlExecutorParams): Promise<{
+  result: SearchAfterAndBulkCreateReturnType;
+  loggedRequests?: RulePreviewLoggedRequest[];
+}> => {
   const ruleParams = completeRule.ruleParams;
+  const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
+  const loggedRequests: RulePreviewLoggedRequest[] = [];
 
+  // eslint-disable-next-line complexity
   return withSecuritySpan('eqlExecutor', async () => {
     const result = createSearchAfterReturnType();
 
@@ -125,13 +136,24 @@ export const eqlExecutor = async ({
     const eqlSignalSearchStart = performance.now();
 
     try {
+      if (isLoggedRequestsEnabled) {
+        loggedRequests.push({
+          request: logEqlRequest(request),
+          description: i18n.EQL_SEARCH_REQUEST_DESCRIPTION,
+        });
+      }
+
       const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
         request
       );
 
       const eqlSignalSearchEnd = performance.now();
-      const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
-      result.searchAfterTimes = [eqlSearchDuration];
+      const eqlSearchDuration = eqlSignalSearchEnd - eqlSignalSearchStart;
+      result.searchAfterTimes = [makeFloatString(eqlSearchDuration)];
+
+      if (isLoggedRequestsEnabled && loggedRequests[0]) {
+        loggedRequests[0].duration = Math.round(eqlSearchDuration);
+      }
 
       let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
 
@@ -198,8 +220,7 @@ export const eqlExecutor = async ({
           responseActions: completeRule.ruleParams.responseActions,
         });
       }
-
-      return result;
+      return { result, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
     } catch (error) {
       if (
         typeof error.message === 'string' &&
@@ -211,7 +232,7 @@ export const eqlExecutor = async ({
       }
       result.errors.push(error.message);
       result.success = false;
-      return result;
+      return { result, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
     }
   });
 };

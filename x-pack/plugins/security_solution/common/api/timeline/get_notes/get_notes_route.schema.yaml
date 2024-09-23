@@ -15,8 +15,8 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: GetNotes
-      description: Gets notes
-      summary: Get all notes for a given document.
+      description: Get all notes for a given document.
+      summary: Get notes
       tags:
         - access:securitySolution
       parameters:
