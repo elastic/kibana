@@ -83,7 +83,7 @@ export function mapSavedObjectToMonitor({
     created_at: monitor.created_at,
     updated_at: monitor.updated_at,
   } as Result;
-  if (ui || typeof ui === 'undefined') {
+  if (ui) {
     return result;
   }
   return transformPublicKeys(result);

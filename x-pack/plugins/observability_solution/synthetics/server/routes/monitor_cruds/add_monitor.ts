@@ -26,7 +26,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         id: schema.maybe(schema.string()),
         preserve_namespace: schema.maybe(schema.boolean()),
         gettingStarted: schema.maybe(schema.boolean()),
-        ui: schema.maybe(schema.boolean()),
+        ui: schema.maybe(
+          schema.boolean({
+            defaultValue: false,
+          })
+        ),
       }),
     },
   },
