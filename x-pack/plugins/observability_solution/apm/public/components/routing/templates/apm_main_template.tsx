@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
-import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import {
+  ObservabilityPageTemplateProps,
+  TechnicalPreviewBadge,
+} from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { SerializableRecord } from '@kbn/utility-types';
+import { ENTITY_INVENTORY_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { KibanaEnvironmentContext } from '../../../context/kibana_environment_context/kibana_environment_context';
@@ -72,7 +78,7 @@ export function ApmMainTemplate({
   const { http, docLinks, observabilityShared, application } = services;
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
-  const { config, core } = useApmPluginContext();
+  const { config, core, share } = useApmPluginContext();
   const isEntityCentricExperienceSettingEnabled = core.uiSettings.get<boolean>(
     entityCentricExperience,
     true
@@ -136,6 +142,14 @@ export function ApmMainTemplate({
   const rightSideItems = [...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : [])];
 
   const sanitizedPath = getPathForFeedback(window.location.pathname);
+
+  const showInventoryCallout =
+    isEntityCentricExperienceSettingEnabled &&
+    serviceInventoryViewLocalStorageSetting === ServiceInventoryView.classic &&
+    selectedNavButton === 'allServices';
+
+  const inventoryLocator = share.url.locators.get<SerializableRecord>(ENTITY_INVENTORY_LOCATOR_ID);
+
   const pageHeaderTitle = (
     <EuiFlexGroup justifyContent="spaceBetween" wrap={true}>
       {pageHeader?.pageTitle ?? pageTitle}
@@ -158,6 +172,22 @@ export function ApmMainTemplate({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{environmentFilter && <ApmEnvironmentFilter />}</EuiFlexItem>
         </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const inventoryCallout = (
+    <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <TechnicalPreviewBadge icon="beaker" style={{ verticalAlign: 'middle' }} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiLink data-test-subj="inventoryCalloutLink" href={inventoryLocator?.useUrl({})}>
+          <FormattedMessage
+            id="xpack.apm.inventoryCallout.link"
+            defaultMessage="Try our new Inventory!"
+          />
+        </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -191,6 +221,8 @@ export function ApmMainTemplate({
                   })}
                 />
               ) : null}
+
+              {showInventoryCallout ? inventoryCallout : null}
               {showServiceGroupsNav && selectedNavButton && (
                 <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
               )}
