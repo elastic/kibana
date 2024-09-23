@@ -16,19 +16,18 @@ import type { FieldRetentionDefinition } from './types';
 import { getEntitiesIndexName } from '../utils/utils';
 import { buildFieldRetentionIngestPipeline } from './build_field_retention_ingest_pipeline';
 
-const getEnrichPolicyName = (spaceId: string, definition: FieldRetentionDefinition) =>
-  `entity_store_field_retention_${definition.entityType}_${spaceId}_v${definition.version}`;
+const getEnrichPolicyName = (namespace: string, definition: FieldRetentionDefinition) =>
+  `entity_store_field_retention_${definition.entityType}_${namespace}_v${definition.version}`;
 
 const getFieldRetentionEnrichPolicy = (
   entityType: EntityType,
-  spaceId: string
+  namespace: string
 ): EnrichPutPolicyRequest => {
   const definition = getFieldRetentionDefinition(entityType);
-  // TODO: all this needs spaces support
   return {
-    name: getEnrichPolicyName(spaceId, definition),
+    name: getEnrichPolicyName(namespace, definition),
     match: {
-      indices: getEntitiesIndexName(entityType),
+      indices: getEntitiesIndexName(entityType, namespace),
       match_field: definition.matchField,
       enrich_fields: definition.fields.map(({ field }) => field),
     },
@@ -36,46 +35,46 @@ const getFieldRetentionEnrichPolicy = (
 };
 
 export const createFieldRetentionEnrichPolicy = async ({
-  spaceId,
+  namespace,
   esClient,
   entityType,
 }: {
-  spaceId: string;
+  namespace: string;
   esClient: ElasticsearchClient;
   entityType: EntityType;
 }) => {
-  const policy = getFieldRetentionEnrichPolicy(entityType, spaceId);
+  const policy = getFieldRetentionEnrichPolicy(entityType, namespace);
   return esClient.enrich.putPolicy(policy);
 };
 
 export const executeFieldRetentionEnrichPolicy = async ({
-  spaceId,
+  namespace,
   entityType,
   esClient,
 }: {
-  spaceId: string;
+  namespace: string;
   entityType: EntityType;
   esClient: ElasticsearchClient;
 }) => {
-  const policy = getFieldRetentionEnrichPolicy(entityType, spaceId);
+  const policy = getFieldRetentionEnrichPolicy(entityType, namespace);
   return esClient.enrich.executePolicy({ name: policy.name });
 };
 
 export const deleteFieldRetentionEnrichPolicy = async ({
-  spaceId,
+  namespace,
   entityType,
   esClient,
 }: {
-  spaceId: string;
+  namespace: string;
   entityType: EntityType;
   esClient: ElasticsearchClient;
 }) => {
-  const policy = getFieldRetentionEnrichPolicy(entityType, spaceId);
+  const policy = getFieldRetentionEnrichPolicy(entityType, namespace);
   return esClient.enrich.deletePolicy({ name: policy.name });
 };
 
 export const getFieldRetentionPipelineSteps = (opts: {
-  spaceId: string;
+  namespace: string;
   entityType: EntityType;
   debugMode?: boolean;
   allEntityFields: string[];
@@ -84,7 +83,7 @@ export const getFieldRetentionPipelineSteps = (opts: {
     ...opts,
     fieldRetentionDefinition: getFieldRetentionDefinition(opts.entityType),
     enrichPolicyName: getEnrichPolicyName(
-      opts.spaceId,
+      opts.namespace,
       getFieldRetentionDefinition(opts.entityType)
     ),
   });

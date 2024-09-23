@@ -12,9 +12,9 @@ import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/as
 import { ENTITY_STORE_DEFAULT_SOURCE_INDICES } from './constants';
 import { buildEntityDefinitionId } from './utils/utils';
 
-export const buildHostEntityDefinition = (spaceId: string): EntityDefinition =>
+export const buildHostEntityDefinition = (namespace: string): EntityDefinition =>
   entityDefinitionSchema.parse({
-    id: buildEntityDefinitionId('host', spaceId),
+    id: buildEntityDefinitionId('host', namespace),
     name: 'EA Host Store',
     type: 'host',
     indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
@@ -40,9 +40,9 @@ export const buildHostEntityDefinition = (spaceId: string): EntityDefinition =>
     managed: true,
   });
 
-export const buildUserEntityDefinition = (spaceId: string): EntityDefinition =>
+export const buildUserEntityDefinition = (namespace: string): EntityDefinition =>
   entityDefinitionSchema.parse({
-    id: buildEntityDefinitionId('user', spaceId),
+    id: buildEntityDefinitionId('user', namespace),
     name: 'EA User Store',
     type: 'user',
     indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
@@ -67,20 +67,15 @@ export const buildUserEntityDefinition = (spaceId: string): EntityDefinition =>
     managed: true,
   });
 
-const ENTITY_TYPE_TO_ENTITY_DEFINITION: Record<EntityType, (spaceId: string) => EntityDefinition> =
-  {
-    host: buildHostEntityDefinition,
-    user: buildUserEntityDefinition,
-  };
+export const getDefinitionForEntityType = (entityType: EntityType, namespace: string) => {
+  const definitionBuilder =
+    entityType === 'host' ? buildHostEntityDefinition : buildUserEntityDefinition;
+  const entityDefinition = { ...definitionBuilder(namespace) };
 
-// TODO: space support
-export const getDefinitionForEntityType = (entityType: EntityType, spaceId: string) => {
-  const definitionBuilder = ENTITY_TYPE_TO_ENTITY_DEFINITION[entityType];
-  const entityDefinition = { ...definitionBuilder(spaceId) };
-
+  // TODO: this will move when we support dynamic index patterns
   entityDefinition.indexPatterns.push(
-    getAssetCriticalityIndex(spaceId),
-    getRiskScoreLatestIndex(spaceId)
+    getAssetCriticalityIndex(namespace),
+    getRiskScoreLatestIndex(namespace)
   );
 
   return entityDefinition;

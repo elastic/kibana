@@ -175,10 +175,7 @@ export const runTask = async ({
       if (engine.type) {
         // TODO: why is this optional?
         const start = Date.now();
-        await entityStoreDataClient.executeFieldRetentionEnrichPolicy({
-          spaceId: state.namespace,
-          entityType: engine.type,
-        });
+        await entityStoreDataClient.executeFieldRetentionEnrichPolicy(engine.type);
         log(`executed field retention enrich policy for ${engine.type} in ${Date.now() - start}ms`);
       }
     }

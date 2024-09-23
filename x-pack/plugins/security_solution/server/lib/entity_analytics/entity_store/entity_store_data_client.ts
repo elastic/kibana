@@ -78,6 +78,9 @@ export class EntityStoreDataClient {
 
     logger.info(`Initializing entity store for ${entityType}`);
 
+    const debugLog = (message: string) =>
+      logger.debug(`[Entity Engine] [${entityType}] ${message}`);
+
     const descriptor = await this.engineClient.init(entityType, definition, filter);
     logger.debug(`Initialized engine for ${entityType}`);
     // first create the entity definition without starting it
@@ -92,27 +95,27 @@ export class EntityStoreDataClient {
       },
       installOnly: true,
     });
-    logger.debug(`Created entity definition for ${entityType}`);
+    debugLog(`Created entity definition`);
 
     // the index must be in place with the correct mapping before the enrich policy is created
     // this is because the enrich policy will fail if the index does not exist with the correct fields
-    await this.createEntityIndexComponentTemplate({ entityType });
-    logger.debug(`Created entity index component template for ${entityType}`);
-    await this.createEntityIndex({ entityType });
-    logger.debug(`Created entity index for ${entityType}`);
+    await this.createEntityIndexComponentTemplate(entityType);
+    debugLog(`Created entity index component template`);
+    await this.createEntityIndex(entityType);
+    debugLog(`Created entity index`);
 
     // we must create and execute the enrich policy before the pipeline is created
     // this is because the pipeline will fail if the enrich index does not exist
-    await this.createFieldRetentionEnrichPolicy({ entityType });
-    logger.debug(`Created field retention enrich policy for ${entityType}`);
-    await this.executeFieldRetentionEnrichPolicy({ entityType });
-    logger.debug(`Executed field retention enrich policy for ${entityType}`);
-    await this.createPlatformPipeline({ entityType });
-    logger.debug(`Created @platform pipeline for ${entityType}`);
+    await this.createFieldRetentionEnrichPolicy(entityType);
+    debugLog(`Created field retention enrich policy`);
+    await this.executeFieldRetentionEnrichPolicy(entityType);
+    debugLog(`Executed field retention enrich policy`);
+    await this.createPlatformPipeline(entityType);
+    debugLog(`Created @platform pipeline`);
 
     // finally start the entity definition now that everything is in place
     await this.start(entityType, { force: true });
-    logger.debug(`Started entity definition for ${entityType}`);
+    debugLog(`Started entity definition`);
 
     // the task will execute the enrich policy on a schedule
     await startEntityStoreFieldRetentionEnrichTask({
@@ -120,32 +123,32 @@ export class EntityStoreDataClient {
       logger,
       taskManager,
     });
-    logger.debug(`Started entity store field retention enrich task for ${entityType}`);
+    debugLog(`Started entity store field retention enrich task`);
 
     // and finally update the engine status to started once everything is in place
     const updated = await this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
-    logger.debug(`Updated engine status to 'started' for ${entityType}, initialisation complete`);
-    logger.info(`Entity store for ${entityType} initialized`);
+    debugLog(`Updated engine status to 'started', initialisation complete`);
+    logger.info(`Entity store initialized`);
     return { ...descriptor, ...updated };
   }
 
-  public executeFieldRetentionEnrichPolicy({ entityType }: { entityType: EntityType }) {
+  public executeFieldRetentionEnrichPolicy(entityType: EntityType) {
     return executeFieldRetentionEnrichPolicy({
-      spaceId: this.options.namespace,
+      namespace: this.options.namespace,
       esClient: this.options.esClient,
       entityType,
     });
   }
 
-  public async createFieldRetentionEnrichPolicy({ entityType }: { entityType: EntityType }) {
+  public async createFieldRetentionEnrichPolicy(entityType: EntityType) {
     return createFieldRetentionEnrichPolicy({
-      spaceId: this.options.namespace,
+      namespace: this.options.namespace,
       esClient: this.options.esClient,
       entityType,
     });
   }
 
-  private async createPlatformPipeline({ entityType }: { entityType: EntityType }) {
+  private async createPlatformPipeline(entityType: EntityType) {
     const definition = getDefinitionForEntityType(entityType, this.options.namespace);
 
     const allEntityFields: string[] = (definition?.metadata || []).map((m) => {
@@ -165,7 +168,7 @@ export class EntityStoreDataClient {
         },
         description: `Ingest pipeline for entity defiinition ${definition.id}`,
         processors: getFieldRetentionPipelineSteps({
-          spaceId: this.options.namespace,
+          namespace: this.options.namespace,
           entityType,
           allEntityFields,
         }),
@@ -173,14 +176,14 @@ export class EntityStoreDataClient {
     });
   }
 
-  private async createEntityIndex({ entityType }: { entityType: EntityType }) {
+  private async createEntityIndex(entityType: EntityType) {
     await this.options.esClient.indices.create({
       index: getEntitiesIndexName(entityType, this.options.namespace),
       body: {},
     });
   }
 
-  private async createEntityIndexComponentTemplate({ entityType }: { entityType: EntityType }) {
+  private async createEntityIndexComponentTemplate(entityType: EntityType) {
     const definition = getDefinitionForEntityType(entityType, this.options.namespace);
 
     await this.options.esClient.cluster.putComponentTemplate({
