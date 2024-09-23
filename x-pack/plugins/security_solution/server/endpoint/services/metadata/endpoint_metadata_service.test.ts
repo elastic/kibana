@@ -143,22 +143,20 @@ describe('EndpointMetadataService', () => {
       const mockDoc = unitedMetadataSearchResponseMock(endpointMetadataDoc, mockAgent);
       esClient.search.mockResponse(mockDoc);
       agentPolicyServiceMock.getByIds.mockResolvedValue(agentPolicies);
-      testMockedContext.packagePolicyService.list.mockImplementation(
-        async (_, { page, perPage }) => {
-          const response = {
-            items: packagePolicies,
-            page: page ?? 1,
-            total: packagePolicies.length,
-            perPage: packagePolicies.length,
-          };
+      testMockedContext.packagePolicyService.list.mockImplementation(async (_, { page }) => {
+        const response = {
+          items: packagePolicies,
+          page: page ?? 1,
+          total: packagePolicies.length,
+          perPage: packagePolicies.length,
+        };
 
-          if ((page ?? 1) > 1) {
-            response.items = [];
-          }
-
-          return response;
+        if ((page ?? 1) > 1) {
+          response.items = [];
         }
-      );
+
+        return response;
+      });
 
       const queryOptions = { page: 1, pageSize: 10, kuery: '', hostStatuses: [] };
       const metadataListResponse = await metadataService.getHostMetadataList(queryOptions);

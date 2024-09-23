@@ -49,6 +49,8 @@ import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured
 import type { PluginStartContract as ActionPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { EndpointMetadataService } from '../services/metadata';
+import { createEndpointFleetServicesFactoryMock } from '../services/fleet/endpoint_fleet_services_factory.mocks';
 import type { ProductFeaturesService } from '../../lib/product_features_service';
 import { responseActionsClientMock } from '../services/actions/clients/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
@@ -68,7 +70,6 @@ import {
 import { requestContextFactoryMock } from '../../request_context_factory.mock';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../lib/detection_engine/routes/__mocks__/request_context';
 import { createMockClients } from '../../lib/detection_engine/routes/__mocks__/request_context';
-import { createEndpointMetadataServiceTestContextMock } from '../services/metadata/mocks';
 import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
 import { createLicenseServiceMock } from '../../../common/license/mocks';
 import { createFeatureUsageServiceMock } from '../services/feature_usage/mocks';
@@ -97,7 +98,15 @@ export const createMockEndpointAppContext = (
 export const createMockEndpointAppContextService = (
   mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
-  const mockEndpointMetadataContext = createEndpointMetadataServiceTestContextMock(); // FIXME:PT remove this
+  const { esClient, fleetStartServices } = createMockEndpointAppContextServiceStartContract();
+  const fleetServices = createEndpointFleetServicesFactoryMock({
+    fleetDependencies: fleetStartServices,
+  }).service.asInternalUser();
+  const endpointMetadataService = new EndpointMetadataService(
+    esClient,
+    savedObjectsClientMock.create(),
+    fleetServices
+  );
   const casesClientMock = createCasesClientMock();
   const fleetFromHostFilesClientMock = createFleetFromHostFilesClientMock();
   const fleetToHostFilesClientMock = createFleetToHostFilesClientMock();
@@ -115,8 +124,8 @@ export const createMockEndpointAppContextService = (
     },
     createLogger: jest.fn((...parts) => loggerFactory.get(...parts)),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
-    getEndpointMetadataService: jest.fn(() => mockEndpointMetadataContext.endpointMetadataService),
-    getInternalFleetServices: jest.fn(() => mockEndpointMetadataContext.fleetServices),
+    getEndpointMetadataService: jest.fn(() => endpointMetadataService),
+    getInternalFleetServices: jest.fn(() => fleetServices),
     getEndpointAuthz: jest.fn(async (_) => getEndpointAuthzInitialStateMock()),
     getCasesClient: jest.fn().mockReturnValue(casesClientMock),
     getFleetFromHostFilesClient: jest.fn(async () => fleetFromHostFilesClientMock),

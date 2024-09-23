@@ -8,10 +8,10 @@
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { createFleetStartContractMock } from '@kbn/fleet-plugin/server/mocks';
-import { coreMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { SavedObjectsClientFactory } from '../saved_objects';
+import type { SavedObjectsClientFactory } from '../saved_objects';
 import type { EndpointFleetServicesFactoryInterface } from './endpoint_fleet_services_factory';
 import { EndpointFleetServicesFactory } from './endpoint_fleet_services_factory';
+import { createSavedObjectsClientFactoryMock } from '../saved_objects/saved_objects_client_factory.mocks';
 
 interface EndpointFleetServicesFactoryInterfaceMocked
   extends EndpointFleetServicesFactoryInterface {
@@ -33,10 +33,7 @@ export const createEndpointFleetServicesFactoryMock = (
 } => {
   const {
     fleetDependencies = createFleetStartContractMock(),
-    savedObjects = new SavedObjectsClientFactory(
-      savedObjectsServiceMock.createStartContract(),
-      coreMock.createSetup().http
-    ),
+    savedObjects = createSavedObjectsClientFactoryMock().service,
   } = dependencies;
 
   return {
