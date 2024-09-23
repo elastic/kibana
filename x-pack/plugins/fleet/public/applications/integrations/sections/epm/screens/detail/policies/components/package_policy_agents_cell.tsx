@@ -5,23 +5,34 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useMemo } from 'react';
 
 import {
   EuiBadge,
   EuiButton,
+  EuiLink,
   EuiPopover,
   EuiPopoverTitle,
-  EuiProgress,
+  EuiHorizontalRule,
   EuiSpacer,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopoverFooter,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { sortBy } from 'lodash';
 
 import { LinkedAgentCount, AddAgentHelpPopover } from '../../../../../../components';
 import type { AgentPolicy } from '../../../../../../types';
 import { policyHasFleetServer } from '../../../../../../services';
-import { useAuthz, useMultipleAgentPolicies } from '../../../../../../hooks';
+import { useAuthz, useLink, useMultipleAgentPolicies } from '../../../../../../hooks';
+import {
+  PRIVILEGED_AGENT_KUERY,
+  UNPRIVILEGED_AGENT_KUERY,
+  AGENTS_PREFIX,
+} from '../../../../../../constants';
 
 const AddAgentButton = ({
   onAddAgent,
@@ -93,7 +104,7 @@ export const PackagePolicyAgentsCell = ({
   const canAddFleetServers = useAuthz().fleet.addFleetServers;
 
   if (canUseMultipleAgentPolicies && agentCount > 0 && agentPolicies.length > 1) {
-    return <MultipleAgentsCountBreakDown agentCount={agentCount} agentPolicies={agentPolicies} />;
+    return <AgentsCountBreakDown agentCount={agentCount} agentPolicies={agentPolicies} />;
   }
 
   if (!canUseMultipleAgentPolicies || (agentCount > 0 && agentPolicies.length === 1)) {
@@ -123,16 +134,35 @@ export const PackagePolicyAgentsCell = ({
   );
 };
 
-export const MultipleAgentsCountBreakDown = ({
+export const AgentsCountBreakDown = ({
   agentPolicies,
   agentCount,
+  privilegeMode,
 }: {
   agentPolicies: AgentPolicy[];
   agentCount: number;
+  privilegeMode?: 'privileged' | 'unprivileged';
 }) => {
+  const { getHref } = useLink();
+  const authz = useAuthz();
+
+  const canReadAgents = authz.fleet.readAgents;
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = () => setIsPopoverOpen(false);
-  const maxValue = Math.max(...agentPolicies.map((policy) => policy?.agents ?? 0));
+
+  const getKuery = (agentPolicyId: string) =>
+    `${AGENTS_PREFIX}.policy_id : ${agentPolicyId}${
+      privilegeMode
+        ? ` and ${
+            privilegeMode === 'unprivileged' ? UNPRIVILEGED_AGENT_KUERY : PRIVILEGED_AGENT_KUERY
+          }`
+        : ''
+    }`;
+  const topFivePolicies = useMemo(
+    () => sortBy(agentPolicies, 'agents').slice(0, 5).reverse(),
+    [agentPolicies]
+  );
 
   return (
     <>
@@ -140,7 +170,7 @@ export const MultipleAgentsCountBreakDown = ({
         color="hollow"
         onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         onClickAriaLabel="Open agents count popover"
-        data-test-subj="multipleAgentsCountBreakdownBadge"
+        data-test-subj="agentsCountBreakDownBadge"
       >
         {agentCount}
       </EuiBadge>
@@ -152,23 +182,61 @@ export const MultipleAgentsCountBreakDown = ({
       >
         <EuiPopoverTitle>
           {i18n.translate('xpack.fleet.agentsCountsBreakdown.popover.title', {
-            defaultMessage: 'Agents count by policy',
+            defaultMessage: 'Agents breakdown',
           })}
         </EuiPopoverTitle>
-        <div style={{ maxWidth: 250 }}>
-          {agentPolicies.map((agentPolicy) => (
+        <div style={{ minWidth: 300 }}>
+          <EuiText size="xs">
+            <b>
+              {i18n.translate('xpack.fleet.agentsCountsBreakdown.popover.heading', {
+                defaultMessage: 'Top values',
+              })}
+            </b>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {topFivePolicies.map((agentPolicy) => (
             <Fragment key={agentPolicy.id}>
-              <EuiProgress
-                max={maxValue}
-                valueText={maxValue}
-                color="primary"
-                size="m"
-                value={agentPolicy.agents ?? 0}
-                label={agentPolicy.name}
-              />
-              <EuiSpacer size="s" />
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" key={agentPolicy.id}>
+                    {agentPolicy.name}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {agentPolicy?.agents && agentPolicy.agents > 0 ? (
+                    <EuiLink
+                      href={getHref('agent_list', {
+                        kuery: getKuery(agentPolicy.id),
+                        showInactive: true,
+                      })}
+                    >
+                      {agentPolicy.agents}
+                    </EuiLink>
+                  ) : (
+                    0
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiHorizontalRule margin="xs" />
             </Fragment>
           ))}
+          <EuiSpacer size="s" />
+          {agentCount > 0 ? (
+            <EuiPopoverFooter>
+              <EuiButton
+                fullWidth
+                size="s"
+                data-test-subj="agentsCountsBreakdownPopoverButton"
+                href={getHref('agent_list', { showInactive: true })}
+                isDisabled={!canReadAgents}
+              >
+                {i18n.translate('xpack.fleet.agentsCountsBreakdown.popover.button', {
+                  defaultMessage: 'View all {agentCount, plural, one {# agent} other {# agents}}',
+                  values: { agentCount },
+                })}
+              </EuiButton>
+            </EuiPopoverFooter>
+          ) : null}
         </div>
       </EuiPopover>
     </>
