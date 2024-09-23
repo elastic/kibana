@@ -16,8 +16,6 @@ import type { FieldRetentionDefinition } from './types';
 import { getEntitiesIndexName } from '../utils/utils';
 import { buildFieldRetentionIngestPipeline } from './build_field_retention_ingest_pipeline';
 
-const HISTORICAL_FIELD = 'historical';
-
 const getEnrichPolicyName = (spaceId: string, definition: FieldRetentionDefinition) =>
   `entity_store_field_retention_${definition.entityType}_${spaceId}_v${definition.version}`;
 
@@ -76,35 +74,16 @@ export const deleteFieldRetentionEnrichPolicy = async ({
   return esClient.enrich.deletePolicy({ name: policy.name });
 };
 
-export const getFieldRetentionPipelineSteps = ({
-  spaceId,
-  entityType,
-  debugMode = false,
-}: {
+export const getFieldRetentionPipelineSteps = (opts: {
   spaceId: string;
   entityType: EntityType;
   debugMode?: boolean;
-}): IngestProcessorContainer[] => {
-  const definition = getFieldRetentionDefinition(entityType);
-  const steps: IngestProcessorContainer[] = [
-    {
-      enrich: {
-        policy_name: getEnrichPolicyName(spaceId, definition),
-        field: definition.matchField,
-        target_field: HISTORICAL_FIELD,
-      },
-    },
-    ...buildFieldRetentionIngestPipeline(definition, HISTORICAL_FIELD),
-  ];
-
-  if (!debugMode) {
-    steps.push({
-      remove: {
-        ignore_failure: true,
-        field: `${HISTORICAL_FIELD}`,
-      },
-    });
-  }
-
-  return steps;
-};
+}): IngestProcessorContainer[] =>
+  buildFieldRetentionIngestPipeline({
+    ...opts,
+    definition: getFieldRetentionDefinition(opts.entityType),
+    enrichPolicyName: getEnrichPolicyName(
+      opts.spaceId,
+      getFieldRetentionDefinition(opts.entityType)
+    ),
+  });

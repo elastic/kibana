@@ -13,41 +13,79 @@ import type {
   KeepOldestValue,
 } from './types';
 
-export const buildFieldRetentionIngestPipeline = (
-  definition: FieldRetentionDefinition,
-  enrichField: string
-): IngestProcessorContainer[] => {
-  return definition.fields.map((field) => fieldToProcessorStep(field, enrichField));
+const ENRICH_FIELD = 'historical';
+
+export const buildFieldRetentionIngestPipeline = ({
+  definition,
+  enrichPolicyName,
+  debugMode = false,
+}: {
+  definition: FieldRetentionDefinition;
+  enrichPolicyName: string;
+  debugMode?: boolean;
+}): IngestProcessorContainer[] => [
+  {
+    enrich: {
+      policy_name: enrichPolicyName,
+      field: definition.matchField,
+      target_field: ENRICH_FIELD,
+    },
+  },
+  ...getFieldProcessors(definition),
+  ...(debugMode ? getRemoveEmptyFieldProcessors(definition) : []),
+  ...(debugMode
+    ? [
+        {
+          remove: {
+            ignore_failure: true,
+            field: ENRICH_FIELD,
+          },
+        },
+      ]
+    : []),
+];
+
+const getFieldProcessors = (definition: FieldRetentionDefinition): IngestProcessorContainer[] => {
+  return definition.fields.map((field) => fieldToProcessorStep(field));
 };
 
-const checkIfFieldDoesNotExist = (field: string): string => {
+const isFieldMissingOrEmpty = (field: string): string => {
   const fieldParts = field.split('.');
   const partsCheck = fieldParts.reduce((acc, part, index) => {
     const path = fieldParts.slice(0, index + 1).join('.');
     return `${acc}ctx.${path} == null${index < fieldParts.length - 1 ? ' || ' : ''}`;
   }, '');
 
-  // check if the value is an empty array
   const emptyArrayCheck = `(ctx.${field} instanceof List && ctx.${field}.size() == 0)`;
 
   return `${partsCheck} || ${emptyArrayCheck}`;
 };
 
-const keepOldestValueProcessor = (
-  { field }: KeepOldestValue,
-  enrichField: string
-): IngestProcessorContainer => {
-  const historicalField = `${enrichField}.${field}`;
+const keepOldestValueProcessor = ({ field }: KeepOldestValue): IngestProcessorContainer => {
+  const historicalField = `${ENRICH_FIELD}.${field}`;
   return {
     set: {
-      if: checkIfFieldDoesNotExist(field),
+      if: isFieldMissingOrEmpty(field),
       field,
       value: `{{${historicalField}}}`,
     },
   };
 };
 
-const collectValuesProcessor = ({ field, maxLength }: CollectValues, enrichField: string) => {
+const getRemoveEmptyFieldProcessors = (
+  definition: FieldRetentionDefinition
+): IngestProcessorContainer[] =>
+  definition.fields.map(({ field }) => {
+    return {
+      remove: {
+        if: isFieldMissingOrEmpty(field),
+        field,
+        ignore_missing: true,
+      },
+    };
+  });
+
+const collectValuesProcessor = ({ field, maxLength }: CollectValues) => {
   return {
     script: {
       lang: 'painless',
@@ -60,9 +98,9 @@ const collectValuesProcessor = ({ field, maxLength }: CollectValues, enrichField
 
   combinedItems.addAll(ctx.${field});
 
-  if (combinedItems.size() < params.max_length && ctx.${enrichField} != null && ctx.${enrichField}.${field} != null) {
+  if (combinedItems.size() < params.max_length && ctx.${ENRICH_FIELD} != null && ctx.${ENRICH_FIELD}.${field} != null) {
     int remaining = params.max_length - combinedItems.size();
-    combinedItems.addAll(ctx.${enrichField}.${field}.subList(0, Math.min(remaining, ctx.${enrichField}.${field}.size())));
+    combinedItems.addAll(ctx.${ENRICH_FIELD}.${field}.subList(0, Math.min(remaining, ctx.${ENRICH_FIELD}.${field}.size())));
   }
 
   ctx.${field} = combinedItems.subList(0, (int) Math.min(params.max_length, combinedItems.size()));
@@ -74,14 +112,11 @@ const collectValuesProcessor = ({ field, maxLength }: CollectValues, enrichField
   };
 };
 
-const fieldToProcessorStep = (
-  fieldOperator: FieldRetentionOperator,
-  enrichField: string
-): IngestProcessorContainer => {
+const fieldToProcessorStep = (fieldOperator: FieldRetentionOperator): IngestProcessorContainer => {
   switch (fieldOperator.operation) {
     case 'keep_oldest_value':
-      return keepOldestValueProcessor(fieldOperator, enrichField);
+      return keepOldestValueProcessor(fieldOperator);
     case 'collect_values':
-      return collectValuesProcessor(fieldOperator, enrichField);
+      return collectValuesProcessor(fieldOperator);
   }
 };
