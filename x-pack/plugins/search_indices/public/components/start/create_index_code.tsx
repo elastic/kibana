@@ -15,6 +15,7 @@ import { DenseVectorSeverlessCodeExamples } from '../../code_examples/create_ind
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { useKibana } from '../../hooks/use_kibana';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
+import { getDefaultCodingLanguage } from '../../utils/language';
 
 import { CodeSample } from '../shared/code_sample';
 import { LanguageSelector } from '../shared/language_selector';
@@ -32,8 +33,8 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
   const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
 
-  // TODO: initing this should be dynamic and possibly saved in the form state
-  const [selectedLanguage, setSelectedLanguage] = useState<AvailableLanguages>('python');
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<AvailableLanguages>(getDefaultCodingLanguage);
   const onSelectLanguage = useCallback(
     (value: AvailableLanguages) => {
       setSelectedLanguage(value);

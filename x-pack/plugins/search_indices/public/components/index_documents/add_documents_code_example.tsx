@@ -21,6 +21,7 @@ import { AvailableLanguages, LanguageOptions, Languages } from '../../code_examp
 import { AnalyticsEvents } from '../../analytics/constants';
 import { CodeSample } from '../shared/code_sample';
 import { generateSampleDocument } from '../../utils/document_generation';
+import { getDefaultCodingLanguage } from '../../utils/language';
 
 export interface AddDocumentsCodeExampleProps {
   indexName: string;
@@ -37,8 +38,8 @@ export const AddDocumentsCodeExample = ({
   const usageTracker = useUsageTracker();
   const indexHasMappings = Object.keys(mappingProperties).length > 0;
 
-  // TODO: initing this should be dynamic and possibly saved in the form state
-  const [selectedLanguage, setSelectedLanguage] = useState<AvailableLanguages>('python');
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<AvailableLanguages>(getDefaultCodingLanguage);
   const selectedCodeExamples = ingestCodeExamples[selectedLanguage];
   const codeSampleMappings = indexHasMappings
     ? mappingProperties
