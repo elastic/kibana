@@ -60,6 +60,7 @@ describe('useStateProps', () => {
         query: { language: 'kuery', query: '' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -150,6 +151,7 @@ describe('useStateProps', () => {
         query: { esql: 'FROM index' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -236,6 +238,7 @@ describe('useStateProps', () => {
         query: { esql: 'FROM index' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
@@ -255,6 +258,7 @@ describe('useStateProps', () => {
         query: { language: 'kuery', query: '' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -333,6 +337,7 @@ describe('useStateProps', () => {
         query: { language: 'kuery', query: '' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -411,6 +416,7 @@ describe('useStateProps', () => {
         query: { language: 'kuery', query: '' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     const {
@@ -470,6 +476,7 @@ describe('useStateProps', () => {
         query: { language: 'kuery', query: '' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     (stateService.setLensRequestAdapter as jest.Mock).mockClear();
@@ -489,6 +496,7 @@ describe('useStateProps', () => {
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
+      columns: undefined,
     };
     const hook = renderHook((props: Parameters<typeof useStateProps>[0]) => useStateProps(props), {
       initialProps,

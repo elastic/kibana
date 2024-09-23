@@ -14,7 +14,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
@@ -374,6 +374,7 @@ export const UnifiedHistogramLayout = ({
           lensAdapters={lensAdapters}
           lensEmbeddableOutput$={lensEmbeddableOutput$}
           withDefaultActions={withDefaultActions}
+          columns={columns}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>

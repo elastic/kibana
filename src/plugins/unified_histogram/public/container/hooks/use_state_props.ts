@@ -11,6 +11,8 @@ import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/co
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { useCallback, useEffect, useMemo } from 'react';
 import {
   UnifiedHistogramChartLoadEvent,
@@ -35,12 +37,14 @@ export const useStateProps = ({
   query,
   searchSessionId,
   requestAdapter,
+  columns,
 }: {
   stateService: UnifiedHistogramStateService | undefined;
   dataView: DataView;
   query: Query | AggregateQuery | undefined;
   searchSessionId: string | undefined;
   requestAdapter: RequestAdapter | undefined;
+  columns: DatatableColumn[] | undefined;
 }) => {
   const breakdownField = useStateSelector(stateService?.state$, breakdownFieldSelector);
   const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
@@ -96,16 +100,20 @@ export const useStateProps = ({
       return undefined;
     }
 
-    // if (isPlainRecord) {
-    //   return {
-    //     field: breakdownField ?? ,
-    //   };
-    // }
+    if (isPlainRecord) {
+      const breakdownColumn = columns?.find((column) => column.name === breakdownField);
+      const field = breakdownColumn
+        ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
+        : undefined;
+      return {
+        field,
+      };
+    }
 
     return {
       field: breakdownField ? dataView?.getFieldByName(breakdownField) : undefined,
     };
-  }, [breakdownField, dataView, query, isTimeBased]);
+  }, [isTimeBased, query, isPlainRecord, breakdownField, dataView, columns]);
 
   const request = useMemo(() => {
     return {

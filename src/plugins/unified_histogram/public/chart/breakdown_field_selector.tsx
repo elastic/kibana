@@ -11,7 +11,9 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiSelectableOption } from '@elastic/eui';
 import { FieldIcon, getFieldIconProps, comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
 import { UnifiedHistogramBreakdownContext } from '../types';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
@@ -25,22 +27,44 @@ import {
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
   breakdown: UnifiedHistogramBreakdownContext;
+  esqlColumns?: DatatableColumn[];
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
 }
+
+const getDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
+  if (esqlColumns) {
+    return esqlColumns.map((column) => ({
+      key: column.id,
+      value: column.id,
+      label: column.name,
+      name: column.name,
+      type: column.meta?.type,
+    }));
+  }
+
+  return dataView.fields.filter(fieldSupportsBreakdown).map((field) => ({
+    key: field.name,
+    value: field.name,
+    label: field.displayName,
+    name: field.name,
+    type: field.type,
+  }));
+};
 
 export const BreakdownFieldSelector = ({
   dataView,
   breakdown,
+  esqlColumns,
   onBreakdownFieldChange,
 }: BreakdownFieldSelectorProps) => {
+  const fields = useMemo(() => getDropdownFields(dataView, esqlColumns), [dataView, esqlColumns]);
   const fieldOptions: SelectableEntry[] = useMemo(() => {
-    const options: SelectableEntry[] = dataView.fields
-      .filter(fieldSupportsBreakdown)
+    const options: SelectableEntry[] = fields
       .map((field) => ({
-        key: field.name,
+        key: field.key,
         name: field.name,
-        label: field.displayName,
-        value: field.name,
+        label: field.label,
+        value: field.value,
         checked:
           breakdown?.field?.name === field.name
             ? ('on' as EuiSelectableOption['checked'])
@@ -69,16 +93,24 @@ export const BreakdownFieldSelector = ({
     });
 
     return options;
-  }, [dataView, breakdown.field]);
+  }, [fields, breakdown?.field]);
 
   const onChange = useCallback<NonNullable<ToolbarSelectorProps['onChange']>>(
     (chosenOption) => {
-      const field = chosenOption?.value
-        ? dataView.fields.find((currentField) => currentField.name === chosenOption.value)
-        : undefined;
-      onBreakdownFieldChange?.(field);
+      let breakdownField: DataViewField | undefined;
+      if (esqlColumns) {
+        const breakdownColumn = esqlColumns?.find((column) => column.name === chosenOption?.value);
+        breakdownField = breakdownColumn
+          ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
+          : undefined;
+      } else {
+        breakdownField = chosenOption?.value
+          ? dataView.fields.find((currentField) => currentField.name === chosenOption.value)
+          : undefined;
+      }
+      onBreakdownFieldChange?.(breakdownField);
     },
-    [dataView.fields, onBreakdownFieldChange]
+    [dataView.fields, esqlColumns, onBreakdownFieldChange]
   );
 
   return (
