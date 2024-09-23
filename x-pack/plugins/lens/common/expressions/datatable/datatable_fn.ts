@@ -64,7 +64,11 @@ export const datatableFn =
       transposeTable(args, table, formatters);
 
       if (context?.inspectorAdapters?.tables) {
-        context.inspectorAdapters.tables.logDatatable(DatatableInspectorTables.Transpose, table);
+        const exposedColumns = new Set(args.columns.map((c) => c.columnId));
+        context.inspectorAdapters.tables.logDatatable(DatatableInspectorTables.Transpose, {
+          ...table,
+          columns: table.columns.filter((c) => exposedColumns.has(c.id)), // remove ghost formula columns
+        });
         context.inspectorAdapters.tables.initialSelectedTable = DatatableInspectorTables.Transpose;
       }
     }
