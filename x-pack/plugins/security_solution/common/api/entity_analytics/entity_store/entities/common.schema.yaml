@@ -1,0 +1,159 @@
+openapi: 3.0.0
+info:
+  title: Common Entities Schemas
+  description: Common Entities schemas for the Entity Store
+  version: '1'
+paths: {}
+components:
+  schemas:
+    UserEntity:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            full_name:
+              type: array
+              items:
+                type: string
+            domain:
+              type: array
+              items:
+                type: string
+            roles:
+              type: array
+              items:
+                type: string
+            name:
+              type: string
+            id:
+              type: array
+              items:
+                type: string
+            email:
+              type: array
+              items:
+                type: string
+            hash:
+              type: array
+              items:
+                type: string
+          required:
+            - name
+        entity:
+          type: object
+          properties:
+            lastSeenTimestamp:
+              type: string
+              format: date-time
+            schemaVersion:
+              type: string
+            definitionVersion:
+              type: string
+            displayName:
+              type: string
+            identityFields:
+              type: array
+              items:
+                type: string
+            id:
+              type: string
+            type:
+              type: string
+              enum:
+                - node
+            firstSeenTimestamp:
+              type: string
+              format: date-time
+            definitionId:
+              type: string
+          required:
+            - lastSeenTimestamp
+            - schemaVersion
+            - definitionVersion
+            - displayName
+            - identityFields
+            - id
+            - type
+            - firstSeenTimestamp
+            - definitionId
+    HostEntity:
+      type: object
+      properties:
+        host:
+          type: object
+          properties:
+            hostname:
+              type: array
+              items:
+                type: string
+            domain:
+              type: array
+              items:
+                type: string
+            ip:
+              type: array
+              items:
+                type: string
+            name:
+              type: string
+            id:
+              type: array
+              items:
+                type: string
+            type:
+              type: array
+              items:
+                type: string
+            mac:
+              type: array
+              items:
+                type: string
+            architecture:
+              type: array
+              items:
+                type: string
+          required:
+            - name
+        entity:
+          type: object
+          properties:
+            lastSeenTimestamp:
+              type: string
+              format: date-time
+            schemaVersion:
+              type: string
+            definitionVersion:
+              type: string
+            displayName:
+              type: string
+            identityFields:
+              type: array
+              items:
+                type: string
+            id:
+              type: string
+            type:
+              type: string
+              enum:
+                - node
+            firstSeenTimestamp:
+              type: string
+              format: date-time
+            definitionId:
+              type: string
+          required:
+            - lastSeenTimestamp
+            - schemaVersion
+            - definitionVersion
+            - displayName
+            - identityFields
+            - id
+            - type
+            - firstSeenTimestamp
+            - definitionId
+
+    Entity:
+      oneOf:
+        - $ref: '#/components/schemas/UserEntity'
+        - $ref: '#/components/schemas/HostEntity'
