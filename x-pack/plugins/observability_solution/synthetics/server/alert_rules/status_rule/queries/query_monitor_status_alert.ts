@@ -52,26 +52,25 @@ export interface AlertStatusResponse {
   enabledMonitorQueryIds: string[];
 }
 
-export async function queryMonitorStatusAlert(
-  esClient: SyntheticsEsClient,
-  monitorLocationIds: string[],
-  range: { from: string; to: string },
-  monitorQueryIds: string[],
-  monitorLocationsMap: Record<string, string[]>,
-  numberOfChecks: number
-): Promise<AlertStatusResponse> {
-  monitorQueryIdToConfigIdMap: Record<string, string>
-): Promise<AlertOverviewStatus> {
+export async function queryMonitorStatusAlert({
+  esClient,
+  monitorLocationIds,
+  range,
+  monitorQueryIds,
+  monitorLocationsMap,
+  numberOfChecks,
+}: {
+  esClient: SyntheticsEsClient;
+  monitorLocationIds: string[];
+  range: { from: string; to: string };
+  monitorQueryIds: string[];
+  monitorLocationsMap: Record<string, string[]>;
+  numberOfChecks: number;
+}): Promise<AlertStatusResponse> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
   const upConfigs: StatusConfigs = {};
   const downConfigs: StatusConfigs = {};
-  let up = 0;
-  let down = 0;
-  const upConfigs: Record<string, AlertStatusMetaData> = {};
-  const downConfigs: Record<string, AlertStatusMetaData> = {};
-  const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
-  const pendingConfigs: Record<string, AlertPendingStatusMetaData> = {};
 
   await pMap(
     times(pageCount),
@@ -210,6 +209,5 @@ export async function queryMonitorStatusAlert(
     upConfigs,
     downConfigs,
     enabledMonitorQueryIds: monitorQueryIds,
-    staleDownConfigs: {},
   };
 }

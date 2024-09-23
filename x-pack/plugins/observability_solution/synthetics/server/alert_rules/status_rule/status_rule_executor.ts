@@ -138,10 +138,8 @@ export class StatusRuleExecutor {
 
   async getDownChecks(prevDownConfigs: StatusConfigs = {}): Promise<AlertOverviewStatus> {
     await this.init();
-    const { enabledMonitorQueryIds, maxPeriod, monitorLocationIds, monitorLocationMap } =
+    const { enabledMonitorQueryIds, maxPeriod, monitorLocationIds, monitorLocationsMap } =
       await this.getMonitors();
-
-    this.monitorLocationsMap = monitorLocationMap;
 
     const range = this.getRange(maxPeriod);
 
@@ -154,18 +152,18 @@ export class StatusRuleExecutor {
         upConfigs: {},
         staleDownConfigs,
         enabledMonitorQueryIds,
-        monitorLocationsMap: monitorLocationMap,
+        monitorLocationsMap,
       };
     }
 
-    const currentStatus = await queryMonitorStatusAlert(
-      this.esClient,
+    const currentStatus = await queryMonitorStatusAlert({
+      esClient: this.esClient,
       monitorLocationIds,
       range,
-      enabledMonitorQueryIds,
-      monitorLocationMap,
-      numberOfChecks
-    );
+      monitorQueryIds: enabledMonitorQueryIds,
+      numberOfChecks,
+      monitorLocationsMap,
+    });
 
     const { downConfigs, upConfigs } = currentStatus;
 
@@ -198,7 +196,7 @@ export class StatusRuleExecutor {
     return {
       ...currentStatus,
       staleDownConfigs,
-      monitorLocationsMap: monitorLocationMap,
+      monitorLocationsMap,
     };
   }
 

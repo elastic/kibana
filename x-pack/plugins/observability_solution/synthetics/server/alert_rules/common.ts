@@ -40,7 +40,6 @@ import {
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
-import { AlertOverviewStatus } from './status_rule/status_rule_executor';
 import type { MonitorSummaryStatusRule, MonitorStatusAlertDocument } from './status_rule/types';
 import { StatusRuleParams } from '../../common/rules/status_rule';
 import { SyntheticsMonitorStatusAlertState } from '../../common/runtime_types/alert_rules/common';
