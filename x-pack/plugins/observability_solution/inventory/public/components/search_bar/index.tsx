@@ -77,6 +77,7 @@ export function SearchBar() {
   return (
     <UnifiedSearchBar
       appName="Inventory"
+      displayStyle="inPage"
       showDatePicker={false}
       showFilterBar={false}
       indexPatterns={dataView ? [dataView] : undefined}
