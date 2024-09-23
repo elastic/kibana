@@ -330,22 +330,6 @@ describe('autocomplete', () => {
     testSuggestions('from a | dissect keywordField/', []);
   });
 
-  describe('sort', () => {
-    testSuggestions('from a | sort /', [
-      ...getFieldNamesByType('any').map((name) => `${name} `),
-      ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-    ]);
-    testSuggestions('from a | sort keywordField /', ['ASC ', 'DESC ', ',', '| ']);
-    testSuggestions('from a | sort keywordField desc /', [
-      'NULLS FIRST ',
-      'NULLS LAST ',
-      ',',
-      '| ',
-    ]);
-    // @TODO: improve here
-    // testSuggestions('from a | sort keywordField desc ', ['first', 'last']);
-  });
-
   describe('limit', () => {
     testSuggestions('from a | limit /', ['10 ', '100 ', '1000 ']);
     testSuggestions('from a | limit 4 /', ['| ']);
@@ -671,23 +655,6 @@ describe('autocomplete', () => {
 
     // RENAME field AS var0
     testSuggestions('FROM index1 | RENAME field AS v/', ['var0']);
-
-    // SORT field
-    testSuggestions('FROM index1 | SORT f/', [
-      ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-      ...getFieldNamesByType('any').map((field) => `${field} `),
-    ]);
-
-    // SORT field order
-    testSuggestions('FROM index1 | SORT keywordField a/', ['ASC ', 'DESC ', ',', '| ']);
-
-    // SORT field order nulls
-    testSuggestions('FROM index1 | SORT keywordField ASC n/', [
-      'NULLS FIRST ',
-      'NULLS LAST ',
-      ',',
-      '| ',
-    ]);
 
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
@@ -1015,27 +982,6 @@ describe('autocomplete', () => {
     // LIMIT number
     testSuggestions('FROM a | LIMIT /', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
 
-    // SORT field
-    testSuggestions(
-      'FROM a | SORT /',
-      [
-        ...getFieldNamesByType('any').map((field) => `${field} `),
-        ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-      ].map(attachTriggerCommand)
-    );
-
-    // SORT field order
-    testSuggestions('FROM a | SORT field /', [
-      ',',
-      ...['ASC ', 'DESC ', '| '].map(attachTriggerCommand),
-    ]);
-
-    // SORT field order nulls
-    testSuggestions('FROM a | SORT field ASC /', [
-      ',',
-      ...['NULLS FIRST ', 'NULLS LAST ', '| '].map(attachTriggerCommand),
-    ]);
-
     // STATS argument
     testSuggestions(
       'FROM a | STATS /',
@@ -1251,22 +1197,6 @@ describe('autocomplete', () => {
       'IN $0',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
-      'IS NULL',
-      '% $0',
-      '* $0',
-      '+ $0',
-      '- $0',
-      '/ $0',
-      '!= $0',
-      '< $0',
-      '<= $0',
-      '== $0',
-      '> $0',
-      '>= $0',
-      'IN $0',
-    ]);
-    testSuggestions('FROM a | SORT doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
       'IS NULL',
       '% $0',
