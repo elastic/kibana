@@ -8,7 +8,7 @@
  */
 
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../../../mocks';
-import { DashboardEmbeddableService } from '../../embeddable/types';
+import { embeddableService } from '../../kibana_services';
 import { SavedDashboardInput } from '../types';
 import { migrateDashboardInput } from './migrate_dashboard_input';
 
@@ -31,14 +31,12 @@ describe('Migrate dashboard input', () => {
       panel4: getSampleDashboardPanel({ type: 'ultraDiscover', explicitInput: { id: 'panel4' } }),
     };
 
-    const embeddableService: DashboardEmbeddableService = {
-      getEmbeddableFactory: jest.fn(() => ({
-        latestVersion: '1.0.0',
-        migrations: {},
-      })),
-    } as unknown as DashboardEmbeddableService;
+    embeddableService.getEmbeddableFactory = jest.fn(() => ({
+      latestVersion: '1.0.0',
+      migrations: {},
+    })) as unknown as typeof embeddableService.getEmbeddableFactory;
 
-    const result = migrateDashboardInput(dashboardInput, embeddableService);
+    const result = migrateDashboardInput(dashboardInput);
 
     // migration run should be true because the runEmbeddableFactoryMigrations mock above returns true.
     expect(result.anyMigrationRun).toBe(true);
