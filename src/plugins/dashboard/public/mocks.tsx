@@ -119,7 +119,6 @@ export function getSampleDashboardInput(
     id: '123',
     tags: [],
     filters: [],
-    isEmbeddedExternally: false,
     title: 'My Dashboard',
     query: {
       language: 'kuery',

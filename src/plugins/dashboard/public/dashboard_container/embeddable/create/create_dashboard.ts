@@ -101,7 +101,6 @@ export const createDashboard = async (
     },
     hasRunClientsideMigrations: savedObjectResult.anyMigrationRun,
     isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
-    animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
     hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
     managed: savedObjectResult.managed,
     lastSavedId: savedObjectId,
@@ -475,7 +474,7 @@ export const initializeDashboard = async ({
   // Start animating panel transforms 500 ms after dashboard is created.
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboard) =>
-    setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
+    setTimeout(() => dashboard.setAnimatePanelTransforms(true), 500)
   );
 
   // --------------------------------------------------------------------------------------

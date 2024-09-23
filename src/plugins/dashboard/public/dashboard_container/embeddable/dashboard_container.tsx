@@ -107,6 +107,7 @@ import {
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
+import { initializeComponentStateManager } from '../../dashboard_api/component_state_manager';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -148,6 +149,7 @@ export class DashboardContainer
   public dispatch: DashboardReduxEmbeddableTools['dispatch'];
   public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
   public anyReducerRun: Subject<null> = new Subject();
+  public setAnimatePanelTransforms: (animate: boolean) => void;
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
@@ -299,6 +301,10 @@ export class DashboardContainer
       'id'
     ) as BehaviorSubject<string>;
 
+    const componentStateManager = initializeComponentStateManager();
+    this.animatePanelTransforms$ = componentStateManager.api.animatePanelTransforms$;
+    this.setAnimatePanelTransforms = componentStateManager.setters.setAnimatePanelTransforms;
+
     this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
     this.expandedPanelId = new BehaviorSubject(this.getExpandedPanelId());
     this.focusedPanelId$ = new BehaviorSubject(this.getState().componentState.focusedPanelId);
@@ -312,9 +318,6 @@ export class DashboardContainer
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
     this.scrollToPanelId$ = new BehaviorSubject(this.getState().componentState.scrollToPanelId);
     this.highlightPanelId$ = new BehaviorSubject(this.getState().componentState.highlightPanelId);
-    this.animatePanelTransforms$ = new BehaviorSubject(
-      this.getState().componentState.animatePanelTransforms
-    );
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
     this.embeddedExternally$ = new BehaviorSubject(
       this.getState().componentState.isEmbeddedExternally
@@ -354,9 +357,6 @@ export class DashboardContainer
         }
         if (this.highlightPanelId$.value !== state.componentState.highlightPanelId) {
           this.highlightPanelId$.next(state.componentState.highlightPanelId);
-        }
-        if (this.animatePanelTransforms$.value !== state.componentState.animatePanelTransforms) {
-          this.animatePanelTransforms$.next(state.componentState.animatePanelTransforms);
         }
         if (this.embeddedExternally$.value !== state.componentState.isEmbeddedExternally) {
           this.embeddedExternally$.next(state.componentState.isEmbeddedExternally);
@@ -587,7 +587,7 @@ export class DashboardContainer
   public useMargins$: BehaviorSubject<boolean>;
   public scrollToPanelId$: BehaviorSubject<string | undefined>;
   public highlightPanelId$: BehaviorSubject<string | undefined>;
-  public animatePanelTransforms$: BehaviorSubject<boolean | undefined>;
+  public animatePanelTransforms$: BehaviorSubject<boolean>;
   public panels$: BehaviorSubject<DashboardPanelMap>;
   public embeddedExternally$: BehaviorSubject<boolean | undefined>;
   public uuid$: BehaviorSubject<string>;
@@ -818,12 +818,12 @@ export class DashboardContainer
     this.searchSessionId = searchSessionId;
     this.searchSessionId$.next(searchSessionId);
 
+    this.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
     batch(() => {
       this.dispatch.setLastSavedInput(
         omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
       );
       this.dispatch.setManaged(loadDashboardReturn?.managed);
-      this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
       this.setExpandedPanelId(undefined);
     });

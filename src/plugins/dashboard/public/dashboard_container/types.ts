@@ -41,7 +41,6 @@ export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & Das
 export interface DashboardPublicState {
   lastSavedInput: DashboardContainerInput;
   hasRunClientsideMigrations?: boolean;
-  animatePanelTransforms?: boolean;
   isEmbeddedExternally?: boolean;
   hasUnsavedChanges?: boolean;
   hasOverlays?: boolean;
@@ -91,7 +90,7 @@ export interface DashboardSaveOptions {
 export type DashboardLocatorParams = Partial<
   Omit<
     DashboardContainerInput,
-    'panels' | 'controlGroupInput' | 'executionContext' | 'isEmbeddedExternally'
+    'panels' | 'controlGroupInput' | 'executionContext'
   >
 > & {
   /**

@@ -48,7 +48,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesViewMode &
   TracksOverlays & {
     addFromLibrary: () => void;
-    animatePanelTransforms$: PublishingSubject<boolean | undefined>;
+    animatePanelTransforms$: PublishingSubject<boolean>;
     asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     embeddedExternally$: PublishingSubject<boolean | undefined>;
