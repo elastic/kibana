@@ -13,7 +13,7 @@ import type {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { cloneDeep, merge } from 'lodash';
+import { cloneDeep } from 'lodash';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type {
   DataViewSpec,
@@ -161,7 +161,7 @@ export abstract class AbstractDataView {
           }
           return acc;
         }, {} as Record<string, FieldAttrSet>)
-      : [];
+      : {};
 
     this.allowNoIndex = spec?.allowNoIndex || false;
 
@@ -191,7 +191,7 @@ export abstract class AbstractDataView {
     this.sourceFilters = [...(spec.sourceFilters || [])];
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = cloneDeep(merge({}, extractedFieldAttrs, spec.fieldAttrs)) || {};
+    this.fieldAttrs = new Map(Object.entries({ ...extractedFieldAttrs, ...spec.fieldAttrs }));
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
@@ -300,10 +300,9 @@ export abstract class AbstractDataView {
     attrName: K,
     value: FieldAttrSet[K]
   ) {
-    if (!this.fieldAttrs[fieldName]) {
-      this.fieldAttrs[fieldName] = {} as FieldAttrSet;
-    }
-    this.fieldAttrs[fieldName][attrName] = value;
+    const fieldAttrs = this.fieldAttrs.get(fieldName) || {};
+    fieldAttrs[attrName] = value;
+    this.fieldAttrs.set(fieldName, fieldAttrs);
   }
 
   /**
@@ -385,7 +384,7 @@ export abstract class AbstractDataView {
 
   protected toSpecShared(includeFields = true): DataViewSpec {
     // if fields aren't included, don't include count
-    const fieldAttrs = cloneDeep(this.fieldAttrs);
+    const fieldAttrs = Object.fromEntries(this.fieldAttrs.entries());
     if (!includeFields) {
       Object.keys(fieldAttrs).forEach((key) => {
         delete fieldAttrs[key].count;
@@ -546,5 +545,8 @@ export abstract class AbstractDataView {
     this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
   }
 
-  getFieldAttrs = () => cloneDeep(this.fieldAttrs);
+  getFieldAttrs = () => {
+    const clonedFieldAttrs = cloneDeep(Object.fromEntries(this.fieldAttrs.entries()));
+    return new Map(Object.entries(clonedFieldAttrs));
+  };
 }
