@@ -17,6 +17,7 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
+import { EntityInventoryLocatorDefinition } from '@kbn/observability-shared-plugin/common';
 import type {
   ConfigSchema,
   InventoryPublicSetup,
@@ -50,6 +51,10 @@ export class InventoryPlugin
   ): InventoryPublicSetup {
     const inventoryAPIClient = createCallInventoryAPI(coreSetup);
     this.telemetry.setup({ analytics: coreSetup.analytics });
+
+    const inventoryLocator = pluginsSetup.share.url.locators.create(
+      new EntityInventoryLocatorDefinition()
+    );
 
     pluginsSetup.observabilityShared.navigation.registerSections(
       from(coreSetup.getStartServices()).pipe(
@@ -118,7 +123,7 @@ export class InventoryPlugin
       },
     });
 
-    return {};
+    return { inventoryLocator };
   }
 
   start(coreStart: CoreStart, pluginsStart: InventoryStartDependencies): InventoryPublicStart {
