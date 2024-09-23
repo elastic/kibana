@@ -30,7 +30,7 @@ import {
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
-import { dashboardActionGroup } from '.';
+import { DASHBOARD_ACTION_GROUP } from '.';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 
@@ -55,7 +55,7 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_UNLINK_FROM_LIBRARY;
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
-  public grouping = [dashboardActionGroup];
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
   private toastsService;
 

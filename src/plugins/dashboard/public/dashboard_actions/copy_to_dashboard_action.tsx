@@ -29,7 +29,7 @@ import { DashboardApi } from '../dashboard_api/types';
 import { pluginServices } from '../services/plugin_services';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
-import { dashboardActionGroup } from '.';
+import { DASHBOARD_ACTION_GROUP } from '.';
 
 export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
 
@@ -60,7 +60,7 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_COPY_TO_DASHBOARD;
   public readonly id = ACTION_COPY_TO_DASHBOARD;
   public order = 1;
-  public grouping = [dashboardActionGroup];
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
   private dashboardCapabilities;
   private openModal;

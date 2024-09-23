@@ -16,7 +16,7 @@ import {
   HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { dashboardActionGroup } from '.';
+import { DASHBOARD_ACTION_GROUP } from '.';
 
 import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
 
@@ -31,7 +31,7 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EXPAND_PANEL;
   public readonly id = ACTION_EXPAND_PANEL;
   public order = 9;
-  public grouping = [dashboardActionGroup];
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
   constructor() {}
 
