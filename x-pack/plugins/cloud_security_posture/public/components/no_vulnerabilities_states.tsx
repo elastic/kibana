@@ -42,7 +42,7 @@ import { PostureTypes } from '../../common/types_old';
 import { useAdd3PIntegrationRoute } from '../common/api/use_wiz_integration_route';
 import cloudsSVG from '../assets/illustrations/clouds.svg';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
-import vendorsSVG from '../assets/illustrations/vendors.svg';
+import vulnerabilitiesVendorsSVG from '../assets/illustrations/vulnerabilities_vendors.svg';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -145,7 +145,14 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
           <EuiEmptyPrompt
             style={{ padding: euiTheme.size.l }}
             data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT}
-            icon={<EuiImage size="fullWidth" src={vendorsSVG} alt="vendors" role="presentation" />}
+            icon={
+              <EuiImage
+                size="fullWidth"
+                src={vulnerabilitiesVendorsSVG}
+                alt="vulnerabilitiesVendorsSVG"
+                role="presentation"
+              />
+            }
             title={
               <h2>
                 <FormattedMessage

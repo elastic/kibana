@@ -42,7 +42,7 @@ import {
 } from '../cloud_posture_page';
 import type { PostureTypes } from '../../../common/types_old';
 import cloudsSVG from '../../assets/illustrations/clouds.svg';
-import vendorsSVG from '../../assets/illustrations/vendors.svg';
+import misconfigurationsVendorsSVG from '../../assets/illustrations/misconfigurations_vendors.svg';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
@@ -266,7 +266,14 @@ const EmptySecurityFindingsPrompt = () => {
           <EuiEmptyPrompt
             style={{ padding: euiTheme.size.l }}
             data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT}
-            icon={<EuiImage size="fullWidth" src={vendorsSVG} alt="vendors" role="presentation" />}
+            icon={
+              <EuiImage
+                size="fullWidth"
+                src={misconfigurationsVendorsSVG}
+                alt="misconfigurationsVendorsSVG"
+                role="presentation"
+              />
+            }
             title={
               <h2>
                 <FormattedMessage
