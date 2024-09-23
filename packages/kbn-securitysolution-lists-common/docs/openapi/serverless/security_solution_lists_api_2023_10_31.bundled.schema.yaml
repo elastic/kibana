@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.'
+  description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
   title: Security Solution Lists API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -375,7 +375,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/NonEmptyString'
-        - description: 'Determines the sort order, which can be `desc` or `asc`'
+        - description: Determines the sort order, which can be `desc` or `asc`
           in: query
           name: sort_order
           required: false
@@ -622,7 +622,7 @@ paths:
         - Security Solution Lists API
   /api/lists/items:
     delete:
-      description: 'Delete a list item using its `id`, or its `list_id` and `value` fields.'
+      description: Delete a list item using its `id`, or its `list_id` and `value` fields.
       operationId: DeleteListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
@@ -1078,7 +1078,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/NonEmptyString'
-        - description: 'Determines the sort order, which can be `desc` or `asc`'
+        - description: Determines the sort order, which can be `desc` or `asc`
           in: query
           name: sort_order
           required: false
@@ -1562,5 +1562,5 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.'
+  - description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
     name: Security Solution Lists API

@@ -1173,7 +1173,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => ({ t_start: string; t_end?: undefined; } | { t_end: string; t_start?: undefined; })[]"
+          " | undefined) => ({ _tstart: string; _tend?: undefined; } | { _tend: string; _tstart?: undefined; })[]"
         ],
         "path": "packages/kbn-esql-utils/src/utils/run_query.ts",
         "deprecated": false,
@@ -1227,7 +1227,7 @@
         "tags": [],
         "label": "getTimeFieldFromESQLQuery",
         "description": [
-          "\nWhen the ?t_start and ?t_end params are used, we want to retrieve the timefield from the query."
+          "\nWhen the ?_tstart and ?_tend params are used, we want to retrieve the timefield from the query."
         ],
         "signature": [
           "(esql: string) => string | undefined"

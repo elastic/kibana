@@ -13,6 +13,7 @@ import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-browser-internal';
 import type { InternalUserProfileServiceSetup } from '@kbn/core-user-profile-browser-internal';
+import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-browser';
 
 /** @internal */
 export interface InternalCoreSetup
@@ -21,6 +22,7 @@ export interface InternalCoreSetup
     'application' | 'plugins' | 'getStartServices' | 'http' | 'security' | 'userProfile'
   > {
   application: InternalApplicationSetup;
+  featureFlags: FeatureFlagsSetup;
   injectedMetadata: InternalInjectedMetadataSetup;
   http: InternalHttpSetup;
   security: InternalSecurityServiceSetup;

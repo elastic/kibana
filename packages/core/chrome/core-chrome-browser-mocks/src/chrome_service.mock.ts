@@ -51,7 +51,10 @@ const createStartContractMock = () => {
     setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn(),
     setBreadcrumbs: jest.fn(),
-    getIsSideNavCollapsed$: jest.fn(),
+    sideNav: {
+      getIsCollapsed$: jest.fn(),
+      setIsCollapsed: jest.fn(),
+    },
     getBreadcrumbsAppendExtension$: jest.fn(),
     setBreadcrumbsAppendExtension: jest.fn(),
     getGlobalHelpExtensionMenuLinks$: jest.fn(),
@@ -94,7 +97,7 @@ const createStartContractMock = () => {
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
   startContract.getBodyClasses$.mockReturnValue(new BehaviorSubject([]));
   startContract.hasHeaderBanner$.mockReturnValue(new BehaviorSubject(false));
-  startContract.getIsSideNavCollapsed$.mockReturnValue(new BehaviorSubject(false));
+  startContract.sideNav.getIsCollapsed$.mockReturnValue(new BehaviorSubject(false));
   return startContract;
 };
 

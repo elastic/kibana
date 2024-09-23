@@ -9,28 +9,22 @@
 
 import { monaco } from '@kbn/monaco';
 import { RequestResult } from '../../../hooks/use_send_current_request/send_request';
-import {
-  DEFAULT_STATUS_BADGE_CLASSNAME,
-  SUCCESS_STATUS_BADGE_CLASSNAME,
-  PRIMARY_STATUS_BADGE_CLASSNAME,
-  WARNING_STATUS_BADGE_CLASSNAME,
-  DANGER_STATUS_BADGE_CLASSNAME,
-} from './constants';
+import { STATUS_CODE_LINE_CLASSNAME } from './constants';
 
-const getStatusCodeClassName = (statusCode: number) => {
+const getStatusCodeClassNameSuffix = (statusCode: number) => {
   if (statusCode <= 199) {
-    return DEFAULT_STATUS_BADGE_CLASSNAME;
+    return '--default';
   }
   if (statusCode <= 299) {
-    return SUCCESS_STATUS_BADGE_CLASSNAME;
+    return '--success';
   }
   if (statusCode <= 399) {
-    return PRIMARY_STATUS_BADGE_CLASSNAME;
+    return '--primary';
   }
   if (statusCode <= 499) {
-    return WARNING_STATUS_BADGE_CLASSNAME;
+    return '--warning';
   }
-  return DANGER_STATUS_BADGE_CLASSNAME;
+  return '--danger';
 };
 
 export const getStatusCodeDecorations = (data: RequestResult[]) => {
@@ -39,25 +33,21 @@ export const getStatusCodeDecorations = (data: RequestResult[]) => {
 
   data.forEach(({ response }) => {
     if (response?.value) {
-      const totalStatus =
-        response.statusCode && response.statusText
-          ? response.statusCode + ' ' + response.statusText
-          : '';
-      const startColumn = (response.value as string).indexOf(totalStatus) + 1;
-      if (totalStatus && startColumn !== 0) {
-        const range = {
-          startLineNumber: lastResponseEndLine + 1,
-          startColumn,
-          endLineNumber: lastResponseEndLine + 1,
-          endColumn: startColumn + totalStatus.length,
-        };
-        decorations.push({
-          range,
-          options: {
-            inlineClassName: getStatusCodeClassName(response.statusCode),
-          },
-        });
-      }
+      const range = {
+        startLineNumber: lastResponseEndLine + 1,
+        startColumn: 1,
+        endLineNumber: lastResponseEndLine + 1,
+        endColumn: 1, // It doesn't matter what endColumn we set as the decoration will be applied to the whole line
+      };
+      const classNameSuffix = getStatusCodeClassNameSuffix(response.statusCode);
+      decorations.push({
+        range,
+        options: {
+          isWholeLine: true,
+          blockClassName: `${STATUS_CODE_LINE_CLASSNAME}${classNameSuffix}`,
+          marginClassName: `${STATUS_CODE_LINE_CLASSNAME}_number${classNameSuffix}`,
+        },
+      });
       lastResponseEndLine += (response.value as string).split(/\\n|\n/).length;
     }
   });

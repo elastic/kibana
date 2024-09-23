@@ -77,7 +77,7 @@ describe('ShowShareModal', () => {
     return {
       isDirty: true,
       anchorElement: document.createElement('div'),
-      getDashboardState: () => ({} as DashboardContainerInput),
+      getPanelsState: () => ({}),
     };
   };
 
@@ -125,19 +125,17 @@ describe('ShowShareModal', () => {
       query: { query: 'bye', language: 'kuery' },
     } as unknown as DashboardContainerInput;
     const showModalProps = getPropsAndShare(unsavedDashboardState);
-    showModalProps.getDashboardState = () => {
+    showModalProps.getPanelsState = () => {
       return {
-        panels: {
-          panel_1: {
-            type: 'panel_type',
-            gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-            panelRefName: 'superPanel',
-            explicitInput: {
-              id: 'superPanel',
-            },
+        panel_1: {
+          type: 'panel_type',
+          gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+          panelRefName: 'superPanel',
+          explicitInput: {
+            id: 'superPanel',
           },
         },
-      } as unknown as DashboardContainerInput;
+      };
     };
     ShowShareModal(showModalProps);
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
@@ -171,36 +169,6 @@ describe('ShowShareModal', () => {
       },
     };
     const props = getPropsAndShare(unsavedDashboardState);
-    const getCurrentState: () => DashboardContainerInput = () => {
-      return {
-        panels: {
-          panel_1: {
-            gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-            type: 'superType',
-            explicitInput: {
-              id: 'whatever',
-              changedKey1: 'NOT changed',
-            },
-          },
-          panel_2: {
-            gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-            type: 'superType',
-            explicitInput: {
-              id: 'whatever2',
-              changedKey2: 'definitely NOT changed',
-            },
-          },
-          panel_3: {
-            gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-            type: 'superType',
-            explicitInput: {
-              id: 'whatever2',
-              changedKey3: 'should still exist',
-            },
-          },
-        },
-      } as unknown as DashboardContainerInput;
-    };
     pluginServices.getServices().dashboardBackup.getState = jest.fn().mockReturnValue({
       dashboardState: unsavedDashboardState,
       panels: {
@@ -208,7 +176,32 @@ describe('ShowShareModal', () => {
         panel_2: { changedKey2: 'definitely changed' },
       },
     });
-    props.getDashboardState = getCurrentState;
+    props.getPanelsState = () => ({
+      panel_1: {
+        gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+        type: 'superType',
+        explicitInput: {
+          id: 'whatever',
+          changedKey1: 'NOT changed',
+        },
+      },
+      panel_2: {
+        gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+        type: 'superType',
+        explicitInput: {
+          id: 'whatever2',
+          changedKey2: 'definitely NOT changed',
+        },
+      },
+      panel_3: {
+        gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+        type: 'superType',
+        explicitInput: {
+          id: 'whatever2',
+          changedKey3: 'should still exist',
+        },
+      },
+    });
     ShowShareModal(props);
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (

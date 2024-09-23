@@ -51,7 +51,6 @@ import {
   EDITOR_MIN_HEIGHT,
   textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
-import { getRateLimitedColumnsWithMetadata } from './ecs_metadata_helper';
 import type { TextBasedLanguagesEditorProps, TextBasedEditorDeps } from './types';
 
 import './overwrite.scss';
@@ -79,6 +78,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   hideTimeFilterInfo,
   hideQueryHistory,
   hasOutline,
+  displayDocumentationAsFlyout,
 }: TextBasedLanguagesEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -109,9 +109,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
-  const [isLanguagePopoverOpen, setIsLanguagePopoverOpen] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -353,7 +353,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   type: c.meta.esType as FieldType,
                 };
               }) || [];
-            return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
+
+            return columns;
           } catch (e) {
             // no action yet
           }
@@ -373,6 +374,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           histogramBarTarget,
         };
       },
+      // @ts-expect-error To prevent circular type import, type defined here is partial of full client
+      getFieldsMetadata: fieldsMetadata?.getClient(),
     };
     return callbacks;
   }, [
@@ -386,8 +389,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     expressions,
     abortController,
     indexManagementApiService,
-    fieldsMetadata,
     histogramBarTarget,
+    fieldsMetadata,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -735,8 +738,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         setIsHistoryOpen={toggleHistory}
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
-        isHelpMenuOpen={isLanguagePopoverOpen}
-        setIsHelpMenuOpen={setIsLanguagePopoverOpen}
+        displayDocumentationAsFlyout={displayDocumentationAsFlyout}
       />
       <ResizableButton
         onMouseDownResizeHandler={onMouseDownResizeHandler}
