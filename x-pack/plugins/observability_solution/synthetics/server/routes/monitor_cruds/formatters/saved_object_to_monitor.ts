@@ -132,7 +132,10 @@ const formatPWOptions = (config: MonitorFields) => {
 };
 
 // combine same nested fields into same object
-const formatNestedFields = (config: MonitorFields, nestedKey: 'ssl' | 'response' | 'check') => {
+const formatNestedFields = (
+  config: MonitorFields | Record<string, any>,
+  nestedKey: 'ssl' | 'response' | 'check' | 'request'
+): Record<string, any> => {
   const nestedFields = Object.keys(config).filter((key) =>
     key.startsWith(`${nestedKey}.`)
   ) as ConfigKey[];
@@ -143,6 +146,13 @@ const formatNestedFields = (config: MonitorFields, nestedKey: 'ssl' | 'response'
     obj[newKey] = config[key];
     delete config[key];
   });
+
+  if (nestedKey === 'check') {
+    return {
+      request: formatNestedFields(obj, 'request'),
+      response: formatNestedFields(obj, 'response'),
+    };
+  }
 
   return obj;
 };

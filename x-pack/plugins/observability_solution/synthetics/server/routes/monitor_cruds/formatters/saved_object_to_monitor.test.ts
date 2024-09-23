@@ -126,8 +126,12 @@ describe('mergeSourceMonitor', () => {
         include_headers: true,
       },
       check: {
-        'request.method': 'GET',
-        'response.status': ['404'],
+        request: {
+          method: 'GET',
+        },
+        response: {
+          status: ['404'],
+        },
       },
       params: {},
     });
