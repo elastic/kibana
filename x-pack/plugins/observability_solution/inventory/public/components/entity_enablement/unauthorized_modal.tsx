@@ -19,13 +19,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
+  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import inventoryLight from '../../assets/entities_inventory_light.png';
 import inventoryDark from '../../assets/entities_inventory_dark.png';
-import { useTheme } from '../../hooks/use_theme';
 
 export function Unauthorized({ onClose }: { onClose: () => void }) {
-  const { darkMode } = useTheme();
+  const { colorMode } = useEuiTheme();
 
   return (
     <EuiConfirmModal
@@ -87,7 +88,7 @@ export function Unauthorized({ onClose }: { onClose: () => void }) {
         <EuiImage
           allowFullScreen
           size="xl"
-          src={darkMode ? inventoryDark : inventoryLight}
+          src={colorMode === COLOR_MODES_STANDARD.dark ? inventoryDark : inventoryLight}
           alt={i18n.translate('xpack.inventory.unauthorised.image.at,', {
             defaultMessage:
               'Image of the new experience of the entities inventory, showing services, hosts and containers',
