@@ -186,12 +186,13 @@ export const AgentPolicyActionMenu = memo<{
           const agentlessMenuItems = [viewPolicyItem, deletePolicyItem];
 
           let menuItems;
+
           if (agentPolicy?.is_managed) {
             menuItems = managedMenuItems;
-          } else if (!agentPolicy?.supports_agentless) {
-            menuItems = agentBasedMenuItems;
-          } else {
+          } else if (agentPolicy?.supports_agentless) {
             menuItems = agentlessMenuItems;
+          } else {
+            menuItems = agentBasedMenuItems;
           }
 
           if (

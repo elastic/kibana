@@ -22,6 +22,7 @@ import { appContextService } from '../app_context';
 
 import { listEnrollmentApiKeys } from '../api_keys';
 import { listFleetServerHosts } from '../fleet_server_host';
+import type { AgentlessConfig } from '../utils/agentless';
 import {
   prependAgentlessApiBasePathToEndpoint,
   isAgentlessApiEnabled,
@@ -68,14 +69,7 @@ class AgentlessAgentService {
     logger.debug(`[Agentless API] Creating agentless agent with TLS config with certificate: ${agentlessConfig.api.tls.certificate},
        and key: ${agentlessConfig.api.tls.key}`);
 
-    const tlsConfig = new SslConfig(
-      sslSchema.validate({
-        enabled: true,
-        certificate: agentlessConfig.api.tls.certificate,
-        key: agentlessConfig.api.tls.key,
-        certificateAuthorities: agentlessConfig.api.tls.ca,
-      })
-    );
+    const tlsConfig = this.createTlsConfig(agentlessConfig);
 
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
@@ -96,23 +90,12 @@ class AgentlessAgentService {
       }),
     };
 
+    const requestConfigDebug = this.createRequestConfigDebug(requestConfig);
+
     const cloudSetup = appContextService.getCloud();
     if (!cloudSetup?.isServerlessEnabled) {
       requestConfig.data.stack_version = appContextService.getKibanaVersion();
     }
-
-    const requestConfigDebug = JSON.stringify({
-      ...requestConfig,
-      httpsAgent: {
-        ...requestConfig.httpsAgent,
-        options: {
-          ...requestConfig.httpsAgent.options,
-          cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
-          key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
-          ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
-        },
-      },
-    });
 
     logger.debug(
       `[Agentless API] Creating agentless agent with request config ${requestConfigDebug}`
@@ -170,15 +153,7 @@ class AgentlessAgentService {
   public async deleteAgentlessAgent(agentlessPolicyId: string) {
     const logger = appContextService.getLogger();
     const agentlessConfig = appContextService.getConfig()?.agentless;
-    const tlsConfig = new SslConfig(
-      sslSchema.validate({
-        enabled: true,
-        certificate: agentlessConfig?.api?.tls?.certificate,
-        key: agentlessConfig?.api?.tls?.key,
-        certificateAuthorities: agentlessConfig?.api?.tls?.ca,
-      })
-    );
-
+    const tlsConfig = this.createTlsConfig(agentlessConfig);
     const requestConfig = {
       url: getDeletionEndpointPath(agentlessConfig, `/deployments/${agentlessPolicyId}`),
       method: 'DELETE',
@@ -193,19 +168,7 @@ class AgentlessAgentService {
       }),
     };
 
-    const requestConfigDebug = JSON.stringify({
-      url: getDeletionEndpointPath(agentlessConfig, `/deployments/${agentlessPolicyId}`),
-      method: 'DELETE',
-      headers: {
-        'Content-type': 'application/json',
-      },
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: tlsConfig.rejectUnauthorized,
-        cert: tlsConfig.certificate,
-        key: tlsConfig.key,
-        ca: tlsConfig.certificateAuthorities,
-      }),
-    });
+    const requestConfigDebug = this.createRequestConfigDebug(requestConfig);
 
     logger.debug(
       `[Agentless API] Start deleting agentless agent for agent policy ${requestConfigDebug}`
@@ -224,18 +187,7 @@ class AgentlessAgentService {
     logger.debug(`[Agentless API] Deleting agentless agent with TLS config with certificate`);
 
     logger.debug(
-      `[Agentless API] Deleting agentless deployment with request config ${JSON.stringify({
-        ...requestConfig,
-        httpsAgent: {
-          ...requestConfig.httpsAgent,
-          options: {
-            ...requestConfig.httpsAgent.options,
-            cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
-            key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
-            ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
-          },
-        },
-      })}`
+      `[Agentless API] Deleting agentless deployment with request config ${requestConfigDebug}`
     );
 
     const response = await axios(requestConfig).catch((error: AxiosError) => {
@@ -262,14 +214,38 @@ class AgentlessAgentService {
         );
       } else {
         logger.error(
-          `[Agentless API] Deleting agentless deployment failed to delete the request ${errorLogCodeCause} ${JSON.stringify(
-            requestConfigDebug
-          )}`
+          `[Agentless API] Deleting agentless deployment failed to delete the request ${errorLogCodeCause} ${requestConfigDebug}`
         );
       }
     });
 
     return response;
+  }
+
+  private createTlsConfig(agentlessConfig: AgentlessConfig | undefined) {
+    return new SslConfig(
+      sslSchema.validate({
+        enabled: true,
+        certificate: agentlessConfig?.api?.tls?.certificate,
+        key: agentlessConfig?.api?.tls?.key,
+        certificateAuthorities: agentlessConfig?.api?.tls?.ca,
+      })
+    );
+  }
+
+  private createRequestConfigDebug(requestConfig: AxiosRequestConfig<any>) {
+    return JSON.stringify({
+      ...requestConfig,
+      httpsAgent: {
+        ...requestConfig.httpsAgent,
+        options: {
+          ...requestConfig.httpsAgent.options,
+          cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
+          key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
+          ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
+        },
+      },
+    });
   }
 
   private convertCauseErrorsToString = (error: AxiosError) => {

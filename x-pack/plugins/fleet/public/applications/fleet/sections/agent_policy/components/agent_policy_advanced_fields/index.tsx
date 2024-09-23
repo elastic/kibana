@@ -120,6 +120,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const licenseService = useLicense();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
+  const isManagedorAgentlessPolicy =
+    agentPolicy.is_managed === true || agentPolicy.supports_agentless === true;
 
   const AgentTamperProtectionSectionContent = useMemo(
     () => (
@@ -408,9 +410,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         }
       >
         <EuiCheckboxGroup
-          disabled={
-            disabled || agentPolicy.is_managed === true || agentPolicy?.supports_agentless === true
-          }
+          disabled={disabled || isManagedorAgentlessPolicy}
           options={[
             {
               id: `${dataTypes.Logs}_${monitoringCheckboxIdSuffix}`,
@@ -535,11 +535,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         >
           <EuiFieldNumber
             fullWidth
-            disabled={
-              disabled ||
-              agentPolicy.is_managed === true ||
-              agentPolicy?.supports_agentless === true
-            }
+            disabled={disabled || isManagedorAgentlessPolicy}
             value={agentPolicy.inactivity_timeout || ''}
             min={0}
             onChange={(e) => {
@@ -580,11 +576,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.fleet_server_host_id && validation.fleet_server_host_id)}
         >
           <EuiSuperSelect
-            disabled={
-              disabled ||
-              agentPolicy.is_managed === true ||
-              agentPolicy?.supports_agentless === true
-            }
+            disabled={disabled || isManagedorAgentlessPolicy}
             valueOfSelected={agentPolicy.fleet_server_host_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingFleetServerHostsOption}
@@ -625,11 +617,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isDisabled={disabled}
         >
           <EuiSuperSelect
-            disabled={
-              disabled ||
-              agentPolicy.is_managed === true ||
-              agentPolicy?.supports_agentless === true
-            }
+            disabled={disabled || isManagedorAgentlessPolicy}
             valueOfSelected={agentPolicy.data_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
@@ -670,11 +658,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isDisabled={disabled}
         >
           <EuiSuperSelect
-            disabled={
-              disabled ||
-              agentPolicy.is_managed === true ||
-              agentPolicy?.supports_agentless === true
-            }
+            disabled={disabled || isManagedorAgentlessPolicy}
             valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
@@ -844,11 +828,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         >
           <EuiFieldNumber
             fullWidth
-            disabled={
-              disabled ||
-              agentPolicy.is_managed === true ||
-              agentPolicy?.supports_agentless === true
-            }
+            disabled={disabled || isManagedorAgentlessPolicy}
             value={agentPolicy.unenroll_timeout || ''}
             min={0}
             onChange={(e) => {

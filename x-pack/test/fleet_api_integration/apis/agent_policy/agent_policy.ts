@@ -1483,7 +1483,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Agentless policy',
             namespace: 'default',
             is_managed: false,
-            support_agentless: true,
+            supports_agentless: true,
           })
           .expect(200);
         const { body } = await supertest
@@ -1507,7 +1507,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Agentless policy',
             namespace: 'default',
             is_managed: false,
-            support_agentless: true,
+            supports_agentless: true,
           })
           .expect(200);
         const {
@@ -1518,7 +1518,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'Agentless policy',
             namespace: 'default',
-            support_agentless: true,
+            supports_agentless: true,
           })
           .expect(200);
         await generateAgent(providerContext, 'healhty', 'agent-healthy-1', agentlessPolicy.id);

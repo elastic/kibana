@@ -58,15 +58,15 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const deleteAgentPolicyPrompt: DeleteAgentPolicy = (
-    agentPolicyToDelete,
+    agentPolicyIdToDelete,
     onSuccess = () => undefined
   ) => {
-    if (!agentPolicyToDelete) {
+    if (!agentPolicyIdToDelete) {
       throw new Error('No agent policy specified for deletion');
     }
     setIsModalOpen(true);
-    setAgentPolicyId(agentPolicyToDelete);
-    fetchAgentsCount(agentPolicyToDelete);
+    setAgentPolicyId(agentPolicyIdToDelete);
+    fetchAgentsCount(agentPolicyIdToDelete);
     onSuccessCallback.current = onSuccess;
   };
 

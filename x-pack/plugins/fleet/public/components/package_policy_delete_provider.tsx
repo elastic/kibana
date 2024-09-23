@@ -132,7 +132,9 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 values: { id: successfulResults[0].name || successfulResults[0].id },
               });
 
-          const agentlessPolicy = agentPolicies?.find((policy) => policy.supports_agentless);
+          const agentlessPolicy = agentPolicies?.find(
+            (policy) => policy.supports_agentless === true
+          );
 
           if (!!agentlessPolicy) {
             try {

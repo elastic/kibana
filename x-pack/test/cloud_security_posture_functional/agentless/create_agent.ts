@@ -104,7 +104,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it(`should hide setup technology selector in edit mode`, async () => {
-      const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
+      const integrationPolicyName = `cloud_security_posture1-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
         CLOUD_CREDENTIALS_PACKAGE_VERSION
       );
@@ -114,13 +114,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
       await cisIntegration.selectSetupTechnology('agent-based');
-      await cisIntegration.selectAwsCredentials('direct');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
 
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
