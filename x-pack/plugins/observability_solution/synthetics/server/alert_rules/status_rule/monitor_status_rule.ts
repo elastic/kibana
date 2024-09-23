@@ -75,7 +75,7 @@ export const registerSyntheticsStatusCheckRule = (
       const statusRule = new StatusRuleExecutor(server, syntheticsMonitorClient, options);
 
       const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
-        ruleState.meta?.downConfigs as StatusConfigs
+        ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']
       );
 
       statusRule.handleDownMonitorThresholdAlert({

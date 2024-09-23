@@ -7,7 +7,11 @@
 import { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
 import { SyntheticsCommonState } from '../../common/runtime_types/alert_rules/common';
-import { AlertOverviewStatus, StaleDownConfig } from './status_rule/status_rule_executor';
+import {
+  AlertOverviewStatus,
+  StaleDownConfig,
+  SyntheticsCommonState,
+} from '../../common/runtime_types/alert_rules/common';
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const monitorName = 'test-monitor';

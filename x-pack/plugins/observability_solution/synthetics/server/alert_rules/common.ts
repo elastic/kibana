@@ -34,6 +34,7 @@ import { OverviewPing, StatusCheckFilters } from '../../common/runtime_types';
 import { SyntheticsEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
 import {
+  AlertOverviewStatus,
   SyntheticsCommonState,
   SyntheticsCommonStateCodec,
 } from '../../common/runtime_types/alert_rules/common';
