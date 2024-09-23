@@ -47,7 +47,7 @@
     "@kbn/esql-utils",
     "@kbn/react-kibana-mount",
     "@kbn/field-utils",
-    "@kbn/language-documentation-popover"
+    "@kbn/language-documentation"
   ],
   "exclude": [
     "target/**/*",

@@ -19,7 +19,7 @@ export const storybookAliases = {
   cloud_chat: 'x-pack/plugins/cloud_integrations/cloud_chat/.storybook',
   cloud: 'packages/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
-  language_documentation_popover: 'packages/kbn-language-documentation-popover/.storybook',
+  language_documentation_popover: 'packages/kbn-language-documentation/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
   custom_icons: 'packages/kbn-custom-icons/.storybook',
