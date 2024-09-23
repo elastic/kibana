@@ -8,6 +8,7 @@
  */
 
 import fs from 'fs';
+import { dump, load } from 'js-yaml';
 import prConfigs from '../../../pull_requests.json';
 import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
 
@@ -23,10 +24,20 @@ const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed.map((r) => new RegExp(r, 'i'));
 
-const getPipeline = (filename: string, agents: string, removeSteps = true) => {
-  const str = fs.readFileSync(filename).toString();
-  str.replace(/^agents:/, agents);
-  return removeSteps ? str.replace(/^steps:/, '') : str;
+const getPipeline = (filename: string, removeSteps = true) => {
+  const fileContent = fs.readFileSync(filename, 'utf8');
+  const config = load(fileContent) as any;
+  config.agents = {
+    ...config.agents,
+    provider: 'gcp',
+    image: 'family/kibana-ubuntu-2004',
+    imageProject: 'elastic-images-prod',
+  };
+
+  const updatedYaml = dump(config, { lineWidth: -1 });
+
+  // str.replace(/^agents:/, agents);
+  return removeSteps ? updatedYaml.replace(/^steps:/, '') : updatedYaml;
 };
 
 const getPerfPipeline = (filename: string, groups: string) => {
@@ -48,21 +59,10 @@ const getPerfPipeline = (filename: string, groups: string) => {
     // const agentConfig = getAgentImageConfig({ returnYaml: true });
     // pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
-    const agentSharedConfig = JSON.stringify({
-      agents: {
-        provider: 'gcp',
-        image: 'family/kibana-ubuntu-2004',
-        imageProject: 'elastic-images-prod',
-      },
-    });
-    pipeline.push(
-      getPipeline('.buildkite/pipelines/pull_request/base.yml', agentSharedConfig, false)
-    );
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml', agentSharedConfig)
-      );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
     }
 
     if (
@@ -76,9 +76,7 @@ const getPerfPipeline = (filename: string, groups: string) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/response_ops.yml', agentSharedConfig)
-      );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
     }
 
     // if (
@@ -343,9 +341,7 @@ const getPerfPipeline = (filename: string, groups: string) => {
       );
     }
 
-    pipeline.push(
-      getPipeline('.buildkite/pipelines/pull_request/post_build.yml', agentSharedConfig)
-    );
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     // remove duplicated steps
     console.log([...new Set(pipeline)].join('\n'));
