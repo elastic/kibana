@@ -71,6 +71,7 @@ const defaultCloudInfo: CloudInfo = {
   isCloudTrial: false,
   deploymentId: null,
   cloudUrl: null,
+  isMlAutoscalingEnabled: false,
 };
 
 export function useCloudCheck() {
