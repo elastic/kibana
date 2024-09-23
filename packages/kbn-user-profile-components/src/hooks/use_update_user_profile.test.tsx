@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook, type WrapperComponent } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
+import { renderHook, type WrapperComponent } from '@testing-library/react-hooks';
 import React from 'react';
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
 
@@ -78,7 +79,7 @@ describe('useUpdateUserProfile() hook', () => {
       await lastValueFrom(updateDone.pipe(first((v) => v === true)));
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useUpdateUserProfile(), { wrapper });
+    const { result } = renderHook(() => useUpdateUserProfile(), { wrapper });
     const { update } = result.current;
 
     expect(result.current.isLoading).toBeFalsy();
@@ -90,7 +91,7 @@ describe('useUpdateUserProfile() hook', () => {
     expect(result.current.isLoading).toBeTruthy();
 
     updateDone.next(true); // Resolve the http.post promise
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current.isLoading).toBeFalsy();
   });
@@ -118,7 +119,9 @@ describe('useUpdateUserProfile() hook', () => {
       return true;
     };
 
-    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), { wrapper });
+    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), {
+      wrapper,
+    });
     const { update } = result.current;
 
     await act(async () => {
@@ -146,7 +149,9 @@ describe('useUpdateUserProfile() hook', () => {
       userProfile$: of(initialValue),
     };
 
-    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), { wrapper });
+    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), {
+      wrapper,
+    });
     const { update } = result.current;
 
     const nextValue = { userSettings: { darkMode: 'light' as const } };

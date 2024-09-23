@@ -7,7 +7,8 @@
 
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { useStatusAction } from './use_status_action';
 
 import * as api from '../../../containers/api';
@@ -72,7 +73,7 @@ describe('useStatusAction', () => {
   it('update the status cases', async () => {
     const updateSpy = jest.spyOn(api, 'updateCases');
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
@@ -110,7 +111,7 @@ describe('useStatusAction', () => {
   it.each(singleCaseTests)(
     'shows the success toaster correctly when updating the status of the case: %s',
     async (_, index, expectedMessage) => {
-      const { result, waitFor } = renderHook(
+      const { result } = renderHook(
         () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -142,7 +143,7 @@ describe('useStatusAction', () => {
   it.each(multipleCasesTests)(
     'shows the success toaster correctly when updating the status of the case: %s',
     async (_, index, expectedMessage) => {
-      const { result, waitFor } = renderHook(
+      const { result } = renderHook(
         () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
         {
           wrapper: appMockRender.AppWrapper,

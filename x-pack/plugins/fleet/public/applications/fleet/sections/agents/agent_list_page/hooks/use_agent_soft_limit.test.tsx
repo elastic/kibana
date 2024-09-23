@@ -38,8 +38,8 @@ describe('useAgentSoftLimit', () => {
         total: 5,
       },
     } as any);
-    const { result, waitFor } = renderer.renderHook(() => useAgentSoftLimit());
-    await waitFor(() => null);
+    const { result } = renderer.renderHook(() => useAgentSoftLimit());
+    await renderer.waitFor(() => null);
 
     expect(mockedSendGetAgents).toBeCalled();
     expect(result.current.shouldDisplayAgentSoftLimit).toEqual(false);
@@ -53,8 +53,8 @@ describe('useAgentSoftLimit', () => {
         total: 15,
       },
     } as any);
-    const { result, waitFor } = renderer.renderHook(() => useAgentSoftLimit());
-    await waitFor(() => null);
+    const { result } = renderer.renderHook(() => useAgentSoftLimit());
+    await renderer.waitFor(() => null);
 
     expect(mockedSendGetAgents).toBeCalled();
     expect(result.current.shouldDisplayAgentSoftLimit).toEqual(true);

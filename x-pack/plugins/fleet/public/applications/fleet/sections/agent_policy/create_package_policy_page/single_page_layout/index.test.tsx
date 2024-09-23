@@ -284,17 +284,15 @@ describe('When on the package policy create page', () => {
       let cancelButton: HTMLAnchorElement;
 
       beforeEach(async () => {
-        await act(async () => {
-          render();
+        render();
 
-          cancelLink = renderResult.getByTestId(
-            'createPackagePolicy_cancelBackLink'
-          ) as HTMLAnchorElement;
+        cancelLink = renderResult.getByTestId(
+          'createPackagePolicy_cancelBackLink'
+        ) as HTMLAnchorElement;
 
-          cancelButton = (await renderResult.findByTestId(
-            'createPackagePolicyCancelButton'
-          )) as HTMLAnchorElement;
-        });
+        cancelButton = (await renderResult.findByTestId(
+          'createPackagePolicyCancelButton'
+        )) as HTMLAnchorElement;
       });
 
       test('should use custom "cancel" URL', () => {
