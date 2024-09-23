@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import type { Role } from '@kbn/security-plugin-types-common';
 import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -26,6 +26,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const platformSecurityUtils = getService('platformSecurityUtils');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const svlCommonApi = getService('svlCommonApi');
+  const samlAuth = getService('samlAuth');
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
   const es = getService('es');
@@ -86,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(204);
 
           const role = await es.security.getRole({ name: 'role_with_privileges' });
-          expect(role).to.eql({
+          expect(role).toEqual({
             role_with_privileges: {
               cluster: ['manage'],
               indices: [
@@ -425,7 +427,6 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200)
             .expect((res: { body: Role[] }) => {
               const roles = res.body;
-              expect(roles).to.be.an('array');
 
               const success = roles.every((role) => {
                 return (
@@ -440,8 +441,8 @@ export default function ({ getService }: FtrProviderContext) {
 
               const expectedRole = roles.find((role) => role.name === 'space_role_to_get');
 
-              expect(success).to.be(true);
-              expect(expectedRole).to.be.an('object');
+              expect(success).toBe(true);
+              expect(expectedRole).toBeTruthy();
             });
         });
       });
@@ -508,7 +509,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(204);
 
           const role = await es.security.getRole({ name: 'role_to_update' });
-          expect(role).to.eql({
+          expect(role).toEqual({
             role_to_update: {
               cluster: ['manage'],
               indices: [
@@ -582,9 +583,9 @@ export default function ({ getService }: FtrProviderContext) {
 
           const role = await es.security.getRole({ name: 'role_to_update_with_dls_fls' });
 
-          expect(role.role_to_update_with_dls_fls.cluster).to.eql(['manage']);
-          expect(role.role_to_update_with_dls_fls.indices[0].names).to.eql(['logstash-*']);
-          expect(role.role_to_update_with_dls_fls.indices[0].query).to.eql(
+          expect(role.role_to_update_with_dls_fls.cluster).toEqual(['manage']);
+          expect(role.role_to_update_with_dls_fls.indices[0].names).toEqual(['logstash-*']);
+          expect(role.role_to_update_with_dls_fls.indices[0].query).toEqual(
             `{ "match": { "geo.src": "CN" } }`
           );
         });
@@ -652,7 +653,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(400);
 
           const role = await es.security.getRole({ name: 'role_to_update' });
-          expect(role).to.eql({
+          expect(role).toEqual({
             role_to_update: {
               cluster: ['monitor'],
               indices: [
@@ -753,7 +754,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(400);
 
           const role = await es.security.getRole({ name: 'role_to_update' });
-          expect(role).to.eql({
+          expect(role).toEqual({
             role_to_update: {
               cluster: ['monitor'],
               indices: [
@@ -855,7 +856,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(400);
 
           const role = await es.security.getRole({ name: 'role_to_update' });
-          expect(role).to.eql({
+          expect(role).toEqual({
             role_to_update: {
               cluster: ['monitor'],
               indices: [
@@ -924,7 +925,26 @@ export default function ({ getService }: FtrProviderContext) {
             { name: 'role_to_delete' },
             { ignore: [404] }
           );
-          expect(deletedRole).to.eql({});
+          expect(deletedRole).toEqual({});
+        });
+      });
+
+      describe('Access', () => {
+        describe('public', () => {
+          it('reset session page', async () => {
+            const { status } = await supertestAdminWithCookieCredentials.get(
+              '/internal/security/reset_session_page.js'
+            );
+            expect(status).toBe(200);
+          });
+        });
+        describe('Disabled', () => {
+          it('get shared saved object permissions', async () => {
+            const { body, status } = await supertestAdminWithCookieCredentials.get(
+              '/internal/security/_share_saved_object_permissions'
+            );
+            svlCommonApi.assertApiNotFound(body, status);
+          });
         });
       });
     });

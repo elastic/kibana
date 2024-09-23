@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it('delete roleAuthc', async () => {
+        it('delete role', async () => {
           const { body, status } = await supertestAdminWithApiKey.delete(
             '/api/security/role/superuser'
           );
