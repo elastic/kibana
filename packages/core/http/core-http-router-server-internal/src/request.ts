@@ -37,7 +37,6 @@ import {
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-  ELASTIC_HTTP_VERSION_QUERY_PARAM,
 } from '@kbn/core-http-common';
 import { RouteValidator } from './validator';
 import { isSafeMethod } from './route';
@@ -103,26 +102,13 @@ export class CoreKibanaRequest<
 
     if (routeSchemas === undefined) {
       requestParts = {
-        query: {
-          [ELASTIC_HTTP_VERSION_QUERY_PARAM]: (rawParts.query as Record<string, unknown>)[
-            ELASTIC_HTTP_VERSION_QUERY_PARAM
-          ],
-        } as Q,
+        query: {} as Q,
         params: {} as P,
         body: {} as B,
       };
     } else {
       const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
       requestParts = CoreKibanaRequest.validate<P, Q, B>(rawParts, routeValidator);
-
-      if ((rawParts.query as Record<string, unknown>)[ELASTIC_HTTP_VERSION_QUERY_PARAM]) {
-        requestParts.query = {
-          ...requestParts.query,
-          [ELASTIC_HTTP_VERSION_QUERY_PARAM]: (rawParts.query as Record<string, unknown>)[
-            ELASTIC_HTTP_VERSION_QUERY_PARAM
-          ],
-        };
-      }
     }
 
     return new CoreKibanaRequest(
@@ -331,7 +317,9 @@ export class CoreKibanaRequest<
     const securityConfig = ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
       ?.security;
 
-    return isRouteSecurityGetter(securityConfig) ? securityConfig(this) : securityConfig;
+    return isRouteSecurityGetter(securityConfig)
+      ? securityConfig(this[requestSymbol])
+      : securityConfig;
   }
 
   /** set route access to internal if not declared */

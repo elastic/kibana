@@ -63,13 +63,15 @@ export function removeQueryVersion(request: Mutable<KibanaRequestWithQueryVersio
   delete request.query[ELASTIC_HTTP_VERSION_QUERY_PARAM];
 }
 
-function readQueryVersion(request: KibanaRequest): undefined | ApiVersion {
+function readQueryVersion(
+  request: Pick<KibanaRequest, 'headers' | 'query'>
+): undefined | ApiVersion {
   const version = get(request.query, ELASTIC_HTTP_VERSION_QUERY_PARAM);
   if (typeof version === 'string') return version;
 }
 /** Reading from header takes precedence over query param */
 export function readVersion(
-  request: KibanaRequest,
+  request: Pick<KibanaRequest, 'headers' | 'query'>,
   isQueryVersionEnabled?: boolean
 ): undefined | ApiVersion {
   const versions = request.headers?.[ELASTIC_HTTP_VERSION_HEADER];

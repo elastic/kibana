@@ -59,6 +59,11 @@ function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handl
   return handler.options.validate;
 }
 
+interface RequestLike {
+  headers: KibanaRequest['headers'];
+  query: KibanaRequest['query'];
+}
+
 export class CoreVersionedRoute implements VersionedRoute {
   private readonly handlers = new Map<
     ApiVersion,
@@ -128,7 +133,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     return this.handlers.size ? '[' + [...this.handlers.keys()].join(', ') + ']' : '<none>';
   }
 
-  private getVersion(req: KibanaRequest): ApiVersion | undefined {
+  private getVersion(req: Pick<KibanaRequest, 'headers' | 'query'>): ApiVersion | undefined {
     let version;
     const maybeVersion = readVersion(req, this.enableQueryVersion);
     if (!maybeVersion && (this.isPublic || this.useDefaultStrategyForPath)) {
@@ -271,7 +276,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     return [...this.handlers.values()];
   }
 
-  public getSecurity: RouteSecurityGetter = (req: KibanaRequest) => {
+  public getSecurity: RouteSecurityGetter = (req: Pick<KibanaRequest, 'headers' | 'query'>) => {
     const version = this.getVersion(req)!;
 
     return this.handlers.get(version)?.options.security ?? this.defaultSecurityConfig;

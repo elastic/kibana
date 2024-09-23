@@ -16,7 +16,9 @@ import type { IKibanaSocket } from './socket';
 import type { RouteMethod, RouteConfigOptions, RouteSecurity } from './route';
 import type { Headers } from './headers';
 
-export type RouteSecurityGetter = (request: KibanaRequest) => RouteSecurity | undefined;
+export type RouteSecurityGetter = (
+  request: Pick<KibanaRequest, 'headers' | 'query'>
+) => RouteSecurity | undefined;
 export type InternalRouteSecurity = RouteSecurity | RouteSecurityGetter;
 
 /**
