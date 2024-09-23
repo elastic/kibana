@@ -5,30 +5,12 @@
  * 2.0.
  */
 
-import { debounce, call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
+import { call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
+import { OverviewStatusStateReducer, selectOverviewStatus } from '../overview_status';
 import type { OverviewTrend, TrendTable } from '../../../../../common/types';
-import { fetchEffectFactory } from '../utils/fetch_effect';
-import { selectOverviewState, selectOverviewTrends } from './selectors';
-import {
-  fetchMonitorOverviewAction,
-  quietFetchOverviewAction,
-  refreshOverviewTrends,
-  trendStatsBatch,
-} from './actions';
-import { fetchMonitorOverview, fetchOverviewTrendStats as trendsApi } from './api';
-import { MonitorOverviewState } from '.';
-
-export function* fetchMonitorOverviewEffect() {
-  yield debounce(
-    200, // Only take the latest while ignoring any intermediate triggers
-    [fetchMonitorOverviewAction.get, quietFetchOverviewAction.get],
-    fetchEffectFactory(
-      fetchMonitorOverview,
-      fetchMonitorOverviewAction.success,
-      fetchMonitorOverviewAction.fail
-    )
-  );
-}
+import { selectOverviewTrends } from './selectors';
+import { refreshOverviewTrends, trendStatsBatch } from './actions';
+import { fetchOverviewTrendStats as trendsApi } from './api';
 
 export const TRENDS_CHUNK_SIZE = 50;
 
@@ -55,7 +37,9 @@ export function* fetchOverviewTrendStats() {
 
 export function* refreshTrends(): Generator<unknown, void, any> {
   const existingTrends: TrendTable = yield select(selectOverviewTrends);
-  const overviewState: MonitorOverviewState = yield select(selectOverviewState);
+  const { allConfigs }: OverviewStatusStateReducer = yield select(selectOverviewStatus);
+
+  const monitorConfigs = Object.values(allConfigs ?? {});
 
   const keys = Object.keys(existingTrends);
   while (keys.length) {
@@ -65,7 +49,7 @@ export function* refreshTrends(): Generator<unknown, void, any> {
         (key: string) =>
           existingTrends[key] !== null &&
           existingTrends[key] !== 'loading' &&
-          overviewState.data.monitors.some(
+          monitorConfigs.some(
             ({ configId }) => configId === (existingTrends[key] as OverviewTrend)!.configId
           )
       )
@@ -74,8 +58,7 @@ export function* refreshTrends(): Generator<unknown, void, any> {
         return {
           configId: trend.configId,
           locationId: trend.locationId,
-          schedule: overviewState.data.monitors.find(({ configId }) => configId === trend.configId)!
-            .schedule,
+          schedule: monitorConfigs.find(({ configId }) => configId === trend.configId)!.schedule,
         };
       });
     if (chunk.length) {

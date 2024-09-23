@@ -86,6 +86,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
     [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
     [ConfigKey.PARAMS]: t.string,
+    [ConfigKey.LABELS]: t.record(t.string, t.string),
     retest_on_failure: t.boolean,
   }),
 ]);
@@ -382,30 +383,6 @@ export const MonitorManagementListResultCodec = t.type({
   syncErrors: t.union([ServiceLocationErrors, t.null]),
 });
 
-export const MonitorOverviewItemCodec = t.intersection([
-  t.interface({
-    name: t.string,
-    id: t.string,
-    configId: t.string,
-    location: MonitorServiceLocationCodec,
-    isEnabled: t.boolean,
-    isStatusAlertEnabled: t.boolean,
-    type: t.string,
-    tags: t.array(t.string),
-    schedule: t.string,
-  }),
-  t.partial({
-    status: t.string,
-    projectId: t.string,
-  }),
-]);
-
-export const MonitorOverviewResultCodec = t.type({
-  total: t.number,
-  allMonitorIds: t.array(t.string),
-  monitors: t.array(MonitorOverviewItemCodec),
-});
-
 export const SyntheticsMonitorWithSecretsCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
   t.interface({
@@ -430,8 +407,6 @@ export type EncryptedSyntheticsSavedMonitor = t.TypeOf<typeof EncryptedSynthetic
 export type HeartbeatConfig = t.TypeOf<typeof HeartbeatConfigCodec>;
 export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
-export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
-export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;
 export type Secret = (typeof secretKeys)[number];
 export type SyntheticsMonitorWithSecrets = Omit<
   t.TypeOf<typeof SyntheticsMonitorWithSecretsCodec>,

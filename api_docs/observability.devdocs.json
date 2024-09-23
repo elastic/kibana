@@ -2892,27 +2892,6 @@
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsSetup.inventory",
-            "type": "Object",
-            "tags": [],
-            "label": "inventory",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "inventory",
-                "scope": "public",
-                "docId": "kibInventoryPluginApi",
-                "section": "def-public.InventoryPublicSetup",
-                "text": "InventoryPublicSetup"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3857,27 +3836,6 @@
                 "docId": "kibInvestigatePluginApi",
                 "section": "def-public.InvestigatePublicStart",
                 "text": "InvestigatePublicStart"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.inventory",
-            "type": "Object",
-            "tags": [],
-            "label": "inventory",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "inventory",
-                "scope": "public",
-                "docId": "kibInventoryPluginApi",
-                "section": "def-public.InventoryPublicStart",
-                "text": "InventoryPublicStart"
               },
               " | undefined"
             ],
