@@ -4,23 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import * as t from 'io-ts';
 
-export interface LatestEntity {
-  agent: {
-    name: string[];
-  };
-  data_stream: {
-    type: string[];
-  };
-  cloud: {
-    availability_zone: string[];
-  };
-  entity: {
-    firstSeenTimestamp: string;
-    lastSeenTimestamp: string;
-    type: string;
-    displayName: string;
-    id: string;
-    identityFields: string[];
-  };
-}
+export const entityTypeRt = t.union([
+  t.literal('service'),
+  t.literal('host'),
+  t.literal('container'),
+]);
+
+export type EntityType = t.TypeOf<typeof entityTypeRt>;
+
+export const MAX_NUMBER_OF_ENTITIES = 500;

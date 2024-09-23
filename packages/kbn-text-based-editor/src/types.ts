@@ -61,6 +61,9 @@ export interface TextBasedLanguagesEditorProps {
 
   /** adds border in the editor **/
   hasOutline?: boolean;
+
+  /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
+  displayDocumentationAsFlyout?: boolean;
 }
 
 export interface TextBasedEditorDeps {
