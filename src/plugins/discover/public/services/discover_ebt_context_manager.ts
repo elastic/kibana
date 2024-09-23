@@ -15,14 +15,19 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 const FIELD_USAGE_EVENT_TYPE = 'discover_field_usage';
 const FIELD_USAGE_EVENT_NAME = 'eventName';
 const FIELD_USAGE_FIELD_NAME = 'fieldName';
+const FIELD_USAGE_FILTER_OPERATION = 'filterOperation';
+
+type FilterOperation = '+' | '-' | '_exists_';
 
 export enum FieldUsageEventName {
   dataTableSelection = 'dataTableSelection',
   dataTableRemoval = 'dataTableRemoval',
+  filterAddition = 'filterAddition',
 }
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
   [FIELD_USAGE_FIELD_NAME]?: string;
+  [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
 }
 
 export interface DiscoverEBTContextProps {
@@ -79,6 +84,13 @@ export class DiscoverEBTContextManager {
             optional: true,
           },
         },
+        [FIELD_USAGE_FILTER_OPERATION]: {
+          type: 'keyword',
+          _meta: {
+            description: "Operation type when a filter is added i.e. '+', '-', '_exists_'",
+            optional: true,
+          },
+        },
       },
     });
     this.reportEvent = core.analytics.reportEvent;
@@ -107,10 +119,12 @@ export class DiscoverEBTContextManager {
   private async trackFieldUsageEvent({
     eventName,
     fieldName,
+    filterOperation,
     fieldsMetadata,
   }: {
     eventName: FieldUsageEventName;
     fieldName: string;
+    filterOperation?: FilterOperation;
     fieldsMetadata: FieldsMetadataPublicStart | undefined;
   }) {
     if (!this.reportEvent) {
@@ -132,6 +146,10 @@ export class DiscoverEBTContextManager {
       if (fields[fieldName]?.short) {
         eventData[FIELD_USAGE_FIELD_NAME] = fieldName;
       }
+    }
+
+    if (filterOperation) {
+      eventData[FIELD_USAGE_FILTER_OPERATION] = filterOperation;
     }
 
     this.reportEvent(FIELD_USAGE_EVENT_TYPE, eventData);
@@ -162,6 +180,23 @@ export class DiscoverEBTContextManager {
       eventName: FieldUsageEventName.dataTableRemoval,
       fieldName,
       fieldsMetadata,
+    });
+  }
+
+  public async trackFilterAddition({
+    fieldName,
+    fieldsMetadata,
+    filterOperation,
+  }: {
+    fieldName: string;
+    fieldsMetadata: FieldsMetadataPublicStart | undefined;
+    filterOperation: FilterOperation;
+  }) {
+    await this.trackFieldUsageEvent({
+      eventName: FieldUsageEventName.filterAddition,
+      fieldName,
+      fieldsMetadata,
+      filterOperation,
     });
   }
 

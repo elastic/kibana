@@ -184,6 +184,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      it('should track field usage when a filter is added', async () => {
+        await dataViews.switchToAndValidate('my-example-logs');
+        await discover.waitUntilSearchingHasFinished();
+        await ebtUIHelper.setOptIn(true);
+        await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 0);
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_field_usage'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'filterAddition',
+          fieldName: '@timestamp',
+          filterOperation: '+',
+        });
+
+        await unifiedFieldList.clickFieldListExistsFilter('log.level');
+
+        const [_, event2] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_field_usage'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event2.properties).to.eql({
+          eventName: 'filterAddition',
+          fieldName: 'log.level',
+          filterOperation: '_exists_',
+        });
+      });
+
       it('should track field usage for doc viewer too', async () => {
         await dataViews.switchToAndValidate('my-example-logs');
         await discover.waitUntilSearchingHasFinished();
@@ -193,30 +227,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
 
+        // event 1
         await dataGrid.clickFieldActionInFlyout('service.name', 'toggleColumnButton');
+        await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
 
-        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+        // event 2
+        await dataGrid.clickFieldActionInFlyout('log.level', 'toggleColumnButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        // event 3
+        await dataGrid.clickFieldActionInFlyout('log.level', 'addFilterOutValueButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const [event1, event2, event3] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['discover_field_usage'],
           withTimeoutMs: 500,
         });
 
-        expect(event.properties).to.eql({
+        expect(event1.properties).to.eql({
           eventName: 'dataTableSelection',
           fieldName: 'service.name',
-        });
-
-        await dataGrid.clickFieldActionInFlyout('log.level', 'toggleColumnButton');
-        await discover.waitUntilSearchingHasFinished();
-
-        const [_, event2] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-          eventTypes: ['discover_field_usage'],
-          withTimeoutMs: 500,
         });
 
         expect(event2.properties).to.eql({
           eventName: 'dataTableRemoval',
           fieldName: 'log.level',
+        });
+
+        expect(event3.properties).to.eql({
+          eventName: 'filterAddition',
+          fieldName: 'log.level',
+          filterOperation: '-',
         });
       });
     });

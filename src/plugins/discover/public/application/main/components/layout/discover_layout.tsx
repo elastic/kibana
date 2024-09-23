@@ -193,9 +193,22 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
+      void ebtContextManager.trackFilterAddition({
+        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
+        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
+        fieldsMetadata,
+      });
       return filterManager.addFilters(newFilters);
     },
-    [filterManager, dataView, dataViews, trackUiMetric, capabilities]
+    [
+      filterManager,
+      dataView,
+      dataViews,
+      trackUiMetric,
+      capabilities,
+      ebtContextManager,
+      fieldsMetadata,
+    ]
   );
 
   const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
@@ -240,8 +253,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
       }
+      void ebtContextManager.trackFilterAddition({
+        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
+        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
+        fieldsMetadata,
+      });
     },
-    [data.query.queryString, query, trackUiMetric]
+    [data.query.queryString, query, trackUiMetric, ebtContextManager, fieldsMetadata]
   );
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;

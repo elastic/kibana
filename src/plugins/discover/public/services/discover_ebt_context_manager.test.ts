@@ -154,5 +154,33 @@ describe('DiscoverEBTContextManager', () => {
         eventName: 'dataTableRemoval', // non-ECS fields would not be included in properties
       });
     });
+
+    it('should track the field usage when a filter is created', async () => {
+      discoverEBTContextManager.register({ core: coreSetupMock });
+      discoverEBTContextManager.enable();
+
+      await discoverEBTContextManager.trackFilterAddition({
+        fieldName: 'test',
+        fieldsMetadata,
+        filterOperation: '+',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith('discover_field_usage', {
+        eventName: 'filterAddition',
+        fieldName: 'test',
+        filterOperation: '+',
+      });
+
+      await discoverEBTContextManager.trackFilterAddition({
+        fieldName: 'test2',
+        fieldsMetadata,
+        filterOperation: '_exists_',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
+        eventName: 'filterAddition', // non-ECS fields would not be included in properties
+        filterOperation: '_exists_',
+      });
+    });
   });
 });
