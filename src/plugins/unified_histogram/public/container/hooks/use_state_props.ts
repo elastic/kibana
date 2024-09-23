@@ -9,6 +9,7 @@
 
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { useCallback, useEffect, useMemo } from 'react';
 import {
@@ -86,14 +87,25 @@ export const useStateProps = ({
   }, [chartHidden, isPlainRecord, isTimeBased, timeInterval]);
 
   const breakdown = useMemo(() => {
-    if (isPlainRecord || !isTimeBased) {
+    if (!isTimeBased) {
       return undefined;
     }
+
+    // hide the breakdown field selector when the ES|QL query has a transformational command (STATS, KEEP etc)
+    if (query && isOfAggregateQueryType(query) && hasTransformationalCommand(query.esql)) {
+      return undefined;
+    }
+
+    // if (isPlainRecord) {
+    //   return {
+    //     field: breakdownField ?? ,
+    //   };
+    // }
 
     return {
       field: breakdownField ? dataView?.getFieldByName(breakdownField) : undefined,
     };
-  }, [breakdownField, dataView, isPlainRecord, isTimeBased]);
+  }, [breakdownField, dataView, query, isTimeBased]);
 
   const request = useMemo(() => {
     return {

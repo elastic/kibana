@@ -245,7 +245,10 @@ export class LensVisService {
 
     if (queryParams.isPlainRecord) {
       // appends an ES|QL histogram
-      const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({ queryParams });
+      const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
+        queryParams,
+        breakdownField,
+      });
       if (histogramSuggestionForESQL) {
         availableSuggestionsWithType.push({
           suggestion: histogramSuggestionForESQL,
@@ -452,16 +455,25 @@ export class LensVisService {
 
   private getHistogramSuggestionForESQL = ({
     queryParams,
+    breakdownField,
   }: {
     queryParams: QueryParams;
+    breakdownField?: DataViewField;
   }): Suggestion | undefined => {
-    const { dataView, query, timeRange } = queryParams;
+    const { dataView, query, timeRange, columns } = queryParams;
+    const breakdownColumn = columns?.find((column) => column.name === breakdownField?.name);
     if (dataView.isTimeBased() && query && isOfAggregateQueryType(query) && timeRange) {
       const isOnHistogramMode = shouldDisplayHistogram(query);
       if (!isOnHistogramMode) return undefined;
 
       const interval = computeInterval(timeRange, this.services.data);
-      const esqlQuery = this.getESQLHistogramQuery({ dataView, query, timeRange, interval });
+      const esqlQuery = this.getESQLHistogramQuery({
+        dataView,
+        query,
+        timeRange,
+        interval,
+        breakdownColumn,
+      });
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
@@ -485,6 +497,10 @@ export class LensVisService {
           esql: esqlQuery,
         },
       };
+
+      if (breakdownColumn) {
+        context.textBasedColumns.push(breakdownColumn);
+      }
       const suggestions = this.lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
       if (suggestions.length) {
         return suggestions[0];
@@ -499,18 +515,21 @@ export class LensVisService {
     timeRange,
     query,
     interval,
+    breakdownColumn,
   }: {
     dataView: DataView;
     timeRange: TimeRange;
     query: AggregateQuery;
     interval?: string;
+    breakdownColumn?: DatatableColumn;
   }): string => {
     const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
+    const breakdown = breakdownColumn ? `, ${breakdownColumn.name}` : '';
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp ${breakdown} | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
     );
   };
 
@@ -548,7 +567,7 @@ export class LensVisService {
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus;
     visContext: UnifiedHistogramVisContext | undefined;
   } => {
-    const { dataView, query, filters, timeRange } = queryParams;
+    const { dataView, query, filters, timeRange, columns } = queryParams;
     const { type: suggestionType, suggestion } = currentSuggestionContext;
 
     if (!suggestion || !suggestion.datasourceId || !query || !filters) {
@@ -563,13 +582,15 @@ export class LensVisService {
       dataViewId: dataView.id,
       timeField: dataView.timeFieldName,
       timeInterval: isTextBased ? undefined : timeInterval,
-      breakdownField: isTextBased ? undefined : breakdownField?.name,
+      breakdownField: breakdownField?.name,
     };
+
+    const breakdownColumn = columns?.find((column) => column.name === breakdownField?.name);
 
     const currentQuery =
       suggestionType === UnifiedHistogramSuggestionType.histogramForESQL && isTextBased && timeRange
         ? {
-            esql: this.getESQLHistogramQuery({ dataView, query, timeRange }),
+            esql: this.getESQLHistogramQuery({ dataView, query, timeRange, breakdownColumn }),
           }
         : query;
 
