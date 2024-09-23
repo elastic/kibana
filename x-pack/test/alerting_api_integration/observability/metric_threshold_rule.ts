@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import expect from '@kbn/expect';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
@@ -210,7 +209,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action parameter: ruleType', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<{
           ruleType: string;
           alertDetailsUrl: string;
