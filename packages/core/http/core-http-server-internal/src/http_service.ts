@@ -10,6 +10,8 @@
 import { Observable, Subscription, combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
 import { map } from 'rxjs';
 
+import EventEmitter from 'node:events';
+
 import { pick, Semaphore } from '@kbn/std';
 import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
 import { Logger } from '@kbn/logging';
@@ -182,6 +184,10 @@ export class HttpService
     this.internalSetup = {
       ...serverContract,
 
+      registerOnPostValidation: (cb) => {
+        Router.on('onPostValidate', cb);
+      },
+
       externalUrl: new ExternalUrlConfig(config.externalUrl),
 
       createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
@@ -208,7 +214,7 @@ export class HttpService
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 
-    return this.internalSetup;
+    return this.internalSetup!;
   }
 
   // this method exists because we need the start contract to create the `CoreStart` used to start

@@ -13,13 +13,14 @@ import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
-import type { RouteMethod, RouteConfigOptions } from './route';
+import type { RouteMethod, RouteConfigOptions, RouteDeprecation } from './route';
 import type { Headers } from './headers';
 
 /**
  * @public
  */
 export interface KibanaRouteOptions extends RouteOptionsApp {
+  deprecated?: RouteDeprecation;
   xsrfRequired: boolean;
   access: 'internal' | 'public';
 }

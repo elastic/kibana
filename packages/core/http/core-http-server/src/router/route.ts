@@ -111,11 +111,86 @@ export interface RouteConfigOptionsBody {
  */
 export type RouteAccess = 'public' | 'internal';
 
+/** @public */
+export type RouteInputDeprecationLocation = 'query' | 'body';
+
+/** @public */
+export interface RouteInputDeprecationRenamedDescription {
+  type: 'renamed';
+  location: RouteInputDeprecationLocation;
+  old: string;
+  new: string;
+}
+
+/** @public */
+export interface RouteInputDeprecationRemovedDescription {
+  type: 'removed';
+  location: RouteInputDeprecationLocation;
+  path: string;
+}
+
+/** @public */
+export type RouteInputDeprecationDescription =
+  | RouteInputDeprecationRenamedDescription
+  | RouteInputDeprecationRemovedDescription;
+
+/**
+ * Factory for supported types of route API deprecations.
+ * @public
+ */
+export type RouteInputDeprecationFactory = (factories: {
+  remove(path: string): RouteInputDeprecationRemovedDescription;
+  rename(oldPath: string, newPath: string): RouteInputDeprecationRenamedDescription;
+}) => RouteInputDeprecationDescription[];
+
+/**
+ * Declare route input deprecations.
+ * @public
+ */
+export interface RouteInputDeprecation {
+  query?: RouteInputDeprecationFactory;
+  body?: RouteInputDeprecationFactory;
+}
+
+/**
+ * Description of deprecations for this HTTP API.
+ *
+ * @remark This will assist Kibana HTTP API users when upgrading to new versions
+ * of the Elastic stack (via Upgrade Assistant) and will be surfaced in documentation
+ * created from HTTP API introspection (like OAS).
+ *
+ * string - Provide a string to mark this route as deprecated along with a description like:
+ *          "This route is deprecated and staged for removal by X.X.X. Use /another/cool/route instead"
+ * boolean - Set this to `true` to specify that this entire route is deprecated.
+ *
+ * It's also possible to provide deprecation messages about sub-parts of the route. Consider this
+ * example of a route deprecating an enum value from its request body:
+ *
+ * ```ts
+ * {
+ *   body: {
+ *     foo: {
+ *       type: { check: (v) => v === "bar", message : "'bar' is deprecated. Use 'qux' or 'baz' instead." }
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * @default false
+ * @public
+ */
+export type RouteDeprecation = boolean | string | RouteInputDeprecation;
+
 /**
  * Additional route options.
  * @public
  */
-export interface RouteConfigOptions<Method extends RouteMethod> {
+export interface RouteConfigOptions<
+  Method extends RouteMethod,
+  P = unknown,
+  Q = unknown,
+  B = unknown
+> {
   /**
    * Defines authentication mode for a route:
    * - true. A user has to have valid credentials to access a resource
@@ -201,12 +276,11 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   description?: string;
 
   /**
-   * Setting this to `true` declares this route to be deprecated. Consumers SHOULD
-   * refrain from usage of this route.
+   * A description of this routes deprecations.
    *
-   * @remarks This will be surfaced in OAS documentation.
+   * @remarks This may be surfaced in OAS documentation.
    */
-  deprecated?: boolean;
+  deprecated?: RouteDeprecation;
 
   /**
    * Release version or date that this route will be removed
@@ -299,5 +373,5 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
   /**
    * Additional route options {@link RouteConfigOptions}.
    */
-  options?: RouteConfigOptions<Method>;
+  options?: RouteConfigOptions<Method, P, Q, B>;
 }

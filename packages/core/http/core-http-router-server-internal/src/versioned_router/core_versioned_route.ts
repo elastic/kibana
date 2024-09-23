@@ -99,7 +99,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         options: this.getRouteConfigOptions(),
       },
       this.requestHandler,
-      { isVersioned: true }
+      { isVersioned: true, events: false }
     );
   }
 
@@ -191,6 +191,8 @@ export class CoreVersionedRoute implements VersionedRoute {
       req.params = {};
       req.query = {};
     }
+
+    this.router.router.emitPostValidate(req);
 
     const response = await handler.fn(ctx, req, res);
 
