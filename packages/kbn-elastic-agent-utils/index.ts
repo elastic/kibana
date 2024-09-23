@@ -7,6 +7,7 @@
  */
 export {
   isOpenTelemetryAgentName,
+  hasOpenTelemetryPrefix,
   isJavaAgentName,
   isRumAgentName,
   isMobileAgentName,

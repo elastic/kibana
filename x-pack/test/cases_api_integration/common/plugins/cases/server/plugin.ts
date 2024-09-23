@@ -12,6 +12,7 @@ import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
 import { FilesSetup } from '@kbn/files-plugin/server';
 import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { registerRoutes } from './routes';
@@ -28,6 +29,7 @@ export interface FixtureStartDeps {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   cases: CasesServerStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
