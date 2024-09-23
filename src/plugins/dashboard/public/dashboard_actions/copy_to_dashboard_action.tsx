@@ -25,7 +25,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
-import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
+import { DashboardApi } from '../dashboard_api/types';
 import { pluginServices } from '../services/plugin_services';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
@@ -41,7 +41,7 @@ export type CopyToDashboardAPI = HasType &
   HasUniqueId &
   HasParentApi<
     { type: typeof DASHBOARD_CONTAINER_TYPE } & PublishesSavedObjectId &
-      DashboardPluginInternalFunctions
+      Pick<DashboardApi, 'getDashboardPanelFromId'>
   >;
 
 const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
@@ -49,6 +49,8 @@ const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
     apiHasUniqueId(api) &&
     apiHasParentApi(api) &&
     apiIsOfType(api.parentApi, DASHBOARD_CONTAINER_TYPE) &&
+    (api?.parentApi as unknown as Pick<DashboardApi, 'getDashboardPanelFromId'>)
+      ?.getDashboardPanelFromId !== undefined &&
     apiPublishesSavedObjectId(api.parentApi)
   );
 };
