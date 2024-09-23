@@ -24,12 +24,16 @@ import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
   useTimelineDataFilters: jest.fn(),
@@ -68,6 +72,7 @@ const renderVisualizationsSection = (contextValue = panelContextValue) =>
 
 describe('<VisualizationsSection />', () => {
   beforeEach(() => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
