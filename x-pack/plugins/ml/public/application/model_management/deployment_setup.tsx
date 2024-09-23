@@ -704,7 +704,7 @@ export const getUserInputModelDeploymentParamsProvider =
               model={model}
               onConfigChange={(config) => {
                 modalSession.close();
-                resolve(deploymentParamsMapper.mapUiToUiDeploymentParams(config));
+                resolve(deploymentParamsMapper.mapUiToApiDeploymentParams(config));
               }}
               onClose={() => {
                 modalSession.close();

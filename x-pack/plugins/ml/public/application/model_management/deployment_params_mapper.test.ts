@@ -44,7 +44,7 @@ describe('DeploymentParamsMapper', () => {
 
       it('should enforce adaptive allocations', () => {
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
@@ -58,12 +58,12 @@ describe('DeploymentParamsMapper', () => {
           },
           deployment_id: 'test-deployment',
           model_id: 'test-model',
-          priority: 'low',
+          priority: 'normal',
           threads_per_allocation: 2,
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: false,
@@ -77,7 +77,7 @@ describe('DeploymentParamsMapper', () => {
           },
           deployment_id: 'test-deployment',
           model_id: 'test-model',
-          priority: 'low',
+          priority: 'normal',
           threads_per_allocation: 1,
         });
       });
@@ -119,7 +119,7 @@ describe('DeploymentParamsMapper', () => {
 
       it('should map UI params to API request correctly', () => {
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
@@ -128,13 +128,13 @@ describe('DeploymentParamsMapper', () => {
         ).toEqual({
           model_id: modelId,
           deployment_id: 'test-deployment',
-          priority: 'low',
+          priority: 'normal',
           threads_per_allocation: 2,
           number_of_allocations: 1,
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
@@ -149,7 +149,7 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
@@ -164,7 +164,7 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: false,
@@ -173,13 +173,13 @@ describe('DeploymentParamsMapper', () => {
         ).toEqual({
           model_id: modelId,
           deployment_id: 'test-deployment',
-          priority: 'low',
+          priority: 'normal',
           threads_per_allocation: 1,
           number_of_allocations: 2,
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: false,
@@ -194,7 +194,7 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: false,
@@ -211,7 +211,7 @@ describe('DeploymentParamsMapper', () => {
 
       it('should map UI params to API request correctly with adaptive resources', () => {
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
@@ -220,7 +220,7 @@ describe('DeploymentParamsMapper', () => {
         ).toEqual({
           model_id: modelId,
           deployment_id: 'test-deployment',
-          priority: 'low',
+          priority: 'normal',
           threads_per_allocation: 2,
           adaptive_allocations: {
             enabled: true,
@@ -230,7 +230,7 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
@@ -249,7 +249,7 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
@@ -358,7 +358,7 @@ describe('DeploymentParamsMapper', () => {
             mapper.mapApiToUiDeploymentParams({
               model_id: modelId,
               deployment_id: 'test-deployment',
-              priority: 'low',
+              priority: 'normal',
               threads_per_allocation: 1,
               adaptive_allocations: {
                 enabled: true,
@@ -390,7 +390,7 @@ describe('DeploymentParamsMapper', () => {
 
       it('should map UI params to API request correctly', () => {
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
@@ -399,13 +399,13 @@ describe('DeploymentParamsMapper', () => {
         ).toEqual({
           model_id: modelId,
           deployment_id: 'test-deployment',
-          priority: 'low',
+          priority: 'normal',
           threads_per_allocation: 2,
           number_of_allocations: 1,
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
@@ -420,7 +420,7 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: false,
@@ -437,7 +437,7 @@ describe('DeploymentParamsMapper', () => {
 
       it('should map UI params to API request correctly with adaptive resources', () => {
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
@@ -446,7 +446,7 @@ describe('DeploymentParamsMapper', () => {
         ).toEqual({
           model_id: modelId,
           deployment_id: 'test-deployment',
-          priority: 'low',
+          priority: 'normal',
           threads_per_allocation: 2,
           adaptive_allocations: {
             enabled: true,
@@ -456,7 +456,7 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
@@ -475,7 +475,7 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
             adaptiveResources: true,
@@ -494,7 +494,7 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: true,
@@ -503,7 +503,7 @@ describe('DeploymentParamsMapper', () => {
         ).toEqual({
           model_id: modelId,
           deployment_id: 'test-deployment',
-          priority: 'low',
+          priority: 'normal',
           threads_per_allocation: 1,
           adaptive_allocations: {
             enabled: true,
@@ -513,7 +513,7 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: true,
@@ -532,7 +532,7 @@ describe('DeploymentParamsMapper', () => {
         });
 
         expect(
-          mapper.mapUiToUiDeploymentParams({
+          mapper.mapUiToApiDeploymentParams({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
             adaptiveResources: true,

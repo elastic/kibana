@@ -119,7 +119,7 @@ export class DeploymentParamsMapper {
    * Maps UI params to the actual start deployment API request
    * @param input
    */
-  public mapUiToUiDeploymentParams(
+  public mapUiToApiDeploymentParams(
     input: DeploymentParamsUI
   ): MlStartTrainedModelDeploymentRequestNew {
     const resultInput: DeploymentParamsUI = Object.create(input);
@@ -133,7 +133,7 @@ export class DeploymentParamsMapper {
     return {
       model_id: this.modelId,
       deployment_id: resultInput.deploymentId,
-      priority: resultInput.vCPUUsage === 'low' ? 'low' : 'normal',
+      priority: 'normal',
       threads_per_allocation: this.getNumberOfThreads(resultInput),
       ...(resultInput.adaptiveResources || !this.showNodeInfo
         ? {
