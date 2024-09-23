@@ -30,7 +30,7 @@ export const DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_TEXT = i18n.translate(
 export const DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_BUTTON = i18n.translate(
   'xpack.securitySolution.onboarding.dashboardsCard.calloutIntegrationsButton',
   {
-    defaultMessage: 'Add integrations',
+    defaultMessage: 'Add integrations step',
   }
 );
 export const DASHBOARDS_CARD_GO_TO_DASHBOARDS_BUTTON = i18n.translate(
