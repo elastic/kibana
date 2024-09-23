@@ -32,19 +32,17 @@ describe('QueryHistory', () => {
     it('should render the history action component as a button if is spaceReduced is undefined', () => {
       render(<QueryHistoryAction toggleHistory={jest.fn()} isHistoryOpen />);
       expect(
-        screen.getByTestId('TextBasedLangEditor-toggle-query-history-button-container')
+        screen.getByTestId('ESQLEditor-toggle-query-history-button-container')
       ).toBeInTheDocument();
 
       expect(
-        screen.getByTestId('TextBasedLangEditor-toggle-query-history-button-container')
+        screen.getByTestId('ESQLEditor-toggle-query-history-button-container')
       ).toHaveTextContent('Hide recent queries');
     });
 
     it('should render the history action component as an icon if is spaceReduced is true', () => {
       render(<QueryHistoryAction toggleHistory={jest.fn()} isHistoryOpen isSpaceReduced />);
-      expect(
-        screen.getByTestId('TextBasedLangEditor-toggle-query-history-icon')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('ESQLEditor-toggle-query-history-icon')).toBeInTheDocument();
     });
   });
 
@@ -134,7 +132,7 @@ describe('QueryHistory', () => {
         />
       );
       expect(
-        screen.queryByTestId('TextBasedLangEditor-queryHistory-queryString-expanded')
+        screen.queryByTestId('ESQLEditor-queryHistory-queryString-expanded')
       ).not.toBeInTheDocument();
     });
 
@@ -155,7 +153,7 @@ describe('QueryHistory', () => {
         />
       );
       expect(
-        screen.getByTestId('TextBasedLangEditor-queryHistory-queryString-expanded')
+        screen.getByTestId('ESQLEditor-queryHistory-queryString-expanded')
       ).toBeInTheDocument();
     });
   });
