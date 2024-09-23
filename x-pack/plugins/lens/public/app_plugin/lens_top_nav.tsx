@@ -576,6 +576,8 @@ export const LensTopNavMenu = ({
               return;
             }
 
+            const activeVisualization = visualizationMap[visualization.activeId];
+
             const {
               shareableUrl,
               savedObjectURL,
@@ -606,14 +608,15 @@ export const LensTopNavMenu = ({
 
             const sharingData = {
               activeData,
-              sortedColumns: visualizationMap[visualization.activeId].getSortedColumns?.(
+              sortedColumns: activeVisualization.getSortedColumns?.(
                 visualization.state,
                 datasourceLayers
               ),
-              columnSorting: visualizationMap[visualization.activeId].getColumnSorting?.(
+              columnSorting: activeVisualization.getColumnSorting?.(
                 visualization.state,
                 datasourceLayers
               ),
+              tablesToShare: activeVisualization.getTablesToShare?.(),
               csvEnabled,
               reportingDisabled: !csvEnabled,
               title: title || defaultLensTitle,
@@ -623,9 +626,8 @@ export const LensTopNavMenu = ({
               },
               layout: {
                 dimensions:
-                  visualizationMap[visualization.activeId].getReportingLayout?.(
-                    visualization.state
-                  ) ?? DEFAULT_LENS_LAYOUT_DIMENSIONS,
+                  activeVisualization.getReportingLayout?.(visualization.state) ??
+                  DEFAULT_LENS_LAYOUT_DIMENSIONS,
               },
             };
 

@@ -51,6 +51,7 @@ import {
   shouldColorByTerms,
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { DatatableInspectorTables } from '../../../common/expressions/datatable/datatable_fn';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
@@ -745,6 +746,10 @@ export const getDatatableVisualization = ({
         direction: state.sorting.direction,
       },
     ];
+  },
+
+  getTablesToShare() {
+    return [DatatableInspectorTables.Transpose];
   },
 
   getVisualizationInfo(state) {

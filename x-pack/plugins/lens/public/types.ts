@@ -1362,6 +1362,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     datasourceLayers?: DatasourceLayers
   ) => EuiDataGridColumnSortingConfig[];
   /**
+   * Table ids to export via csv, corresponding to the tables in inspector adapter
+   */
+  getTablesToShare?: () => string[];
+  /**
    * returns array of telemetry events for the visualization on save
    */
   getTelemetryEventsOnSave?: (state: T, prevState?: T) => string[];

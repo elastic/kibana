@@ -65,6 +65,7 @@ export const datatableFn =
 
       if (context?.inspectorAdapters?.tables) {
         context.inspectorAdapters.tables.logDatatable(DatatableInspectorTables.Transpose, table);
+        context.inspectorAdapters.tables.initialSelectedTable = DatatableInspectorTables.Transpose;
       }
     }
 

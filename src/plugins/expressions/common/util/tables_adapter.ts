@@ -14,9 +14,11 @@ export class TablesAdapter extends EventEmitter {
   #tables: { [key: string]: Datatable } = {};
 
   public allowCsvExport: boolean = false;
+  /** Key of table to set as initial selection */
+  public initialSelectedTable?: string;
 
-  public logDatatable(name: string, datatable: Datatable): void {
-    this.#tables[name] = datatable;
+  public logDatatable(key: string, datatable: Datatable): void {
+    this.#tables[key] = datatable;
     this.emit('change', this.tables);
   }
 

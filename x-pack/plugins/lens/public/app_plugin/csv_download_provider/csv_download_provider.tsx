@@ -20,6 +20,7 @@ export interface CSVSharingData {
   title: string;
   activeData: TableInspectorAdapter;
   csvEnabled: boolean;
+  tablesToShare?: string[];
   sortedColumns?: string[];
   columnSorting?: EuiDataGridColumnSortingConfig[];
 }
@@ -39,6 +40,7 @@ async function downloadCSVs({
   title,
   formatFactory,
   uiSettings,
+  tablesToShare = [],
   sortedColumns,
   columnSorting,
 }: {
@@ -46,6 +48,7 @@ async function downloadCSVs({
   activeData: TableInspectorAdapter;
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
+  tablesToShare?: string[];
   sortedColumns?: string[];
   columnSorting?: EuiDataGridColumnSortingConfig[];
 }) {
@@ -55,7 +58,11 @@ async function downloadCSVs({
     }
     return;
   }
-  const datatables = Object.values(activeData);
+  const seletedDatatables = Object.entries(activeData)
+    .filter(([id]) => tablesToShare.includes(id))
+    .map(([, table]) => table);
+  const datatables = seletedDatatables.length > 0 ? seletedDatatables : Object.values(activeData);
+
   const content = datatables.reduce<Record<string, { content: string; type: string }>>(
     (memo, datatable, i) => {
       // skip empty datatables
@@ -122,7 +129,7 @@ export const downloadCsvShareProvider = ({
     }
 
     // TODO fix sharingData types
-    const { title, activeData, csvEnabled, sortedColumns, columnSorting } =
+    const { title, activeData, csvEnabled, sortedColumns, columnSorting, tablesToShare } =
       sharingData as unknown as CSVSharingData;
 
     const panelTitle = i18n.translate(
@@ -147,6 +154,7 @@ export const downloadCsvShareProvider = ({
         formatFactory: formatFactoryFn(),
         activeData,
         uiSettings,
+        tablesToShare,
         sortedColumns,
         columnSorting,
       });

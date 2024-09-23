@@ -9,7 +9,6 @@
 
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
@@ -27,16 +26,10 @@ interface TableSelectorState {
 interface TableSelectorProps {
   tables: Datatable[];
   selectedTable: Datatable;
-  onTableChanged: Function;
+  onTableChanged: (table: Datatable) => void;
 }
 
 export class TableSelector extends Component<TableSelectorProps, TableSelectorState> {
-  static propTypes = {
-    tables: PropTypes.array.isRequired,
-    selectedTable: PropTypes.object.isRequired,
-    onTableChanged: PropTypes.func,
-  };
-
   state = {
     isPopoverOpen: false,
   };
