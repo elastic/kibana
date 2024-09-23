@@ -1,0 +1,28 @@
+name: CodeQL statistics
+
+on:
+  schedule:
+    - cron: '27 0 * * 1' # At 00:27 every Monday
+
+jobs:
+  stats:
+    name: CodeQL statistics
+    runs-on: ubuntu-latest
+    if: github.repository == 'elastic/kibana' # Hack: Do not run on forks
+    steps:
+    - name: Checkout kibana-operations
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      with:
+        repository: 'elastic/kibana-operations'
+        ref: main
+        path: ./kibana-operations
+        token: ${{secrets.KIBANAMACHINE_TOKEN}}
+
+    - name: CodeQL alert statistics
+      working-directory: ./kibana-operations/triage
+      env:
+        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+        SLACK_TOKEN: ${{secrets.CODE_SCANNING_SLACK_TOKEN}}
+      run: |
+        npm ci --omit=dev
+        node codeql-alert-stats

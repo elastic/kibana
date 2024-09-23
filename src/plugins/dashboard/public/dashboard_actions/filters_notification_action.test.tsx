@@ -56,6 +56,7 @@ describe('filters notification action', () => {
           getAllDataViews: jest.fn(),
           getDashboardPanelFromId: jest.fn(),
         },
+        viewMode: viewModeSubject,
         filters$: filtersSubject,
         query$: querySubject,
       },

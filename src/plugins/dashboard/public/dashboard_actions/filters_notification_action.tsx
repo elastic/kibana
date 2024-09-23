@@ -20,9 +20,9 @@ import {
   HasParentApi,
   PublishesUnifiedSearch,
   HasUniqueId,
+  PublishesDataViews,
 } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
-import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
 import { pluginServices } from '../services/plugin_services';
 import { FiltersNotificationPopover } from './filters_notification_popover';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
@@ -31,7 +31,7 @@ export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
 export type FiltersNotificationActionApi = HasUniqueId &
   Partial<PublishesUnifiedSearch> &
-  HasParentApi<DashboardPluginInternalFunctions>;
+  Partial<HasParentApi<Partial<PublishesDataViews>>>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
   Boolean(apiHasUniqueId(api) && apiPublishesPartialUnifiedSearch(api));
