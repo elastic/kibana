@@ -11,7 +11,6 @@
  * rescheduling, middleware application, etc.
  */
 
-import { Observable } from 'rxjs';
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
@@ -113,7 +112,7 @@ type Opts = {
   config: TaskManagerConfig;
   allowReadingInvalidState: boolean;
   strategy: string;
-  pollIntervalConfiguration$: Observable<number>;
+  getPollInterval: () => number;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -166,7 +165,7 @@ export class TaskManagerRunner implements TaskRunner {
   private config: TaskManagerConfig;
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
-  private currentPollInterval: number;
+  private getPollInterval: () => number;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -192,7 +191,7 @@ export class TaskManagerRunner implements TaskRunner {
     config,
     allowReadingInvalidState,
     strategy,
-    pollIntervalConfiguration$,
+    getPollInterval,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -212,10 +211,7 @@ export class TaskManagerRunner implements TaskRunner {
       allowReadingInvalidState,
     });
     this.claimStrategy = strategy;
-    this.currentPollInterval = config.poll_interval;
-    pollIntervalConfiguration$.subscribe((pollInterval) => {
-      this.currentPollInterval = pollInterval;
-    });
+    this.getPollInterval = getPollInterval;
   }
 
   /**
@@ -656,7 +652,7 @@ export class TaskManagerRunner implements TaskRunner {
                   startedAt: this.instance.task.startedAt,
                   schedule: updatedTaskSchedule,
                 },
-                this.currentPollInterval
+                this.getPollInterval()
               ),
             state,
             schedule: updatedTaskSchedule,

@@ -11,6 +11,7 @@
     "__mocks__/**/*",
     "../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "common/**/*.json",
     "public/**/*.json",
     "server/**/*.json"
   ],
@@ -19,7 +20,9 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../../src/setup_node_env/tsconfig.json" },
+    {
+      "path": "../../../src/setup_node_env/tsconfig.json"
+    },
     // add references to other TypeScript projects the plugin depends on
     "@kbn/ace",
     "@kbn/actions-plugin",

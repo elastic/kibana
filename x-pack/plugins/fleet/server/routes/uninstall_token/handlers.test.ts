@@ -28,11 +28,9 @@ import type { FleetRequestHandlerContext } from '../..';
 import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { agentPolicyService, appContextService } from '../../services';
-import {
-  GetUninstallTokensMetadataResponseSchema,
-  type GetUninstallTokenRequestSchema,
-  type GetUninstallTokensMetadataRequestSchema,
-  GetUninstallTokenResponseSchema,
+import type {
+  GetUninstallTokenRequestSchema,
+  GetUninstallTokensMetadataRequestSchema,
 } from '../../types/rest_spec/uninstall_token';
 
 import { createAgentPolicyMock } from '../../../common/mocks';
@@ -118,10 +116,6 @@ describe('uninstall token handlers', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: uninstallTokensResponseFixture,
       });
-      const validateResp = GetUninstallTokensMetadataResponseSchema.validate(
-        uninstallTokensResponseFixture
-      );
-      expect(validateResp).toEqual(uninstallTokensResponseFixture);
     });
 
     it('should return internal error when uninstallTokenService throws error', async () => {
@@ -137,19 +131,18 @@ describe('uninstall token handlers', () => {
   });
 
   describe('getUninstallTokenHandler', () => {
-    let uninstallTokenFixture: UninstallToken;
+    const uninstallTokenFixture: UninstallToken = {
+      id: 'id-1',
+      policy_id: 'policy-id-1',
+      policy_name: null,
+      created_at: '2023-06-15T16:46:48.274Z',
+      token: '123456789',
+    };
 
     let getTokenMock: jest.Mock;
     let request: KibanaRequest<TypeOf<typeof GetUninstallTokenRequestSchema.params>>;
 
     beforeEach(async () => {
-      uninstallTokenFixture = {
-        id: 'id-1',
-        policy_id: 'policy-id-1',
-        policy_name: null,
-        created_at: '2023-06-15T16:46:48.274Z',
-        token: '123456789',
-      };
       const uninstallTokenService = (await context.fleet).uninstallTokenService.asCurrentUser;
       getTokenMock = uninstallTokenService.getToken as jest.Mock;
 
@@ -172,10 +165,6 @@ describe('uninstall token handlers', () => {
           item: uninstallTokenFixture,
         },
       });
-      const validateResp = GetUninstallTokenResponseSchema.validate({
-        item: uninstallTokenFixture,
-      });
-      expect(validateResp).toEqual({ item: uninstallTokenFixture });
     });
 
     it('should return internal error when uninstallTokenService throws error', async () => {

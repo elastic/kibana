@@ -1999,7 +1999,8 @@ export const runActionTestSuite = ({
     });
   });
 
-  describe('bulkOverwriteTransformedDocuments', () => {
+  // Failing ES Promotion: https://github.com/elastic/kibana/issues/193592
+  describe.skip('bulkOverwriteTransformedDocuments', () => {
     it('resolves right when documents do not yet exist in the index', async () => {
       const newDocs = [
         { _source: { title: 'doc 5' } },

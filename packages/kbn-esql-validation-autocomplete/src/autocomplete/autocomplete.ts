@@ -111,6 +111,7 @@ import {
 } from '../definitions/types';
 import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
+import { countBracketsUnclosed } from '../shared/helpers';
 
 type GetFieldsByTypeFn = (
   type: string | string[],
@@ -554,8 +555,11 @@ async function getExpressionSuggestionsByType(
   const fieldsMap: Map<string, ESQLRealField> = await (argDef ? getFieldsMap() : new Map());
   const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
+  const previousWord = findPreviousWord(innerText);
   // enrich with assignment has some special rules who are handled somewhere else
-  const canHaveAssignments = ['eval', 'stats', 'row'].includes(command.name);
+  const canHaveAssignments =
+    ['eval', 'stats', 'row'].includes(command.name) &&
+    !comparisonFunctions.map((fn) => fn.name).includes(previousWord);
 
   const references = { fields: fieldsMap, variables: anyVariables };
 
@@ -1422,10 +1426,9 @@ async function getFunctionArgsSuggestions(
       suggestions.push(
         ...comparisonFunctions.map<SuggestionRawDefinition>(({ name, description }) => ({
           label: name,
-          text: name + ' ',
+          text: name,
           kind: 'Function' as ItemKind,
           detail: description,
-          command: TRIGGER_SUGGESTION_COMMAND,
         }))
       );
     }
@@ -1786,10 +1789,13 @@ async function getOptionArgsSuggestions(
             openSuggestions: true,
           }))
         );
+        // Checks if cursor is still within function ()
+        // by checking if the marker editor/cursor is within an unclosed parenthesis
+        const canHaveAssignment = countBracketsUnclosed('(', innerText) === 0;
 
         if (option.name === 'by') {
           // Add quick snippet for for stats ... by bucket(<>)
-          if (command.name === 'stats') {
+          if (command.name === 'stats' && canHaveAssignment) {
             suggestions.push({
               label: i18n.translate(
                 'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogram',
@@ -1820,12 +1826,13 @@ async function getOptionArgsSuggestions(
               {
                 functions: true,
                 fields: false,
-              }
+              },
+              { ignoreFn: canHaveAssignment ? [] : ['bucket', 'case'] }
             ))
           );
         }
 
-        if (command.name === 'stats' && isNewExpression) {
+        if (command.name === 'stats' && isNewExpression && canHaveAssignment) {
           suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
         }
       }

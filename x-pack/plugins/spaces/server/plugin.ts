@@ -235,8 +235,8 @@ export class SpacesPlugin
     };
   }
 
-  public start(core: CoreStart) {
-    const spacesClientStart = this.spacesClientService.start(core);
+  public start(core: CoreStart, plugins: PluginsStart) {
+    const spacesClientStart = this.spacesClientService.start(core, plugins.features);
 
     this.spacesServiceStart = this.spacesService.start({
       basePath: core.http.basePath,
