@@ -367,7 +367,7 @@ export abstract class AbstractDataView {
     const stringifyOrUndefined = (obj: any) => (obj ? JSON.stringify(obj) : undefined);
 
     return {
-      fieldAttrs: stringifyOrUndefined(this.fieldAttrs),
+      fieldAttrs: stringifyOrUndefined(Object.fromEntries(this.fieldAttrs.entries())),
       title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: stringifyOrUndefined(this.sourceFilters),
