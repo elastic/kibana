@@ -15,7 +15,7 @@ export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
   router.versioned
     .get({
       access: 'internal',
-      path: '/internal/controls/optionsList/getExpensiveQueriesSetting',
+      path: '/internal/controls/getExpensiveQueriesSetting',
     })
     .addVersion(
       {
