@@ -52,13 +52,14 @@ import {
   getSessionURLObservable,
   removeSearchSessionIdFromURL,
 } from './url/search_sessions_integration';
-import { loadAndRemoveDashboardState } from './url/url_utils';
+import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
 
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
+  expandedPanelId?: string;
 }
 
 export function DashboardApp({
@@ -66,6 +67,7 @@ export function DashboardApp({
   embedSettings,
   redirectTo,
   history,
+  expandedPanelId,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
@@ -167,6 +169,12 @@ export function DashboardApp({
     });
   }, [history, embedSettings, validateOutcome, getScopedHistory, kbnUrlStateStorage]);
 
+  useEffect(() => {
+    if (!dashboardApi) return;
+    const { stopWatchingExpandedPanel } = startSyncingExpandedPanelState({ dashboardApi, history });
+    return () => stopWatchingExpandedPanel();
+  }, [dashboardApi, history]);
+
   /**
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
    */
@@ -205,7 +213,14 @@ export function DashboardApp({
       <DashboardRenderer
         key={regenerateId}
         locator={locator}
-        onApiAvailable={setDashboardApi}
+        onApiAvailable={(dashboard) => {
+          if (dashboard && !dashboardApi) {
+            setDashboardApi(dashboard);
+            if (expandedPanelId) {
+              dashboard?.expandPanel(expandedPanelId);
+            }
+          }
+        }}
         dashboardRedirect={redirectTo}
         savedObjectId={savedDashboardId}
         showPlainSpinner={showPlainSpinner}

@@ -21,7 +21,9 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
 import { dashboardCapabilitiesService } from '../../../services/dashboard_services';
 import {
@@ -32,7 +34,6 @@ import {
   visualizationsService,
 } from '../../../services/kibana_services';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 export function DashboardEmptyScreen() {
   const lensAlias = useMemo(
@@ -43,13 +44,19 @@ export function DashboardEmptyScreen() {
     return dashboardCapabilitiesService.dashboardCapabilities;
   }, []);
 
-  const dashboardContainer = useDashboardContainer();
+  const dashboardApi = useDashboardApi();
   const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
-  const isEditMode =
-    dashboardContainer.select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
-  const embeddableAppContext = dashboardContainer.getAppContext();
-  const originatingPath = embeddableAppContext?.getCurrentPath?.() ?? '';
-  const originatingApp = embeddableAppContext?.currentAppId;
+  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode);
+  const isEditMode = useMemo(() => {
+    return viewMode === 'edit';
+  }, [viewMode]);
+  const { originatingPath, originatingApp } = useMemo(() => {
+    const appContext = dashboardApi.getAppContext();
+    return {
+      originatingApp: appContext?.currentAppId,
+      originatingPath: appContext?.getCurrentPath?.() ?? '',
+    };
+  }, [dashboardApi]);
 
   const goToLens = useCallback(() => {
     if (!lensAlias || !lensAlias.alias) return;
@@ -119,7 +126,7 @@ export function DashboardEmptyScreen() {
             <EuiButtonEmpty
               flush="left"
               iconType="folderOpen"
-              onClick={() => dashboardContainer.addFromLibrary()}
+              onClick={() => dashboardApi.addFromLibrary()}
             >
               {emptyScreenStrings.getAddFromLibraryButtonTitle()}
             </EuiButtonEmpty>
@@ -129,10 +136,7 @@ export function DashboardEmptyScreen() {
     }
     if (showWriteControls) {
       return (
-        <EuiButton
-          iconType="pencil"
-          onClick={() => dashboardContainer.dispatch.setViewMode(ViewMode.EDIT)}
-        >
+        <EuiButton iconType="pencil" onClick={() => dashboardApi.setViewMode(ViewMode.EDIT)}>
           {emptyScreenStrings.getEditLinkTitle()}
         </EuiButton>
       );

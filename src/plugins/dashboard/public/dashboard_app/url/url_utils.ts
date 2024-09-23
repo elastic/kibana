@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { History } from 'history';
 import _ from 'lodash';
+import { skip } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
@@ -20,7 +22,8 @@ import {
   convertSavedPanelsToPanelMap,
 } from '../../../common';
 import { SavedDashboardPanel } from '../../../common/content_management';
-import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
+import { DashboardApi } from '../../dashboard_api/types';
+import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../dashboard_constants';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management/lib/load_dashboard_state';
 import { coreServices } from '../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
@@ -83,4 +86,26 @@ export const loadAndRemoveDashboardState = (
   };
 
   return partialState;
+};
+
+export const startSyncingExpandedPanelState = ({
+  dashboardApi,
+  history,
+}: {
+  dashboardApi: DashboardApi;
+  history: History;
+}) => {
+  const expandedPanelSubscription = dashboardApi?.expandedPanelId
+    // skip the first value because we don't want to trigger a history.replace on initial load
+    .pipe(skip(1))
+    .subscribe((expandedPanelId) => {
+      history.replace({
+        ...history.location,
+        pathname: `${createDashboardEditUrl(dashboardApi.savedObjectId.value)}${
+          Boolean(expandedPanelId) ? `/${expandedPanelId}` : ''
+        }`,
+      });
+    });
+  const stopWatchingExpandedPanel = () => expandedPanelSubscription.unsubscribe();
+  return { stopWatchingExpandedPanel };
 };

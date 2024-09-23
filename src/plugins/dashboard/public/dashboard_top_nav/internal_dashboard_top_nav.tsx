@@ -45,8 +45,13 @@ import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_edit
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import { DashboardEmbedSettings } from '../dashboard_app/types';
 import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants';
+import { openSettingsFlyout } from '../dashboard_container/embeddable/api';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
+import {
+  dashboardCapabilitiesService,
+  dashboardRecentlyAccessedService,
+} from '../services/dashboard_services';
 import {
   coreServices,
   dataService,
@@ -55,10 +60,6 @@ import {
   serverlessService,
 } from '../services/kibana_services';
 import './_dashboard_top_nav.scss';
-import {
-  dashboardCapabilitiesService,
-  dashboardRecentlyAccessedService,
-} from '../services/dashboard_services';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -175,7 +176,7 @@ export function InternalDashboardTopNav({
                 size="s"
                 type="pencil"
                 className="dshTitleBreadcrumbs__updateIcon"
-                onClick={() => dashboardApi.openSettingsFlyout()}
+                onClick={() => openSettingsFlyout(dashboardApi)}
               />
             </>
           ) : (

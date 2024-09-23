@@ -12,13 +12,12 @@ import { merge } from 'rxjs';
 
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
 import {
   CanAccessViewMode,
   EmbeddableApiContext,
   HasParentApi,
   HasUniqueId,
+  PublishesDataViews,
   PublishesUnifiedSearch,
   apiCanAccessViewMode,
   apiHasUniqueId,
@@ -26,8 +25,8 @@ import {
   getInheritedViewMode,
   getViewModeSubject,
 } from '@kbn/presentation-publishing';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
 import { coreServices } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 import { FiltersNotificationPopover } from './filters_notification_popover';
@@ -37,7 +36,7 @@ export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 export type FiltersNotificationActionApi = HasUniqueId &
   CanAccessViewMode &
   Partial<PublishesUnifiedSearch> &
-  HasParentApi<DashboardPluginInternalFunctions>;
+  Partial<HasParentApi<Partial<PublishesDataViews>>>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
   Boolean(

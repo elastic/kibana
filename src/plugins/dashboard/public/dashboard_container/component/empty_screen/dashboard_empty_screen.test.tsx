@@ -12,21 +12,22 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { DashboardApi } from '../../../dashboard_api/types';
+import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
 import { buildMockDashboard } from '../../../mocks';
-import { visualizationsService } from '../../../services/kibana_services';
 import { dashboardCapabilitiesService } from '../../../services/dashboard_services';
-import { DashboardContainerContext } from '../../embeddable/dashboard_container';
+import { visualizationsService } from '../../../services/kibana_services';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
 
 visualizationsService.getAliases = jest.fn().mockReturnValue([{ name: 'lens' }]);
 
 describe('DashboardEmptyScreen', () => {
   function mountComponent(viewMode: ViewMode) {
-    const dashboardContainer = buildMockDashboard({ overrides: { viewMode } });
+    const dashboardApi = buildMockDashboard({ overrides: { viewMode } }) as DashboardApi;
     return mountWithIntl(
-      <DashboardContainerContext.Provider value={dashboardContainer}>
+      <DashboardContext.Provider value={dashboardApi}>
         <DashboardEmptyScreen />
-      </DashboardContainerContext.Provider>
+      </DashboardContext.Provider>
     );
   }
 

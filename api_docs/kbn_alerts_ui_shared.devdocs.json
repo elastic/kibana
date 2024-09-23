@@ -3496,7 +3496,7 @@
                     "text": "ControlGroupRendererProps"
                   }
                 ],
-                "path": "src/plugins/controls/public/react_controls/external_api/control_group_renderer_lazy.tsx",
+                "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer_lazy.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5957,14 +5957,6 @@
             "section": "def-public.HasEditCapabilities",
             "text": "HasEditCapabilities"
           },
-          " & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesDataLoading",
-            "text": "PublishesDataLoading"
-          },
           " & Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
@@ -6076,8 +6068,8 @@
             "pluginId": "controls",
             "scope": "common",
             "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlStyle",
-            "text": "ControlStyle"
+            "section": "def-common.ControlLabelPosition",
+            "text": "ControlLabelPosition"
           },
           ">; asyncResetUnsavedChanges: () => Promise<void>; controlFetch$: (controlUuid: string) => ",
           "Observable",
