@@ -7,8 +7,7 @@
 
 import moment from 'moment/moment';
 import { IBasePath } from '@kbn/core-http-server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { AlertsLocatorParams, getAlertDetailsUrl } from '@kbn/observability-plugin/common';
+import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
@@ -85,9 +84,7 @@ export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThres
 export const setTLSRecoveredAlertsContext = async ({
   alertsClient,
   basePath,
-  defaultStartedAt,
   spaceId,
-  alertsLocator,
   latestPings,
 }: {
   alertsClient: PublicAlertsClient<
@@ -96,10 +93,8 @@ export const setTLSRecoveredAlertsContext = async ({
     AlertContext,
     ActionGroupIdsOf<MonitorStatusActionGroup>
   >;
-  defaultStartedAt: string;
   basePath: IBasePath;
   spaceId: string;
-  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
   latestPings: TLSLatestPing[];
 }) => {
   const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];

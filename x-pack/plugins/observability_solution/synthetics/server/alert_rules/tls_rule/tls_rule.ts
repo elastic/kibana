@@ -15,13 +15,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { asyncForEach } from '@kbn/std';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
-import {
-  alertsLocatorID,
-  AlertsLocatorParams,
-  getAlertDetailsUrl,
-  observabilityPaths,
-} from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
 import { schema } from '@kbn/config-schema';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
@@ -92,14 +86,12 @@ export const registerSyntheticsTLSCheckRule = (
         TLSAlert
       >
     ) => {
-      const { state: ruleState, params, services, spaceId, previousStartedAt, startedAt } = options;
+      const { state: ruleState, params, services, spaceId, previousStartedAt } = options;
       const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
-      const { basePath, share } = server;
-      const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
-        share.url.locators.get(alertsLocatorID);
+      const { basePath } = server;
 
       const tlsRule = new TLSRuleExecutor(
         previousStartedAt,
@@ -152,9 +144,7 @@ export const registerSyntheticsTLSCheckRule = (
       await setTLSRecoveredAlertsContext({
         alertsClient,
         basePath,
-        defaultStartedAt: startedAt.toISOString(),
         spaceId,
-        alertsLocator,
         latestPings,
       });
 
