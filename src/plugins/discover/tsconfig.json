@@ -95,10 +95,16 @@
     "@kbn/presentation-containers",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/fields-metadata-plugin",
+    "@kbn/discover-contextual-components",
+    "@kbn/router-utils",
+    "@kbn/management-settings-ids",
+    "@kbn/react-hooks",
     "@kbn/logs-data-access-plugin",
     "@kbn/core-lifecycle-browser",
-    "@kbn/discover-contextual-components",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/discover-shared-plugin",
+    "@kbn/expandable-flyout"
   ],
   "exclude": [
     "target/**/*"

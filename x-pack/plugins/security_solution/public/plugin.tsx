@@ -21,6 +21,11 @@ import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import type {
+  SecuritySolutionAppWrapperFeature,
+  SecuritySolutionCellRenderFeature,
+  SecuritySolutionReduxStoreInitFeature,
+} from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -57,6 +62,8 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { getCellRendererForGivenRecord } from './one_discover/cell_renderers';
+import { createSecuritySolutionDiscoverAppWrapperGetter } from './one_discover/app_wrapper';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -70,6 +77,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   // Lazily instantiated dependencies
   private _subPlugins?: SubPlugins;
   private _store?: SecurityAppStore;
+  private _securityStoreForDiscover?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
   private _alertsTableRegistered?: boolean = false;
 
@@ -203,6 +211,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       getExternalReferenceAttachmentEndpointRegular()
     );
 
+    this.registerDiscoverSharedFeatures(core, plugins);
+
     return this.contract.getSetupContract();
   }
 
@@ -215,6 +225,49 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public stop() {
     this.services.stop();
+  }
+
+  public registerDiscoverSharedFeatures(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>,
+    plugins: SetupPlugins
+  ) {
+    const { discoverShared } = plugins;
+    const discoverFeatureRegistry = discoverShared.features.registry;
+    const cellRendererFeature: SecuritySolutionCellRenderFeature = {
+      id: 'security-solution-cell-render',
+      getRender: getCellRendererForGivenRecord,
+    };
+
+    const appWrapperFeature: SecuritySolutionAppWrapperFeature = {
+      id: 'security-solution-app-wrapper',
+      getWrapper: async () => {
+        const [coreStart, startPlugins] = await core.getStartServices();
+
+        const services = await this.services.generateServices(coreStart, startPlugins);
+
+        return createSecuritySolutionDiscoverAppWrapperGetter({
+          core: coreStart,
+          services,
+          plugins: startPlugins,
+        });
+      },
+    };
+
+    const securityReduxStoreInitFeature: SecuritySolutionReduxStoreInitFeature = {
+      id: 'security-solution-redux-store-init',
+      get: async () => {
+        const [coreStart, startPlugins] = await core.getStartServices();
+
+        const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+        // const services = await this.services.generateServices(coreStart, startPlugins);
+
+        return this.getStoreForDiscover(coreStart, startPlugins, subPlugins);
+      },
+    };
+
+    discoverFeatureRegistry.register(cellRendererFeature);
+    discoverFeatureRegistry.register(appWrapperFeature);
+    discoverFeatureRegistry.register(securityReduxStoreInitFeature);
   }
 
   /**
@@ -304,6 +357,31 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       startPlugins.timelines.setTimelineEmbeddedStore(this._store);
     }
     return this._store;
+  }
+
+  /**
+   * Lazily instantiate a `SecurityAppStore` for discover.
+   */
+  private async getStoreForDiscover(
+    coreStart: CoreStart,
+    startPlugins: StartPlugins,
+    subPlugins: StartedSubPlugins
+  ): Promise<SecurityAppStore> {
+    if (!this._securityStoreForDiscover) {
+      const { createStoreFactory } = await this.lazyApplicationDependencies();
+
+      this._securityStoreForDiscover = await createStoreFactory(
+        coreStart,
+        startPlugins,
+        subPlugins,
+        this.storage,
+        this.experimentalFeatures
+      );
+    }
+    if (startPlugins.timelines) {
+      startPlugins.timelines.setTimelineEmbeddedStore(this._securityStoreForDiscover);
+    }
+    return this._securityStoreForDiscover;
   }
 
   private async registerActions(

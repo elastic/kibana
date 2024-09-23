@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { PropsWithChildren, ReactElement } from 'react';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { FeaturesRegistry } from '../../../common';
 
 /**
@@ -30,8 +32,39 @@ export interface ObservabilityLogsAIAssistantFeature {
   render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
 }
 
+/** ***************************** Security **********/
+export interface SecuritySolutionCellRenderFeature {
+  id: 'security-solution-cell-render';
+  getRender: (
+    fieldName: string
+  ) => ((props: DataGridCellValueElementProps) => ReactElement) | undefined;
+}
+
+interface SecuritySolutionAppWrapperFeatureArgs {
+  store: unknown;
+}
+
+export interface SecuritySolutionAppWrapperFeature {
+  id: 'security-solution-app-wrapper';
+  getWrapper: () => Promise<
+    (args: SecuritySolutionAppWrapperFeatureArgs) => (props: PropsWithChildren<{}>) => ReactElement
+  >;
+}
+
+export interface SecuritySolutionReduxStoreInitFeature {
+  id: 'security-solution-redux-store-init';
+  /* returns the security's redux store instance */
+  get: () => Promise<unknown>;
+}
+
+type SecuritySolutionFeatures =
+  | SecuritySolutionCellRenderFeature
+  | SecuritySolutionAppWrapperFeature
+  | SecuritySolutionReduxStoreInitFeature;
+/** ****************************************************************************************/
+
 // This should be a union of all the available client features.
-export type DiscoverFeature = ObservabilityLogsAIAssistantFeature;
+export type DiscoverFeature = ObservabilityLogsAIAssistantFeature | SecuritySolutionFeatures;
 
 /**
  * Service types

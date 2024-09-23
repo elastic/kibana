@@ -9,6 +9,9 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import useObservable from 'react-use/lib/useObservable';
+import { APP_UI_ID } from '../../../../../../common';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { UserPanelKey } from '../../../../../flyout/entity_details/user_right';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -47,6 +50,11 @@ const UserNameComponent: React.FC<Props> = ({
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
   const { openRightPanel } = useExpandableFlyoutApi();
+  const {
+    services: { application },
+  } = useKibana();
+
+  const currentAppId = useObservable(application.currentAppId$);
 
   const openUserDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent) => {
@@ -83,13 +91,23 @@ const UserNameComponent: React.FC<Props> = ({
         Component={Component}
         userName={userName}
         isButton={isButton}
-        onClick={isInTimelineContext ? openUserDetailsSidePanel : undefined}
+        onClick={
+          isInTimelineContext || currentAppId !== APP_UI_ID ? openUserDetailsSidePanel : undefined
+        }
         title={title}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{userName}</TruncatableText>
       </UserDetailsLink>
     ),
-    [userName, isButton, isInTimelineContext, openUserDetailsSidePanel, Component, title]
+    [
+      userName,
+      isButton,
+      isInTimelineContext,
+      openUserDetailsSidePanel,
+      Component,
+      title,
+      currentAppId,
+    ]
   );
 
   return isString(value) && userName.length > 0 ? (

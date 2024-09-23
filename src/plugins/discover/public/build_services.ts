@@ -135,6 +135,7 @@ export interface DiscoverServices {
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
+  discoverFeaturesRegistry: DiscoverStartPlugins['discoverShared']['features']['registry'];
 }
 
 export const buildServices = memoize(
@@ -226,6 +227,7 @@ export const buildServices = memoize(
       ebtManager,
       fieldsMetadata: plugins.fieldsMetadata,
       logsDataAccess: plugins.logsDataAccess,
+      discoverFeaturesRegistry: plugins.discoverShared.features.registry,
     };
   }
 );

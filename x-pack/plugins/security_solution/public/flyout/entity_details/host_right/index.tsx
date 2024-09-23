@@ -173,6 +173,8 @@ export const HostPanel = ({
     return <FlyoutLoading />;
   }
 
+  console.log({ isRiskScoreExist, hasMisconfigurationFindings });
+
   return (
     <AnomalyTableProvider
       criteriaFields={hostToCriteria(observedHost.details)}
