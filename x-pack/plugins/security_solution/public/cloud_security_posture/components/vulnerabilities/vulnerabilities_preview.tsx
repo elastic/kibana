@@ -187,7 +187,7 @@ export const VulnerabilitiesPreview = ({ hostName }: { hostName: string }) => {
             `}
           >
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.misconfigurations.misconfigurationsTitle"
+              id="xpack.securitySolution.flyout.right.insights.vulnerabilities.vulnerabilitiesTitle"
               defaultMessage="Vulnerabilities"
             />
           </EuiText>
