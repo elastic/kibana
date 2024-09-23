@@ -7,6 +7,7 @@
 
 import * as redux from 'react-redux';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { ScreenshotRefImageData, ScreenshotBlockCache } from '../../../../common/runtime_types';
 import { fetchBlocksAction } from '../state';
 import { shouldCompose, useComposeImageFromRef } from './use_composite_image';
@@ -179,7 +180,7 @@ describe('use composite image', () => {
     });
 
     it('composes when all required blocks are loaded 2', async () => {
-      const { waitFor, result } = renderHook(() => useComposeImageFromRef(imgRef));
+      const { result } = renderHook(() => useComposeImageFromRef(imgRef));
 
       expect(selectorSpy).toHaveBeenCalled();
       expect(result.current.isComposing).toBeTruthy();

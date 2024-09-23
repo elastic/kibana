@@ -9,7 +9,8 @@ import React, { FunctionComponent } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserFields } from '@kbn/alerting-types';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
@@ -340,10 +341,7 @@ describe('useColumns', () => {
   describe('columns', () => {
     test('should changes the column list when defaultColumns has been updated', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result, waitFor } = renderHook<
-        React.PropsWithChildren<UseColumnsArgs>,
-        UseColumnsResp
-      >(
+      const { result } = renderHook<React.PropsWithChildren<UseColumnsArgs>, UseColumnsResp>(
         () =>
           useColumns({
             defaultColumns,

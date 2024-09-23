@@ -7,7 +7,8 @@
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { useItemsAction } from './use_items_action';
 
 import * as api from '../../containers/api';
@@ -54,7 +55,7 @@ describe('useItemsAction', () => {
     });
 
     it('closes the flyout', async () => {
-      const { result, waitFor } = renderHook(() => useItemsAction(props), {
+      const { result } = renderHook(() => useItemsAction(props), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -81,7 +82,7 @@ describe('useItemsAction', () => {
     it('update the items correctly', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor } = renderHook(() => useItemsAction(props), {
+      const { result } = renderHook(() => useItemsAction(props), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -117,7 +118,7 @@ describe('useItemsAction', () => {
     });
 
     it('calls fieldSelector correctly', async () => {
-      const { result, waitFor } = renderHook(() => useItemsAction(props), {
+      const { result } = renderHook(() => useItemsAction(props), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -142,7 +143,7 @@ describe('useItemsAction', () => {
     });
 
     it('calls itemsTransformer correctly', async () => {
-      const { result, waitFor } = renderHook(() => useItemsAction(props), {
+      const { result } = renderHook(() => useItemsAction(props), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -169,7 +170,7 @@ describe('useItemsAction', () => {
     it('removes duplicates', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor } = renderHook(() => useItemsAction(props), {
+      const { result } = renderHook(() => useItemsAction(props), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -203,7 +204,7 @@ describe('useItemsAction', () => {
     });
 
     it('shows the success toaster correctly when updating a case', async () => {
-      const { result, waitFor } = renderHook(() => useItemsAction(props), {
+      const { result } = renderHook(() => useItemsAction(props), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -229,7 +230,7 @@ describe('useItemsAction', () => {
     it('do not update cases with no changes', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor } = renderHook(() => useItemsAction(props), {
+      const { result } = renderHook(() => useItemsAction(props), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -254,7 +255,7 @@ describe('useItemsAction', () => {
     it('do not update if the selected items are the same but with different order', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor } = renderHook(() => useItemsAction(props), {
+      const { result } = renderHook(() => useItemsAction(props), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -279,7 +280,7 @@ describe('useItemsAction', () => {
     it('do not update if the selected items are the same', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor } = renderHook(() => useItemsAction(props), {
+      const { result } = renderHook(() => useItemsAction(props), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -304,7 +305,7 @@ describe('useItemsAction', () => {
     it('do not update if selecting and unselecting the same item', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor } = renderHook(() => useItemsAction(props), {
+      const { result } = renderHook(() => useItemsAction(props), {
         wrapper: appMockRender.AppWrapper,
       });
 
@@ -329,7 +330,7 @@ describe('useItemsAction', () => {
     it('do not update with empty items and no selection', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor } = renderHook(() => useItemsAction(props), {
+      const { result } = renderHook(() => useItemsAction(props), {
         wrapper: appMockRender.AppWrapper,
       });
 

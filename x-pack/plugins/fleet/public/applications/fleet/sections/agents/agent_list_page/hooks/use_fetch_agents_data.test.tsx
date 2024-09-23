@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 
 import { useStartServices } from '../../../../hooks';
 
@@ -118,7 +118,7 @@ describe('useFetchAgentsData', () => {
 
   it('should fetch agents and agent policies data', async () => {
     const renderer = createFleetTestRendererMock();
-    const { result, waitFor } = renderer.renderHook(() => useFetchAgentsData());
+    const { result } = renderer.renderHook(() => useFetchAgentsData());
     await waitFor(() => null);
 
     expect(result?.current.selectedStatus).toEqual(['healthy', 'unhealthy', 'updating', 'offline']);
@@ -153,7 +153,7 @@ describe('useFetchAgentsData', () => {
 
   it('sync querystring kuery with current search', async () => {
     const renderer = createFleetTestRendererMock();
-    const { result, waitFor } = renderer.renderHook(() => useFetchAgentsData());
+    const { result } = renderer.renderHook(() => useFetchAgentsData());
 
     await waitFor(() => null);
 

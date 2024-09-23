@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 
 import { useUserActionsPagination } from './use_user_actions_pagination';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
@@ -32,7 +33,7 @@ describe('useUserActionsPagination', () => {
   });
 
   it('renders expandable option correctly when user actions are more than 10', async () => {
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useUserActionsPagination({
         userActivityQueryParams,
         caseId: basicCase.id,
@@ -62,7 +63,7 @@ describe('useUserActionsPagination', () => {
   });
 
   it('renders less than 10 user actions correctly', async () => {
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useUserActionsPagination({
         userActivityQueryParams,
         caseId: basicCase.id,
@@ -92,7 +93,7 @@ describe('useUserActionsPagination', () => {
   it('returns loading state correctly', async () => {
     useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
 
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useUserActionsPagination({
         userActivityQueryParams,
         caseId: basicCase.id,
@@ -124,7 +125,7 @@ describe('useUserActionsPagination', () => {
   it('returns empty array when data is undefined', async () => {
     useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: false, data: undefined });
 
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useUserActionsPagination({
         userActivityQueryParams,
         caseId: basicCase.id,
@@ -161,7 +162,7 @@ describe('useUserActionsPagination', () => {
       },
     });
 
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useUserActionsPagination({
         userActivityQueryParams,
         caseId: basicCase.id,

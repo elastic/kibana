@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import * as api from './api';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
@@ -30,7 +31,7 @@ describe('useGetCaseConnectors', () => {
 
   it('calls getCaseConnectors with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCaseConnectors');
-    const { waitFor } = renderHook(() => useGetCaseConnectors(caseId), {
+    renderHook(() => useGetCaseConnectors(caseId), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -50,7 +51,7 @@ describe('useGetCaseConnectors', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { waitFor } = renderHook(() => useGetCaseConnectors(caseId), {
+    renderHook(() => useGetCaseConnectors(caseId), {
       wrapper: appMockRender.AppWrapper,
     });
 

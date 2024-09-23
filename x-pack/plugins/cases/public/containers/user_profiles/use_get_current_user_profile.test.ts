@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { useToasts, useKibana } from '../../common/lib/kibana';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import type { AppMockRenderer } from '../../common/mock';
@@ -36,7 +37,7 @@ describe('useGetCurrentUserProfile', () => {
   it('calls getCurrentUserProfile with correct arguments', async () => {
     const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
 
-    const { waitFor } = renderHook(() => useGetCurrentUserProfile(), {
+    renderHook(() => useGetCurrentUserProfile(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -59,7 +60,7 @@ describe('useGetCurrentUserProfile', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { waitFor } = renderHook(() => useGetCurrentUserProfile(), {
+    renderHook(() => useGetCurrentUserProfile(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -78,7 +79,7 @@ describe('useGetCurrentUserProfile', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { waitFor } = renderHook(() => useGetCurrentUserProfile(), {
+    renderHook(() => useGetCurrentUserProfile(), {
       wrapper: appMockRender.AppWrapper,
     });
 
