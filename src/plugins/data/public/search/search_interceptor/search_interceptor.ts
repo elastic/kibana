@@ -484,10 +484,13 @@ export class SearchInterceptor {
     return responsePromise.then((response) => {
       switch (strategy) {
         case ENHANCED_ES_SEARCH_STRATEGY:
+          if (response.rawResponse) return response;
           const typedResponse = response as unknown as AsyncSearchGetResponse;
           const shimmedResponse = shimHitsTotal(typedResponse.response);
           return {
-            ...typedResponse,
+            id: typedResponse.id,
+            isPartial: typedResponse.is_partial,
+            isRunning: typedResponse.is_running,
             rawResponse: shimmedResponse,
             ...getTotalLoaded(shimmedResponse),
           };

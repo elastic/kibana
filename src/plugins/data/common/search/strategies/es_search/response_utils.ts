@@ -18,6 +18,7 @@ import { sanitizeRequestParams } from '../../sanitize_request_params';
  * @internal
  */
 export function getTotalLoaded(response: estypes.SearchResponse<unknown>) {
+  if (!response._shards) return {};
   const { total, failed, successful } = response._shards;
   const loaded = failed + successful;
   return { total, loaded };

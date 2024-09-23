@@ -10,7 +10,6 @@
 import { first } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { PassThrough } from 'stream';
 import { IncomingMessage } from 'http';
 import { reportSearchError } from '../report_search_error';
 import { getRequestAbortedSignal } from '../../lib';
@@ -77,9 +76,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
             .toPromise();
 
           if (response && (response.rawResponse as unknown as IncomingMessage).pipe) {
-            const stream = new PassThrough();
-            (response.rawResponse as unknown as IncomingMessage).pipe(stream);
-            return res.ok({ body: stream });
+            return res.ok({ body: response.rawResponse });
           } else {
             return res.ok({ body: response });
           }
