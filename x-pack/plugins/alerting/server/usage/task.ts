@@ -30,7 +30,7 @@ import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
 export const TASK_ID = `Alerting-${TELEMETRY_TASK_TYPE}`;
-export const SCHEDULE: IntervalSchedule = { interval: '1m' };
+export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 
 export function initializeAlertingTelemetry(
   logger: Logger,
