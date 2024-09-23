@@ -37,6 +37,10 @@ export interface Props {
   mapCenter?: MapCenterAndZoom;
   getTooltipRenderer?: () => RenderToolTipContent;
   onApiAvailable?: (api: MapApi) => void;
+  /*
+   * Set to false to exclude sharing attributes 'data-*'.
+   */
+  isSharable?: boolean;
 }
 
 export function MapRenderer(props: Props) {
@@ -64,8 +68,8 @@ export function MapRenderer(props: Props) {
         getParentApi={() => ({
           type: MAP_RENDERER_TYPE,
           getTooltipRenderer: props.getTooltipRenderer,
-          hideFilterActions:
-            typeof props.hideFilterActions === 'boolean' ? props.hideFilterActions : false,
+          hideFilterActions: props.hideFilterActions,
+          isSharable: props.isSharable,
           getSerializedStateForChild: () => {
             return {
               rawState: {
