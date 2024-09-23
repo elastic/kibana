@@ -1142,6 +1142,47 @@ export default ({ getService }: FtrProviderContext): void => {
               ],
             });
           });
+
+          it('should import rules and update references correctly after overwriting an existing connector', async () => {
+            const defaultSpaceConnectorId = '8fbf6d10-a21a-11ed-84a4-a33e4c2558c9';
+
+            const spaceId = '4567-space';
+            const buffer = getImportRuleWithConnectorsBuffer(defaultSpaceConnectorId);
+
+            await supertest
+              .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .set('elastic-api-version', '2023-10-31')
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
+
+            await supertest
+              .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .set('elastic-api-version', '2023-10-31')
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
+
+            const { body: overwriteResponseBody } = await supertest
+              .post(
+                `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true&overwrite_action_connectors=true`
+              )
+              .set('kbn-xsrf', 'true')
+              .set('elastic-api-version', '2023-10-31')
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
+
+            expect(overwriteResponseBody).toMatchObject({
+              success: true,
+              success_count: 1,
+              rules_count: 1,
+              errors: [],
+              action_connectors_success: true,
+              action_connectors_success_count: 1,
+              action_connectors_warnings: [],
+              action_connectors_errors: [],
+            });
+          });
         });
       });
 

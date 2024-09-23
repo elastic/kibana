@@ -13,10 +13,7 @@ import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/appl
 
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import {
-  checkIfActionsHaveMissingConnectors,
   filterExistingActionConnectors,
-  getActionConnectorRules,
-  handleActionsHaveNoConnectors,
   mapSOErrorToRuleError,
   returnErroredImportResult,
 } from './utils';
@@ -33,41 +30,18 @@ export const importRuleActionConnectors = async ({
   actionConnectors,
   actionsClient,
   actionsImporter,
-  rules,
   overwrite,
 }: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> => {
   try {
-    const connectorIdToRuleIdsMap = getActionConnectorRules(rules);
-    const referencedConnectorIds = await filterOutPreconfiguredConnectors(
-      actionsClient,
-      Object.keys(connectorIdToRuleIdsMap)
-    );
-
-    if (!referencedConnectorIds.length) {
-      return NO_ACTION_RESULT;
-    }
-
-    if (overwrite && !actionConnectors.length) {
-      return handleActionsHaveNoConnectors(referencedConnectorIds, connectorIdToRuleIdsMap);
-    }
-
     let actionConnectorsToImport: SavedObject[] = actionConnectors;
 
     if (!overwrite) {
-      const newIdsToAdd = await filterExistingActionConnectors(
+      actionConnectorsToImport = await filterExistingActionConnectors(
         actionsClient,
-        referencedConnectorIds
+        actionConnectors
       );
-
-      const foundMissingConnectors = checkIfActionsHaveMissingConnectors(
-        actionConnectors,
-        newIdsToAdd,
-        connectorIdToRuleIdsMap
-      );
-      if (foundMissingConnectors) return foundMissingConnectors;
-      // filter out existing connectors
-      actionConnectorsToImport = actionConnectors.filter(({ id }) => newIdsToAdd.includes(id));
     }
+
     if (!actionConnectorsToImport.length) {
       return NO_ACTION_RESULT;
     }

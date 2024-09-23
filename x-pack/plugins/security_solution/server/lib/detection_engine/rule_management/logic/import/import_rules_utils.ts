@@ -31,12 +31,11 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param ruleChunks {array} - rules being imported
  * @param rulesResponseAcc {array} - the accumulation of success and
  * error messages gathered through the rules import logic
- * @param mlAuthz {object}
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
  * @param detectionRulesClient {object}
- * @param existingLists {object} - all exception lists referenced by
- * rules that were found to exist
+ * @param allowMissingConnectorSecrets {boolean}
+ * @param savedObjecsClient {object}
  * @returns {Promise} an array of error and success messages from import
  */
 export const importRules = async ({
