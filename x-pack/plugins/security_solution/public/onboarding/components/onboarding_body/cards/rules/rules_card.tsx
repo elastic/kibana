@@ -8,18 +8,18 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
 import { CardCallOut } from '../common/card_callout';
-import { CardLinkButton } from '../common/card_link_button';
-import dashboardsImageSrc from './images/dashboards.png';
+import rulesImageSrc from './images/rules.png';
 import * as i18n from './translations';
 
-export const DashboardsCard: OnboardingCardComponent = ({
+export const RulesCard: OnboardingCardComponent = ({
   isCardComplete,
-  setComplete,
   setExpandedCardId,
+  setComplete,
 }) => {
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
@@ -31,10 +31,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
   }, [setExpandedCardId]);
 
   return (
-    <OnboardingCardContentImagePanel
-      imageSrc={dashboardsImageSrc}
-      imageAlt={i18n.DASHBOARDS_CARD_TITLE}
-    >
+    <OnboardingCardContentImagePanel imageSrc={rulesImageSrc} imageAlt={i18n.RULES_CARD_TITLE}>
       <EuiFlexGroup
         direction="column"
         gutterSize="xl"
@@ -43,7 +40,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
       >
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            {i18n.DASHBOARDS_CARD_DESCRIPTION}
+            {i18n.RULES_CARD_DESCRIPTION}
           </EuiText>
           {!isIntegrationsCardComplete && (
             <>
@@ -51,11 +48,11 @@ export const DashboardsCard: OnboardingCardComponent = ({
               <CardCallOut
                 color="primary"
                 icon="iInCircle"
-                text={i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_TEXT}
+                text={i18n.RULES_CARD_CALLOUT_INTEGRATIONS_TEXT}
                 action={
                   <EuiLink onClick={expandIntegrationsCard}>
                     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-                      <EuiFlexItem>{i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_BUTTON}</EuiFlexItem>
+                      <EuiFlexItem>{i18n.RULES_CARD_CALLOUT_INTEGRATIONS_BUTTON}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiIcon type="arrowRight" color="primary" size="s" />
                       </EuiFlexItem>
@@ -67,16 +64,13 @@ export const DashboardsCard: OnboardingCardComponent = ({
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <CardLinkButton
-            onClick={() => setComplete(true)}
-            linkId="goToDashboardsButton"
-            cardId={OnboardingCardId.dashboards}
-            deepLinkId={SecurityPageName.dashboards}
+          <SecuritySolutionLinkButton
+            deepLinkId={SecurityPageName.rules}
             fill
             isDisabled={!isIntegrationsCardComplete}
           >
-            {i18n.DASHBOARDS_CARD_GO_TO_DASHBOARDS_BUTTON}
-          </CardLinkButton>
+            {i18n.RULES_CARD_ADD_RULES_BUTTON}
+          </SecuritySolutionLinkButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </OnboardingCardContentImagePanel>
@@ -84,4 +78,4 @@ export const DashboardsCard: OnboardingCardComponent = ({
 };
 
 // eslint-disable-next-line import/no-default-export
-export default DashboardsCard;
+export default RulesCard;

@@ -13,7 +13,7 @@ export const useCardContentImagePanelStyles = () => {
   const shadowStyles = useEuiShadow('m');
   return css`
     .cardSpacer {
-      width: 10%;
+      width: 8%;
     }
     .cardImage {
       width: 50%;
