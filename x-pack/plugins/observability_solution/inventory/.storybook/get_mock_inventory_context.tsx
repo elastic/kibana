@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { EntityManagerPublicPluginStart } from '@kbn/entityManager-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -17,6 +18,7 @@ export function getMockInventoryContext(): InventoryKibanaContext {
 
   return {
     ...coreStart,
+    entityManager: {} as unknown as EntityManagerPublicPluginStart,
     observabilityShared: {} as unknown as ObservabilitySharedPluginStart,
     inference: {} as unknown as InferencePublicStart,
     share: {} as unknown as SharePluginStart,
