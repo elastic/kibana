@@ -27,7 +27,6 @@ export default function ({ getService }: FtrProviderContext) {
   const platformSecurityUtils = getService('platformSecurityUtils');
   const roleScopedSupertest = getService('roleScopedSupertest');
   const svlCommonApi = getService('svlCommonApi');
-  const samlAuth = getService('samlAuth');
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
   const es = getService('es');

@@ -13,7 +13,7 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetSpaceApi(deps: ExternalRouteDeps) {
-  const { router, getSpacesService, isServerless } = deps;
+  const { router, getSpacesService } = deps;
 
   router.get(
     {

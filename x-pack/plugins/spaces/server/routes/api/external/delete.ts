@@ -15,7 +15,7 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
-  const { router, log, getSpacesService, isServerless } = deps;
+  const { router, log, getSpacesService } = deps;
 
   router.delete(
     {
