@@ -640,6 +640,16 @@ export function findPreviousWord(text: string) {
   return words[words.length - 2];
 }
 
+/**
+ * Returns the word at the end of the text if there is one.
+ * @param text
+ * @returns
+ */
+export function findFinalWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 1];
+}
+
 export function shouldBeQuotedSource(text: string) {
   // Based on lexer `fragment UNQUOTED_SOURCE_PART`
   return /[:"=|,[\]\/ \t\r\n]/.test(text);

@@ -241,6 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
             max_attempts: 2,
+            labels: {},
           });
         }
       } finally {
@@ -425,6 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv6: true,
             ipv4: true,
             max_attempts: 2,
+            labels: {},
           });
         }
       } finally {
@@ -542,6 +544,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv4: true,
             params: '',
             max_attempts: 2,
+            labels: {},
           });
         }
       } finally {
@@ -656,6 +659,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv6: true,
             params: '',
             max_attempts: 2,
+            labels: {},
           });
         }
       } finally {
