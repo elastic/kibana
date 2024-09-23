@@ -142,6 +142,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('should send request with mixed case methods', async () => {
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText('Get /');
+      await PageObjects.console.clickPlay();
+      await retry.try(async () => {
+        const status = await PageObjects.console.getResponseStatus();
+        expect(status).to.eql(200);
+      });
+    });
+
     describe('with kbn: prefix in request', () => {
       before(async () => {
         await PageObjects.console.clearEditorText();
