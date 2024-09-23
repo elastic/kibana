@@ -24,7 +24,7 @@ export function ResizableButton({
 }) {
   return (
     <EuiResizableButton
-      data-test-subj="TextBasedLangEditor-resize"
+      data-test-subj="ESQLEditor-resize"
       onMouseDown={onMouseDownResizeHandler}
       onKeyDown={onKeyDownResizeHandler}
       onTouchStart={onMouseDownResizeHandler}

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { TextBasedLanguagesEditorProps } from './src/types';
-export { fetchFieldsFromESQL } from './src/fetch_fields_from_esql';
-import { TextBasedLanguagesEditor } from './src/text_based_languages_editor';
-
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default TextBasedLanguagesEditor;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-esql-editor'],
+  setupFilesAfterEnv: ['<rootDir>/packages/kbn-esql-editor/setup_tests.ts'],
+};
