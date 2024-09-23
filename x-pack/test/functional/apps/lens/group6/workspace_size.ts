@@ -268,15 +268,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await assertWorkspaceDimensions('600px', '375px');
     });
 
-    // Fails in chrome 128+: https://github.com/elastic/kibana-operations/issues/199
-    it.skip('gauge size (absolute pixels) - major arc', async () => {
+    it('gauge size (absolute pixels) - major arc', async () => {
       await lens.openVisualOptions();
       await lens.setGaugeShape('Major arc');
       await assertWorkspaceDimensions('600px', '430px');
     });
 
-    // Fails in chrome 129+: https://github.com/elastic/kibana-operations/issues/199
-    it.skip('gauge size (absolute pixels) - circle', async () => {
+    it('gauge size (absolute pixels) - circle', async () => {
       await lens.openVisualOptions();
       await lens.setGaugeShape('Circle');
       await assertWorkspaceDimensions('600px', '430px');
