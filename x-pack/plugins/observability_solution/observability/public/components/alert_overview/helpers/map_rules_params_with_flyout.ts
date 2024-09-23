@@ -120,12 +120,20 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case METRIC_THRESHOLD_ALERT_TYPE_ID:
       return observedValues.map((observedValue, metricIndex) => {
-        const criteria = ruleCriteria[metricIndex] as BaseMetricExpressionParams & {
-          metric: string;
-          customMetrics: Array<{
-            field?: string;
-          }>;
-        };
+        const criteria = Array.isArray(ruleCriteria)
+          ? (ruleCriteria[metricIndex] as BaseMetricExpressionParams & {
+              metric: string;
+              customMetrics: Array<{
+                field?: string;
+              }>;
+            })
+          : (ruleCriteria as BaseMetricExpressionParams & {
+              metric: string;
+              customMetrics: Array<{
+                field?: string;
+              }>;
+            });
+
         let fields: string[] = [];
         const metric = criteria.metric;
         const customMetric = criteria.customMetrics;
@@ -159,14 +167,21 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID:
       return observedValues.map((observedValue, metricIndex) => {
-        const { threshold, customMetric, metric, comparator } = ruleCriteria[
-          metricIndex
-        ] as BaseMetricExpressionParams & {
-          metric: string;
-          customMetric: {
-            field: string;
-          };
-        };
+        const criteria = Array.isArray(ruleCriteria)
+          ? (ruleCriteria[metricIndex] as BaseMetricExpressionParams & {
+              metric: string;
+              customMetric: {
+                field: string;
+              };
+            })
+          : (ruleCriteria as BaseMetricExpressionParams & {
+              metric: string;
+              customMetric: {
+                field: string;
+              };
+            });
+
+        const { threshold, customMetric, metric, comparator } = criteria;
         const metricField = customMetric?.field || metric;
         const thresholdFormatted = threshold.map((thresholdToFormat) => {
           if (
