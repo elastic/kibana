@@ -84,7 +84,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
   private readonly executionContext: ExecutionContextStart;
-  private readonly pollIntervalConfiguration$: Observable<number>;
 
   private logger: Logger;
   public pool: TaskPool;
@@ -95,6 +94,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
+  private currentPollInterval: number;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -123,7 +123,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.config = config;
-    this.pollIntervalConfiguration$ = pollIntervalConfiguration$;
+    this.currentPollInterval = config.poll_interval;
+    pollIntervalConfiguration$.subscribe((pollInterval) => {
+      this.currentPollInterval = pollInterval;
+    });
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -225,7 +228,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       config: this.config,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       strategy: this.config.claim_strategy,
-      pollIntervalConfiguration$: this.pollIntervalConfiguration$,
+      getPollInterval: () => this.currentPollInterval,
     });
   };
 
