@@ -7,7 +7,7 @@
 
 import { Filter } from '@kbn/es-query';
 import { useEffect, useReducer, useCallback } from 'react';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-plugin/public';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-ui-actions';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 interface ReducerState {

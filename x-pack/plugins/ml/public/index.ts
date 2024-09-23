@@ -35,8 +35,6 @@ export type { DataRecognizerConfigResponse } from '../common/types/modules';
 
 export type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './embeddables';
 
-export { CONTROLLED_BY_SWIM_LANE_FILTER } from './ui_actions/constants';
-
 export type { MlLocator } from './locator';
 export { useMlHref, ML_PAGES, MlLocatorDefinition } from './locator';
 

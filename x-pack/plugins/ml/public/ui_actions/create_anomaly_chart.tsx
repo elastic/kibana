@@ -10,9 +10,9 @@ import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables';
 import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app';
 import type { AnomalyChartsEmbeddableApi } from '../embeddables';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
 import type { MlCoreSetup } from '../plugin';
 
 export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
