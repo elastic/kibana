@@ -11,7 +11,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { EntityDefinition } from '@kbn/entities-schema';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { EntityManagerServerSetup } from '../../../types';
 import { getClientsFromAPIKey } from '../../utils';
 import { readEntityDiscoveryAPIKey } from '../../auth';
@@ -54,7 +54,7 @@ export class EntityMergeTask {
   }
 
   private async runTask(taskInstance: ConcreteTaskInstance) {
-    let latestEventIngested: string | undefined;
+    let latestEventIngested: Moment | undefined;
     const { targetIndex, apiKeyId, definitionId } = taskInstance.params;
     const { lastRunAt } = taskInstance.state;
     const apiKey = await readEntityDiscoveryAPIKey(this.server, apiKeyId);
@@ -68,22 +68,21 @@ export class EntityMergeTask {
     const start = Date.now();
     let entitiesProcessed = 0;
     for await (const hits of scrollEntities(esClient.asCurrentUser, lastRunAt, definitionId)) {
+      const now = moment();
       const body = hits.reduce((acc, { _source: entityDoc }) => {
         if (entityDoc) {
+          const eventIngested = entityDoc.event.ingested;
           acc.push({ update: { _index: targetIndex, _id: entityDoc.entity.id } });
           acc.push({
             doc: {
               ...(entityDoc as object),
-              event: { ...entityDoc.event, ingested: moment().toISOString() },
+              event: { ...entityDoc.event, ingested: now.toISOString() },
             },
             doc_as_upsert: true,
           });
-          if (
-            entityDoc?.event.ingested &&
-            latestEventIngested &&
-            moment(latestEventIngested).isBefore(moment(entityDoc?.event?.ingested))
-          ) {
-            latestEventIngested = entityDoc.event.ingested;
+
+          if (!latestEventIngested || latestEventIngested.isBefore(eventIngested)) {
+            latestEventIngested = moment(eventIngested);
           }
         }
 
@@ -93,11 +92,15 @@ export class EntityMergeTask {
       entitiesProcessed += hits.length;
     }
     const end = Date.now();
-    this.logger.info(`Finished in ${end - start}ms – Processed ${entitiesProcessed} entities`);
+    this.logger.info(
+      `Finished in ${
+        end - start
+      }ms – Processed ${entitiesProcessed} entities, last event ingested at ${latestEventIngested?.toISOString()}`
+    );
 
     return {
       state: {
-        lastRunAt: latestEventIngested,
+        lastRunAt: latestEventIngested?.toISOString(),
       },
     };
   }
