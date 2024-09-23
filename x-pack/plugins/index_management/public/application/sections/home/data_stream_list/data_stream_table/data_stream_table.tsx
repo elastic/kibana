@@ -32,6 +32,8 @@ import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { ConditionalWrap } from '../data_stream_detail_panel';
 import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
+import { FilterListButton, Filters } from '../../components';
+import { type DataStreamFilterName } from '../data_stream_list';
 
 interface TableDataStream extends DataStream {
   isDataStreamFullyManagedByILM: boolean;
@@ -42,7 +44,9 @@ interface Props {
   reload: UseRequestResponse['resendRequest'];
   history: ScopedHistory;
   includeStats: boolean;
-  filters?: string;
+  filters: string;
+  viewFilters: Filters<DataStreamFilterName>;
+  onViewFilterChange: (newFilter: Filters<DataStreamFilterName>) => void;
 }
 
 const INFINITE_AS_ICON = true;
@@ -54,6 +58,8 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   history,
   filters,
   includeStats,
+  onViewFilterChange,
+  viewFilters,
 }) => {
   const [selection, setSelection] = useState<DataStream[]>([]);
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
@@ -282,6 +288,10 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         </EuiButton>
       ) : undefined,
     toolsRight: [
+      <FilterListButton<DataStreamFilterName>
+        filters={viewFilters}
+        onChange={onViewFilterChange}
+      />,
       <EuiButton
         color="success"
         iconType="refresh"
