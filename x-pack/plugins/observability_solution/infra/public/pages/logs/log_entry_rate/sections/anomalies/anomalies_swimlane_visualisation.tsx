@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-plugin/public';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables';
 import { MissingEmbeddableFactoryCallout } from '../../../../../components/missing_embeddable_factory_callout';
 import { partitionField } from '../../../../../../common/infra_ml';
 import { TimeRange } from '../../../../../../common/time/time_range';

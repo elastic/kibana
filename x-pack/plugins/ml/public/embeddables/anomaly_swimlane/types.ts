@@ -15,11 +15,11 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { apiIsOfType } from '@kbn/presentation-publishing';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import type {
   AnomalySwimlaneEmbeddableCustomInput,
   AnomalySwimlaneEmbeddableUserInput,

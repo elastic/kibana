@@ -25,12 +25,12 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables';
 import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
 import { useMlKibana } from '../../../contexts/kibana';
 import { useCasesModal } from '../../../contexts/kibana/use_cases_modal';
 import { getDefaultSingleMetricViewerPanelTitle } from '../../../../embeddables/single_metric_viewer/get_default_panel_title';
 import type { MlEntity } from '../../../../embeddables';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../../../../embeddables/constants';
 import type { SingleMetricViewerEmbeddableState } from '../../../../embeddables/types';
 
 interface Props {

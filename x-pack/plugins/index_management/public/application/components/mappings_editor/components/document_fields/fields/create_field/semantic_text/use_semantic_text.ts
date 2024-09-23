@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect } from 'react';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ElserModels } from '@kbn/ml-trained-models-utils';

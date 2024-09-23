@@ -13,7 +13,7 @@ import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/moc
 import { render, waitFor, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables';
 import { getAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
 import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';

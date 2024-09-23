@@ -1212,6 +1212,8 @@
       "@kbn/ml-date-picker/*": ["x-pack/packages/ml/date_picker/*"],
       "@kbn/ml-date-utils": ["x-pack/packages/ml/date_utils"],
       "@kbn/ml-date-utils/*": ["x-pack/packages/ml/date_utils/*"],
+      "@kbn/ml-embeddables": ["x-pack/packages/ml/embeddables"],
+      "@kbn/ml-embeddables/*": ["x-pack/packages/ml/embeddables/*"],
       "@kbn/ml-error-utils": ["x-pack/packages/ml/error_utils"],
       "@kbn/ml-error-utils/*": ["x-pack/packages/ml/error_utils/*"],
       "@kbn/ml-field-stats-flyout": ["x-pack/packages/ml/field_stats_flyout"],

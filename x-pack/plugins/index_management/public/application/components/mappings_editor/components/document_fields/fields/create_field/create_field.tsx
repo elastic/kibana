@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
