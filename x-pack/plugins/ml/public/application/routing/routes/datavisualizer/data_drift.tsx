@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
+import { ML_PAGES } from '@kbn/ml-locator';
 import {
   DataDriftIndexOrSearchRedirect,
   DataDriftIndexPatternsPicker,
@@ -16,7 +17,6 @@ import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../..';
 import type { PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import {
   breadcrumbOnClickFactory,
   DATA_DRIFT_BREADCRUMB,

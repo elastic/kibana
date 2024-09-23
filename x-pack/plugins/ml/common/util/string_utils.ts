@@ -23,11 +23,3 @@ export function getMedianStringLength(strings: string[]) {
   const sortedStringLengths = strings.map((s) => s.length).sort((a, b) => a - b);
   return sortedStringLengths[Math.floor(sortedStringLengths.length / 2)] || 0;
 }
-
-export function getGroupQueryText(groupIds: string[]): string {
-  return `groups:(${groupIds.join(' or ')})`;
-}
-
-export function getJobQueryText(jobIds: string | string[]): string {
-  return Array.isArray(jobIds) ? `id:(${jobIds.join(' OR ')})` : `id:${jobIds}`;
-}

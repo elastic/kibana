@@ -9,7 +9,7 @@ import React, { useMemo, useCallback, useState } from 'react';
 import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
-import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { useMlHref, ML_PAGES } from '@kbn/ml-locator';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
 import {
@@ -122,7 +122,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
     },
   });
 
-  const viewAnomalyInMachineLearningLink = useMlHref(ml, http.basePath.get(), {
+  const viewAnomalyInMachineLearningLink = useMlHref(ml?.locator, http.basePath.get(), {
     page: ML_PAGES.SINGLE_METRIC_VIEWER,
     pageState: {
       jobIds: [anomaly.jobId],

@@ -6,8 +6,8 @@
  */
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { ML_PAGES } from '../../../common/constants/locator';
-import type { ChangePointDetectionUrlState } from '../../../common/types/locator';
+import { ML_PAGES } from '../constants';
+import type { ChangePointDetectionUrlState } from '../types';
 
 /**
  * Creates URL to the Change Point Detection page

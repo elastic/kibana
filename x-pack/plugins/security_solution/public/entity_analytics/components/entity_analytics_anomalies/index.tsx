@@ -14,7 +14,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
+import { ML_PAGES, useMlHref } from '@kbn/ml-locator';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HeaderSection } from '../../../common/components/header_section';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
@@ -55,7 +56,7 @@ export const EntityAnalyticsAnomalies = () => {
     services: { ml, http, docLinks },
   } = useKibana();
 
-  const jobsUrl = useMlHref(ml, http.basePath.get(), {
+  const jobsUrl = useMlHref(ml?.locator, http.basePath.get(), {
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
   });
 

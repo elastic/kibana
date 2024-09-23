@@ -16,7 +16,7 @@ import { FlowTarget } from '../../../../../common/search_strategy';
 import { fireEvent, render } from '@testing-library/react';
 import { mockAnomalies } from '../mock';
 import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
-import { useMlHref } from '@kbn/ml-plugin/public';
+import { useMlHref } from '@kbn/ml-locator';
 
 jest.mock('../../../containers/query_toggle');
 jest.mock('../anomaly/use_anomalies_table_data');

@@ -21,6 +21,7 @@ import {
   SPARSE_DATA_AGGREGATIONS,
 } from '@kbn/ml-anomaly-utils';
 import { cloneDeep } from 'lodash';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { jobCloningService } from '../../../../../services/job_cloning_service';
 import type {
   Job,
@@ -29,7 +30,6 @@ import type {
 } from '../../../../../../../common/types/anomaly_detection_jobs';
 import type { NewJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import type { NavigateToPath } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import type { JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 

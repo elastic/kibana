@@ -25,7 +25,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { MlNodeAvailableWarningShared } from '../../node_available_warning';
 

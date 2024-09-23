@@ -7,7 +7,7 @@
 
 import React, { ReactNode } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { useMlHref, ML_PAGES } from '@kbn/ml-locator';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { DEFAULT_REFRESH_INTERVAL } from '../../date_picker/apm_date_picker';
@@ -45,7 +45,7 @@ export function useExplorerHref({ jobId }: { jobId: string }) {
     rangeTo = 'now',
   } = urlParams;
 
-  const href = useMlHref(ml, core.http.basePath.get(), {
+  const href = useMlHref(ml?.locator, core.http.basePath.get(), {
     page: ML_PAGES.ANOMALY_EXPLORER,
     pageState: {
       jobIds: [jobId],

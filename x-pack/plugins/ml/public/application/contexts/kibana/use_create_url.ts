@@ -8,9 +8,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { LocatorGetUrlParams } from '@kbn/share-plugin/common/url_service';
 import { useUrlState } from '@kbn/ml-url-state';
+import { ML_APP_LOCATOR } from '@kbn/ml-locator';
+import type { MlLocatorParams } from '@kbn/ml-locator';
 import { useMlKibana } from './kibana_context';
-import { ML_APP_LOCATOR } from '../../../../common/constants/locator';
-import type { MlLocatorParams } from '../../../../common/types/locator';
 
 export const useMlLocator = () => {
   const {

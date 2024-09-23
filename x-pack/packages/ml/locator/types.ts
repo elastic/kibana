@@ -12,10 +12,15 @@ import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-u
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import type { JobId } from './anomaly_detection_jobs/job';
-import type { ML_PAGES } from '../constants/locator';
+import type { MlPages, ML_PAGES } from './constants';
+
+type JobId = string;
 
 type OptionalPageState = object | undefined;
+
+export type AppPageState<T> = {
+  [key in MlPages]?: Partial<T>;
+};
 
 export type MLPageState<PageType, PageState> = PageState extends OptionalPageState
   ? { page: PageType; pageState?: PageState }

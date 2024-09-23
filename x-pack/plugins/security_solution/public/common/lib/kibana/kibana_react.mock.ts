@@ -36,7 +36,7 @@ import {
 } from '../../../../common/constants';
 import type { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
-import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
+import { MlLocatorDefinition } from '@kbn/ml-locator';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';

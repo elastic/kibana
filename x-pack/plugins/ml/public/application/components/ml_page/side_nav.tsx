@@ -11,12 +11,12 @@ import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { useUrlState } from '@kbn/ml-url-state';
+import type { MlLocatorParams } from '@kbn/ml-locator';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { NotificationsIndicator } from './notifications_indicator';
-import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
-import { ML_PAGES } from '../../../../common/constants/locator';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 export interface Tab {

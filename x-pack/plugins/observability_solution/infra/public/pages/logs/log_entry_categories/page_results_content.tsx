@@ -13,7 +13,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
+import { ML_PAGES, useMlHref } from '@kbn/ml-locator';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { logEntryCategoriesJobType } from '../../../../common/log_analysis';
@@ -196,7 +197,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     autoRefresh.isPaused ? null : autoRefresh.interval
   );
 
-  const analyzeInMlLink = useMlHref(ml, http.basePath.get(), {
+  const analyzeInMlLink = useMlHref(ml?.locator, http.basePath.get(), {
     page: ML_PAGES.ANOMALY_EXPLORER,
     pageState: {
       jobIds: [jobIds[logEntryCategoriesJobType]],

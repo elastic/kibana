@@ -10,9 +10,9 @@ import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay, filter } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { AnomalyExplorerFilterUrlState } from '@kbn/ml-locator';
 import type { ExplorerJob } from './explorer_utils';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
-import type { AnomalyExplorerFilterUrlState } from '../../../common/types/locator';
 import type { KQLFilterSettings } from './components/explorer_query_bar/explorer_query_bar';
 import { StateService } from '../services/state_service';
 

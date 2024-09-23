@@ -35,8 +35,5 @@ export type { DataRecognizerConfigResponse } from '../common/types/modules';
 
 export type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './embeddables';
 
-export type { MlLocator } from './locator';
-export { useMlHref, ML_PAGES, MlLocatorDefinition } from './locator';
-
 export { MLJobsAwaitingNodeWarning } from './application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared';
 export { MlNodeAvailableWarningShared } from './application/components/node_available_warning';

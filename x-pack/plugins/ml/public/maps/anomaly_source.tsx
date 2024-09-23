@@ -26,12 +26,12 @@ import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/publ
 import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
 import type { DataRequest } from '@kbn/maps-plugin/public';
 import type { GetFeatureActionsArgs, IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
+import { ML_PAGES } from '@kbn/ml-locator';
 import {
   AnomalySourceField,
   AnomalySourceTooltipProperty,
   ANOMALY_SOURCE_FIELDS,
 } from './anomaly_source_field';
-import { ML_PAGES } from '../../common/constants/locator';
 import type { MlAnomalyLayersType } from './util';
 import { getResultsForJobId, ML_ANOMALY_LAYERS } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';

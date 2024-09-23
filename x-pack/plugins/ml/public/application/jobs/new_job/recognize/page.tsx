@@ -24,6 +24,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { ML_PAGES } from '@kbn/ml-locator';
 import type { Module } from '../../../../../common/types/modules';
 import { useDataSource } from '../../../contexts/ml';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
@@ -43,7 +44,6 @@ import type { JobSettingsFormValues } from './components/job_settings_form';
 import { JobSettingsForm } from './components/job_settings_form';
 import type { TimeRange } from '../common/components';
 import type { JobId } from '../../../../../common/types/anomaly_detection_jobs';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { MlPageHeader } from '../../../components/page_header';
 

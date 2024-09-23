@@ -11,9 +11,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import type { EuiTableFieldDataColumnType, EuiTableActionsColumnType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
+import { ML_PAGES } from '@kbn/ml-locator';
 
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
-import { ML_PAGES } from '../../../../common/constants/locator';
 import type {
   RecognizeModuleResult,
   RecognizeModuleResultDataView,

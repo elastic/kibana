@@ -22,10 +22,10 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_PAGES } from '@kbn/ml-locator';
 import type { AnomalyChartsEmbeddableState } from '..';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 import { JobSelectorControl } from '../../alerting/job_selector';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { getDefaultExplorerChartsPanelTitle } from './utils';
 import { useMlLink } from '../../application/contexts/kibana';
 import { getJobSelectionErrors } from '../utils';

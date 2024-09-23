@@ -16,7 +16,7 @@ import type {
   VectorLayerDescriptor,
   VectorStylePropertiesDescriptor,
 } from '@kbn/maps-plugin/common/descriptor_types';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-locator';
 import { CUSTOM_COLOR_RAMP } from './util';
 import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
 import type { AnomalySourceDescriptor } from './anomaly_source';

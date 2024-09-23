@@ -6,21 +6,23 @@
  */
 
 import type { DependencyList } from 'react';
-import type { MlPluginSetup } from '..';
-import type { MlLocatorParams } from '../../common/types/locator';
+
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+
+import type { MlLocatorParams } from './types';
 
 /**
  * Provides a URL to ML plugin page
  * TODO remove basePath parameter
  */
 export const useMlHref = (
-  ml: MlPluginSetup | undefined,
+  mlLocator: LocatorPublic<MlLocatorParams> | undefined,
   basePath: string | undefined,
   params: MlLocatorParams,
   dependencies?: DependencyList
 ) => {
-  return ml && ml.locator
-    ? ml.locator.useUrl(params, undefined, dependencies)
+  return mlLocator
+    ? mlLocator.useUrl(params, undefined, dependencies)
     : basePath !== undefined
     ? `${basePath}/app/ml/${params.page}`
     : '';

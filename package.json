@@ -652,6 +652,7 @@
     "@kbn/ml-is-populated-object": "link:x-pack/packages/ml/is_populated_object",
     "@kbn/ml-kibana-theme": "link:x-pack/packages/ml/kibana_theme",
     "@kbn/ml-local-storage": "link:x-pack/packages/ml/local_storage",
+    "@kbn/ml-locator": "link:x-pack/packages/ml/locator",
     "@kbn/ml-nested-property": "link:x-pack/packages/ml/nested_property",
     "@kbn/ml-number-utils": "link:x-pack/packages/ml/number_utils",
     "@kbn/ml-parse-interval": "link:x-pack/packages/ml/parse_interval",

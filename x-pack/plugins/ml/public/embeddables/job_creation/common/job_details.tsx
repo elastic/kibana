@@ -32,6 +32,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
+import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-locator';
 
 import type { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
@@ -39,7 +40,6 @@ import type { CreateState } from '../../../application/jobs/new_job/job_from_das
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../common/constants/new_job';
 import { basicJobValidation } from '../../../../common/util/job_utils';
 import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { useMlFromLensKibanaContext } from './context';
 
 export interface CreateADJobParams {

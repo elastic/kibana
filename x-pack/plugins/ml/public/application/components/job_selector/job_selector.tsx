@@ -20,7 +20,7 @@ import { useUrlState } from '@kbn/ml-url-state';
 import './_index.scss';
 
 import { useStorage } from '@kbn/ml-local-storage';
-import { ML_PAGES } from '../../../locator';
+import { ML_PAGES } from '@kbn/ml-locator';
 import type { Dictionary } from '../../../../common/types/common';
 import { IdBadges } from './id_badges';
 import type { JobSelectorFlyoutProps } from './job_selector_flyout';

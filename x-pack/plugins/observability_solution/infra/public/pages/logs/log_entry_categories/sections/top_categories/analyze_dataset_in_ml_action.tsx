@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { useMlHref, ML_PAGES } from '@kbn/ml-locator';
 import { shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { TimeRange } from '../../../../../../common/time/time_range';
@@ -26,7 +26,7 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   } = useKibanaContextForPlugin();
 
   const viewAnomalyInMachineLearningLink = useMlHref(
-    ml,
+    ml?.locator,
     http.basePath.get(),
     {
       page: ML_PAGES.SINGLE_METRIC_VIEWER,

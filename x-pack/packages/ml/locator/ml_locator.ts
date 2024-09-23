@@ -13,8 +13,8 @@ import type {
   MlLocatorParams,
   MlLocator,
   ChangePointDetectionQueryState,
-} from '../../common/types/locator';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+} from './types';
+import { ML_APP_LOCATOR, ML_PAGES } from './constants';
 import {
   formatAnomalyDetectionCreateJobSelectIndex,
   formatAnomalyDetectionCreateJobSelectType,

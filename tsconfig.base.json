@@ -1228,6 +1228,8 @@
       "@kbn/ml-kibana-theme/*": ["x-pack/packages/ml/kibana_theme/*"],
       "@kbn/ml-local-storage": ["x-pack/packages/ml/local_storage"],
       "@kbn/ml-local-storage/*": ["x-pack/packages/ml/local_storage/*"],
+      "@kbn/ml-locator": ["x-pack/packages/ml/locator"],
+      "@kbn/ml-locator/*": ["x-pack/packages/ml/locator/*"],
       "@kbn/ml-nested-property": ["x-pack/packages/ml/nested_property"],
       "@kbn/ml-nested-property/*": ["x-pack/packages/ml/nested_property/*"],
       "@kbn/ml-number-utils": ["x-pack/packages/ml/number_utils"],

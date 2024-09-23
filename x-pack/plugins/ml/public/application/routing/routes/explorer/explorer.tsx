@@ -11,8 +11,8 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { basicResolvers } from '../../resolvers';
-import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import { useMlKibana } from '../../../contexts/kibana';
 

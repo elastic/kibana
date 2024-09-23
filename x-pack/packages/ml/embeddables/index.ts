@@ -9,4 +9,7 @@ export {
   ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  type AnomalyExplorerChartsEmbeddableType,
+  type AnomalySwimLaneEmbeddableType,
+  type MlEmbeddableTypes,
 } from './constants';

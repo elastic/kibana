@@ -15,10 +15,10 @@ import type { AppMountParameters, ChromeStart, ChromeBreadcrumb } from '@kbn/cor
 
 import { EuiSkeletonText } from '@elastic/eui';
 import { UrlStateProvider } from '@kbn/ml-url-state';
-import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
+import type { MlPages } from '@kbn/ml-locator';
 
+import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 import { MlPage } from '../components/ml_page';
-import type { MlPages } from '../../locator';
 import { type RouteResolverContext } from './use_resolver';
 
 // custom RouteProps making location non-optional

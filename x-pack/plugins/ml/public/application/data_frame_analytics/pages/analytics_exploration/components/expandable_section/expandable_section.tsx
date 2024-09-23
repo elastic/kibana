@@ -19,11 +19,11 @@ import {
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
+import type { ExpandablePanels } from '@kbn/ml-locator';
 import {
   getDefaultExplorationPageUrlState,
   useExplorationUrlState,
 } from '../../hooks/use_exploration_url_state';
-import type { ExpandablePanels } from '../../../../../../../common/types/locator';
 
 interface HeaderItem {
   // id is used as the React key and to construct a data-test-subj

@@ -9,8 +9,8 @@ import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { useMlLink } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 export const BackToListPanel: FC = () => {
   const analyticsManagementPageLink = useMlLink({

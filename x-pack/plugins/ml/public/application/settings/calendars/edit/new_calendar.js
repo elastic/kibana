@@ -18,7 +18,7 @@ import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { HelpMenu } from '../../../components/help_menu';
 

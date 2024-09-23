@@ -25,8 +25,8 @@ import type { Observable } from 'rxjs';
 import { combineLatest, map } from 'rxjs';
 import { debounce, intersectionBy } from 'lodash';
 import { type DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { ML_PAGES } from '../../../../common/constants/locator';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { DataViewEditor } from './data_view_editor';
 

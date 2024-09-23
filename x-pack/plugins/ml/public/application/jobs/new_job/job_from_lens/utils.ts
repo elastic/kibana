@@ -21,7 +21,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
+import { ML_PAGES, ML_APP_LOCATOR } from '@kbn/ml-locator';
 
 export const COMPATIBLE_SERIES_TYPES = [
   'line',

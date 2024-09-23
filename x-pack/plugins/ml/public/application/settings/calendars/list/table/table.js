@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { GLOBAL_CALENDAR } from '../../../../../../common/constants/calendars';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-locator';
 
 export const CalendarsListTable = ({
   calendarsList,

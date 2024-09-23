@@ -31,7 +31,7 @@ import { EditFilterListToolbar } from './toolbar';
 import { ItemsGrid } from '../../../components/items_grid';
 import { isValidFilterListId, saveFilterList } from './utils';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { HelpMenu } from '../../../components/help_menu';
 
 const DEFAULT_ITEMS_PER_PAGE = 50;
