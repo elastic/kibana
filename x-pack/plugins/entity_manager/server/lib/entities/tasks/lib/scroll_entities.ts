@@ -14,12 +14,12 @@ import {
 
 export async function* scrollEntities(
   esClient: ElasticsearchClient,
-  lastRunAt: string,
   definitionId: string,
+  lastRunAt?: string,
   size = 100,
   scroll = '30s'
 ) {
-  let response = await esClient.search<EntityLatestDoc>({
+  const params = {
     index: entitiesIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V1,
       dataset: 'latest',
@@ -29,20 +29,25 @@ export async function* scrollEntities(
     allow_no_indices: true,
     scroll,
     size,
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              'event.ingested': {
-                gte: lastRunAt,
-              },
+    ...(lastRunAt != null
+      ? {
+          query: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    'event.ingested': {
+                      gte: lastRunAt,
+                    },
+                  },
+                },
+              ],
             },
           },
-        ],
-      },
-    },
-  });
+        }
+      : {}),
+  };
+  let response = await esClient.search<EntityLatestDoc>(params);
 
   while (true) {
     const hits = response.hits.hits;

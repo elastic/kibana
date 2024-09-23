@@ -23,6 +23,14 @@ import { generateInstanceIndexName } from '../helpers/generate_component_id';
 export const TASK_TYPE = 'EEM:ENTITY-MERGE-TASK';
 const TASK_NAME = 'EntityMergeTask';
 
+interface EntityMergeTaskState {
+  lastRunAt?: string;
+}
+
+interface EntityMergeTaskInstance extends ConcreteTaskInstance {
+  state: EntityMergeTaskState;
+}
+
 export class EntityMergeTask {
   private abortController = new AbortController();
   private logger: Logger;
@@ -38,7 +46,7 @@ export class EntityMergeTask {
         title: TASK_NAME,
         timeout: '1m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({ taskInstance }: { taskInstance: EntityMergeTaskInstance }) => {
           return {
             run: async () => {
               return this.runTask(taskInstance);
@@ -53,7 +61,7 @@ export class EntityMergeTask {
     });
   }
 
-  private async runTask(taskInstance: ConcreteTaskInstance) {
+  private async runTask(taskInstance: EntityMergeTaskInstance) {
     let latestEventIngested: Moment | undefined;
     const { targetIndex, apiKeyId, definitionId } = taskInstance.params;
     const { lastRunAt } = taskInstance.state;
@@ -67,7 +75,7 @@ export class EntityMergeTask {
     this.logger.info(`Starting indexing`);
     const start = Date.now();
     let entitiesProcessed = 0;
-    for await (const hits of scrollEntities(esClient.asCurrentUser, lastRunAt, definitionId)) {
+    for await (const hits of scrollEntities(esClient.asCurrentUser, definitionId, lastRunAt)) {
       const now = moment();
       const body = hits.reduce((acc, { _source: entityDoc }) => {
         if (entityDoc) {
