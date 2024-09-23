@@ -48,6 +48,7 @@ import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
+import { openSettingsFlyout } from '../dashboard_container/embeddable/api';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -188,7 +189,7 @@ export function InternalDashboardTopNav({
                 size="s"
                 type="pencil"
                 className="dshTitleBreadcrumbs__updateIcon"
-                onClick={() => dashboardApi.openSettingsFlyout()}
+                onClick={() => openSettingsFlyout(dashboardApi)}
               />
             </>
           ) : (
