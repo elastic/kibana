@@ -395,4 +395,39 @@ describe('Pipeline Editor', () => {
       assertTestProcessor({ description: processorDescriptions.none, descriptionVisible: false });
     });
   });
+
+  describe('object values', () => {
+    const mockData: Pick<Pipeline, 'processors'> = {
+      processors: [
+        {
+          set: {
+            field: 'test',
+            value: { test: 'test' },
+          },
+        },
+        {
+          append: {
+            field: 'test',
+            value: { test: 'test' },
+          },
+        },
+      ],
+    };
+    it('editor works when value is an object', async () => {
+      onUpdate = jest.fn();
+      testBed = await setup({
+        value: {
+          ...mockData,
+        },
+        onFlyoutOpen: jest.fn(),
+        onUpdate,
+      });
+      expect(testBed.find(`processors>0.inlineTextInputNonEditableText`).text()).toBe(
+        'Sets value of "test" to "{"test":"test"}"'
+      );
+      expect(testBed.find(`processors>1.inlineTextInputNonEditableText`).text()).toBe(
+        'Appends "{"test":"test"}" to the "test" field'
+      );
+    });
+  });
 });

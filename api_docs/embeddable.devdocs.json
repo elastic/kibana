@@ -14875,14 +14875,6 @@
               "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
             },
             {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/services/embeddable/types.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/services/embeddable/embeddable_service.ts"
-            },
-            {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.ts"
             },
@@ -14905,10 +14897,6 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/services/embeddable/embeddable.stub.ts"
             },
             {
               "plugin": "dashboard",
