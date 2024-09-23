@@ -500,8 +500,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Bulk upsert up to 1000 asset criticality records, creating or updating them as needed.
-   */
+    * Bulk upsert up to 1000 asset criticality records.
+
+If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
+
+    */
   async bulkUpsertAssetCriticalityRecords(props: BulkUpsertAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API BulkUpsertAssetCriticalityRecords`);
     return this.kbnClient
@@ -565,8 +568,11 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Create or update a criticality record for a specific asset.
-   */
+    * Create or update an asset criticality record for a specific entity.
+
+If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
+
+    */
   async createAssetCriticalityRecord(props: CreateAssetCriticalityRecordProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateAssetCriticalityRecord`);
     return this.kbnClient
@@ -641,7 +647,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Delete the asset criticality record for a specific asset if it exists.
+   * Delete the asset criticality record for a specific entity.
    */
   async deleteAssetCriticalityRecord(props: DeleteAssetCriticalityRecordProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteAssetCriticalityRecord`);
@@ -1146,7 +1152,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get the criticality record for a specific asset.
+   * Get the asset criticality record for a specific entity.
    */
   async getAssetCriticalityRecord(props: GetAssetCriticalityRecordProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetAssetCriticalityRecord`);
@@ -1768,6 +1774,9 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
+   */
   async scheduleRiskEngineNow() {
     this.log.info(`${new Date().toISOString()} Calling API ScheduleRiskEngineNow`);
     return this.kbnClient

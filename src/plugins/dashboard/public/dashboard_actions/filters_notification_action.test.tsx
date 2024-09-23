@@ -58,10 +58,6 @@ describe('filters notification action', () => {
       embeddable: {
         uuid: 'testId',
         viewMode: viewModeSubject,
-        parentApi: {
-          getAllDataViews: jest.fn(),
-          getDashboardPanelFromId: jest.fn(),
-        },
         filters$: filtersSubject,
         query$: querySubject,
       },
