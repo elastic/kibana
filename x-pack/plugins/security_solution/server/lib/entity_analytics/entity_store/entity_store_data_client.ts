@@ -148,6 +148,14 @@ export class EntityStoreDataClient {
   private async createPlatformPipeline({ entityType }: { entityType: EntityType }) {
     const definition = getDefinitionForEntityType(entityType, this.options.namespace);
 
+    const allEntityFields: string[] = (definition?.metadata || []).map((m) => {
+      if (typeof m === 'string') {
+        return m;
+      }
+
+      return m.destination;
+    });
+
     await this.options.esClient.ingest.putPipeline({
       id: `${definition.id}-latest@platform`,
       body: {
@@ -156,7 +164,11 @@ export class EntityStoreDataClient {
           managed: true,
         },
         description: `Ingest pipeline for entity defiinition ${definition.id}`,
-        processors: getFieldRetentionPipelineSteps({ spaceId: this.options.namespace, entityType }),
+        processors: getFieldRetentionPipelineSteps({
+          spaceId: this.options.namespace,
+          entityType,
+          allEntityFields,
+        }),
       },
     });
   }
