@@ -987,6 +987,10 @@
                 "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
+                "plugin": "inventory",
+                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "observabilityLogsExplorer",
                 "path": "x-pack/plugins/observability_solution/observability_logs_explorer/public/state_machines/observability_logs_explorer/src/telemetry_events.ts"
               },
@@ -1281,6 +1285,14 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/observability_solution/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "inventory",
+                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "inventory",
+                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "securitySolution",
