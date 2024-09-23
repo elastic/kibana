@@ -27,7 +27,7 @@ const checkIfFieldExists = (field: string): string => {
     return `${acc}ctx.${path} == null || `;
   }, '');
 
-  return `${partsCheck} || ctx.${field}.size() == 0`;
+  return `${partsCheck} ctx.${field}.size() == 0`;
 };
 
 const keepOldestValueProcessor = (
@@ -43,26 +43,29 @@ const keepOldestValueProcessor = (
   };
 };
 
-const collectValuesProcessor = (
-  { field, count }: CollectValues,
-  enrichField: string
-): IngestProcessorContainer => {
+const collectValuesProcessor = ({ field, maxLength }: CollectValues, enrichField: string) => {
   return {
     script: {
+      lang: 'painless',
       source: `
-            def values = ctx.${field};
-            def enrichValues = ctx.${enrichField}.${field};
-            if (values == null) {
-            values = [];
-            }
-            if (enrichValues != null) {
-            values.addAll(enrichValues);
-            }
-            if (values.size() > ${count}) {
-            values = values.subList(0, ${count});
-            }
-            return values;
-        `,
+if (ctx.${field} == null) {
+  ctx.${field} = [];
+}
+
+List combinedItems = new ArrayList();
+
+combinedItems.addAll(ctx.${field});
+
+if (combinedItems.size() < params.max_length && ctx.${enrichField} != null && ctx.${enrichField}.${field} != null) {
+  int remaining = params.max_length - combinedItems.size();
+  combinedItems.addAll(ctx.${enrichField}.${field}.subList(0, Math.min(remaining, ctx.${enrichField}.${field}.size())));
+}
+
+ctx.${field} = combinedItems.subList(0, (int) Math.min(params.max_length, combinedItems.size()));
+          `,
+      params: {
+        max_length: maxLength,
+      },
     },
   };
 };

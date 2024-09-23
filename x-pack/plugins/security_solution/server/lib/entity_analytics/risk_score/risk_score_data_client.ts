@@ -87,6 +87,17 @@ export class RiskScoreDataClient {
       soClient: this.options.soClient,
     });
 
+  public createRiskScoreLatestIndex = async () => {
+    await createOrUpdateIndex({
+      esClient: this.options.esClient,
+      logger: this.options.logger,
+      options: {
+        index: getRiskScoreLatestIndex(this.options.namespace),
+        mappings: mappingFromFieldMap(riskScoreFieldMap, false),
+      },
+    });
+  };
+
   public async init() {
     const namespace = this.options.namespace;
 
@@ -152,14 +163,7 @@ export class RiskScoreDataClient {
         indexPatterns,
       });
 
-      await createOrUpdateIndex({
-        esClient,
-        logger: this.options.logger,
-        options: {
-          index: getRiskScoreLatestIndex(namespace),
-          mappings: mappingFromFieldMap(riskScoreFieldMap, false),
-        },
-      });
+      await this.createRiskScoreLatestIndex();
 
       const transformId = getLatestTransformId(namespace);
       await createTransform({

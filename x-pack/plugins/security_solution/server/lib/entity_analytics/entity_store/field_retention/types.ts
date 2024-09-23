@@ -17,10 +17,10 @@ export interface KeepOldestValue extends BaseFieldRetentionOperator {
   operation: 'keep_oldest_value';
 }
 
-// A field retention operator that collects up to `count` values of the field. e.g collect up to 10 values of ip_address
+// A field retention operator that collects up to `maxLength` values of the field. e.g collect up to 10 values of ip_address
 export interface CollectValues extends BaseFieldRetentionOperator {
   operation: 'collect_values';
-  count: number;
+  maxLength: number;
 }
 
 export type FieldRetentionOperator = KeepOldestValue | CollectValues;
@@ -28,5 +28,6 @@ export type FieldRetentionOperator = KeepOldestValue | CollectValues;
 export interface FieldRetentionDefinition {
   version: number;
   entityType: EntityType;
+  matchField: string;
   fields: FieldRetentionOperator[];
 }
