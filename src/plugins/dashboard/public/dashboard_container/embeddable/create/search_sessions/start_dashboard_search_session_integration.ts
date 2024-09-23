@@ -11,11 +11,11 @@ import { skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
-import { dashboardCapabilitiesService } from '../../../../services/dashboard_services';
 import { dataService } from '../../../../services/kibana_services';
 import { DashboardContainer } from '../../dashboard_container';
 import { DashboardCreationOptions } from '../../dashboard_container_factory';
 import { newSession$ } from './new_session';
+import { getDashboardCapabilities } from '../../../../utils/get_dashboard_capabilities';
 
 /**
  * Enables dashboard search sessions.
@@ -35,7 +35,7 @@ export function startDashboardSearchSessionIntegration(
 
   dataService.search.session.enableStorage(createSessionRestorationDataProvider(this), {
     isDisabled: () =>
-      dashboardCapabilitiesService.dashboardCapabilities.storeSearchSession
+      getDashboardCapabilities().storeSearchSession
         ? { disabled: false }
         : {
             disabled: true,

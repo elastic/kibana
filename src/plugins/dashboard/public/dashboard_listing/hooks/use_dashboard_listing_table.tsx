@@ -25,11 +25,11 @@ import {
 } from '../../dashboard_constants';
 import {
   dashboardBackupService,
-  dashboardCapabilitiesService,
   dashboardContentManagementService,
   dashboardRecentlyAccessedService,
 } from '../../services/dashboard_services';
 import { coreServices } from '../../services/kibana_services';
+import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
@@ -272,7 +272,7 @@ export const useDashboardListingTable = ({
   );
 
   const tableListViewTableProps: DashboardListingViewTableProps = useMemo(() => {
-    const { showWriteControls } = dashboardCapabilitiesService.dashboardCapabilities;
+    const { showWriteControls } = getDashboardCapabilities();
     return {
       contentEditor: {
         isReadonly: !showWriteControls,

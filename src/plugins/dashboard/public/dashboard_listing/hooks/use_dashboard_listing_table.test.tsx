@@ -15,7 +15,6 @@ import { DashboardSavedObjectUserContent } from '../types';
 import { useDashboardListingTable } from './use_dashboard_listing_table';
 import {
   dashboardBackupService,
-  dashboardCapabilitiesService,
   dashboardContentManagementService,
 } from '../../services/dashboard_services';
 
@@ -58,7 +57,6 @@ describe('useDashboardListingTable', () => {
     dashboardBackupService.getDashboardIdsWithUnsavedChanges = jest.fn().mockReturnValue([]);
 
     dashboardBackupService.clearState = clearStateMock;
-    dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = true;
     dashboardContentManagementService.deleteDashboards = deleteDashboards;
     coreServices.uiSettings.get = getUiSettingsMock;
     coreServices.notifications.toasts.addError = jest.fn();
@@ -235,8 +233,12 @@ describe('useDashboardListingTable', () => {
   });
 
   test('createItem should be undefined when showWriteControls equals false', () => {
-    dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = false;
-
+    coreServices.application.capabilities = {
+      ...coreServices.application.capabilities,
+      dashboard: {
+        showWriteControls: false,
+      },
+    };
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,
@@ -248,7 +250,8 @@ describe('useDashboardListingTable', () => {
   });
 
   test('deleteItems should be undefined when showWriteControls equals false', () => {
-    dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,
@@ -260,7 +263,8 @@ describe('useDashboardListingTable', () => {
   });
 
   test('editItem should be undefined when showWriteControls equals false', () => {
-    dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,

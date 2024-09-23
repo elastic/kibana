@@ -32,9 +32,21 @@ import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
 
 import { setKibanaServices } from './kibana_services';
+import { DashboardCapabilities } from '../../common';
+
+const defaultDashboardCapabilities: DashboardCapabilities = {
+  show: true,
+  createNew: true,
+  saveQuery: true,
+  createShortUrl: true,
+  showWriteControls: true,
+  storeSearchSession: true,
+};
 
 export const setStubServices = () => {
   const core = coreMock.createStart();
+  (core.application.capabilities as any).dashboard = defaultDashboardCapabilities;
+
   setKibanaServices(core, {
     contentManagement: contentManagementMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),

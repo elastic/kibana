@@ -19,7 +19,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
+import { dashboardBackupService } from '../services/dashboard_services';
 import { coreServices } from '../services/kibana_services';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import {
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
@@ -27,10 +29,6 @@ import {
 } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { DashboardListingProps } from './types';
-import {
-  dashboardBackupService,
-  dashboardCapabilitiesService,
-} from '../services/dashboard_services';
 
 export interface DashboardListingEmptyPromptProps {
   createItem: () => void;
@@ -108,7 +106,7 @@ export const DashboardListingEmptyPrompt = ({
     setUnsavedDashboardIds,
   ]);
 
-  if (!dashboardCapabilitiesService.dashboardCapabilities.showWriteControls) {
+  if (!getDashboardCapabilities().showWriteControls) {
     return (
       <EuiEmptyPrompt
         iconType="glasses"

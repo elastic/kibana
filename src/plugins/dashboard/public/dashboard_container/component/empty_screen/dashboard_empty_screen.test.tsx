@@ -15,8 +15,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { DashboardApi } from '../../../dashboard_api/types';
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
 import { buildMockDashboard } from '../../../mocks';
-import { dashboardCapabilitiesService } from '../../../services/dashboard_services';
-import { visualizationsService } from '../../../services/kibana_services';
+import { coreServices, visualizationsService } from '../../../services/kibana_services';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
 
 visualizationsService.getAliases = jest.fn().mockReturnValue([{ name: 'lens' }]);
@@ -56,7 +55,7 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders correctly with readonly mode', () => {
-    dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
 
     const component = mountComponent(ViewMode.VIEW);
     expect(component.render()).toMatchSnapshot();
@@ -71,7 +70,7 @@ describe('DashboardEmptyScreen', () => {
 
   // even when in edit mode, readonly users should not have access to the editing buttons in the empty prompt.
   test('renders correctly with readonly and edit mode', () => {
-    dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
 
     const component = mountComponent(ViewMode.EDIT);
     expect(component.render()).toMatchSnapshot();

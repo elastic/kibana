@@ -90,16 +90,14 @@ import {
   PanelPlacementStrategy,
 } from '../../dashboard_constants';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
-import {
-  dashboardCapabilitiesService,
-  dashboardContentManagementService,
-} from '../../services/dashboard_services';
+import { dashboardContentManagementService } from '../../services/dashboard_services';
 import {
   coreServices,
   dataService,
   embeddableService,
   usageCollectionService,
 } from '../../services/kibana_services';
+import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { placePanel } from '../panel_placement';
 import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
@@ -260,8 +258,7 @@ export class DashboardContainer
       { untilContainerInitialized }
     );
 
-    ({ showWriteControls: this.showWriteControls } =
-      dashboardCapabilitiesService.dashboardCapabilities);
+    ({ showWriteControls: this.showWriteControls } = getDashboardCapabilities());
 
     this.controlGroupApi$ = controlGroupApi$;
     this.untilContainerInitialized = untilContainerInitialized;

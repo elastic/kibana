@@ -21,11 +21,9 @@ import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { openSettingsFlyout } from '../../dashboard_container/embeddable/api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
-import {
-  dashboardBackupService,
-  dashboardCapabilitiesService,
-} from '../../services/dashboard_services';
+import { dashboardBackupService } from '../../services/dashboard_services';
 import { coreServices, shareService } from '../../services/kibana_services';
+import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 
@@ -273,7 +271,7 @@ export const useDashboardMenuItems = ({
    * Build ordered menus for view and edit mode.
    */
   const viewModeTopNavConfig = useMemo(() => {
-    const { showWriteControls } = dashboardCapabilitiesService.dashboardCapabilities;
+    const { showWriteControls } = getDashboardCapabilities();
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService ? [menuItems.share] : [];

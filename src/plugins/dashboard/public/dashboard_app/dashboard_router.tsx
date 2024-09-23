@@ -28,8 +28,8 @@ import {
   VIEW_DASHBOARD_URL,
 } from '../dashboard_constants';
 import { RedirectToProps } from '../dashboard_container/types';
-import { dashboardCapabilitiesService } from '../services/dashboard_services';
 import { coreServices, dataService, embeddableService } from '../services/kibana_services';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
 import { DashboardApp } from './dashboard_app';
 import { DashboardMountContext } from './hooks/dashboard_mount_context';
@@ -179,7 +179,7 @@ export async function mountApp({
     ],
   });
 
-  if (!dashboardCapabilitiesService.dashboardCapabilities.showWriteControls) {
+  if (!getDashboardCapabilities().showWriteControls) {
     coreServices.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),

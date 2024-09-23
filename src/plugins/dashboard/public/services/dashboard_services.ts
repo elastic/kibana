@@ -10,42 +10,20 @@
 import type { CoreStart } from '@kbn/core/public';
 import { RecentlyAccessedService, type RecentlyAccessed } from '@kbn/recently-accessed';
 
-import type { DashboardCapabilities } from '../../common';
 import type { DashboardStartDependencies } from '../plugin';
 import { getDashboardBackupService } from './dashboard_backup/dashboard_backup_service';
 import { getDashboardContentManagementService } from './dashboard_content_management/get_dashboard_content_management_service';
 import { DashboardContentManagementService } from './dashboard_content_management/types';
 
 export let dashboardBackupService: ReturnType<typeof getDashboardBackupService>;
-export let dashboardCapabilitiesService: { dashboardCapabilities: DashboardCapabilities };
 export let dashboardContentManagementService: DashboardContentManagementService;
 export let dashboardRecentlyAccessedService: RecentlyAccessed;
 
 export const setDashboardServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
   dashboardBackupService = getDashboardBackupService();
-  dashboardCapabilitiesService = {
-    dashboardCapabilities: getDashboardCapabilities(kibanaCore),
-  };
   dashboardContentManagementService = getDashboardContentManagementService(deps);
   dashboardRecentlyAccessedService = new RecentlyAccessedService().start({
     http: kibanaCore.http,
     key: 'dashboardRecentlyAccessed',
   });
-};
-
-const getDashboardCapabilities = (coreStart: CoreStart): DashboardCapabilities => {
-  const {
-    application: {
-      capabilities: { dashboard },
-    },
-  } = coreStart;
-
-  return {
-    show: Boolean(dashboard.show),
-    saveQuery: Boolean(dashboard.saveQuery),
-    createNew: Boolean(dashboard.createNew),
-    createShortUrl: Boolean(dashboard.createShortUrl),
-    showWriteControls: Boolean(dashboard.showWriteControls),
-    storeSearchSession: Boolean(dashboard.storeSearchSession),
-  };
 };

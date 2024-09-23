@@ -25,7 +25,6 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
-import { dashboardCapabilitiesService } from '../../../services/dashboard_services';
 import {
   coreServices,
   dataService,
@@ -33,6 +32,7 @@ import {
   usageCollectionService,
   visualizationsService,
 } from '../../../services/kibana_services';
+import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
 
 export function DashboardEmptyScreen() {
@@ -41,7 +41,7 @@ export function DashboardEmptyScreen() {
     []
   );
   const { showWriteControls } = useMemo(() => {
-    return dashboardCapabilitiesService.dashboardCapabilities;
+    return getDashboardCapabilities();
   }, []);
 
   const dashboardApi = useDashboardApi();

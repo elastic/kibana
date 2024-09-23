@@ -19,9 +19,9 @@ import { I18nProvider } from '@kbn/i18n-react';
  */
 import { TableListView } from '@kbn/content-management-table-list-view';
 
-import { dashboardCapabilitiesService } from '../services/dashboard_services';
 import { DashboardListing } from './dashboard_listing';
 import { DashboardListingProps } from './types';
+import { coreServices } from '../services/kibana_services';
 
 jest.mock('@kbn/content-management-table-list-view-table', () => {
   const originalModule = jest.requireActual('@kbn/content-management-table-list-view-table');
@@ -65,7 +65,7 @@ function mountWith({ props: incomingProps }: { props?: Partial<DashboardListingP
 }
 
 test('initial filter is passed through', async () => {
-  dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = false;
+  (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
 
   let component: ReactWrapper;
 
@@ -80,7 +80,7 @@ test('initial filter is passed through', async () => {
 });
 
 test('when showWriteControls is true, table list view is passed editing functions', async () => {
-  dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = true;
+  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
 
   let component: ReactWrapper;
 
@@ -99,7 +99,7 @@ test('when showWriteControls is true, table list view is passed editing function
 });
 
 test('when showWriteControls is false, table list view is not passed editing functions', async () => {
-  dashboardCapabilitiesService.dashboardCapabilities.showWriteControls = false;
+  (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
 
   let component: ReactWrapper;
 

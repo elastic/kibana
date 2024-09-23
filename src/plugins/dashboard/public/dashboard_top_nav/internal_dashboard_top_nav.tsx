@@ -48,10 +48,7 @@ import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants
 import { openSettingsFlyout } from '../dashboard_container/embeddable/api';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
-import {
-  dashboardCapabilitiesService,
-  dashboardRecentlyAccessedService,
-} from '../services/dashboard_services';
+import { dashboardRecentlyAccessedService } from '../services/dashboard_services';
 import {
   coreServices,
   dataService,
@@ -59,6 +56,7 @@ import {
   navigationService,
   serverlessService,
 } from '../services/kibana_services';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import './_dashboard_top_nav.scss';
 
 export interface InternalDashboardTopNavProps {
@@ -147,17 +145,11 @@ export function InternalDashboardTopNav({
     const subscription = coreServices.chrome
       .getIsVisible$()
       .subscribe((visible) => setIsChromeVisible(visible));
+
     if (lastSavedId && title) {
-      coreServices.chrome.recentlyAccessed.add(
-        getFullEditPath(lastSavedId, viewMode === 'edit'),
-        title,
-        lastSavedId
-      );
-      dashboardRecentlyAccessedService.add(
-        getFullEditPath(lastSavedId, viewMode === 'edit'),
-        title,
-        lastSavedId
-      );
+      const fullEditPath = getFullEditPath(lastSavedId, viewMode === 'edit');
+      coreServices.chrome.recentlyAccessed.add(fullEditPath, title, lastSavedId);
+      dashboardRecentlyAccessedService.add(fullEditPath, title, lastSavedId); // used to sort the listing table
     }
     return () => subscription.unsubscribe();
   }, [lastSavedId, viewMode, title]);
@@ -315,7 +307,7 @@ export function InternalDashboardTopNav({
       });
     }
 
-    const { showWriteControls } = dashboardCapabilitiesService.dashboardCapabilities;
+    const { showWriteControls } = getDashboardCapabilities();
     if (showWriteControls && managed) {
       const badgeProps = {
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
@@ -391,9 +383,7 @@ export function InternalDashboardTopNav({
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews ?? []}
         saveQueryMenuVisibility={
-          dashboardCapabilitiesService.dashboardCapabilities.saveQuery
-            ? 'allowed_by_app_privilege'
-            : 'globally_managed'
+          getDashboardCapabilities().saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
         }
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== 'print'}

@@ -36,10 +36,10 @@ import {
 } from '../../../services/dashboard_content_management/types';
 import {
   dashboardBackupService,
-  dashboardCapabilitiesService,
   dashboardContentManagementService,
 } from '../../../services/dashboard_services';
 import { coreServices, dataService, embeddableService } from '../../../services/kibana_services';
+import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
 import { DashboardPublicState, UnsavedPanelState } from '../../types';
@@ -184,10 +184,7 @@ export const initializeDashboard = async ({
     return dashboardBackupState?.dashboardState;
   })();
   const initialViewMode = (() => {
-    if (
-      loadDashboardReturn.managed ||
-      !dashboardCapabilitiesService.dashboardCapabilities.showWriteControls
-    )
+    if (loadDashboardReturn.managed || !getDashboardCapabilities().showWriteControls)
       return ViewMode.VIEW;
     if (
       loadDashboardReturn.newDashboardCreated ||
