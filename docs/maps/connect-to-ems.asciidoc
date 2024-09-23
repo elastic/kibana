@@ -148,7 +148,7 @@ endif::[]
  | URL of the {es} instance to use for license validation.
 
 | `elasticsearch.username` and `elasticsearch.password`
-  | Credentials of a user with at least the `monitor` role.
+  | Credentials of a user with at least the {stack-ref}/security-privileges.html[`monitor`] permission.
 
 | `elasticsearch.ssl.certificateAuthorities`
  | Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates that make up a trusted certificate chain for {hosted-ems}. This chain is used by {hosted-ems} to establish trust when connecting to your {es} cluster. <<elasticsearch-ssl-certificateAuthorities,Equivalent {kib} setting>>.
