@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch, EuiSpacer } from '@elastic/eui';
 import type { AlertsFilter } from '@kbn/alerting-types';
+import deepEqual from 'fast-deep-equal';
 import { useRuleFormState } from '../hooks';
 import { RuleAction } from '../../common';
 import { RuleFormPlugins } from '../types';
@@ -50,21 +51,31 @@ export const RuleActionsAlertsFilter = ({
     dataViews,
   } = propsPlugins || plugins;
 
-  const query = action.alertsFilter?.query;
+  const [query, setQuery] = useState(action.alertsFilter?.query ?? DEFAULT_QUERY);
 
-  const toggleQuery = useCallback(() => {
-    onChange(query ? undefined : DEFAULT_QUERY);
-  }, [query, onChange]);
+  const state = useMemo(() => {
+    return action.alertsFilter?.query;
+  }, [action]);
 
+  const queryEnabled = useMemo(() => Boolean(state), [state]);
+
+  useEffect(() => {
+    const nextState = queryEnabled ? query : undefined;
+    if (!deepEqual(state, nextState)) onChange(nextState);
+  }, [queryEnabled, query, state, onChange]);
+
+  const toggleQuery = useCallback(
+    () => onChange(state ? undefined : query),
+    [state, query, onChange]
+  );
   const updateQuery = useCallback(
     (update: Partial<AlertsFilter['query']>) => {
-      const newQuery = {
-        ...(query || DEFAULT_QUERY),
+      setQuery({
+        ...query,
         ...update,
-      };
-      onChange(newQuery);
+      });
     },
-    [query, onChange]
+    [query, setQuery]
   );
 
   const onQueryChange = useCallback<NonNullable<AlertsSearchBarProps['onQueryChange']>>(
@@ -86,11 +97,11 @@ export const RuleActionsAlertsFilter = ({
             defaultMessage: 'If alert matches a query',
           }
         )}
-        checked={!!query}
+        checked={queryEnabled}
         onChange={toggleQuery}
         data-test-subj="alertsFilterQueryToggle"
       />
-      {query && (
+      {queryEnabled && (
         <>
           <EuiSpacer size="s" />
           <AlertsSearchBar

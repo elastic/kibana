@@ -170,8 +170,14 @@ describe('ruleActionsAlertsFilter', () => {
       kql: 'test',
     });
     await userEvent.click(screen.getByText('Update Query'));
-    expect(mockOnChange).toHaveBeenLastCalledWith({ filters: [], kql: 'onQueryChange' });
+    expect(mockOnChange).toHaveBeenLastCalledWith({
+      filters: [{ $state: { store: 'appState' }, meta: {} }],
+      kql: 'onQueryChange',
+    });
     await userEvent.click(screen.getByText('Submit Query'));
-    expect(mockOnChange).toHaveBeenLastCalledWith({ filters: [], kql: 'onQuerySubmit' });
+    expect(mockOnChange).toHaveBeenLastCalledWith({
+      filters: [{ $state: { store: 'appState' }, meta: {} }],
+      kql: 'onQuerySubmit',
+    });
   });
 });

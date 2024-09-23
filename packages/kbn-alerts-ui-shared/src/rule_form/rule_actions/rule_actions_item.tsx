@@ -124,7 +124,25 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   const plain = useEuiBackgroundColor('plain');
   const { euiTheme } = useEuiTheme();
 
-  const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
+  const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>(() => {
+    if (!selectedRuleType.actionVariables) {
+      return [];
+    }
+
+    const selectedActionGroup = getSelectedActionGroup({
+      group: action.group,
+      ruleType: selectedRuleType,
+      ruleTypeModel: selectedRuleTypeModel,
+    });
+
+    return getAvailableActionVariables(
+      selectedRuleType.actionVariables,
+      // TODO: this is always undefined for now, might need to make this a prop later on
+      undefined,
+      selectedActionGroup,
+      !!action.frequency?.summary
+    );
+  });
 
   const [useDefaultMessage, setUseDefaultMessage] = useState(false);
 
@@ -207,8 +225,13 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   );
 
   const onAvailableActionVariablesChange = useCallback(
-    ({ actionGroup, summary }: { actionGroup: string; summary?: boolean }) => {
+    ({ actionGroup, summary: isSummaryAction }: { actionGroup: string; summary?: boolean }) => {
       const messageVariables = selectedRuleType.actionVariables;
+
+      if (!messageVariables) {
+        setAvailableActionVariables([]);
+        return;
+      }
 
       const newSelectedActionGroup = getSelectedActionGroup({
         group: actionGroup,
@@ -216,13 +239,14 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         ruleTypeModel: selectedRuleTypeModel,
       });
 
-      if (messageVariables) {
-        setAvailableActionVariables(
-          getAvailableActionVariables(messageVariables, undefined, newSelectedActionGroup, summary)
-        );
-      } else {
-        setAvailableActionVariables([]);
-      }
+      setAvailableActionVariables(
+        getAvailableActionVariables(
+          messageVariables,
+          undefined,
+          newSelectedActionGroup,
+          !!isSummaryAction
+        )
+      );
     },
     [selectedRuleType, selectedRuleTypeModel]
   );
