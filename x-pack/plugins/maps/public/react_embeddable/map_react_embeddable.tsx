@@ -237,7 +237,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
               onSingleValueTrigger={actionHandlers.onSingleValueTrigger}
               addFilters={
                 (isMapRendererApi(parentApi) &&
-                  typeof parentApi.isSharable === 'boolean' &&
+                  typeof parentApi.hideFilterActions === 'boolean' &&
                   parentApi.hideFilterActions) ||
                 areTriggersDisabled(api)
                   ? null
