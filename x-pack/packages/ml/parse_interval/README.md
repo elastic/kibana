@@ -1,6 +1,6 @@
 # @kbn/ml-parse-interval
 
-The `parse_interval` package provides a utility function for parsing time intervals in various formats.
+The `parse_interval` package provides the `parseInterval` utility function for parsing time intervals in various formats.
 
 ## Usage
 

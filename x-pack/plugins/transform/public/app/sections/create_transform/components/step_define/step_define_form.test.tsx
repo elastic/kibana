@@ -27,7 +27,6 @@ import { StepDefineForm } from './step_define_form';
 
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
-jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
 const startMock = coreMock.createStart();

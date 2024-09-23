@@ -19,7 +19,6 @@ import type { SimpleQuery } from '@kbn/ml-query-utils';
 import type { SearchItems } from './use_search_items';
 import { useIndexData } from './use_index_data';
 
-jest.mock('../../shared_imports');
 jest.mock('../app_dependencies');
 
 const query: SimpleQuery = {
