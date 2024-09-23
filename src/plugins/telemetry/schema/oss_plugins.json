@@ -10349,15 +10349,6 @@
             }
           }
         },
-        "observability:searchExcludedDataTiers": {
-          "type": "array",
-          "items": {
-            "type": "keyword",
-            "_meta": {
-              "description": "Non-default value of setting."
-            }
-          }
-        },
         "banners:placement": {
           "type": "keyword",
           "_meta": {
@@ -10638,6 +10629,15 @@
           "type": "boolean",
           "_meta": {
             "description": "Enable the new logs overview component."
+          }
+        },
+        "observability:searchExcludedDataTiers": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Non-default value of setting."
+            }
           }
         }
       }

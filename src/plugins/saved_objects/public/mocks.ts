@@ -7,21 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsStart, SavedObjectSetup } from './plugin';
-
-const createStartContract = (): SavedObjectsStart => {
-  return {
-    SavedObjectClass: jest.fn(),
-  };
-};
-
-const createSetupContract = (): jest.Mocked<SavedObjectSetup> => {
-  return {
-    registerDecorator: jest.fn(),
-  };
-};
-
-export const savedObjectsPluginMock = {
-  createStartContract,
-  createSetupContract,
-};
+export const savedObjectsPluginMock = {};

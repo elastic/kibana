@@ -95,6 +95,7 @@ export const AGENT_FLYOUT = {
 export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT = {
   TITLE: 'createAgentPolicyFlyoutTitle',
   CREATE_BUTTON: 'createAgentPolicyButton',
+  ADVANCED_OPTIONS_TOGGLE: 'advancedOptionsButton',
   COLLECT_LOGS_CHECKBOX: 'collectLogsCheckbox',
   COLLECT_METRICS_CHECKBOX: 'collectMetricsCheckbox',
 };
