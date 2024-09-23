@@ -22,12 +22,23 @@ import { useFieldStatsFlyoutContext } from './use_field_stats_flyout_context';
 
 const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 
-export const FieldStatsContent: FC<{
+/**
+ * Represents the props for the FieldStatsFlyout component.
+ */
+export interface FieldStatsFlyoutProps {
   dataView: DataView;
   fieldStatsServices: FieldStatsServices;
   timeRangeMs?: TimeRangeMs;
   dslQuery?: FieldStatsProps['dslQuery'];
-}> = ({ dataView: selectedDataView, fieldStatsServices, timeRangeMs, dslQuery }) => {
+}
+
+/**
+ * Renders the content for the field statistics flyout.
+ * @param props - The props for the FieldStatsContent component.
+ * @returns The rendered FieldStatsContent component.
+ */
+export const FieldStatsContent: FC<FieldStatsFlyoutProps> = (props) => {
+  const { dataView: selectedDataView, fieldStatsServices, timeRangeMs, dslQuery } = props;
   const { fieldName } = useFieldStatsFlyoutContext();
 
   // Format timestamp to ISO formatted date strings

@@ -7,12 +7,13 @@
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { type FC } from 'react';
 import { FieldIcon } from '@kbn/react-field';
 import { type Field } from '@kbn/ml-anomaly-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
-import { getKbnFieldIconType } from './get_field_icon_types';
+
+import { getKbnFieldIconType } from './get_kbn_field_icon_types';
 
 function useThemeVars() {
   const { theme } = useKibana().services;
@@ -24,23 +25,42 @@ function useThemeVars() {
   return useCurrentEuiThemeVars(theme);
 }
 
+/**
+ * Represents a field used for statistics.
+ */
 export type FieldForStats = Pick<Field, 'id' | 'type'>;
-export const FieldStatsInfoButton = ({
-  field,
-  label,
-  onButtonClick,
-  disabled,
-  isEmpty = false,
-  hideTrigger = false,
-}: {
+
+/**
+ * Represents the props for the FieldStatsInfoButton component.
+ */
+export interface FieldStatsInfoButtonProps {
   field: FieldForStats;
   label: string;
-  searchValue?: string;
+  onButtonClick?: (field: FieldForStats) => void;
   disabled?: boolean;
   isEmpty?: boolean;
-  onButtonClick?: (field: FieldForStats) => void;
   hideTrigger?: boolean;
-}) => {
+}
+
+/**
+ * Renders a button component for field statistics information.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <FieldStatsInfoButton
+ *   field={field}
+ *   label={label}
+ *   onButtonClick={handleButtonClick}
+ *   disabled={false}
+ *   isEmpty={true}
+ *   hideTrigger={false}
+ * />
+ * ```
+ * @param {FieldStatsInfoButtonProps} props - The props for the FieldStatsInfoButton component.
+ */
+export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
+  const { field, label, onButtonClick, disabled, isEmpty, hideTrigger } = props;
   const themeVars = useThemeVars();
   const emptyFieldMessage = isEmpty
     ? ' ' +

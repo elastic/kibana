@@ -13,10 +13,23 @@ import { optionCss } from './eui_combo_box_with_field_stats';
 import { useFieldStatsFlyoutContext } from '.';
 import type { FieldForStats } from './field_stats_info_button';
 import { FieldStatsInfoButton } from './field_stats_info_button';
+
 interface Option extends EuiComboBoxOptionOption<string> {
   field: Field;
 }
 
+/**
+ * Custom hook for managing field statistics trigger functionality.
+ *
+ * @returns An object containing the following properties and functions:
+ *   - `renderOption`: A callback function for rendering options in a combo box.
+ *   - `setIsFlyoutVisible`: A function for setting the visibility of the flyout.
+ *   - `setFieldName`: A function for setting the field name.
+ *   - `handleFieldStatsButtonClick`: A callback function for handling field stats button click.
+ *   - `closeFlyout`: A callback function for closing the flyout.
+ *   - `optionCss`: CSS styles for the options in the combo box.
+ *   - `populatedFields`: A set of populated fields.
+ */
 export const useFieldStatsTrigger = () => {
   const { setIsFlyoutVisible, setFieldName, populatedFields } = useFieldStatsFlyoutContext();
 

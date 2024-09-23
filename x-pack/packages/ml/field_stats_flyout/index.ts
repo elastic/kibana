@@ -6,12 +6,22 @@
  */
 
 export { FieldStatsFlyout } from './field_stats_flyout';
-export { FieldStatsContent } from './field_stats_content';
-export { FieldStatsFlyoutProvider } from './field_stats_flyout_provider';
+export { FieldStatsContent, type FieldStatsFlyoutProps } from './field_stats_content';
+export {
+  FieldStatsFlyoutProvider,
+  type FieldStatsFlyoutProviderProps,
+} from './field_stats_flyout_provider';
 export {
   MLFieldStatsFlyoutContext,
   useFieldStatsFlyoutContext,
 } from './use_field_stats_flyout_context';
-export { FieldStatsInfoButton, type FieldForStats } from './field_stats_info_button';
+export {
+  FieldStatsInfoButton,
+  type FieldForStats,
+  type FieldStatsInfoButtonProps,
+} from './field_stats_info_button';
 export { useFieldStatsTrigger } from './use_field_stats_trigger';
-export { EuiComboBoxWithFieldStats } from './eui_combo_box_with_field_stats';
+export {
+  EuiComboBoxWithFieldStats,
+  type EuiComboBoxWithFieldStatsProps,
+} from './eui_combo_box_with_field_stats';

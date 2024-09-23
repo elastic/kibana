@@ -32,28 +32,58 @@ function useDataSearch() {
   const { data } = useKibana<Services>().services;
 
   if (!data) {
-    throw new Error('Kibana data service not available');
+    throw new Error('Kibana data service not available.');
   }
 
   return data.search;
 }
 
-export const FieldStatsFlyoutProvider: FC<
-  PropsWithChildren<{
-    dataView: DataView;
-    fieldStatsServices: FieldStatsServices;
-    timeRangeMs?: TimeRangeMs;
-    dslQuery?: FieldStatsProps['dslQuery'];
-    disablePopulatedFields?: boolean;
-  }>
-> = ({
-  dataView,
-  fieldStatsServices,
-  timeRangeMs,
-  dslQuery,
-  disablePopulatedFields = false,
-  children,
-}) => {
+/**
+ * Props for the FieldStatsFlyoutProvider component.
+ *
+ * @typedef {Object} FieldStatsFlyoutProviderProps
+ * @property dataView - The data view object.
+ * @property fieldStatsServices - Services required for field statistics.
+ * @property [timeRangeMs] - Optional time range in milliseconds.
+ * @property [dslQuery] - Optional DSL query for filtering field statistics.
+ * @property [disablePopulatedFields] - Optional flag to disable populated fields.
+ */
+export type FieldStatsFlyoutProviderProps = PropsWithChildren<{
+  dataView: DataView;
+  fieldStatsServices: FieldStatsServices;
+  timeRangeMs?: TimeRangeMs;
+  dslQuery?: FieldStatsProps['dslQuery'];
+  disablePopulatedFields?: boolean;
+}>;
+
+/**
+ * Provides field statistics in a flyout component.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <FieldStatsFlyoutProvider
+ *   dataView={dataView}
+ *   fieldStatsServices={fieldStatsServices}
+ *   timeRangeMs={timeRangeMs}
+ *   dslQuery={dslQuery}
+ *   disablePopulatedFields={disablePopulatedFields}
+ * >
+ *   {children}
+ * </FieldStatsFlyoutProvider>
+ * ```
+ *
+ * @param {FieldStatsFlyoutProviderProps} props - The component props.
+ */
+export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (props) => {
+  const {
+    dataView,
+    fieldStatsServices,
+    timeRangeMs,
+    dslQuery,
+    disablePopulatedFields = false,
+    children,
+  } = props;
   const search = useDataSearch();
   const [isFieldStatsFlyoutVisible, setFieldStatsIsFlyoutVisible] = useState(false);
   const [fieldName, setFieldName] = useState<string | undefined>();
