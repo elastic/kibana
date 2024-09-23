@@ -11768,6 +11768,85 @@ paths:
       summary: Stop the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
+  /api/entity_store/entities/list:
+    get:
+      description: 'List entities records, paging, sorting and filtering as needed.'
+      operationId: ListEntities
+      parameters:
+        - in: query
+          name: sort_field
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: sort_order
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+        - in: query
+          name: per_page
+          required: false
+          schema:
+            maximum: 10000
+            minimum: 1
+            type: integer
+        - description: An ES query to filter by.
+          in: query
+          name: filterQuery
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: entities_types
+          required: true
+          schema:
+            items:
+              $ref: >-
+                #/components/schemas/Security_Solution_Entity_Analytics_API_EntityType
+            type: array
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  inspect:
+                    $ref: >-
+                      #/components/schemas/Security_Solution_Entity_Analytics_API_InspectQuery
+                  page:
+                    minimum: 1
+                    type: integer
+                  per_page:
+                    maximum: 1000
+                    minimum: 1
+                    type: integer
+                  records:
+                    items:
+                      $ref: >-
+                        #/components/schemas/Security_Solution_Entity_Analytics_API_Entity
+                    type: array
+                  total:
+                    minimum: 0
+                    type: integer
+                required:
+                  - records
+                  - page
+                  - per_page
+                  - total
+          description: Entities returned successfully
+      summary: List Entity Store Entities
+      tags:
+        - Security Solution Entity Analytics API
   /api/exception_lists:
     delete:
       operationId: DeleteExceptionList
@@ -38833,11 +38912,92 @@ components:
         - started
         - stopped
       type: string
+    Security_Solution_Entity_Analytics_API_Entity:
+      oneOf:
+        - $ref: >-
+            #/components/schemas/Security_Solution_Entity_Analytics_API_UserEntity
+        - $ref: >-
+            #/components/schemas/Security_Solution_Entity_Analytics_API_HostEntity
     Security_Solution_Entity_Analytics_API_EntityType:
       enum:
         - user
         - host
       type: string
+    Security_Solution_Entity_Analytics_API_HostEntity:
+      type: object
+      properties:
+        entity:
+          type: object
+          properties:
+            definitionId:
+              type: string
+            definitionVersion:
+              type: string
+            displayName:
+              type: string
+            firstSeenTimestamp:
+              format: date-time
+              type: string
+            id:
+              type: string
+            identityFields:
+              items:
+                type: string
+              type: array
+            lastSeenTimestamp:
+              format: date-time
+              type: string
+            schemaVersion:
+              type: string
+            type:
+              enum:
+                - node
+              type: string
+          required:
+            - lastSeenTimestamp
+            - schemaVersion
+            - definitionVersion
+            - displayName
+            - identityFields
+            - id
+            - type
+            - firstSeenTimestamp
+            - definitionId
+        host:
+          type: object
+          properties:
+            architecture:
+              items:
+                type: string
+              type: array
+            domain:
+              items:
+                type: string
+              type: array
+            hostname:
+              items:
+                type: string
+              type: array
+            id:
+              items:
+                type: string
+              type: array
+            ip:
+              items:
+                type: string
+              type: array
+            mac:
+              items:
+                type: string
+              type: array
+            name:
+              type: string
+            type:
+              items:
+                type: string
+              type: array
+          required:
+            - name
     Security_Solution_Entity_Analytics_API_IdField:
       enum:
         - host.name
@@ -38845,6 +39005,20 @@ components:
       type: string
     Security_Solution_Entity_Analytics_API_IndexPattern:
       type: string
+    Security_Solution_Entity_Analytics_API_InspectQuery:
+      type: object
+      properties:
+        dsl:
+          items:
+            type: string
+          type: array
+        response:
+          items:
+            type: string
+          type: array
+      required:
+        - dsl
+        - response
     Security_Solution_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -38872,6 +39046,77 @@ components:
       required:
         - status_code
         - message
+    Security_Solution_Entity_Analytics_API_UserEntity:
+      type: object
+      properties:
+        entity:
+          type: object
+          properties:
+            definitionId:
+              type: string
+            definitionVersion:
+              type: string
+            displayName:
+              type: string
+            firstSeenTimestamp:
+              format: date-time
+              type: string
+            id:
+              type: string
+            identityFields:
+              items:
+                type: string
+              type: array
+            lastSeenTimestamp:
+              format: date-time
+              type: string
+            schemaVersion:
+              type: string
+            type:
+              enum:
+                - node
+              type: string
+          required:
+            - lastSeenTimestamp
+            - schemaVersion
+            - definitionVersion
+            - displayName
+            - identityFields
+            - id
+            - type
+            - firstSeenTimestamp
+            - definitionId
+        user:
+          type: object
+          properties:
+            domain:
+              items:
+                type: string
+              type: array
+            email:
+              items:
+                type: string
+              type: array
+            full_name:
+              items:
+                type: string
+              type: array
+            hash:
+              items:
+                type: string
+              type: array
+            id:
+              items:
+                type: string
+              type: array
+            name:
+              type: string
+            roles:
+              items:
+                type: string
+              type: array
+          required:
+            - name
     Security_Solution_Exceptions_API_CreateExceptionListItemComment:
       type: object
       properties:
