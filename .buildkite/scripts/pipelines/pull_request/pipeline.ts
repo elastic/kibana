@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
-import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig } from '#pipeline-utils';
+import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
@@ -45,8 +45,16 @@ const getPerfPipeline = (filename: string, groups: string) => {
       return;
     }
 
-    const agentSharedConfig = getAgentImageConfig({ returnYaml: true });
+    // const agentConfig = getAgentImageConfig({ returnYaml: true });
     // pipeline.push(getAgentImageConfig({ returnYaml: true }));
+
+    const agentSharedConfig = JSON.stringify({
+      agents: {
+        provider: 'gcp',
+        image: 'family/kibana-ubuntu-2004',
+        imageProject: 'elastic-images-prod',
+      },
+    });
     pipeline.push(
       getPipeline('.buildkite/pipelines/pull_request/base.yml', agentSharedConfig, false)
     );
