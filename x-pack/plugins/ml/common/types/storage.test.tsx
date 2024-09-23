@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import { renderHook as reactRenderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider, useStorage } from '@kbn/ml-local-storage';
@@ -46,18 +46,15 @@ describe('useStorage', () => {
   });
 
   test('returns the default value', () => {
-    const { result } = reactRenderHook(
-      () => useStorage('ml.jobSelectorFlyout.applyTimeRange', true),
-      {
-        wrapper: Provider,
-      }
-    );
+    const { result } = renderHook(() => useStorage('ml.jobSelectorFlyout.applyTimeRange', true), {
+      wrapper: Provider,
+    });
 
     expect(result.current[0]).toBe(true);
   });
 
   test('returns the value from storage', () => {
-    const { result } = reactRenderHook(() => useStorage('ml.gettingStarted.isDismissed', false), {
+    const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed', false), {
       wrapper: Provider,
     });
 
@@ -65,7 +62,7 @@ describe('useStorage', () => {
   });
 
   test('updates the storage value', async () => {
-    const { result } = reactRenderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+    const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
       wrapper: Provider,
     });
 
@@ -84,7 +81,7 @@ describe('useStorage', () => {
   });
 
   test('removes the storage value', async () => {
-    const { result } = reactRenderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+    const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
       wrapper: Provider,
     });
 
@@ -103,7 +100,7 @@ describe('useStorage', () => {
   });
 
   test('updates the value on storage event', async () => {
-    const { result } = reactRenderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+    const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
       wrapper: Provider,
     });
 

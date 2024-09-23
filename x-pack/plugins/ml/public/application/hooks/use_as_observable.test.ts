@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { reactRenderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAsObservable } from './use_as_observable';
 
 describe('useAsObservable', () => {
@@ -14,7 +14,7 @@ describe('useAsObservable', () => {
   });
 
   test('provides and observable preserving a reference', () => {
-    const { result, rerender } = reactRenderHook(useAsObservable, { initialProps: 1 });
+    const { result, rerender } = renderHook(useAsObservable, { initialProps: 1 });
 
     let observableValue;
     const subscriptionMock = jest.fn((v) => (observableValue = v));
@@ -35,7 +35,7 @@ describe('useAsObservable', () => {
   });
 
   test('updates the subject with a new value', async () => {
-    const { result, rerender } = reactRenderHook(useAsObservable, {
+    const { result, rerender } = renderHook(useAsObservable, {
       initialProps: 'test',
     });
 

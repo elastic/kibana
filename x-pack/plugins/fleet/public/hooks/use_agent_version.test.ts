@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook as reactRenderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { useAgentVersion } from './use_agent_version';
 import { useKibanaVersion } from './use_kibana_version';
@@ -28,7 +28,7 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result } = reactRenderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
@@ -46,7 +46,7 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result } = reactRenderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
@@ -64,7 +64,7 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result } = reactRenderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
@@ -82,7 +82,7 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result } = reactRenderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
@@ -100,7 +100,7 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result } = reactRenderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
@@ -118,7 +118,7 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result } = reactRenderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
@@ -133,7 +133,7 @@ describe('useAgentVersion', () => {
     (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
     (sendGetAgentsAvailableVersions as jest.Mock).mockRejectedValue(new Error('Fetching error'));
 
-    const { result } = reactRenderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
     await waitFor(() => null);
@@ -157,7 +157,7 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result } = reactRenderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 

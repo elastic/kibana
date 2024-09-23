@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook as reactRenderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import type { DataStream } from '../types';
 import * as useLocatorModule from '../../../hooks/use_locator';
@@ -30,7 +30,7 @@ describe('useApmServiceHref hook', () => {
       package: 'elastic_agent',
     } as DataStream;
 
-    const { result } = reactRenderHook(() => useAPMServiceDetailHref(datastream));
+    const { result } = renderHook(() => useAPMServiceDetailHref(datastream));
 
     await waitFor(() => null);
 
@@ -84,7 +84,7 @@ describe('useApmServiceHref hook', () => {
   it.each(testCases)(
     'it passes the correct params to apm locator for %s',
     async (datastream, locatorParams) => {
-      const { result } = reactRenderHook(() => useAPMServiceDetailHref(datastream));
+      const { result } = renderHook(() => useAPMServiceDetailHref(datastream));
 
       await waitFor(() => null);
 

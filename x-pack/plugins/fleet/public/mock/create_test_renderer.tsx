@@ -15,12 +15,7 @@ import type {
   RenderHookOptions,
   RenderHookResult,
 } from '@testing-library/react';
-import {
-  render as reactRender,
-  act,
-  renderHook as reactRenderHook,
-  waitFor,
-} from '@testing-library/react';
+import { render as reactRender, act, renderHook, waitFor } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -132,7 +127,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
         </testRendererMocks.HookWrapper>
       );
 
-      return reactRenderHook(callback, {
+      return renderHook(callback, {
         wrapper,
       });
     },
@@ -146,6 +141,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
       });
       return renderResponse!;
     },
+    waitFor,
   };
 
   return testRendererMocks;
@@ -215,7 +211,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
           <ExtraWrapper>{children}</ExtraWrapper>
         </testRendererMocks.HookWrapper>
       );
-      return reactRenderHook(callback, {
+      return renderHook(callback, {
         wrapper,
       });
     },
