@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { ActionPayload } from '../../explorer_dashboard_service';
+import type { EXPLORER_ACTION } from '../../explorer_constants';
+import type { ExplorerActionPayloads } from '../../explorer_dashboard_service';
 
 import { getIndexPattern } from './get_index_pattern';
 import type { ExplorerState } from './state';
 
-export const jobSelectionChange = (state: ExplorerState, payload: ActionPayload): ExplorerState => {
+export const jobSelectionChange = (
+  state: ExplorerState,
+  payload: ExplorerActionPayloads[typeof EXPLORER_ACTION.JOB_SELECTION_CHANGE]
+): ExplorerState => {
   const { selectedJobs, noInfluencersConfigured } = payload;
   const stateUpdate: ExplorerState = {
     ...state,

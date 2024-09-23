@@ -259,15 +259,25 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           </EuiFlexGroup>
         </EuiPageTemplate.Header>
         <EuiSpacer size="m" />
-        <ESQLLangEditor
-          query={localQuery}
-          onTextLangQueryChange={onTextLangQueryChange}
-          onTextLangQuerySubmit={onTextLangQuerySubmit}
-          detectedTimestamp={currentDataView?.timeFieldName}
-          hideRunQueryText={false}
-          isLoading={queryHistoryStatus ?? false}
-          displayDocumentationAsFlyout
-        />
+        <EuiFlexItem
+          grow={false}
+          data-test-subj="DataVisualizerESQLEditor"
+          css={css({
+            borderTop: euiTheme.euiBorderThin,
+            borderLeft: euiTheme.euiBorderThin,
+            borderRight: euiTheme.euiBorderThin,
+          })}
+        >
+          <ESQLLangEditor
+            query={localQuery}
+            onTextLangQueryChange={onTextLangQueryChange}
+            onTextLangQuerySubmit={onTextLangQuerySubmit}
+            detectedTimestamp={currentDataView?.timeFieldName}
+            hideRunQueryText={false}
+            isLoading={queryHistoryStatus ?? false}
+            displayDocumentationAsFlyout
+          />
+        </EuiFlexItem>
 
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>
