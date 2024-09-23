@@ -61,12 +61,7 @@ const fieldConfig = schema.maybe(
       by: schema.string(),
       order: schema.maybe(schema.string()),
     }),
-    filterBy: schema.maybe(
-      schema.object({
-        field: schema.string(),
-        query: schema.string(),
-      })
-    ),
+    value: schema.maybe(schema.string()),
   })
 );
 

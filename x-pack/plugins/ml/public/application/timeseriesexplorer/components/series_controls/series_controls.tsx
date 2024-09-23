@@ -54,22 +54,6 @@ export type UiPartitionFieldsConfig = Exclude<PartitionFieldsConfig, undefined>;
 export type UiPartitionFieldConfig = Exclude<PartitionFieldConfig, undefined>;
 
 /**
- * Returns a filterBy object based on the partition_field value.
- */
-const getFilterBy = (entities: Entity[]): Pick<UiPartitionFieldConfig, 'filterBy'> | null => {
-  const query = entities.find((e) => e.fieldType === 'partition_field')?.fieldValue;
-
-  if (!query) return null;
-
-  return {
-    filterBy: {
-      field: 'partition_field_value',
-      query,
-    },
-  };
-};
-
-/**
  * Provides default fields configuration.
  */
 const getDefaultFieldConfig = (
@@ -82,7 +66,7 @@ const getDefaultFieldConfig = (
       applyTimeRange,
       anomalousOnly: isAnomalousOnly,
       sort: { by: 'anomaly_score', order: 'desc' },
-      ...(f.fieldType === 'by_field' ? getFilterBy(entities) : {}),
+      ...(f.fieldValue && { value: f.fieldValue }),
     };
     return acc;
   }, {} as UiPartitionFieldsConfig);
@@ -158,18 +142,28 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
 
   // Merge the default config with the one from the local storage
   const resultFieldsConfig = useMemo(() => {
-    return {
-      ...getDefaultFieldConfig(
-        entityControls,
-        !storageFieldsConfig
-          ? true
-          : Object.values(storageFieldsConfig).some((v) => !!v?.anomalousOnly),
-        !storageFieldsConfig
-          ? true
-          : Object.values(storageFieldsConfig).some((v) => !!v?.applyTimeRange)
-      ),
-      ...(!storageFieldsConfig ? {} : storageFieldsConfig),
-    };
+    const defaultFieldConfig = getDefaultFieldConfig(
+      entityControls,
+      !storageFieldsConfig
+        ? true
+        : Object.values(storageFieldsConfig).some((v) => !!v?.anomalousOnly),
+      !storageFieldsConfig
+        ? true
+        : Object.values(storageFieldsConfig).some((v) => !!v?.applyTimeRange)
+    );
+
+    // Early return to prevent unnecessary looping through the default config
+    if (!storageFieldsConfig) return defaultFieldConfig;
+
+    // Merge the default config with the one from the local storage without overriding the default values
+    for (const key of Object.keys(defaultFieldConfig) as MlEntityFieldType[]) {
+      defaultFieldConfig[key] = {
+        ...defaultFieldConfig[key],
+        ...storageFieldsConfig[key],
+      } as UiPartitionFieldConfig;
+    }
+
+    return defaultFieldConfig;
   }, [entityControls, storageFieldsConfig]);
 
   /**
