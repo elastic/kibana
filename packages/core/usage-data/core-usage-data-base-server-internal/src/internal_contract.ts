@@ -23,4 +23,7 @@ export interface InternalCoreUsageDataSetup extends CoreUsageDataSetup {
 
   /** @internal {@link CoreIncrementUsageCounter} **/
   incrementUsageCounter: CoreIncrementUsageCounter;
+
+  /** @internal {@link CoreIncrementUsageCounter} **/
+  incrementDeprecatedApiUsageCounter: CoreIncrementUsageCounter;
 }

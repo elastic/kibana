@@ -56,6 +56,12 @@ const i18nTexts = {
       defaultMessage: 'Feature',
     }
   ),
+  routeDeprecationTypeCellLabel: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.table.routeDeprecationTypeCellLabel',
+    {
+      defaultMessage: 'Route',
+    }
+  ),
   unknownDeprecationTypeCellLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.unknownDeprecationTypeCellLabel',
     {
@@ -135,6 +141,8 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
             return i18nTexts.configDeprecationTypeCellLabel;
           case 'feature':
             return i18nTexts.featureDeprecationTypeCellLabel;
+          case 'route':
+            return i18nTexts.routeDeprecationTypeCellLabel;
           case 'uncategorized':
           default:
             return i18nTexts.unknownDeprecationTypeCellLabel;

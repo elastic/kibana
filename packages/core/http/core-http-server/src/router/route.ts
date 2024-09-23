@@ -159,8 +159,6 @@ export interface RouteInputDeprecation {
  * of the Elastic stack (via Upgrade Assistant) and will be surfaced in documentation
  * created from HTTP API introspection (like OAS).
  *
- * string - Provide a string to mark this route as deprecated along with a description like:
- *          "This route is deprecated and staged for removal by X.X.X. Use /another/cool/route instead"
  * boolean - Set this to `true` to specify that this entire route is deprecated.
  *
  * It's also possible to provide deprecation messages about sub-parts of the route. Consider this
@@ -179,7 +177,7 @@ export interface RouteInputDeprecation {
  * @default false
  * @public
  */
-export type RouteDeprecation = boolean | string | RouteInputDeprecation;
+export type RouteDeprecation = boolean | RouteInputDeprecation;
 
 /**
  * Additional route options.

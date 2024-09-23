@@ -10,8 +10,6 @@
 import { Observable, Subscription, combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
 import { map } from 'rxjs';
 
-import EventEmitter from 'node:events';
-
 import { pick, Semaphore } from '@kbn/std';
 import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
 import { Logger } from '@kbn/logging';
@@ -186,6 +184,10 @@ export class HttpService
 
       registerOnPostValidation: (cb) => {
         Router.on('onPostValidate', cb);
+      },
+
+      getRegisteredDeprecatedApis: () => {
+        return serverContract.getDeprecatedRoutes();
       },
 
       externalUrl: new ExternalUrlConfig(config.externalUrl),

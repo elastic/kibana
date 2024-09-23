@@ -67,6 +67,7 @@ export interface InternalHttpServiceSetup
     provider: IContextProvider<Context, ContextName>
   ) => IContextContainer;
   registerOnPostValidation(cb: (req: CoreKibanaRequest) => void): void;
+  getRegisteredDeprecatedApis: () => any[];
 }
 
 /** @internal */

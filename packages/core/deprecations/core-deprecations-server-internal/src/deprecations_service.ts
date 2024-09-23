@@ -87,6 +87,7 @@ export class DeprecationsService
     if (!this.deprecationsFactory) {
       throw new Error('`setup` must be called before `start`');
     }
+
     return {
       asScopedToClient: this.createScopedDeprecations(),
     };

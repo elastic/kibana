@@ -62,7 +62,10 @@ export class DeprecationsFactory {
       })
     );
 
-    return deprecationsInfo.flat();
+    return [
+      ...deprecationsInfo.flat(),
+      // ...apiDeprecations,
+    ];
   };
 
   private createDeprecationInfo = (

@@ -15,6 +15,9 @@ export const registerGetRoute = (router: InternalDeprecationRouter) => {
     {
       path: '/',
       validate: false,
+      options: {
+        deprecated: true,
+      },
     },
     async (context, req, res) => {
       const deprecationsClient = (await context.core).deprecations.client;

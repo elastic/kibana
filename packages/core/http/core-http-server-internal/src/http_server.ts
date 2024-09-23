@@ -39,7 +39,7 @@ import type {
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
-import { identity } from 'lodash';
+import { identity, isFunction } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
@@ -144,6 +144,8 @@ export interface HttpServerSetup {
   authRequestHeaders: IAuthHeadersStorage;
   auth: HttpAuth;
   getServerInfo: () => HttpServerInfo;
+
+  getDeprecatedRoutes: HttpServiceSetup['getDeprecatedRoutes'];
 }
 
 /** @internal */
@@ -200,6 +202,25 @@ export class HttpServer {
 
   public isListening() {
     return this.server !== undefined && this.server.listener.listening;
+  }
+
+  private getDeprecatedRoutes() {
+    const deprecatedRoutes: any[] = [];
+
+    for (const router of this.registeredRouters) {
+      for (const route of router.getRoutes()) {
+        if (route.options.deprecated === true || isFunction(route.options.deprecated)) {
+          deprecatedRoutes.push({
+            basePath: router.routerPath,
+            routePath: route.path,
+            routeOptions: route.options,
+            routeMethod: route.method,
+          });
+        }
+      }
+    }
+
+    return deprecatedRoutes;
   }
 
   private registerRouter(router: IRouter) {
@@ -281,6 +302,7 @@ export class HttpServer {
 
     return {
       registerRouter: this.registerRouter.bind(this),
+      getDeprecatedRoutes: this.getDeprecatedRoutes.bind(this),
       registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
       staticAssets,

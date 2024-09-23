@@ -29,9 +29,6 @@ export function createRouteDeprecationsHandler({ coreUsageData }: Dependencies) 
     if (typeof deprecatedInput === 'boolean' && deprecatedInput === true) {
       // Log route level deprecation
       messages.push(`${req.route.method} ${req.route.path} is deprecated.`);
-    } else if (typeof deprecatedInput === 'string') {
-      // Log route level deprecation + message
-      messages.push(deprecatedInput);
     } else if (typeof deprecatedInput === 'object') {
       // Log route input level deprecation + message
       const deprecations = buildDeprecations(deprecatedInput);
@@ -39,6 +36,7 @@ export function createRouteDeprecationsHandler({ coreUsageData }: Dependencies) 
         if (check(req[location])) messages.push(`${req.route.method} ${req.route.path} ${message}`);
       }
     }
+
     for (const message of messages) {
       coreUsageData.incrementUsageCounter({ counterName: message }); // TODO(jloleysens) figure this part out
     }
