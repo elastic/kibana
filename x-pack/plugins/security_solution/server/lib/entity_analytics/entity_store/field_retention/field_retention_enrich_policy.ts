@@ -14,8 +14,8 @@ import type { EntityType } from '../../../../../common/api/entity_analytics/enti
 import { getFieldRetentionDefinition } from './field_retention_definitions';
 import type { FieldRetentionDefinition } from './types';
 import { getEntitiesIndexName } from '../utils/utils';
+import { buildFieldRetentionPipeline } from './field_retention_ingest_pipeline';
 
-const ID_FIELD = '_id';
 const HISTORICAL_FIELD = 'historical';
 
 const getEnrichPolicyName = (spaceId: string, definition: FieldRetentionDefinition) =>
@@ -26,19 +26,18 @@ const getFieldRetentionEnrichPolicy = (
   spaceId: string
 ): EnrichPutPolicyRequest => {
   const definition = getFieldRetentionDefinition(entityType);
-
   // TODO: all this needs spaces support
   return {
     name: getEnrichPolicyName(spaceId, definition),
     match: {
       indices: getEntitiesIndexName(entityType),
-      match_field: ID_FIELD,
+      match_field: definition.matchField,
       enrich_fields: definition.fields.map(({ field }) => field),
     },
   };
 };
 
-export const ensureFieldRetentionEnrichPolicy = async ({
+export const createFieldRetentionEnrichPolicy = async ({
   spaceId,
   esClient,
   entityType,
@@ -48,6 +47,7 @@ export const ensureFieldRetentionEnrichPolicy = async ({
   entityType: EntityType;
 }) => {
   const policy = getFieldRetentionEnrichPolicy(entityType, spaceId);
+  console.log('policy', JSON.stringify(policy));
   return esClient.enrich.putPolicy(policy);
 };
 
@@ -91,17 +91,11 @@ export const getFieldRetentionPipelineSteps = ({
     {
       enrich: {
         policy_name: getEnrichPolicyName(spaceId, definition),
-        field: ID_FIELD,
+        field: definition.matchField,
         target_field: HISTORICAL_FIELD,
       },
     },
-    {
-      set: {
-        if: 'ctx.asset == null || ctx.asset.criticality == null || ctx.asset.criticality.size() == 0',
-        field: 'asset.criticality',
-        value: `{{${HISTORICAL_FIELD}.asset.criticality.criticality_level}}`,
-      },
-    },
+    ...buildFieldRetentionPipeline(definition, HISTORICAL_FIELD),
   ];
 
   if (!debugMode) {
@@ -111,6 +105,8 @@ export const getFieldRetentionPipelineSteps = ({
       },
     });
   }
+
+  console.log('steps', JSON.stringify(steps));
 
   return steps;
 };

@@ -7,29 +7,27 @@
 
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
-
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type {
   InitEntityEngineRequestBody,
   InitEntityEngineResponse,
 } from '../../../../common/api/entity_analytics/entity_store/engine/init.gen';
-
 import type {
   EntityType,
   InspectQuery,
 } from '../../../../common/api/entity_analytics/entity_store/common.gen';
-
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { getEntitiesIndexName } from './utils/utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import type { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import { getDefinitionForEntityType } from './definition';
 import {
-  ensureFieldRetentionEnrichPolicy,
+  createFieldRetentionEnrichPolicy,
   executeFieldRetentionEnrichPolicy,
   getFieldRetentionPipelineSteps,
 } from './field_retention';
+import { getEntityIndexMapping } from './index_mappings';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -73,17 +71,13 @@ export class EntityStoreDataClient {
     }
 
     const definition = getDefinitionForEntityType(entityType, this.options.namespace);
+    const { logger, entityClient } = this.options;
 
     logger.info(`Initializing entity store for ${entityType}`);
 
     const descriptor = await this.engineClient.init(entityType, definition, filter);
-
-    // TODO: spaces
-    const spaceId = 'default';
-    await this.ensureFieldRetentionEnrichPolicy({ spaceId, entityType });
-    await this.executeFieldRetentionEnrichPolicy({ spaceId, entityType });
-    await this.createPlatformPipeline({ spaceId, entityType });
-    await this.options.entityClient.createEntityDefinition({
+    logger.debug(`Initialized engine for ${entityType}`);
+    await entityClient.createEntityDefinition({
       definition: {
         ...definition,
         filter,
@@ -91,47 +85,44 @@ export class EntityStoreDataClient {
           ? [...definition.indexPatterns, ...indexPattern.split(',')]
           : definition.indexPatterns,
       },
+      installOnly: true,
     });
-    const updated = await this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
+    logger.debug(`Created entity definition for ${entityType}`);
+    await this.createEntityIndexComponentTemplate({ entityType });
+    logger.debug(`Created entity index component template for ${entityType}`);
+    await this.createEntityIndex({ entityType });
+    logger.debug(`Created entity index for ${entityType}`);
+    await this.createFieldRetentionEnrichPolicy({ entityType });
+    logger.debug(`Created field retention enrich policy for ${entityType}`);
+    await this.executeFieldRetentionEnrichPolicy({ entityType });
+    logger.debug(`Executed field retention enrich policy for ${entityType}`);
+    await this.createPlatformPipeline({ entityType });
+    logger.debug(`Created @platform pipeline for ${entityType}`);
 
+    await this.start(entityType, { force: true });
+    logger.debug(`Started entity definition for ${entityType}`);
+    const updated = await this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
+    logger.debug(`Updated engine status to 'started' for ${entityType}, initialisation complete`);
     return { ...descriptor, ...updated };
   }
 
-  public executeFieldRetentionEnrichPolicy({
-    spaceId,
-    entityType,
-  }: {
-    spaceId: string;
-    entityType: EntityType;
-  }) {
+  public executeFieldRetentionEnrichPolicy({ entityType }: { entityType: EntityType }) {
     return executeFieldRetentionEnrichPolicy({
-      spaceId,
+      spaceId: this.options.namespace,
       esClient: this.options.esClient,
       entityType,
     });
   }
 
-  public async ensureFieldRetentionEnrichPolicy({
-    spaceId,
-    entityType,
-  }: {
-    spaceId: string;
-    entityType: EntityType;
-  }) {
-    return ensureFieldRetentionEnrichPolicy({
-      spaceId,
+  public async createFieldRetentionEnrichPolicy({ entityType }: { entityType: EntityType }) {
+    return createFieldRetentionEnrichPolicy({
+      spaceId: this.options.namespace,
       esClient: this.options.esClient,
       entityType,
     });
   }
 
-  private async createPlatformPipeline({
-    spaceId,
-    entityType,
-  }: {
-    entityType: EntityType;
-    spaceId: string;
-  }) {
+  private async createPlatformPipeline({ entityType }: { entityType: EntityType }) {
     const definition = getDefinitionForEntityType(entityType, this.options.namespace);
 
     await this.options.esClient.ingest.putPipeline({
@@ -142,17 +133,37 @@ export class EntityStoreDataClient {
           managed: true,
         },
         description: `Ingest pipeline for entity defiinition ${definition.id}`,
-        processors: getFieldRetentionPipelineSteps({ spaceId, entityType }),
+        processors: getFieldRetentionPipelineSteps({ spaceId: this.options.namespace, entityType }),
       },
     });
   }
 
-  public async start(entityType: EntityType) {
+  private async createEntityIndex({ entityType }: { entityType: EntityType }) {
+    await this.options.esClient.indices.create({
+      index: getEntitiesIndexName(entityType, this.options.namespace),
+      body: {},
+    });
+  }
+
+  private async createEntityIndexComponentTemplate({ entityType }: { entityType: EntityType }) {
+    const definition = getDefinitionForEntityType(entityType, this.options.namespace);
+
+    await this.options.esClient.cluster.putComponentTemplate({
+      name: `${definition.id}-latest@platform`,
+      body: {
+        template: {
+          mappings: getEntityIndexMapping(entityType),
+        },
+      },
+    });
+  }
+
+  public async start(entityType: EntityType, options?: { force: boolean }) {
     const definition = getDefinitionForEntityType(entityType, this.options.namespace);
 
     const descriptor = await this.engineClient.get(entityType);
 
-    if (descriptor.status !== ENGINE_STATUS.STOPPED) {
+    if (!options?.force && descriptor.status !== ENGINE_STATUS.STOPPED) {
       throw new Error(
         `Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );

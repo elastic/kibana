@@ -24,17 +24,18 @@ const getBaseFields = (entityType: EntityType): FieldRetentionDefinition['fields
 const HOST_FIELD_RETENTION_DEFINITION: FieldRetentionDefinition = {
   entityType: 'host',
   version: 1,
+  matchField: 'host.name',
   fields: [
     ...getBaseFields('host'),
     {
       field: 'host.ip',
       operation: 'collect_values',
-      count: DEFAULT_FIELD_RETENTION_COUNT,
+      maxLength: DEFAULT_FIELD_RETENTION_COUNT,
     },
     {
       field: 'host.mac',
       operation: 'collect_values',
-      count: DEFAULT_FIELD_RETENTION_COUNT,
+      maxLength: DEFAULT_FIELD_RETENTION_COUNT,
     },
     {
       field: 'host.risk.calculated_level',
@@ -46,17 +47,18 @@ const HOST_FIELD_RETENTION_DEFINITION: FieldRetentionDefinition = {
 const USER_FIELD_RETENTION_DEFINITION: FieldRetentionDefinition = {
   entityType: 'user',
   version: 1,
+  matchField: 'user.name',
   fields: [
     ...getBaseFields('user'),
     {
       field: 'user.email',
       operation: 'collect_values',
-      count: DEFAULT_FIELD_RETENTION_COUNT,
+      maxLength: DEFAULT_FIELD_RETENTION_COUNT,
     },
     {
       field: 'user.roles',
       operation: 'collect_values',
-      count: DEFAULT_FIELD_RETENTION_COUNT,
+      maxLength: DEFAULT_FIELD_RETENTION_COUNT,
     },
   ],
 };
