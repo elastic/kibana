@@ -8,9 +8,7 @@
  */
 
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent, FC } from 'react';
-import ReactMonacoEditor, {
-  type MonacoEditorProps as ReactMonacoEditorProps,
-} from 'react-monaco-editor';
+
 import {
   htmlIdGenerator,
   EuiToolTip,
@@ -34,6 +32,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import {
+  MonacoEditor as ReactMonacoEditor,
+  type MonacoEditorProps as ReactMonacoEditorProps,
+} from './monaco_editor';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
