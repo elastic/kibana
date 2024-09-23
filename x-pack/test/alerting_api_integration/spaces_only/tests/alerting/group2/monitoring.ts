@@ -61,10 +61,10 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       const ruleId = createResponse.body.id;
       objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
-      await waitForExecutionCount(1, ruleId);
-      await run(ruleId);
-      await waitForExecutionCount(2, ruleId);
-      await run(ruleId);
+      for (let i = 1; i < 3; i++) {
+        await waitForExecutionCount(i, ruleId);
+        await run(ruleId);
+      }
       // Allow at least three executions
       await waitForExecutionCount(3, ruleId);
 
@@ -99,14 +99,10 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       const ruleId = createResponse.body.id;
       objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
-      await waitForExecutionCount(1, ruleId);
-      await run(ruleId);
-      await waitForExecutionCount(2, ruleId);
-      await run(ruleId);
-      await waitForExecutionCount(3, ruleId);
-      await run(ruleId);
-      await waitForExecutionCount(4, ruleId);
-      await run(ruleId);
+      for (let i = 1; i < 5; i++) {
+        await waitForExecutionCount(i, ruleId);
+        await run(ruleId);
+      }
       // Allow at least five executions
       await waitForExecutionCount(5, ruleId);
 
