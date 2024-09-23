@@ -130,10 +130,6 @@ export class DataViewMgmtService {
 
     this.state$ = this.internalState$ as BehaviorObservable<DataViewMgmtState>;
 
-    uiSettings.get('defaultIndex').then((defaultIndex: string) => {
-      this.updateState({ defaultIndex });
-    });
-
     // allowed types are set once and never change
     this.allowedTypes = new Promise((resolve) => {
       savedObjectsManagement.getAllowedTypes().then((resp) => {
@@ -173,7 +169,7 @@ export class DataViewMgmtService {
 
   private getTags = async (dataView: DataView) => {
     if (dataView) {
-      const defaultIndex = await this.services.uiSettings.get('defaultIndex'); // todo use const
+      const defaultIndex = await this.services.uiSettings.get('defaultIndex');
       const tags = getTags(
         dataView,
         dataView.id === defaultIndex,
