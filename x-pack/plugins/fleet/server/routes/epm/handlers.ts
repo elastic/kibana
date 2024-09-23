@@ -540,11 +540,16 @@ export const deletePackageHandler: FleetRequestHandler<
     const fleetContext = await context.fleet;
     const savedObjectsClient = fleetContext.internalSoClient;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const entityClient = await appContextService
+      .getEntityManagerStart()
+      ?.getScopedClient({ request });
+
     const res = await removeInstallation({
       savedObjectsClient,
       pkgName,
       pkgVersion,
       esClient,
+      entityClient,
       force: request.query?.force,
     });
     const body: DeletePackageResponse = {
@@ -675,6 +680,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       installed_kibana_space_id: attributes.installed_kibana_space_id,
       additional_spaces_installed_kibana: attributes.additional_spaces_installed_kibana,
       installed_es: attributes.installed_es,
+      installed_entity_definitions: attributes.installed_entity_definitions,
       install_status: attributes.install_status,
       install_source: attributes.install_source,
       name: attributes.name,

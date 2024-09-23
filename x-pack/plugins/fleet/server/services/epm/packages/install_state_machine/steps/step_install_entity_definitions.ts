@@ -10,13 +10,15 @@ import type { EntityDefinition } from '@kbn/entities-schema';
 import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
-import type { PackageInstallContext } from '../../../../../../common/types';
+import type { Installation, type PackageInstallContext } from '../../../../../../common/types';
 import { getAssetFromAssetsMap, getPathParts } from '../../../archive';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common';
 
 export async function stepInstallEntityDefinitions(context: InstallContext) {
-  const { packageInstallContext, entityClient } = context;
+  const { packageInstallContext, entityClient, savedObjectsClient } = context;
+  const { packageInfo } = packageInstallContext;
 
-  await withPackageSpan('Install Entity definitions', async () => {
+  return await withPackageSpan('Install Entity definitions', async () => {
     const assets = await getEntityDefinitionAssets(packageInstallContext);
 
     await Promise.all(
@@ -26,12 +28,28 @@ export async function stepInstallEntityDefinitions(context: InstallContext) {
         });
       })
     );
+
+    await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, packageInfo.name, {
+      installed_entity_definitions: assets.map((asset) => asset.definition.id),
+    });
   });
 }
 
 export async function cleanUpEntityDefinitionsStep(context: InstallContext) {
-  const { packageInstallContext } = context;
-  const { packageInfo } = packageInstallContext;
+  const { packageInstallContext, entityClient } = context;
+
+  await withPackageSpan('Clean up Entity definitions', async () => {
+    const assets = await getEntityDefinitionAssets(packageInstallContext);
+
+    await Promise.all(
+      assets.map(async ({ definition }) => {
+        const result = await entityClient?.getEntityDefinitions({ id: definition.id });
+        if (result?.definitions.length) {
+          return entityClient?.deleteEntityDefinition({ id: definition.id });
+        }
+      })
+    );
+  });
 }
 
 interface EntityDefinitionArchive {

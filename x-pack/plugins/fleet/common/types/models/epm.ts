@@ -599,6 +599,7 @@ export interface Installation {
   installed_kibana: KibanaAssetReference[];
   additional_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
   installed_es: EsAssetReference[];
+  installed_entity_definitions: string[];
   package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;

@@ -16,6 +16,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import minVersion from 'semver/ranges/min-version';
 
+import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
+
 import { chunk } from 'lodash';
 
 import { updateIndexSettings } from '../elasticsearch/index/update_settings';
@@ -59,9 +61,10 @@ export async function removeInstallation(options: {
   pkgName: string;
   pkgVersion: string;
   esClient: ElasticsearchClient;
+  entityClient?: EntityClient;
   force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
+  const { savedObjectsClient, pkgName, pkgVersion, esClient, entityClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new PackageRemovalError(`${pkgName} is not installed`);
 
@@ -96,6 +99,14 @@ export async function removeInstallation(options: {
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
   await deleteAssets(installation, esClient);
+
+  if (installation.installed_entity_definitions?.length) {
+    await Promise.all(
+      installation.installed_entity_definitions.map((id) =>
+        entityClient?.deleteEntityDefinition({ id })
+      )
+    );
+  }
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -311,6 +322,7 @@ async function deleteAssets(
   {
     installed_es: installedEs,
     installed_kibana: installedKibana,
+    installed_entity_definitions: installedEntityDefinitions,
     installed_kibana_space_id: spaceId = DEFAULT_SPACE_ID,
     additional_spaces_installed_kibana: installedInAdditionalSpacesKibana = {},
     name,

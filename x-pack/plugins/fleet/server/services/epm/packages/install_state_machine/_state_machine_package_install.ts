@@ -57,7 +57,10 @@ import {
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
-import { stepInstallEntityDefinitions } from './steps/step_install_entity_definitions';
+import {
+  cleanUpEntityDefinitionsStep,
+  stepInstallEntityDefinitions,
+} from './steps/step_install_entity_definitions';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
@@ -99,6 +102,7 @@ const statesDefinition: StateMachineStates<StateNames> = {
     onPostTransition: updateLatestExecutedState,
   },
   install_entity_definitions: {
+    onPreTransition: cleanUpEntityDefinitionsStep,
     onTransition: stepInstallEntityDefinitions,
     nextState: INSTALL_STATES.INSTALL_ILM_POLICIES,
     onPostTransition: updateLatestExecutedState,
@@ -194,12 +198,9 @@ export async function _stateMachineInstallPackage(
   };
 
   try {
-    const { installedKibanaAssetsRefs, esReferences } = await handleState(
-      initialState!,
-      installStates,
-      installStates.context
-    );
+    const state = await handleState(initialState!, installStates, installStates.context);
 
+    const { installedKibanaAssetsRefs, esReferences } = state;
     return [
       ...(installedKibanaAssetsRefs ? (installedKibanaAssetsRefs as KibanaAssetReference[]) : []),
       ...(esReferences ? (esReferences as EsAssetReference[]) : []),
