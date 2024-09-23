@@ -79,6 +79,7 @@
     "@kbn/content-management-content-insights-server",
     "@kbn/managed-content-badge",
     "@kbn/content-management-favorites-public",
+    "@kbn/core-custom-branding-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }
