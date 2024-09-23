@@ -36,12 +36,9 @@ import {
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
 import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
-import { before, set } from 'lodash';
+import { set } from 'lodash';
 import { responseActionsClientMock } from '../mocks';
-import type {
-  ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
-} from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
 import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -809,21 +806,4 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   public fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
     return super.fetchAllPendingActions();
   }
-
-  // public sendActionCreationTelemetry(
-  //   actionRequest: LogsEndpointAction<
-  //     EndpointActionDataParameterTypes,
-  //     EndpointActionResponseDataOutput,
-  //     {}
-  //   >
-  // ): void {
-  //   return super.sendActionCreationTelemetry(actionRequest);
-  // }
-
-  // public sendActionCreationErrorTelemetry(
-  //   command: ResponseActionsApiCommandNames,
-  //   error: Error
-  // ): void {
-  //   return super.sendActionCreationErrorTelemetry(command, error);
-  // }
 }
