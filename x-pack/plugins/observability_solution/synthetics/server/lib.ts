@@ -166,7 +166,7 @@ export class SyntheticsEsClient {
     }
 
     return {
-      responses: res.body.responses as unknown as Array<
+      responses: res.body?.responses as unknown as Array<
         InferSearchResponseOf<TDocument, TSearchRequest>
       >,
     };
