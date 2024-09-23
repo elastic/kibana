@@ -48,7 +48,7 @@ export const SeverityFilter: React.FC<SeverityFilterProps> = ({
 
   return (
     <MultiselectFilter<RiskSeverity>
-      data-test-subj="risk-filter-button"
+      data-test-subj="risk-filter"
       title={ENTITY_RISK_LEVEL(riskEntity)}
       items={SEVERITY_UI_SORT_ORDER}
       selectedItems={selectedItems}

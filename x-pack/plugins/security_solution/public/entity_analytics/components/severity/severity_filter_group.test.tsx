@@ -38,9 +38,10 @@ describe('SeverityFilterGroup', () => {
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('risk-filter-button'));
+    fireEvent.click(getByTestId('risk-filter-popoverButton'));
 
     fireEvent.click(getByTestId('risk-filter-item-Unknown'));
+
     expect(mockedTelemetry.reportEntityRiskFiltered).toHaveBeenCalledTimes(1);
   });
 
@@ -61,7 +62,7 @@ describe('SeverityFilterGroup', () => {
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('risk-filter-button'));
+    fireEvent.click(getByTestId('risk-filter-popoverButton'));
 
     fireEvent.click(getByTestId('risk-filter-item-Unknown'));
     expect(mockedTelemetry.reportEntityRiskFiltered).toHaveBeenCalledTimes(0);

@@ -52,7 +52,7 @@ describe('RiskScoreHeaderContent', () => {
   });
 
   it('should render severity filter group', () => {
-    expect(res.getByTestId(`risk-filter-button`)).toBeInTheDocument();
+    expect(res.getByTestId(`risk-filter`)).toBeInTheDocument();
   });
 
   it('should render view all button', () => {

@@ -12,7 +12,7 @@ import { EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
 import { useBoolState } from '../../hooks/use_bool_state';
 
 export interface MultiselectFilterProps<T = unknown> {
-  dataTestSubj?: string;
+  ['data-test-subj']?: string;
   title: string;
   items: T[];
   selectedItems: T[];
@@ -33,7 +33,7 @@ interface MultiselectFilterOption<T> {
 }
 
 const MultiselectFilterComponent = <T extends unknown>({
-  dataTestSubj = 'multiselectFilter',
+  'data-test-subj': dataTestSubj = 'multiselectFilter',
   title,
   items,
   selectedItems,
@@ -68,7 +68,7 @@ const MultiselectFilterComponent = <T extends unknown>({
 
   return (
     <EuiPopover
-      data-test-subj={`${dataTestSubj}-popover`}
+      data-test-subj={dataTestSubj}
       button={
         <EuiFilterButton
           data-test-subj={`${dataTestSubj}-popoverButton`}
