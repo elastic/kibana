@@ -63,7 +63,7 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
           checked={isDocSelected(record.id)}
           data-test-subj={`dscGridSelectDoc-${record.id}`}
           onChange={(event) => {
-            if (event.nativeEvent?.shiftKey) {
+            if ((event.nativeEvent as MouseEvent)?.shiftKey) {
               toggleMultipleDocsSelection(record.id);
             } else {
               toggleDocSelection(record.id);

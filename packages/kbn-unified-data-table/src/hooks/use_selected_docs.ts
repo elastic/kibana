@@ -86,7 +86,7 @@ export const useSelectedDocs = (
         lastCheckboxToggledDocId.current || toDocId
       )?.docIndex;
       const currentToggledDocIdIndex = docMap.get(toDocId)?.docIndex;
-      const docIds = [];
+      const docIds: string[] = [];
 
       if (
         lastToggledDocIdIndex &&

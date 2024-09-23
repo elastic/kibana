@@ -499,7 +499,7 @@ export const UnifiedDataTable = ({
   const defaultColumns = displayedColumns.includes('_source');
   const docMap = useMemo(
     () =>
-      new Map<string, { row: DataTableRecord; rowIndex: number }>(
+      new Map<string, { doc: DataTableRecord; docIndex: number }>(
         rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []
       ),
     [rows]

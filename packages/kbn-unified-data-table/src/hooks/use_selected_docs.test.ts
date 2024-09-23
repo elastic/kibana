@@ -17,7 +17,7 @@ describe('useSelectedDocs', () => {
   const docs = generateEsHits(dataViewWithTimefieldMock, 5).map((hit) =>
     buildDataTableRecord(hit, dataViewWithTimefieldMock)
   );
-  const docsMap = new Map(docs.map((doc) => [doc.id, doc]));
+  const docsMap = new Map(docs.map((doc, docIndex) => [doc.id, { doc, docIndex }]));
 
   test('should have a correct default state', () => {
     const { result } = renderHook(() => useSelectedDocs(docsMap));
@@ -223,4 +223,6 @@ describe('useSelectedDocs', () => {
     expect(result.current.getCountOfFilteredSelectedDocs([docs[0].id])).toBe(0);
     expect(result.current.getCountOfFilteredSelectedDocs([docs[2].id, docs[3].id])).toBe(0);
   });
+
+  // TODO: add test for toggleMultipleDocsSelection
 });
