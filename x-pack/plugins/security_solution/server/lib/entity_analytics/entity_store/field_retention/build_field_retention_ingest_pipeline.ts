@@ -16,24 +16,27 @@ import type {
 const ENRICH_FIELD = 'historical';
 
 export const buildFieldRetentionIngestPipeline = ({
-  definition,
+  fieldRetentionDefinition,
   enrichPolicyName,
+  allEntityFields,
   debugMode = false,
 }: {
-  definition: FieldRetentionDefinition;
+  fieldRetentionDefinition: FieldRetentionDefinition;
   enrichPolicyName: string;
+  allEntityFields: string[];
   debugMode?: boolean;
 }): IngestProcessorContainer[] => [
   {
     enrich: {
       policy_name: enrichPolicyName,
-      field: definition.matchField,
+      field: fieldRetentionDefinition.matchField,
       target_field: ENRICH_FIELD,
     },
   },
-  ...getFieldProcessors(definition),
-  ...(debugMode ? getRemoveEmptyFieldProcessors(definition) : []),
-  ...(debugMode
+  ...getDotExpanderProcessors(allEntityFields),
+  ...getFieldProcessors(fieldRetentionDefinition),
+  ...(!debugMode ? getRemoveEmptyFieldProcessors(allEntityFields) : []),
+  ...(!debugMode
     ? [
         {
           remove: {
@@ -45,20 +48,32 @@ export const buildFieldRetentionIngestPipeline = ({
     : []),
 ];
 
-const getFieldProcessors = (definition: FieldRetentionDefinition): IngestProcessorContainer[] => {
-  return definition.fields.map((field) => fieldToProcessorStep(field));
+const getFieldProcessors = (
+  fieldRetentionDefinition: FieldRetentionDefinition
+): IngestProcessorContainer[] => {
+  return fieldRetentionDefinition.fields.map((field) => fieldToProcessorStep(field));
 };
 
 const isFieldMissingOrEmpty = (field: string): string => {
   const fieldParts = field.split('.');
-  const partsCheck = fieldParts.reduce((acc, part, index) => {
-    const path = fieldParts.slice(0, index + 1).join('.');
-    return `${acc}ctx.${path} == null${index < fieldParts.length - 1 ? ' || ' : ''}`;
+  return fieldParts.reduce((acc, part, index) => {
+    const path = fieldParts
+      .slice(0, index + 1)
+      .map((p) => `['${p}']`)
+      .join('');
+
+    // Check if the current path part is missing or null
+    let condition = `ctx${path} == null`;
+
+    // At the final field level, add the empty array check
+    if (index === fieldParts.length - 1) {
+      const emptyArrayCheck = `(ctx${path} instanceof List && ctx${path}.size() == 0)`;
+      const emptyStringCheck = `(ctx${path} instanceof String && ctx${path}.isEmpty())`;
+      condition += ` || ${emptyArrayCheck} || ${emptyStringCheck}`;
+    }
+
+    return `${acc}${condition}${index < fieldParts.length - 1 ? ' || ' : ''}`;
   }, '');
-
-  const emptyArrayCheck = `(ctx.${field} instanceof List && ctx.${field}.size() == 0)`;
-
-  return `${partsCheck} || ${emptyArrayCheck}`;
 };
 
 const keepOldestValueProcessor = ({ field }: KeepOldestValue): IngestProcessorContainer => {
@@ -71,19 +86,6 @@ const keepOldestValueProcessor = ({ field }: KeepOldestValue): IngestProcessorCo
     },
   };
 };
-
-const getRemoveEmptyFieldProcessors = (
-  definition: FieldRetentionDefinition
-): IngestProcessorContainer[] =>
-  definition.fields.map(({ field }) => {
-    return {
-      remove: {
-        if: isFieldMissingOrEmpty(field),
-        field,
-        ignore_missing: true,
-      },
-    };
-  });
 
 const collectValuesProcessor = ({ field, maxLength }: CollectValues) => {
   return {
@@ -120,3 +122,23 @@ const fieldToProcessorStep = (fieldOperator: FieldRetentionOperator): IngestProc
       return collectValuesProcessor(fieldOperator);
   }
 };
+
+const getRemoveEmptyFieldProcessors = (fields: string[]): IngestProcessorContainer[] =>
+  fields.map((field) => {
+    return {
+      remove: {
+        if: isFieldMissingOrEmpty(field),
+        field,
+        ignore_missing: true,
+      },
+    };
+  });
+
+const getDotExpanderProcessors = (fields: string[]): IngestProcessorContainer[] =>
+  fields.map((field) => {
+    return {
+      dot_expander: {
+        field,
+      },
+    };
+  });

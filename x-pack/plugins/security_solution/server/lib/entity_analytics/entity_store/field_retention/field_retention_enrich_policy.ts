@@ -78,10 +78,11 @@ export const getFieldRetentionPipelineSteps = (opts: {
   spaceId: string;
   entityType: EntityType;
   debugMode?: boolean;
+  allEntityFields: string[];
 }): IngestProcessorContainer[] =>
   buildFieldRetentionIngestPipeline({
     ...opts,
-    definition: getFieldRetentionDefinition(opts.entityType),
+    fieldRetentionDefinition: getFieldRetentionDefinition(opts.entityType),
     enrichPolicyName: getEnrichPolicyName(
       opts.spaceId,
       getFieldRetentionDefinition(opts.entityType)
