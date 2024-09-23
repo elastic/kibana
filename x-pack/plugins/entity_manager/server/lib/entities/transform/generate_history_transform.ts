@@ -30,7 +30,9 @@ export function generateHistoryTransform(
 ): TransformPutTransformRequest {
   const filter: QueryDslQueryContainer[] = [];
 
-  if (definition.filter) {
+  if (definition.history.overrides?.filter) {
+    filter.push(getElasticsearchQueryOrThrow(definition.history.overrides.filter));
+  } else if (definition.filter) {
     filter.push(getElasticsearchQueryOrThrow(definition.filter));
   }
 
@@ -70,7 +72,9 @@ export function generateBackfillHistoryTransform(
 
   const filter: QueryDslQueryContainer[] = [];
 
-  if (definition.filter) {
+  if (definition.history.overrides?.filter) {
+    filter.push(getElasticsearchQueryOrThrow(definition.history.overrides.filter));
+  } else if (definition.filter) {
     filter.push(getElasticsearchQueryOrThrow(definition.filter));
   }
 
@@ -114,6 +118,10 @@ const generateTransformPutRequest = ({
   frequency?: string;
   syncDelay?: string;
 }) => {
+  const indexPatterns =
+    definition.history.overrides?.indexPatterns != null
+      ? definition.history.overrides.indexPatterns
+      : definition.indexPatterns;
   return {
     transform_id: transformId,
     _meta: {
@@ -122,7 +130,7 @@ const generateTransformPutRequest = ({
     },
     defer_validation: true,
     source: {
-      index: definition.indexPatterns,
+      index: indexPatterns,
       ...(filter.length > 0 && {
         query: {
           bool: {

@@ -21,4 +21,26 @@ describe('generateHistoryTransform(definition)', () => {
     const transform = generateBackfillHistoryTransform(entityDefinitionWithBackfill);
     expect(transform).toMatchSnapshot();
   });
+  it('should generate a valid history transform with overrides', () => {
+    const definitionWithOverrides = {
+      ...entityDefinition,
+      history: {
+        ...entityDefinition.history,
+        overrides: { indexPatterns: ['some-summary-index'], filter: 'includes_metrics: true' },
+      },
+    };
+    const transform = generateHistoryTransform(definitionWithOverrides);
+    expect(transform).toMatchSnapshot();
+  });
+  it('should generate a valid history backfill transform with overrides', () => {
+    const definitionWithOverrides = {
+      ...entityDefinitionWithBackfill,
+      history: {
+        ...entityDefinition.history,
+        overrides: { indexPatterns: ['some-summary-index'], filter: 'includes_metrics: true' },
+      },
+    };
+    const transform = generateHistoryTransform(definitionWithOverrides);
+    expect(transform).toMatchSnapshot();
+  });
 });

@@ -33,6 +33,12 @@ export const entityDefinitionSchema = z.object({
   staticFields: z.optional(z.record(z.string(), z.string())),
   managed: z.optional(z.boolean()).default(false),
   history: z.object({
+    overrides: z.optional(
+      z.object({
+        indexPatterns: z.optional(arrayOfStringsSchema),
+        filter: filterSchema,
+      })
+    ),
     timestampField: z.string(),
     interval: durationSchemaWithMinimum(1),
     settings: historySettingsSchema,
