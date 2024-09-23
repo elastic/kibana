@@ -2040,7 +2040,7 @@ describe('helper functions', () => {
       expect(record.kibana?.alert?.rule?.gap?.status).toEqual('unfilled');
       expect(record.kibana?.alert?.rule?.gap?.range?.from).toEqual('2022-05-05T15:59:54.480Z');
       expect(record.kibana?.alert?.rule?.gap?.range?.to).toEqual('2022-05-05T16:59:54.480Z');
-      
+
       expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(ruleDataWithName.type?.id);
       expect(record.kibana?.alert?.rule?.consumer).toEqual(ruleDataWithName.consumer);
       expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(
