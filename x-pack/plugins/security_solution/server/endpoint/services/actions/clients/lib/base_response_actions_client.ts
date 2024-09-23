@@ -748,7 +748,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         responseActions: {
           agentType: this.agentType,
           command,
-          error,
+          error: error.message,
         },
       });
   }
