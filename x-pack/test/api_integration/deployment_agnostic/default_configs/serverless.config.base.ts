@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrConfigProviderContext, Config } from '@kbn/test';
+import { FtrConfigProviderContext, Config, defineDockerServersConfig } from '@kbn/test';
 
 import { ServerlessProjectType } from '@kbn/es';
+import path from 'path';
+import { dockerImage } from '../../../fleet_api_integration/config.base';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
@@ -65,6 +67,17 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       );
     }
 
+    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
+    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+
+    /**
+     * This is used by CI to set the docker registry port
+     * you can also define this environment variable locally when running tests which
+     * will spin up a local docker package registry locally for you
+     * if this is defined it takes precedence over the `packageRegistryOverride` variable
+     */
+    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
     const svlSharedConfig = await readConfigFile(
       require.resolve('@kbn/test-suites-serverless/shared/config.base')
     );
@@ -76,6 +89,17 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
         // services can be customized, but must extend DeploymentAgnosticCommonServices
         ...(options.services || services),
       },
+      dockerServers: defineDockerServersConfig({
+        registry: {
+          enabled: !!dockerRegistryPort,
+          image: dockerImage,
+          portInContainer: 8080,
+          port: dockerRegistryPort,
+          args: dockerArgs,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+        },
+      }),
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [

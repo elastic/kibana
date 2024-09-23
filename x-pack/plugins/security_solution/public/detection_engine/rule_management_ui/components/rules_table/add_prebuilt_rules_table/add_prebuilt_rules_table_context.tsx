@@ -7,7 +7,7 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
@@ -75,9 +75,9 @@ export interface AddPrebuiltRulesTableState {
 
 export interface AddPrebuiltRulesTableActions {
   reFetchRules: () => void;
-  installOneRule: (ruleId: RuleSignatureId) => void;
+  installOneRule: (ruleId: RuleSignatureId, enable?: boolean) => void;
   installAllRules: () => void;
-  installSelectedRules: () => void;
+  installSelectedRules: (enable?: boolean) => void;
   setFilterOptions: Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleResponse[]) => void;
   openRulePreview: (ruleId: RuleSignatureId) => void;
@@ -140,13 +140,16 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const filteredRules = useFilterPrebuiltRulesToInstall({ filterOptions, rules });
 
   const installOneRule = useCallback(
-    async (ruleId: RuleSignatureId) => {
+    async (ruleId: RuleSignatureId, enable?: boolean) => {
       const rule = rules.find((r) => r.rule_id === ruleId);
       invariant(rule, `Rule with id ${ruleId} not found`);
 
       setLoadingRules((prev) => [...prev, ruleId]);
       try {
-        await installSpecificRulesRequest([{ rule_id: ruleId, version: rule.version }]);
+        await installSpecificRulesRequest({
+          rules: [{ rule_id: ruleId, version: rule.version }],
+          enable,
+        });
       } finally {
         setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
       }
@@ -154,19 +157,24 @@ export const AddPrebuiltRulesTableContextProvider = ({
     [installSpecificRulesRequest, rules]
   );
 
-  const installSelectedRules = useCallback(async () => {
-    const rulesToUpgrade = selectedRules.map((rule) => ({
-      rule_id: rule.rule_id,
-      version: rule.version,
-    }));
-    setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
-    try {
-      await installSpecificRulesRequest(rulesToUpgrade);
-    } finally {
-      setLoadingRules((prev) => prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id)));
-      setSelectedRules([]);
-    }
-  }, [installSpecificRulesRequest, selectedRules]);
+  const installSelectedRules = useCallback(
+    async (enable?: boolean) => {
+      const rulesToUpgrade = selectedRules.map((rule) => ({
+        rule_id: rule.rule_id,
+        version: rule.version,
+      }));
+      setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
+      try {
+        await installSpecificRulesRequest({ rules: rulesToUpgrade, enable });
+      } finally {
+        setLoadingRules((prev) =>
+          prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id))
+        );
+        setSelectedRules([]);
+      }
+    },
+    [installSpecificRulesRequest, selectedRules]
+  );
 
   const installAllRules = useCallback(async () => {
     // Unselect all rules so that the table doesn't show the "bulk actions" bar
@@ -188,17 +196,33 @@ export const AddPrebuiltRulesTableContextProvider = ({
         !(isPreviewRuleLoading || isRefetching || isUpgradingSecurityPackages);
 
       return (
-        <EuiButton
-          disabled={!canPreviewedRuleBeInstalled}
-          onClick={() => {
-            installOneRule(rule.rule_id);
-            closeRulePreview();
-          }}
-          fill
-          data-test-subj="installPrebuiltRuleFromFlyoutButton"
-        >
-          {i18n.INSTALL_BUTTON_LABEL}
-        </EuiButton>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiButton
+              disabled={!canPreviewedRuleBeInstalled}
+              onClick={() => {
+                installOneRule(rule.rule_id);
+                closeRulePreview();
+              }}
+              data-test-subj="installPrebuiltRuleFromFlyoutButton"
+            >
+              {i18n.INSTALL_WITHOUT_ENABLING_BUTTON_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton
+              disabled={!canPreviewedRuleBeInstalled}
+              onClick={() => {
+                installOneRule(rule.rule_id, true);
+                closeRulePreview();
+              }}
+              fill
+              data-test-subj="installAndEnablePrebuiltRuleFromFlyoutButton"
+            >
+              {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     },
     [

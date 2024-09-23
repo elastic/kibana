@@ -141,26 +141,27 @@ export const MetricItem = ({
                 {
                   title: monitor.name,
                   subtitle: locationName,
-                  value: trendData?.median ?? 0,
+                  value: trendData !== 'loading' ? trendData?.median ?? 0 : 0,
                   trendShape: MetricTrendShape.Area,
-                  trend: trendData?.data ?? [],
-                  extra: trendData ? (
-                    <MetricItemExtra
-                      stats={{
-                        medianDuration: trendData.median,
-                        minDuration: trendData.min,
-                        maxDuration: trendData.max,
-                        avgDuration: trendData.avg,
-                      }}
-                    />
-                  ) : (
-                    <div>
-                      <FormattedMessage
-                        defaultMessage="Loading metrics"
-                        id="xpack.synthetics.overview.metricItem.loadingMessage"
+                  trend: trendData !== 'loading' && !!trendData?.data ? trendData.data : [],
+                  extra:
+                    trendData !== 'loading' && !!trendData ? (
+                      <MetricItemExtra
+                        stats={{
+                          medianDuration: trendData.median,
+                          minDuration: trendData.min,
+                          maxDuration: trendData.max,
+                          avgDuration: trendData.avg,
+                        }}
                       />
-                    </div>
-                  ),
+                    ) : trendData === 'loading' ? (
+                      <div>
+                        <FormattedMessage
+                          defaultMessage="Loading metrics"
+                          id="xpack.synthetics.overview.metricItem.loadingMessage"
+                        />
+                      </div>
+                    ) : undefined,
                   valueFormatter: (d: number) => formatDuration(d),
                   color: getColor(theme, monitor.isEnabled, status),
                   body: <MetricItemBody monitor={monitor} />,

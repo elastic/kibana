@@ -7,31 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { JAVA_AGENT_NAMES, OPEN_TELEMETRY_AGENT_NAMES, RUM_AGENT_NAMES } from './agent_names';
+import {
+  ANDROID_AGENT_NAMES,
+  IOS_AGENT_NAMES,
+  JAVA_AGENT_NAMES,
+  OPEN_TELEMETRY_AGENT_NAMES,
+  RUM_AGENT_NAMES,
+} from './agent_names';
 
 import type {
+  AndroidAgentName,
+  IOSAgentName,
   JavaAgentName,
   OpenTelemetryAgentName,
   RumAgentName,
   ServerlessType,
 } from './agent_names';
 
+export function hasOpenTelemetryPrefix(agentName?: string, language: string = '') {
+  if (!agentName) {
+    return false;
+  }
+
+  return (
+    agentName.startsWith(`opentelemetry/${language}`) || agentName.startsWith(`otlp/${language}`)
+  );
+}
+
 export function isOpenTelemetryAgentName(agentName: string): agentName is OpenTelemetryAgentName {
   return (
-    agentName?.startsWith('opentelemetry/') ||
+    hasOpenTelemetryPrefix(agentName) ||
     OPEN_TELEMETRY_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName)
   );
 }
 
 export function isJavaAgentName(agentName?: string): agentName is JavaAgentName {
   return (
-    agentName?.startsWith('opentelemetry/java') ||
+    hasOpenTelemetryPrefix(agentName, 'java') ||
     JAVA_AGENT_NAMES.includes(agentName! as JavaAgentName)
   );
 }
 
 export function isRumAgentName(agentName?: string): agentName is RumAgentName {
-  return RUM_AGENT_NAMES.includes(agentName! as RumAgentName);
+  return (
+    hasOpenTelemetryPrefix(agentName, 'webjs') ||
+    RUM_AGENT_NAMES.includes(agentName! as RumAgentName)
+  );
 }
 
 export function isMobileAgentName(agentName?: string) {
@@ -43,12 +64,21 @@ export function isRumOrMobileAgentName(agentName?: string) {
 }
 
 export function isIosAgentName(agentName?: string) {
-  return agentName?.toLowerCase() === 'ios/swift';
+  const lowercasedAgentName = agentName && agentName.toLowerCase();
+
+  return (
+    hasOpenTelemetryPrefix(lowercasedAgentName, 'swift') ||
+    IOS_AGENT_NAMES.includes(lowercasedAgentName! as IOSAgentName)
+  );
 }
 
 export function isAndroidAgentName(agentName?: string) {
-  const lowercased = agentName && agentName.toLowerCase();
-  return lowercased === 'android/java';
+  const lowercasedAgentName = agentName && agentName.toLowerCase();
+
+  return (
+    hasOpenTelemetryPrefix(lowercasedAgentName, 'android') ||
+    ANDROID_AGENT_NAMES.includes(lowercasedAgentName! as AndroidAgentName)
+  );
 }
 
 export function isJRubyAgentName(agentName?: string, runtimeName?: string) {

@@ -8,8 +8,9 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { SeverityMappingReadOnly } from './severity_mapping';
+import { mockCustomQueryRule } from '../../storybook/mocks';
 
 export default {
   component: SeverityMappingReadOnly,
@@ -18,22 +19,17 @@ export default {
 };
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
+  finalDiffableRule: DiffableRule;
 }
 
 const Template: Story<TemplateProps> = (args) => {
-  return (
-    <FieldReadOnly
-      fieldName="severity_mapping"
-      finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-    />
-  );
+  return <FieldReadOnly fieldName="severity_mapping" finalDiffableRule={args.finalDiffableRule} />;
 };
 
 export const Default = Template.bind({});
 
 Default.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockCustomQueryRule({
     severity_mapping: [
       {
         field: 'event.severity',
@@ -48,5 +44,5 @@ Default.args = {
         value: 'VERY HIGH',
       },
     ],
-  },
+  }),
 };
