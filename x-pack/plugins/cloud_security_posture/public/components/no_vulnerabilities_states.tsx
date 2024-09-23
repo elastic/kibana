@@ -156,7 +156,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
             title={
               <h2>
                 <FormattedMessage
-                  id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptTitle"
+                  id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.promptTitle"
                   defaultMessage="Already using a {lineBreak} cloud security product?"
                   values={{ lineBreak: <br /> }}
                 />
@@ -167,7 +167,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
             body={
               <p>
                 <FormattedMessage
-                  id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptDescription"
+                  id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.promptDescription"
                   defaultMessage="Ingest data from your existing vulnerability {lineBreak} solution for centralized analytics, hunting, {lineBreak} investigations, visualizations, and more. {lineBreak} Other integrations coming soon."
                   values={{ lineBreak: <br /> }}
                 />
@@ -184,7 +184,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
                     data-test-subj={THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON}
                   >
                     <FormattedMessage
-                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.addWizIntegrationButtonTitle"
+                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.addWizIntegrationButtonTitle"
                       defaultMessage="Add Wiz Integration"
                     />
                   </EuiButton>
