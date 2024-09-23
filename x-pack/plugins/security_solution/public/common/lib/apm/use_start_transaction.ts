@@ -19,9 +19,9 @@ interface StartTransactionOptions {
 }
 
 export const useStartTransaction = () => {
-  const {
-    services: { apm },
-  } = useKibana();
+  const { services } = useKibana();
+
+  const { apm } = services;
 
   const startTransaction = useCallback(
     ({ name, type = 'user-interaction', options }: StartTransactionOptions) => {

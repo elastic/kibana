@@ -8,7 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { ReactElement } from 'react';
+import type { ComponentType, ReactElement } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { FeaturesRegistry } from '../../../common';
 
@@ -32,12 +32,36 @@ export interface ObservabilityLogsAIAssistantFeature {
   render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
 }
 
+/** ***************************** Security **********/
 export interface SecuritySolutionCellRenderFeature {
   id: 'security-solution-cell-render';
   getRender: () => (props: DataGridCellValueElementProps) => ReactElement;
 }
 
-type SecuritySolutionFeatures = SecuritySolutionCellRenderFeature;
+interface SecuritySolutionAppWrapperFeatureArgs {
+  store: unknown;
+}
+
+export interface SecuritySolutionAppWrapperFeature {
+  id: 'security-solution-app-wrapper';
+  getWrapper: () => Promise<
+    (
+      args: SecuritySolutionAppWrapperFeatureArgs
+    ) => ComponentType<{ children: React.ReactNode | React.ReactNode[] }>
+  >;
+}
+
+export interface SecuritySolutionReduxStoreInitFeature {
+  id: 'security-solution-redux-store-init';
+  /* returns the security's redux store instance */
+  init: () => Promise<unknown>;
+}
+
+type SecuritySolutionFeatures =
+  | SecuritySolutionCellRenderFeature
+  | SecuritySolutionAppWrapperFeature
+  | SecuritySolutionReduxStoreInitFeature;
+/** ****************************************************************************************/
 
 // This should be a union of all the available client features.
 export type DiscoverFeature = ObservabilityLogsAIAssistantFeature | SecuritySolutionFeatures;

@@ -25,7 +25,7 @@ export const getCellRendererForGivenRecord: SecuritySolutionRowCellRendererGette
         : ([props.row.flattened[fieldName]] as Maybe<string[]>),
     }));
 
-    return <p> {`Security ${props.columnId} - ${props.row.flattened[props.columnId]}`} </p>;
+    // return <p> {`Security ${props.columnId} - ${props.row.flattened[props.columnId]}`} </p>;
 
     return (
       <DefaultCellRenderer

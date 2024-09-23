@@ -106,6 +106,7 @@ export interface SetupPlugins {
   ml?: MlPluginSetup;
   cases?: CasesPublicSetup;
   data: DataPublicPluginSetup;
+  discoverShared?: DiscoverSharedPublicStart;
 }
 
 /**

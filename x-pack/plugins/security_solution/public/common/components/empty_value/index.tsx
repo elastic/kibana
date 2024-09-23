@@ -12,7 +12,10 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 
 const EmptyWrapper = styled.span`
-  color: ${(props) => props.theme.eui.euiColorDarkShade};
+  color: ${(props) => {
+    console.log({ props });
+    return props.theme.eui.euiTextSubduedColor;
+  }}};
 `;
 
 EmptyWrapper.displayName = 'EmptyWrapper';
