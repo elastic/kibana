@@ -739,6 +739,9 @@ describe('#getQueryParams', () => {
           hidden: true,
           namespaceType: 'multiple-isolated',
           mappings: getNestedMapping({ fieldName: 'title' }),
+          management: {
+            defaultSearchField: 'title.value',
+          },
         };
 
         registry.registerType(nestedTypeSO);
@@ -763,25 +766,6 @@ describe('#getQueryParams', () => {
         expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
           'nestedtype.title.value',
         ]);
-      });
-
-      // TODO: review assertion
-      it('should ignore nested fields when searching for wildcard', () => {
-        const result = getQueryParams({
-          registry,
-          search: 'foo*',
-          type: ['nestedtype', 'saved'],
-          mappings: nestedFieldMappings,
-        });
-
-        const shouldClause = result.query.bool.should;
-        const nestedTypeTitleQueryClause = shouldClause[0].nested;
-        const simpleQueryClause = shouldClause[0].simple_query_string;
-
-        expect(nestedTypeTitleQueryClause).toBe(undefined);
-
-        expect(simpleQueryClause.fields[0]).toBe('*');
-        expect(simpleQueryClause.fields.length).toBe(1);
       });
 
       it('should use one nested clause if there are multiple nested fields in same type', () => {
@@ -814,12 +798,12 @@ describe('#getQueryParams', () => {
         ]);
       });
 
-      it('ignores match_phrase_prefix for nested fields', () => {
+      it('should add nested and match phrase prefix clause for nested fields when using wildcard', () => {
         const result = getQueryParams({
           registry,
           search: 'foo*',
-          searchFields: ['title.value', 'title'],
-          type: ['nestedtype', 'saved'],
+          searchFields: ['title.value'],
+          type: ['nestedtype'],
           mappings: nestedFieldMappings,
         });
 
@@ -836,14 +820,10 @@ describe('#getQueryParams', () => {
             expect.objectContaining({
               match_phrase_prefix: { 'nestedtype.title.value': { boost: 1, query: 'foo' } },
             }),
-            expect.objectContaining({
-              match_phrase_prefix: { 'nestedtype.title': { boost: 1, query: 'foo' } },
-            }),
           ])
         );
       });
 
-      // TODO: review this one
       it('defaultSearchField does not work with nested fields', () => {
         const result = getQueryParams({
           registry,
@@ -864,12 +844,12 @@ describe('#getQueryParams', () => {
       });
 
       describe('when using same field name for different types and one is nested', () => {
-        it('should identify repeated field names in different types', () => {
+        it('should create the specific nested clause and search in all fields even if they arent defined in the mapping', () => {
           const result = getQueryParams({
             registry,
             search: 'foo',
             searchFields: ['title', 'title.value'],
-            type: ['nestedtype', 'saved', 'pending'], // all three types have a field called title
+            type: ['nestedtype', 'saved', 'pending'],
             mappings: nestedFieldMappings,
           });
 
@@ -894,11 +874,11 @@ describe('#getQueryParams', () => {
           expect(simpleQueryClause.query).toBe('foo');
         });
 
-        it('should work with boosted', () => {
+        it('shouldnt matter that a field is boosted', () => {
           const result = getQueryParams({
             registry,
             search: 'foo',
-            searchFields: ['title^3', 'title.value'],
+            searchFields: ['title^3', 'title.value^2'],
             type: ['nestedtype', 'saved', 'pending'],
             mappings: nestedFieldMappings,
           });
@@ -910,18 +890,36 @@ describe('#getQueryParams', () => {
           expect(nestedQueryClause.path).toBe('nestedtype.title');
           expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
           expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
-            'nestedtype.title.value',
+            'nestedtype.title.value^2',
           ]);
 
           expect(simpleQueryClause.fields).toEqual([
-            'nestedtype.title^3', // does not exist but wont break
+            'nestedtype.title^3',
             'saved.title^3',
             'pending.title^3',
-            'nestedtype.title.value',
-            'saved.title.value',
-            'pending.title.value',
+            'nestedtype.title.value^2',
+            'saved.title.value^2',
+            'pending.title.value^2',
           ]);
           expect(simpleQueryClause.query).toBe('foo');
+        });
+
+        it('should add match_phrase_prefix when using wildcard', () => {
+          const result = getQueryParams({
+            registry,
+            search: 'foo*',
+            searchFields: ['title', 'title.value'],
+            type: ['nestedtype', 'saved'],
+            mappings: nestedFieldMappings,
+          });
+
+          expect(result.query.bool.should).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                match_phrase_prefix: { 'nestedtype.title.value': { boost: 1, query: 'foo' } },
+              }),
+            ])
+          );
         });
       });
     });

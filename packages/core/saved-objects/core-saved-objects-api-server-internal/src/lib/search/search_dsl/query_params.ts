@@ -256,7 +256,6 @@ export function getQueryParams({
           searchFields: simpleQuerySearchFields,
           types,
           registry,
-          mappings,
         })
       : [];
 
@@ -288,13 +287,11 @@ const getMatchPhrasePrefixClauses = ({
   searchFields,
   registry,
   types,
-  mappings,
 }: {
   search: string;
   searchFields?: string[];
   types: string[];
   registry: ISavedObjectTypeRegistry;
-  mappings: IndexMapping;
 }) => {
   // need to remove the prefix search operator
   const query = search.replace(/[*]$/, '');
