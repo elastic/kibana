@@ -253,9 +253,13 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
+    const spaceIdValue = this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+      ? spaceId
+      : DEFAULT_SPACE_ID;
+
     return new EndpointMetadataService(
       this.startDependencies.esClient,
-      this.savedObjects.createInternalScopedSoClient({ readonly: false }),
+      this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId: spaceIdValue }),
       this.getInternalFleetServices(),
       this.createLogger('endpointMetadata')
     );
