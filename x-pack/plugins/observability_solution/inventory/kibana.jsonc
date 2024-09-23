@@ -12,11 +12,10 @@
       "entityManager",
       "inference",
       "dataViews",
-      "share"
+      "share",
+      "features"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
+    "requiredBundles": ["kibanaReact"],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }
