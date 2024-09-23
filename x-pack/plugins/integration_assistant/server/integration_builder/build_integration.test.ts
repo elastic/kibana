@@ -12,7 +12,7 @@ import * as DataStreamModule from './data_stream';
 import * as FieldsModule from './fields';
 import * as AgentModule from './agent';
 import * as PipelineModule from './pipeline';
-import * as ReadmeModule from './readme';
+import { createReadme } from './readme';
 import { DataStream, Docs, InputType, Pipeline, Integration } from '../../common';
 import { renderPackageManifestYAML } from './build_integration';
 import yaml from 'js-yaml';
@@ -219,7 +219,7 @@ describe('buildPackage', () => {
 
     await buildIntegrationModule.buildPackage(testIntegration);
 
-    expect(ReadmeModule.createReadme).toHaveBeenCalledWith(integrationPath, testIntegration.name, [
+    expect(createReadme).toHaveBeenCalledWith(integrationPath, testIntegration.name, [
       { datastream: firstDatastreamName, fields: firstDataStreamFields },
       { datastream: secondDatastreamName, fields: secondDataStreamFields },
     ]);

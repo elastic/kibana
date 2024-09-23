@@ -6,7 +6,7 @@
  */
 
 import nunjucks from 'nunjucks';
-import * as yaml from 'js-yaml';
+import { load } from 'js-yaml';
 import { flattenObjectsList } from '../util/samples';
 import { createSync, generateFields, mergeSamples } from '../util';
 import { Docs } from '../../common';
@@ -36,7 +36,7 @@ function createBaseFields(
 
   createSync(`${specificDataStreamDir}/base-fields.yml`, baseFields);
 
-  return yaml.load(baseFields) as Docs[];
+  return load(baseFields) as Docs[];
 }
 
 function createCustomFields(specificDataStreamDir: string, pipelineResults: object[]): Docs[] {
@@ -44,7 +44,7 @@ function createCustomFields(specificDataStreamDir: string, pipelineResults: obje
   const fieldKeys = generateFields(mergedResults);
   createSync(`${specificDataStreamDir}/fields/fields.yml`, fieldKeys);
 
-  return yaml.load(fieldKeys) as Docs[];
+  return load(fieldKeys) as Docs[];
 }
 
 function mergeFields(baseFields: object[], customFields: object[]): object[] {

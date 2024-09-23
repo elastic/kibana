@@ -7,8 +7,8 @@
 
 import { testIntegration } from '../../__jest__/fixtures/build_integration';
 import { createReadme } from './readme';
-import * as Utils from '../util';
-import * as nunjucks from 'nunjucks';
+import { ensureDirSync, createSync } from '../util';
+import { configure } from 'nunjucks';
 import { join as joinPath } from 'path';
 
 jest.mock('../util', () => ({
@@ -21,7 +21,7 @@ describe('createReadme', () => {
   const integrationPath = 'path';
 
   const templateDir = joinPath(__dirname, '../templates');
-  nunjucks.configure([templateDir], {
+  configure([templateDir], {
     autoescape: false,
   });
 
@@ -61,14 +61,14 @@ describe('createReadme', () => {
 
     createReadme(integrationPath, testIntegration.name, fields);
 
-    expect(Utils.createSync).toHaveBeenCalledWith(
+    expect(createSync).toHaveBeenCalledWith(
       `${integrationPath}/_dev/build/docs/README.md`,
       expect.any(String)
     );
 
     // Docs files
-    expect(Utils.ensureDirSync).toHaveBeenCalledWith(`${integrationPath}/docs/`);
-    expect(Utils.createSync).toHaveBeenCalledWith(
+    expect(ensureDirSync).toHaveBeenCalledWith(`${integrationPath}/docs/`);
+    expect(createSync).toHaveBeenCalledWith(
       `${integrationPath}/docs/README.md`,
       expect.any(String)
     );
@@ -120,12 +120,12 @@ describe('createReadme', () => {
 | @timestamp | Event timestamp. | date |
 `;
 
-    expect(Utils.createSync).toHaveBeenCalledWith(
+    expect(createSync).toHaveBeenCalledWith(
       `${integrationPath}/docs/README.md`,
       expect.stringContaining(firstDatastreamFieldsDisplayed)
     );
 
-    expect(Utils.createSync).toHaveBeenCalledWith(
+    expect(createSync).toHaveBeenCalledWith(
       `${integrationPath}/docs/README.md`,
       expect.stringContaining(secondDatastreamFieldsDisplayed)
     );
@@ -141,7 +141,7 @@ describe('createReadme', () => {
 
     createReadme(integrationPath, testIntegration.name, fields);
 
-    expect(Utils.createSync).toHaveBeenCalledWith(
+    expect(createSync).toHaveBeenCalledWith(
       `${integrationPath}/_dev/build/docs/README.md`,
       expect.stringContaining('{{fields "data_stream_1"}}')
     );
