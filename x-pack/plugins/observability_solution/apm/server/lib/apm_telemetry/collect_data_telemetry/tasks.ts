@@ -11,7 +11,6 @@ import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { normalizeFields } from '../../../utils/normalize_fields';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_ACTIVATION_METHOD,
@@ -55,10 +54,7 @@ import {
   SavedServiceGroup,
 } from '../../../../common/service_groups';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { Span } from '../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import {
   APMDataTelemetry,
   APMPerService,
@@ -75,6 +71,7 @@ import {
   APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
   SavedApmCustomDashboard,
 } from '../../../../common/custom_dashboards';
+import { serviceVersionMapping } from '../../../utils/es_fields_mappings';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
@@ -695,10 +692,7 @@ export const tasks: TelemetryTask[] = [
         },
       });
 
-      const hit = normalizeFields(response.hits.hits[0]?.fields) as Pick<
-        Transaction | Span | APMError,
-        'observer'
-      >;
+      const hit = serviceVersionMapping(response.hits.hits[0]?.fields);
 
       if (!hit || !hit.observer?.version) {
         return {};

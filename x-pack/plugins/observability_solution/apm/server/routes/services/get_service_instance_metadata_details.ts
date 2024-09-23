@@ -7,6 +7,11 @@
 import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import {
+  metadataAppMetricMapping,
+  metadataAppTransactionEventMapping,
+  metaDataAppTransactionMetric,
+} from '../../utils/es_fields_mappings';
 import { METRICSET_NAME, SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import { maybe } from '../../../common/utils/maybe';
 import {
@@ -20,7 +25,6 @@ import { Container } from '../../../typings/es_schemas/raw/fields/container';
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { Host } from '../../../typings/es_schemas/raw/fields/host';
 import { Cloud } from '../../../typings/es_schemas/raw/fields/cloud';
-import { normalizeFields } from '../../utils/normalize_fields';
 
 export interface ServiceInstanceMetadataDetailsResponse {
   '@timestamp': string;
@@ -72,11 +76,7 @@ export async function getServiceInstanceMetadataDetails({
       }
     );
 
-    return maybe(
-      normalizeFields(
-        response.hits.hits[0]?.fields
-      ) as unknown as ServiceInstanceMetadataDetailsResponse
-    );
+    return maybe(metadataAppMetricMapping(response.hits.hits[0]?.fields));
   }
 
   async function getTransactionEventSample() {
@@ -96,7 +96,7 @@ export async function getServiceInstanceMetadataDetails({
       }
     );
 
-    return maybe(normalizeFields(response.hits.hits[0]?.fields));
+    return maybe(metadataAppTransactionEventMapping(response.hits.hits[0]?.fields));
   }
 
   async function getTransactionMetricSample() {
@@ -119,7 +119,7 @@ export async function getServiceInstanceMetadataDetails({
         },
       }
     );
-    return maybe(normalizeFields(response.hits.hits[0]?.fields));
+    return maybe(metaDataAppTransactionMetric(response.hits.hits[0]?.fields));
   }
 
   // we can expect the most detail of application metrics,
@@ -138,6 +138,7 @@ export async function getServiceInstanceMetadataDetails({
     applicationMetricSample
   );
 
+  // todo: find scenarios for container and cloud then add to mappings
   const { agent, service, container, kubernetes, host, cloud } = sample;
 
   return {

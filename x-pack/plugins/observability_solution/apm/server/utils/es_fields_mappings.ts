@@ -69,7 +69,77 @@ import {
   CLOUD_PROVIDER,
   CONTAINER,
   KUBERNETES,
+  AGENT_ACTIVATION_METHOD,
+  CLIENT_IP,
+  DOC_COUNT,
+  EVENT_SUCCESS_COUNT_SUM,
+  EVENT_SUCCESS_COUNT_VALUE_COUNT,
+  HOST_ARCHITECTURE,
+  HOST_HOSTNAME,
+  HOST_IP,
+  HOST_OS_PLATFORM,
+  HTTP_REQUEST_HEADERS_ACCEPT,
+  HTTP_REQUEST_HEADERS_CONNECTION,
+  HTTP_REQUEST_HEADERS_ELASTIC_APM_TRACEPARENT,
+  HTTP_REQUEST_HEADERS_HOST,
+  HTTP_REQUEST_HEADERS_TRACEPARENT,
+  HTTP_REQUEST_HEADERS_TRACESTATE,
+  HTTP_REQUEST_HEADERS_USER_AGENT,
+  HTTP_REQUEST_METHOD,
+  HTTP_RESPONSE_HEADERS_CONNECTION,
+  HTTP_RESPONSE_HEADERS_DATE,
+  HTTP_RESPONSE_HEADERS_TRANSFER_ENCODING,
+  HTTP_RESPONSE_HEADERS_X_POWERED_BY,
+  HTTP_RESPONSE_STATUS_CODE,
+  HTTP_VERSION,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_NODE_NAME,
+  KUBERNETES_POD_NAME,
+  KUBERNETES_POD_UID,
+  LABEL_ENV,
+  LABEL_HOSTNAME,
+  METRIC_PROCESS_CPU_SYSTEM_NORM_PCT,
+  METRIC_PROCESS_CPU_TOTAL_NORM_PCT,
+  METRIC_PROCESS_CPU_TOTAL_USER_PCT,
+  METRIC_PROCESS_MEMORY_RSS_BYTES,
+  METRIC_PROCESS_MEMORY_SIZE,
+  METRIC_SYSTEM_CPU_PERCENT,
+  METRIC_SYSTEM_FREE_MEMORY,
+  METRIC_SYSTEM_TOTAL_MEMORY,
+  METRICSET_INTERVAL,
+  METRICSET_NAME,
+  NODEJS_EVENTLOOP_DELAY_AVG_MS,
+  NODEJS_HANDLES_ACTIVE,
+  NODEJS_MEMORY_ARRAYBUFFERS_BYTES,
+  NODEJS_MEMORY_EXTERNAL_BYTES,
+  NODEJS_MEMORY_HEAP_ALLOCATED_BYTES,
+  NODEJS_MEMORY_HEAP_USED_BYTES,
+  NODEJS_REQUESTS_ACTIVE,
+  PROCESS_ARGS,
+  PROCESS_PARENT_PID,
+  PROCESS_PID,
+  PROCESS_TITLE,
+  SERVICE_FRAMEWORK_VERSION,
+  SERVICE_LANGUAGE_NAME,
+  SERVICE_RUNTIME_NAME,
+  SERVICE_RUNTIME_VERSION,
+  SERVICE_VERSION,
+  SOURCE_IP,
+  TRANSACTION_DURATION_HISTOGRAM_VALUES,
+  TRANSACTION_DURATION_SUMMARY_SUM,
+  TRANSACTION_DURATION_SUMMARY_VALUE_COUNT,
+  TRANSACTION_SPAN_COUNT_STARTED,
+  URL_DOMAIN,
+  URL_ORIGINAL,
+  URL_PATH,
+  URL_PORT,
+  URL_SCHEME,
+  USER_AGENT_DEVICE_NAME,
+  USER_AGENT_NAME,
+  USER_AGENT_ORIGINAL,
+  USER_AGENT_VERSION,
 } from '@kbn/apm-types';
+import { Transaction } from '../../typings/es_schemas/ui/transaction';
 import { TransactionRaw } from '../../typings/es_schemas/raw/transaction_raw';
 import {
   WaterfallError,
@@ -80,6 +150,10 @@ import { EventOutcome } from '../../common/event_outcome';
 import { Exception } from '../../typings/es_schemas/raw/error_raw';
 
 type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
+
+const normalizeValue = <T>(field: unknown[] | unknown): T => {
+  return (Array.isArray(field) && field.length > 0 ? field[0] : field) as T;
+};
 
 export const metadataForDependencyMapping = (fields: Partial<Record<string, unknown[]>>) => {
   return {
@@ -210,7 +284,7 @@ export const spanLinksDetailsMapping = (fields: Partial<Record<string, unknown[]
       environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
     },
     processor: {
-      event: normalizeValue<'span'>(fields[PROCESSOR_EVENT]),
+      event: normalizeValue<string>(fields[PROCESSOR_EVENT]),
     },
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
@@ -274,7 +348,7 @@ export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) =
       outcome: normalizeValue<EventOutcome>(fields[EVENT_OUTCOME]),
     },
     processor: {
-      event: normalizeValue<'transaction'>(fields[PROCESSOR_EVENT]),
+      event: normalizeValue<string>(fields[PROCESSOR_EVENT]),
     },
     data_stream: {
       namespace: normalizeValue<string>(fields[DATA_STREAM_NAMESPACE]),
@@ -483,6 +557,387 @@ export const serviceMetadataIcons = (
   };
 };
 
-const normalizeValue = <T>(field: unknown[] | unknown): T => {
-  return (Array.isArray(field) && field.length > 0 ? field[0] : field) as T;
+// todo(milosz): test it
+export const serviceVersionMapping = (
+  fields: Partial<Record<string, unknown[]>>
+): Pick<Transaction | Span | APMError, 'observer'> => {
+  return {
+    observer: {
+      version: normalizeValue<string>(fields[OBSERVER_VERSION]),
+      version_major: normalizeValue<number>(fields[OBSERVER_VERSION_MAJOR]),
+    },
+  };
+};
+
+export const metadataAppMetricMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  return {
+    '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
+    agent: {
+      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
+      version: normalizeValue<string>(fields[AGENT_VERSION]),
+      activation_method: normalizeValue<string>(fields[AGENT_ACTIVATION_METHOD]),
+    },
+    data_stream: {
+      namespace: normalizeValue<string>(fields[DATA_STREAM_NAMESPACE]),
+      type: normalizeValue<string>(fields[DATA_STEAM_TYPE]),
+      dataset: normalizeValue<string>(fields[DATA_STREAM_DATASET]),
+    },
+    host: {
+      architecture: normalizeValue<string>(fields[HOST_ARCHITECTURE]),
+      hostname: normalizeValue<string>(fields[HOST_HOSTNAME]),
+      ip: normalizeValue<string>(fields[HOST_IP]),
+      name: normalizeValue<string>(fields[HOST_NAME]),
+      os: {
+        platform: normalizeValue<string>(fields[HOST_OS_PLATFORM]),
+      },
+    },
+    kubernetes: {
+      namespace: normalizeValue<string>(fields[KUBERNETES_NAMESPACE]),
+      node: {
+        name: normalizeValue<string>(fields[KUBERNETES_NODE_NAME]),
+      },
+      pod: {
+        name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
+        uid: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
+      },
+    },
+    labels: {
+      env: normalizeValue<string>(fields[LABEL_ENV]),
+      hostname: normalizeValue<string>(fields[LABEL_HOSTNAME]),
+    },
+    metricset: {
+      name: normalizeValue<string>(fields[METRICSET_NAME]),
+    },
+    nodejs: {
+      eventloop: {
+        delay: {
+          avg: {
+            ms: normalizeValue<number>(fields[NODEJS_EVENTLOOP_DELAY_AVG_MS]),
+          },
+        },
+      },
+      handles: {
+        active: normalizeValue<number>(fields[NODEJS_HANDLES_ACTIVE]),
+      },
+      memory: {
+        arrayBuffers: {
+          bytes: normalizeValue<number>(fields[NODEJS_MEMORY_ARRAYBUFFERS_BYTES]),
+        },
+        external: {
+          bytes: normalizeValue<number>(fields[NODEJS_MEMORY_EXTERNAL_BYTES]),
+        },
+        heap: {
+          allocated: {
+            bytes: normalizeValue<number>(fields[NODEJS_MEMORY_HEAP_ALLOCATED_BYTES]),
+          },
+          used: {
+            bytes: normalizeValue<number>(fields[NODEJS_MEMORY_HEAP_USED_BYTES]),
+          },
+        },
+      },
+      requests: {
+        active: normalizeValue<number>(fields[NODEJS_REQUESTS_ACTIVE]),
+      },
+    },
+    observer: {
+      hostname: normalizeValue<string>(fields[OBSERVER_HOSTNAME]),
+      type: normalizeValue<string>(fields[OBSERVER_TYPE]),
+      version: normalizeValue<string>(fields[OBSERVER_VERSION]),
+    },
+    process: {
+      args: fields[PROCESS_ARGS] as string[] | undefined,
+      parent: {
+        pid: normalizeValue<number>(fields[PROCESS_PARENT_PID]),
+      },
+      pid: normalizeValue<number>(fields[PROCESS_PID]),
+      title: normalizeValue<string>(fields[PROCESS_TITLE]),
+    },
+    processor: {
+      event: normalizeValue<string>(fields[PROCESSOR_EVENT]),
+    },
+    service: {
+      name: normalizeValue<string>(fields[SERVICE_NAME]),
+      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
+      framework: {
+        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
+        versions: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
+      },
+      language: {
+        name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
+      },
+      node: {
+        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
+      },
+      runtime: {
+        name: normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]),
+        version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
+      },
+      version: normalizeValue<string>(fields[SERVICE_VERSION]),
+    },
+    system: {
+      cpu: {
+        total: {
+          norm: {
+            pct: normalizeValue<number>(fields[METRIC_SYSTEM_CPU_PERCENT]),
+          },
+        },
+      },
+      memory: {
+        actual: {
+          free: normalizeValue<number>(fields[METRIC_SYSTEM_FREE_MEMORY]),
+        },
+        total: normalizeValue<number>(fields[METRIC_SYSTEM_TOTAL_MEMORY]),
+      },
+      process: {
+        cpu: {
+          system: {
+            norm: {
+              pct: normalizeValue<number>(fields[METRIC_PROCESS_CPU_SYSTEM_NORM_PCT]),
+            },
+          },
+          total: {
+            norm: {
+              pct: normalizeValue<number>(fields[METRIC_PROCESS_CPU_TOTAL_NORM_PCT]),
+            },
+          },
+          user: {
+            norm: {
+              pct: normalizeValue<number>(fields[METRIC_PROCESS_CPU_TOTAL_USER_PCT]),
+            },
+          },
+        },
+        memory: {
+          rss: {
+            bytes: normalizeValue<string>(fields[METRIC_PROCESS_MEMORY_RSS_BYTES]),
+          },
+          size: normalizeValue<string>(fields[METRIC_PROCESS_MEMORY_SIZE]),
+        },
+      },
+    },
+  };
+};
+
+export const metadataAppTransactionEventMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  return {
+    kubernetes: {
+      namespace: normalizeValue<string>(fields[KUBERNETES_NAMESPACE]),
+      node: {
+        name: normalizeValue<string>(fields[KUBERNETES_NODE_NAME]),
+      },
+      pod: {
+        name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
+        uid: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
+      },
+    },
+    parent: {
+      id: normalizeValue<string>(fields[PARENT_ID]),
+    },
+    agent: {
+      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
+      version: normalizeValue<string>(fields[AGENT_VERSION]),
+      activation_method: normalizeValue<string>(fields[AGENT_ACTIVATION_METHOD]),
+    },
+    process: {
+      args: fields[PROCESS_ARGS] as string[] | undefined,
+      parent: {
+        pid: normalizeValue<number>(fields[PROCESS_PARENT_PID]),
+      },
+      pid: normalizeValue<number>(fields[PROCESS_PID]),
+      title: normalizeValue<string>(fields[PROCESS_TITLE]),
+    },
+    source: {
+      ip: normalizeValue<string>(fields[SOURCE_IP]),
+    },
+    processor: {
+      event: normalizeValue<string>(fields[PROCESSOR_EVENT]),
+    },
+    url: {
+      path: normalizeValue<string>(fields[URL_PATH]),
+      original: normalizeValue<string>(fields[URL_ORIGINAL]),
+      scheme: normalizeValue<string>(fields[URL_SCHEME]),
+      port: normalizeValue<number>(fields[URL_PORT]),
+      domain: normalizeValue<string>(fields[URL_DOMAIN]),
+      full: normalizeValue<string>(fields[SOURCE_IP]),
+    },
+    observer: {
+      hostname: normalizeValue<string>(fields[OBSERVER_HOSTNAME]),
+      type: normalizeValue<string>(fields[OBSERVER_TYPE]),
+      version: normalizeValue<string>(fields[OBSERVER_VERSION]),
+    },
+    trace: {
+      id: normalizeValue<string>(fields[TRACE_ID]),
+    },
+    '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
+    data_stream: {
+      namespace: normalizeValue<string>(fields[DATA_STREAM_NAMESPACE]),
+      type: normalizeValue<string>(fields[DATA_STEAM_TYPE]),
+      dataset: normalizeValue<string>(fields[DATA_STREAM_DATASET]),
+    },
+    service: {
+      name: normalizeValue<string>(fields[SERVICE_NAME]),
+      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
+      framework: {
+        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
+        versions: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
+      },
+      language: {
+        name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
+      },
+      node: {
+        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
+      },
+      runtime: {
+        name: normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]),
+        version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
+      },
+      version: normalizeValue<string>(fields[SERVICE_VERSION]),
+    },
+    host: {
+      architecture: normalizeValue<string>(fields[HOST_ARCHITECTURE]),
+      hostname: normalizeValue<string>(fields[HOST_HOSTNAME]),
+      ip: fields[HOST_IP] as string[] | undefined,
+      name: normalizeValue<string>(fields[HOST_NAME]),
+      os: {
+        platform: normalizeValue<string>(fields[HOST_OS_PLATFORM]),
+      },
+    },
+    client: {
+      ip: normalizeValue<string>(fields[CLIENT_IP]),
+    },
+    http: {
+      request: {
+        headers: {
+          Accept: fields[HTTP_REQUEST_HEADERS_ACCEPT] as string[] | undefined,
+          Connection: fields[HTTP_REQUEST_HEADERS_CONNECTION] as string[] | undefined,
+          'User-Agent': fields[HTTP_REQUEST_HEADERS_USER_AGENT] as string[] | undefined,
+          Host: fields[HTTP_REQUEST_HEADERS_HOST] as string[] | undefined,
+          'Elastic-Apm-Traceparent': fields[HTTP_REQUEST_HEADERS_ELASTIC_APM_TRACEPARENT] as
+            | string[]
+            | undefined,
+          Tracestate: fields[HTTP_REQUEST_HEADERS_TRACESTATE] as string[] | undefined,
+          Traceparent: fields[HTTP_REQUEST_HEADERS_TRACEPARENT] as string[] | undefined,
+        },
+        method: normalizeValue<string>(fields[HTTP_REQUEST_METHOD]),
+      },
+      response: {
+        headers: {
+          'Transfer-Encoding': fields[HTTP_RESPONSE_HEADERS_TRANSFER_ENCODING] as
+            | string
+            | undefined,
+          Connection: fields[HTTP_RESPONSE_HEADERS_CONNECTION] as string | undefined,
+          Date: fields[HTTP_RESPONSE_HEADERS_DATE] as string | undefined,
+          'X-Powered-By': fields[HTTP_RESPONSE_HEADERS_X_POWERED_BY] as string | undefined,
+        },
+        status_code: normalizeValue<number>(fields[HTTP_RESPONSE_STATUS_CODE]),
+      },
+      version: normalizeValue<string>(fields[HTTP_VERSION]),
+    },
+    event: {
+      success_count: normalizeValue<boolean>(fields[EVENT_SUCCESS_COUNT]),
+      outcome: normalizeValue<EventOutcome>(fields[EVENT_OUTCOME]),
+    },
+    transaction: {
+      result: normalizeValue<string>(fields[TRANSACTION_RESULT]),
+      representative_count: normalizeValue<number>(fields[TRANSACTION_REPRESENTATIVE_COUNT]),
+      sampled: normalizeValue<boolean>(fields[TRANSACTION_SAMPLED]),
+      id: normalizeValue<string>(fields[TRANSACTION_ID]),
+      duration: {
+        us: normalizeValue<number>(fields[TRANSACTION_DURATION]),
+      },
+      type: normalizeValue<string>(fields[TRANSACTION_TYPE]),
+      name: normalizeValue<string>(fields[TRANSACTION_NAME]),
+      span_count: {
+        started: normalizeValue<number>(fields[TRANSACTION_SPAN_COUNT_STARTED]),
+      },
+    },
+    user_agent: {
+      original: normalizeValue<string>(fields[USER_AGENT_ORIGINAL]),
+      name: normalizeValue<string>(fields[USER_AGENT_NAME]),
+      device: {
+        name: normalizeValue<string>(fields[USER_AGENT_DEVICE_NAME]),
+      },
+      version: normalizeValue<string>(fields[USER_AGENT_VERSION]),
+    },
+    span: {
+      id: normalizeValue<string>(fields[SPAN_ID]),
+    },
+    timestamp: {
+      us: normalizeValue<number>(fields[TIMESTAMP]),
+    },
+  };
+};
+
+export const metaDataAppTransactionMetric = (fields: Partial<Record<string, unknown[]>>) => {
+  return {
+    '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
+    _doc_count: normalizeValue<number>(fields[DOC_COUNT]),
+    agent: {
+      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
+    },
+    data_stream: {
+      namespace: normalizeValue<string>(fields[DATA_STREAM_NAMESPACE]),
+      type: normalizeValue<string>(fields[DATA_STEAM_TYPE]),
+      dataset: normalizeValue<string>(fields[DATA_STREAM_DATASET]),
+    },
+    event: {
+      outcome: normalizeValue<EventOutcome>(fields[EVENT_OUTCOME]),
+      success_count: {
+        sum: normalizeValue<number>(fields[EVENT_SUCCESS_COUNT_SUM]),
+        value_count: normalizeValue<number>(fields[EVENT_SUCCESS_COUNT_VALUE_COUNT]),
+      },
+    },
+    host: {
+      hostname: normalizeValue<string>(fields[HOST_HOSTNAME]),
+      name: normalizeValue<string>(fields[HOST_NAME]),
+      os: {
+        platform: normalizeValue<string>(fields[HOST_OS_PLATFORM]),
+      },
+    },
+    kubernetes: {
+      pod: {
+        name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
+      },
+    },
+    metricset: {
+      name: normalizeValue<string>(fields[METRICSET_NAME]),
+      interval: normalizeValue<string>(fields[METRICSET_INTERVAL]),
+    },
+    observer: {
+      hostname: normalizeValue<string>(fields[OBSERVER_HOSTNAME]),
+      type: normalizeValue<string>(fields[OBSERVER_TYPE]),
+      version: normalizeValue<string>(fields[OBSERVER_VERSION]),
+    },
+    processor: {
+      event: normalizeValue<string>(fields[PROCESSOR_EVENT]),
+    },
+    service: {
+      name: normalizeValue<string>(fields[SERVICE_NAME]),
+      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
+      language: {
+        name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
+      },
+      node: {
+        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
+      },
+      runtime: {
+        name: normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]),
+        version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
+      },
+      version: normalizeValue<string>(fields[SERVICE_VERSION]),
+    },
+    transaction: {
+      duration: {
+        histogram: {
+          values: fields[TRANSACTION_DURATION_HISTOGRAM_VALUES] as number[] | undefined,
+        },
+        summary: {
+          sum: normalizeValue<number>(fields[TRANSACTION_DURATION_SUMMARY_SUM]),
+          value_count: normalizeValue<number>(fields[TRANSACTION_DURATION_SUMMARY_VALUE_COUNT]),
+        },
+      },
+      name: normalizeValue<string>(fields[TRANSACTION_NAME]),
+      result: normalizeValue<string>(fields[TRANSACTION_RESULT]),
+      type: normalizeValue<string>(fields[TRANSACTION_TYPE]),
+    },
+  };
 };
