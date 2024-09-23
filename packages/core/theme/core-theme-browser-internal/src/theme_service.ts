@@ -30,13 +30,17 @@ export class ThemeService {
     const themeMetadata = injectedMetadata.getTheme();
     this.themeMetadata = themeMetadata;
 
-    let theme: CoreTheme;
+    let darkMode: boolean;
     if (themeMetadata.darkMode === 'system' && browsersSupportsSystemTheme()) {
-      theme = { darkMode: systemThemeIsDark() };
+      darkMode = systemThemeIsDark();
     } else {
-      const darkMode = themeMetadata.darkMode === 'system' ? false : themeMetadata.darkMode;
-      theme = { darkMode };
+      darkMode = themeMetadata.darkMode === 'system' ? false : themeMetadata.darkMode;
     }
+
+    const theme: CoreTheme = {
+      darkMode,
+      name: themeMetadata.name,
+    };
 
     this.applyTheme(theme);
 

@@ -25,6 +25,7 @@ import {
   parseDarkModeValue,
   type UiSettingsParams,
 } from '@kbn/core-ui-settings-common';
+import { parseThemeNameValue } from '@kbn/core-ui-settings-common/src/theme_name';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -209,6 +210,8 @@ export class RenderingService {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
 
+    const themeName = getSettingValue<string>('theme:name', settings, parseThemeNameValue);
+
     const themeStylesheetPaths = (mode: boolean) =>
       getThemeStylesheetPaths({
         darkMode: mode,
@@ -273,6 +276,7 @@ export class RenderingService {
         theme: {
           darkMode,
           version: themeVersion,
+          name: themeName,
           stylesheetPaths: {
             default: themeStylesheetPaths(false),
             dark: themeStylesheetPaths(true),

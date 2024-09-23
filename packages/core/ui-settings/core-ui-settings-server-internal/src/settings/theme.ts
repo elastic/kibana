@@ -89,5 +89,28 @@ export const getThemeSettings = (
       readonly: true,
       schema: schema.literal('v8'),
     },
+    'theme:name': {
+      name: i18n.translate('core.ui_settings.params.themeNameTitle', {
+        defaultMessage: 'Theme name',
+      }),
+      value: 'amsterdam',
+      requiresPageReload: true,
+      schema: schema.oneOf([
+        schema.literal('amsterdam'),
+        schema.literal('berlin'),
+        // Accept any string for theming experiments
+        schema.string(),
+      ]),
+      type: 'select',
+      options: ['amsterdam', 'berlin'],
+      optionLabels: {
+        amsterdam: i18n.translate('core.ui_settings.params.themeName.options.amsterdam', {
+          defaultMessage: 'Amsterdam',
+        }),
+        berlin: i18n.translate('core.ui_settings.params.themeName.options.berlin', {
+          defaultMessage: 'Berlin',
+        }),
+      },
+    },
   };
 };

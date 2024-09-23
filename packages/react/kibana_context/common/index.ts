@@ -9,8 +9,10 @@
 
 export { getColorMode } from './color_mode';
 export type { KibanaTheme, ThemeServiceStart } from './types';
+export { getKibanaThemeByName, getKibanaDefaultTheme } from './theme';
 
 import type { KibanaTheme } from './types';
+import { DEFAULT_KIBANA_THEME_NAME } from './theme';
 
 /**
  * The default `KibanaTheme` for use in Storybook, Jest, or initialization.  At
@@ -18,4 +20,5 @@ import type { KibanaTheme } from './types';
  */
 export const defaultTheme: KibanaTheme = {
   darkMode: false,
+  name: DEFAULT_KIBANA_THEME_NAME,
 };
