@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  UiSettingsType,
-  ReadonlyModeType,
-  DeprecationSettings,
-  UiSettingsParams,
-  UserProvidedValues,
-  UiSettingsScope,
-  GetUiSettingsContext,
-} from './src/ui_settings';
-export { type DarkModeValue, parseDarkModeValue } from './src/dark_mode';
-export { type ThemeNameValue, parseThemeNameValue } from './src/theme_name';
+export type ThemeNameValue = 'amsterdam' | 'berlin' | string;
 
-export { TIMEZONE_OPTIONS } from './src/timezones';
+export const parseThemeNameValue = (rawValue: unknown): ThemeNameValue => {
+  if (rawValue === 'amsterdam' || rawValue === 'berlin') {
+    return rawValue;
+  }
+
+  return 'amsterdam';
+};
