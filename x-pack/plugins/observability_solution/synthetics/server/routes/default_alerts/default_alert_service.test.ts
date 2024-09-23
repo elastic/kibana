@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-types';
+import { SanitizedRule } from '@kbn/alerting-types';
 import { omit } from 'lodash';
 import {
   SYNTHETICS_STATUS_RULE,
@@ -176,8 +176,8 @@ describe('DefaultAlertService', () => {
   });
 
   describe('existing alerts', () => {
-    function setUpExistingRules<T>(
-      ruleOverride?: Partial<SanitizedRule<T extends RuleTypeParams>>,
+    function setUpExistingRules<T extends Record<string, any>>(
+      ruleOverride?: Partial<SanitizedRule<T>>,
       getRulesClientMocks = {}
     ) {
       const getRulesClient = jest.fn();
@@ -285,7 +285,7 @@ describe('DefaultAlertService', () => {
       });
     });
 
-    function setUpUpdateTest<T>(mockRule?: Partial<SanitizedRule<T extends RuleTypeParams>>) {
+    function setUpUpdateTest<T extends Record<string, any>>(mockRule?: Partial<SanitizedRule<T>>) {
       const update = jest.fn().mockResolvedValue({
         alertTypeId: 'test-alert-type-id',
         actions: [{ id: 'id', actionTypeId: 'actionTypeId', name: 'action name' }],
