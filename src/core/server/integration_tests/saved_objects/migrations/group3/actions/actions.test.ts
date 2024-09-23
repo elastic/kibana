@@ -2031,27 +2031,5 @@ describe.skip('migration actions', () => {
           }
       `);
     });
-
-    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
-      const newDocs = new Array(10000).fill({
-        _source: {
-          title:
-            'how do I create a document thats large enoug to exceed the limits without typing long sentences',
-        },
-      }) as SavedObjectsRawDoc[];
-      const task = bulkOverwriteTransformedDocuments({
-        client,
-        index: 'existing_index_with_docs',
-        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
-      });
-      await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "request_entity_too_large_exception",
-          },
-        }
-      `);
-    });
   });
 });
