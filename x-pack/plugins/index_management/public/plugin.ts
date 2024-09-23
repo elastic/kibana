@@ -50,6 +50,7 @@ export class IndexMgmtUIPlugin
     isIndexManagementUiEnabled: boolean;
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
+    enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
   };
 
@@ -68,6 +69,7 @@ export class IndexMgmtUIPlugin
       editableIndexSettings,
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
+      enableProjectLevelRetentionChecks,
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
     this.config = {
@@ -80,6 +82,7 @@ export class IndexMgmtUIPlugin
       editableIndexSettings: editableIndexSettings ?? 'all',
       enableMappingsSourceFieldSection: enableMappingsSourceFieldSection ?? true,
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
+      enableProjectLevelRetentionChecks: enableProjectLevelRetentionChecks ?? false,
       enableSemanticText: enableSemanticText ?? true,
     };
   }

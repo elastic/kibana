@@ -57,6 +57,7 @@ export interface ClientConfigType {
   editableIndexSettings?: 'all' | 'limited';
   enableMappingsSourceFieldSection?: boolean;
   enableTogglingDataRetention?: boolean;
+  enableProjectLevelRetentionChecks?: boolean;
   dev: {
     enableSemanticText?: boolean;
   };
