@@ -17,8 +17,6 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
-import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
-import type { EntityDefinition } from '@kbn/entities-schema';
 import { partition, chunk } from 'lodash';
 
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
@@ -77,7 +75,6 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
-  [KibanaAssetType.entityDefinition]: KibanaSavedObjectType.entityDefinition,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -112,51 +109,25 @@ export async function installKibanaAssets(options: {
   logger: Logger;
   pkgName: string;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
-  entityClient?: EntityClient;
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssets, savedObjectsClient, savedObjectsImporter, entityClient, logger } = options;
+  const { kibanaAssets, savedObjectsClient, savedObjectsImporter, logger } = options;
 
-  const assetsToInstall = Object.entries(kibanaAssets)
-    .flatMap(([assetType, assets]) => {
-      if (!validKibanaAssetTypes.has(assetType as KibanaAssetType)) {
-        return [];
-      }
+  const assetsToInstall = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
+    if (!validKibanaAssetTypes.has(assetType as KibanaAssetType)) {
+      return [];
+    }
 
-      if (!assets.length) {
-        return [];
-      }
+    if (!assets.length) {
+      return [];
+    }
 
-      const assetFilter = AssetFilters[assetType];
-      if (assetFilter) {
-        return assetFilter(assets);
-      }
+    const assetFilter = AssetFilters[assetType];
+    if (assetFilter) {
+      return assetFilter(assets);
+    }
 
-      return assets;
-    })
-    .concat([
-      {
-        id: 'hosts_from_logs_data',
-        type: KibanaSavedObjectType.entityDefinition,
-        references: [],
-        attributes: {
-          id: 'hosts_from_logs_data',
-          name: 'Hosts from logs data',
-          description: 'This definition extracts host entities from log data',
-          version: '1.0.0',
-          type: 'host',
-          indexPatterns: ['remote_cluster:logs-*'],
-          identityFields: ['host.name'],
-          displayNameTemplate: '{{host.name}}',
-          history: {
-            timestampField: '@timestamp',
-            interval: '2m',
-            settings: {
-              frequency: '2m',
-            },
-          },
-        },
-      },
-    ]);
+    return assets;
+  });
 
   if (!assetsToInstall.length) {
     return [];
@@ -178,25 +149,15 @@ export async function installKibanaAssets(options: {
   const installedSavedObjects = await installKibanaSavedObjects({
     logger,
     savedObjectsImporter,
-    kibanaAssets: assetsToInstall.filter((asset) => asset.type !== 'entity-definition'),
+    kibanaAssets: assetsToInstall,
     assetsChunkSize: MAX_ASSETS_TO_INSTALL_IN_PARALLEL,
   });
-
-  const entityDefinitions = assetsToInstall.filter(({ type }) => type === 'entity-definition');
-  if (entityDefinitions.length > 0) {
-    await Promise.all(
-      entityDefinitions.map(({ attributes }) =>
-        entityClient!.createEntityDefinition({ definition: attributes as EntityDefinition })
-      )
-    );
-  }
 
   return installedSavedObjects;
 }
 
 export async function installKibanaAssetsAndReferencesMultispace({
   savedObjectsClient,
-  entityClient,
   logger,
   pkgName,
   pkgTitle,
@@ -207,7 +168,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  entityClient?: EntityClient;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
@@ -221,7 +181,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
     // Install in every space => upgrades
     const refs = await installKibanaAssetsAndReferences({
       savedObjectsClient,
-      entityClient,
       logger,
       pkgName,
       pkgTitle,
@@ -237,7 +196,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
     )) {
       await installKibanaAssetsAndReferences({
         savedObjectsClient,
-        entityClient,
         logger,
         pkgName,
         pkgTitle,
@@ -253,7 +211,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
 
   return installKibanaAssetsAndReferences({
     savedObjectsClient,
-    entityClient,
     logger,
     pkgName,
     pkgTitle,
@@ -267,7 +224,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
 
 export async function installKibanaAssetsAndReferences({
   savedObjectsClient,
-  entityClient,
   logger,
   pkgName,
   pkgTitle,
@@ -278,7 +234,6 @@ export async function installKibanaAssetsAndReferences({
   installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  entityClient?: EntityClient;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
@@ -311,7 +266,6 @@ export async function installKibanaAssetsAndReferences({
     savedObjectsImporter,
     pkgName,
     kibanaAssets,
-    entityClient,
   });
   if (installAsAdditionalSpace) {
     const assets = importedAssets.map(

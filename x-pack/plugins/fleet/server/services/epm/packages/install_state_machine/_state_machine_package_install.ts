@@ -57,6 +57,7 @@ import {
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
+import { stepInstallEntityDefinitions } from './steps/step_install_entity_definitions';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
@@ -94,6 +95,11 @@ const statesDefinition: StateMachineStates<StateNames> = {
   install_kibana_assets: {
     onPreTransition: cleanUpKibanaAssetsStep,
     onTransition: stepInstallKibanaAssets,
+    nextState: INSTALL_STATES.INSTALL_ENTITY_DEFINITIONS,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_entity_definitions: {
+    onTransition: stepInstallEntityDefinitions,
     nextState: INSTALL_STATES.INSTALL_ILM_POLICIES,
     onPostTransition: updateLatestExecutedState,
   },

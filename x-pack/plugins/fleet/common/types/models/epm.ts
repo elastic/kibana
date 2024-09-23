@@ -46,7 +46,8 @@ export type AssetType =
   | KibanaAssetType
   | ElasticsearchAssetType
   | ValueOf<AgentAssetType>
-  | DocAssetType;
+  | DocAssetType
+  | 'entity_definition';
 
 /*
   Enum mapping of a saved object asset type to how it would appear in a package file path (snake cased)
@@ -64,7 +65,6 @@ export enum KibanaAssetType {
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
-  entityDefinition = 'entity_definition',
 }
 
 /*
@@ -83,7 +83,6 @@ export enum KibanaSavedObjectType {
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
-  entityDefinition = 'entity-definition',
 }
 
 export enum ElasticsearchAssetType {
@@ -568,6 +567,7 @@ export interface InstallFailedAttempt {
 export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
+  INSTALL_ENTITY_DEFINITIONS = 'install_entity_definitions',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
   INSTALL_ML_MODEL = 'install_ml_model',
   INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
