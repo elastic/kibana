@@ -8,9 +8,9 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { TextObject } from '../../../../common/text_object';
 import { migrateToTextObjects } from './data_migration';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
-import { TextObject } from "@kbn/console-plugin/common/text_object";
 
 export const useDataInit = () => {
   const [error, setError] = useState<Error | null>(null);
