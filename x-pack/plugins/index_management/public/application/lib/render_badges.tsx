@@ -20,7 +20,10 @@ export const renderBadges = (
 ) => {
   const badgeLabels: ReactNode[] = [];
   extensionsService.badges.forEach((indexBadge) => {
-    const { matchIndex, label, color, filterExpression } = indexBadge;
+    const { matchIndex, filterExpression, label: badgeLabel, color: badgeColor } = indexBadge;
+    const label = typeof badgeLabel === 'function' ? badgeLabel(index) : badgeLabel;
+    const color = typeof badgeColor === 'function' ? badgeColor(index) : badgeColor;
+
     if (matchIndex(index)) {
       const clickHandler = () => {
         if (onFilterChange && filterExpression) {

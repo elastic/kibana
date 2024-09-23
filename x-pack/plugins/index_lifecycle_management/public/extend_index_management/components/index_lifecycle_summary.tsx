@@ -19,40 +19,16 @@ import {
   EuiText,
   EuiSpacer,
   EuiDescriptionList,
-  EuiBadgeProps,
   EuiBadge,
   EuiCode,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ApplicationStart } from '@kbn/core/public';
 import { Index, IndexDetailsTab } from '@kbn/index-management-shared-types';
 import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
 import { Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
-
-const phaseToBadgeMapping: Record<Phase, { color: EuiBadgeProps['color']; label: string }> = {
-  hot: {
-    color: euiThemeVars.euiColorVis9,
-    label: 'Hot',
-  },
-  warm: {
-    color: euiThemeVars.euiColorVis5,
-    label: 'Warm',
-  },
-  cold: {
-    color: euiThemeVars.euiColorVis1,
-    label: 'Cold',
-  },
-  frozen: {
-    color: euiThemeVars.euiColorVis4,
-    label: 'Frozen',
-  },
-  delete: {
-    color: 'default',
-    label: 'Delete',
-  },
-};
+import { phaseToBadgeMapping } from '..';
 
 interface Props {
   index: Index;

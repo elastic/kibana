@@ -25,10 +25,10 @@ export interface IndexToggle {
 }
 export interface IndexBadge {
   matchIndex: (index: Index) => boolean;
-  label: string;
+  label: string | ((index: Index) => string);
   // a parseable search bar filter expression, for example "isFollowerIndex:true"
   filterExpression?: string;
-  color: EuiBadgeProps['color'];
+  color: EuiBadgeProps['color'] | ((index: Index) => EuiBadgeProps['color']);
 }
 
 export interface EmptyListContent {
