@@ -22,7 +22,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -1035,9 +1035,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     logger.debug(`Bumping revision of associated agent policies ${associatedPolicyIds}`);
     const bumpPromises = [];
     for (const policyId of associatedPolicyIds) {
+      // Check if the agent policy is in both old and updated package policies
+      const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
+      const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
+
+      // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
+      const removeProtection =
+        (assignedInOldPolicy && !assignedInNewPolicy) ||
+        (!assignedInOldPolicy && assignedInNewPolicy);
+
       bumpPromises.push(
         agentPolicyService.bumpRevision(soClient, esClient, policyId, {
           user: options?.user,
+          removeProtection,
         })
       );
     }
@@ -1207,10 +1217,33 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ...packagePolicyUpdates.flatMap((p) => p.policy_ids),
       ...oldPackagePolicies.flatMap((p) => p.policy_ids),
     ]);
-    logger.debug(`Bumping revision of associated agent policies ${associatedPolicyIds}`);
+
+    const [endpointPackagePolicyUpdatesIds, endpointOldPackagePoliciesIds] = [
+      packagePolicyUpdates,
+      oldPackagePolicies,
+    ].map(
+      (packagePolicies) =>
+        new Set(
+          packagePolicies
+            .filter((p) => p.package?.name === 'endpoint')
+            .map((p) => p.policy_ids)
+            .flat()
+        )
+    );
+
     const bumpPromise = pMap(associatedPolicyIds, async (agentPolicyId) => {
+      // Check if the agent policy is in both old and updated package policies
+      const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
+      const assignedInUpdatedPolicies = endpointPackagePolicyUpdatesIds.has(agentPolicyId);
+
+      // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
+      const removeProtection =
+        (assignedInOldPolicies && !assignedInUpdatedPolicies) ||
+        (!assignedInOldPolicies && assignedInUpdatedPolicies);
+
       await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
         user: options?.user,
+        removeProtection,
       });
     });
 
@@ -2287,7 +2320,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 }
 
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
-  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, safeLoad);
+  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, load);
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
       .map(([key, value]) => ({
@@ -2784,7 +2817,7 @@ export function updatePackageInputs(
     inputs,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, safeLoad);
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, load);
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))

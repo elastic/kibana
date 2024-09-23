@@ -18,11 +18,12 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: PersistNoteRoute
-      summary: Persists a note to a timeline.
+      summary: Add or update a note
+      description: Add a note to a Timeline or update an existing note.
       tags:
         - access:securitySolution
       requestBody:
-        description: The note to persist or update along with additional metadata.
+        description: The note to add or update, along with additional metadata.
         required: true
         content:
           application/json:
