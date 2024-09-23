@@ -14,7 +14,7 @@ import type { EntityType } from '../../../../../common/api/entity_analytics/enti
 import { getFieldRetentionDefinition } from './field_retention_definitions';
 import type { FieldRetentionDefinition } from './types';
 import { getEntitiesIndexName } from '../utils/utils';
-import { buildFieldRetentionPipeline } from './field_retention_ingest_pipeline';
+import { buildFieldRetentionIngestPipeline } from './build_field_retention_ingest_pipeline';
 
 const HISTORICAL_FIELD = 'historical';
 
@@ -94,12 +94,13 @@ export const getFieldRetentionPipelineSteps = ({
         target_field: HISTORICAL_FIELD,
       },
     },
-    ...buildFieldRetentionPipeline(definition, HISTORICAL_FIELD),
+    ...buildFieldRetentionIngestPipeline(definition, HISTORICAL_FIELD),
   ];
 
   if (!debugMode) {
     steps.push({
       remove: {
+        ignore_failure: true,
         field: `${HISTORICAL_FIELD}`,
       },
     });
