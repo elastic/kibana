@@ -723,10 +723,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   protected sendActionCreationTelemetry(actionRequest: LogsEndpointAction): void {
-    const isAutomated =
-      (actionRequest.EndpointActions.data.alert_id &&
-        actionRequest.EndpointActions.data.alert_id.length > 0) ??
-      false;
     this.options.endpointService
       .getTelemetryService()
       .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
@@ -734,7 +730,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           actionId: actionRequest.EndpointActions.action_id,
           agentType: this.agentType,
           command: actionRequest.EndpointActions.data.command,
-          isAutomated,
+          isAutomated: this.options.isAutomated ?? false,
         },
       });
   }
