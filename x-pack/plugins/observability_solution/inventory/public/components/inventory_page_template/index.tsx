@@ -13,9 +13,7 @@ import { Welcome } from '../entity_enablement/welcome_modal';
 
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
-    dependencies: {
-      start: { observabilityShared },
-    },
+    services: { observabilityShared },
   } = useKibana();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
