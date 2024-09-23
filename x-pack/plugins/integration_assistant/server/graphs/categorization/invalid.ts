@@ -6,12 +6,14 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { GraphRecursionError } from '@langchain/langgraph';
 import type { Pipeline } from '../../../common';
 import type { CategorizationNodeParams } from './types';
 import type { SimplifiedProcessors, SimplifiedProcessor, CategorizationState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
 import { CATEGORIZATION_VALIDATION_PROMPT } from './prompts';
+import { RecursionLimitError } from '../../lib/errors';
 
 export async function handleInvalidCategorization({
   state,
@@ -21,14 +23,22 @@ export async function handleInvalidCategorization({
 
   const outputParser = new JsonOutputParser();
   const categorizationInvalidGraph = categorizationInvalidPrompt.pipe(model).pipe(outputParser);
+  let currentProcessors: SimplifiedProcessor[] = [];
 
-  const currentProcessors = (await categorizationInvalidGraph.invoke({
-    current_processors: JSON.stringify(state.currentProcessors, null, 2),
-    invalid_categorization: JSON.stringify(state.invalidCategorization, null, 2),
-    ex_answer: state.exAnswer,
-    compatible_types: JSON.stringify(ECS_EVENT_TYPES_PER_CATEGORY, null, 2),
-  })) as SimplifiedProcessor[];
-
+  try {
+    currentProcessors = (await categorizationInvalidGraph.invoke({
+      current_processors: JSON.stringify(state.currentProcessors, null, 2),
+      invalid_categorization: JSON.stringify(state.invalidCategorization, null, 2),
+      ex_answer: state.exAnswer,
+      compatible_types: JSON.stringify(ECS_EVENT_TYPES_PER_CATEGORY, null, 2),
+    })) as SimplifiedProcessor[];
+  } catch (e) {
+    if (e instanceof GraphRecursionError) {
+      throw new RecursionLimitError(e.message);
+    } else {
+      throw e;
+    }
+  }
   const processors = {
     type: 'categorization',
     processors: currentProcessors,

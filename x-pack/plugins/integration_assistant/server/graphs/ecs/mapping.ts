@@ -6,9 +6,11 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { GraphRecursionError } from '@langchain/langgraph';
 import type { EcsMappingState } from '../../types';
 import { ECS_MAIN_PROMPT } from './prompts';
 import type { EcsNodeParams } from './types';
+import { RecursionLimitError } from '../../lib/errors';
 
 export async function handleEcsMapping({
   state,
@@ -16,13 +18,22 @@ export async function handleEcsMapping({
 }: EcsNodeParams): Promise<Partial<EcsMappingState>> {
   const outputParser = new JsonOutputParser();
   const ecsMainGraph = ECS_MAIN_PROMPT.pipe(model).pipe(outputParser);
+  let currentMapping;
 
-  const currentMapping = await ecsMainGraph.invoke({
-    ecs: state.ecs,
-    combined_samples: state.combinedSamples,
-    package_name: state.packageName,
-    data_stream_name: state.dataStreamName,
-    ex_answer: state.exAnswer,
-  });
+  try {
+    currentMapping = await ecsMainGraph.invoke({
+      ecs: state.ecs,
+      combined_samples: state.combinedSamples,
+      package_name: state.packageName,
+      data_stream_name: state.dataStreamName,
+      ex_answer: state.exAnswer,
+    });
+  } catch (e) {
+    if (e instanceof GraphRecursionError) {
+      throw new RecursionLimitError(e.message);
+    } else {
+      throw e;
+    }
+  }
   return { currentMapping, hasTriedOnce: true, lastExecutedChain: 'ecsMapping' };
 }

@@ -5,9 +5,11 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { GraphRecursionError } from '@langchain/langgraph';
 import type { LogFormatDetectionState } from '../../types';
 import { LOG_FORMAT_DETECTION_PROMPT } from './prompts';
 import type { LogDetectionNodeParams } from './types';
+import { RecursionLimitError } from '../../lib/errors';
 
 const MaxLogSamplesInPrompt = 5;
 
@@ -22,12 +24,20 @@ export async function handleLogFormatDetection({
     state.logSamples.length > MaxLogSamplesInPrompt
       ? state.logSamples.slice(0, MaxLogSamplesInPrompt)
       : state.logSamples;
+  let detectedLogFormatAnswer;
 
-  const detectedLogFormatAnswer = await logFormatDetectionNode.invoke({
-    ex_answer: state.exAnswer,
-    log_samples: samples,
-  });
-
+  try {
+    detectedLogFormatAnswer = await logFormatDetectionNode.invoke({
+      ex_answer: state.exAnswer,
+      log_samples: samples,
+    });
+  } catch (e) {
+    if (e instanceof GraphRecursionError) {
+      throw new RecursionLimitError(e.message);
+    } else {
+      throw e;
+    }
+  }
   const logFormat = detectedLogFormatAnswer.log_type;
   const header = detectedLogFormatAnswer.header;
 

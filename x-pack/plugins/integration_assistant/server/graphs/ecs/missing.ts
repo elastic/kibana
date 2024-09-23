@@ -6,9 +6,11 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { GraphRecursionError } from '@langchain/langgraph';
 import { EcsMappingState } from '../../types';
 import { ECS_MISSING_KEYS_PROMPT } from './prompts';
 import { EcsNodeParams } from './types';
+import { RecursionLimitError } from '../../lib/errors';
 
 export async function handleMissingKeys({
   state,
@@ -18,15 +20,22 @@ export async function handleMissingKeys({
   const ecsMissingGraph = ECS_MISSING_KEYS_PROMPT.pipe(model).pipe(outputParser);
   const usesFinalMapping = state?.useFinalMapping;
   const mapping = usesFinalMapping ? state.finalMapping : state.currentMapping;
-
-  const result = await ecsMissingGraph.invoke({
-    ecs: state.ecs,
-    current_mapping: JSON.stringify(mapping, null, 2),
-    ex_answer: state.exAnswer,
-    combined_samples: state.combinedSamples,
-    missing_keys: state?.missingKeys,
-  });
-
+  let result;
+  try {
+    result = await ecsMissingGraph.invoke({
+      ecs: state.ecs,
+      current_mapping: JSON.stringify(mapping, null, 2),
+      ex_answer: state.exAnswer,
+      combined_samples: state.combinedSamples,
+      missing_keys: state?.missingKeys,
+    });
+  } catch (e) {
+    if (e instanceof GraphRecursionError) {
+      throw new RecursionLimitError(e.message);
+    } else {
+      throw e;
+    }
+  }
   return {
     [usesFinalMapping ? 'finalMapping' : 'currentMapping']: result,
     lastExecutedChain: 'missingKeys',

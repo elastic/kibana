@@ -5,10 +5,12 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { GraphRecursionError } from '@langchain/langgraph';
 import type { UnstructuredLogState } from '../../types';
 import { GROK_MAIN_PROMPT } from './prompts';
 import { GrokResult, HandleUnstructuredNodeParams } from './types';
 import { GROK_EXAMPLE_ANSWER } from './constants';
+import { RecursionLimitError } from '../../lib/errors';
 
 export async function handleUnstructured({
   state,
@@ -19,11 +21,20 @@ export async function handleUnstructured({
 
   // Pick logSamples if there was no header detected.
   const samples = state.logSamples;
+  let pattern: GrokResult;
 
-  const pattern = (await grokMainGraph.invoke({
-    samples: samples[0],
-    ex_answer: JSON.stringify(GROK_EXAMPLE_ANSWER, null, 2),
-  })) as GrokResult;
+  try {
+    pattern = (await grokMainGraph.invoke({
+      samples: samples[0],
+      ex_answer: JSON.stringify(GROK_EXAMPLE_ANSWER, null, 2),
+    })) as GrokResult;
+  } catch (e) {
+    if (e instanceof GraphRecursionError) {
+      throw new RecursionLimitError(e.message);
+    } else {
+      throw e;
+    }
+  }
 
   return {
     grokPatterns: pattern.grok_patterns,

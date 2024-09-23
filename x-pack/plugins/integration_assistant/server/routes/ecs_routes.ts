@@ -16,6 +16,7 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -93,6 +94,9 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
 
           return res.ok({ body: EcsMappingResponse.parse(results) });
         } catch (e) {
+          if (isErrorThatHandlesItsOwnResponse(e)) {
+            return e.sendResponse(res);
+          }
           return res.badRequest({ body: e });
         }
       })

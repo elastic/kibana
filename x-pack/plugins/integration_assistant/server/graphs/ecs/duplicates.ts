@@ -6,9 +6,11 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { GraphRecursionError } from '@langchain/langgraph';
 import type { EcsMappingState } from '../../types';
 import { ECS_DUPLICATES_PROMPT } from './prompts';
 import type { EcsNodeParams } from './types';
+import { RecursionLimitError } from '../../lib/errors';
 
 export async function handleDuplicates({
   state,
@@ -19,12 +21,22 @@ export async function handleDuplicates({
   const usesFinalMapping = state?.useFinalMapping;
   const mapping = usesFinalMapping ? state.finalMapping : state.currentMapping;
 
-  const result = await ecsDuplicatesGraph.invoke({
-    ecs: state.ecs,
-    current_mapping: JSON.stringify(mapping, null, 2),
-    ex_answer: state.exAnswer,
-    duplicate_fields: state.duplicateFields,
-  });
+  let result;
+
+  try {
+    result = await ecsDuplicatesGraph.invoke({
+      ecs: state.ecs,
+      current_mapping: JSON.stringify(mapping, null, 2),
+      ex_answer: state.exAnswer,
+      duplicate_fields: state.duplicateFields,
+    });
+  } catch (e) {
+    if (e instanceof GraphRecursionError) {
+      throw new RecursionLimitError(e.message);
+    } else {
+      throw e;
+    }
+  }
 
   return {
     [usesFinalMapping ? 'finalMapping' : 'currentMapping']: result,

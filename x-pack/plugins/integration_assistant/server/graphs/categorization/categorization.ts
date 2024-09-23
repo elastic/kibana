@@ -5,12 +5,14 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { GraphRecursionError } from '@langchain/langgraph';
 import type { Pipeline } from '../../../common';
 import type { CategorizationState, SimplifiedProcessor, SimplifiedProcessors } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { CATEGORIZATION_EXAMPLE_PROCESSORS } from './constants';
 import { CATEGORIZATION_MAIN_PROMPT } from './prompts';
 import type { CategorizationNodeParams } from './types';
+import { RecursionLimitError } from '../../lib/errors';
 
 export async function handleCategorization({
   state,
@@ -19,13 +21,22 @@ export async function handleCategorization({
   const categorizationMainPrompt = CATEGORIZATION_MAIN_PROMPT;
   const outputParser = new JsonOutputParser();
   const categorizationMainGraph = categorizationMainPrompt.pipe(model).pipe(outputParser);
-  const currentProcessors = (await categorizationMainGraph.invoke({
-    pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
-    example_processors: CATEGORIZATION_EXAMPLE_PROCESSORS,
-    ex_answer: state?.exAnswer,
-    ecs_categories: state?.ecsCategories,
-    ecs_types: state?.ecsTypes,
-  })) as SimplifiedProcessor[];
+  let currentProcessors: SimplifiedProcessor[] = [];
+  try {
+    currentProcessors = (await categorizationMainGraph.invoke({
+      pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
+      example_processors: CATEGORIZATION_EXAMPLE_PROCESSORS,
+      ex_answer: state?.exAnswer,
+      ecs_categories: state?.ecsCategories,
+      ecs_types: state?.ecsTypes,
+    })) as SimplifiedProcessor[];
+  } catch (e) {
+    if (e instanceof GraphRecursionError) {
+      throw new RecursionLimitError(e.message);
+    } else {
+      throw e;
+    }
+  }
 
   const processors = {
     type: 'categorization',

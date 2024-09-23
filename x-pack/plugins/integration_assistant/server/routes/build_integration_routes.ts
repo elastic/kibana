@@ -11,6 +11,7 @@ import { buildPackage } from '../integration_builder';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 
 export function registerIntegrationBuilderRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -39,6 +40,9 @@ export function registerIntegrationBuilderRoutes(
             headers: { 'Content-Type': 'application/zip' },
           });
         } catch (e) {
+          if (isErrorThatHandlesItsOwnResponse(e)) {
+            return e.sendResponse(response);
+          }
           return response.customError({ statusCode: 500, body: e });
         }
       })

@@ -12,6 +12,7 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { testPipeline } from '../util/pipeline';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 
 export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -47,6 +48,9 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
               body: CheckPipelineResponse.parse({ results: { docs: pipelineResults } }),
             });
           } catch (e) {
+            if (isErrorThatHandlesItsOwnResponse(e)) {
+              return e.sendResponse(res);
+            }
             return res.badRequest({ body: e });
           }
         }
