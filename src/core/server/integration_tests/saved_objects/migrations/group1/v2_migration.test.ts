@@ -9,6 +9,7 @@
 
 import { join } from 'path';
 import { omit } from 'lodash';
+import JSON5 from 'json5';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 
@@ -105,6 +106,7 @@ describe('v2 migration', () => {
   describe('to a newer stack version', () => {
     describe('with unknown types', () => {
       let unknownTypesKit: KibanaMigratorTestKit;
+      let logs: string;
 
       beforeAll(async () => {
         await clearLog(logFilePath);
@@ -126,12 +128,12 @@ describe('v2 migration', () => {
           To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
           Please refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html for more information."
         `);
-        const logs = await readLog(logFilePath);
+        logs = await readLog(logFilePath);
         expect(logs).toMatch(
           'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
         );
         expect(logs).toMatch(
-          `Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: Migration failed because some documents were found which use unknown saved object types: deprecated`
+          `[${defaultKibanaIndex}] Migration failed because some documents were found which use unknown saved object types: deprecated`
         );
         expect(logs).toMatch(`[${defaultKibanaIndex}] CHECK_UNKNOWN_DOCUMENTS -> FATAL.`);
       });
@@ -139,6 +141,7 @@ describe('v2 migration', () => {
 
     describe('with transform errors', () => {
       let transformErrorsKit: KibanaMigratorTestKit;
+      let logs: string;
 
       beforeAll(async () => {
         await clearLog(logFilePath);
@@ -167,11 +170,31 @@ describe('v2 migration', () => {
       });
 
       it('fails if Kibana is not configured to discard transform errors', async () => {
-        const logs = await readLog(logFilePath);
+        logs = await readLog(logFilePath);
         expect(logs).toMatch(
           `Cannot convert 'complex' objects with values that are multiple of 100`
         );
         expect(logs).toMatch(`[${defaultKibanaIndex}] REINDEX_SOURCE_TO_TEMP_READ -> FATAL.`);
+      });
+
+      it('closes reindex PIT upon failure', async () => {
+        const lineWithPit = logs
+          .split('\n')
+          .find((line) =>
+            line.includes(`[${defaultKibanaIndex}] REINDEX_SOURCE_TO_TEMP_OPEN_PIT PitId:`)
+          );
+
+        expect(lineWithPit).toBeTruthy();
+
+        const id = JSON5.parse(lineWithPit!).message.split(':')[1];
+        expect(id).toBeTruthy();
+
+        await expect(
+          transformErrorsKit.client.search({
+            pit: { id },
+          })
+          // throws an exception that cannot search with closed PIT
+        ).rejects.toThrow(/search_phase_execution_exception/);
       });
     });
 

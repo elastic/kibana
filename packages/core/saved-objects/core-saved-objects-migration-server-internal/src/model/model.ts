@@ -896,6 +896,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         corruptDocumentIds: [],
         transformErrors: [],
         progress: createInitialProgress(),
+        logs: [
+          ...logs,
+          {
+            level: 'info',
+            message: `REINDEX_SOURCE_TO_TEMP_OPEN_PIT PitId:${res.right.pitId}`,
+          },
+        ],
       };
     } else {
       throwBadResponse(stateP, res);
