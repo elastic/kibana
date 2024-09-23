@@ -153,7 +153,7 @@ export const SolutionView: FunctionComponent<Props> = ({
               placeholder={i18n.translate(
                 'xpack.spaces.management.navigation.solutionViewDefaultValue',
                 {
-                  defaultMessage: 'Classic (Default)',
+                  defaultMessage: 'Select view',
                 }
               )}
               isInvalid={validator.validateSolutionView(space, isEditing).isInvalid}

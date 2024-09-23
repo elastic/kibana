@@ -4971,6 +4971,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-editor@link:packages/kbn-esql-editor":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-utils@link:packages/kbn-esql-utils":
   version "0.0.0"
   uid ""
@@ -5471,7 +5475,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/language-documentation-popover@link:packages/kbn-language-documentation-popover":
+"@kbn/language-documentation@link:packages/kbn-language-documentation":
   version "0.0.0"
   uid ""
 
@@ -6932,10 +6936,6 @@
   uid ""
 
 "@kbn/testing-embedded-lens-plugin@link:x-pack/examples/testing_embedded_lens":
-  version "0.0.0"
-  uid ""
-
-"@kbn/text-based-editor@link:packages/kbn-text-based-editor":
   version "0.0.0"
   uid ""
 
