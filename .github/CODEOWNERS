@@ -429,6 +429,7 @@ src/plugins/esql @elastic/kibana-esql
 packages/kbn-esql-ast @elastic/kibana-esql
 examples/esql_ast_inspector @elastic/kibana-esql
 src/plugins/esql_datagrid @elastic/kibana-esql
+packages/kbn-esql-editor @elastic/kibana-esql
 packages/kbn-esql-utils @elastic/kibana-esql
 packages/kbn-esql-validation-autocomplete @elastic/kibana-esql
 examples/esql_validation_example @elastic/kibana-esql
@@ -553,7 +554,7 @@ src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-langchain @elastic/security-generative-ai
-packages/kbn-language-documentation-popover @elastic/kibana-esql
+packages/kbn-language-documentation @elastic/kibana-esql
 x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
 packages/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 packages/kbn-lens-formula-docs @elastic/kibana-visualizations
@@ -919,7 +920,6 @@ test
 x-pack/test 
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
-packages/kbn-text-based-editor @elastic/kibana-esql
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
@@ -1418,6 +1418,15 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test_serverless/functional/test_suites/security/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/api_integration/test_suites/common/alerting/ @elastic/response-ops
+/x-pack/test/functional/es_archives/action_task_params @elastic/response-ops
+/x-pack/test/functional/es_archives/actions @elastic/response-ops
+/x-pack/test/functional/es_archives/alerting @elastic/response-ops
+/x-pack/test/functional/es_archives/alerts @elastic/response-ops
+/x-pack/test/functional/es_archives/alerts_legacy @elastic/response-ops
+/x-pack/test/functional/es_archives/observability/alerts @elastic/response-ops
+/x-pack/test/functional/es_archives/actions @elastic/response-ops
+/x-pack/test/functional/es_archives/rules_scheduled_task_id  @elastic/response-ops
+/x-pack/test/functional/es_archives/alerting/8_2_0  @elastic/response-ops
 
 # Enterprise Search
 /x-pack/test/functional_enterprise_search/ @elastic/search-kibana

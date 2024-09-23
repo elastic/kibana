@@ -21,7 +21,6 @@ export const savedObjectsTaggingServiceFactory: SavedObjectsTaggingServiceFactor
 
     // I'm not defining components so that I don't have to update the snapshot of `save_modal.test`
     // However, if it's ever necessary, it can be done via: `components: pluginMock.components`,
-    hasTagDecoration: pluginMock.hasTagDecoration,
     parseSearchQuery: pluginMock.parseSearchQuery,
     getSearchBarFilter: pluginMock.getSearchBarFilter,
     getTagIdsFromReferences: pluginMock.getTagIdsFromReferences,
