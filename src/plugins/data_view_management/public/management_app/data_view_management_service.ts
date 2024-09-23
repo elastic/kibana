@@ -11,6 +11,7 @@ import { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import { BehaviorSubject, Observable, map, distinctUntilChanged } from 'rxjs';
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { FilterChecked } from '@elastic/eui';
 
 import {
   SavedObjectsManagementPluginStart,
@@ -31,6 +32,8 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { getTags } from '../components/utils';
 
 import { APP_STATE_STORAGE_KEY } from '../components/edit_index_pattern/edit_index_pattern_state_container';
+
+import { convertToEuiFilterOptions } from '../components/edit_index_pattern/tabs/utils';
 
 export interface SavedObjectRelationWithTitle extends SavedObjectRelation {
   title: string;
@@ -79,7 +82,11 @@ export interface DataViewMgmtState {
   relationships: SavedObjectRelationWithTitle[];
   fields: DataViewField[];
   scriptedFields: DataViewField[];
-  scriptedFieldLangs: string[];
+  scriptedFieldLangs: Array<{
+    value: string;
+    name: string;
+    checked?: FilterChecked;
+  }>;
   indexedFieldTypes: string[];
   fieldConflictCount: number;
   tags: Array<{ key: string; 'data-test-subj': string; name: string }>;
@@ -202,7 +209,7 @@ export class DataViewMgmtService {
 
       this.updateState({
         scriptedFields,
-        scriptedFieldLangs,
+        scriptedFieldLangs: convertToEuiFilterOptions(scriptedFieldLangs),
       });
     }
   }
@@ -247,8 +254,6 @@ export class DataViewMgmtService {
         });
       });
 
-    this.updateScriptedFields();
-
     this.updateState({
       dataView,
       fields,
@@ -260,6 +265,8 @@ export class DataViewMgmtService {
       // scriptedFields: Object.values(dataView.getScriptedFields({ fieldName: ['*'] })),
       scriptedFields: dataView.getScriptedFields(),
     });
+
+    this.updateScriptedFields();
   }
 
   async refreshFields() {
@@ -278,5 +285,28 @@ export class DataViewMgmtService {
     await this.services.uiSettings.set('defaultIndex', dataView.id);
 
     this.updateState({ tags: await this.getTags(dataView) });
+  }
+
+  setScriptedFieldLangSelection(index: number) {
+    const items = this.state$.getValue().scriptedFieldLangs;
+
+    if (!items[index]) {
+      return;
+    }
+
+    const scriptedFieldLangs = [...items];
+
+    switch (scriptedFieldLangs[index].checked) {
+      case 'on':
+        scriptedFieldLangs[index].checked = undefined;
+        break;
+
+      default:
+        scriptedFieldLangs[index].checked = 'on';
+    }
+
+    this.updateState({
+      scriptedFieldLangs,
+    });
   }
 }

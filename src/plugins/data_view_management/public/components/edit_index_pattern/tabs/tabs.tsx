@@ -218,8 +218,9 @@ export const Tabs: React.FC<TabsProps> = ({
   const indexedFieldTypes = convertToEuiFilterOptions(
     useStateSelector(dataViewMgmtService.state$, indexedFieldTypeSelector)
   );
-  const scriptedFieldLanguages = convertToEuiFilterOptions(
-    useStateSelector(dataViewMgmtService.state$, scriptedFieldLangsSelector)
+  const scriptedFieldLanguages = useStateSelector(
+    dataViewMgmtService.state$,
+    scriptedFieldLangsSelector
   );
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
@@ -268,29 +269,6 @@ export const Tabs: React.FC<TabsProps> = ({
     [syncingStateFunc]
   );
 
-  const updateFilterItem = (
-    items: FilterItems[],
-    index: number,
-    updater: (a: FilterItems[]) => void
-  ) => {
-    if (!items[index]) {
-      return;
-    }
-
-    const newItems = [...items];
-
-    switch (newItems[index].checked) {
-      case 'on':
-        newItems[index].checked = undefined;
-        break;
-
-      default:
-        newItems[index].checked = 'on';
-    }
-
-    updater(newItems);
-  };
-
   const closeFieldEditor = useCallback(() => {
     if (closeEditorHandler.current) {
       closeEditorHandler.current();
@@ -325,6 +303,7 @@ export const Tabs: React.FC<TabsProps> = ({
   const refreshRef = useRef<HTMLButtonElement>(null);
 
   const userEditPermission = dataViews.getCanSaveSync();
+
   const getFilterSection = useCallback(
     (type: string) => {
       return (
@@ -502,14 +481,14 @@ export const Tabs: React.FC<TabsProps> = ({
                       checked={item.checked}
                       key={item.value}
                       onClick={() => {
+                        // this does the filtering
                         setScriptedFieldLanguageFilter(
                           item.checked
                             ? scriptedFieldLanguageFilter.filter((f) => f !== item.value)
                             : [...scriptedFieldLanguageFilter, item.value]
                         );
-                        // todo
-                        // updateFilterItem(scriptedFieldLanguages, index, setScriptedFieldLanguages);
-                        updateFilterItem(scriptedFieldLanguages, index, () => {});
+                        // updates the UI
+                        dataViewMgmtService.setScriptedFieldLangSelection(index);
                       }}
                       data-test-subj={`scriptedFieldLanguageFilterDropdown-option-${item.value}${
                         item.checked ? '-checked' : ''
@@ -526,6 +505,7 @@ export const Tabs: React.FC<TabsProps> = ({
       );
     },
     [
+      dataViewMgmtService,
       fieldFilter,
       filteredSchemaFieldTypeFilter,
       filteredIndexedFieldTypeFilter,
