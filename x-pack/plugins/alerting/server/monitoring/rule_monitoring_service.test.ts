@@ -171,5 +171,22 @@ describe('RuleMonitoringService', () => {
       } = ruleMonitoringService.getMonitoring();
       expect(metrics.gap_duration_s).toEqual(567);
     });
+
+    it('should set gapRange', () => {
+      const ruleMonitoringService = new RuleMonitoringService();
+      const { setLastRunMetricsGapRange } = ruleMonitoringService.getLastRunMetricsSetters();
+      setLastRunMetricsGapRange({
+        from: '2020-01-01T00:00:00.000Z',
+        to: '2020-01-01T01:00:00.000Z',
+      });
+
+      const {
+        run: {
+          last_run: { metrics },
+        },
+      } = ruleMonitoringService.getMonitoring();
+      expect(metrics.gap_range?.from).toEqual('2020-01-01T00:00:00.000Z');
+      expect(metrics.gap_range?.to).toEqual('2020-01-01T01:00:00.000Z');
+    });
   });
 });
