@@ -73,17 +73,17 @@ export const transformPublicKeys = (result: Result) => {
 
 export function mapSavedObjectToMonitor({
   monitor,
-  ui = false,
+  internal = false,
 }: {
   monitor: SavedObject<MonitorFields | EncryptedSyntheticsMonitor>;
-  ui?: boolean;
+  internal?: boolean;
 }) {
   const result = {
     ...monitor.attributes,
     created_at: monitor.created_at,
     updated_at: monitor.updated_at,
   } as Result;
-  if (ui) {
+  if (internal) {
     return result;
   }
   return transformPublicKeys(result);

@@ -212,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
           monitors.map((mon) => ({ ...mon, name: mon.name + '5' })).map(saveMonitor)
         );
 
-        const apiResponse = await monitorTestService.getMonitor(id1, { ui: true });
+        const apiResponse = await monitorTestService.getMonitor(id1, { internal: true });
 
         expect(apiResponse.body).eql(
           omit(

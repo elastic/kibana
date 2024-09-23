@@ -43,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
         ? `/s/${spaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`
         : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS;
       const res = await supertest
-        .post(apiURL + '?ui=true')
+        .post(apiURL + '?internal=true')
         .set('kbn-xsrf', 'true')
         .send(monitor);
 
@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const editMonitor = async (modifiedMonitor: MonitorFields, monitorId: string) => {
       const res = await supertest
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId + '?ui=true')
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId + '?internal=true')
         .set('kbn-xsrf', 'true')
         .send(modifiedMonitor);
 
@@ -397,7 +397,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const updatedResponse = await monitorTestService.getMonitor(monitorId, {
         space: SPACE_ID,
-        ui: true,
+        internal: true,
       });
 
       // ensure monitor was updated
@@ -417,7 +417,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const updatedResponse2 = await monitorTestService.getMonitor(monitorId, {
         space: SPACE_ID,
-        ui: true,
+        internal: true,
       });
 
       // ensure monitor was updated

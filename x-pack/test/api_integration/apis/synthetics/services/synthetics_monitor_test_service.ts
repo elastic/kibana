@@ -52,19 +52,19 @@ export class SyntheticsMonitorTestService {
     {
       statusCode = 200,
       space,
-      ui,
+      internal,
     }: {
       statusCode?: number;
       space?: string;
-      ui?: boolean;
+      internal?: boolean;
     } = {}
   ) {
     let url = SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId);
     if (space) {
       url = '/s/' + space + url;
     }
-    if (ui) {
-      url += `?ui=${ui}`;
+    if (internal) {
+      url += `?internal=${internal}`;
     }
     const apiResponse = await this.supertest.get(url).expect(200);
 

@@ -71,7 +71,7 @@ export const fetchSyntheticsMonitor = async ({
   return apiService.get<SyntheticsMonitorWithId>(
     SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
     {
-      ui: true,
+      internal: true,
       version: INITIAL_REST_VERSION,
     },
     EncryptedSyntheticsMonitorCodec

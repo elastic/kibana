@@ -25,7 +25,7 @@ export const createMonitorAPI = async ({
 }): Promise<UpsertMonitorResponse> => {
   return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, null, {
     version: INITIAL_REST_VERSION,
-    ui: true,
+    internal: true,
   });
 };
 
@@ -54,7 +54,7 @@ export const updateMonitorAPI = async ({
   id: string;
 }): Promise<UpsertMonitorResponse> => {
   return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, null, {
-    ui: true,
+    internal: true,
     version: INITIAL_REST_VERSION,
   });
 };

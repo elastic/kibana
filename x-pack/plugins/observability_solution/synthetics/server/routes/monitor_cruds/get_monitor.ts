@@ -25,7 +25,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
       }),
       query: schema.object({
-        ui: schema.maybe(
+        internal: schema.maybe(
           schema.boolean({
             defaultValue: false,
           })
@@ -42,7 +42,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   }): Promise<any> => {
     const { monitorId } = request.params;
     try {
-      const { ui } = request.query;
+      const { internal } = request.query;
 
       const canSave =
         (
@@ -60,14 +60,14 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           encryptedSavedObjectsClient,
           spaceId,
         });
-        return mapSavedObjectToMonitor({ monitor, ui });
+        return mapSavedObjectToMonitor({ monitor, internal });
       } else {
         return mapSavedObjectToMonitor({
           monitor: await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
             syntheticsMonitorType,
             monitorId
           ),
-          ui,
+          internal,
         });
       }
     } catch (getErr) {

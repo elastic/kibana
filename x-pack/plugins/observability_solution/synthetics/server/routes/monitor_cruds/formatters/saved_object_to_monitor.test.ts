@@ -140,7 +140,7 @@ describe('mergeSourceMonitor', () => {
   it('should not omit null or undefined values with ui', () => {
     const result = mapSavedObjectToMonitor({
       monitor: { attributes: { ...testMonitor } },
-      ui: true,
+      internal: true,
     } as any);
 
     expect(result).toEqual({
