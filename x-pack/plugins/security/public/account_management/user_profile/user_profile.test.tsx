@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
@@ -180,8 +180,13 @@ describe('useUserProfileForm', () => {
 
     await act(async () => {
       await result.current.setFieldValue('user.full_name', 'Another Name');
+    });
+
+    await act(async () => {
       await result.current.submitForm();
     });
+
+    await waitFor(() => null);
 
     expect(result.current.initialValues.user.full_name).toEqual('Another Name');
   });
@@ -304,8 +309,13 @@ describe('useUserProfileForm', () => {
 
       await act(async () => {
         await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
+      });
+
+      await act(async () => {
         await result.current.submitForm();
       });
+
+      await waitFor(() => null);
 
       expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
         2,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { AssistantOverlay } from './overlay';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -37,7 +37,7 @@ describe('AssistantOverlay', () => {
     expect(queryByTestId('assistantOverlay')).toBeInTheDocument();
   });
 
-  it('should not render the header link if not authorized', () => {
+  it('should not render the header link if not authorized', async () => {
     mockAssistantAvailability.mockReturnValueOnce({ hasAssistantPrivilege: false });
 
     const { queryByTestId } = render(
@@ -45,6 +45,9 @@ describe('AssistantOverlay', () => {
         <AssistantOverlay />
       </QueryClientProvider>
     );
+
+    await waitFor(() => null);
+
     expect(queryByTestId('assistantOverlay')).not.toBeInTheDocument();
   });
 });

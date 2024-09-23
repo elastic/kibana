@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-test-renderer';
+import { act } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
@@ -21,6 +21,8 @@ describe('useFleetServerHostsForm', () => {
     const testRenderer = createFleetTestRendererMock();
     const onSuccess = jest.fn();
     const { result } = testRenderer.renderHook(() => useFleetServerHostsForm(undefined, onSuccess));
+
+    await testRenderer.waitFor(() => null);
 
     act(() =>
       result.current.inputs.hostUrlsInput.props.onChange(['https://test.fr', 'https://test.fr'])
@@ -83,6 +85,8 @@ describe('useFleetServerHostsForm', () => {
         onSuccess
       )
     );
+
+    await testRenderer.waitFor(() => null);
 
     act(() =>
       result.current.inputs.hostUrlsInput.props.onChange(['https://test.fr', 'https://test.fr'])

@@ -1071,6 +1071,8 @@ describe('when on the endpoint list page', () => {
 
       renderResult = render();
 
+      await reactTestingLibrary.waitFor(() => null);
+
       await reactTestingLibrary.act(async () => {
         await middlewareSpy.waitForAction('serverReturnedEndpointList');
         await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
@@ -1323,16 +1325,19 @@ describe('when on the endpoint list page', () => {
       });
 
       renderResult = render();
-      await middlewareSpy.waitForAction('serverReturnedEndpointList');
-      await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
+
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
+      });
+
+      await reactTestingLibrary.waitFor(() => null);
 
       const endpointActionsButton: HTMLElement = (
         await renderResult.findAllByTestId('endpointTableRowActions')
       )[tableRow];
 
-      reactTestingLibrary.act(() => {
-        reactTestingLibrary.fireEvent.click(endpointActionsButton);
-      });
+      reactTestingLibrary.fireEvent.click(endpointActionsButton);
     };
 
     beforeEach(async () => {

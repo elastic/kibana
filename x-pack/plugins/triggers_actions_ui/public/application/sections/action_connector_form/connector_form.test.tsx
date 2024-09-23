@@ -101,6 +101,8 @@ describe('ConnectorForm', () => {
       />
     );
 
+    await waitFor(() => null);
+
     expect(result.getByTestId('nameInput')).toBeInTheDocument();
 
     await act(async () => {

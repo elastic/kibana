@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 
 import { HealthCheck } from './health_check';
 import { I18nProvider } from '@kbn/i18n-react';
-import { act } from 'react-dom/test-utils';
 import { HealthContextProvider } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 jest.mock('../../common/lib/kibana');
@@ -31,8 +30,9 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
+    await waitFor(() => {
       // wait for useEffect to run
+      return null;
     });
 
     expect(container.getElementsByClassName('euiLoadingSpinner').length).toBe(1);
@@ -53,8 +53,9 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
+    await waitFor(() => {
       // wait for useEffect to run
+      return null;
     });
 
     expect(container.getElementsByClassName('euiLoadingSpinner').length).toBe(0);
@@ -81,8 +82,9 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
+    await waitFor(() => {
       // wait for useEffect to run
+      return null;
     });
     expect(queryByText('should render')).toBeInTheDocument();
   });
@@ -107,8 +109,9 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
+    await waitFor(() => {
       // wait for useEffect to run
+      return null;
     });
 
     const [description] = queryAllByText(/API keys/i);
@@ -147,11 +150,14 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
+
+    await waitFor(() => {
       // wait for useEffect to run
+      return null;
     });
 
-    const description = queryByRole(/banner/i);
+    const description = queryByRole('banner');
+
     expect(description!.textContent).toMatchInlineSnapshot(
       `"You must configure an encryption key to use Alerting. Learn more.External link(opens in a new tab or window)"`
     );
@@ -186,8 +192,9 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
+    await waitFor(() => {
       // wait for useEffect to run
+      return null;
     });
 
     const description = queryByText(/You must enable/i);
@@ -221,8 +228,9 @@ describe('health check', () => {
         </HealthContextProvider>
       </I18nProvider>
     );
-    await act(async () => {
+    await waitFor(() => {
       // wait for useEffect to run
+      return null;
     });
     expect(queryByText('should render')).toBeInTheDocument();
   });

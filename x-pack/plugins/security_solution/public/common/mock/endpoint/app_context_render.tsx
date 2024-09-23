@@ -44,20 +44,20 @@ import { fleetGetPackageHttpMock } from '../../../management/mocks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 
-// const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
+const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
 
-// /**
-//  * Resets the mock that is applied to `createPortal()` by default.
-//  * **IMPORTANT** : Make sure you call this function from a `before*()` or `after*()` callback
-//  *
-//  * @example
-//  *
-//  * // Turn off for test using Enzyme
-//  * beforeAll(() => resetReactDomCreatePortalMock());
-//  */
-// export const resetReactDomCreatePortalMock = () => {
-//   ReactDOM.createPortal = REAL_REACT_DOM_CREATE_PORTAL;
-// };
+/**
+ * Resets the mock that is applied to `createPortal()` by default.
+ * **IMPORTANT** : Make sure you call this function from a `before*()` or `after*()` callback
+ *
+ * @example
+ *
+ * // Turn off for test using Enzyme
+ * beforeAll(() => resetReactDomCreatePortalMock());
+ */
+export const resetReactDomCreatePortalMock = () => {
+  ReactDOM.createPortal = REAL_REACT_DOM_CREATE_PORTAL;
+};
 
 beforeAll(() => {
   // Mocks the React DOM module to ensure compatibility with react-testing-library and avoid

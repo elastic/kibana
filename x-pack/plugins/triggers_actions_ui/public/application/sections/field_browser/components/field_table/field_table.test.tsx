@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, RenderResult } from '@testing-library/react';
+import { render, type RenderResult, fireEvent } from '@testing-library/react';
 import { mockBrowserFields } from '../../mock';
 
 import { FieldTable, FieldTableProps } from './field_table';
@@ -141,7 +141,7 @@ describe('FieldTable', () => {
       result.getByTestId('pagination-button-0').hasAttribute('aria-current');
 
     const changePage = (result: RenderResult) => {
-      result.getByTestId('pagination-button-1').click();
+      fireEvent.click(result.getByTestId('pagination-button-1'));
     };
 
     const paginationProps = {

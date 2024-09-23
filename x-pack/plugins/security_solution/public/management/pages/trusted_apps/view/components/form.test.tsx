@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, cleanup, act, fireEvent, getByTestId } from '@testing-library/react';
+import { screen, cleanup, act, fireEvent, getByTestId, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
@@ -220,6 +220,7 @@ describe('Trusted apps form', () => {
     it('should allow user to select between 3 OSs', async () => {
       const osField = getOsField();
       await userEvent.click(osField);
+      await waitFor(() => null);
       const options = Array.from(
         renderResult.baseElement.querySelectorAll(
           '.euiSuperSelect__listbox button.euiSuperSelect__item'

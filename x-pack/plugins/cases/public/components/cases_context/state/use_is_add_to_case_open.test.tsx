@@ -26,8 +26,7 @@ describe('use is add to existing case modal open hook', () => {
   });
 
   it('should throw if called outside of a cases context', () => {
-    const { result } = renderHook(useIsAddToCaseOpen);
-    expect(result.error?.message).toContain(
+    expect(() => renderHook(useIsAddToCaseOpen)).toThrow(
       'useCasesStateContext must be used within a CasesProvider and have a defined value'
     );
   });

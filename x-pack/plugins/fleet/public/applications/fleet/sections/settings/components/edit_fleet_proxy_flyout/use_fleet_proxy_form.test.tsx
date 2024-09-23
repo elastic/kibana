@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-test-renderer';
+import { act } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
@@ -24,6 +24,7 @@ describe('useFleetProxyForm', () => {
     it('should accept http url', async () => {
       const testRenderer = createFleetTestRendererMock();
       const { result } = testRenderer.renderHook(() => useFleetProxyForm(undefined, () => {}));
+      await testRenderer.waitFor(() => null);
       act(() => result.current.inputs.urlInput.setValue('http://test.fr:8080'));
       act(() => expect(result.current.inputs.urlInput.validate()).toBeTruthy());
       expect(result.current.inputs.urlInput.errors).toBeUndefined();
@@ -32,6 +33,7 @@ describe('useFleetProxyForm', () => {
     it('should accept https url', async () => {
       const testRenderer = createFleetTestRendererMock();
       const { result } = testRenderer.renderHook(() => useFleetProxyForm(undefined, () => {}));
+      await testRenderer.waitFor(() => null);
       act(() => result.current.inputs.urlInput.setValue('https://test.fr:8080'));
       act(() => expect(result.current.inputs.urlInput.validate()).toBeTruthy());
       expect(result.current.inputs.urlInput.errors).toBeUndefined();
@@ -39,6 +41,7 @@ describe('useFleetProxyForm', () => {
     it('should accept socks5 url', async () => {
       const testRenderer = createFleetTestRendererMock();
       const { result } = testRenderer.renderHook(() => useFleetProxyForm(undefined, () => {}));
+      await testRenderer.waitFor(() => null);
       act(() => result.current.inputs.urlInput.setValue('socks5://test.fr:8080'));
       act(() => expect(result.current.inputs.urlInput.validate()).toBeTruthy());
       expect(result.current.inputs.urlInput.errors).toBeUndefined();
@@ -47,6 +50,7 @@ describe('useFleetProxyForm', () => {
     it('should not accept invalid url', async () => {
       const testRenderer = createFleetTestRendererMock();
       const { result } = testRenderer.renderHook(() => useFleetProxyForm(undefined, () => {}));
+      await testRenderer.waitFor(() => null);
       act(() => result.current.inputs.urlInput.setValue('iamnotavaliderror'));
       act(() => expect(result.current.inputs.urlInput.validate()).toBeFalsy());
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render, act, fireEvent, waitForElementToBeRemoved, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitForElementToBeRemoved, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { AgentStatusFilter } from './agent_status_filter';
@@ -59,23 +59,19 @@ describe('AgentStatusFilter', () => {
       totalInactiveAgents: 999,
     });
 
-    await act(async () => {
-      expect(getByText(PARTIAL_TOUR_TEXT, { exact: false })).toBeVisible();
+    expect(getByText(PARTIAL_TOUR_TEXT, { exact: false })).toBeVisible();
 
-      const statusFilterButton = container.querySelector(
-        '[data-test-subj="agentList.statusFilter"]'
-      );
+    const statusFilterButton = container.querySelector('[data-test-subj="agentList.statusFilter"]');
 
-      expect(statusFilterButton).not.toBeNull();
+    expect(statusFilterButton).not.toBeNull();
 
-      fireEvent.click(statusFilterButton!);
+    fireEvent.click(statusFilterButton!);
 
-      await waitForElementToBeRemoved(() => queryByText(PARTIAL_TOUR_TEXT, { exact: false }));
+    await waitForElementToBeRemoved(() => queryByText(PARTIAL_TOUR_TEXT, { exact: false }));
 
-      expect(getByText('999')).toBeInTheDocument();
+    expect(getByText('999')).toBeInTheDocument();
 
-      expect(mockStorage['fleet.inactiveAgentsTour']).toEqual({ active: false });
-    });
+    expect(mockStorage['fleet.inactiveAgentsTour']).toEqual({ active: false });
   });
 
   it('Should not show tour if previously been dismissed', async () => {
@@ -86,9 +82,7 @@ describe('AgentStatusFilter', () => {
       onSelectedStatusChange: () => {},
       totalInactiveAgents: 999,
     });
-    await act(async () => {
-      expect(queryByText(PARTIAL_TOUR_TEXT, { exact: false })).toBeNull();
-    });
+    expect(queryByText(PARTIAL_TOUR_TEXT, { exact: false })).toBeNull();
   });
 
   it('Should should show difference between last seen inactive agents and total agents', async () => {
@@ -100,15 +94,13 @@ describe('AgentStatusFilter', () => {
       totalInactiveAgents: 999,
     });
 
-    await act(async () => {
-      const statusFilterButton = getByTestId('agentList.statusFilter');
+    const statusFilterButton = getByTestId('agentList.statusFilter');
 
-      fireEvent.click(statusFilterButton);
+    fireEvent.click(statusFilterButton);
 
-      await waitFor(() => {
-        expect(getByTestId('agentList.agentStatusFilterOptions')).toBeInTheDocument();
-        expect(getByText('899')).toBeInTheDocument();
-      });
+    await waitFor(() => {
+      expect(getByTestId('agentList.agentStatusFilterOptions')).toBeInTheDocument();
+      expect(getByText('899')).toBeInTheDocument();
     });
   });
 });

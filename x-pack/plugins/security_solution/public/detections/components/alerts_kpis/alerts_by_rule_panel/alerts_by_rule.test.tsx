@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsByRule } from './alerts_by_rule';
@@ -28,35 +28,28 @@ describe('Alert by rule chart', () => {
   });
 
   test('renders table correctly without data', () => {
-    act(() => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsByRule {...defaultProps} />
-        </TestProviders>
-      );
-      expect(
-        container.querySelector('[data-test-subj="alerts-by-rule-table"]')
-      ).toBeInTheDocument();
-      expect(
-        container.querySelector('[data-test-subj="alerts-by-rule-table"] tbody')?.textContent
-      ).toEqual('No items found');
-    });
+    render(
+      <TestProviders>
+        <AlertsByRule {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('alerts-by-rule-table')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('alerts-by-rule-table')).getByText('No items found')
+    ).toBeInTheDocument();
   });
 
   test('renders table correctly with data', () => {
-    act(() => {
-      const { queryAllByRole } = render(
-        <TestProviders>
-          <AlertsByRule data={parsedAlerts} isLoading={false} />
-        </TestProviders>
-      );
+    const { queryAllByRole } = render(
+      <TestProviders>
+        <AlertsByRule data={parsedAlerts} isLoading={false} />
+      </TestProviders>
+    );
 
-      parsedAlerts.forEach((_, i) => {
-        expect(queryAllByRole('row')[i + 1].textContent).toContain(parsedAlerts[i].rule);
-        expect(queryAllByRole('row')[i + 1].textContent).toContain(
-          parsedAlerts[i].value.toString()
-        );
-      });
+    parsedAlerts.forEach((_, i) => {
+      expect(queryAllByRole('row')[i + 1].textContent).toContain(parsedAlerts[i].rule);
+      expect(queryAllByRole('row')[i + 1].textContent).toContain(parsedAlerts[i].value.toString());
     });
   });
 });

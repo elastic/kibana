@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { TRUNCATE_MAX_HEIGHT, TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE } from '@kbn/discover-utils';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { TableFieldValue } from './table_cell_value';
@@ -79,7 +79,7 @@ describe('TableFieldValue', () => {
     expect(valueElement.getAttribute('css')).toBeDefined();
     expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(true);
 
-    toggleButton.click();
+    fireEvent.click(toggleButton);
 
     toggleButton = screen.getByTestId('toggleLongFieldValue-message');
     expect(toggleButton).toBeInTheDocument();
@@ -89,7 +89,7 @@ describe('TableFieldValue', () => {
     expect(valueElement.getAttribute('css')).toBeNull();
     expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(false);
 
-    toggleButton.click();
+    fireEvent.click(toggleButton);
 
     toggleButton = screen.getByTestId('toggleLongFieldValue-message');
     expect(toggleButton).toBeInTheDocument();
@@ -147,7 +147,7 @@ describe('TableFieldValue', () => {
     expect(valueElement.getAttribute('css')).toBeDefined();
     expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(true);
 
-    toggleButton.click();
+    fireEvent.click(toggleButton);
 
     toggleButton = screen.getByTestId('toggleLongFieldValue-message');
     expect(toggleButton).toBeInTheDocument();
@@ -157,7 +157,7 @@ describe('TableFieldValue', () => {
     expect(valueElement.getAttribute('css')).toBeNull();
     expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(false);
 
-    toggleButton.click();
+    fireEvent.click(toggleButton);
 
     toggleButton = screen.getByTestId('toggleLongFieldValue-message');
     expect(toggleButton).toBeInTheDocument();
