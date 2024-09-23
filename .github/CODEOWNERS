@@ -617,6 +617,7 @@ x-pack/packages/ml/kibana_theme @elastic/ml-ui
 x-pack/packages/ml/local_storage @elastic/ml-ui
 x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/packages/ml/number_utils @elastic/ml-ui
+x-pack/packages/ml/parse_interval @elastic/ml-ui
 x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/random_sampler_utils @elastic/ml-ui
@@ -628,6 +629,7 @@ x-pack/packages/ml/time_buckets @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/ui_actions @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
+x-pack/packages/ml/validators @elastic/ml-ui
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
