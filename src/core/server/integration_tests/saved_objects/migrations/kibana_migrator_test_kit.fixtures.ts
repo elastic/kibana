@@ -141,6 +141,17 @@ export const getReindexingBaselineTypes = (filterDeprecated: boolean) =>
                   createdAt: { type: 'date' },
                 },
               },
+              {
+                type: 'unsafe_transform',
+                transformFn: (doc) => {
+                  if (doc.attributes.value % 100 === 0) {
+                    throw new Error(
+                      `Cannot convert 'complex' objects with values that are multiple of 100 ${doc.id}`
+                    );
+                  }
+                  return { document: doc };
+                },
+              },
             ],
           },
         },
@@ -268,13 +279,21 @@ export const getCompatibleMigratorTestKit = async ({
 export const getReindexingMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
   filterDeprecated = false,
+  types = getReindexingBaselineTypes(filterDeprecated),
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
     logFilePath,
-    types: getReindexingBaselineTypes(filterDeprecated),
+    types,
     kibanaVersion,
-    settings,
+    settings: {
+      ...settings,
+      migrations: {
+        discardUnknownObjects: nextMinor,
+        discardCorruptObjects: nextMinor,
+        ...settings.migrations,
+      },
+    },
   });
 };

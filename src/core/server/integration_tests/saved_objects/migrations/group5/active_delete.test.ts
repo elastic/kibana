@@ -376,10 +376,11 @@ describe('when upgrading to a new stack version', () => {
       expect(logs).toMatch('MARK_VERSION_INDEX_READY -> DONE');
 
       const counts = await getAggregatedTypesCount(client);
+      // for 'complex' objects, we discard second half and also multiples of 100
       expect(counts).toMatchInlineSnapshot(`
         Object {
           "basic": 10,
-          "complex": 5,
+          "complex": 4,
           "deprecated": 10,
           "task": 10,
         }
