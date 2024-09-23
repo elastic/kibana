@@ -33,6 +33,8 @@ import { EntityRelationshipsView } from '../entity_relationships_view';
 import { InventoryPageHeader } from '../inventory_page_header';
 import { InventoryPageHeaderTitle } from '../inventory_page_header/inventory_page_header_title';
 import { LoadingPanel } from '../loading_panel';
+import { DataStreamManagementView } from '../data_stream_management_view/physical_management';
+import { GeneralManagementView } from '../data_stream_management_view';
 
 interface TabDependencies {
   entity: Entity;
@@ -283,6 +285,15 @@ export function EntityDetailViewWithoutParams({
       }),
       content: <EntityRelationshipsView entity={entity} dataStreams={dataStreams} />,
     },
+    management: {
+      href: router.link('/{type}/{displayName}/{tab}', {
+        path: { type, displayName, tab: 'management' },
+      }),
+      label: i18n.translate('xpack.inventory.entityDetailView.managementTabLabel', {
+        defaultMessage: 'Management',
+      }),
+      content: <GeneralManagementView entity={entity} dataStreams={dataStreams} />,
+    },
     ...Object.fromEntries(
       getAdditionalTabs?.({
         entity,
@@ -296,7 +307,7 @@ export function EntityDetailViewWithoutParams({
             path: {
               type,
               displayName,
-              tab,
+              tab: name,
             },
           }),
         },

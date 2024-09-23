@@ -81,7 +81,7 @@ export function EntityOverview({
 
     const baseQuery = `FROM ${indexPatterns.join(', ')}`;
 
-    const logsQuery = `${baseQuery} | LIMIT 100`;
+    const logsQuery = `${baseQuery} | SORT @timestamp DESC | LIMIT 100`;
 
     const histogramQuery = `${baseQuery} | STATS count = COUNT(*) BY @timestamp = BUCKET(@timestamp, 1 minute)`;
 

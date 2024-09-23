@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { useLocation } from 'react-router-dom';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
@@ -29,10 +30,13 @@ import { getInitialColumnsForLogs } from '../../util/get_initial_columns_for_log
 import { ControlledEsqlGrid } from '../esql_grid/controlled_esql_grid';
 import { planToConsoleOutput } from '../dataset_detail_view/utils';
 
-export function DatasetManagementSplitView() {
+export function DatasetManagementSplitView({ goBack }: { goBack: () => void }) {
   const {
-    path: { id },
-  } = useInventoryParams('/data_stream/{id}/*');
+    path: { displayName: id },
+  } = useInventoryParams('/data_stream/{displayName}/*');
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
 
   const {
     core: { http },
@@ -43,7 +47,7 @@ export function DatasetManagementSplitView() {
 
   const baseQuery = `FROM "${id}" | WHERE @timestamp <= NOW() AND @timestamp >= NOW() - 60 minutes`;
 
-  const logsQuery = `${baseQuery} | LIMIT 100`;
+  const logsQuery = `${baseQuery} | SORT @timestamp DESC | LIMIT 100`;
 
   const path = `/internal/dataset_quality/data_streams/${id}/details`;
   const details = useAsync(() => {
@@ -62,14 +66,17 @@ export function DatasetManagementSplitView() {
   }, [http]);
 
   const [result, setResult] = React.useState<any>();
-  const [code, setCode] = React.useState<string>(`
+  const [code, setCode] = React.useState<string>(
+    queryParams.get('initialCode') ||
+      `
 {
   "reroute": {
     "if" : "ctx['cloud.region']?.contains('us-east-1')",
     "dataset": "us_east_synth"
   }
 }
-`);
+`
+  );
 
   async function testReroute() {
     const apiResult = await http.post('/api/test_reroute', {
@@ -105,12 +112,16 @@ export function DatasetManagementSplitView() {
     [displayedKqlFilter]
   );
 
-  const logsQueryResult = useEsqlQueryResult({ query: logsQuery, kqlFilter: persistedKqlFilter });
+  const logsQueryResult = useEsqlQueryResult({
+    query: logsQuery,
+    kuery: persistedKqlFilter,
+    operationName: 'logs',
+  });
 
   const columnAnalysis = useMemo(() => {
     if (logsQueryResult.value) {
       return getInitialColumnsForLogs({
-        datatable: logsQueryResult.value,
+        response: logsQueryResult.value,
         typeDefinitions: [],
       });
     }
@@ -122,10 +133,7 @@ export function DatasetManagementSplitView() {
   ) : (
     <>
       <EuiFlexGroup>
-        <EuiButton
-          data-test-subj="inventoryDatasetManagementViewSplitUpButton"
-          href={`/app/observability/entities/data_stream/${id}/management`}
-        >
+        <EuiButton data-test-subj="inventoryDatasetManagementViewSplitUpButton" onClick={goBack}>
           {i18n.translate(
             'xpack.inventory.datasetManagementSplitView.backToManagementViewButtonLabel',
             { defaultMessage: 'Back to management view' }
@@ -247,14 +255,19 @@ function ResultPanel(props: { result: any }) {
     core: { http },
   } = useKibana();
   // split props.result.simulatedRun.docs by _source["data_stream.dataset"]
-  const byDataset = props.result.simulatedRun.docs.reduce((acc: any, doc: any) => {
-    const dataset = doc.doc._source['data_stream.dataset'];
-    if (!acc[dataset]) {
-      acc[dataset] = [];
-    }
-    acc[dataset].push(doc.doc);
-    return acc;
-  }, {});
+  const byDataset = useMemo(
+    () =>
+      props.result.simulatedRun?.docs.reduce((acc: any, doc: any) => {
+        const dataset =
+          doc.doc?._source?.['data_stream.dataset'] || doc.doc._source?.data_stream?.dataset;
+        if (!acc[dataset]) {
+          acc[dataset] = [];
+        }
+        acc[dataset].push(doc.doc);
+        return acc;
+      }, {}) || { undefined: [] },
+    [props.result.simulatedRun?.docs]
+  );
 
   const [selectedDataset, setSelectedDataset] = React.useState<string>(Object.keys(byDataset)[0]);
 
@@ -310,7 +323,9 @@ function ResultPanel(props: { result: any }) {
               columns={gridColumns}
               columnVisibility={{ visibleColumns, setVisibleColumns: () => {} }}
               rowCount={10}
-              renderCellValue={({ rowIndex, columnId }) => gridRows[rowIndex][columnId] || ''}
+              renderCellValue={({ rowIndex, columnId }) =>
+                JSON.stringify(gridRows[rowIndex]?.[columnId]) || ''
+              }
             />
           </>
         )}

@@ -746,7 +746,7 @@ export class InventoryPlugin
                 pipeline_substitutions: {
                   [defaultPipeline]: {
                     ...pipelineObj[defaultPipeline],
-                    processors: [...pipelineObj[defaultPipeline].processors, change],
+                    processors: [change],
                   },
                 },
                 docs,

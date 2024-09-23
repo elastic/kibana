@@ -56,38 +56,32 @@ const inventoryRoutes = {
           </InventoryRouterBreadcrumb>
         ),
       },
-      '/data_stream/{displayName}': {
-        element: <Outlet />,
-        params: t.type({
-          path: t.type({
-            displayName: t.string,
-          }),
-        }),
-        children: {
-          '/data_stream/{displayName}': {
-            element: (
-              <RedirectTo
-                path="/data_stream/{displayName}/{tab}"
-                params={{ path: { tab: 'overview' } }}
-              />
-            ),
-          },
-          '/data_stream/{displayName}/{tab}': {
-            element: <DataStreamDetailView />,
-            params: t.type({
-              path: t.type({
-                tab: t.string,
-              }),
-            }),
-          },
-          '/data_stream/{id}/management/split': {
-            element: <DatasetManagementSplitView />,
-          },
-          '/data_stream/{id}/management/parse': {
-            element: <DatasetManagementParseView />,
-          },
-        },
-      },
+      // '/data_stream/{displayName}': {
+      //   element: <Outlet />,
+      //   params: t.type({
+      //     path: t.type({
+      //       displayName: t.string,
+      //     }),
+      //   }),
+      //   children: {
+      //     '/data_stream/{displayName}': {
+      //       element: (
+      //         <RedirectTo
+      //           path="/data_stream/{displayName}/{tab}"
+      //           params={{ path: { tab: 'overview' } }}
+      //         />
+      //       ),
+      //     },
+      //     '/data_stream/{displayName}/{tab}': {
+      //       element: <DataStreamDetailView />,
+      //       params: t.type({
+      //         path: t.type({
+      //           tab: t.string,
+      //         }),
+      //       }),
+      //     },
+      //   },
+      // },
       '/{type}': {
         element: <Outlet />,
         params: t.type({

@@ -66,10 +66,10 @@ function cleanDoc(doc: any): any {
   return doc._source;
 }
 
-export function DatasetManagementParseView() {
+export function DatasetManagementParseView({ goBack }: { goBack: () => void }) {
   const {
-    path: { id },
-  } = useInventoryParams('/data_stream/{id}/*');
+    path: { displayName: id },
+  } = useInventoryParams('/data_stream/{displayName}/*');
 
   const {
     core: { http },
@@ -90,7 +90,7 @@ export function DatasetManagementParseView() {
 
   const baseQuery = `FROM "${id}" | WHERE @timestamp <= NOW() AND @timestamp >= NOW() - 60 minutes`;
 
-  const logsQuery = `${baseQuery} | LIMIT 100`;
+  const logsQuery = `${baseQuery} | SORT @timestamp DESC | LIMIT 100`;
 
   const path = `/internal/dataset_quality/data_streams/${id}/details`;
   const details = useAsync(() => {
@@ -131,12 +131,16 @@ export function DatasetManagementParseView() {
     [displayedKqlFilter]
   );
 
-  const logsQueryResult = useEsqlQueryResult({ query: logsQuery, kqlFilter: persistedKqlFilter });
+  const logsQueryResult = useEsqlQueryResult({
+    query: logsQuery,
+    kuery: persistedKqlFilter,
+    operationName: 'logs',
+  });
 
   const columnAnalysis = useMemo(() => {
     if (logsQueryResult.value) {
       return getInitialColumnsForLogs({
-        datatable: logsQueryResult.value,
+        response: logsQueryResult.value,
         typeDefinitions: [],
       });
     }
@@ -184,10 +188,7 @@ export function DatasetManagementParseView() {
   ) : (
     <>
       <EuiFlexGroup>
-        <EuiButton
-          data-test-subj="inventoryDatasetManagementViewSplitUpButton"
-          href={`/app/observability/entities/data_stream/${id}/management`}
-        >
+        <EuiButton data-test-subj="inventoryDatasetManagementViewSplitUpButton" onClick={goBack}>
           {i18n.translate(
             'xpack.inventory.datasetManagementSplitView.backToManagementViewButtonLabel',
             { defaultMessage: 'Back to management view' }
@@ -310,6 +311,7 @@ function ResultPanel(props: { result: any; code: string }) {
   // for each doc, we calculate the diff between the before and after by comparing the value of all the keys.
   const diffs = props.result.simulatedRun.docs.map((after, i) => {
     const before = props.result.docs[i];
+    if (after.error) return [{ key: 'error', after: JSON.stringify(after.error) }];
     return Object.keys(after.doc._source)
       .map((key) => {
         if (
