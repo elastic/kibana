@@ -239,11 +239,7 @@ describe('unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         await waitFor(() => {
           expect(screen.getByTitle('Move left')).toBeEnabled();
@@ -278,11 +274,7 @@ describe('unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         await waitFor(() => {
           expect(screen.getByTitle('Move right')).toBeEnabled();
@@ -314,11 +306,7 @@ describe('unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         // column is currently present in the state
         const currentColumns = getTimelineFromStore(customStore).columns;
@@ -363,16 +351,12 @@ describe('unified timeline', () => {
           container.querySelector('[data-gridcell-column-id="@timestamp"]')
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="@timestamp"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-@timestamp'));
 
         await waitFor(() => {
           expect(screen.getByTitle('Sort Old-New')).toBeVisible();
         });
-        expect(screen.getByTitle('Sort New-Old')).toBeVisible();
+        expect(screen.getByTitle('Unsort New-Old')).toBeVisible();
 
         useTimelineEventsMock.mockClear();
 
@@ -404,11 +388,7 @@ describe('unified timeline', () => {
           container.querySelector('[data-gridcell-column-id="host.name"]')
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="host.name"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-host.name'));
 
         await waitFor(() => {
           expect(screen.getByTestId('dataGridHeaderCellActionGroup-host.name')).toBeVisible();
@@ -457,11 +437,7 @@ describe('unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         await waitFor(() => {
           expect(screen.getByTestId(`dataGridHeaderCellActionGroup-${field.name}`)).toBeVisible();
@@ -512,11 +488,7 @@ describe('unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         await waitFor(() => {
           expect(screen.getByTitle('Edit data view field')).toBeEnabled();
