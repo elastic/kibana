@@ -136,7 +136,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     return (
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiText color="subdued">
+          <EuiText color="subdued" css={{ maxWidth: '80%' }}>
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
               defaultMessage="Data streams store time-series data across multiple indices and can be created from index templates. {learnMoreLink}"
@@ -156,6 +156,17 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
             />
           </EuiText>
         </EuiFlexItem>
+
+        {shouldShowProjectLevelRetention && (
+          <EuiFlexItem grow={false}>
+            <EuiLink href={cloud.deploymentUrl} target="_blank">
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreamList.projectlevelRetention.linkText"
+                defaultMessage="Project data retention"
+              />
+            </EuiLink>
+          </EuiFlexItem>
+        )}
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
