@@ -51,8 +51,6 @@ jest.mock('./handlers', () => ({
   copyAgentPolicyHandler: jest.fn(),
   deleteAgentPoliciesHandler: jest.fn(),
   getFullAgentPolicy: jest.fn(),
-  //   downloadFullAgentPolicy: jest.fn(),
-  //   downloadK8sManifest: jest.fn(),
   getK8sManifest: jest.fn(),
   bulkGetAgentPoliciesHandler: jest.fn(),
 }));
@@ -173,16 +171,30 @@ describe('schema validation', () => {
         agent_limits_go_max_procs: 1,
         agent_logging_level: 'info',
         agent_logging_metrics_period: '30s',
-        agent_monitoring_http: {
-          'buffer.enabled': false,
-          enabled: false,
-          host: 'localhost',
-          port: 6791,
-        },
       },
       keep_monitoring_alive: true,
       supports_agentless: true,
       global_data_tags: [{ name: 'name', value: 'value' }],
+      monitoring_pprof_enabled: true,
+      monitoring_http: {
+        enabled: true,
+        host: 'host',
+        port: 1,
+        buffer: {
+          enabled: true,
+        },
+      },
+      monitoring_diagnostics: {
+        limit: {
+          interval: '1s',
+          burst: 1,
+        },
+        uploader: {
+          max_retries: 1,
+          init_dur: '1s',
+          max_dur: '1s',
+        },
+      },
     };
     fullAgentPolicy = {
       id: 'id',
