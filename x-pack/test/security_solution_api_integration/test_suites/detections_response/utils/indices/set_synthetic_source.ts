@@ -6,8 +6,6 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ToolingLog } from '@kbn/tooling-log';
 
 interface UpdateMappingsProps {
   es: Client;
