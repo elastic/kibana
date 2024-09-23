@@ -9,12 +9,13 @@
 
 import { EuiLoadingChart } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EmbeddablePanel, ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
+import { EmbeddablePanel, ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardPanelState } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -45,10 +46,13 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     },
     ref
   ) => {
-    const container = useDashboardContainer();
-    const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
-    const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
-    const useMargins = container.select((state) => state.explicitInput.useMargins);
+    const dashboardApi = useDashboardApi();
+    const [highlightPanelId, scrollToPanelId, useMargins, viewMode] = useBatchedPublishingSubjects(
+      dashboardApi.highlightPanelId$,
+      dashboardApi.scrollToPanelId$,
+      dashboardApi.useMargins$,
+      dashboardApi.viewMode
+    );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
@@ -60,17 +64,17 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       'dshDashboardGrid__item--focused': focusPanel,
       'dshDashboardGrid__item--blurred': blurPanel,
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
+      printViewport__vis: viewMode === 'print',
     });
 
     useLayoutEffect(() => {
       if (typeof ref !== 'function' && ref?.current) {
         const panelRef = ref.current;
         if (scrollToPanelId === id) {
-          container.scrollToPanel(panelRef);
+          dashboardApi.scrollToPanel(panelRef);
         }
         if (highlightPanelId === id) {
-          container.highlightPanel(panelRef);
+          dashboardApi.highlightPanel(panelRef);
         }
 
         panelRef.querySelectorAll('*').forEach((e) => {
@@ -83,7 +87,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           }
         });
       }
-    }, [id, container, scrollToPanelId, highlightPanelId, ref, blurPanel]);
+    }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
     const focusStyles = blurPanel
       ? css`
@@ -110,10 +114,10 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           <ReactEmbeddableRenderer
             type={type}
             maybeId={id}
-            getParentApi={() => container}
+            getParentApi={() => dashboardApi}
             key={`${type}_${id}`}
             panelProps={panelProps}
-            onApiAvailable={(api) => container.registerChildApi(api)}
+            onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
           />
         );
       }
@@ -122,11 +126,11 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         <EmbeddablePanel
           key={type}
           index={index}
-          embeddable={() => container.untilEmbeddableLoaded(id)}
+          embeddable={() => dashboardApi.untilEmbeddableLoaded(id)}
           {...panelProps}
         />
       );
-    }, [id, container, type, index, useMargins]);
+    }, [id, dashboardApi, type, index, useMargins]);
 
     return (
       <div
@@ -189,14 +193,14 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
   const {
     settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
-  const container = useDashboardContainer();
-  const focusedPanelId = container.select((state) => state.componentState.focusedPanelId);
+  const dashboardApi = useDashboardApi();
+  const [focusedPanelId, viewMode] = useBatchedPublishingSubjects(
+    dashboardApi.focusedPanelId$,
+    dashboardApi.viewMode
+  );
 
-  const dashboard = useDashboardContainer();
-
-  const isPrintMode = dashboard.select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
   const isEnabled =
-    !isPrintMode &&
+    viewMode !== 'print' &&
     isProjectEnabledInLabs('labs:dashboard:deferBelowFold') &&
     (!focusedPanelId || focusedPanelId === props.id);
 
