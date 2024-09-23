@@ -10,7 +10,7 @@ import type { EntityDefinition } from '@kbn/entities-schema';
 import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
-import type { Installation, type PackageInstallContext } from '../../../../../../common/types';
+import type { Installation, PackageInstallContext } from '../../../../../../common/types';
 import { getAssetFromAssetsMap, getPathParts } from '../../../archive';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common';
 
