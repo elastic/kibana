@@ -313,7 +313,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           {currentTab === SHELL_TAB_ID && (
             <Editor
               loading={!done}
-              initialTextObject={currentTextObject}
               inputEditorValue={inputEditorValue}
               setInputEditorValue={setInputEditorValue}
             />
