@@ -43,6 +43,7 @@
     overflow-x: auto;
     overflow-y: auto;
     white-space: normal;
+    max-height: calc(80vh - 100px);
   }
 
   &.kbnQueryBar__textarea--isSuggestionsVisible {
