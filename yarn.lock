@@ -1786,6 +1786,17 @@
     url-parse "^1.5.10"
     uuid "^8.3.0"
     vfile "^4.2.1"
+"@elastic/eui-common@file:./elastic_eui_common_0.0.1_setup_05.tgz":
+  version "0.0.1"
+  resolved "file:./elastic_eui_common_0.0.1_setup_05.tgz#2cdfd6ccac89c525c6cffd926ee7b5d6afcf394a"
+
+"@elastic/eui-theme-base@file:./elastic_eui_theme_base_0.0.1_setup_06.tgz":
+  version "0.0.1"
+  resolved "file:./elastic_eui_theme_base_0.0.1_setup_06.tgz#a801eee26b5eaf5d535fde89644f7972e16606c3"
+"@elastic/eui-theme-berlin@file:./elastic_eui_theme_berlin_0.0.1_setup_02.tgz":
+  version "0.0.1"
+  resolved "file:./elastic_eui_theme_berlin_0.0.1_setup_02.tgz#7972a60e5c5a2e342980fde9550a90201bba171e"
+>>>>>>> 6af88e983fc (add initial theme setup)
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
