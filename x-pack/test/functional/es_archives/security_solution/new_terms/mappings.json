@@ -50,8 +50,7 @@
             "type": "keyword"
           },
           "blob": {
-            "type": "binary",
-            "doc_values": true
+            "type": "binary"
           },
           "possibly_null_field": {
             "type": "keyword"
