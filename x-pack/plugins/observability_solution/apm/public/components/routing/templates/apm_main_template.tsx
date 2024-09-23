@@ -27,7 +27,6 @@ import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { EntityEnablement } from '../../shared/entity_enablement';
-import { CustomNoDataTemplate } from './custom_no_data_template';
 import { ServiceInventoryView } from '../../../context/entity_manager_context/entity_manager_context';
 
 // Paths that must skip the no data screen
@@ -117,11 +116,6 @@ export function ApmMainTemplate({
 
   const hasApmData = !!data?.hasData;
   const hasApmIntegrations = !!fleetApmPoliciesData?.hasApmPolicies;
-  const showCustomEmptyState =
-    !hasApmData &&
-    !isLoading &&
-    isEntityCentricExperienceSettingEnabled &&
-    serviceInventoryViewLocalStorageSetting === ServiceInventoryView.classic;
 
   const noDataConfig = getNoDataConfig({
     basePath,
@@ -168,47 +162,45 @@ export function ApmMainTemplate({
     </EuiFlexGroup>
   );
 
-  const pageTemplate = showCustomEmptyState ? (
-    <CustomNoDataTemplate isPageDataLoaded={isLoading === false} noDataConfig={noDataConfig} />
-  ) : (
-    <ObservabilityPageTemplate
-      noDataConfig={
-        shouldBypassNoDataScreen ||
-        serviceInventoryViewLocalStorageSetting === ServiceInventoryView.entity
-          ? undefined
-          : noDataConfig
-      }
-      isPageDataLoaded={isLoading === false}
-      pageHeader={{
-        rightSideItems,
-        ...pageHeader,
-        pageTitle: pageHeaderTitle,
-        children: (
-          <EuiFlexGroup direction="column">
-            {isEntityCentricExperienceSettingEnabled &&
-            showEnablementCallout &&
-            selectedNavButton === 'allServices' ? (
-              <EntityEnablement
-                label={i18n.translate('xpack.apm.eemEnablement.tryItButton.', {
-                  defaultMessage: 'Try our new experience!',
-                })}
-                tooltip={i18n.translate('xpack.apm.entityEnablement.content', {
-                  defaultMessage:
-                    'Our new experience combines both APM-instrumented services with services detected from logs in a single service inventory.',
-                })}
-              />
-            ) : null}
-            {showServiceGroupsNav && selectedNavButton && (
-              <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
-            )}
-          </EuiFlexGroup>
-        ),
-      }}
-      {...pageTemplateProps}
-    >
-      {children}
-    </ObservabilityPageTemplate>
+  return (
+    <EnvironmentsContextProvider>
+      <ObservabilityPageTemplate
+        noDataConfig={
+          shouldBypassNoDataScreen ||
+          serviceInventoryViewLocalStorageSetting === ServiceInventoryView.entity
+            ? undefined
+            : noDataConfig
+        }
+        isPageDataLoaded={isLoading === false}
+        pageHeader={{
+          rightSideItems,
+          ...pageHeader,
+          pageTitle: pageHeaderTitle,
+          children: (
+            <EuiFlexGroup direction="column">
+              {isEntityCentricExperienceSettingEnabled &&
+              showEnablementCallout &&
+              selectedNavButton === 'allServices' ? (
+                <EntityEnablement
+                  label={i18n.translate('xpack.apm.eemEnablement.tryItButton.', {
+                    defaultMessage: 'Try our new experience!',
+                  })}
+                  tooltip={i18n.translate('xpack.apm.entityEnablement.content', {
+                    defaultMessage:
+                      'Our new experience combines both APM-instrumented services with services detected from logs in a single service inventory.',
+                  })}
+                />
+              ) : null}
+              {showServiceGroupsNav && selectedNavButton && (
+                <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+              )}
+            </EuiFlexGroup>
+          ),
+        }}
+        {...pageTemplateProps}
+      >
+        {children}
+      </ObservabilityPageTemplate>
+    </EnvironmentsContextProvider>
   );
-
-  return <EnvironmentsContextProvider>{pageTemplate}</EnvironmentsContextProvider>;
 }
