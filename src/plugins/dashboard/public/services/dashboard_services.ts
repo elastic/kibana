@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import type { CoreStart } from '@kbn/core/public';
 import { RecentlyAccessedService, type RecentlyAccessed } from '@kbn/recently-accessed';
 
 import type { DashboardCapabilities } from '../../common';
-import { DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID } from '../dashboard_constants';
 import type { DashboardStartDependencies } from '../plugin';
 import { getDashboardBackupService } from './dashboard_backup/dashboard_backup_service';
 import { getDashboardContentManagementService } from './dashboard_content_management/get_dashboard_content_management_service';
@@ -22,8 +19,6 @@ import { DashboardContentManagementService } from './dashboard_content_managemen
 export let dashboardBackupService: ReturnType<typeof getDashboardBackupService>;
 export let dashboardCapabilitiesService: { dashboardCapabilities: DashboardCapabilities };
 export let dashboardContentManagementService: DashboardContentManagementService;
-export let dashboardFavoritesService: FavoritesClient;
-export let dashboardInsightsService: ReturnType<typeof getDashboardInsightsService>;
 export let dashboardRecentlyAccessedService: RecentlyAccessed;
 
 export const setDashboardServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
@@ -32,29 +27,10 @@ export const setDashboardServices = (kibanaCore: CoreStart, deps: DashboardStart
     dashboardCapabilities: getDashboardCapabilities(kibanaCore),
   };
   dashboardContentManagementService = getDashboardContentManagementService(deps);
-  dashboardFavoritesService = new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
-    http: kibanaCore.http,
-    usageCollection: deps.usageCollection,
-  });
-  dashboardInsightsService = getDashboardInsightsService(kibanaCore);
   dashboardRecentlyAccessedService = new RecentlyAccessedService().start({
     http: kibanaCore.http,
     key: 'dashboardRecentlyAccessed',
   });
-};
-
-const getDashboardInsightsService = (kibanaCore: CoreStart) => {
-  const contentInsightsClient = new ContentInsightsClient(
-    { http: kibanaCore.http },
-    { domainId: 'dashboard' }
-  );
-
-  return {
-    trackDashboardView: (dashboardId: string) => {
-      contentInsightsClient.track(dashboardId, 'viewed');
-    },
-    contentInsightsClient,
-  };
 };
 
 const getDashboardCapabilities = (coreStart: CoreStart): DashboardCapabilities => {

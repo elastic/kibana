@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
+import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { TableListView } from '@kbn/content-management-table-list-view';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
+import { DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID } from '../dashboard_constants';
 import {
-  dashboardFavoritesService,
-  dashboardInsightsService,
-} from '../services/dashboard_services';
-import { coreServices, savedObjectsTaggingService } from '../services/kibana_services';
+  coreServices,
+  savedObjectsTaggingService,
+  usageCollectionService,
+} from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
 import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
@@ -35,13 +37,24 @@ export const DashboardListing = ({
     page: 'list',
   });
 
-  const { unsavedDashboardIds, refreshUnsavedDashboards, tableListViewTableProps } =
-    useDashboardListingTable({
-      goToDashboard,
-      getDashboardUrl,
-      useSessionStorageIntegration,
-      initialFilter,
+  const {
+    unsavedDashboardIds,
+    refreshUnsavedDashboards,
+    tableListViewTableProps,
+    contentInsightsClient,
+  } = useDashboardListingTable({
+    goToDashboard,
+    getDashboardUrl,
+    useSessionStorageIntegration,
+    initialFilter,
+  });
+
+  const dashboardFavoritesClient = useMemo(() => {
+    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
+      http: coreServices.http,
+      usageCollection: usageCollectionService,
     });
+  }, []);
 
   return (
     <I18nProvider>
@@ -50,8 +63,8 @@ export const DashboardListing = ({
           core: coreServices,
           savedObjectsTagging: savedObjectsTaggingService,
           FormattedRelative,
-          favorites: dashboardFavoritesService,
-          contentInsightsClient: dashboardInsightsService.contentInsightsClient,
+          favorites: dashboardFavoritesClient,
+          contentInsightsClient,
         }}
       >
         <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>

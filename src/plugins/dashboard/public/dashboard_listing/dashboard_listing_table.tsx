@@ -16,7 +16,6 @@ import {
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
-import { dashboardInsightsService } from '../services/dashboard_services';
 import { coreServices, savedObjectsTaggingService } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
@@ -40,6 +39,7 @@ export const DashboardListingTable = ({
     unsavedDashboardIds,
     refreshUnsavedDashboards,
     tableListViewTableProps: { title: tableCaption, ...tableListViewTable },
+    contentInsightsClient,
   } = useDashboardListingTable({
     disableCreateDashboardButton,
     goToDashboard,
@@ -56,7 +56,7 @@ export const DashboardListingTable = ({
         core={coreServices}
         savedObjectsTagging={savedObjectsTaggingService}
         FormattedRelative={FormattedRelative}
-        contentInsightsClient={dashboardInsightsService.contentInsightsClient}
+        contentInsightsClient={contentInsightsClient}
       >
         <>
           <DashboardUnsavedListing

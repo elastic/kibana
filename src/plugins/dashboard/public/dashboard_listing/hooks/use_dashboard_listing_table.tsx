@@ -10,6 +10,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { OpenContentEditorParams } from '@kbn/content-management-content-editor';
+import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -73,6 +74,7 @@ interface UseDashboardListingTableReturnType {
   refreshUnsavedDashboards: () => void;
   tableListViewTableProps: DashboardListingViewTableProps;
   unsavedDashboardIds: string[];
+  contentInsightsClient: ContentInsightsClient;
 }
 
 export const useDashboardListingTable = ({
@@ -324,11 +326,17 @@ export const useDashboardListingTable = ({
     []
   );
 
+  const contentInsightsClient = useMemo(
+    () => new ContentInsightsClient({ http: coreServices.http }, { domainId: 'dashboard' }),
+    []
+  );
+
   return {
     hasInitialFetchReturned,
     pageDataTestSubject,
     refreshUnsavedDashboards,
     tableListViewTableProps,
     unsavedDashboardIds,
+    contentInsightsClient,
   };
 };
