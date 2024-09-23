@@ -25,6 +25,8 @@ export async function hasHistoricalAgentData(apmEventClient: APMEventClient) {
 }
 
 async function hasDataRequest(apmEventClient: APMEventClient, dataTiers?: DataTier[]) {
+  // the `observability:searchExcludedDataTiers` setting will also be considered
+  // in the `search` function to exclude data tiers from the search
   const query = dataTiers ? { terms: { _tier: dataTiers } } : undefined;
 
   const params = {
