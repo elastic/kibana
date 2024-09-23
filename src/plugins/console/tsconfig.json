@@ -33,7 +33,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/ui-theme",
     "@kbn/core-doc-links-browser",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/console-plugin"
   ],
   "exclude": [
     "target/**/*",
