@@ -121,11 +121,18 @@ describe('v2 migration', () => {
       });
 
       it('fails if Kibana is not configured to discard unknown objects', async () => {
-        await expect(unknownTypesKit.runMigrations()).rejects.toThrowError(
-          /Unable to complete saved object migrations for the \[\.kibana_migrator\] index: Migration failed because some documents were found which use unknown saved object types:/
-        );
-
+        await expect(unknownTypesKit.runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
+          "Unable to complete saved object migrations for the [.kibana_migrator] index: Migration failed because some documents were found which use unknown saved object types: deprecated
+          To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
+          Please refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html for more information."
+        `);
         const logs = await readLog(logFilePath);
+        expect(logs).toMatch(
+          'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
+        );
+        expect(logs).toMatch(
+          `Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: Migration failed because some documents were found which use unknown saved object types: deprecated`
+        );
         expect(logs).toMatch(`[${defaultKibanaIndex}] CHECK_UNKNOWN_DOCUMENTS -> FATAL.`);
       });
     });
