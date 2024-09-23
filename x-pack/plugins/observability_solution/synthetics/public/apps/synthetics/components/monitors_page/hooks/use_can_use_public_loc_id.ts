@@ -7,18 +7,21 @@
 
 import { useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { selectServiceLocationsState } from '../../../state';
+import { selectOverviewStatus } from '../../../state/overview_status';
 import { useEnablement } from '../../../hooks';
-import { selectOverviewState } from '../../../state';
 
 export const useCanUsePublicLocById = (configId: string) => {
-  const {
-    data: { monitors },
-  } = useSelector(selectOverviewState);
+  const { allConfigs } = useSelector(selectOverviewStatus);
 
   const { isServiceAllowed } = useEnablement();
 
-  const hasManagedLocation = monitors?.filter(
-    (mon) => mon.configId === configId && mon.location.isServiceManaged
+  const { locations: allLocations } = useSelector(selectServiceLocationsState);
+
+  const listIds = allLocations?.filter((loc) => loc.isServiceManaged).map((loc) => loc.id) ?? [];
+
+  const hasManagedLocation = allConfigs?.filter(
+    (mon) => mon.configId === configId && listIds.includes(mon.locationId)
   );
 
   const canUsePublicLocations =
