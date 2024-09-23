@@ -17,6 +17,8 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
+import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 type MisconfigurationFindingDetailFields = Pick<CspFinding, 'result' | 'rule' | 'resource'>;
 
@@ -51,6 +53,7 @@ const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: numb
  */
 export const MisconfigurationFindingsDetailsTable = memo(
   ({ fieldName, queryName }: { fieldName: 'host.name' | 'user.name'; queryName: string }) => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, 'cdr-misconfiguration-flyout');
     const { data } = useMisconfigurationFindings({
       query: buildEntityFlyoutPreviewQuery(fieldName, queryName),
       sort: [],

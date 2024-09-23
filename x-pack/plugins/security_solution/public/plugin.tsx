@@ -56,6 +56,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -106,6 +107,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const services = await this.services.generateServices(coreStart, startPlugins, params);
       return { renderApp, subPlugins, store, services };
     };
+
+    // register cloud security ui metrics
+    if (plugins.usageCollection) uiMetricService.setup(plugins.usageCollection);
 
     // Register main Security Solution plugin
     core.application.register({
