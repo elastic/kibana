@@ -78,9 +78,8 @@ import {
   registerDashboardPanelPlacementSetting,
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
-import { setServices, untilPluginStartServicesReady } from './services/services';
-import { buildAllDashboardActions } from './dashboard_actions';
 import { dashboardContentManagementService } from './services/dashboard_services';
+import { setServices, untilPluginStartServicesReady } from './services/services';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -338,7 +337,8 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setServices(core, plugins);
-    untilPluginStartServicesReady().then(() => {
+    untilPluginStartServicesReady().then(async () => {
+      const { buildAllDashboardActions } = await import('./dashboard_actions');
       buildAllDashboardActions({
         core,
         plugins,
