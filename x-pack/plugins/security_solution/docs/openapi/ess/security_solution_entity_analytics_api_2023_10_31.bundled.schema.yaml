@@ -4,7 +4,7 @@ info:
   title: Security Solution Entity Analytics API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
-  - url: http://{kibana_host}:{port}
+  - url: 'http://{kibana_host}:{port}'
     variables:
       kibana_host:
         default: localhost
@@ -57,6 +57,8 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Delete an asset criticality record
       tags:
         - Security Solution Entity Analytics API
@@ -88,6 +90,8 @@ paths:
           description: Invalid request
         '404':
           description: Criticality record not found
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get an asset criticality record
       tags:
         - Security Solution Entity Analytics API
@@ -125,6 +129,8 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Upsert an asset criticality record
       tags:
         - Security Solution Entity Analytics API
@@ -188,12 +194,14 @@ paths:
           description: Bulk upload successful
         '413':
           description: File too large
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Bulk upsert asset criticality records
       tags:
         - Security Solution Entity Analytics API
   /api/asset_criticality/list:
     get:
-      description: List asset criticality records, paging, sorting and filtering as needed.
+      description: 'List asset criticality records, paging, sorting and filtering as needed.'
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -264,6 +272,8 @@ paths:
                   - per_page
                   - total
           description: Bulk upload successful
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: List asset criticality records
       tags:
         - Security Solution Entity Analytics API
@@ -284,10 +294,12 @@ paths:
                       $ref: '#/components/schemas/EngineDescriptor'
                     type: array
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: List the Entity Store engines
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}:
+  '/api/entity_store/engines/{entityType}':
     delete:
       operationId: DeleteEntityStore
       parameters:
@@ -313,6 +325,8 @@ paths:
                   deleted:
                     type: boolean
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Delete the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
@@ -332,10 +346,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/EngineDescriptor'
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/init:
+  '/api/entity_store/engines/{entityType}/init':
     post:
       operationId: InitEntityStore
       parameters:
@@ -364,10 +380,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/EngineDescriptor'
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Initialize the Entity Store
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/start:
+  '/api/entity_store/engines/{entityType}/start':
     post:
       operationId: StartEntityStore
       parameters:
@@ -387,10 +405,12 @@ paths:
                   started:
                     type: boolean
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Start the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/stats:
+  '/api/entity_store/engines/{entityType}/stats':
     post:
       operationId: GetEntityStoreStats
       parameters:
@@ -422,10 +442,12 @@ paths:
                   type:
                     $ref: '#/components/schemas/EntityType'
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Get the Entity Store engine stats
       tags:
         - Security Solution Entity Analytics API
-  /api/entity_store/engines/{entityType}/stop:
+  '/api/entity_store/engines/{entityType}/stop':
     post:
       operationId: StopEntityStore
       parameters:
@@ -445,12 +467,14 @@ paths:
                   stopped:
                     type: boolean
           description: Successful response
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Stop the Entity Store engine
       tags:
         - Security Solution Entity Analytics API
   /api/entity_store/entities/list:
     get:
-      description: List entities records, paging, sorting and filtering as needed.
+      description: 'List entities records, paging, sorting and filtering as needed.'
       operationId: ListEntities
       parameters:
         - in: query
@@ -521,6 +545,8 @@ paths:
                   - per_page
                   - total
           description: Entities returned successfully
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: List Entity Store Entities
       tags:
         - Security Solution Entity Analytics API
@@ -553,10 +579,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
           description: Unexpected error
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Run the risk scoring engine
       tags:
         - Security Solution Entity Analytics API
 components:
+  callbacks: !<tag:yaml.org,2002:js/undefined> ''
+  examples: !<tag:yaml.org,2002:js/undefined> ''
+  headers: !<tag:yaml.org,2002:js/undefined> ''
+  links: !<tag:yaml.org,2002:js/undefined> ''
+  parameters: !<tag:yaml.org,2002:js/undefined> ''
+  requestBodies: !<tag:yaml.org,2002:js/undefined> ''
+  responses: !<tag:yaml.org,2002:js/undefined> ''
   schemas:
     AssetCriticalityBulkUploadErrorItem:
       type: object
@@ -852,3 +887,4 @@ security:
 tags:
   - description: ''
     name: Security Solution Entity Analytics API
+externalDocs: !<tag:yaml.org,2002:js/undefined> ''

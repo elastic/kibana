@@ -39,10 +39,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/CleanUpRiskEngineErrorResponse'
           description: Unexpected error
+      servers: !<tag:yaml.org,2002:js/undefined> ''
+      security: !<tag:yaml.org,2002:js/undefined> ''
       summary: Cleanup the Risk Engine
       tags:
         - Security Solution Entity Analytics API
 components:
+  callbacks: !<tag:yaml.org,2002:js/undefined> ''
+  examples: !<tag:yaml.org,2002:js/undefined> ''
+  headers: !<tag:yaml.org,2002:js/undefined> ''
+  links: !<tag:yaml.org,2002:js/undefined> ''
+  parameters: !<tag:yaml.org,2002:js/undefined> ''
+  requestBodies: !<tag:yaml.org,2002:js/undefined> ''
+  responses: !<tag:yaml.org,2002:js/undefined> ''
   schemas:
     CleanUpRiskEngineErrorResponse:
       type: object
@@ -86,3 +95,4 @@ security:
 tags:
   - description: ''
     name: Security Solution Entity Analytics API
+externalDocs: !<tag:yaml.org,2002:js/undefined> ''
