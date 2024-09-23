@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPageHeaderProps } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPageHeaderProps,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import {
@@ -20,6 +28,7 @@ import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SerializableRecord } from '@kbn/utility-types';
 import { ENTITY_INVENTORY_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { KibanaEnvironmentContext } from '../../../context/kibana_environment_context/kibana_environment_context';
@@ -143,13 +152,6 @@ export function ApmMainTemplate({
 
   const sanitizedPath = getPathForFeedback(window.location.pathname);
 
-  const showInventoryCallout =
-    isEntityCentricExperienceSettingEnabled &&
-    serviceInventoryViewLocalStorageSetting === ServiceInventoryView.classic &&
-    selectedNavButton === 'allServices';
-
-  const inventoryLocator = share.url.locators.get<SerializableRecord>(ENTITY_INVENTORY_LOCATOR_ID);
-
   const pageHeaderTitle = (
     <EuiFlexGroup justifyContent="spaceBetween" wrap={true}>
       {pageHeader?.pageTitle ?? pageTitle}
@@ -176,6 +178,19 @@ export function ApmMainTemplate({
     </EuiFlexGroup>
   );
 
+  const [dismissedInventoryCallout, setDismissedInventoryCallout] = useLocalStorage(
+    `apm.dismissedInventoryCallout`,
+    false
+  );
+
+  const showInventoryCallout =
+    !dismissedInventoryCallout &&
+    isEntityCentricExperienceSettingEnabled &&
+    serviceInventoryViewLocalStorageSetting === ServiceInventoryView.classic &&
+    selectedNavButton === 'allServices';
+
+  const inventoryLocator = share.url.locators.get<SerializableRecord>(ENTITY_INVENTORY_LOCATOR_ID);
+
   const inventoryCallout = (
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
@@ -184,10 +199,28 @@ export function ApmMainTemplate({
       <EuiFlexItem grow={false}>
         <EuiLink data-test-subj="inventoryCalloutLink" href={inventoryLocator?.useUrl({})}>
           <FormattedMessage
-            id="xpack.apm.inventoryCallout.link"
+            id="xpack.apm.inventoryCallout.linklabel"
             defaultMessage="Try our new Inventory!"
           />
         </EuiLink>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.apm.inventoryCallout.linkTooltip"
+              defaultMessage="Hide this"
+            />
+          }
+        >
+          <EuiButtonIcon
+            data-test-subj="inventoryCalloutDismiss"
+            iconType="cross"
+            onClick={() => {
+              setDismissedInventoryCallout(true);
+            }}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
