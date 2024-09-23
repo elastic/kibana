@@ -21,11 +21,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardAttributes } from '../../common/content_management';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
 import {
+  DASHBOARD_PANELS_UNSAVED_ID,
   dashboardBackupService,
-  dashboardContentManagementService,
-} from '../services/dashboard_services';
+} from '../services/dashboard_backup_service';
+import { dashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 

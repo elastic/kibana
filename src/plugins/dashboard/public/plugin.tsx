@@ -78,7 +78,13 @@ import {
   registerDashboardPanelPlacementSetting,
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
-import { setServices, untilPluginStartServicesReady } from './services/services';
+import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { setDashboardRecentlyAccessedService } from './services/dashboard_recently_accessed_service';
+import { setDashboardBackupService } from './services/dashboard_backup_service';
+import {
+  dashboardContentManagementService,
+  setDashboardContentManagementService,
+} from './services/dashboard_content_management_service';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -169,10 +175,6 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            const [{ dashboardContentManagementService }] = await Promise.all([
-              import('./services/dashboard_services'),
-              untilPluginStartServicesReady(),
-            ]);
             return (
               (await dashboardContentManagementService.loadDashboardState({ id: dashboardId }))
                 .dashboardInput?.filters ?? []
@@ -330,9 +332,14 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    setServices(core, plugins);
+    setKibanaServices(core, plugins);
+    setDashboardRecentlyAccessedService();
+    setDashboardBackupService();
+    setDashboardContentManagementService();
+
     untilPluginStartServicesReady().then(async () => {
       const { buildAllDashboardActions } = await import('./dashboard_actions');
+
       buildAllDashboardActions({
         core,
         plugins,
@@ -345,10 +352,6 @@ export class DashboardPlugin
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
-        const [{ dashboardContentManagementService }] = await Promise.all([
-          import('./services/dashboard_services'),
-          untilPluginStartServicesReady(), // the services promise might not have resolved yet
-        ]);
         return dashboardContentManagementService.findDashboards;
       },
     };

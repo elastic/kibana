@@ -7,18 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardStartDependencies } from '../../../plugin';
-import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardCrudTypes } from '../../../../common/content_management';
-import { dashboardContentManagementCache } from '../dashboard_content_management_cache';
+import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { contentManagementService } from '../../kibana_services';
+import { dashboardContentManagementCache } from '../../dashboard_content_management_service';
 
-export const deleteDashboards = async (
-  ids: string[],
-  contentManagement: DashboardStartDependencies['contentManagement']
-) => {
+export const deleteDashboards = async (ids: string[]) => {
   const deletePromises = ids.map((id) => {
     dashboardContentManagementCache.deleteDashboard(id);
-    return contentManagement.client.delete<
+    return contentManagementService.client.delete<
       DashboardCrudTypes['DeleteIn'],
       DashboardCrudTypes['DeleteOut']
     >({

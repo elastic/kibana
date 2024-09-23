@@ -48,7 +48,6 @@ import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants
 import { openSettingsFlyout } from '../dashboard_container/embeddable/api';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
-import { dashboardRecentlyAccessedService } from '../services/dashboard_services';
 import {
   coreServices,
   dataService,
@@ -56,6 +55,7 @@ import {
   navigationService,
   serverlessService,
 } from '../services/kibana_services';
+import { dashboardRecentlyAccessed } from '../services/dashboard_recently_accessed_service';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import './_dashboard_top_nav.scss';
 
@@ -149,7 +149,7 @@ export function InternalDashboardTopNav({
     if (lastSavedId && title) {
       const fullEditPath = getFullEditPath(lastSavedId, viewMode === 'edit');
       coreServices.chrome.recentlyAccessed.add(fullEditPath, title, lastSavedId);
-      dashboardRecentlyAccessedService.add(fullEditPath, title, lastSavedId); // used to sort the listing table
+      dashboardRecentlyAccessed.add(fullEditPath, title, lastSavedId); // used to sort the listing table
     }
     return () => subscription.unsubscribe();
   }, [lastSavedId, viewMode, title]);

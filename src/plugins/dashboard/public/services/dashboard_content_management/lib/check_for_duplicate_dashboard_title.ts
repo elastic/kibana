@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardCrudTypes } from '../../../../common/content_management';
 import { extractTitleAndCount } from '../../../dashboard_container/embeddable/api/lib/extract_title_and_count';
+import { contentManagementService } from '../../kibana_services';
 
 export interface DashboardDuplicateTitleCheckProps {
   title: string;
@@ -28,16 +28,13 @@ export interface DashboardDuplicateTitleCheckProps {
  * returns Promise<true> when there is no duplicate, or runs the provided onTitleDuplicate
  * function when the title already exists
  */
-export async function checkForDuplicateDashboardTitle(
-  {
-    title,
-    copyOnSave,
-    lastSavedTitle,
-    onTitleDuplicate,
-    isTitleDuplicateConfirmed,
-  }: DashboardDuplicateTitleCheckProps,
-  contentManagement: DashboardStartDependencies['contentManagement']
-): Promise<boolean> {
+export async function checkForDuplicateDashboardTitle({
+  title,
+  copyOnSave,
+  lastSavedTitle,
+  onTitleDuplicate,
+  isTitleDuplicateConfirmed,
+}: DashboardDuplicateTitleCheckProps): Promise<boolean> {
   // Don't check if the title is an empty string
   if (!title) {
     return true;
@@ -56,7 +53,7 @@ export async function checkForDuplicateDashboardTitle(
 
   const [baseDashboardName] = extractTitleAndCount(title);
 
-  const { hits } = await contentManagement.client.search<
+  const { hits } = await contentManagementService.client.search<
     DashboardCrudTypes['SearchIn'],
     DashboardCrudTypes['SearchOut']
   >({

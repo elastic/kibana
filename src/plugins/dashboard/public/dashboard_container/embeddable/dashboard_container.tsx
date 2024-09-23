@@ -89,8 +89,8 @@ import {
   DEFAULT_PANEL_WIDTH,
   PanelPlacementStrategy,
 } from '../../dashboard_constants';
-import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
-import { dashboardContentManagementService } from '../../services/dashboard_services';
+import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup_service';
+import { dashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import {
   coreServices,
   dataService,

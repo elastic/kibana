@@ -15,11 +15,11 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitFor } from '@testing-library/react';
 
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
 import {
+  DASHBOARD_PANELS_UNSAVED_ID,
   dashboardBackupService,
-  dashboardContentManagementService,
-} from '../services/dashboard_services';
+} from '../services/dashboard_backup_service';
+import { dashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { coreServices } from '../services/kibana_services';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 

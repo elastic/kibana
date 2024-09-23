@@ -14,11 +14,11 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { set } from '@kbn/safer-lodash-set';
 
-import type { DashboardContainerInput } from '../../../common';
-import { backupServiceStrings } from '../../dashboard_container/_dashboard_container_strings';
-import { UnsavedPanelState } from '../../dashboard_container/types';
-import { coreServices, spacesService } from '../kibana_services';
-import type { DashboardBackupServiceType } from './types';
+import type { DashboardContainerInput } from '../../common';
+import { backupServiceStrings } from '../dashboard_container/_dashboard_container_strings';
+import { UnsavedPanelState } from '../dashboard_container/types';
+import { coreServices, spacesService } from './kibana_services';
+import { SavedDashboardInput } from './dashboard_content_management/types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
@@ -27,6 +27,26 @@ const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 
 // this key is named `panels` for BWC reasons, but actually contains the entire dashboard state
 const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
+
+interface DashboardBackupServiceType {
+  clearState: (id?: string) => void;
+  getState: (id: string | undefined) =>
+    | {
+        dashboardState?: Partial<SavedDashboardInput>;
+        panels?: UnsavedPanelState;
+      }
+    | undefined;
+  setState: (
+    id: string | undefined,
+    dashboardState: Partial<SavedDashboardInput>,
+    panels: UnsavedPanelState
+  ) => void;
+  getViewMode: () => ViewMode;
+  storeViewMode: (viewMode: ViewMode) => void;
+  getDashboardIdsWithUnsavedChanges: () => string[];
+  dashboardHasUnsavedEdits: (id?: string) => boolean;
+}
+
 class DashboardBackupService implements DashboardBackupServiceType {
   private activeSpaceId: string;
   private sessionStorage: Storage;
@@ -173,6 +193,8 @@ class DashboardBackupService implements DashboardBackupServiceType {
   }
 }
 
-export const getDashboardBackupService = (): DashboardBackupService => {
-  return new DashboardBackupService();
+export let dashboardBackupService: DashboardBackupService;
+
+export const setDashboardBackupService = () => {
+  dashboardBackupService = new DashboardBackupService();
 };

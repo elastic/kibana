@@ -32,7 +32,7 @@ import {
   SaveDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
-import { dashboardContentManagementService } from '../../../services/dashboard_services';
+import { dashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import {
   coreServices,
   dataService,

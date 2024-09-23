@@ -33,7 +33,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DashboardContainerInput } from '../../../../common';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { dashboardContentManagementService } from '../../../services/dashboard_services';
+import { dashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import { savedObjectsTaggingService } from '../../../services/kibana_services';
 
 interface DashboardSettingsProps {

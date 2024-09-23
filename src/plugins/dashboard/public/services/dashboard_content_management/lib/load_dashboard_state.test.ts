@@ -9,7 +9,7 @@
 
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { getSampleDashboardInput } from '../../../mocks';
-import { dashboardContentManagementCache } from '../dashboard_content_management_cache';
+import { dashboardContentManagementCache } from '../../utils/dashboard_content_management_cache';
 import { loadDashboardState } from './load_dashboard_state';
 
 describe('Load dashboard state', () => {

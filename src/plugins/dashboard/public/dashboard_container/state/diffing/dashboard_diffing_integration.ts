@@ -13,8 +13,10 @@ import { combineLatest, debounceTime, skipWhile, startWith, switchMap } from 'rx
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
-import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
-import { dashboardBackupService } from '../../../services/dashboard_services';
+import {
+  PANELS_CONTROL_GROUP_KEY,
+  dashboardBackupService,
+} from '../../../services/dashboard_backup_service';
 import { UnsavedPanelState } from '../../types';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
 import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_diffing_functions';

@@ -37,7 +37,6 @@ export interface DashboardContentManagementService {
  */
 export interface LoadDashboardFromSavedObjectProps {
   id?: string;
-  contentManagement: DashboardStartDependencies['contentManagement'];
 }
 
 type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];

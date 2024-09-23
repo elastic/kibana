@@ -23,11 +23,16 @@ import {
 } from '../../../../common';
 import { DashboardCrudTypes } from '../../../../common/content_management';
 import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
-import { dataService, embeddableService, savedObjectsTaggingService } from '../../kibana_services';
-import { dashboardContentManagementCache } from '../dashboard_content_management_cache';
+import {
+  contentManagementService,
+  dataService,
+  embeddableService,
+  savedObjectsTaggingService,
+} from '../../kibana_services';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 import { convertNumberToDashboardVersion } from './dashboard_versioning';
 import { migrateDashboardInput } from './migrate_dashboard_input';
+import { dashboardContentManagementCache } from '../../dashboard_content_management_service';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -40,7 +45,6 @@ export function migrateLegacyQuery(query: Query | { [key: string]: any } | strin
 
 export const loadDashboardState = async ({
   id,
-  contentManagement,
 }: LoadDashboardFromSavedObjectProps): Promise<LoadDashboardReturn> => {
   const {
     search: dataSearchService,
@@ -76,7 +80,7 @@ export const loadDashboardState = async ({
     ({ item: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
   } else {
     /** Otherwise, fetch and load the dashboard from the content management client, and add it to the cache */
-    const result = await contentManagement.client
+    const result = await contentManagementService.client
       .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
         contentTypeId: DASHBOARD_CONTENT_ID,
         id,

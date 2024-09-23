@@ -23,12 +23,8 @@ import {
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../dashboard_constants';
-import {
-  dashboardBackupService,
-  dashboardContentManagementService,
-  dashboardRecentlyAccessedService,
-} from '../../services/dashboard_services';
 import { coreServices } from '../../services/kibana_services';
+import { dashboardRecentlyAccessed } from '../../services/dashboard_recently_accessed_service';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import {
   dashboardListingErrorStrings,
@@ -37,6 +33,8 @@ import {
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import { DashboardSavedObjectUserContent } from '../types';
+import { dashboardBackupService } from '../../services/dashboard_backup_service';
+import { dashboardContentManagementService } from '../../services/dashboard_content_management_service';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -297,7 +295,7 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
-      recentlyAccessed: dashboardRecentlyAccessedService,
+      recentlyAccessed: dashboardRecentlyAccessed,
     };
   }, [
     contentEditorValidators,

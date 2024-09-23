@@ -19,17 +19,17 @@ import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_conv
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
-import { DashboardStartDependencies } from '../../../plugin';
+import { dashboardBackupService } from '../../dashboard_backup_service';
+import { dashboardContentManagementCache } from '../../dashboard_content_management_service';
 import {
+  contentManagementService,
   coreServices,
   dataService,
   embeddableService,
   savedObjectsTaggingService,
 } from '../../kibana_services';
-import { dashboardContentManagementCache } from '../dashboard_content_management_cache';
 import { SaveDashboardProps, SaveDashboardReturn } from '../types';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
-import { dashboardBackupService } from '../../dashboard_services';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -41,18 +41,13 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
   }
 };
 
-type SaveDashboardStateProps = SaveDashboardProps & {
-  contentManagement: DashboardStartDependencies['contentManagement'];
-};
-
 export const saveDashboardState = async ({
   controlGroupReferences,
   lastSavedId,
   saveOptions,
   currentState,
   panelReferences,
-  contentManagement,
-}: SaveDashboardStateProps): Promise<SaveDashboardReturn> => {
+}: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   const {
     search: dataSearchService,
     query: {
@@ -177,7 +172,7 @@ export const saveDashboardState = async ({
 
   try {
     const result = idToSaveTo
-      ? await contentManagement.client.update<
+      ? await contentManagementService.client.update<
           DashboardCrudTypes['UpdateIn'],
           DashboardCrudTypes['UpdateOut']
         >({
@@ -190,7 +185,7 @@ export const saveDashboardState = async ({
             mergeAttributes: false,
           },
         })
-      : await contentManagement.client.create<
+      : await contentManagementService.client.create<
           DashboardCrudTypes['CreateIn'],
           DashboardCrudTypes['CreateOut']
         >({

@@ -22,7 +22,7 @@ import {
   isDashboardAppInNoDataState,
 } from '../no_data/dashboard_app_no_data';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
-import { dashboardContentManagementService } from '../../services/dashboard_services';
+import { dashboardContentManagementService } from '../../services/dashboard_content_management_service';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;

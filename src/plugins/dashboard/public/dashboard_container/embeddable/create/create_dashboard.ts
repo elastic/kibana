@@ -29,15 +29,15 @@ import {
   GLOBAL_STATE_STORAGE_KEY,
   PanelPlacementStrategy,
 } from '../../../dashboard_constants';
-import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
+import {
+  PANELS_CONTROL_GROUP_KEY,
+  dashboardBackupService,
+} from '../../../services/dashboard_backup_service';
 import {
   LoadDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
-import {
-  dashboardBackupService,
-  dashboardContentManagementService,
-} from '../../../services/dashboard_services';
+import { dashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import { coreServices, dataService, embeddableService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';

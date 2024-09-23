@@ -9,14 +9,12 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { dashboardBackupService } from '../../services/dashboard_backup_service';
+import { dashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { coreServices } from '../../services/kibana_services';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardSavedObjectUserContent } from '../types';
 import { useDashboardListingTable } from './use_dashboard_listing_table';
-import {
-  dashboardBackupService,
-  dashboardContentManagementService,
-} from '../../services/dashboard_services';
 
 const clearStateMock = jest.fn();
 const getDashboardUrl = jest.fn();

@@ -16,11 +16,10 @@ import {
   DashboardItem,
 } from '../../../../common/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
-import { DashboardStartDependencies } from '../../../plugin';
-import { dashboardContentManagementCache } from '../dashboard_content_management_cache';
+import { contentManagementService } from '../../kibana_services';
+import { dashboardContentManagementCache } from '../../dashboard_content_management_service';
 
 export interface SearchDashboardsArgs {
-  contentManagement: DashboardStartDependencies['contentManagement'];
   options?: DashboardCrudTypes['SearchIn']['options'];
   hasNoReference?: SavedObjectsFindOptionsReference[];
   hasReference?: SavedObjectsFindOptionsReference[];
@@ -34,7 +33,6 @@ export interface SearchDashboardsResponse {
 }
 
 export async function searchDashboards({
-  contentManagement,
   hasNoReference,
   hasReference,
   options,
@@ -44,7 +42,7 @@ export async function searchDashboards({
   const {
     hits,
     pagination: { total },
-  } = await contentManagement.client.search<
+  } = await contentManagementService.client.search<
     DashboardCrudTypes['SearchIn'],
     DashboardCrudTypes['SearchOut']
   >({
@@ -70,10 +68,7 @@ export type FindDashboardsByIdResponse = { id: string } & (
   | { status: 'error'; error: SavedObjectError }
 );
 
-export async function findDashboardById(
-  contentManagement: DashboardStartDependencies['contentManagement'],
-  id: string
-): Promise<FindDashboardsByIdResponse> {
+export async function findDashboardById(id: string): Promise<FindDashboardsByIdResponse> {
   /** If the dashboard exists in the cache, then return the result from that */
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
   if (cachedDashboard) {
@@ -87,7 +82,7 @@ export async function findDashboardById(
 
   /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
   try {
-    const response = await contentManagement.client.get<
+    const response = await contentManagementService.client.get<
       DashboardCrudTypes['GetIn'],
       DashboardCrudTypes['GetOut']
     >({
@@ -114,20 +109,14 @@ export async function findDashboardById(
   }
 }
 
-export async function findDashboardsByIds(
-  contentManagement: DashboardStartDependencies['contentManagement'],
-  ids: string[]
-): Promise<FindDashboardsByIdResponse[]> {
-  const findPromises = ids.map((id) => findDashboardById(contentManagement, id));
+export async function findDashboardsByIds(ids: string[]): Promise<FindDashboardsByIdResponse[]> {
+  const findPromises = ids.map((id) => findDashboardById(id));
   const results = await Promise.all(findPromises);
   return results as FindDashboardsByIdResponse[];
 }
 
-export async function findDashboardIdByTitle(
-  contentManagement: DashboardStartDependencies['contentManagement'],
-  title: string
-): Promise<{ id: string } | undefined> {
-  const { hits } = await contentManagement.client.search<
+export async function findDashboardIdByTitle(title: string): Promise<{ id: string } | undefined> {
+  const { hits } = await contentManagementService.client.search<
     DashboardCrudTypes['SearchIn'],
     DashboardCrudTypes['SearchOut']
   >({

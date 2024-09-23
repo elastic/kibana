@@ -20,13 +20,11 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import { getSampleDashboardPanel, mockControlGroupApi } from '../../../mocks';
-import {
-  dashboardBackupService,
-  dashboardContentManagementService,
-} from '../../../services/dashboard_services';
 import { dataService, embeddableService } from '../../../services/kibana_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { createDashboard } from './create_dashboard';
+import { dashboardContentManagementService } from '../../../services/dashboard_content_management_service';
+import { dashboardBackupService } from '../../../services/dashboard_backup_service';
 
 test("doesn't throw error when no data views are available", async () => {
   dataService.dataViews.defaultDataViewExists = jest.fn().mockReturnValue(false);
