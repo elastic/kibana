@@ -724,8 +724,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   protected sendActionCreationTelemetry(actionRequest: LogsEndpointAction): void {
     const isAutomated =
-      actionRequest.EndpointActions.data.alert_id &&
-      actionRequest.EndpointActions.data.alert_id.length > 0;
+      (actionRequest.EndpointActions.data.alert_id &&
+        actionRequest.EndpointActions.data.alert_id.length > 0) ??
+      false;
     this.options.endpointService
       .getTelemetryService()
       .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
