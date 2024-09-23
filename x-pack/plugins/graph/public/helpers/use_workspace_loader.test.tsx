@@ -10,7 +10,8 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Workspace } from '../types';
-import { renderHook, act, RenderHookOptions } from '@testing-library/react-hooks';
+import { renderHook, RenderHookOptions } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 import { ContentClient } from '@kbn/content-management-plugin/public';
 
 jest.mock('react-router-dom', () => {

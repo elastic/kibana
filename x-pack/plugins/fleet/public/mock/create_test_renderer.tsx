@@ -122,6 +122,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
           <ExtraWrapper>{children}</ExtraWrapper>
         </testRendererMocks.HookWrapper>
       );
+
       return renderHook(callback, {
         wrapper,
       });
@@ -137,6 +138,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
       });
       return renderResponse!;
     },
+    waitFor,
   };
 
   return testRendererMocks;
