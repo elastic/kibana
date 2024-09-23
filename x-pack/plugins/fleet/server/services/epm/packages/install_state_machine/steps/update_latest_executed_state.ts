@@ -34,11 +34,16 @@ export const updateLatestExecutedState = async (context: InstallContext) => {
       id: pkgName,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
-    return await withPackageSpan('Update latest executed state', () =>
-      savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+    logger.error('updateLatestExecutedState:before');
+    return await withPackageSpan('Update latest executed state', async () => {
+      const result = await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
         latest_executed_state: latestExecutedState,
-      })
-    );
+      });
+
+      logger.error('updateLatestExecutedState:after savedObjectsClient.update');
+
+      return result;
+    });
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       logger.error(`Failed to update SO with latest executed state: ${err}`);
