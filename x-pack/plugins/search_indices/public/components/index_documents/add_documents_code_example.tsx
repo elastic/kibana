@@ -106,6 +106,7 @@ export const AddDocumentsCodeExample = ({
         {selectedCodeExamples.installCommand && (
           <EuiFlexItem>
             <CodeSample
+              id="installCodeExample"
               title={i18n.translate('xpack.searchIndices.indexDetails.installLibrary.title', {
                 defaultMessage: 'Install Elasticsearch library',
               })}
@@ -123,6 +124,7 @@ export const AddDocumentsCodeExample = ({
         {!indexHasMappings && (
           <EuiFlexItem>
             <CodeSample
+              id="addMappingsCodeExample"
               title={i18n.translate('xpack.searchIndices.indexDetails.addMappingsCode.title', {
                 defaultMessage: 'Add mappings to your index',
               })}
@@ -139,6 +141,7 @@ export const AddDocumentsCodeExample = ({
         )}
         <EuiFlexItem>
           <CodeSample
+            id="ingestDataCodeExample"
             title={ingestCodeExamples.ingestTitle}
             language={Languages[selectedLanguage].codeBlockLanguage}
             code={selectedCodeExamples.ingestCommand(codeParams)}
