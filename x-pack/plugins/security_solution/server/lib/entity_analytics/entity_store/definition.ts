@@ -32,6 +32,7 @@ export const buildHostEntityDefinition = (): EntityDefinition =>
       interval: '1m',
     },
     version: '1.0.0',
+    managed: true,
   });
 
 export const buildUserEntityDefinition = (): EntityDefinition =>
@@ -55,4 +56,5 @@ export const buildUserEntityDefinition = (): EntityDefinition =>
       interval: '1m',
     },
     version: '1.0.0',
+    managed: true,
   });
