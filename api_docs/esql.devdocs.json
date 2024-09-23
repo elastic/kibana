@@ -440,6 +440,22 @@
             "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.TextBasedLanguagesEditorProps.displayDocumentationAsFlyout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "displayDocumentationAsFlyout",
+            "description": [
+              "adds a documentation icon in the footer which opens the inline docs as a flyout"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

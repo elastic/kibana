@@ -6,31 +6,30 @@
  */
 
 import expect from 'expect';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const INTERNAL_API_BASE_PATH = '/internal/search_indices';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
-  let internalReqHeader: InternalRequestHeader;
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestDeveloperWithCookieCredentials: SupertestWithRoleScopeType;
+  let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('search_indices Indices APIs', function () {
-    before(function () {
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
-    });
     describe('create index', function () {
       const createIndexName = 'a-test-index';
       describe('developer', function () {
         before(async () => {
-          // get auth header for Viewer role
-          roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('developer');
+          supertestDeveloperWithCookieCredentials =
+            await roleScopedSupertest.getSupertestWithRoleScope('developer', {
+              useCookieHeader: true,
+              withInternalHeaders: true,
+            });
         });
+
         after(async () => {
           // Cleanup index created for testing purposes
           try {
@@ -39,14 +38,11 @@ export default function ({ getService }: FtrProviderContext) {
             log.debug('[Cleanup error] Error deleting index');
             throw err;
           }
-          await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
         });
 
         it('can create a new index', async () => {
-          const { body } = await supertestWithoutAuth
+          const { body } = await supertestDeveloperWithCookieCredentials
             .post(`${INTERNAL_API_BASE_PATH}/indices/create`)
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader)
             .send({
               indexName: createIndexName,
             })
@@ -55,10 +51,8 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body?.index).toBe(createIndexName);
         });
         it('gives a conflict error if the index exists already', async () => {
-          await supertestWithoutAuth
+          await supertestDeveloperWithCookieCredentials
             .post(`${INTERNAL_API_BASE_PATH}/indices/create`)
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader)
             .send({
               indexName: createIndexName,
             })
@@ -67,15 +61,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
       describe('viewer', function () {
         before(async () => {
-          // get auth header for Viewer role
-          roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
+          supertestViewerWithCookieCredentials =
+            await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
+              useCookieHeader: true,
+              withInternalHeaders: true,
+            });
         });
 
         it('cannot create a new index', async () => {
-          await supertestWithoutAuth
+          await supertestViewerWithCookieCredentials
             .post(`${INTERNAL_API_BASE_PATH}/indices/create`)
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader)
             .send({
               indexName: 'a-new-index',
             })

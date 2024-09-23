@@ -473,19 +473,23 @@
           },
           {
             "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.elasticsearchUrl",
-            "type": "string",
+            "id": "def-public.CloudStart.fetchElasticsearchConfig",
+            "type": "Function",
             "tags": [],
-            "label": "elasticsearchUrl",
+            "label": "fetchElasticsearchConfig",
             "description": [
-              "\nThe full URL to the elasticsearch cluster."
+              "\nFetches the full URL to the elasticsearch cluster."
             ],
             "signature": [
-              "string | undefined"
+              "() => Promise<",
+              "PublicElasticsearchConfigType",
+              ">"
             ],
             "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "cloud",
@@ -730,19 +734,23 @@
         },
         {
           "parentPluginId": "cloud",
-          "id": "def-public.CloudSetup.elasticsearchUrl",
-          "type": "string",
+          "id": "def-public.CloudSetup.fetchElasticsearchConfig",
+          "type": "Function",
           "tags": [],
-          "label": "elasticsearchUrl",
+          "label": "fetchElasticsearchConfig",
           "description": [
-            "\nThe full URL to the elasticsearch cluster."
+            "\nFetches the full URL to the elasticsearch cluster."
           ],
           "signature": [
-            "string | undefined"
+            "() => Promise<",
+            "PublicElasticsearchConfigType",
+            ">"
           ],
           "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "cloud",
