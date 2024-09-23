@@ -9,7 +9,7 @@ import { testIntegration } from '../../__jest__/fixtures/build_integration';
 import { ensureDirSync, createSync } from '../util';
 import { configure } from 'nunjucks';
 import { join as joinPath } from 'path';
-import { createReadme } from './readme';
+import { createReadme } from './readme_files';
 
 jest.mock('../util', () => ({
   ...jest.requireActual('../util'),

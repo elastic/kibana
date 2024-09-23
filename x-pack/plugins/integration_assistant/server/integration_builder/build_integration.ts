@@ -16,7 +16,7 @@ import { createAgentInput } from './agent';
 import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
-import { createReadme } from './readme';
+import { createReadme } from './readme_files';
 
 const initialVersion = '1.0.0';
 

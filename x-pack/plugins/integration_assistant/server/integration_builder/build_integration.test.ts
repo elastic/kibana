@@ -15,7 +15,7 @@ import * as PipelineModule from './pipeline';
 import { DataStream, Docs, InputType, Pipeline, Integration } from '../../common';
 import { renderPackageManifestYAML } from './build_integration';
 import yaml from 'js-yaml';
-import { createReadme } from './readme';
+import { createReadme } from './readme_files';
 
 const mockedDataPath = 'path';
 const mockedId = 123;
@@ -25,7 +25,7 @@ jest.mock('./data_stream');
 jest.mock('./fields');
 jest.mock('./agent');
 jest.mock('./pipeline');
-jest.mock('./readme');
+jest.mock('./readme_files');
 
 (Utils.generateUniqueId as jest.Mock).mockReturnValue(mockedId);
 
