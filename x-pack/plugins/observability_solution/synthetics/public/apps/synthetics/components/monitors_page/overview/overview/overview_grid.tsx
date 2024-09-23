@@ -156,7 +156,7 @@ export const OverviewGrid = memo(() => {
                     listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
                   }
                   itemCount={listItems.length}
-                  loadMoreItems={(_: number, stop: number) => setMaxItem(Math.max(maxItem, stop))}
+                  loadMoreItems={(_, stop: number) => setMaxItem(Math.max(maxItem, stop))}
                   minimumBatchSize={MIN_BATCH_SIZE}
                   threshold={LIST_THRESHOLD}
                 >
