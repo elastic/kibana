@@ -62,6 +62,7 @@ export const ProjectMonitorCodec = t.intersection([
     hash: t.string,
     namespace: t.string,
     retestOnFailure: t.boolean,
+    labels: t.record(t.string, t.string),
   }),
 ]);
 
