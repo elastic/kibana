@@ -226,5 +226,6 @@
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
     "@kbn/inference-plugin",
+    "@kbn/core-saved-objects-server-mocks",
   ]
 }
