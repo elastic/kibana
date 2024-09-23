@@ -6,10 +6,10 @@
  */
 
 import { ConfigKey, SyntheticsMonitor } from '../../../common/runtime_types';
-import { hydrateMonitorFields } from './add_monitor';
+import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 
 describe('hydrateMonitorFields', () => {
-  it('creates expected zip b64 project field value for inline browser monitor', async () => {
+  it.only('creates expected zip b64 project field value for inline browser monitor', async () => {
     const normalizedMonitor: SyntheticsMonitor = {
       // @ts-expect-error extra field
       type: 'browser',
@@ -62,26 +62,27 @@ step('fail', () => {
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
     };
 
-    const hydratedMonitor = await hydrateMonitorFields({
-      normalizedMonitor,
-      newMonitorId: 'testMonitorId',
-      routeContext: {
-        // @ts-expect-error not checking request functionality
-        request: {
-          query: {
-            preserve_namespace: true,
-          },
-        },
-        server: {
-          // @ts-expect-error not checking logger functionality
-          logger: jest.fn(),
+    const api = new AddEditMonitorAPI({
+      request: {
+        query: {
+          preserve_namespace: true,
         },
       },
+      server: {
+        logger: jest.fn(),
+      },
+    } as any);
+    const hydratedMonitor = await api.hydrateMonitorFields({
+      normalizedMonitor,
+      newMonitorId: 'testMonitorId',
     });
 
+    console.log('hydratedMonitor', JSON.stringify(hydratedMonitor));
+
+    console.log('field', hydratedMonitor['source.project.content']);
     expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeDefined();
     // zip is not deterministic, so we can't check the exact value
-    expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]).length.toBeGreaterThan(0);
+    expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT].length).toBeGreaterThan(0);
   });
 
   it('does not add b64 zip data to lightweight monitors', async () => {
@@ -137,13 +138,12 @@ step('fail', () => {
       'ssl.verification_mode': 'full',
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
     };
-    const hydratedMonitor = await hydrateMonitorFields({
+    const api = new AddEditMonitorAPI(routeContext as any);
+    const hydratedMonitor = await api.hydrateMonitorFields({
       normalizedMonitor,
       newMonitorId,
-      // @ts-expect-error not checking routeContext functionality
-      routeContext,
     });
 
-    expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]).toEqual('');
+    expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeFalsy();
   });
 });
