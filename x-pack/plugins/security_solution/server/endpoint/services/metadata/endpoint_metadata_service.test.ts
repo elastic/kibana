@@ -58,7 +58,7 @@ describe('EndpointMetadataService', () => {
     });
 
     it('should call elasticsearch with proper filter', async () => {
-      await metadataService.findHostMetadataForFleetAgents(esClient, fleetAgentIds);
+      await metadataService.findHostMetadataForFleetAgents(fleetAgentIds);
       expect(esClient.search).toHaveBeenCalledWith(
         { ...getESQueryHostMetadataByFleetAgentIds(fleetAgentIds), size: fleetAgentIds.length },
         { ignore: [404] }
@@ -67,16 +67,13 @@ describe('EndpointMetadataService', () => {
 
     it('should throw a wrapped elasticsearch Error when one occurs', async () => {
       esClient.search.mockRejectedValue(new Error('foo bar'));
-      await expect(
-        metadataService.findHostMetadataForFleetAgents(esClient, fleetAgentIds)
-      ).rejects.toThrow(EndpointError);
+      await expect(metadataService.findHostMetadataForFleetAgents(fleetAgentIds)).rejects.toThrow(
+        EndpointError
+      );
     });
 
     it('should return an array of Host Metadata documents', async () => {
-      const response = await metadataService.findHostMetadataForFleetAgents(
-        esClient,
-        fleetAgentIds
-      );
+      const response = await metadataService.findHostMetadataForFleetAgents(fleetAgentIds);
       expect(response).toEqual([endpointMetadataDoc]);
     });
   });
@@ -91,17 +88,12 @@ describe('EndpointMetadataService', () => {
 
     it('should throw wrapped error if es error', async () => {
       esClient.search.mockRejectedValue({});
-      const metadataListResponse = metadataService.getHostMetadataList(
-        esClient,
-        soClient,
-        testMockedContext.fleetServices,
-        {
-          page: 0,
-          pageSize: 10,
-          kuery: '',
-          hostStatuses: [],
-        }
-      );
+      const metadataListResponse = metadataService.getHostMetadataList({
+        page: 0,
+        pageSize: 10,
+        kuery: '',
+        hostStatuses: [],
+      });
       await expect(metadataListResponse).rejects.toThrow(EndpointError);
     });
 
@@ -109,17 +101,12 @@ describe('EndpointMetadataService', () => {
       esClient.search.mockRejectedValue({
         meta: { body: { error: { type: 'index_not_found_exception' } } },
       });
-      const metadataListResponse = await metadataService.getHostMetadataList(
-        esClient,
-        soClient,
-        testMockedContext.fleetServices,
-        {
-          page: 0,
-          pageSize: 10,
-          kuery: '',
-          hostStatuses: [],
-        }
-      );
+      const metadataListResponse = await metadataService.getHostMetadataList({
+        page: 0,
+        pageSize: 10,
+        kuery: '',
+        hostStatuses: [],
+      });
 
       expect(metadataListResponse).toEqual({
         data: [],
@@ -174,12 +161,7 @@ describe('EndpointMetadataService', () => {
       );
 
       const queryOptions = { page: 1, pageSize: 10, kuery: '', hostStatuses: [] };
-      const metadataListResponse = await metadataService.getHostMetadataList(
-        esClient,
-        soClient,
-        testMockedContext.fleetServices,
-        queryOptions
-      );
+      const metadataListResponse = await metadataService.getHostMetadataList(queryOptions);
       const unitedIndexQuery = await buildUnitedIndexQuery(
         soClient,
         queryOptions,

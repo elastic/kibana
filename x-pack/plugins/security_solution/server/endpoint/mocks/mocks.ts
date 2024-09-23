@@ -97,7 +97,7 @@ export const createMockEndpointAppContext = (
 export const createMockEndpointAppContextService = (
   mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
-  const mockEndpointMetadataContext = createEndpointMetadataServiceTestContextMock();
+  const mockEndpointMetadataContext = createEndpointMetadataServiceTestContextMock(); // FIXME:PT remove this
   const casesClientMock = createCasesClientMock();
   const fleetFromHostFilesClientMock = createFleetFromHostFilesClientMock();
   const fleetToHostFilesClientMock = createFleetToHostFilesClientMock();

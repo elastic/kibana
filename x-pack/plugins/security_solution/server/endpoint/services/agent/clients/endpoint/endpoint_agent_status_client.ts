@@ -23,16 +23,11 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
     try {
       const agentIdsKql = agentIds.map((agentId) => `agent.id: ${agentId}`).join(' or ');
       const [{ data: hostInfoForAgents }, allPendingActions] = await Promise.all([
-        metadataService.getHostMetadataList(
-          esClient,
-          soClient,
-          this.options.endpointService.getInternalFleetServices(),
-          {
-            page: 0,
-            pageSize: 1000,
-            kuery: agentIdsKql,
-          }
-        ),
+        metadataService.getHostMetadataList({
+          page: 0,
+          pageSize: 1000,
+          kuery: agentIdsKql,
+        }),
         getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
       ]).catch(catchAndWrapError);
 

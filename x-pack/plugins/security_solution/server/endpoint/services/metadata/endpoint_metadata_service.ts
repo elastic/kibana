@@ -70,14 +70,13 @@ export class EndpointMetadataService {
    * could be associated with a Fleet Agent that is no longer active. If wanting to ensure the
    * endpoint is associated with an active Fleet Agent, then use `getEnrichedHostMetadata()` instead
    *
-   * @param esClient Elasticsearch Client (usually scoped to the user's context)
    * @param endpointId the endpoint id (from `agent.id`)
    *
    * @throws
    */
-  async getHostMetadata(esClient: ElasticsearchClient, endpointId: string): Promise<HostMetadata> {
+  async getHostMetadata(endpointId: string): Promise<HostMetadata> {
     const query = getESQueryHostMetadataByID(endpointId);
-    const queryResult = await esClient.search<HostMetadata>(query).catch(catchAndWrapError);
+    const queryResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
     const endpointMetadata = queryResponseToHostResult(queryResult).result;
 
     if (endpointMetadata) {
@@ -89,19 +88,15 @@ export class EndpointMetadataService {
 
   /**
    * Find a  list of Endpoint Host Metadata document associated with a given list of Fleet Agent Ids
-   * @param esClient
    * @param fleetAgentIds
    */
-  async findHostMetadataForFleetAgents(
-    esClient: ElasticsearchClient,
-    fleetAgentIds: string[]
-  ): Promise<HostMetadata[]> {
+  async findHostMetadataForFleetAgents(fleetAgentIds: string[]): Promise<HostMetadata[]> {
     const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds);
 
     // @ts-expect-error `size` not defined as top level property when using `typesWithBodyKey`
     query.size = fleetAgentIds.length;
 
-    const searchResult = await esClient
+    const searchResult = await this.esClient
       .search<HostMetadata>(query, { ignore: [404] })
       .catch(catchAndWrapError);
 
@@ -111,18 +106,12 @@ export class EndpointMetadataService {
   /**
    * Retrieve a single endpoint host metadata along with fleet information
    *
-   * @param esClient Elasticsearch Client (usually scoped to the user's context)
-   * @param fleetServices
    * @param endpointId the endpoint id (from `agent.id`)
    *
    * @throws
    */
-  async getEnrichedHostMetadata(
-    esClient: ElasticsearchClient,
-    fleetServices: EndpointFleetServicesInterface,
-    endpointId: string
-  ): Promise<HostInfo> {
-    const endpointMetadata = await this.getHostMetadata(esClient, endpointId);
+  async getEnrichedHostMetadata(endpointId: string): Promise<HostInfo> {
+    const endpointMetadata = await this.getHostMetadata(endpointId);
 
     let fleetAgentId = endpointMetadata.elastic.agent.id;
     let fleetAgent: Agent | undefined;
@@ -134,7 +123,7 @@ export class EndpointMetadataService {
         this.logger?.warn(`Missing elastic agent id, using host id instead ${fleetAgentId}`);
       }
 
-      fleetAgent = await this.getFleetAgent(fleetServices.agent, fleetAgentId);
+      fleetAgent = await this.getFleetAgent(fleetAgentId);
     } catch (error) {
       if (error instanceof FleetAgentNotFoundError) {
         this.logger?.debug(`agent with id ${fleetAgentId} not found`);
@@ -150,12 +139,12 @@ export class EndpointMetadataService {
       );
     }
 
-    return this.enrichHostMetadata(fleetServices, endpointMetadata, fleetAgent);
+    return this.enrichHostMetadata(endpointMetadata, fleetAgent);
   }
 
   /**
    * Enriches a host metadata document with data from fleet
-   * @param fleetServices
+   *
    * @param endpointMetadata
    * @param _fleetAgent
    * @param _fleetAgentPolicy
@@ -164,7 +153,6 @@ export class EndpointMetadataService {
    */
   // eslint-disable-next-line complexity
   private async enrichHostMetadata(
-    fleetServices: EndpointFleetServicesInterface,
     endpointMetadata: HostMetadata,
     /**
      * If undefined, it will be retrieved from Fleet using the ID in the endpointMetadata.
@@ -200,7 +188,7 @@ export class EndpointMetadataService {
           );
         }
 
-        fleetAgent = await this.getFleetAgent(fleetServices.agent, fleetAgentId);
+        fleetAgent = await this.getFleetAgent(fleetAgentId);
       } catch (error) {
         if (error instanceof FleetAgentNotFoundError) {
           this.logger?.warn(`Agent with id ${fleetAgentId} not found`);
@@ -269,15 +257,11 @@ export class EndpointMetadataService {
   /**
    * Retrieve a single Fleet Agent data
    *
-   * @param fleetAgentService
    * @param agentId The elastic agent id (`from `elastic.agent.id`)
    */
-  async getFleetAgent(
-    fleetAgentService: EndpointFleetServicesInterface['agent'],
-    agentId: string
-  ): Promise<Agent> {
+  async getFleetAgent(agentId: string): Promise<Agent> {
     try {
-      return await fleetAgentService.getAgent(agentId);
+      return await this.fleetServices.agent.getAgent(agentId);
     } catch (error) {
       if (error instanceof AgentNotFoundError) {
         throw new FleetAgentNotFoundError(`agent with id ${agentId} not found`, error);
@@ -330,27 +314,25 @@ export class EndpointMetadataService {
   /**
    * Retrieve list of host metadata. Only supports new united index.
    *
-   * @param esClient
    * @param queryOptions
-   * @param soClient
-   * @param fleetServices
    *
    * @throws
    */
   async getHostMetadataList(
-    esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract,
-    fleetServices: EndpointFleetServicesInterface,
     queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
     const endpointPolicies = await this.getAllEndpointPackagePolicies();
     const endpointPolicyIds = uniq(endpointPolicies.flatMap((policy) => policy.policy_ids));
-    const unitedIndexQuery = await buildUnitedIndexQuery(soClient, queryOptions, endpointPolicyIds);
+    const unitedIndexQuery = await buildUnitedIndexQuery(
+      this.soClient,
+      queryOptions,
+      endpointPolicyIds
+    );
 
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
 
     try {
-      unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadataPersistedData>(
+      unitedMetadataQueryResponse = await this.esClient.search<UnitedAgentMetadataPersistedData>(
         unitedIndexQuery
       );
     } catch (error) {
@@ -417,9 +399,7 @@ export class EndpointMetadataService {
           ...runtimeFields,
         };
 
-        hosts.push(
-          await this.enrichHostMetadata(fleetServices, metadata, agent, agentPolicy, endpointPolicy)
-        );
+        hosts.push(await this.enrichHostMetadata(metadata, agent, agentPolicy, endpointPolicy));
       }
     }
 
@@ -433,12 +413,9 @@ export class EndpointMetadataService {
     return getAllEndpointPackagePolicies(this.fleetServices.packagePolicy, this.soClient);
   }
 
-  async getMetadataForEndpoints(
-    esClient: ElasticsearchClient,
-    endpointIDs: string[]
-  ): Promise<HostMetadata[]> {
+  async getMetadataForEndpoints(endpointIDs: string[]): Promise<HostMetadata[]> {
     const query = getESQueryHostMetadataByIDs(endpointIDs);
-    const { body } = await esClient.search<HostMetadata>(query, {
+    const { body } = await this.esClient.search<HostMetadata>(query, {
       meta: true,
     });
     const hosts = queryResponseToHostListResult(body);
