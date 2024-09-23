@@ -105,6 +105,9 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it('@skipInServerlessMKI @skipInServerless starts the latest transform', async () => {
+            // Transform states that indicate the transform is running happily
+            const TRANSFORM_STARTED_STATES = ['started', 'indexing'];
+
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const transformStats = await es.transform.getTransformStats({
@@ -113,12 +116,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(transformStats.transforms.length).to.eql(1);
             const latestTransform = transformStats.transforms[0];
-            if (latestTransform.state !== 'started') {
-              log.error('Transform state is not started, logging the transform');
+            if (!TRANSFORM_STARTED_STATES.includes(latestTransform.state)) {
+              log.error('Transform state is not in the started states, logging the transform');
               log.info(`latestTransform: ${JSON.stringify(latestTransform)}`);
             }
 
-            expect(latestTransform.state).to.eql('started');
+            expect(TRANSFORM_STARTED_STATES).to.contain(latestTransform.state);
           });
 
           describe('@skipInServerlessMKI disabling and re-enabling the risk engine', () => {
