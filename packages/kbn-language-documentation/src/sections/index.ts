@@ -24,7 +24,7 @@ export const getESQLDocsSections = async () => {
     operators,
   } = await import('./esql_documentation_sections');
   groups.push({
-    label: i18n.translate('languageDocumentationPopover.esqlSections.initialSectionLabel', {
+    label: i18n.translate('languageDocumentation.esqlSections.initialSectionLabel', {
       defaultMessage: 'ES|QL',
     }),
     items: [],

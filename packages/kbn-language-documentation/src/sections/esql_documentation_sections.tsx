@@ -17,7 +17,7 @@ const Markdown = (props: Parameters<typeof SharedUXMarkdown>[0]) => (
 
 export const initialSection = (
   <Markdown
-    markdownContent={i18n.translate('languageDocumentationPopover.documentationESQL.markdown', {
+    markdownContent={i18n.translate('languageDocumentation.documentationESQL.markdown', {
       defaultMessage: `
 An ES|QL (Elasticsearch query language) query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch. 
 
@@ -36,27 +36,22 @@ The result of a query is the table produced by the final processing command.
 );
 
 export const sourceCommands = {
-  label: i18n.translate('languageDocumentationPopover.documentationESQL.sourceCommands', {
+  label: i18n.translate('languageDocumentation.documentationESQL.sourceCommands', {
     defaultMessage: 'Source commands',
   }),
-  description: i18n.translate(
-    'languageDocumentationPopover.documentationESQL.commandsDescription',
-    {
-      defaultMessage: `A source command produces a table, typically with data from Elasticsearch. ES|QL supports the following source commands.`,
-    }
-  ),
+  description: i18n.translate('languageDocumentation.documentationESQL.commandsDescription', {
+    defaultMessage: `A source command produces a table, typically with data from Elasticsearch. ES|QL supports the following source commands.`,
+  }),
   items: [
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.from', {
+      label: i18n.translate('languageDocumentation.documentationESQL.from', {
         defaultMessage: 'FROM',
       }),
       description: (
         <Markdown
           openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.from.markdown',
-            {
-              defaultMessage: `### FROM
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.from.markdown', {
+            defaultMessage: `### FROM
 The \`FROM\` source command returns a table with up to 10,000 documents from a data stream, index, or alias. Each row in the resulting table represents a document. Each column corresponds to a field, and can be accessed by the name of that field.
 
 \`\`\`
@@ -104,23 +99,20 @@ FROM employees [METADATA _index, _id]
 | STATS max = MAX(emp_no) BY _index
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.row', {
+      label: i18n.translate('languageDocumentation.documentationESQL.row', {
         defaultMessage: 'ROW',
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.row.markdown',
-            {
-              defaultMessage: `### ROW
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.row.markdown', {
+            defaultMessage: `### ROW
 The \`ROW\` source command produces a row with one or more columns with values that you specify. This can be useful for testing.
               
 \`\`\`
@@ -139,33 +131,29 @@ ROW supports the use of functions:
 ROW a = ROUND(1.23, 0)
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.show', {
+      label: i18n.translate('languageDocumentation.documentationESQL.show', {
         defaultMessage: 'SHOW',
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.show.markdown',
-            {
-              defaultMessage: `### SHOW
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.show.markdown', {
+            defaultMessage: `### SHOW
 The \`SHOW <item>\` source command returns information about the deployment and its capabilities:
 
 * Use \`SHOW INFO\` to return the deployment's version, build date and hash.
 * Use \`SHOW FUNCTIONS\` to return a list of all supported functions and a synopsis of each function.
             `,
-              ignoreTag: true,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            ignoreTag: true,
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
@@ -173,25 +161,25 @@ The \`SHOW <item>\` source command returns information about the deployment and 
 };
 
 export const processingCommands = {
-  label: i18n.translate('languageDocumentationPopover.documentationESQL.processingCommands', {
+  label: i18n.translate('languageDocumentation.documentationESQL.processingCommands', {
     defaultMessage: 'Processing commands',
   }),
   description: i18n.translate(
-    'languageDocumentationPopover.documentationESQL.processingCommandsDescription',
+    'languageDocumentation.documentationESQL.processingCommandsDescription',
     {
       defaultMessage: `Processing commands change an input table by adding, removing, or changing rows and columns. ES|QL supports the following processing commands.`,
     }
   ),
   items: [
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.dissect', {
+      label: i18n.translate('languageDocumentation.documentationESQL.dissect', {
         defaultMessage: 'DISSECT',
       }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.dissect.markdown',
+            'languageDocumentation.documentationESQL.dissect.markdown',
             {
               defaultMessage: `### DISSECT
 \`DISSECT\` enables you to extract structured data out of a string. \`DISSECT\` matches the string against a delimiter-based pattern, and extracts the specified keys as columns.
@@ -211,15 +199,13 @@ ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.drop', {
+      label: i18n.translate('languageDocumentation.documentationESQL.drop', {
         defaultMessage: 'DROP',
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.drop.markdown',
-            {
-              defaultMessage: `### DROP
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.drop.markdown', {
+            defaultMessage: `### DROP
 Use \`DROP\` to remove columns from a table:
               
 \`\`\`
@@ -234,22 +220,21 @@ FROM employees
 | DROP height*
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.enrich', {
+      label: i18n.translate('languageDocumentation.documentationESQL.enrich', {
         defaultMessage: 'ENRICH',
       }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.enrich.markdown',
+            'languageDocumentation.documentationESQL.enrich.markdown',
             {
               defaultMessage: `### ENRICH
 You can use \`ENRICH\` to add data from your existing indices to incoming records. It’s similar to [ingest enrich](https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-enriching-data.html), but it works at query time.
@@ -295,15 +280,13 @@ In case of name collisions, the newly created fields will override the existing 
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.eval', {
+      label: i18n.translate('languageDocumentation.documentationESQL.eval', {
         defaultMessage: 'EVAL',
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.eval.markdown',
-            {
-              defaultMessage: `### EVAL
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.eval.markdown', {
+            defaultMessage: `### EVAL
 \`EVAL\` enables you to add new columns:
 
 \`\`\`
@@ -323,24 +306,21 @@ FROM employees
 #### Functions
 \`EVAL\` supports various functions for calculating values. Refer to Functions for more information.
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.grok', {
+      label: i18n.translate('languageDocumentation.documentationESQL.grok', {
         defaultMessage: 'GROK',
       }),
       description: (
         <Markdown
           openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.grok.markdown',
-            {
-              defaultMessage: `### GROK
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.grok.markdown', {
+            defaultMessage: `### GROK
 \`GROK\` enables you to extract structured data out of a string. \`GROK\` matches the string against patterns, based on regular expressions, and extracts the specified patterns as columns.
 
 Refer to the [grok processor documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/grok-processor.html) for the syntax of grok patterns.
@@ -350,23 +330,20 @@ ROW a = "12 15.5 15.6 true"
 | GROK a "%'{NUMBER:b:int}' %'{NUMBER:c:float}' %'{NUMBER:d:double}' %'{WORD:e:boolean}'"
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.keep', {
+      label: i18n.translate('languageDocumentation.documentationESQL.keep', {
         defaultMessage: 'KEEP',
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.keep.markdown',
-            {
-              defaultMessage: `### KEEP
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.keep.markdown', {
+            defaultMessage: `### KEEP
 The \`KEEP\` command enables you to specify what columns are returned and the order in which they are returned.
 
 To limit the columns that are returned, use a comma-separated list of column names. The columns are returned in the specified order:
@@ -390,21 +367,20 @@ FROM employees
 | KEEP h*, *
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.limit', {
+      label: i18n.translate('languageDocumentation.documentationESQL.limit', {
         defaultMessage: 'LIMIT',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.limit.markdown',
+            'languageDocumentation.documentationESQL.limit.markdown',
             {
               defaultMessage: `### LIMIT
 The \`LIMIT\` processing command enables you to limit the number of rows:
@@ -422,13 +398,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.mvExpand', {
+      label: i18n.translate('languageDocumentation.documentationESQL.mvExpand', {
         defaultMessage: 'MV_EXPAND',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.mvExpand.markdown',
+            'languageDocumentation.documentationESQL.mvExpand.markdown',
             {
               defaultMessage: `### MV_EXPAND
 The \`MV_EXPAND\` processing command expands multivalued fields into one row per value, duplicating other fields:              
@@ -445,13 +421,13 @@ ROW a=[1,2,3], b="b", j=["a","b"]
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.rename', {
+      label: i18n.translate('languageDocumentation.documentationESQL.rename', {
         defaultMessage: 'RENAME',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.rename.markdown',
+            'languageDocumentation.documentationESQL.rename.markdown',
             {
               defaultMessage: `### RENAME
 Use \`RENAME\` to rename a column using the following syntax:
@@ -487,15 +463,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.sort', {
+      label: i18n.translate('languageDocumentation.documentationESQL.sort', {
         defaultMessage: 'SORT',
       }),
       description: (
         <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.sort.markdown',
-            {
-              defaultMessage: `### SORT
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.sort.markdown', {
+            defaultMessage: `### SORT
 Use the \`SORT\` command to sort rows on one or more fields:
 
 \`\`\`
@@ -529,21 +503,20 @@ FROM employees
 | SORT first_name ASC NULLS FIRST
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
         />
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.statsby', {
+      label: i18n.translate('languageDocumentation.documentationESQL.statsby', {
         defaultMessage: 'STATS ... BY',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.statsby.markdown',
+            'languageDocumentation.documentationESQL.statsby.markdown',
             {
               defaultMessage: `### STATS ... BY
 Use \`STATS ... BY\` to group rows according to a common value and calculate one or more aggregated values over the grouped rows.
@@ -624,13 +597,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.where', {
+      label: i18n.translate('languageDocumentation.documentationESQL.where', {
         defaultMessage: 'WHERE',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.where.markdown',
+            'languageDocumentation.documentationESQL.where.markdown',
             {
               defaultMessage: `### WHERE
 Use \`WHERE\` to produce a table that contains all the rows from the input table for which the provided condition evaluates to \`true\`:
@@ -659,24 +632,24 @@ Refer to **Operators** for an overview of the supported operators.
 };
 
 export const groupingFunctions = {
-  label: i18n.translate('languageDocumentationPopover.documentationESQL.groupingFunctions', {
+  label: i18n.translate('languageDocumentation.documentationESQL.groupingFunctions', {
     defaultMessage: 'Grouping functions',
   }),
   description: i18n.translate(
-    'languageDocumentationPopover.documentationESQL.groupingFunctionsDocumentationESQLDescription',
+    'languageDocumentation.documentationESQL.groupingFunctionsDocumentationESQLDescription',
     {
       defaultMessage: `These grouping functions can be used with \`STATS...BY\`:`,
     }
   ),
   items: [
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.autoBucketFunction', {
+      label: i18n.translate('languageDocumentation.documentationESQL.autoBucketFunction', {
         defaultMessage: 'BUCKET',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.autoBucketFunction.markdown',
+            'languageDocumentation.documentationESQL.autoBucketFunction.markdown',
             {
               defaultMessage: `### BUCKET
 Creates groups of values - buckets - out of a datetime or numeric input. The size of the buckets can either be provided directly, or chosen based on a recommended count and values range.
@@ -792,24 +765,24 @@ FROM employees
 };
 
 export const operators = {
-  label: i18n.translate('languageDocumentationPopover.documentationESQL.operators', {
+  label: i18n.translate('languageDocumentation.documentationESQL.operators', {
     defaultMessage: 'Operators',
   }),
   description: i18n.translate(
-    'languageDocumentationPopover.documentationESQL.operatorsDocumentationESQLDescription',
+    'languageDocumentation.documentationESQL.operatorsDocumentationESQLDescription',
     {
       defaultMessage: `ES|QL supports the following operators:`,
     }
   ),
   items: [
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.binaryOperators', {
+      label: i18n.translate('languageDocumentation.documentationESQL.binaryOperators', {
         defaultMessage: 'Binary operators',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.binaryOperators.markdown',
+            'languageDocumentation.documentationESQL.binaryOperators.markdown',
             {
               defaultMessage: `### Binary operators
 These binary comparison operators are supported:
@@ -834,13 +807,13 @@ These binary comparison operators are supported:
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.booleanOperators', {
+      label: i18n.translate('languageDocumentation.documentationESQL.booleanOperators', {
         defaultMessage: 'Boolean operators',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.booleanOperators.markdown',
+            'languageDocumentation.documentationESQL.booleanOperators.markdown',
             {
               defaultMessage: `### Boolean operators
 The following boolean operators are supported:
@@ -857,13 +830,13 @@ The following boolean operators are supported:
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.castOperator', {
+      label: i18n.translate('languageDocumentation.documentationESQL.castOperator', {
         defaultMessage: 'Cast (::)',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.castOperator.markdown',
+            'languageDocumentation.documentationESQL.castOperator.markdown',
             {
               defaultMessage: `### CAST (\`::\`)
 The \`::\` operator provides a convenient alternative syntax to the \`TO_<type>\` type conversion functions.
@@ -882,13 +855,13 @@ ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.inOperator', {
+      label: i18n.translate('languageDocumentation.documentationESQL.inOperator', {
         defaultMessage: 'IN',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.inOperator.markdown',
+            'languageDocumentation.documentationESQL.inOperator.markdown',
             {
               defaultMessage: `### IN
 The \`IN\` operator allows testing whether a field or expression equals an element in a list of literals, fields or expressions:
@@ -906,13 +879,13 @@ ROW a = 1, b = 4, c = 3
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.stringOperators', {
+      label: i18n.translate('languageDocumentation.documentationESQL.stringOperators', {
         defaultMessage: 'LIKE and RLIKE',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.stringOperators.markdown',
+            'languageDocumentation.documentationESQL.stringOperators.markdown',
             {
               defaultMessage: `### LIKE and RLIKE
 For string comparison using wildcards or regular expressions, use \`LIKE\` or \`RLIKE\`:
@@ -944,13 +917,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('languageDocumentationPopover.documentationESQL.predicates', {
+      label: i18n.translate('languageDocumentation.documentationESQL.predicates', {
         defaultMessage: 'NULL values',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentationPopover.documentationESQL.predicates.markdown',
+            'languageDocumentation.documentationESQL.predicates.markdown',
             {
               defaultMessage: `### NULL values
 For NULL comparison use the \`IS NULL\` and \`IS NOT NULL\` predicates:

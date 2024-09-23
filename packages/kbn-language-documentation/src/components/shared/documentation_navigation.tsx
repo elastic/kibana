@@ -45,7 +45,7 @@ function DocumentationNav({
         <EuiFlexItem grow={true}>
           <EuiFormRow
             fullWidth
-            label={i18n.translate('languageDocumentationPopover.esqlDocsLabel', {
+            label={i18n.translate('languageDocumentation.esqlDocsLabel', {
               defaultMessage: 'Select or search topics',
             })}
             labelAppend={
@@ -57,7 +57,7 @@ function DocumentationNav({
                     target="_blank"
                     data-test-subj="language-documentation-navigation-link"
                   >
-                    {i18n.translate('languageDocumentationPopover.esqlDocsLinkLabel', {
+                    {i18n.translate('languageDocumentation.esqlDocsLinkLabel', {
                       defaultMessage: 'View full ES|QL documentation',
                     })}
                   </EuiLink>
@@ -66,10 +66,10 @@ function DocumentationNav({
             }
           >
             <EuiComboBox
-              aria-label={i18n.translate('languageDocumentationPopover.navigationAriaLabel', {
+              aria-label={i18n.translate('languageDocumentation.navigationAriaLabel', {
                 defaultMessage: 'Navigate through the documentation',
               })}
-              placeholder={i18n.translate('languageDocumentationPopover.navigationPlaceholder', {
+              placeholder={i18n.translate('languageDocumentation.navigationPlaceholder', {
                 defaultMessage: 'Commands and functions',
               })}
               data-test-subj="language-documentation-navigation-dropdown"
@@ -94,7 +94,7 @@ function DocumentationNav({
               setSearchText(e.target.value);
             }}
             data-test-subj="language-documentation-navigation-search"
-            placeholder={i18n.translate('languageDocumentationPopover.searchPlaceholder', {
+            placeholder={i18n.translate('languageDocumentation.searchPlaceholder', {
               defaultMessage: 'Search',
             })}
             fullWidth

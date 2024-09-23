@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/language-documentation-popover",
+  "name": "@kbn/language-documentation",
   "version": "1.0.0",
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "private": true,
@@ -9,6 +9,6 @@
   "scripts": {
     "make:docs": "ts-node --transpileOnly scripts/generate_esql_docs.ts",
     "postmake:docs": "yarn run lint:fix",
-    "lint:fix": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-language-documentation-popover/src/sections/generated"
+    "lint:fix": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-language-documentation/src/sections/generated"
   }
 }

@@ -60,7 +60,7 @@ function DocumentationPopover({
         button={
           <EuiToolTip
             position="top"
-            content={i18n.translate('languageDocumentationPopover.tooltip', {
+            content={i18n.translate('languageDocumentation.tooltip', {
               defaultMessage: '{lang} reference',
               values: {
                 lang: language,

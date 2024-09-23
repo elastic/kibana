@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-language-documentation-popover'],
+  roots: ['<rootDir>/packages/kbn-language-documentation'],
 };
