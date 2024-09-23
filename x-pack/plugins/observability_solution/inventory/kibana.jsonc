@@ -13,9 +13,12 @@
       "inference",
       "dataViews",
       "unifiedSearch",
-      "data"
+      "data",
+      "share"
     ],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { EuiDataGridSorting } from '@elastic/eui';
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EntitiesGrid } from '../../components/entities_grid';
 import { searchBarContentSubject$ } from '../../components/search_bar';
+import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
@@ -27,7 +27,7 @@ export function InventoryPage() {
     value = { entities: [] },
     loading,
     refresh,
-  } = useAbortableAsync(
+  } = useInventoryAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
         params: {

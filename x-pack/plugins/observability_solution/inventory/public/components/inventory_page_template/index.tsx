@@ -12,9 +12,7 @@ import { SearchBar } from '../search_bar';
 
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
-    dependencies: {
-      start: { observabilityShared },
-    },
+    services: { observabilityShared },
   } = useKibana();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
