@@ -6,7 +6,6 @@
  */
 import { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
-import { SyntheticsCommonState } from '../../common/runtime_types/alert_rules/common';
 import {
   AlertOverviewStatus,
   StaleDownConfig,

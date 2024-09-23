@@ -11,6 +11,12 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
 import { isEmpty, uniq } from 'lodash';
+import {
+  AlertOverviewStatus,
+  AlertStatusConfigs,
+  AlertStatusMetaData,
+  StaleDownConfig,
+} from '../../../common/runtime_types/alert_rules/common';
 import { queryFilterMonitors } from './queries/filter_monitors';
 import { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
 import {
@@ -25,12 +31,7 @@ import {
   getMonitorSummary,
   getUngroupedReasonMessage,
 } from './message_utils';
-import {
-  AlertStatusMetaData,
-  AlertStatusResponse,
-  queryMonitorStatusAlert,
-  StatusConfigs,
-} from './queries/query_monitor_status_alert';
+import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
 import { parseArrayFilters } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
@@ -46,16 +47,6 @@ import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { ALERT_DETAILS_URL, VIEW_IN_APP_URL } from '../action_variables';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
-
-export interface StaleDownConfig extends AlertStatusMetaData {
-  isDeleted?: boolean;
-  isLocationRemoved?: boolean;
-}
-
-export interface AlertOverviewStatus extends AlertStatusResponse {
-  staleDownConfigs: Record<string, StaleDownConfig>;
-  monitorLocationsMap: Record<string, string[]>;
-}
 
 export class StatusRuleExecutor {
   previousStartedAt: Date | null;
@@ -136,7 +127,7 @@ export class StatusRuleExecutor {
     return processMonitors(this.monitors);
   }
 
-  async getDownChecks(prevDownConfigs: StatusConfigs = {}): Promise<AlertOverviewStatus> {
+  async getDownChecks(prevDownConfigs: AlertStatusConfigs = {}): Promise<AlertOverviewStatus> {
     await this.init();
     const { enabledMonitorQueryIds, maxPeriod, monitorLocationIds, monitorLocationsMap } =
       await this.getMonitors();
@@ -152,7 +143,7 @@ export class StatusRuleExecutor {
         upConfigs: {},
         staleDownConfigs,
         enabledMonitorQueryIds,
-        monitorLocationsMap,
+        pendingConfigs: {},
       };
     }
 
@@ -196,7 +187,7 @@ export class StatusRuleExecutor {
     return {
       ...currentStatus,
       staleDownConfigs,
-      monitorLocationsMap,
+      pendingConfigs: {},
     };
   }
 
@@ -226,7 +217,7 @@ export class StatusRuleExecutor {
     return { from, to: 'now' };
   };
 
-  markDeletedConfigs(downConfigs: StatusConfigs): Record<string, StaleDownConfig> {
+  markDeletedConfigs(downConfigs: AlertStatusConfigs): Record<string, StaleDownConfig> {
     const monitors = this.monitors;
     const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {};
     Object.keys(downConfigs).forEach((locPlusId) => {
@@ -253,7 +244,7 @@ export class StatusRuleExecutor {
     return staleDownConfigs;
   }
 
-  handleDownMonitorThresholdAlert = ({ downConfigs }: { downConfigs: StatusConfigs }) => {
+  handleDownMonitorThresholdAlert = ({ downConfigs }: { downConfigs: AlertStatusConfigs }) => {
     const { useTimeWindow, useLatestChecks, downThreshold, locationsThreshold } = getConditionType(
       this.params?.condition
     );
@@ -369,11 +360,7 @@ export class StatusRuleExecutor {
     idWithLocation: string;
     alertId: string;
     monitorSummary: MonitorSummaryStatusRule;
-    statusConfig: {
-      configId: string;
-      locationId: string;
-      checks?: AlertStatusMetaData['checks'];
-    };
+    statusConfig: AlertStatusMetaData;
     downThreshold: number;
     useLatestChecks?: boolean;
     locationNames: string[];
@@ -459,7 +446,9 @@ export const getDoesMonitorMeetLocationThreshold = ({
   }
 };
 
-export const getConfigsByIds = (downConfigs: StatusConfigs): Map<string, AlertStatusMetaData[]> => {
+export const getConfigsByIds = (
+  downConfigs: AlertStatusConfigs
+): Map<string, AlertStatusMetaData[]> => {
   const downConfigsById = new Map<string, AlertStatusMetaData[]>();
   Object.entries(downConfigs).forEach(([_, config]) => {
     const { configId } = config;

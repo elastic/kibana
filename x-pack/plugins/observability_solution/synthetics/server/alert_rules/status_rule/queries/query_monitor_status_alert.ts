@@ -9,6 +9,7 @@ import pMap from 'p-map';
 import times from 'lodash/times';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { intersection } from 'lodash';
+import { AlertStatusMetaData } from '../../../../common/runtime_types/alert_rules/common';
 import {
   FINAL_SUMMARY_FILTER,
   getTimespanFilter,
@@ -30,21 +31,7 @@ const fields = [
   'state',
   'tags',
 ];
-
-export interface AlertStatusMetaData {
-  monitorQueryId: string;
-  configId: string;
-  status?: string;
-  locationId: string;
-  timestamp: string;
-  ping: OverviewPing;
-  checks?: {
-    downWithinXChecks: number;
-    down: number;
-  };
-}
-
-export type StatusConfigs = Record<string, AlertStatusMetaData>;
+type StatusConfigs = Record<string, AlertStatusMetaData>;
 
 export interface AlertStatusResponse {
   upConfigs: StatusConfigs;
@@ -184,6 +171,7 @@ export async function queryMonitorStatusAlert({
                 ),
                 down: downCount,
               },
+              status: 'up',
             };
 
             if (downCount > 0) {
