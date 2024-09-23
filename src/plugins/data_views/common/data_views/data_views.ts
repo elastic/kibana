@@ -189,7 +189,7 @@ export interface DataViewsServicePublicMethods {
    * @params fieldAttrs - Field attributes, map by name
    * @returns Field map by name
    */
-  fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => DataViewFieldMap;
+  fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrsAsObject) => DataViewFieldMap;
   /**
    * Search for data views based on title
    * @param search - Search string
