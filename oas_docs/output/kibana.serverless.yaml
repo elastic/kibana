@@ -1474,6 +1474,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      from:
+                                        description: Start of the gap range.
+                                        type: string
+                                      to:
+                                        description: End of the gap range.
+                                        type: string
+                                    required:
+                                      - from
+                                      - to
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
@@ -2615,6 +2629,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      from:
+                                        description: Start of the gap range.
+                                        type: string
+                                      to:
+                                        description: End of the gap range.
+                                        type: string
+                                    required:
+                                      - from
+                                      - to
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
@@ -3727,6 +3755,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      from:
+                                        description: Start of the gap range.
+                                        type: string
+                                      to:
+                                        description: End of the gap range.
+                                        type: string
+                                    required:
+                                      - from
+                                      - to
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
@@ -4937,6 +4979,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      from:
+                                        description: Start of the gap range.
+                                        type: string
+                                      to:
+                                        description: End of the gap range.
+                                        type: string
+                                    required:
+                                      - from
+                                      - to
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
