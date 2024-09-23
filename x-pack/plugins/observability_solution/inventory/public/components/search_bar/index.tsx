@@ -23,12 +23,10 @@ export const searchBarContentSubject$ = new Subject<{
 
 export function SearchBar() {
   const {
-    dependencies: {
-      start: {
-        unifiedSearch,
-        data: {
-          query: { queryString: queryStringService },
-        },
+    services: {
+      unifiedSearch,
+      data: {
+        query: { queryString: queryStringService },
       },
     },
   } = useKibana();

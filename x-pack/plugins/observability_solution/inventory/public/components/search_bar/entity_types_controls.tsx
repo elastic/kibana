@@ -7,12 +7,12 @@
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
 import React from 'react';
 import { EntityType } from '../../../common/entities';
+import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
+import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
-import { useInventoryParams } from '../../hooks/use_inventory_params';
 
 interface Props {
   onChange: (entityTypes: EntityType[]) => void;
@@ -32,7 +32,7 @@ export function EntityTypesControls({ onChange }: Props) {
     services: { inventoryAPIClient },
   } = useKibana();
 
-  const { value, loading } = useAbortableAsync(
+  const { value, loading } = useInventoryAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entities/types', { signal });
     },

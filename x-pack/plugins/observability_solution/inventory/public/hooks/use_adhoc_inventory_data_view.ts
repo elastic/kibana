@@ -13,10 +13,7 @@ import { ENTITIES_LATEST_ALIAS } from '../../common/entities';
 
 export function useAdHocInventoryDataView() {
   const {
-    dependencies: {
-      start: { dataViews },
-    },
-    core: { notifications },
+    services: { dataViews, notifications },
   } = useKibana();
   const [dataView, setDataView] = useState<DataView | undefined>();
 
