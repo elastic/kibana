@@ -45,6 +45,7 @@ export interface GetEnrollmentSettingsResponse {
     host_proxy?: FleetProxy;
   };
   download_source?: DownloadSource;
+  download_source_proxy?: FleetProxy;
 }
 export interface PutSpaceSettingsRequest {
   body: {

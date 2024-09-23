@@ -69,6 +69,19 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
       settingsResponse.download_source = undefined;
     }
 
+    // Get download source proxy
+    // ignore errors if the download source proxy is not found
+    try {
+      if (settingsResponse.download_source?.proxy_id) {
+        settingsResponse.download_source_proxy = await getFleetProxy(
+          soClient,
+          settingsResponse.download_source.proxy_id
+        );
+      }
+    } catch (e) {
+      settingsResponse.download_source_proxy = undefined;
+    }
+
     // Get associated fleet server host, or default one if it doesn't exist
     // `getFleetServerHostsForAgentPolicy` errors if there is no default, so catch it
     try {

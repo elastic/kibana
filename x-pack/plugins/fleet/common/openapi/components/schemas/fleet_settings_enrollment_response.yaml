@@ -38,5 +38,7 @@ properties:
       - has_active
   download_source:
     $ref: ./download_sources.yaml
+  download_source_proxy:
+    $ref: ./proxies.yaml
 required:
   - fleet_server
