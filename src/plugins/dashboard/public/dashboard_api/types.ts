@@ -64,7 +64,7 @@ export type DashboardApi = CanExpandPanels &
     hasUnsavedChanges$: PublishingSubject<boolean | undefined>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
-    managed$: PublishingSubject<boolean | undefined>;
+    managed$: PublishingSubject<boolean>;
     panels$: PublishingSubject<DashboardPanelMap>;
     registerChildApi: (api: DefaultEmbeddableApi) => void;
     runInteractiveSave: (interactionMode: ViewMode) => Promise<SaveDashboardReturn | undefined>;

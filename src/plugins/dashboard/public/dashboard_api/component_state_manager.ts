@@ -7,19 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject } from 'rxjs';
+
+export interface InitialComponentState {
+  managed: boolean;
+}
 
 /**
- * Component state is non-persisted runtime state
+ * Non-persisted runtime state
  */
-export function initializeComponentStateManager() {
-  const animatePanelTransforms$ = new BehaviorSubject<boolean>(false); // set panel transforms to false initially to avoid panels animating on initial render.
+export function initializeComponentStateManager(initialComponentState: InitialComponentState) {
+  const animatePanelTransforms$ = new BehaviorSubject(false); // set panel transforms to false initially to avoid panels animating on initial render.
+  const managed$ = new BehaviorSubject(initialComponentState.managed);
   return {
-    api: {
-      animatePanelTransforms$,
-    },
-    setters: {
-      setAnimatePanelTransforms: (next: boolean) => animatePanelTransforms$.next(next),
-    }
+    animatePanelTransforms$,
+    managed$,
+    setAnimatePanelTransforms: (animate: boolean) => animatePanelTransforms$.next(animate),
+    setManaged: (managed: boolean) => managed$.next(managed),
   };
 }

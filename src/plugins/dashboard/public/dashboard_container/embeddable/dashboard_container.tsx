@@ -86,12 +86,7 @@ import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
-import {
-  DashboardPublicState,
-  DashboardReduxState,
-  DashboardStateFromSettingsFlyout,
-  UnsavedPanelState,
-} from '../types';
+import { DashboardReduxState, DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../types';
 import { addFromLibrary, addOrUpdateEmbeddable, runQuickSave, runInteractiveSave } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
 import {
@@ -107,7 +102,10 @@ import {
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
-import { initializeComponentStateManager } from '../../dashboard_api/component_state_manager';
+import {
+  InitialComponentState,
+  initializeComponentStateManager,
+} from '../../dashboard_api/component_state_manager';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -150,6 +148,7 @@ export class DashboardContainer
   public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
   public anyReducerRun: Subject<null> = new Subject();
   public setAnimatePanelTransforms: (animate: boolean) => void;
+  public setManaged: (managed: boolean) => void;
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
@@ -216,7 +215,7 @@ export class DashboardContainer
     dashboardCreationStartTime?: number,
     parent?: Container,
     creationOptions?: DashboardCreationOptions,
-    initialComponentState?: DashboardPublicState
+    initialComponentState?: InitialComponentState
   ) {
     const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
     async function untilContainerInitialized(): Promise<void> {
@@ -287,7 +286,6 @@ export class DashboardContainer
       embeddable: this,
       reducers: dashboardContainerReducers,
       additionalMiddleware: [diffingMiddleware],
-      initialComponentState,
     });
     this.onStateChange = reduxTools.onStateChange;
     this.cleanupStateTools = reduxTools.cleanup;
@@ -301,14 +299,21 @@ export class DashboardContainer
       'id'
     ) as BehaviorSubject<string>;
 
-    const componentStateManager = initializeComponentStateManager();
-    this.animatePanelTransforms$ = componentStateManager.api.animatePanelTransforms$;
-    this.setAnimatePanelTransforms = componentStateManager.setters.setAnimatePanelTransforms;
+    const componentStateManager = initializeComponentStateManager(
+      initialComponentState
+        ? initialComponentState
+        : {
+            managed: false,
+          }
+    );
+    this.animatePanelTransforms$ = componentStateManager.animatePanelTransforms$;
+    this.managed$ = componentStateManager.managed$;
+    this.setAnimatePanelTransforms = componentStateManager.setAnimatePanelTransforms;
+    this.setManaged = componentStateManager.setManaged;
 
     this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
     this.expandedPanelId = new BehaviorSubject(this.getExpandedPanelId());
     this.focusedPanelId$ = new BehaviorSubject(this.getState().componentState.focusedPanelId);
-    this.managed$ = new BehaviorSubject(this.getState().componentState.managed);
     this.fullScreenMode$ = new BehaviorSubject(this.getState().componentState.fullScreenMode);
     this.hasRunMigrations$ = new BehaviorSubject(
       this.getState().componentState.hasRunClientsideMigrations
@@ -333,9 +338,6 @@ export class DashboardContainer
         }
         if (this.focusedPanelId$.value !== state.componentState.focusedPanelId) {
           this.focusedPanelId$.next(state.componentState.focusedPanelId);
-        }
-        if (this.managed$.value !== state.componentState.managed) {
-          this.managed$.next(state.componentState.managed);
         }
         if (this.fullScreenMode$.value !== state.componentState.fullScreenMode) {
           this.fullScreenMode$.next(state.componentState.fullScreenMode);
@@ -494,7 +496,7 @@ export class DashboardContainer
   public updateInput(changes: Partial<DashboardContainerInput>): void {
     // block the Dashboard from entering edit mode if this Dashboard is managed.
     if (
-      (this.getState().componentState.managed || !this.showWriteControls) &&
+      (this.managed$.value || !this.showWriteControls) &&
       changes.viewMode?.toLowerCase() === ViewMode.EDIT?.toLowerCase()
     ) {
       const { viewMode, ...rest } = changes;
@@ -579,7 +581,7 @@ export class DashboardContainer
   public savedObjectId: BehaviorSubject<string | undefined>;
   public expandedPanelId: BehaviorSubject<string | undefined>;
   public focusedPanelId$: BehaviorSubject<string | undefined>;
-  public managed$: BehaviorSubject<boolean | undefined>;
+  public managed$: BehaviorSubject<boolean>;
   public fullScreenMode$: BehaviorSubject<boolean | undefined>;
   public hasRunMigrations$: BehaviorSubject<boolean | undefined>;
   public hasUnsavedChanges$: BehaviorSubject<boolean | undefined>;
@@ -819,11 +821,11 @@ export class DashboardContainer
     this.searchSessionId$.next(searchSessionId);
 
     this.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
+    this.setManaged(loadDashboardReturn?.managed ?? false);
     batch(() => {
       this.dispatch.setLastSavedInput(
         omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
       );
-      this.dispatch.setManaged(loadDashboardReturn?.managed);
       this.dispatch.setLastSavedId(newSavedObjectId);
       this.setExpandedPanelId(undefined);
     });
@@ -873,6 +875,10 @@ export class DashboardContainer
   };
 
   public setViewMode = (viewMode: ViewMode) => {
+    // block the Dashboard from entering edit mode if this Dashboard is managed.
+    if (this.managed$.value && viewMode?.toLowerCase() === ViewMode.EDIT?.toLowerCase()) {
+      return;
+    }
     this.dispatch.setViewMode(viewMode);
   };
 

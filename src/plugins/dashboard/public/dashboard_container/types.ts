@@ -48,7 +48,6 @@ export interface DashboardPublicState {
   fullScreenMode?: boolean;
   savedQueryId?: string;
   lastSavedId?: string;
-  managed?: boolean;
   scrollToPanelId?: string;
   highlightPanelId?: string;
   focusedPanelId?: string;
@@ -88,10 +87,7 @@ export interface DashboardSaveOptions {
 }
 
 export type DashboardLocatorParams = Partial<
-  Omit<
-    DashboardContainerInput,
-    'panels' | 'controlGroupInput' | 'executionContext'
-  >
+  Omit<DashboardContainerInput, 'panels' | 'controlGroupInput' | 'executionContext'>
 > & {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,

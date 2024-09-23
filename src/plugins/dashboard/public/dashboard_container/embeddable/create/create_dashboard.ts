@@ -33,7 +33,7 @@ import {
 import { pluginServices } from '../../../services/plugin_services';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
-import { DashboardPublicState, UnsavedPanelState } from '../../types';
+import { UnsavedPanelState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
@@ -41,6 +41,7 @@ import { startQueryPerformanceTracking } from './performance/query_performance_t
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
 import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
+import { InitialComponentState } from '../../../dashboard_api/component_state_manager';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -94,7 +95,7 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Build the dashboard container.
   // --------------------------------------------------------------------------------------
-  const initialComponentState: DashboardPublicState = {
+  /* const initialComponentState: DashboardPublicState = {
     lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
       ...DEFAULT_DASHBOARD_INPUT,
       id: input.id,
@@ -102,8 +103,11 @@ export const createDashboard = async (
     hasRunClientsideMigrations: savedObjectResult.anyMigrationRun,
     isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
     hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
-    managed: savedObjectResult.managed,
     lastSavedId: savedObjectId,
+  };*/
+
+  const initialComponentState: InitialComponentState = {
+    managed: savedObjectResult.managed ?? false,
   };
 
   const dashboardContainer = new DashboardContainer(
