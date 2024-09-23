@@ -55,14 +55,14 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       simulator.close();
       await esTestIndexTool.destroy();
 
-      const deletePromises = rulesWithAAD.map((id) => {
+      const deleteAlerts = rulesWithAAD.map((id) => {
         return es.deleteByQuery({
           index: '.internal.alerts-*',
           query: { term: { 'kibana.alert.rule.uuid': id } },
         });
       });
 
-      Promise.all(deletePromises).catch(() => {});
+      Promise.all(deleteAlerts).catch(() => {});
     });
 
     async function createConnector(opts: {
@@ -98,6 +98,44 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(ruleResponse.status).to.equal(200);
       objectRemover.add(space, ruleResponse.body.id, 'rule', 'alerting');
       return ruleResponse.body.id;
+    }
+
+    async function createMaintenanceWindow({
+      spaceId,
+      interval,
+      scopedQuery = null,
+    }: {
+      spaceId: string;
+      interval?: number;
+      scopedQuery?: {
+        filters: string[];
+        kql: string;
+        dsl: string;
+      } | null;
+    }) {
+      const response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .auth(Superuser.username, Superuser.password)
+        .send({
+          title: 'test-maintenance-window',
+          duration: 60 * 60 * 1000, // 1 hr
+          r_rule: {
+            dtstart: new Date().toISOString(),
+            tzid: 'UTC',
+            freq: 0,
+            count: 1,
+            ...(interval ? { interval } : {}),
+          },
+          category_ids: ['management'],
+          scoped_query: scopedQuery,
+        });
+
+      expect(response.status).to.equal(200);
+
+      objectRemover.add(spaceId, response.body.id, 'rules/maintenance_window', 'alerting', true);
+
+      return response.body.id;
     }
 
     async function setup() {
@@ -224,6 +262,18 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
               timeField: 'date_epoch_millis',
             },
             actions: [],
+          },
+        });
+        // MW with both toggles off
+        await createMaintenanceWindow({ spaceId: space.id });
+        // MW with 'Repeat' toggle on and 'Filter alerts' toggle on
+        await createMaintenanceWindow({
+          spaceId: space.id,
+          interval: 1,
+          scopedQuery: {
+            filters: [],
+            kql: 'kibana.alert.job_errors_results.job_id : * ',
+            dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
           },
         });
 
@@ -535,6 +585,11 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_rules_by_execution_status_per_day.failure > 0).to.be(true);
       expect(telemetry.count_rules_by_execution_status_per_day.success > 0).to.be(true);
 
+      // maintenance window telemetry
+      expect(telemetry.count_mw_total).to.equal(6);
+      expect(telemetry.count_mw_with_filter_alert_toggle_on).to.equal(3);
+      expect(telemetry.count_mw_with_repeat_toggle_on).to.equal(3);
+
       // AAD alert counts
       expect(telemetry.count_alerts_total).to.be(6);
       expect(telemetry.count_alerts_by_rule_type['test__always-firing-alert-as-data']).to.be(6);
@@ -565,7 +620,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       let actionsTelemetry: any;
       await retry.try(async () => {
         const telemetryTask = await es.get<TaskManagerDoc>({
-          id: `task:Actions-actions_telemetry`,
+          id: 'task:Actions-actions_telemetry',
           index: '.kibana_task_manager',
         });
         expect(telemetryTask!._source!.task?.status).to.be('idle');
@@ -588,7 +643,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       let alertingTelemetry: any;
       await retry.try(async () => {
         const telemetryTask = await es.get<TaskManagerDoc>({
-          id: `task:Alerting-alerting_telemetry`,
+          id: 'task:Alerting-alerting_telemetry',
           index: '.kibana_task_manager',
         });
         expect(telemetryTask!._source!.task?.status).to.be('idle');

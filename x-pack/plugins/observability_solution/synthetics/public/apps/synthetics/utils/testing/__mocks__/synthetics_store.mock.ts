@@ -30,8 +30,6 @@ export const mockState: SyntheticsAppState = {
     integrationsPopoverOpen: null,
     searchText: '',
     monitorId: '',
-    refreshInterval: 60,
-    refreshPaused: true,
   },
   serviceLocations: {
     throttling: DEFAULT_THROTTLING,

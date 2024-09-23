@@ -1,12 +1,22 @@
-## SINH
+# SINH
 
-The `SINH` function returns the hyperbolic sine of an angle.
+The SINH function calculates the hyperbolic sine of a given angle.
 
-### Examples
+## Syntax
+
+`SINH(angle)`
+
+### Parameters
+
+#### angle
+
+The angle in radians for which the hyperbolic sine is to be calculated. If the parameter is null, the function will return null.
+
+## Examples
 
 ```esql
 ROW a=1.8
-| EVAL sinh = SINH(a)
+| EVAL sinh=SINH(a)
 ```
 
 ```esql

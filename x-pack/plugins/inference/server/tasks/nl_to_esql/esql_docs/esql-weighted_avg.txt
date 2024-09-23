@@ -1,8 +1,22 @@
-## WEIGHTED_AVG
+# WEIGHTED_AVG
 
-The `WEIGHTED_AVG` function calculates the weighted average of a numeric expression.
+The WEIGHTED_AVG function calculates the weighted average of a numeric expression.
 
-### Examples
+## Syntax
+
+`WEIGHTED_AVG(number, weight)`
+
+### Parameters
+
+#### number
+
+A numeric value that you want to calculate the weighted average for.
+
+#### weight
+
+A numeric value that represents the weight of the corresponding number.
+
+## Examples
 
 ```esql
 FROM employees

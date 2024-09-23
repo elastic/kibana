@@ -18,7 +18,6 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { QueryObserverResult } from '@tanstack/react-query';
 import { AssistantAnimatedIcon } from '../assistant_animated_icon';
 import { EmptyConvo } from './empty_convo';
 import { WelcomeSetup } from './welcome_setup';
@@ -35,11 +34,8 @@ interface Props {
   isSettingsModalVisible: boolean;
   isWelcomeSetup: boolean;
   isLoading: boolean;
-  refetchCurrentUserConversations: () => Promise<
-    QueryObserverResult<Record<string, Conversation>, unknown>
-  >;
   http: HttpSetup;
-  setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
+  setCurrentSystemPromptId: (promptId: string | undefined) => void;
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -55,17 +51,16 @@ export const AssistantBody: FunctionComponent<Props> = ({
   isLoading,
   isSettingsModalVisible,
   isWelcomeSetup,
-  refetchCurrentUserConversations,
   setIsSettingsModalVisible,
 }) => {
-  const isNewConversation = useMemo(
+  const isEmptyConversation = useMemo(
     () => currentConversation?.messages.length === 0,
     [currentConversation?.messages.length]
   );
 
   const disclaimer = useMemo(
     () =>
-      isNewConversation && (
+      isEmptyConversation && (
         <EuiText
           data-test-subj="assistant-disclaimer"
           textAlign="center"
@@ -78,7 +73,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
           {i18n.DISCLAIMER}
         </EuiText>
       ),
-    [isNewConversation]
+    [isEmptyConversation]
   );
 
   // Start Scrolling
@@ -113,13 +108,11 @@ export const AssistantBody: FunctionComponent<Props> = ({
             currentConversation={currentConversation}
             handleOnConversationSelected={handleOnConversationSelected}
           />
-        ) : currentConversation?.messages.length === 0 ? (
+        ) : isEmptyConversation ? (
           <EmptyConvo
             allSystemPrompts={allSystemPrompts}
-            currentConversation={currentConversation}
             currentSystemPromptId={currentSystemPromptId}
             isSettingsModalVisible={isSettingsModalVisible}
-            refetchCurrentUserConversations={refetchCurrentUserConversations}
             setCurrentSystemPromptId={setCurrentSystemPromptId}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
           />

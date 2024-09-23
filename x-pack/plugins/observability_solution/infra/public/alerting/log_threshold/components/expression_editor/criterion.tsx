@@ -8,6 +8,7 @@
 import {
   EuiButtonIcon,
   EuiComboBox,
+  EuiComboBoxProps,
   EuiExpression,
   EuiFieldNumber,
   EuiFieldText,
@@ -131,7 +132,7 @@ export const Criterion: React.FC<Props> = ({
     return getCompatibleComparatorsForField(fieldInfo);
   }, [fieldInfo]);
 
-  const handleFieldChange = useCallback(
+  const handleFieldChange = useCallback<NonNullable<EuiComboBoxProps<{}>['onChange']>>(
     ([selectedOption]) => {
       if (!selectedOption) {
         updateCriterion(idx, { field: '' });
@@ -198,7 +199,7 @@ export const Criterion: React.FC<Props> = ({
                   style={{ minWidth: '300px' }}
                   // @ts-expect-error upgrade typescript v5.1.6
                   isInvalid={errors.field.length > 0}
-                  error={errors.field}
+                  error={errors.field as string}
                 >
                   <EuiComboBox
                     compressed
@@ -255,7 +256,7 @@ export const Criterion: React.FC<Props> = ({
                         // @ts-expect-error upgrade typescript v5.1.6
                         errors.comparator.length > 0
                       }
-                      error={errors.comparator}
+                      error={errors.comparator as string}
                     >
                       <EuiSelect
                         data-test-subj="infraCriterionSelect"
@@ -275,7 +276,7 @@ export const Criterion: React.FC<Props> = ({
                         // @ts-expect-error upgrade typescript v5.1.6
                         errors.value.length > 0
                       }
-                      error={errors.value}
+                      error={errors.value as string}
                     >
                       {fieldInfo?.type === 'number' ? (
                         <EuiFieldNumber

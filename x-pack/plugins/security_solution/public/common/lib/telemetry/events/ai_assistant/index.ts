@@ -66,6 +66,12 @@ export const assistantMessageSentEvent: TelemetryEvent = {
         optional: true,
       },
     },
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is knowledge base enabled',
+      },
+    },
   },
 };
 

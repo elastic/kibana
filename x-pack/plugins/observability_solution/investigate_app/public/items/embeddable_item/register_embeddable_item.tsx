@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
@@ -14,6 +14,8 @@ import { v4 } from 'uuid';
 import { ErrorMessage } from '../../components/error_message';
 import { useKibana } from '../../hooks/use_kibana';
 import { Options } from '../register_items';
+
+export const EMBEDDABLE_ITEM_TYPE = 'embeddable';
 
 const embeddableClassName = css`
   height: 100%;
@@ -34,8 +36,9 @@ function ReactEmbeddable({ type, config, timeRange: { from, to }, savedObjectId 
         from,
         to,
       },
+      savedObjectId,
     };
-  }, [config, from, to]);
+  }, [config, from, to, savedObjectId]);
 
   const configWithOverridesRef = useRef(configWithOverrides);
 
@@ -48,18 +51,14 @@ function ReactEmbeddable({ type, config, timeRange: { from, to }, savedObjectId 
   }, []);
 
   return (
-    <ReactEmbeddableRenderer
-      type={type}
-      getParentApi={() => api}
-      maybeId={savedObjectId}
-      onAnyStateChange={(state) => {
-        // console.log('onAnyStateChange', state);
-      }}
-      onApiAvailable={(childApi) => {
-        // console.log('onApiAvailable', childApi);
-      }}
-      hidePanelChrome
-    />
+    <div className={embeddableClassName}>
+      <ReactEmbeddableRenderer
+        type={type}
+        getParentApi={() => api}
+        maybeId={savedObjectId}
+        hidePanelChrome
+      />
+    </div>
   );
 }
 
@@ -89,6 +88,11 @@ function LegacyEmbeddable({ type, config, timeRange: { from, to }, savedObjectId
       timeRange: {
         from,
         to,
+      },
+      overrides: {
+        axisX: { hide: true },
+        axisLeft: { style: { axisTitle: { visible: false } } },
+        settings: { showLegend: false },
       },
     };
 
@@ -166,7 +170,7 @@ export function registerEmbeddableItem({
   services,
 }: Options) {
   investigate.registerItemDefinition<EmbeddableItemParams, {}>({
-    type: 'embeddable',
+    type: EMBEDDABLE_ITEM_TYPE,
     generate: async (option: {
       itemParams: EmbeddableItemParams;
       globalParams: GlobalWidgetParameters;
@@ -184,7 +188,18 @@ export function registerEmbeddableItem({
         timeRange: option.globalParams.timeRange,
       };
 
-      return <EmbeddableWidget {...parameters} />;
+      return (
+        <EuiFlexItem
+          grow={true}
+          className={css`
+            > div {
+              height: 128px;
+            }
+          `}
+        >
+          <EmbeddableWidget {...parameters} />
+        </EuiFlexItem>
+      );
     },
   });
 }

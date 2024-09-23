@@ -179,11 +179,11 @@ you make the necessary updates after you upgrade to 8.15.0.
 
 [discrete]
 [[deprecation-uptime]]
-.Uptime is deprecated in 8.15.0 and will be removed in 9.0.0.
+.Uptime is deprecated in 8.15.0 and will be removed in a future version.
 [%collapsible]
 ====
 *Details* +
-The Uptime app is already hidden from Kibana when there is no recent Heartbeat data, but will be completely removed in 9.0.0. You should migrate to Synthetics as an alternative. For more details, refer to the {observability-guide}/uptime-intro.html[Uptime documentation].
+The Uptime app is already hidden from Kibana when there is no recent Heartbeat data, and will be completely removed in early 2026. You should migrate to Synthetics as an alternative. For more details, refer to the {observability-guide}/uptime-intro.html[Uptime documentation].
 ====
 
 [float]

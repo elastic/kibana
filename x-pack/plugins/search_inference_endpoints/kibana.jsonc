@@ -12,11 +12,12 @@
     ],
     "requiredPlugins": [
       "actions",
+      "features",
       "share",
     ],
     "optionalPlugins": [
-      "cloud", 
-      "console", 
+      "cloud",
+      "console",
       "ml"
     ],
     "requiredBundles": [

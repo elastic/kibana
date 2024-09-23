@@ -249,6 +249,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               connectorId,
               persist: true,
               screenContexts: [],
+              scope: 'observability',
             },
           },
         }).expect(200);

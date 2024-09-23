@@ -225,11 +225,7 @@ export interface PackagePolicyClient {
    * @param esClient
    * @param outputId
    */
-  removeOutputFromAll(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    outputId: string
-  ): Promise<void>;
+  removeOutputFromAll(esClient: ElasticsearchClient, outputId: string): Promise<void>;
 
   /**
    * Returns an `AsyncIterable` for retrieving all integration policy IDs

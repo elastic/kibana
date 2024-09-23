@@ -5157,8 +5157,14 @@ describe('Package policy service', () => {
           });
         }
       });
+      appContextService.start(
+        createAppContextStartContractMock(undefined, false, {
+          internal: soClient,
+          withoutSpaceExtensions: soClient,
+        })
+      );
 
-      await packagePolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
+      await packagePolicyService.removeOutputFromAll(esClient, 'output-id-123');
 
       expect(updateSpy).toHaveBeenCalledTimes(1);
       expect(updateSpy).toHaveBeenCalledWith(

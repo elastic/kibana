@@ -58,9 +58,9 @@ export interface CloudStart {
    */
   projectsUrl?: string;
   /**
-   * The full URL to the elasticsearch cluster.
+   * Fetches the full URL to the elasticsearch cluster.
    */
-  elasticsearchUrl?: string;
+  fetchElasticsearchConfig: () => Promise<PublicElasticsearchConfigType>;
   /**
    * The full URL to the Kibana deployment.
    */
@@ -112,6 +112,12 @@ export interface CloudSetup {
    */
   cname?: string;
   /**
+   * The cloud service provider identifier.
+   *
+   * @note Expected to be one of `aws`, `gcp` or `azure`, but could be something different.
+   */
+  csp?: string;
+  /**
    * This is the URL of the Cloud interface.
    */
   baseUrl?: string;
@@ -144,9 +150,9 @@ export interface CloudSetup {
    */
   snapshotsUrl?: string;
   /**
-   * The full URL to the elasticsearch cluster.
+   * Fetches the full URL to the elasticsearch cluster.
    */
-  elasticsearchUrl?: string;
+  fetchElasticsearchConfig: () => Promise<PublicElasticsearchConfigType>;
   /**
    * The full URL to the Kibana deployment.
    */
@@ -218,4 +224,13 @@ export interface CloudSetup {
      */
     orchestratorTarget?: string;
   };
+}
+
+export interface PublicElasticsearchConfigType {
+  /**
+   * The URL to the Elasticsearch cluster, derived from xpack.elasticsearch.publicBaseUrl if populated
+   * Otherwise this is based on the cloudId
+   * If neither is populated, this will be undefined
+   */
+  elasticsearchUrl?: string;
 }

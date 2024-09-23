@@ -556,8 +556,8 @@ Includes {ref}/frozen-indices.html[frozen indices] in results. Searching through
 frozen indices might increase the search time. This setting is off by default.
 Users must opt-in to include frozen indices.
 
-[[search-timeout]]`search:timeout`:: Change the maximum timeout, in milliseconds (ms), for a search
-session. To disable the timeout and allow queries to run to completion, set to 0. The default is 600,000 ms, or 10 minutes.
+[[search-timeout]]`search:timeout`:: Change the maximum timeout, in milliseconds (ms), for search requests. To disable
+the timeout and allow queries to run to completion, set to 0. The default is `600000`, or 10 minutes.
 
 [float]
 [[kibana-siem-settings]]

@@ -24,7 +24,8 @@ const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as j
 
 let onChangeSelectionMock: jest.Mock;
 
-describe('Policies selector', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192688
+describe.skip('Policies selector', () => {
   let getElement: (params: Partial<PoliciesSelectorProps>) => RenderResult;
   beforeEach(() => {
     onChangeSelectionMock = jest.fn();

@@ -120,6 +120,18 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
                 sassOptions: {
                   includePaths: [resolve(REPO_ROOT, 'node_modules')],
                   quietDeps: true,
+                  logger: {
+                    warn: (message: string, warning: any) => {
+                      // Muted - see https://github.com/elastic/kibana/issues/190345 for tracking remediation
+                      if (warning?.deprecationType?.id === 'mixed-decls') return;
+
+                      if (warning.deprecation)
+                        return process.stderr.write(
+                          `DEPRECATION WARNING: ${message}\n${warning.stack}`
+                        );
+                      process.stderr.write('WARNING: ' + message);
+                    },
+                  },
                 },
               },
             },

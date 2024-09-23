@@ -34,7 +34,7 @@ describe('getEsqlDataView', () => {
   });
 
   it('returns an adhoc dataview if it is adhoc with named params and query index pattern is the same as the dataview index pattern', async () => {
-    const query = { esql: 'from data-view-ad-hoc-title | where time >= ?t_start' };
+    const query = { esql: 'from data-view-ad-hoc-title | where time >= ?_tstart' };
     const dataView = await getEsqlDataView(query, dataViewAdHocNoAtTimestamp, services);
     expect(dataView.timeFieldName).toBe('time');
   });

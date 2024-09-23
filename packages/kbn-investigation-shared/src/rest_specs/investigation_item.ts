@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import { investigationItemSchema } from '../schema';
 
 const investigationItemResponseSchema = investigationItemSchema;
 
-type InvestigationItemResponse = t.OutputOf<typeof investigationItemResponseSchema>;
+type InvestigationItemResponse = z.output<typeof investigationItemResponseSchema>;
 
 export { investigationItemResponseSchema };
 export type { InvestigationItemResponse };

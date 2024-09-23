@@ -76,10 +76,13 @@ export interface UpgradePrebuiltRulesTableState {
    */
   loadingRules: RuleSignatureId[];
   /**
-  /**
    * The timestamp for when the rules were successfully fetched
    */
   lastUpdated: number;
+  /**
+   * Feature Flag to enable prebuilt rules customization
+   */
+  isPrebuiltRulesCustomizationEnabled: boolean;
 }
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
@@ -315,6 +318,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isUpgradingSecurityPackages,
         loadingRules,
         lastUpdated: dataUpdatedAt,
+        isPrebuiltRulesCustomizationEnabled,
       },
       actions,
     };
@@ -331,6 +335,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     loadingRules,
     dataUpdatedAt,
     actions,
+    isPrebuiltRulesCustomizationEnabled,
   ]);
 
   return (

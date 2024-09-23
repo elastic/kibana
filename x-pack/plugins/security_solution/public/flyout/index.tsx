@@ -16,7 +16,7 @@ import {
   DocumentDetailsRightPanelKey,
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsAlertReasonPanelKey,
-  DocumentDetailsRuleOverviewPanelKey,
+  DocumentDetailsAnalyzerPanelKey,
 } from './document_details/shared/constants/panel_keys';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import { IsolateHostPanel } from './document_details/isolate_host';
@@ -29,18 +29,19 @@ import { PreviewPanel } from './document_details/preview';
 import type { AlertReasonPanelProps } from './document_details/alert_reason';
 import { AlertReasonPanel } from './document_details/alert_reason';
 import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
-import type { RuleOverviewPanelProps } from './document_details/rule_overview';
-import { RuleOverviewPanel } from './document_details/rule_overview';
-import { RuleOverviewPanelProvider } from './document_details/rule_overview/context';
+import type { RulePanelExpandableFlyoutProps } from './rule_details/right';
+import { RulePanel, RulePanelKey, RulePreviewPanelKey } from './rule_details/right';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey, UserPreviewPanelKey } from './entity_details/user_right';
-import type { UserDetailsPanelProps } from './entity_details/user_details_left';
+import type { UserDetailsExpandableFlyoutProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
 import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
 import { NetworkPanel, NetworkPanelKey } from './network_details';
+import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
+import { AnalyzerPanel } from './document_details/analyzer_panels';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -80,11 +81,13 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
-    key: DocumentDetailsRuleOverviewPanelKey,
+    key: RulePanelKey,
+    component: (props) => <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} />,
+  },
+  {
+    key: RulePreviewPanelKey,
     component: (props) => (
-      <RuleOverviewPanelProvider {...(props as RuleOverviewPanelProps).params}>
-        <RuleOverviewPanel />
-      </RuleOverviewPanelProvider>
+      <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} isPreviewMode />
     ),
   },
   {
@@ -96,13 +99,19 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
+    key: DocumentDetailsAnalyzerPanelKey,
+    component: (props) => (
+      <AnalyzerPanel {...(props as AnalyzerPanelExpandableFlyoutProps).params} />
+    ),
+  },
+  {
     key: UserPanelKey,
     component: (props) => <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} />,
   },
   {
     key: UserDetailsPanelKey,
     component: (props) => (
-      <UserDetailsPanel {...({ ...props.params, path: props.path } as UserDetailsPanelProps)} />
+      <UserDetailsPanel {...(props as UserDetailsExpandableFlyoutProps).params} />
     ),
   },
   {

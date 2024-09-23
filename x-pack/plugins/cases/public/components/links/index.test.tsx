@@ -6,11 +6,8 @@
  */
 
 import React from 'react';
-import type { ComponentType, ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { EuiText } from '@elastic/eui';
 
 import type { ConfigureCaseButtonProps, CaseDetailsLinkProps } from '.';
 import { ConfigureCaseButton, CaseDetailsLink } from '.';
@@ -20,7 +17,6 @@ import { useCaseViewNavigation } from '../../common/navigation/hooks';
 jest.mock('../../common/navigation/hooks');
 
 describe('Configuration button', () => {
-  let wrapper: ReactWrapper;
   const props: ConfigureCaseButtonProps = {
     label: 'My label',
     msgTooltip: <></>,
@@ -28,81 +24,46 @@ describe('Configuration button', () => {
     titleTooltip: '',
   };
 
-  beforeAll(() => {
-    wrapper = mount(<ConfigureCaseButton {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+  it('renders without the tooltip', async () => {
+    render(
+      <TestProviders>
+        <ConfigureCaseButton {...props} />
+      </TestProviders>
+    );
+
+    const configureButton = await screen.findByTestId('configure-case-button');
+
+    expect(configureButton).toBeEnabled();
+    expect(configureButton).toHaveAttribute('href', '/app/security/cases/configure');
+    expect(configureButton).toHaveAttribute('aria-label', 'My label');
+  });
+
+  it('renders the tooltip correctly when hovering the button', async () => {
+    jest.useFakeTimers();
+
+    const user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
     });
-  });
 
-  test('it renders without the tooltip', () => {
-    expect(wrapper.find('[data-test-subj="configure-case-button"]').first().exists()).toBe(true);
-
-    expect(wrapper.find('[data-test-subj="configure-case-tooltip"]').first().exists()).toBe(false);
-  });
-
-  test('it pass the correct props to the button', () => {
-    expect(wrapper.find('[data-test-subj="configure-case-button"]').first().props()).toMatchObject({
-      href: `/app/security/cases/configure`,
-      iconType: 'controlsHorizontal',
-      isDisabled: false,
-      'aria-label': 'My label',
-      children: 'My label',
-    });
-  });
-
-  test('it renders the tooltip', () => {
-    const msgTooltip = <EuiText>{'My message tooltip'}</EuiText>;
-
-    const newWrapper = mount(
-      <ConfigureCaseButton
-        {...props}
-        showToolTip={true}
-        titleTooltip={'My tooltip title'}
-        msgTooltip={msgTooltip}
-      />,
-      {
-        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-      }
+    render(
+      <TestProviders>
+        <ConfigureCaseButton
+          {...props}
+          showToolTip={true}
+          titleTooltip={'My title'}
+          msgTooltip={<>{'My message tooltip'}</>}
+        />
+      </TestProviders>
     );
 
-    expect(newWrapper.find('[data-test-subj="configure-case-tooltip"]').first().exists()).toBe(
-      true
-    );
+    await user.hover(await screen.findByTestId('configure-case-button'));
 
-    expect(wrapper.find('[data-test-subj="configure-case-button"]').first().exists()).toBe(true);
-  });
+    expect(await screen.findByTestId('configure-case-tooltip')).toBeInTheDocument();
+    expect(await screen.findByText('My title')).toBeInTheDocument();
+    expect(await screen.findByText('My message tooltip')).toBeInTheDocument();
 
-  test('it shows the tooltip when hovering the button', () => {
-    // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers({ legacyFakeTimers: true });
-
-    const msgTooltip = 'My message tooltip';
-    const titleTooltip = 'My title';
-
-    const newWrapper = mount(
-      <ConfigureCaseButton
-        {...props}
-        showToolTip={true}
-        titleTooltip={titleTooltip}
-        msgTooltip={<>{msgTooltip}</>}
-      />,
-      {
-        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-      }
-    );
-
-    newWrapper.find('a[data-test-subj="configure-case-button"]').first().simulate('mouseOver');
-
-    // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
-
-    newWrapper.update();
-    expect(newWrapper.find('.euiToolTipPopover').last().text()).toBe(
-      `${titleTooltip}${msgTooltip}`
-    );
-
-    // Clearing all mocks will also reset fake timers.
-    jest.clearAllMocks();
+    jest.useRealTimers();
   });
 });
 
@@ -120,31 +81,33 @@ describe('CaseDetailsLink', () => {
     useCaseViewNavigationMock.mockReturnValue({ getCaseViewUrl, navigateToCaseView });
   });
 
-  test('it renders', () => {
+  it('renders', async () => {
     render(<CaseDetailsLink {...props} />);
-    expect(screen.getByText('test detail name')).toBeInTheDocument();
+    expect(await screen.findByText('test detail name')).toBeInTheDocument();
   });
 
-  test('it renders the children instead of the detail name if provided', () => {
+  it('renders the children instead of the detail name if provided', async () => {
     render(<CaseDetailsLink {...props}>{'children'}</CaseDetailsLink>);
     expect(screen.queryByText('test detail name')).toBeFalsy();
-    expect(screen.getByText('children')).toBeInTheDocument();
+    expect(await screen.findByText('children')).toBeInTheDocument();
   });
 
-  test('it uses the detailName in the aria-label if the title is not provided', () => {
+  it('uses the detailName in the aria-label if the title is not provided', async () => {
     render(<CaseDetailsLink {...props} />);
     expect(
-      screen.getByLabelText(`click to visit case with title ${props.detailName}`)
+      await screen.findByLabelText(`click to visit case with title ${props.detailName}`)
     ).toBeInTheDocument();
   });
 
-  test('it uses the title in the aria-label if provided', () => {
+  it('uses the title in the aria-label if provided', async () => {
     render(<CaseDetailsLink {...props} title={'my title'} />);
-    expect(screen.getByText('test detail name')).toBeInTheDocument();
-    expect(screen.getByLabelText(`click to visit case with title my title`)).toBeInTheDocument();
+    expect(await screen.findByText('test detail name')).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText(`click to visit case with title my title`)
+    ).toBeInTheDocument();
   });
 
-  test('it calls navigateToCaseViewClick on click', async () => {
+  it('calls navigateToCaseViewClick on click', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     jest.useFakeTimers();
     const user = userEvent.setup({
@@ -153,7 +116,9 @@ describe('CaseDetailsLink', () => {
     });
 
     render(<CaseDetailsLink {...props} />);
-    await user.click(screen.getByText('test detail name'));
+
+    await user.click(await screen.findByText('test detail name'));
+
     expect(navigateToCaseView).toHaveBeenCalledWith({
       detailName: props.detailName,
     });
@@ -161,11 +126,11 @@ describe('CaseDetailsLink', () => {
     jest.useRealTimers();
   });
 
-  test('it set the href correctly', () => {
+  it('sets the href correctly', async () => {
     render(<CaseDetailsLink {...props} />);
     expect(getCaseViewUrl).toHaveBeenCalledWith({
       detailName: props.detailName,
     });
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/cases/test');
+    expect(await screen.findByRole('link')).toHaveAttribute('href', '/cases/test');
   });
 });
