@@ -23,7 +23,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   LanguageDocumentationInline,
   LanguageDocumentationFlyout,
-} from '@kbn/language-documentation-popover';
+} from '@kbn/language-documentation';
 import { getLimitFromESQLQuery } from '@kbn/esql-utils';
 import { type MonacoMessage } from '../helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
