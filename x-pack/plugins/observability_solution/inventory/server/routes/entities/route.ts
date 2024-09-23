@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { jsonRt } from '@kbn/io-ts-utils';
 import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import * as t from 'io-ts';
-import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { entityTypeRt } from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
-import { getLatestEntities } from './get_latest_entities';
 import { getEntityTypes } from './get_entity_types';
+import { getLatestEntities } from './get_latest_entities';
 
 export const getEntityTypesRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities/types',

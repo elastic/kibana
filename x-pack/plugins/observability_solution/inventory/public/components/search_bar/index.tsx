@@ -4,24 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 import { SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect } from 'react';
-import { Subject } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { EntityType } from '../../../common/entities';
+import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntityTypesControls } from './entity_types_controls';
 
-export const searchBarContentSubject$ = new Subject<{
-  kuery?: string;
-  entityTypes?: EntityType[];
-  refresh: boolean;
-}>();
-
 export function SearchBar() {
+  const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: {
       unifiedSearch,
@@ -58,7 +53,7 @@ export function SearchBar() {
     (nextEntityTypes: EntityType[]) => {
       searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes, refresh: false });
     },
-    [kuery]
+    [kuery, searchBarContentSubject$]
   );
 
   const handleQuerySubmit = useCallback<NonNullable<SearchBarOwnProps['onQuerySubmit']>>(
@@ -69,7 +64,7 @@ export function SearchBar() {
         refresh: !isUpdate,
       });
     },
-    [entityTypes]
+    [entityTypes, searchBarContentSubject$]
   );
 
   return (
