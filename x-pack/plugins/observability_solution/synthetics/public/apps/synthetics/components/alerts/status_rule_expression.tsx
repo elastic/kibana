@@ -12,7 +12,6 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiHorizontalRule,
-  EuiIconTip,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { ValueExpression } from '@kbn/triggers-actions-ui-plugin/public';
@@ -34,7 +33,6 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
     condition && 'downThreshold' in condition ? condition.downThreshold ?? 5 : 5;
   const locationsThreshold =
     condition && 'locationsThreshold' in condition ? condition?.locationsThreshold ?? 1 : 1;
-  const showGroupBy = locationsThreshold === 1;
 
   const onThresholdChange = useCallback(
     (value: number) => {
@@ -66,20 +64,13 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
   return (
     <>
       <EuiHorizontalRule size="half" margin="xs" />
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.synthetics.rules.status.condition.title', {
-                defaultMessage: 'Condition',
-              })}
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content="Monitor alerts are always grouped by monitor ID." position="right" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate('xpack.synthetics.rules.status.condition.title', {
+            defaultMessage: 'Condition',
+          })}
+        </h3>
+      </EuiTitle>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiExpression
@@ -123,13 +114,12 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      {showGroupBy && (
-        <GroupByExpression
-          groupByLocation={ruleParams.condition?.groupBy === 'locationId'}
-          onChange={onGroupByChange}
-        />
-      )}
+      <EuiSpacer size="m" />
+      <GroupByExpression
+        groupByLocation={ruleParams.condition?.groupBy === 'locationId'}
+        onChange={onGroupByChange}
+        locationsThreshold={locationsThreshold}
+      />
       <EuiSpacer size="l" />
     </>
   );

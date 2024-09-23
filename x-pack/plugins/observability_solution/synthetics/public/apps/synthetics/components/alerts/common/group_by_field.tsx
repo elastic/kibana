@@ -7,23 +7,49 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSwitch } from '@elastic/eui';
 
 export const GroupByExpression = ({
-  groupByLocation,
   onChange,
+  groupByLocation,
+  locationsThreshold,
 }: {
+  locationsThreshold: number;
   groupByLocation: boolean;
   onChange: (val: boolean) => void;
 }) => {
+  const disabledGroupBy = locationsThreshold > 1;
+
   return (
-    <EuiSwitch
-      compressed
-      label={i18n.translate('xpack.synthetics.groupByExpression.euiSwitch.groupByLabel', {
-        defaultMessage: 'Send alert per location',
-      })}
-      checked={groupByLocation}
-      onChange={(e) => onChange(e.target.checked)}
-    />
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          compressed
+          disabled={disabledGroupBy}
+          label={i18n.translate('xpack.synthetics.groupByExpression.euiSwitch.groupByLabel', {
+            defaultMessage: 'Receive distinct alerts for each location',
+          })}
+          checked={groupByLocation}
+          onChange={(e) => onChange(e.target.checked)}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {disabledGroupBy ? (
+          <EuiIconTip
+            content={i18n.translate('xpack.synthetics.groupByExpression.euiSwitch.tooltip', {
+              defaultMessage:
+                'When locations threshold is greater than 1, group by location is disabled.',
+            })}
+          />
+        ) : (
+          <EuiIconTip
+            content={i18n.translate('xpack.synthetics.groupByExpression.euiSwitch.tooltip', {
+              defaultMessage:
+                'When the monitor detects a failure on one or more locations, you receive an alert for each of these locations, instead of a single alert.',
+            })}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
