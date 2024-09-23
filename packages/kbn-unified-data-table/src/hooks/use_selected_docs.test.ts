@@ -224,5 +224,29 @@ describe('useSelectedDocs', () => {
     expect(result.current.getCountOfFilteredSelectedDocs([docs[2].id, docs[3].id])).toBe(0);
   });
 
-  // TODO: add test for toggleMultipleDocsSelection
+  test('should toggleMultipleDocsSelection correctly', () => {
+    const { result } = renderHook(() => useSelectedDocs(docsMap));
+    const docIds = docs.map((doc) => doc.id);
+
+    // select `0`
+    act(() => {
+      result.current.toggleDocSelection(docs[0].id);
+    });
+
+    expect(result.current.getCountOfFilteredSelectedDocs(docIds)).toBe(1);
+
+    // select from `0` to `4`
+    act(() => {
+      result.current.toggleMultipleDocsSelection(docs[4].id);
+    });
+
+    expect(result.current.getCountOfFilteredSelectedDocs(docIds)).toBe(5);
+
+    // deselect from `2` to `4`
+    act(() => {
+      result.current.toggleMultipleDocsSelection(docs[2].id);
+    });
+
+    expect(result.current.getCountOfFilteredSelectedDocs(docIds)).toBe(2);
+  });
 });

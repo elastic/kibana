@@ -83,14 +83,14 @@ export const useSelectedDocs = (
       const shouldSelect = !isDocSelected(toDocId);
 
       const lastToggledDocIdIndex = docMap.get(
-        lastCheckboxToggledDocId.current || toDocId
+        lastCheckboxToggledDocId.current ?? toDocId
       )?.docIndex;
       const currentToggledDocIdIndex = docMap.get(toDocId)?.docIndex;
       const docIds: string[] = [];
 
       if (
-        lastToggledDocIdIndex &&
-        currentToggledDocIdIndex &&
+        typeof lastToggledDocIdIndex === 'number' &&
+        typeof currentToggledDocIdIndex === 'number' &&
         lastToggledDocIdIndex !== currentToggledDocIdIndex
       ) {
         const startIndex = Math.min(lastToggledDocIdIndex, currentToggledDocIdIndex);
