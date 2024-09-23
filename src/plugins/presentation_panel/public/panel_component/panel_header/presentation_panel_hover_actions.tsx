@@ -68,7 +68,7 @@ const QUICK_ACTION_IDS = {
   view: ['ACTION_OPEN_IN_DISCOVER', 'ACTION_VIEW_SAVED_SEARCH', 'openInspector', 'togglePanel'],
 };
 
-const allowedNotificationActions = ['ACTION_FILTERS_NOTIFICATION'];
+const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'];
 
 const ALL_ROUNDED_CORNERS = `border-radius: ${euiThemeVars.euiBorderRadius};
 `;
@@ -253,7 +253,7 @@ export const PresentationPanelHoverActions = ({
       );
 
       for (const frequentlyChangingNotification of frequentlyChangingNotifications) {
-        if (allowedNotificationActions.includes(frequentlyChangingNotification.id)) {
+        if (ALLOWED_NOTIFICATIONS.includes(frequentlyChangingNotification.id)) {
           subscriptions.add(
             frequentlyChangingNotification.subscribeToCompatibilityChanges(
               apiContext,

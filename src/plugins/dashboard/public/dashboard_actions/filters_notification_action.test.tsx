@@ -52,11 +52,6 @@ describe('filters notification action', () => {
     context = {
       embeddable: {
         uuid: 'testId',
-        parentApi: {
-          getAllDataViews: jest.fn(),
-          getDashboardPanelFromId: jest.fn(),
-        },
-        viewMode: viewModeSubject,
         filters$: filtersSubject,
         query$: querySubject,
       },

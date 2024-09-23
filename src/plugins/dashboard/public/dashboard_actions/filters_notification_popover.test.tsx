@@ -58,11 +58,6 @@ describe('filters notification popover', () => {
 
     api = {
       uuid: 'testId',
-      parentApi: {
-        getAllDataViews: jest.fn(),
-        getDashboardPanelFromId: jest.fn(),
-      },
-      viewMode: new BehaviorSubject<ViewMode>('edit'),
       filters$: filtersSubject,
       query$: querySubject,
     };
