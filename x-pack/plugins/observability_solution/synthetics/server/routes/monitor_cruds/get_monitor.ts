@@ -12,7 +12,6 @@ import { isStatusEnabled } from '../../../common/runtime_types/monitor_managemen
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { getMonitorFilters, MonitorsQuery, QuerySchema, SEARCH_FIELDS } from '../common';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getSyntheticsMonitor } from '../../queries/get_monitor';
 
