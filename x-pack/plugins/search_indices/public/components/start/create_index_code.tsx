@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
+import { ApiKeyForm } from '@kbn/search-api-keys/public';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 import { DenseVectorSeverlessCodeExamples } from '../../code_examples/create_index';
@@ -57,6 +58,11 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <ApiKeyForm />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem css={{ maxWidth: '300px' }}>
           <LanguageSelector

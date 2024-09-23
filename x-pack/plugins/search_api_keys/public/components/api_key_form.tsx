@@ -25,7 +25,7 @@ const hiddenKeyPreview = '•'.repeat(30);
 export const ApiKeyForm = () => {
   const { euiTheme } = useEuiTheme();
   const [showFlyout, setShowFlyout] = useState(false);
-  const { apiKey, status, handleSaveKey } = useSearchApiKey();
+  const { apiKey, status, handleSaveKey, showAPIKey } = useSearchApiKey();
   const handleAddToClipboard = useCallback(
     () => apiKey && navigator.clipboard.writeText(apiKey),
     [apiKey]
@@ -55,6 +55,18 @@ export const ApiKeyForm = () => {
                 onClick={handleAddToClipboard}
                 aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.copyButton', {
                   defaultMessage: 'Copy button',
+                })}
+              />
+            </EuiFlexItem>
+          )}
+          {status === Status.showHiddenKey && (
+            <EuiFlexItem grow={0}>
+              <EuiButtonIcon
+                iconType="eye"
+                color="success"
+                onClick={showAPIKey}
+                aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.showApiKey', {
+                  defaultMessage: 'Show API Key',
                 })}
               />
             </EuiFlexItem>

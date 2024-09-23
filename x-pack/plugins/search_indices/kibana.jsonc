@@ -13,16 +13,17 @@
     "requiredPlugins": [
       "share",
       "indexManagement",
+      "searchApiKeys",
     ],
     "optionalPlugins": [
       "cloud",
       "console",
       "usageCollection",
-      "searchApiKeys"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "esUiShared"
+      "esUiShared",
+      "searchApiKeys"
     ]
   }
 }

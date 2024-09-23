@@ -53,6 +53,9 @@ export const useSearchApiKey = () => {
     sessionStorage.setItem(API_KEY_STORAGE_KEY, JSON.stringify({ id, encoded }));
     dispatch({ type: 'SET_API_KEY', apiKey: encoded, status: Status.showPreviewKey });
   }, []);
+  const handleShowKeyVisibility = useCallback(() => {
+    dispatch({ type: 'SET_STATUS', status: Status.showPreviewKey });
+  }, []);
   const { mutateAsync: validateApiKey } = useMutation(async (id: string) => {
     try {
       if (!http?.post) {
@@ -130,6 +133,7 @@ export const useSearchApiKey = () => {
 
   return {
     apiKey: state.apiKey,
+    showAPIKey: handleShowKeyVisibility,
     handleSaveKey,
     status: state.status,
   };
