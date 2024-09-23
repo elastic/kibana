@@ -28,7 +28,6 @@ import { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public
 import { pickBy } from 'lodash';
 import type * as CSS from 'csstype';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
-import { DataViewMgmtState } from '../../management_app/data_view_management_service';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -68,13 +67,15 @@ const securitySolution = 'security-solution';
 const getCompositeRuntimeFields = (dataView: DataView) =>
   pickBy(dataView.getAllRuntimeFields(), (fld) => fld.type === 'composite');
 
-const dataViewSelector = (state: DataViewMgmtState) => state.dataView;
-const allowedTypesSelector = (state: DataViewMgmtState) => state.allowedTypes;
-const relationshipsSelector = (state: DataViewMgmtState) => state.relationships;
-const tagsSelector = (state: DataViewMgmtState) => state.tags;
-const isRefreshingSelector = (state: DataViewMgmtState) => state.isRefreshing;
-const defaultIndexSelecxtor = (state: DataViewMgmtState) => state.defaultIndex;
-const fieldsSelector = (state: DataViewMgmtState) => state.fields;
+import {
+  dataViewSelector,
+  allowedTypesSelector,
+  relationshipsSelector,
+  tagsSelector,
+  isRefreshingSelector,
+  defaultIndexSelector,
+  fieldsSelector,
+} from '../../management_app/data_view_mgmt_selectors';
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
@@ -94,7 +95,7 @@ export const EditIndexPattern = withRouter(
     const relationships = useStateSelector(dataViewMgmtService.state$, relationshipsSelector);
     const tags = useStateSelector(dataViewMgmtService.state$, tagsSelector);
     const isRefreshing = useStateSelector(dataViewMgmtService.state$, isRefreshingSelector);
-    const defaultIndex = useStateSelector(dataViewMgmtService.state$, defaultIndexSelecxtor);
+    const defaultIndex = useStateSelector(dataViewMgmtService.state$, defaultIndexSelector);
     const fields = useStateSelector(dataViewMgmtService.state$, fieldsSelector);
     const fieldConflictCount = useStateSelector(
       dataViewMgmtService.state$,

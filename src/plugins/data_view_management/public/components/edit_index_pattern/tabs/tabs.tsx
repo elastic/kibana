@@ -28,7 +28,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
 import {
-  // DataViewLazy,
   DataView,
   DataViewField,
   DataViewsPublicPluginStart,
@@ -54,8 +53,13 @@ import { ScriptedFieldsTable } from '../scripted_fields_table';
 import { RelationshipsTable } from '../relationships_table';
 import { getTabs, getPath, convertToEuiFilterOptions } from './utils';
 import { getFieldInfo } from '../../utils';
-import { DataViewMgmtState } from '../../../management_app/data_view_management_service';
 import { useStateSelector } from '../../../management_app/state_utils';
+
+import {
+  fieldsSelector,
+  indexedFieldTypeSelector,
+  scriptedFieldLangsSelector,
+} from '../../../management_app/data_view_mgmt_selectors';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: DataView;
@@ -165,12 +169,6 @@ const SCHEMA_ITEMS: FilterItems[] = [
   },
 ];
 
-// todo reuse
-const fieldsSelector = (state: DataViewMgmtState) => state.fields;
-const indexedFieldTypeSelector = (state: DataViewMgmtState) => state.indexedFieldTypes;
-const scriptedFieldLangsSelector = (state: DataViewMgmtState) => state.scriptedFieldLangs;
-// const scriptedFieldsSelector = (state: DataViewMgmtState) => state.scriptedFields;
-
 export const Tabs: React.FC<TabsProps> = ({
   indexPattern,
   saveIndexPattern,
@@ -214,7 +212,6 @@ export const Tabs: React.FC<TabsProps> = ({
   const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string[]>([]);
   const [isSchemaFilterOpen, setIsSchemaFilterOpen] = useState(false);
   const fields = useStateSelector(dataViewMgmtService.state$, fieldsSelector);
-  // const scriptedFields = useStateSelector(dataViewMgmtService.state$, scriptedFieldsSelector);
   const indexedFieldTypes = convertToEuiFilterOptions(
     useStateSelector(dataViewMgmtService.state$, indexedFieldTypeSelector)
   );
@@ -589,7 +586,6 @@ export const Tabs: React.FC<TabsProps> = ({
               <SourceFiltersTable
                 saveIndexPattern={saveIndexPattern}
                 indexPattern={indexPattern}
-                // fields={fields}
                 filterFilter={fieldFilter}
                 fieldWildcardMatcher={fieldWildcardMatcherDecorated}
               />
@@ -655,15 +651,7 @@ export const Tabs: React.FC<TabsProps> = ({
           content: getContent(tab.id),
         };
       }),
-    [
-      fieldFilter,
-      getContent,
-      indexPattern,
-      relationships,
-      dataViews.scriptedFieldsEnabled,
-      // fields,
-      // scriptedFields,
-    ]
+    [fieldFilter, getContent, indexPattern, relationships, dataViews.scriptedFieldsEnabled]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);

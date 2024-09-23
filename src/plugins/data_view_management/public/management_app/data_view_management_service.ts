@@ -23,7 +23,6 @@ import {
   DataViewsPublicPluginStart,
   INDEX_PATTERN_TYPE,
   DataViewField,
-  // DataViewLazy,
   DataView,
 } from '@kbn/data-views-plugin/public';
 
@@ -76,7 +75,6 @@ export interface DataViewMgmtServiceConstructorArgs {
 }
 
 export interface DataViewMgmtState {
-  // dataView?: DataViewLazy;
   dataView?: DataView;
   allowedTypes: SavedObjectManagementTypeInfo[];
   relationships: SavedObjectRelationWithTitle[];
@@ -132,12 +130,9 @@ export class DataViewMgmtService {
 
     this.state$ = this.internalState$ as BehaviorObservable<DataViewMgmtState>;
 
-    // todo look at updates
-    /*
     uiSettings.get('defaultIndex').then((defaultIndex: string) => {
       this.updateState({ defaultIndex });
     });
-    */
 
     // allowed types are set once and never change
     this.allowedTypes = new Promise((resolve) => {
@@ -176,7 +171,6 @@ export class DataViewMgmtService {
       })
     );
 
-  // private getTags = async (dataView: DataViewLazy) => {
   private getTags = async (dataView: DataView) => {
     if (dataView) {
       const defaultIndex = await this.services.uiSettings.get('defaultIndex'); // todo use const
@@ -194,7 +188,6 @@ export class DataViewMgmtService {
   async updateScriptedFields() {
     const dataView = this.state$.getValue().dataView;
     if (dataView) {
-      // const scriptedFieldRecords = dataView.getScriptedFields({ fieldName: ['*'] });
       const scriptedFieldRecords = dataView.getScriptedFields();
       const scriptedFields = Object.values(scriptedFieldRecords);
 
@@ -214,15 +207,8 @@ export class DataViewMgmtService {
     }
   }
 
-  // async setDataView(dataView: DataViewLazy) {
   async setDataView(dataView: DataView) {
     this.updateState({ isRefreshing: true });
-    // todo this should probably load the data view here
-    /**
-    const fieldRecords = (
-      await dataView.getFields({ scripted: false, fieldName: ['*'] })
-    ).getFieldMapSorted();
-    */
 
     const fieldRecords = dataView.fields
       .filter((field) => !field.scripted)
@@ -262,7 +248,6 @@ export class DataViewMgmtService {
       tags: await this.getTags(dataView),
       isRefreshing: false,
       conflictFieldsUrl: this.getKbnUrl(dataView.id!),
-      // scriptedFields: Object.values(dataView.getScriptedFields({ fieldName: ['*'] })),
       scriptedFields: dataView.getScriptedFields(),
     });
 
