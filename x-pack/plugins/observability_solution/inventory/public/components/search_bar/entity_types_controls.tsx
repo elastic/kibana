@@ -61,7 +61,7 @@ export function EntityTypesControls({ onChange }: Props) {
       onChange={(newOptions) => {
         onChange(newOptions.map((option) => option.key as EntityType));
       }}
-      isClearable={true}
+      isClearable
     />
   );
 }
