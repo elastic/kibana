@@ -75,8 +75,8 @@ export default ({ getService }: FtrProviderContext) => {
         await initEntityEngineForEntityType('user');
 
         const expectedTransforms = [
-          'entities-v1-history-ea_user_entity_store',
-          'entities-v1-latest-ea_user_entity_store',
+          'entities-v1-history-ea_default_user_entity_store',
+          'entities-v1-latest-ea_default_user_entity_store',
         ];
 
         await expectTransformsExist(expectedTransforms);
@@ -86,8 +86,8 @@ export default ({ getService }: FtrProviderContext) => {
         await initEntityEngineForEntityType('host');
 
         const expectedTransforms = [
-          'entities-v1-history-ea_host_entity_store',
-          'entities-v1-latest-ea_host_entity_store',
+          'entities-v1-history-ea_default_host_entity_store',
+          'entities-v1-latest-ea_default_host_entity_store',
         ];
 
         await expectTransformsExist(expectedTransforms);
