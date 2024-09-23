@@ -34,6 +34,7 @@ import {
   META_FIELDS,
   RuntimeField,
 } from '@kbn/data-views-plugin/public';
+import { AbstractDataView } from '@kbn/data-views-plugin/common';
 import {
   SavedObjectRelation,
   SavedObjectManagementTypeInfo,
@@ -570,7 +571,6 @@ export const Tabs: React.FC<TabsProps> = ({
                     history.push(getPath(field, indexPattern));
                   },
                 }}
-                // todo - make something more specific to scripted fields
                 onRemoveField={() => dataViewMgmtService.refreshFields()}
                 painlessDocLink={docLinks.links.scriptedFields.painless}
                 userEditPermission={dataViews.getCanSaveSync()}
@@ -584,7 +584,10 @@ export const Tabs: React.FC<TabsProps> = ({
               {getFilterSection(type)}
               <EuiSpacer size="m" />
               <SourceFiltersTable
-                saveIndexPattern={saveIndexPattern}
+                saveIndexPattern={async (dv: AbstractDataView) => {
+                  await saveIndexPattern(dv);
+                  dataViewMgmtService.refreshFields();
+                }}
                 indexPattern={indexPattern}
                 filterFilter={fieldFilter}
                 fieldWildcardMatcher={fieldWildcardMatcherDecorated}
@@ -639,18 +642,14 @@ export const Tabs: React.FC<TabsProps> = ({
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(
-        indexPattern,
-        // [...fields, ...scriptedFields],
-        fieldFilter,
-        relationships.length,
-        dataViews.scriptedFieldsEnabled
-      ).map((tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
-        return {
-          ...tab,
-          content: getContent(tab.id),
-        };
-      }),
+      getTabs(indexPattern, fieldFilter, relationships.length, dataViews.scriptedFieldsEnabled).map(
+        (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
+          return {
+            ...tab,
+            content: getContent(tab.id),
+          };
+        }
+      ),
     [fieldFilter, getContent, indexPattern, relationships, dataViews.scriptedFieldsEnabled]
   );
 
