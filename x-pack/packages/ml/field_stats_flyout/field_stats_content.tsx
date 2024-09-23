@@ -26,9 +26,21 @@ const DEFAULT_COLOR = euiPaletteColorBlind()[0];
  * Represents the props for the FieldStatsFlyout component.
  */
 export interface FieldStatsFlyoutProps {
+  /**
+   * The data view object.
+   */
   dataView: DataView;
+  /**
+   * Services required for field statistics.
+   */
   fieldStatsServices: FieldStatsServices;
+  /**
+   * Optional time range in milliseconds.
+   */
   timeRangeMs?: TimeRangeMs;
+  /**
+   * Optional DSL query for filtering field statistics.
+   */
   dslQuery?: FieldStatsProps['dslQuery'];
 }
 
