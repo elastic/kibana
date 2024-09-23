@@ -89,7 +89,9 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
   switch (ruleId) {
     case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
       return observedValues.map((observedValue, metricIndex) => {
-        const criteria = ruleCriteria[metricIndex] as CustomMetricExpressionParams;
+        const criteria = Array.isArray(ruleCriteria)
+          ? (ruleCriteria[metricIndex] as CustomMetricExpressionParams)
+          : (ruleCriteria as CustomMetricExpressionParams);
         const fields = criteria.metrics.map((metric) => metric.field || 'COUNT_AGG');
         const comparator = criteria.comparator;
         const threshold = criteria.threshold;
