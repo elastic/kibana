@@ -3,9 +3,6 @@
   "value": {
     "index": "suppression-data",
     "mappings": {
-      "_source": {
-        "mode": "synthetic"
-      },
       "properties": {
         "@timestamp": {
           "type": "date"
