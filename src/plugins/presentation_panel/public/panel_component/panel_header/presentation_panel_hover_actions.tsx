@@ -44,7 +44,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { Subscription } from 'rxjs';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { css, CSSObject } from '@emotion/react';
+import { css } from '@emotion/react';
 import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { uiActions } from '../../kibana_services';
 import {
@@ -70,22 +70,12 @@ const QUICK_ACTION_IDS = {
 
 const allowedNotificationActions = ['ACTION_FILTERS_NOTIFICATION'];
 
-const ALL_ROUNDED_CORNERS = { borderRadius: euiThemeVars.euiBorderRadius };
-const TOP_ROUNDED_CORNERS = {
-  borderTopLeftRadius: euiThemeVars.euiBorderRadius,
-  borderTopRightRadius: euiThemeVars.euiBorderRadius,
-  borderBottom: '0 !important',
-};
-
-const HOVER_ACTION_STYLES: CSSObject = {
-  padding: euiThemeVars.euiSizeXS,
-  display: 'flex',
-  flexWrap: 'nowrap',
-  border: euiThemeVars.euiBorderThin,
-  backgroundColor: euiThemeVars.euiColorEmptyShade,
-  height: euiThemeVars.euiSizeXL,
-  pointerEvents: 'all', // Enable pointer-events for hover actions
-};
+const ALL_ROUNDED_CORNERS = `border-radius: ${euiThemeVars.euiBorderRadius};
+`;
+const TOP_ROUNDED_CORNERS = `border-top-left-radius: ${euiThemeVars.euiBorderRadius};
+ border-top-right-radius: ${euiThemeVars.euiBorderRadius};
+ border-bottom: 0 !important;
+ `;
 
 const createClickHandler =
   (action: AnyApiAction, context: ActionExecutionContext<EmbeddableApiContext>) =>
@@ -140,7 +130,7 @@ export const PresentationPanelHoverActions = ({
   const leftHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const rightHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const [combineHoverActions, setCombineHoverActions] = useState<boolean>(false);
-  const [borderStyles, setBorderStyles] = useState<CSSObject>(TOP_ROUNDED_CORNERS);
+  const [borderStyles, setBorderStyles] = useState<string>(TOP_ROUNDED_CORNERS);
 
   const updateCombineHoverActions = () => {
     if (!hoverActionsRef.current || !anchorRef.current) return;
@@ -446,12 +436,9 @@ export const PresentationPanelHoverActions = ({
         defaultMessage: 'Move panel',
       })}
       data-test-subj="embeddablePanelDragHandle"
-      css={css(`
-        margin: ${euiThemeVars.euiSizeXS}; 
-        cursor: move !important;
-        img {
-          pointer-events: all !important;
-        }`)}
+      css={css`
+        margin: ${euiThemeVars.euiSizeXS};
+      `}
     />
   );
 
@@ -466,26 +453,12 @@ export const PresentationPanelHoverActions = ({
         /\s/g,
         ''
       )}`}
-      css={css({
-        position: 'relative',
-        height: '100%',
-      })}
     >
       {children}
       {api ? (
         <div
           ref={hoverActionsRef}
-          css={css({
-            height: euiThemeVars.euiSizeXL,
-            position: 'absolute',
-            display: 'flex',
-            justifyContent: 'space-between',
-            padding: `0 ${euiThemeVars.euiSize}`,
-            flexWrap: 'nowrap',
-            minWidth: '100%',
-            // Prevent hover actions wrapper from blocking interactions with other panels
-            pointerEvents: 'none',
-          })}
+          css={css`anchorStyles`}
           className={classNames('embPanel__hoverActionsWrapper', {
             'embPanel__hoverActionsWrapper--openContextMenu': isContextMenuOpen,
           })}
@@ -499,7 +472,9 @@ export const PresentationPanelHoverActions = ({
                 'embPanel__hoverActionsLeft',
                 className
               )}
-              css={css({ ...borderStyles, ...HOVER_ACTION_STYLES })}
+              css={css`
+                ${borderStyles}
+              `}
             >
               {dragHandle}
             </div>
@@ -514,7 +489,9 @@ export const PresentationPanelHoverActions = ({
               'embPanel__hoverActionsRight',
               className
             )}
-            css={css({ ...borderStyles, ...HOVER_ACTION_STYLES })}
+            css={css`
+              ${borderStyles}
+            `}
           >
             {menuPanelsLoading ? (
               <>
@@ -535,7 +512,6 @@ export const PresentationPanelHoverActions = ({
                     anchorClassName="embPanel__descriptionTooltipAnchor"
                     data-test-subj="embeddablePanelDescriptionTooltip"
                     type="iInCircle"
-                    css={css(`padding: $euiSizeXS;`)}
                   />
                 )}
                 {quickActionElements.map(
