@@ -17,7 +17,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
-  getAlertUrl,
+  getAlertDetailsUrl,
   observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
@@ -137,7 +137,7 @@ export function registerTransactionErrorRateRuleType({
         TransactionErrorRateAlert
       >
     ) => {
-      const { services, spaceId, params: ruleParams, startedAt, getTimeRange } = options;
+      const { services, spaceId, params: ruleParams, getTimeRange } = options;
       const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
@@ -272,11 +272,10 @@ export function registerTransactionErrorRateRuleType({
           groupByFields,
         });
 
-        const { uuid, start } = alertsClient.report({
+        const { uuid } = alertsClient.report({
           id: alertId,
           actionGroup: ruleTypeConfig.defaultActionGroupId,
         });
-        const indexedStartedAt = start ?? startedAt.toISOString();
 
         const relativeViewInAppUrl = getAlertUrlTransaction(
           groupByFields[SERVICE_NAME],
@@ -288,13 +287,7 @@ export function registerTransactionErrorRateRuleType({
           spaceId,
           relativeViewInAppUrl
         );
-        const alertDetailsUrl = await getAlertUrl(
-          uuid,
-          spaceId,
-          indexedStartedAt,
-          alertsLocator,
-          basePath.publicBaseUrl
-        );
+        const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
 
         const payload = {

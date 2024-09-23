@@ -18,7 +18,7 @@ import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import {
   alertsLocatorID,
   AlertsLocatorParams,
-  getAlertUrl,
+  getAlertDetailsUrl,
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -121,12 +121,11 @@ export const registerSyntheticsTLSCheckRule = (
         }
 
         const alertId = cert.sha256;
-        const { uuid, start } = alertsClient.report({
+        const { uuid } = alertsClient.report({
           id: alertId,
           actionGroup: TLS_CERTIFICATE.id,
           state: { ...updateState(ruleState, foundCerts), ...summary },
         });
-        const indexedStartedAt = start ?? startedAt.toISOString();
 
         const payload = {
           [CERT_COMMON_NAME]: cert.common_name,
@@ -139,13 +138,7 @@ export const registerSyntheticsTLSCheckRule = (
         };
 
         const context = {
-          [ALERT_DETAILS_URL]: await getAlertUrl(
-            uuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          ),
+          [ALERT_DETAILS_URL]: await getAlertDetailsUrl(basePath, spaceId, uuid),
           ...summary,
         };
 

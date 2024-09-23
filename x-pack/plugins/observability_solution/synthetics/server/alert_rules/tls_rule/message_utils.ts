@@ -8,7 +8,7 @@
 import moment from 'moment/moment';
 import { IBasePath } from '@kbn/core-http-server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
+import { AlertsLocatorParams, getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
@@ -107,16 +107,9 @@ export const setTLSRecoveredAlertsContext = async ({
   for (const recoveredAlert of recoveredAlerts) {
     const recoveredAlertId = recoveredAlert.alert.getId();
     const alertUuid = recoveredAlert.alert.getUuid();
-    const indexedStartedAt = recoveredAlert.alert.getStart() ?? defaultStartedAt;
 
     const state = recoveredAlert.alert.getState();
-    const alertUrl = await getAlertUrl(
-      alertUuid,
-      spaceId,
-      indexedStartedAt,
-      alertsLocator,
-      basePath.publicBaseUrl
-    );
+    const alertUrl = await getAlertDetailsUrl(basePath, spaceId, alertUuid);
 
     const configId = state.configId;
     const latestPing = latestPings.find((ping) => ping.config_id === configId);
