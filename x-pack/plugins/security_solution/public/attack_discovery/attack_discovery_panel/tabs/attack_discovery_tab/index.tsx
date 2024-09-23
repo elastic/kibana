@@ -34,19 +34,21 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
   const summaryMarkdownWithReplacements = useMemo(
     () =>
-      Object.entries<string>(replacements ?? {}).reduce(
-        (acc, [key, value]) => acc.replace(key, value),
-        summaryMarkdown
-      ),
+      Object.entries<string>(replacements ?? {}).reduce((acc, [key, value]) => {
+        const regex = new RegExp(key, 'g');
+
+        return acc.replace(regex, value);
+      }, summaryMarkdown),
     [replacements, summaryMarkdown]
   );
 
   const detailsMarkdownWithReplacements = useMemo(
     () =>
-      Object.entries<string>(replacements ?? {}).reduce(
-        (acc, [key, value]) => acc.replace(key, value),
-        detailsMarkdown
-      ),
+      Object.entries<string>(replacements ?? {}).reduce((acc, [key, value]) => {
+        const regex = new RegExp(key, 'g');
+
+        return acc.replace(regex, value);
+      }, detailsMarkdown),
     [detailsMarkdown, replacements]
   );
 
