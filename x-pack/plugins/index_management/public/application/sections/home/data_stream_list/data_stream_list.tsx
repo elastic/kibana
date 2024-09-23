@@ -18,6 +18,8 @@ import {
   EuiSpacer,
   EuiPageSection,
   EuiEmptyPrompt,
+  EuiCallOut,
+  EuiButton,
   EuiLink,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
@@ -41,7 +43,9 @@ import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
 import { Filters } from '../components';
+import { useStateWithLocalStorage } from '../../../hooks/use_state_with_localstorage';
 
+const SHOW_PROJECT_LEVEL_RETENTION = 'showProjectLevelRetention';
 export type DataStreamFilterName = 'managed' | 'hidden';
 interface MatchParams {
   dataStreamName?: string;
@@ -58,8 +62,9 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
+    config: { enableProjectLevelRetentionChecks },
     core: { getUrlForApp, executionContext },
-    plugins: { isFleetEnabled },
+    plugins: { isFleetEnabled, cloud },
   } = useAppContext();
 
   useExecutionContext(executionContext, {
@@ -80,6 +85,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   } = useLoadDataStreams({
     includeStats: isIncludeStatsChecked,
   });
+
+  const [projectLevelRetentionCallout, setprojectLevelRetentionCallout] = useStateWithLocalStorage<boolean>(
+    SHOW_PROJECT_LEVEL_RETENTION,
+    true
+  );
+  const shouldShowProjectLevelRetention = enableProjectLevelRetentionChecks && cloud?.deploymentUrl;
 
   const [filters, setFilters] = useState<Filters<DataStreamFilterName>>({
     managed: {
@@ -273,6 +284,36 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     activateHiddenFilter(isSelectedDataStreamHidden(dataStreams!, decodedDataStreamName));
     content = (
       <EuiPageSection paddingSize="none" data-test-subj="dataStreamList">
+        {(shouldShowProjectLevelRetention && projectLevelRetentionCallout) && (
+          <>
+            <EuiCallOut
+              onDismiss={() => setprojectLevelRetentionCallout(false)}
+              data-test-subj="projectLevelRetentionCallout"
+              title={i18n.translate(
+                'xpack.idxMgmt.dataStreamList.projectLevelRetentionCallout.titleText',
+                {
+                  defaultMessage: 'You can now configure data stream retention settings for your entire project',
+                }
+              )}
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamList.projectLevelRetentionCallout.descriptionText"
+                  defaultMessage="Optionally define a maximum and default retention period to manage your compliance and storage size needs."
+                />
+              </p>
+
+              <EuiButton href={cloud.deploymentUrl} fill>
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamList.projectLevelRetentionCallout.buttonText"
+                  defaultMessage="Get started"
+                />
+              </EuiButton>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         {renderHeader()}
         <EuiSpacer size="l" />
 
