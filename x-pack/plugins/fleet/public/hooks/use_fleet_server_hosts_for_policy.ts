@@ -27,6 +27,7 @@ export function useFleetServerHostsForPolicy(agentPolicy?: AgentPolicy | null) {
       fleetServerHost: enrollmentSettings?.fleet_server.host?.host_urls[0] || '',
       fleetProxy: enrollmentSettings?.fleet_server.host_proxy,
       downloadSource: enrollmentSettings?.download_source,
+      downloadSourceProxy: enrollmentSettings?.download_source_proxy,
     }),
     [
       isLoading,
@@ -34,6 +35,7 @@ export function useFleetServerHostsForPolicy(agentPolicy?: AgentPolicy | null) {
       enrollmentSettings?.fleet_server.host,
       enrollmentSettings?.fleet_server.host_proxy,
       enrollmentSettings?.download_source,
+      enrollmentSettings?.download_source_proxy,
     ]
   );
 }
