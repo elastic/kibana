@@ -36,6 +36,7 @@
     "@kbn/i18n-react",
     "@kbn/io-ts-utils",
     "@kbn/core-analytics-browser",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/features-plugin"
   ]
 }
