@@ -14,6 +14,7 @@ import {
   SyntheticsMonitor,
   BrowserFields,
   HTTPFields,
+  ScheduleUnit,
 } from '../types';
 
 export const getDefaultFormFields = (
@@ -65,9 +66,9 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
     ...monitor,
   };
 
-  const schedule = monitor[ConfigKey.SCHEDULE];
+  let schedule = monitor[ConfigKey.SCHEDULE];
   if (schedule?.unit === 's') {
-    schedule.number = `${schedule.number}s`;
+    schedule = { number: `${schedule.number}s`, unit: 's' as ScheduleUnit };
   }
 
   const params = monitorWithFormMonitorType[ConfigKey.PARAMS];
