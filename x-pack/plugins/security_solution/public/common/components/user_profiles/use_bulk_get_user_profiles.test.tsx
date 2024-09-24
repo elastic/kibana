@@ -43,10 +43,10 @@ describe('useBulkGetUserProfiles hook', () => {
     const { result } = renderHook(() => useBulkGetUserProfiles({ uids: assigneesIds }), {
       wrapper: TestProviders,
     });
-    await waitFor(() => null);
+
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
 
     expect(spyOnUserProfiles).toHaveBeenCalledTimes(1);
-    expect(result.current.isLoading).toEqual(false);
     expect(result.current.data).toEqual(mockUserProfiles);
   });
 });
