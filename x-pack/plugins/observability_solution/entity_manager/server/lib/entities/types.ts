@@ -5,12 +5,43 @@
  * 2.0.
  */
 
+import {
+  IndicesIndexTemplate,
+  TransformGetTransformStatsTransformStats,
+} from '@elastic/elasticsearch/lib/api/types';
 import { EntityDefinition } from '@kbn/entities-schema';
+
+interface TransformState {
+  id: string;
+  installed: boolean;
+  running: boolean;
+  stats?: TransformGetTransformStatsTransformStats;
+}
+
+interface IngestPipelineState {
+  id: string;
+  installed: boolean;
+  stats?: { count: number; failed: number };
+}
+
+interface IndexTemplateState {
+  id: string;
+  installed: boolean;
+  stats?: IndicesIndexTemplate;
+}
 
 // state is the *live* state of the definition. since a definition
 // is composed of several elasticsearch components that can be
 // modified or deleted outside of the entity manager apis, this can
 // be used to verify the actual installation is complete and running
-export type EntityDefinitionWithState = EntityDefinition & {
-  state: { installed: boolean; running: boolean };
-};
+export interface EntityDefinitionState {
+  installed: boolean;
+  running: boolean;
+  components: {
+    transforms: TransformState[];
+    ingestPipelines: IngestPipelineState[];
+    indexTemplates: IndexTemplateState[];
+  };
+}
+
+export type EntityDefinitionWithState = EntityDefinition & { state: EntityDefinitionState };

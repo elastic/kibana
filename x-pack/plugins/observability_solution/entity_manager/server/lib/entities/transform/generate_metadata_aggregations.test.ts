@@ -44,10 +44,10 @@ describe('Generate Metadata Aggregations for history and latest', () => {
       });
     });
 
-    it('should generate metadata aggregations for object format with source and limit', () => {
+    it('should generate metadata aggregations for object format with source and aggregation', () => {
       const definition = entityDefinitionSchema.parse({
         ...rawEntityDefinition,
-        metadata: [{ source: 'host.name', limit: 10 }],
+        metadata: [{ source: 'host.name', aggregation: { type: 'terms', limit: 10 } }],
       });
       expect(generateHistoryMetadataAggregations(definition)).toEqual({
         'entity.metadata.host.name': {
@@ -59,16 +59,64 @@ describe('Generate Metadata Aggregations for history and latest', () => {
       });
     });
 
-    it('should generate metadata aggregations for object format with source, limit, and destination', () => {
+    it('should generate metadata aggregations for object format with source, aggregation, and destination', () => {
       const definition = entityDefinitionSchema.parse({
         ...rawEntityDefinition,
-        metadata: [{ source: 'host.name', limit: 10, destination: 'hostName' }],
+        metadata: [
+          {
+            source: 'host.name',
+            aggregation: { type: 'terms', limit: 20 },
+            destination: 'hostName',
+          },
+        ],
       });
       expect(generateHistoryMetadataAggregations(definition)).toEqual({
         'entity.metadata.hostName': {
           terms: {
             field: 'host.name',
+            size: 20,
+          },
+        },
+      });
+    });
+
+    it('should generate metadata aggregations for terms and top_value', () => {
+      const definition = entityDefinitionSchema.parse({
+        ...rawEntityDefinition,
+        metadata: [
+          {
+            source: 'host.name',
+            aggregation: { type: 'terms', limit: 10 },
+            destination: 'hostName',
+          },
+          {
+            source: 'agent.name',
+            aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+            destination: 'agentName',
+          },
+        ],
+      });
+
+      expect(generateHistoryMetadataAggregations(definition)).toEqual({
+        'entity.metadata.hostName': {
+          terms: {
+            field: 'host.name',
             size: 10,
+          },
+        },
+        'entity.metadata.agentName': {
+          filter: {
+            exists: {
+              field: 'agent.name',
+            },
+          },
+          aggs: {
+            top_value: {
+              top_metrics: {
+                metrics: { field: 'agent.name' },
+                sort: { '@timestamp': 'desc' },
+              },
+            },
           },
         },
       });
@@ -128,10 +176,10 @@ describe('Generate Metadata Aggregations for history and latest', () => {
       });
     });
 
-    it('should generate metadata aggregations for object format with source and limit', () => {
+    it('should generate metadata aggregations for object format with source and aggregation', () => {
       const definition = entityDefinitionSchema.parse({
         ...rawEntityDefinition,
-        metadata: [{ source: 'host.name', limit: 10 }],
+        metadata: [{ source: 'host.name', aggregation: { type: 'terms', limit: 10 } }],
       });
       expect(generateLatestMetadataAggregations(definition)).toEqual({
         'entity.metadata.host.name': {
@@ -154,10 +202,16 @@ describe('Generate Metadata Aggregations for history and latest', () => {
       });
     });
 
-    it('should generate metadata aggregations for object format with source, limit, and destination', () => {
+    it('should generate metadata aggregations for object format with source, aggregation, and destination', () => {
       const definition = entityDefinitionSchema.parse({
         ...rawEntityDefinition,
-        metadata: [{ source: 'host.name', limit: 10, destination: 'hostName' }],
+        metadata: [
+          {
+            source: 'host.name',
+            aggregation: { type: 'terms', limit: 10 },
+            destination: 'hostName',
+          },
+        ],
       });
       expect(generateLatestMetadataAggregations(definition)).toEqual({
         'entity.metadata.hostName': {
@@ -173,6 +227,75 @@ describe('Generate Metadata Aggregations for history and latest', () => {
               terms: {
                 field: 'hostName',
                 size: 10,
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should generate metadata aggregations for terms and top_value', () => {
+      const definition = entityDefinitionSchema.parse({
+        ...rawEntityDefinition,
+        metadata: [
+          {
+            source: 'host.name',
+            aggregation: { type: 'terms', limit: 10 },
+            destination: 'hostName',
+          },
+          {
+            source: 'agent.name',
+            aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+            destination: 'agentName',
+          },
+        ],
+      });
+      expect(generateLatestMetadataAggregations(definition)).toEqual({
+        'entity.metadata.hostName': {
+          filter: {
+            range: {
+              '@timestamp': {
+                gte: 'now-360s',
+              },
+            },
+          },
+          aggs: {
+            data: {
+              terms: {
+                field: 'hostName',
+                size: 10,
+              },
+            },
+          },
+        },
+        'entity.metadata.agentName': {
+          filter: {
+            bool: {
+              must: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-360s',
+                    },
+                  },
+                },
+                {
+                  exists: {
+                    field: 'agentName',
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            top_value: {
+              top_metrics: {
+                metrics: {
+                  field: 'agentName',
+                },
+                sort: {
+                  '@timestamp': 'desc',
+                },
               },
             },
           },

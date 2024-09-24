@@ -28,7 +28,7 @@ describe('schemas', () => {
       const result = metadataSchema.safeParse({
         source: 'host.name',
         destination: 'host.name',
-        limit: 0,
+        aggregation: { type: 'terms', limit: 0 },
       });
       expect(result.success).toBeFalsy();
       expect(result).toMatchSnapshot();
@@ -52,10 +52,40 @@ describe('schemas', () => {
       const result = metadataSchema.safeParse({
         source: 'host.name',
         destination: 'hostName',
-        size: 1,
       });
       expect(result.success).toBeTruthy();
       expect(result).toMatchSnapshot();
+    });
+
+    it('should default to terms aggregation when none provided', () => {
+      const result = metadataSchema.safeParse({
+        source: 'host.name',
+        destination: 'hostName',
+      });
+      expect(result.success).toBeTruthy();
+      expect(result.data).toEqual({
+        source: 'host.name',
+        destination: 'hostName',
+        aggregation: { type: 'terms', limit: 1000 },
+      });
+    });
+
+    it('should parse supported aggregations', () => {
+      const result = metadataSchema.safeParse({
+        source: 'host.name',
+        destination: 'hostName',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+      });
+      expect(result.success).toBeTruthy();
+    });
+
+    it('should reject unsupported aggregation', () => {
+      const result = metadataSchema.safeParse({
+        source: 'host.name',
+        destination: 'hostName',
+        aggregation: { type: 'unknown_agg', limit: 10 },
+      });
+      expect(result.success).toBeFalsy();
     });
   });
 

@@ -98,6 +98,7 @@
     "@kbn/security-solution-common",
     "@kbn/router-utils",
     "@kbn/management-settings-ids",
+    "@kbn/logs-data-access-plugin"
   ],
   "exclude": [
     "target/**/*"

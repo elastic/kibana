@@ -39,6 +39,7 @@ const createToolkitMock = (): ToolkitMock => {
 
 export const httpServerMock = {
   createKibanaRequest: mockRouter.createKibanaRequest,
+  createFakeKibanaRequest: mockRouter.createFakeKibanaRequest,
   createRawRequest: hapiMocks.createRequest,
   createResponseFactory: mockRouter.createResponseFactory,
   createLifecycleResponseFactory: createLifecycleResponseFactoryMock,
