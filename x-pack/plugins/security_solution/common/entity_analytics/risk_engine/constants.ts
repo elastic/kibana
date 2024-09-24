@@ -17,8 +17,6 @@ export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings` as const;
 export const PUBLIC_RISK_ENGINE_URL = `${PUBLIC_RISK_SCORE_URL}/engine` as const;
 export const RISK_ENGINE_SCHEDULE_NOW_URL = `${RISK_ENGINE_URL}/schedule_now` as const;
 
-export const MAX_SPACES_COUNT = 1;
-
 type ClusterPrivilege = 'manage_index_templates' | 'manage_transform';
 export const RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',
