@@ -45,14 +45,14 @@ $visLegendWidth: 150px;
 }
 
 .visLegend__list {
-  @include euiScrollBar;
   display: flex;
   width: $visLegendWidth; // Must be a hard-coded width for the chart to get its correct dimensions
   flex: 1 1 auto;
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
-
+  
+  @include euiScrollBar;
   .visLegend__button {
     font-size: $euiFontSizeXS;
     text-align: left;
