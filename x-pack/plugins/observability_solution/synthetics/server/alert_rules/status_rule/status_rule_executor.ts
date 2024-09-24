@@ -10,7 +10,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
-import { isEmpty, uniq } from 'lodash';
+import { intersection, isEmpty, uniq } from 'lodash';
 import {
   AlertOverviewStatus,
   AlertStatusConfigs,
@@ -147,13 +147,21 @@ export class StatusRuleExecutor {
       };
     }
 
+    const queryLocations = this.params?.locations;
+
+    // Account for locations filter
+    const listOfLocationAfterFilter = queryLocations
+      ? intersection(monitorLocationIds, queryLocations)
+      : monitorLocationIds;
+
     const currentStatus = await queryMonitorStatusAlert({
       esClient: this.esClient,
-      monitorLocationIds,
+      monitorLocationIds: listOfLocationAfterFilter,
       range,
       monitorQueryIds: enabledMonitorQueryIds,
       numberOfChecks,
       monitorLocationsMap,
+      includeRetests: this.params.condition?.includeRetests,
     });
 
     const { downConfigs, upConfigs } = currentStatus;

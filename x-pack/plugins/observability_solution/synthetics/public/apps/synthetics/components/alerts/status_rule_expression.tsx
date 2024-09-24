@@ -12,6 +12,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiHorizontalRule,
+  EuiIconTip,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { ValueExpression } from '@kbn/triggers-actions-ui-plugin/public';
@@ -64,13 +65,25 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
   return (
     <>
       <EuiHorizontalRule size="half" margin="xs" />
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.synthetics.rules.status.condition.title', {
-            defaultMessage: 'Condition',
-          })}
-        </h3>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.synthetics.rules.status.condition.title', {
+                defaultMessage: 'Condition',
+              })}
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={i18n.translate('xpack.synthetics.rule.condition.retests', {
+              defaultMessage: 'Retests are included in the number of checks.',
+            })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiExpression

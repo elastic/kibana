@@ -46,6 +46,7 @@ export async function queryMonitorStatusAlert({
   monitorQueryIds,
   monitorLocationsMap,
   numberOfChecks,
+  includeRetests = true,
 }: {
   esClient: SyntheticsEsClient;
   monitorLocationIds: string[];
@@ -53,6 +54,7 @@ export async function queryMonitorStatusAlert({
   monitorQueryIds: string[];
   monitorLocationsMap: Record<string, string[]>;
   numberOfChecks: number;
+  includeRetests?: boolean;
 }): Promise<AlertStatusResponse> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
