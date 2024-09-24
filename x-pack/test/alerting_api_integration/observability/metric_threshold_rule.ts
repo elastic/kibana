@@ -32,7 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Metric threshold rule >', () => {
     let ruleId: string;
     let alertId: string;
-    let startedAt: string;
     let actionId: string;
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
@@ -158,7 +157,6 @@ export default function ({ getService }: FtrProviderContext) {
           logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
           'Metric threshold'
