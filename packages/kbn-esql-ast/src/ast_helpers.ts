@@ -42,6 +42,7 @@ import type {
   ESQLNumericLiteralType,
   FunctionSubtype,
   ESQLNumericLiteral,
+  ESQLOrderExpression,
 } from './types';
 import { parseIdentifier } from './parser/helpers';
 
@@ -221,6 +222,26 @@ export function createFunction<Subtype extends FunctionSubtype>(
   }
   return node;
 }
+
+export const createOrderExpression = (
+  ctx: ParserRuleContext,
+  arg: ESQLAstItem,
+  order: ESQLOrderExpression['order'],
+  nulls: ESQLOrderExpression['nulls']
+) => {
+  const node: ESQLOrderExpression = {
+    type: 'order',
+    name: '',
+    order,
+    nulls,
+    args: [arg],
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  };
+
+  return node;
+};
 
 function walkFunctionStructure(
   args: ESQLAstItem[],

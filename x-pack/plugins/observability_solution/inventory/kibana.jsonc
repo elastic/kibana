@@ -12,6 +12,8 @@
       "entityManager",
       "inference",
       "dataViews",
+      "unifiedSearch",
+      "data",
       "share"
     ],
     "requiredBundles": [

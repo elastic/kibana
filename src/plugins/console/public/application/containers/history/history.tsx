@@ -26,6 +26,7 @@ import {
   EuiFormFieldset,
   EuiCheckableCard,
   EuiResizableContainer,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -77,11 +78,7 @@ const CheckeableCardLabel = ({ historyItem }: { historyItem: HistoryProps }) => 
   );
 };
 
-interface Props {
-  isVerticalLayout: boolean;
-}
-
-export function History({ isVerticalLayout }: Props) {
+export function History() {
   const { euiTheme } = useEuiTheme();
   const {
     services: { history, routeHistory },
@@ -98,6 +95,8 @@ export function History({ isVerticalLayout }: Props) {
   }, [history]);
 
   const [viewingReq, setViewingReq] = useState<any>(null);
+
+  const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const initialize = useCallback(() => {
     const nextSelectedIndex = 0;
