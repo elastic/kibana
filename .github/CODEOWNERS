@@ -429,6 +429,7 @@ src/plugins/esql @elastic/kibana-esql
 packages/kbn-esql-ast @elastic/kibana-esql
 examples/esql_ast_inspector @elastic/kibana-esql
 src/plugins/esql_datagrid @elastic/kibana-esql
+packages/kbn-esql-editor @elastic/kibana-esql
 packages/kbn-esql-utils @elastic/kibana-esql
 packages/kbn-esql-validation-autocomplete @elastic/kibana-esql
 examples/esql_validation_example @elastic/kibana-esql
@@ -553,7 +554,7 @@ src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-langchain @elastic/security-generative-ai
-packages/kbn-language-documentation-popover @elastic/kibana-esql
+packages/kbn-language-documentation @elastic/kibana-esql
 x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
 packages/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 packages/kbn-lens-formula-docs @elastic/kibana-visualizations
@@ -609,6 +610,7 @@ x-pack/packages/ml/data_view_utils @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
 x-pack/packages/ml/date_utils @elastic/ml-ui
 x-pack/packages/ml/error_utils @elastic/ml-ui
+x-pack/packages/ml/field_stats_flyout @elastic/ml-ui
 x-pack/packages/ml/in_memory_table @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
@@ -616,6 +618,7 @@ x-pack/packages/ml/kibana_theme @elastic/ml-ui
 x-pack/packages/ml/local_storage @elastic/ml-ui
 x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/packages/ml/number_utils @elastic/ml-ui
+x-pack/packages/ml/parse_interval @elastic/ml-ui
 x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/random_sampler_utils @elastic/ml-ui
@@ -627,6 +630,7 @@ x-pack/packages/ml/time_buckets @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/ui_actions @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
+x-pack/packages/ml/validators @elastic/ml-ui
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
@@ -919,7 +923,6 @@ test
 x-pack/test 
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
-packages/kbn-text-based-editor @elastic/kibana-esql
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
