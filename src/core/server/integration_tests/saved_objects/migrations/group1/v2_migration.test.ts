@@ -22,18 +22,20 @@ import {
   readLog,
   clearLog,
   currentVersion,
+  nextMinor,
 } from '../kibana_migrator_test_kit';
 import {
+  BASELINE_COMPLEX_DOCUMENTS_500K_AFTER,
   BASELINE_DOCUMENTS_PER_TYPE_500K,
   BASELINE_TEST_ARCHIVE_500K,
 } from '../kibana_migrator_archive_utils';
 import {
-  baselineTypes,
   getReindexingBaselineTypes,
   getReindexingMigratorTestKit,
   getUpToDateMigratorTestKit,
 } from '../kibana_migrator_test_kit.fixtures';
 import { delay } from '../test_utils';
+import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test_kit.expect';
 
 const logFilePath = join(__dirname, 'v2_migration.log');
 
@@ -83,11 +85,11 @@ describe('v2 migration', () => {
       expect(migrationResults.map((result) => omit(result, 'elapsedMs'))).toMatchInlineSnapshot(`
         Array [
           Object {
-            "destIndex": ".kibana_migrator_9.0.0_001",
+            "destIndex": ".kibana_migrator_${currentVersion}_001",
             "status": "patched",
           },
           Object {
-            "destIndex": ".kibana_migrator_tasks_9.0.0_001",
+            "destIndex": ".kibana_migrator_tasks_${currentVersion}_001",
             "status": "patched",
           },
         ]
@@ -214,38 +216,10 @@ describe('v2 migration', () => {
       });
 
       it('migrates documents to the highest version', async () => {
-        const typeMigrationVersions: Record<string, string> = {
-          basic: '10.1.0', // did not define any model versions
-          complex: '10.2.0',
-          task: '10.2.0',
-        };
-
-        const resultSets = await Promise.all(
-          baselineTypes.map(({ name: type }) =>
-            kit.client.search<any>({
-              index: [defaultKibanaIndex, defaultKibanaTaskIndex],
-              query: {
-                bool: {
-                  should: [
-                    {
-                      term: { type },
-                    },
-                  ],
-                },
-              },
-            })
-          )
-        );
-
-        expect(
-          resultSets
-            .flatMap((result) => result.hits.hits)
-            .every(
-              (document) =>
-                document._source.typeMigrationVersion ===
-                typeMigrationVersions[document._source.type]
-            )
-        ).toEqual(true);
+        await expectDocumentsMigratedToHighestVersion(kit.client, [
+          defaultKibanaIndex,
+          defaultKibanaTaskIndex,
+        ]);
       });
 
       describe('a migrator performing a compatible upgrade migration', () => {
@@ -338,11 +312,7 @@ describe('v2 migration', () => {
           });
 
           it('executes the excludeOnUpgrade hook', () => {
-            // we discard the second half with exclude on upgrade (firstHalf !== true)
-            // then we discard half all multiples of 100 (1% of them)
-            expect(primaryIndexCounts.complex).toEqual(
-              BASELINE_DOCUMENTS_PER_TYPE_500K / 2 - BASELINE_DOCUMENTS_PER_TYPE_500K / 2 / 100
-            );
+            expect(primaryIndexCounts.complex).toEqual(BASELINE_COMPLEX_DOCUMENTS_500K_AFTER);
           });
         });
 
@@ -352,13 +322,13 @@ describe('v2 migration', () => {
             .toMatchInlineSnapshot(`
                       Array [
                         Object {
-                          "destIndex": ".kibana_migrator_9.1.0_001",
-                          "sourceIndex": ".kibana_migrator_9.0.0_001",
+                          "destIndex": ".kibana_migrator_${nextMinor}_001",
+                          "sourceIndex": ".kibana_migrator_${currentVersion}_001",
                           "status": "migrated",
                         },
                         Object {
-                          "destIndex": ".kibana_migrator_tasks_9.0.0_001",
-                          "sourceIndex": ".kibana_migrator_tasks_9.0.0_001",
+                          "destIndex": ".kibana_migrator_tasks_${currentVersion}_001",
+                          "sourceIndex": ".kibana_migrator_tasks_${currentVersion}_001",
                           "status": "migrated",
                         },
                       ]
