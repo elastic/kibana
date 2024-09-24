@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { ConfigRecordSchema } from '../models';
+import { VarsRecordSchema } from '../models';
 
 const createOtelPolicyRequestBodySchema = schema.object({
   id: schema.maybe(
@@ -61,8 +61,7 @@ const createOtelPolicyRequestBodySchema = schema.object({
     })
   ),
   pipelines: schema.maybe(schema.arrayOf(schema.string())),
-  // reuse the vars schema defined for package policies
-  vars: schema.maybe(ConfigRecordSchema),
+  vars: schema.maybe(VarsRecordSchema),
 });
 
 export const CreateOtelPolicyRequestSchema = {

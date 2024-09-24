@@ -149,7 +149,7 @@ export interface OtelPolicySOAttributes {
     name: string;
     version?: string;
   };
-  vars?: PackagePolicyConfigRecord;
+  vars?: Record<string, string | string[]>;
   pipelines?: string[];
   revision: number;
   created_at: string;

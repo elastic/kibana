@@ -15,6 +15,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: OTEL_POLICIES_ROUTES.CREATE_PATTERN,
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
       description: 'Create new otel policy',
       options: {
         tags: ['oas-tag:Fleet Otel policies'],

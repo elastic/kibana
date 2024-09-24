@@ -28,6 +28,7 @@ import { registerRoutes as registerMessageSigningServiceRoutes } from './message
 import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_token';
 import { registerRoutes as registerStandaloneAgentApiKeyRoutes } from './standalone_agent_api_key';
 import { registerRoutes as registerDebugRoutes } from './debug';
+import { registerRoutes as registerOtelRoutes } from './otel';
 
 export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
   // Always register app routes for permissions checking
@@ -51,6 +52,7 @@ export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: Fleet
   registerUninstallTokenRoutes(fleetAuthzRouter, config);
   registerStandaloneAgentApiKeyRoutes(fleetAuthzRouter);
   registerDebugRoutes(fleetAuthzRouter);
+  registerOtelRoutes(fleetAuthzRouter);
 
   // Conditional config routes
   if (config.agents.enabled) {

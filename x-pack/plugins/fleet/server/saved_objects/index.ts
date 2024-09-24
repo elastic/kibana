@@ -815,7 +815,7 @@ export const getSavedObjectTypes = (
             },
           },
           vars: { type: 'flattened' },
-          pipelines: { type: 'flattened' },
+          pipelines: { type: 'keyword' },
           revision: { type: 'integer' },
           updated_at: { type: 'date' },
           updated_by: { type: 'keyword' },
