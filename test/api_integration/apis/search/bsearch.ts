@@ -140,9 +140,8 @@ export default function ({ getService }: FtrProviderContext) {
         const parsedResponse = parseBfetchResponse(resp);
         expect(parsedResponse).to.have.length(2);
         parsedResponse.forEach((responseJson) => {
-          expect(responseJson.result).to.have.property('isPartial');
-          expect(responseJson.result).to.have.property('isRunning');
-          expect(responseJson.result).to.have.property('rawResponse');
+          expect(responseJson.result).to.have.property('is_partial');
+          expect(responseJson.result).to.have.property('is_running');
         });
       });
 
