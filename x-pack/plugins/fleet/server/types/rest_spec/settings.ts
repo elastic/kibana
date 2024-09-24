@@ -9,6 +9,8 @@ import { schema } from '@kbn/config-schema';
 
 import { isDiffPathProtocol } from '../../../common/services';
 
+import { OutputSchema } from '../models';
+
 import { FleetProxySchema } from './fleet_proxies';
 
 export const GetSettingsRequestSchema = {};
@@ -103,6 +105,7 @@ export const GetEnrollmentSettingsResponseSchema = schema.object({
         fleet_server_host_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
         download_source_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
         space_ids: schema.maybe(schema.arrayOf(schema.string())),
+        data_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
       })
     ),
     has_active: schema.boolean(),
@@ -118,6 +121,8 @@ export const GetEnrollmentSettingsResponseSchema = schema.object({
       })
     ),
     host_proxy: schema.maybe(FleetProxySchema),
+    es_output: schema.maybe(OutputSchema),
+    es_output_proxy: schema.maybe(FleetProxySchema),
   }),
   download_source: schema.maybe(
     schema.object({

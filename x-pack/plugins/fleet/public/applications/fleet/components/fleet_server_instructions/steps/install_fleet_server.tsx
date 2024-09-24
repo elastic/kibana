@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PLATFORM_TYPE } from '../../../hooks';
-import { useDefaultDownloadSource } from '../../../hooks';
-import { useStartServices, useDefaultOutput, useKibanaVersion } from '../../../hooks';
+import { useFleetServerHostsForPolicy } from '../../../hooks';
+import { useStartServices, useKibanaVersion } from '../../../hooks';
 
 import { PlatformSelector } from '../..';
 
@@ -61,23 +61,30 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
 }> = ({ serviceToken, fleetServerHost, fleetServerPolicyId, deploymentMode }) => {
   const { docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion();
-  const { output } = useDefaultOutput();
-  const { downloadSource } = useDefaultDownloadSource();
 
-  const commandOutput = output?.type === 'elasticsearch' ? output : undefined;
+  const { esOutput, esOutputProxy, downloadSource, downloadSourceProxy } =
+    useFleetServerHostsForPolicy(
+      fleetServerPolicyId
+        ? {
+            id: fleetServerPolicyId,
+          }
+        : null
+    );
 
   const installCommands = (['linux', 'mac', 'windows', 'deb', 'rpm'] as PLATFORM_TYPE[]).reduce(
     (acc, platform) => {
       acc[platform] = getInstallCommandForPlatform(
         platform,
-        commandOutput?.hosts?.[0] ?? '<ELASTICSEARCH_HOST>',
+        esOutput?.hosts?.[0] ?? '<ELASTICSEARCH_HOST>',
+        esOutputProxy,
         serviceToken ?? '',
         fleetServerPolicyId,
         fleetServerHost,
         deploymentMode === 'production',
-        commandOutput?.ca_trusted_fingerprint ?? undefined,
+        esOutput?.ca_trusted_fingerprint ?? undefined,
         kibanaVersion,
-        downloadSource
+        downloadSource,
+        downloadSourceProxy
       );
 
       return acc;
