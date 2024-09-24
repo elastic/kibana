@@ -54,7 +54,10 @@ export const CalendarsListTable = ({
       truncateText: true,
       scope: 'row',
       render: (id) => (
-        <Link to={`/${ML_PAGES.CALENDARS_EDIT}/${id}`} data-test-subj="mlEditCalendarLink">
+        <Link
+          to={`/${isDst ? ML_PAGES.CALENDARS_DST_EDIT : ML_PAGES.CALENDARS_EDIT}/${id}`}
+          data-test-subj="mlEditCalendarLink"
+        >
           {id}
         </Link>
       ),

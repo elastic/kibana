@@ -125,7 +125,9 @@ export const CalendarFormDst: FC<Props> = ({
     !isNewCalendarIdValid ||
     calendarId === '' ||
     loading === true;
-  const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
+  const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(
+    ML_PAGES.CALENDARS_DST_MANAGE
+  );
 
   return (
     <EuiForm data-test-subj={`mlCalendarForm${isEdit === true ? 'Edit' : 'New'}`}>

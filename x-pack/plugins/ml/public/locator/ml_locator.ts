@@ -29,6 +29,7 @@ import {
   formatGenericMlUrl,
   formatEditCalendarUrl,
   formatEditFilterUrl,
+  formatEditCalendarDstUrl,
 } from './formatters';
 import {
   formatTrainedModelsManagementUrl,
@@ -123,8 +124,9 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
         path = formatEditFilterUrl('', params.pageState);
         break;
       case ML_PAGES.CALENDARS_EDIT:
-      case ML_PAGES.CALENDARS_DST_EDIT:
         path = formatEditCalendarUrl('', params.pageState);
+      case ML_PAGES.CALENDARS_DST_EDIT:
+        path = formatEditCalendarDstUrl('', params.pageState);
         break;
       case ML_PAGES.NOTIFICATIONS:
         path = formatNotificationsUrl('', params.pageState);

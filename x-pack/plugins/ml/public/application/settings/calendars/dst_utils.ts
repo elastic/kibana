@@ -125,8 +125,21 @@ export function createDstEvents(timezone: string) {
   }, []);
 }
 
-export const isDstCalendar = (calendar: MlCalendar) => {
+export function isDstCalendar(calendar: MlCalendar) {
   return calendar.events.some((event) => {
     return event.force_time_shift !== undefined;
   });
-};
+}
+
+export function separateCalendarsByType(allCalendars: MlCalendar[]) {
+  const calendarsDst: MlCalendar[] = [];
+  const calendars: MlCalendar[] = [];
+  allCalendars.forEach((calendar) => {
+    if (isDstCalendar(calendar)) {
+      calendarsDst.push(calendar);
+    } else {
+      calendars.push(calendar);
+    }
+  });
+  return { calendarsDst, calendars };
+}

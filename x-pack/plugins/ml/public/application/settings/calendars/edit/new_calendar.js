@@ -66,7 +66,12 @@ class NewCalendarUI extends Component {
         application: { navigateToUrl },
       },
     } = this.props.kibana;
-    await navigateToUrl(`${basePath.get()}/app/ml/${ML_PAGES.CALENDARS_MANAGE}`, true);
+    await navigateToUrl(
+      `${basePath.get()}/app/ml/${
+        this.props.isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE
+      }`,
+      true
+    );
   };
 
   async formSetup() {

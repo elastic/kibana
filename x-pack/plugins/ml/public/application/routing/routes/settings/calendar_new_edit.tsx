@@ -80,8 +80,8 @@ export const newCalendarDstRouteFactory = (
   basePath: string
 ): MlRoute => ({
   path: createPath(ML_PAGES.CALENDARS_DST_NEW),
-  title: i18n.translate('xpack.ml.settings.createCalendar.docTitle', {
-    defaultMessage: 'Create Calendar',
+  title: i18n.translate('xpack.ml.settings.createCalendarDst.docTitle', {
+    defaultMessage: 'Create DST Calendar',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} isDst={true} />,
   breadcrumbs: [
@@ -102,8 +102,8 @@ export const editCalendarDstRouteFactory = (
   basePath: string
 ): MlRoute => ({
   path: createPath(ML_PAGES.CALENDARS_DST_EDIT, '/:calendarId'),
-  title: i18n.translate('xpack.ml.settings.editCalendar.docTitle', {
-    defaultMessage: 'Edit Calendar',
+  title: i18n.translate('xpack.ml.settings.editCalendarDst.docTitle', {
+    defaultMessage: 'Edit DST Calendar',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} isDst={true} />,
   breadcrumbs: [

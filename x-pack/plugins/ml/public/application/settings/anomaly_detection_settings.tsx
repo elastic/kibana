@@ -27,11 +27,13 @@ import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_co
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
+import { separateCalendarsByType } from './calendars/dst_utils';
 
 export const AnomalyDetectionSettings: FC = () => {
   const mlApi = useMlApi();
 
   const [calendarsCount, setCalendarsCount] = useState(0);
+  const [calendarsDstCount, setCalendarsDstCount] = useState(0);
   const [filterListsCount, setFilterListsCount] = useState(0);
 
   const { canGetFilters, canCreateFilter, canGetCalendars, canCreateCalendar } = useContext(
@@ -55,8 +57,9 @@ export const AnomalyDetectionSettings: FC = () => {
     // Obtain the counts of calendars and filter lists.
     if (canGetCalendars === true) {
       try {
-        const calendars = await mlApi.calendars();
+        const { calendarsDst, calendars } = separateCalendarsByType(await mlApi.calendars());
         setCalendarsCount(calendars.length);
+        setCalendarsDstCount(calendarsDst.length);
       } catch (e) {
         displayErrorToast(
           e,
@@ -254,10 +257,10 @@ export const AnomalyDetectionSettings: FC = () => {
                 <EuiText>
                   <FormattedMessage
                     id="xpack.ml.settings.anomalyDetection.calendarsSummaryCount"
-                    defaultMessage="You have {calendarsCountBadge} {calendarsCount, plural, one {calendar} other {calendars}}"
+                    defaultMessage="You have {calendarsCountBadge} {calendarsDstCount, plural, one {calendar} other {calendars}}"
                     values={{
-                      calendarsCountBadge: <EuiBadge>{calendarsCount}</EuiBadge>,
-                      calendarsCount,
+                      calendarsCountBadge: <EuiBadge>{calendarsDstCount}</EuiBadge>,
+                      calendarsDstCount,
                     }}
                   />
                 </EuiText>
