@@ -12,12 +12,15 @@ import { navigateToCasesApp } from '../../../../../../shared/lib/cases';
 export default function ({ getPageObject, getPageObjects, getService }: FtrProviderContext) {
   const svlCases = getService('svlCases');
   const svlCommonScreenshots = getService('svlCommonScreenshots');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const screenshotDirectories = ['response_ops_docs', 'observability_cases'];
   const testSubjects = getService('testSubjects');
   const owner = OBSERVABILITY_OWNER;
 
-  // FLAKY:https://github.com/elastic/kibana/issues/189058
-  describe.skip('Observability case settings', function () {
+  describe('Observability case settings', function () {
+    before(async () => {
+      await svlCommonPage.loginWithPrivilegedRole();
+    });
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
     });
