@@ -15,17 +15,18 @@ import type {
 
 const ENRICH_FIELD = 'historical';
 
+const DEBUG_MODE = true; // TODO: do not commit this value
+
 export const buildFieldRetentionIngestPipeline = ({
   fieldRetentionDefinition,
   enrichPolicyName,
   allEntityFields,
-  debugMode = false,
 }: {
   fieldRetentionDefinition: FieldRetentionDefinition;
   enrichPolicyName: string;
   allEntityFields: string[];
-  debugMode?: boolean;
 }): IngestProcessorContainer[] => [
+  ...(DEBUG_MODE ? [debugAddContextStep()] : []),
   {
     enrich: {
       policy_name: enrichPolicyName,
@@ -35,45 +36,59 @@ export const buildFieldRetentionIngestPipeline = ({
   },
   ...getDotExpanderProcessors(allEntityFields),
   ...getFieldProcessors(fieldRetentionDefinition),
-  ...(!debugMode
+  ...getRemoveEmptyFieldProcessors(allEntityFields),
+  {
+    remove: {
+      ignore_failure: true,
+      field: 'entity',
+    },
+  },
+  {
+    remove: {
+      ignore_failure: true,
+      field: 'event',
+    },
+  },
+  {
+    remove: {
+      ignore_failure: true,
+      field: 'asset',
+      if: isFieldMissingOrEmpty('ctx.asset'),
+    },
+  },
+  {
+    remove: {
+      ignore_failure: true,
+      field: `${fieldRetentionDefinition.entityType}.risk`,
+      if: isFieldMissingOrEmpty(`ctx.${fieldRetentionDefinition.entityType}.risk`),
+    },
+  },
+  ...(!DEBUG_MODE
     ? [
-        ...getRemoveEmptyFieldProcessors(allEntityFields),
         {
           remove: {
             ignore_failure: true,
             field: ENRICH_FIELD,
           },
         },
-        // the entity definition adds these
-        {
-          remove: {
-            ignore_failure: true,
-            field: 'entity',
-          },
-        },
-        {
-          remove: {
-            ignore_failure: true,
-            field: 'event',
-          },
-        },
-        {
-          remove: {
-            ignore_failure: true,
-            field: 'asset',
-            if: isFieldMissingOrEmpty('ctx.asset'),
-          },
-        },
-        {
-          remove: {
-            ignore_failure: true,
-            field: `${fieldRetentionDefinition.entityType}.risk`,
-            if: isFieldMissingOrEmpty(`ctx.${fieldRetentionDefinition.entityType}.risk`),
-          },
-        },
       ]
     : []),
 ];
+
+const debugAddContextStep = (): IngestProcessorContainer => ({
+  script: {
+    lang: 'painless',
+    source: `
+    Map ctxCopy = new HashMap(ctx);
+    ctxCopy.remove('_index');
+    ctxCopy.remove('_id');
+    ctxCopy.remove('_version');
+    ctxCopy.remove('_seq_no');
+    ctxCopy.remove('_primary_term');
+    ctx.full_ctx = ctxCopy;
+  `,
+  },
+});
 
 const getFieldProcessors = (
   fieldRetentionDefinition: FieldRetentionDefinition
@@ -84,14 +99,16 @@ const getFieldProcessors = (
 const isFieldMissingOrEmpty = (field: string): string => {
   const progressivePaths = getProgressivePathsNoCtx(convertPathToBracketNotation(field));
   const lastPath = progressivePaths.at(-1);
-  const emptyArrayCheck = `(${lastPath} instanceof List && ${lastPath}.size() == 0)`;
+  const emptyArrayCheck = `(${lastPath} instanceof List && ${lastPath}.isEmpty())`;
   const emptyStringCheck = `(${lastPath} instanceof String && ${lastPath}.isEmpty())`;
-  const emptyObjectCheck = `(${lastPath} instanceof Map && ${lastPath}.size() == 0)`;
+  const emptyObjectCheck = `(${lastPath} instanceof Map && ${lastPath}.isEmpty())`;
+  const isEmptySetCheck = `(${lastPath} instanceof Set && ${lastPath}.isEmpty())`;
   return [
-    ...progressivePaths.map((path, index) => `${path} == null`),
+    ...progressivePaths.map((path) => `${path} == null`),
     emptyArrayCheck,
     emptyStringCheck,
     emptyObjectCheck,
+    isEmptySetCheck,
   ].join(' || ');
 };
 
