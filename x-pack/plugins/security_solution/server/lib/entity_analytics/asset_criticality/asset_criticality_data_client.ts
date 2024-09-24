@@ -310,10 +310,6 @@ export class AssetCriticalityDataClient {
       return undefined;
     }
 
-    if (record.id_value === CRITICALITY_VALUES.DELETED) {
-      return undefined;
-    }
-
     try {
       await this.options.esClient.update({
         id: createId(idParts),
