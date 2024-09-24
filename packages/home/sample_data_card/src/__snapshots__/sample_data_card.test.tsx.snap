@@ -231,17 +231,17 @@ exports[`SampleDataCard installed renders without app links 1`] = `
 
 exports[`SampleDataCard not installed renders 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard css-1fpl0x2-euiPanel-grow-m-m-plain-hasShadow-euiCard-left"
   data-test-subj="sampleDataSetCardsample-data-set"
 >
   <div
-    class="euiCard__main emotion-euiCard__main-vertical"
+    class="euiCard__main css-1t9ljgw-euiCard__main-vertical"
   >
     <div
-      class="euiCard__top emotion-euiCard__top-vertical"
+      class="euiCard__top css-1hghi78-euiCard__top-vertical"
     >
       <div
-        class="euiCard__image emotion-euiCard__image"
+        class="euiCard__image css-26lq4d-euiCard__image"
       >
         <img
           alt=""
@@ -250,20 +250,20 @@ exports[`SampleDataCard not installed renders 1`] = `
       </div>
     </div>
     <div
-      class="euiCard__content emotion-euiCard__content-vertical"
+      class="euiCard__content css-jolp8x-euiCard__content-vertical"
     >
       <p
-        class="euiTitle euiCard__title emotion-euiTitle-s"
+        class="euiTitle euiCard__title css-1422kbt-euiTitle-s"
         id="generated-idTitle"
       >
         <span
-          class="emotion-euiCard__text-left"
+          class="css-q4on12-euiCard__text-left"
         >
           Sample Data Set
         </span>
       </p>
       <div
-        class="euiText emotion-euiText-s-euiCard__description"
+        class="euiText css-mtv1pd-euiText-s-euiCard__description"
         id="generated-idDescription"
       >
         <p>
@@ -272,26 +272,26 @@ exports[`SampleDataCard not installed renders 1`] = `
       </div>
     </div>
     <div
-      class="emotion-euiCard__footer"
+      class="css-sec0wf-euiCard__footer"
     >
       <div
         data-status="not_installed"
         style="display:contents"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+          class="euiFlexGroup css-o4tohf-euiFlexGroup-responsive-l-flexEnd-stretch-row"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
           >
             <button
               aria-label="Add Sample Data Set"
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+              class="euiButton css-gp0gk9-euiButtonDisplay-m-defaultMinWidth-base-primary"
               data-test-subj="addSampleDataSetsample-data-set"
               type="button"
             >
               <span
-                class="emotion-euiButtonDisplayContent"
+                class="css-cf8eum-euiButtonDisplayContent"
               >
                 <span
                   class="eui-textTruncate"

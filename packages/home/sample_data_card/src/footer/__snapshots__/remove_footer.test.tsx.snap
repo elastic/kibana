@@ -2,19 +2,19 @@
 
 exports[`install footer should render 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-stretch-row"
+  class="euiFlexGroup css-15y3jj5-euiFlexGroup-none-spaceBetween-stretch-row"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <button
       aria-label="Remove Data Set Name"
-      class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-danger-flush-left"
+      class="euiButtonEmpty css-1h0356f-euiButtonDisplay-euiButtonEmpty-m-empty-danger-flush-left"
       data-test-subj="removeSampleDataSetdata-set-id"
       type="button"
     >
       <span
-        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+        class="euiButtonEmpty__content css-cf8eum-euiButtonDisplayContent"
       >
         <span
           class="eui-textTruncate euiButtonEmpty__text"
@@ -25,16 +25,16 @@ exports[`install footer should render 1`] = `
     </button>
   </div>
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <button
       aria-label="View Data Set Name"
-      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+      class="euiButton css-gp0gk9-euiButtonDisplay-m-defaultMinWidth-base-primary"
       data-test-subj="launchSampleDataSetdata-set-id"
       type="button"
     >
       <span
-        class="emotion-euiButtonDisplayContent"
+        class="css-cf8eum-euiButtonDisplayContent"
       >
         <span
           class="eui-textTruncate"

@@ -134,43 +134,43 @@ exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
 
 exports[`PingListExpandedRow renders link to docs if body is not recorded but it is present 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-stretch-column"
+  class="euiFlexGroup css-kz3qdw-euiFlexGroup-l-flexStart-stretch-column"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-grow-1"
+    class="euiFlexItem css-9sbomz-euiFlexItem-grow-1"
   >
     <div
-      class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
+      class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary css-1r1yx9p-euiPanel-none-m-primary-euiCallOut"
     >
       <div
-        class="euiText emotion-euiText-s-euiTextColor-default"
+        class="euiText css-f9i6fj-euiText-s-euiTextColor-default"
       >
         <dl
-          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          class="euiDescriptionList css-uznago-euiDescriptionList-row-left"
           data-type="row"
         >
           <dt
-            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+            class="euiDescriptionList__title css-xxhp2h-euiDescriptionList__title-row-normal-s"
           >
             Response Body
           </dt>
           <dd
-            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+            class="euiDescriptionList__description css-zdkgi8-euiDescriptionList__description-row-normal"
           >
             <div
-              class="euiText emotion-euiText-m"
+              class="euiText css-1py2xv4-euiText-m"
             >
               Body size is 1MB.
             </div>
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
             />
             <div
-              class="euiText emotion-euiText-m"
+              class="euiText css-1py2xv4-euiText-m"
             >
               Body not recorded. Read our 
               <a
-                class="euiLink emotion-euiLink-primary"
+                class="euiLink css-4ljoze-euiLink-primary"
                 data-test-subj="syntheticsDocLinkForBodyDocsLink"
                 href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
                 rel="noopener noreferrer"
@@ -178,13 +178,13 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
               >
                 docs
                 <span
-                  class="emotion-EuiExternalLinkIcon"
+                  class="css-1yz4dya-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly"
+                  class="css-gb1zbv-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>

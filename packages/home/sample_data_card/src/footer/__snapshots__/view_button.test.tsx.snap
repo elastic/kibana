@@ -2,17 +2,17 @@
 
 exports[`should render popover when appLinks is not empty 1`] = `
 <div
-  class="euiPopover emotion-euiPopover-inline-block"
+  class="euiPopover css-n7tnex-euiPopover-inline-block"
   data-test-subj="launchSampleDataSetecommerce"
   id="sampleDataLinksecommerce"
 >
   <button
     aria-label="View Sample eCommerce orders"
-    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+    class="euiButton css-gp0gk9-euiButtonDisplay-m-defaultMinWidth-base-primary"
     type="button"
   >
     <span
-      class="emotion-euiButtonDisplayContent"
+      class="css-cf8eum-euiButtonDisplayContent"
     >
       <span
         class="eui-textTruncate"
@@ -30,17 +30,17 @@ exports[`should render popover when appLinks is not empty 1`] = `
 
 exports[`should render popover with ordered appLinks 1`] = `
 <div
-  class="euiPopover emotion-euiPopover-inline-block"
+  class="euiPopover css-n7tnex-euiPopover-inline-block"
   data-test-subj="launchSampleDataSetecommerce"
   id="sampleDataLinksecommerce"
 >
   <button
     aria-label="View Sample eCommerce orders"
-    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+    class="euiButton css-gp0gk9-euiButtonDisplay-m-defaultMinWidth-base-primary"
     type="button"
   >
     <span
-      class="emotion-euiButtonDisplayContent"
+      class="css-cf8eum-euiButtonDisplayContent"
     >
       <span
         class="eui-textTruncate"
@@ -59,12 +59,12 @@ exports[`should render popover with ordered appLinks 1`] = `
 exports[`should render simple button when appLinks is empty 1`] = `
 <button
   aria-label="View Sample eCommerce orders"
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+  class="euiButton css-gp0gk9-euiButtonDisplay-m-defaultMinWidth-base-primary"
   data-test-subj="launchSampleDataSetecommerce"
   type="button"
 >
   <span
-    class="emotion-euiButtonDisplayContent"
+    class="css-cf8eum-euiButtonDisplayContent"
   >
     <span
       class="eui-textTruncate"

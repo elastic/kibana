@@ -5,25 +5,25 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
   class="monSummaryStatusNoWrap"
 >
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
+    class="euiFlexGroup css-eu1fwp-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
     <div
-      class="euiFlexItem eui-textTruncate emotion-euiFlexItem-growZero"
+      class="euiFlexItem eui-textTruncate css-kpsrin-euiFlexItem-growZero"
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat monSummaryStatusNoWrap__stat css-10hx1zo-euiStat-left"
         data-test-subj="status"
       >
         <div
-          class="euiText euiStat__description emotion-euiText-s"
+          class="euiText euiStat__description css-1f3uq2g-euiText-s"
         >
           <p>
             Status
           </p>
         </div>
         <p
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
+          class="euiTitle euiStat__title css-1qzsrmj-euiTitle-xxxs-euiStat__title-default"
         >
           Status: 
           <span
@@ -37,42 +37,42 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       data-test-subj="transportAddress"
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat monSummaryStatusNoWrap__stat css-10hx1zo-euiStat-left"
       >
         <div
-          class="euiText euiStat__description emotion-euiText-s"
+          class="euiText euiStat__description css-1f3uq2g-euiText-s"
         >
           <p />
         </div>
         <p
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
+          class="euiTitle euiStat__title css-1qzsrmj-euiTitle-xxxs-euiStat__title-default"
         >
           127.0.0.1:9300
         </p>
       </div>
     </div>
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       data-test-subj="documentCount"
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat monSummaryStatusNoWrap__stat css-10hx1zo-euiStat-left"
       >
         <div
-          class="euiText euiStat__description emotion-euiText-s"
+          class="euiText euiStat__description css-1f3uq2g-euiText-s"
         >
           <p>
             Documents
           </p>
         </div>
         <p
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
+          class="euiTitle euiStat__title css-1qzsrmj-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
         </p>
@@ -87,51 +87,51 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
   class="monSummaryStatusNoWrap"
 >
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
+    class="euiFlexGroup css-eu1fwp-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
     <div
-      class="euiFlexItem eui-textTruncate emotion-euiFlexItem-growZero"
+      class="euiFlexItem eui-textTruncate css-kpsrin-euiFlexItem-growZero"
       style="max-width:200px"
     />
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       data-test-subj="freeDiskSpace"
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat monSummaryStatusNoWrap__stat css-10hx1zo-euiStat-left"
       >
         <div
-          class="euiText euiStat__description emotion-euiText-s"
+          class="euiText euiStat__description css-1f3uq2g-euiText-s"
         >
           <p>
             Free Disk Space
           </p>
         </div>
         <p
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
+          class="euiTitle euiStat__title css-1qzsrmj-euiTitle-xxxs-euiStat__title-default"
         >
           173.9 GB
         </p>
       </div>
     </div>
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       data-test-subj="documentCount"
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat monSummaryStatusNoWrap__stat css-10hx1zo-euiStat-left"
       >
         <div
-          class="euiText euiStat__description emotion-euiText-s"
+          class="euiText euiStat__description css-1f3uq2g-euiText-s"
         >
           <p>
             Documents
           </p>
         </div>
         <p
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
+          class="euiTitle euiStat__title css-1qzsrmj-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
         </p>
@@ -146,25 +146,25 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
   class="monSummaryStatusNoWrap"
 >
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
+    class="euiFlexGroup css-eu1fwp-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
     <div
-      class="euiFlexItem eui-textTruncate emotion-euiFlexItem-growZero"
+      class="euiFlexItem eui-textTruncate css-kpsrin-euiFlexItem-growZero"
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat monSummaryStatusNoWrap__stat css-10hx1zo-euiStat-left"
         data-test-subj="status"
       >
         <div
-          class="euiText euiStat__description emotion-euiText-s"
+          class="euiText euiStat__description css-1f3uq2g-euiText-s"
         >
           <p>
             Status
           </p>
         </div>
         <p
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
+          class="euiTitle euiStat__title css-1qzsrmj-euiTitle-xxxs-euiStat__title-default"
         >
           Status: 
           <span
@@ -178,44 +178,44 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       data-test-subj="freeDiskSpace"
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat monSummaryStatusNoWrap__stat css-10hx1zo-euiStat-left"
       >
         <div
-          class="euiText euiStat__description emotion-euiText-s"
+          class="euiText euiStat__description css-1f3uq2g-euiText-s"
         >
           <p>
             Free Disk Space
           </p>
         </div>
         <p
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
+          class="euiTitle euiStat__title css-1qzsrmj-euiTitle-xxxs-euiStat__title-default"
         >
           173.9 GB
         </p>
       </div>
     </div>
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       data-test-subj="documentCount"
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat monSummaryStatusNoWrap__stat css-10hx1zo-euiStat-left"
       >
         <div
-          class="euiText euiStat__description emotion-euiText-s"
+          class="euiText euiStat__description css-1f3uq2g-euiText-s"
         >
           <p>
             Documents
           </p>
         </div>
         <p
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
+          class="euiTitle euiStat__title css-1qzsrmj-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
         </p>
