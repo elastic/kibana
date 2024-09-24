@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { AddTimelineButton } from './add_timeline_button';
 import { useCreateTimeline } from '../../hooks/use_create_timeline';
 
@@ -25,7 +25,7 @@ describe('AddTimelineButton', () => {
 
     expect(plusButton).toBeInTheDocument();
 
-    plusButton.click();
+    fireEvent.click(plusButton);
 
     expect(getByTestId('timeline-bottom-bar-create-new-timeline')).toBeInTheDocument();
     expect(getByTestId('timeline-bottom-bar-create-new-timeline')).toHaveTextContent(

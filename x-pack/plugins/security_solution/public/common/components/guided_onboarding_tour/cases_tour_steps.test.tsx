@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { CasesTourSteps } from './cases_tour_steps';
 import { AlertsCasesTourSteps } from './tour_config';
 import { TestProviders } from '../../mock';
@@ -27,7 +27,7 @@ describe('cases tour steps', () => {
   });
   it('On click next, AlertsCasesTourSteps.submitCase step active', () => {
     const { getByTestId, queryByTestId } = render(<CasesTourSteps />, { wrapper: TestProviders });
-    getByTestId(`step-${AlertsCasesTourSteps.createCase}`).click();
+    fireEvent.click(getByTestId(`step-${AlertsCasesTourSteps.createCase}`));
     expect(getByTestId(`step-${AlertsCasesTourSteps.submitCase}`)).toBeInTheDocument();
     expect(queryByTestId(`step-${AlertsCasesTourSteps.createCase}`)).not.toBeInTheDocument();
   });

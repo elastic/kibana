@@ -647,7 +647,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage(cloudPosturePages.kspm_dashboard.path);
 
-    screen.getByTestId(CLOUD_DASHBOARD_TAB).click();
+    fireEvent.click(screen.getByTestId(CLOUD_DASHBOARD_TAB));
 
     expectIdsInDoc({
       be: [CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
@@ -689,7 +689,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    screen.getByTestId(KUBERNETES_DASHBOARD_TAB).click();
+    fireEvent.click(screen.getByTestId(KUBERNETES_DASHBOARD_TAB));
 
     expectIdsInDoc({
       be: [KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],

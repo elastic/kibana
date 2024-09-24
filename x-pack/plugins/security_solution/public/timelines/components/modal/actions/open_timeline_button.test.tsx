@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { OpenTimelineButton } from './open_timeline_button';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
@@ -60,6 +61,7 @@ describe('OpenTimelineButton', () => {
   });
 
   it('should open the modal after clicking on the button', async () => {
+    (useDispatch as jest.Mock).mockReturnValue(jest.fn());
     (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.template });
     (useStartTransaction as jest.Mock).mockReturnValue({ startTransaction: jest.fn() });
     (useSourcererDataView as jest.Mock).mockReturnValue({
@@ -75,7 +77,7 @@ describe('OpenTimelineButton', () => {
 
     const { getByTestId } = renderOpenTimelineButton();
 
-    getByTestId('timeline-modal-open-timeline-button').click();
+    fireEvent.click(getByTestId('timeline-modal-open-timeline-button'));
 
     await waitFor(() => {
       expect(getByTestId('open-timeline-modal')).toBeInTheDocument();
