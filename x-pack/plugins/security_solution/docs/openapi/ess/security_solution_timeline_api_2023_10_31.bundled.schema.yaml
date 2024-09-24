@@ -1098,6 +1098,9 @@ components:
         queryMatch:
           $ref: '#/components/schemas/QueryMatchResult'
           nullable: true
+        type:
+          $ref: '#/components/schemas/DataProviderType'
+          nullable: true
     DataProviderResult:
       type: object
       properties:

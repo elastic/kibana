@@ -99,14 +99,6 @@ export const mockState: SyntheticsAppState = {
       sortField: 'name.keyword',
     },
     trendStats: {},
-    data: {
-      total: 0,
-      allMonitorIds: [],
-      monitors: [],
-    },
-    error: null,
-    loaded: false,
-    loading: false,
     flyoutConfig: null,
     groupBy: {
       field: 'none',

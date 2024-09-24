@@ -14255,6 +14255,10 @@
                 "path": "packages/core/metrics/core-metrics-server-internal/src/routes/elu_history.ts"
               },
               {
+                "plugin": "cloud",
+                "path": "x-pack/plugins/cloud/server/routes/elasticsearch_routes.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
@@ -15021,6 +15025,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/settings.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entities/list.ts"
               },
               {
                 "plugin": "securitySolution",

@@ -43,7 +43,8 @@ export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
           const { savedObjectIds, searchIds } = request.body;
 
           await deleteTimeline(frameworkRequest, savedObjectIds, searchIds);
-          return response.ok({ body: { data: { deleteTimeline: true } } });
+          const body: DeleteTimelinesResponse = { data: { deleteTimeline: true } };
+          return response.ok({ body });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

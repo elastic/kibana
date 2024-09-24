@@ -49,7 +49,8 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
                 perPage: MAX_UNASSOCIATED_NOTES,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
-              return response.ok({ body: res ?? {} });
+              const body: GetNotesResponse = res ?? {};
+              return response.ok({ body });
             } else {
               const options = {
                 type: noteSavedObjectType,
@@ -77,7 +78,8 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
               filter,
             };
             const res = await getAllSavedNote(frameworkRequest, options);
-            return response.ok({ body: res ?? {} });
+            const body: GetNotesResponse = res ?? {};
+            return response.ok({ body });
           }
         } catch (err) {
           const error = transformError(err);
