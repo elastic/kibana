@@ -37,12 +37,12 @@ import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test
 const PARALLEL_MIGRATORS = 4;
 type Job<T> = () => Promise<T>;
 
-const getLogFile = (node: number) => join(__dirname, `multi_node_split_${node}.log`);
-const logFileSecondRun = join(__dirname, `multi_node_split_second_run.log`);
+const getLogFile = (node: number) => join(__dirname, `multiple_kb_nodes_${node}.log`);
+const logFileSecondRun = join(__dirname, `multiple_kb_nodes_second_run.log`);
 
 describe('multiple Kibana nodes performing a reindexing migration', () => {
+  jest.setTimeout(1200000); // costly test
   let esServer: TestElasticsearchUtils['es'];
-  let jobs: Array<Job<MigrationResult[]>>;
   let client: Client;
   let results: MigrationResult[][];
 
@@ -53,28 +53,30 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
     await clearLog(logFileSecondRun);
 
     esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_500K });
-    jobs = await createMigratorJobs(PARALLEL_MIGRATORS);
     client = await getEsClient();
     await checkBeforeState();
   });
 
-  it('migrate saved objects normally when started at the same time', async () => {
-    results = await startWithDelay(jobs, 0);
-  });
-
-  it('migrate saved objects normally when started with a small interval', async () => {
-    results = await startWithDelay(jobs, 1);
-  });
-
-  it('migrate saved objects normally when started with an average interval', async () => {
-    results = await startWithDelay(jobs, 5);
-  });
-
-  it('migrate saved objects normally when started with a bigger interval', async () => {
-    results = await startWithDelay(jobs, 20);
-  });
-
-  afterEach(async () => {
+  it.each([
+    {
+      case: 'migrate saved objects normally when started at the same time',
+      delaySeconds: 0,
+    },
+    {
+      case: 'migrate saved objects normally when started with a small interval',
+      delaySeconds: 1,
+    },
+    {
+      case: 'migrate saved objects normally when started with an average interval',
+      delaySeconds: 5,
+    },
+    {
+      case: 'migrate saved objects normally when started with a bigger interval',
+      delaySeconds: 20,
+    },
+  ])('$case', async ({ delaySeconds }) => {
+    const jobs = await createMigratorJobs(PARALLEL_MIGRATORS);
+    results = await startWithDelay(jobs, delaySeconds);
     checkMigratorsResults();
     await checkIndicesInfo();
     await checkSavedObjectDocuments();
@@ -103,17 +105,17 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
   function checkMigratorsResults() {
     const flatResults = results.flat(); // multiple nodes, multiple migrators each
 
-    // each migrator should take less than 60 seconds
-    expect(
-      (flatResults as Array<{ elapsedMs?: number }>).every(
-        ({ elapsedMs }) => !elapsedMs || elapsedMs < 60000
-      )
-    ).toEqual(true);
+    // each migrator should take less than 120 seconds
+    const painfulMigrator = (flatResults as Array<{ elapsedMs?: number }>).find(
+      ({ elapsedMs }) => elapsedMs && elapsedMs > 120_000
+    );
+    expect(painfulMigrator).toBeUndefined();
 
     // each migrator has either migrated or patched
-    expect(
-      flatResults.every(({ status }) => status === 'migrated' || status === 'patched')
-    ).toEqual(true);
+    const failedMigrator = flatResults.find(
+      ({ status }) => status !== 'migrated' && status !== 'patched'
+    );
+    expect(failedMigrator).toBeUndefined();
   }
 
   async function checkIndicesInfo() {

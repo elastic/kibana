@@ -97,11 +97,10 @@ describe('v2 migration', () => {
     });
 
     it('each migrator takes less than 10 seconds', () => {
-      expect(
-        (migrationResults as Array<{ elapsedMs?: number }>).every(
-          ({ elapsedMs }) => !elapsedMs || elapsedMs < 10000
-        )
-      ).toEqual(true);
+      const painfulMigrator = (migrationResults as Array<{ elapsedMs?: number }>).find(
+        ({ elapsedMs }) => elapsedMs && elapsedMs > 10_000
+      );
+      expect(painfulMigrator).toBeUndefined();
     });
   });
 
@@ -336,11 +335,10 @@ describe('v2 migration', () => {
         });
 
         it('each migrator takes less than 60 seconds', () => {
-          expect(
-            (migrationResults as Array<{ elapsedMs?: number }>).every(
-              ({ elapsedMs }) => !elapsedMs || elapsedMs < 60000
-            )
-          ).toEqual(true);
+          const painfulMigrator = (migrationResults as Array<{ elapsedMs?: number }>).find(
+            ({ elapsedMs }) => elapsedMs && elapsedMs > 60_000
+          );
+          expect(painfulMigrator).toBeUndefined();
         });
       });
     });
