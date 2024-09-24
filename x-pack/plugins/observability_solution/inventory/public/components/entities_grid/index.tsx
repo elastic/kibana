@@ -26,6 +26,8 @@ import {
   ENTITY_TYPE,
 } from '../../../common/es_fields/entities';
 import { APIReturnType } from '../../api';
+import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
+import { EntityType } from '../../../common/entities';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 
@@ -139,7 +141,11 @@ export function EntitiesGrid({
       const columnEntityTableId = columnId as EntityColumnIds;
       switch (columnEntityTableId) {
         case ENTITY_TYPE:
-          return <EuiBadge color="hollow">{entity[columnEntityTableId]}</EuiBadge>;
+          return (
+            <EuiBadge color="hollow">
+              {getEntityTypeLabel(entity[columnEntityTableId] as EntityType)}
+            </EuiBadge>
+          );
         case ENTITY_LAST_SEEN:
           return (
             <FormattedMessage

@@ -11616,7 +11616,7 @@ paths:
         - Security Solution Endpoint Management API
   /api/entity_store/engines:
     get:
-      operationId: ListEntityStoreEngines
+      operationId: ListEntityEngines
       responses:
         '200':
           content:
@@ -11632,14 +11632,14 @@ paths:
                         #/components/schemas/Security_Solution_Entity_Analytics_API_EngineDescriptor
                     type: array
           description: Successful response
-      summary: List the Entity Store engines
+      summary: List the Entity Engines
       tags:
         - Security Solution Entity Analytics API
   /api/entity_store/engines/{entityType}:
     delete:
-      operationId: DeleteEntityStore
+      operationId: DeleteEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -11662,13 +11662,13 @@ paths:
                   deleted:
                     type: boolean
           description: Successful response
-      summary: Delete the Entity Store engine
+      summary: Delete the Entity Engine
       tags:
         - Security Solution Entity Analytics API
     get:
-      operationId: GetEntityStoreEngine
+      operationId: GetEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -11683,14 +11683,14 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Entity_Analytics_API_EngineDescriptor
           description: Successful response
-      summary: Get the Entity Store engine
+      summary: Get an Entity Engine
       tags:
         - Security Solution Entity Analytics API
   /api/entity_store/engines/{entityType}/init:
     post:
-      operationId: InitEntityStore
+      operationId: InitEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -11718,14 +11718,14 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Entity_Analytics_API_EngineDescriptor
           description: Successful response
-      summary: Initialize the Entity Store
+      summary: Initialize an Entity Engine
       tags:
         - Security Solution Entity Analytics API
   /api/entity_store/engines/{entityType}/start:
     post:
-      operationId: StartEntityStore
+      operationId: StartEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -11742,14 +11742,14 @@ paths:
                   started:
                     type: boolean
           description: Successful response
-      summary: Start the Entity Store engine
+      summary: Start an Entity Engine
       tags:
         - Security Solution Entity Analytics API
   /api/entity_store/engines/{entityType}/stats:
     post:
-      operationId: GetEntityStoreStats
+      operationId: GetEntityEngineStats
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -11781,14 +11781,14 @@ paths:
                     $ref: >-
                       #/components/schemas/Security_Solution_Entity_Analytics_API_EntityType
           description: Successful response
-      summary: Get the Entity Store engine stats
+      summary: Get Entity Engine stats
       tags:
         - Security Solution Entity Analytics API
   /api/entity_store/engines/{entityType}/stop:
     post:
-      operationId: StopEntityStore
+      operationId: StopEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -11805,7 +11805,7 @@ paths:
                   stopped:
                     type: boolean
           description: Successful response
-      summary: Stop the Entity Store engine
+      summary: Stop an Entity Engine
       tags:
         - Security Solution Entity Analytics API
   /api/entity_store/entities/list:
@@ -18539,7 +18539,8 @@ paths:
                       type: string
                   required:
                     - noteId
-                - type: object
+                - nullable: true
+                  type: object
                   properties:
                     noteIds:
                       items:
@@ -18570,19 +18571,18 @@ paths:
       parameters:
         - in: query
           name: documentIds
-          required: true
           schema:
             $ref: '#/components/schemas/Security_Solution_Timeline_API_DocumentIds'
         - in: query
           name: page
           schema:
             nullable: true
-            type: number
+            type: string
         - in: query
           name: perPage
           schema:
             nullable: true
-            type: number
+            type: string
         - in: query
           name: search
           schema:
@@ -18605,6 +18605,13 @@ paths:
             type: string
       responses:
         '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                oneOf:
+                  - $ref: >-
+                      #/components/schemas/Security_Solution_Timeline_API_GetNotesResult
+                  - type: object
           description: Indicates the requested notes were returned.
       summary: Get notes
       tags:
@@ -18654,19 +18661,8 @@ paths:
                     type: object
                     properties:
                       persistNote:
-                        type: object
-                        properties:
-                          code:
-                            type: number
-                          message:
-                            type: string
-                          note:
-                            $ref: >-
-                              #/components/schemas/Security_Solution_Timeline_API_Note
-                        required:
-                          - code
-                          - message
-                          - note
+                        $ref: >-
+                          #/components/schemas/Security_Solution_Timeline_API_ResponseNote
                     required:
                       - persistNote
                 required:
@@ -19038,15 +19034,8 @@ paths:
                     type: object
                     properties:
                       persistPinnedEventOnTimeline:
-                        allOf:
-                          - $ref: >-
-                              #/components/schemas/Security_Solution_Timeline_API_PinnedEvent
-                          - type: object
-                            properties:
-                              code:
-                                type: number
-                              message:
-                                type: string
+                        $ref: >-
+                          #/components/schemas/Security_Solution_Timeline_API_PersistPinnedEventResponse
                     required:
                       - persistPinnedEventOnTimeline
                 required:
@@ -40429,7 +40418,6 @@ components:
           nullable: true
           type: string
         timelineId:
-          nullable: true
           type: string
         updated:
           nullable: true
@@ -40438,6 +40426,28 @@ components:
           nullable: true
           type: string
       required:
+        - timelineId
+    Security_Solution_Timeline_API_BarePinnedEvent:
+      type: object
+      properties:
+        created:
+          nullable: true
+          type: number
+        createdBy:
+          nullable: true
+          type: string
+        eventId:
+          type: string
+        timelineId:
+          type: string
+        updated:
+          nullable: true
+          type: number
+        updatedBy:
+          nullable: true
+          type: string
+      required:
+        - eventId
         - timelineId
     Security_Solution_Timeline_API_ColumnHeaderResult:
       type: object
@@ -40613,6 +40623,18 @@ components:
           type: string
         script:
           type: string
+    Security_Solution_Timeline_API_GetNotesResult:
+      type: object
+      properties:
+        notes:
+          items:
+            $ref: '#/components/schemas/Security_Solution_Timeline_API_Note'
+          type: array
+        totalCount:
+          type: number
+      required:
+        - totalCount
+        - notes
     Security_Solution_Timeline_API_ImportTimelineResult:
       type: object
       properties:
@@ -40673,34 +40695,38 @@ components:
               type: string
             version:
               type: string
+          required:
+            - noteId
+            - version
+    Security_Solution_Timeline_API_PersistPinnedEventResponse:
+      oneOf:
+        - allOf:
+            - $ref: '#/components/schemas/Security_Solution_Timeline_API_PinnedEvent'
+            - $ref: >-
+                #/components/schemas/Security_Solution_Timeline_API_PinnedEventBaseResponseBody
+        - nullable: true
+          type: object
     Security_Solution_Timeline_API_PinnedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Security_Solution_Timeline_API_BarePinnedEvent'
+        - type: object
+          properties:
+            pinnedEventId:
+              type: string
+            version:
+              type: string
+          required:
+            - pinnedEventId
+            - version
+    Security_Solution_Timeline_API_PinnedEventBaseResponseBody:
       type: object
       properties:
-        created:
-          nullable: true
+        code:
           type: number
-        createdBy:
-          nullable: true
-          type: string
-        eventId:
-          type: string
-        pinnedEventId:
-          type: string
-        timelineId:
-          type: string
-        updated:
-          nullable: true
-          type: number
-        updatedBy:
-          nullable: true
-          type: string
-        version:
+        message:
           type: string
       required:
-        - eventId
-        - pinnedEventId
-        - timelineId
-        - version
+        - code
     Security_Solution_Timeline_API_QueryMatchResult:
       type: object
       properties:
@@ -40745,6 +40771,19 @@ components:
           type: object
         readable:
           type: boolean
+    Security_Solution_Timeline_API_ResponseNote:
+      type: object
+      properties:
+        code:
+          type: number
+        message:
+          type: string
+        note:
+          $ref: '#/components/schemas/Security_Solution_Timeline_API_Note'
+      required:
+        - code
+        - message
+        - note
     Security_Solution_Timeline_API_RowRendererId:
       enum:
         - alert
