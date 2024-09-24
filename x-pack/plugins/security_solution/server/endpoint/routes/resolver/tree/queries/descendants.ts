@@ -109,7 +109,7 @@ export class DescendantsQuery extends BaseResolverQuery {
                */
               source: `
                 Map ancestryToIndex = [:];
-                List sourceAncestryArray = doc['${ancestryField}'].value;
+                List sourceAncestryArray = doc['${ancestryField}'];
                 int length = sourceAncestryArray.length;
                 for (int i = 0; i < length; i++) {
                   ancestryToIndex[sourceAncestryArray[i]] = i;
