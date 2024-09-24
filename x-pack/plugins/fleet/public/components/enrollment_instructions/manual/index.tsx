@@ -23,6 +23,40 @@ function getfleetServerHostsEnrollArgs(
   return `--url=${fleetServerHost || `FLEET_SERVER_HOST`} --enrollment-token=${apiKey}${proxyArgs}`;
 }
 
+export const getDownloadBaseUrl = (downloadSource?: DownloadSource) => {
+  return downloadSource?.host.endsWith('/')
+    ? downloadSource.host.substring(0, downloadSource.host.length - 1)
+    : 'https://artifacts.elastic.co/downloads';
+};
+
+export const getDownloadSourceProxyArgs = (downloadSourceProxy?: FleetProxy) => {
+  const windows = `${downloadSourceProxy?.url ? `-Proxy "${downloadSourceProxy.url}"` : ''} ${
+    downloadSourceProxy?.proxy_headers
+      ? `-Headers @{${Object.entries(downloadSourceProxy.proxy_headers)
+          .reduce((acc, [proxyKey, proyVal]) => {
+            acc.push(`"${proxyKey}"="${proyVal}"`);
+            return acc;
+          }, [] as string[])
+          .join(';')}`
+      : ''
+  }}`.trim();
+  const curl = `${downloadSourceProxy?.url ? `--proxy ${downloadSourceProxy.url}` : ''} ${
+    downloadSourceProxy?.proxy_headers
+      ? Object.entries(downloadSourceProxy.proxy_headers)
+          .reduce((acc, [proxyKey, proyVal]) => {
+            acc.push(`--proxy-header "${proxyKey}=${proyVal}"`);
+            return acc;
+          }, [] as string[])
+          .join(' ')
+      : ''
+  }`.trim();
+
+  return {
+    windows,
+    curl,
+  };
+};
+
 export const ManualInstructions = ({
   apiKey,
   fleetServerHost,
@@ -45,41 +79,15 @@ export const ManualInstructions = ({
   gcpAccountType?: string;
 }) => {
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHost, fleetProxy);
-  const downloadBaseUrl = downloadSource
-    ? downloadSource.host.endsWith('/')
-      ? downloadSource.host.substring(0, downloadSource.host.length - 1)
-      : downloadSource.host
-    : 'https://artifacts.elastic.co/downloads';
+  const downloadBaseUrl = getDownloadBaseUrl(downloadSource);
 
   const fleetServerUrl = enrollArgs?.split('--url=')?.pop()?.split('--enrollment')[0];
   const enrollmentToken = enrollArgs?.split('--enrollment-token=')[1];
 
   const k8sCommand = 'kubectl apply -f elastic-agent-managed-kubernetes.yml';
 
-  const windowsDownloadSourceProxyArgs = `${
-    downloadSourceProxy?.url ? `-Proxy "${downloadSourceProxy.url}"` : ''
-  } ${
-    downloadSourceProxy?.proxy_headers
-      ? `@{${Object.entries(downloadSourceProxy.proxy_headers)
-          .reduce((acc, [proxyKey, proyVal]) => {
-            acc.push(`"${proxyKey}"="${proyVal}"`);
-            return acc;
-          }, [] as string[])
-          .join(';')}`
-      : ''
-  }}`.trim();
-  const curlDownloadSourceProxyArgs = `${
-    downloadSourceProxy?.url ? `--proxy ${downloadSourceProxy.url}` : ''
-  } ${
-    downloadSourceProxy?.proxy_headers
-      ? Object.entries(downloadSourceProxy.proxy_headers)
-          .reduce((acc, [proxyKey, proyVal]) => {
-            acc.push(`--proxy-header ${proxyKey}=${proyVal}`);
-            return acc;
-          }, [] as string[])
-          .join(' ')
-      : ''
-  }`.trim();
+  const { windows: windowsDownloadSourceProxyArgs, curl: curlDownloadSourceProxyArgs } =
+    getDownloadSourceProxyArgs(downloadSourceProxy);
 
   const linuxCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-x86_64.tar.gz ${curlDownloadSourceProxyArgs}
 tar xzvf elastic-agent-${agentVersion}-linux-x86_64.tar.gz
