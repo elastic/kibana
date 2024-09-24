@@ -675,5 +675,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
     });
+
+    describe('histogram breakdown', () => {
+      before(async () => {
+        await common.navigateToApp('discover');
+        await timePicker.setDefaultAbsoluteRange();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+      });
+
+      it('should choose breakdown field', async () => {
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery = 'from logstash-*';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await discover.chooseBreakdownField('extension');
+        await header.waitUntilLoadingHasFinished();
+        const list = await discover.getHistogramLegendList();
+        expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
+      });
+
+      it('should save breakdown field in saved search', async () => {
+        await discover.saveSearch('esql view with breakdown');
+
+        await discover.clickNewSearchButton();
+        await header.waitUntilLoadingHasFinished();
+        const prevList = await discover.getHistogramLegendList();
+        expect(prevList).to.eql([]);
+
+        await discover.loadSavedSearch('esql view with breakdown');
+        await header.waitUntilLoadingHasFinished();
+        const list = await discover.getHistogramLegendList();
+        expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
+      });
+    });
   });
 }
