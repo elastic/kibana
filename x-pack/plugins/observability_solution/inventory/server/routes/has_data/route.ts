@@ -22,12 +22,10 @@ export const hasDataRoute = createInventoryServerRoute({
       plugin: `@kbn/${INVENTORY_APP_ID}-plugin`,
     });
 
-    const hasData = await getHasData({
+    return getHasData({
       inventoryEsClient,
       logger,
     });
-
-    return { ...hasData };
   },
 });
 

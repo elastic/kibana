@@ -41,7 +41,7 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
     toggleWelcomedModal();
   };
 
-  const { value = { hasData: false }, loading } = useInventoryAbortableAsync(
+  const { value = { hasData: false }, loading: hasDataLoading } = useInventoryAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/has_data', {
         signal,
@@ -50,7 +50,7 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
     [inventoryAPIClient]
   );
 
-  if (isEnablementLoading || loading) {
+  if (isEnablementLoading || hasDataLoading) {
     return (
       <ObservabilityPageTemplate pageHeader={pageTitle}>
         <EuiEmptyPrompt icon={<EuiLoadingLogo logo="logoObservability" size="xl" />} />
