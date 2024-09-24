@@ -1,9 +1,9 @@
-### Create Document Entry
+### Create Document Entry (Admin)
 POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
-Authorization: Basic {{auth.username}} {{auth.password}}
+Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
 X-Kbn-Context: {{appContext.security}}
 
 {
@@ -15,23 +15,43 @@ X-Kbn-Context: {{appContext.security}}
   "text": "My favorite food is Dan Bing"
 }
 
-### Create Index Entry
+### Create Index Entry (Admin)
 POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
-Authorization: Basic {{auth.username}} {{auth.password}}
+Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
 X-Kbn-Context: {{appContext.security}}
 
 {
   "type": "index",
-  "name": "SpongBotSlackConnector",
+  "name": "SlackConnector (Admin)",
   "namespace": "default",
-  "index": "spongbot-slack",
+  "index": "slackbot-test",
   "field": "semantic_text",
   "description": "Use this index to search for the user's Slack messages.",
   "queryDescription":
     "The free text search that the user wants to perform over this dataset. So if asking \"what are my slack messages from last week about failed tests\", the query would be \"A test has failed! failing test failed test\"",
+  "outputFields": ["author", "text", "timestamp"]
+}
+
+### Create Index Entry (Assistant System)
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf: "true"
+Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.assistant_system.username}} {{auth.assistant_system.password}}
+X-Kbn-Context: {{appContext.security}}
+
+{
+  "type": "index",
+  "name": "SlackConnector (Assistant System)",
+  "namespace": "default",
+  "index": "slackbot-test",
+  "field": "semantic_text",
+  "description": "Use this index to search for the user's Slack messages.",
+  "queryDescription":
+  "The free text search that the user wants to perform over this dataset. So if asking \"what are my slack messages from last week about failed tests\", the query would be \"A test has failed! failing test failed test\"",
   "outputFields": ["author", "text", "timestamp"]
 }
 
