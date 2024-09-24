@@ -40,6 +40,7 @@ const renderSummary = (
         data={dataPluginMock.createStartContract()}
         density={DataGridDensity.COMPACT}
         rowHeight={ROWS_HEIGHT_OPTIONS.single}
+        onFilter={jest.fn()}
         shouldShowFieldHandler={() => true}
         {...opts}
       />

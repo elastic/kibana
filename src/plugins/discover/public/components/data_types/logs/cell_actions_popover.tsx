@@ -18,20 +18,30 @@ import {
   EuiText,
   EuiButtonIcon,
   EuiTextTruncate,
+  EuiButtonEmpty,
+  EuiCopy,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { closeCellActionPopoverText, openCellActionPopoverAriaText } from './translations';
-import { FilterInButton } from './filter_in_button';
-import { FilterOutButton } from './filter_out_button';
-import { CopyButton } from './copy_button';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import {
+  actionFilterForText,
+  actionFilterOutText,
+  closeCellActionPopoverText,
+  copyValueAriaText,
+  copyValueText,
+  filterForText,
+  filterOutText,
+  openCellActionPopoverAriaText,
+} from './translations';
 
 const codeFontCSS = css`
   font-family: ${euiThemeVars.euiCodeFontFamily};
 `;
 
 interface CellActionsPopoverProps {
+  onFilter?: DocViewFilterFn;
   /* ECS mapping for the key */
   property: string;
   /* Value for the mapping, which will be displayed */
@@ -49,12 +59,19 @@ interface CellActionsPopoverProps {
 }
 
 export function CellActionsPopover({
+  onFilter,
   property,
   value,
   renderValue,
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
+
+  const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
+    if (onFilter) {
+      onFilter(property, value, operator);
+    }
+  };
 
   const popoverTriggerProps = {
     onClick: togglePopover,
@@ -94,30 +111,63 @@ export function CellActionsPopover({
       </EuiFlexGroup>
       <EuiPopoverFooter>
         <EuiFlexGroup responsive={false} gutterSize="s" wrap={true}>
-          <FilterInButton value={value} property={property} />
-          <FilterOutButton value={value} property={property} />
+          <EuiButtonEmpty
+            key="addToFilterAction"
+            size="s"
+            iconType="plusInCircle"
+            aria-label={actionFilterForText(value)}
+            onClick={makeFilterHandlerByOperator('+')}
+            data-test-subj={`dataTableCellAction_addToFilterAction_${property}`}
+          >
+            {filterForText}
+          </EuiButtonEmpty>
+          <EuiButtonEmpty
+            key="removeFromFilterAction"
+            size="s"
+            iconType="minusInCircle"
+            aria-label={actionFilterOutText(value)}
+            onClick={makeFilterHandlerByOperator('-')}
+            data-test-subj={`dataTableCellAction_removeFromFilterAction_${property}`}
+          >
+            {filterOutText}
+          </EuiButtonEmpty>
         </EuiFlexGroup>
       </EuiPopoverFooter>
       <EuiPopoverFooter>
-        <CopyButton value={value} property={property} />
+        <EuiCopy textToCopy={value}>
+          {(copy) => (
+            <EuiButtonEmpty
+              key="copyToClipboardAction"
+              size="s"
+              iconType="copyClipboard"
+              aria-label={copyValueAriaText(property)}
+              onClick={copy}
+              data-test-subj={`dataTableCellAction_copyToClipboardAction_${property}`}
+            >
+              {copyValueText}
+            </EuiButtonEmpty>
+          )}
+        </EuiCopy>
       </EuiPopoverFooter>
     </EuiPopover>
   );
 }
 
 export interface FieldBadgeWithActionsProps
-  extends Pick<CellActionsPopoverProps, 'property' | 'value' | 'renderValue'> {
+  extends Pick<CellActionsPopoverProps, 'onFilter' | 'property' | 'value' | 'renderValue'> {
   icon?: EuiBadgeProps['iconType'];
 }
 
 export function FieldBadgeWithActions({
   icon,
+  onFilter,
   property,
   renderValue,
   value,
 }: FieldBadgeWithActionsProps) {
   return (
     <CellActionsPopover
+      onFilter={onFilter}
       property={property}
       value={value}
       renderValue={renderValue}

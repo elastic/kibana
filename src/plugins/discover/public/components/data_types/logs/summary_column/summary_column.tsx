@@ -21,6 +21,7 @@ import {
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DataGridCellServicesProvider } from '../../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
 import { Resource, StaticResource } from './resource';
 import { Content } from './content';
@@ -32,6 +33,7 @@ export interface SummaryColumnFactoryDeps {
   density: DataGridDensity | undefined;
   rowHeight: number | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  onFilter?: DocViewFilterFn;
 }
 
 export type SummaryColumnProps = DataGridCellValueElementProps;
@@ -54,7 +56,7 @@ const SummaryCell = ({
   rowHeight: maybeNullishRowHeight,
   ...props
 }: SummaryColumnProps & SummaryColumnFactoryDeps) => {
-  const { data, dataView, row } = props;
+  const { data, dataView, onFilter, row } = props;
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
@@ -71,7 +73,7 @@ const SummaryCell = ({
       <EuiFlexGroup gutterSize={gutterSize} direction={isSingleLine ? 'row' : 'column'}>
         {shouldRenderResource && (
           <EuiFlexItem grow={false} css={{ lineHeight: 'normal', marginTop: -1 }}>
-            <Resource fields={resourceFields} limited={isSingleLine} />
+            <Resource fields={resourceFields} limited={isSingleLine} onFilter={onFilter} />
           </EuiFlexItem>
         )}
         <Content {...props} isCompressed={isCompressed} />

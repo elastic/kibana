@@ -20,6 +20,7 @@ import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 
@@ -104,6 +105,12 @@ export interface DefaultAppStateExtension {
  * Parameters passed to the cell renderers extension
  */
 export interface CellRenderersExtensionParams {
+  /**
+   * Available actions for cell renderers
+   */
+  actions: {
+    addFilter?: DocViewFilterFn;
+  };
   /**
    * The current data view
    */

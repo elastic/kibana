@@ -72,6 +72,7 @@ import { useContextualGridCustomisations } from '../../hooks/grid_customisations
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import {
+  CellRenderersExtensionParams,
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,
   useProfileAccessor,
@@ -306,16 +307,26 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
+  const cellRendererParams: CellRenderersExtensionParams = useMemo(
+    () => ({
+      actions: { addFilter: onAddFilter },
+      dataView,
+      density,
+      rowHeight,
+    }),
+    [onAddFilter, dataView, density, rowHeight]
+  );
+
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
   const { customCellRenderer, customGridColumnsConfiguration } =
-    useContextualGridCustomisations({ dataView, density, rowHeight }) || {};
+    useContextualGridCustomisations(cellRendererParams) || {};
   const additionalFieldGroups = useAdditionalFieldGroups();
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => customCellRenderer ?? {});
-    return getCellRenderers({ dataView, density, rowHeight });
-  }, [customCellRenderer, getCellRenderersAccessor, dataView, density, rowHeight]);
+    return getCellRenderers(cellRendererParams);
+  }, [cellRendererParams, customCellRenderer, getCellRenderersAccessor]);
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 

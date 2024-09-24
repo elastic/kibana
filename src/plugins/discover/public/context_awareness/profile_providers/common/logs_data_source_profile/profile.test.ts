@@ -154,6 +154,7 @@ describe('logsDataSourceProfileProvider', () => {
     it('should return cell renderers for log level fields', () => {
       const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(() => ({}));
       const getCellRenderersParams = {
+        actions: { addFilter: jest.fn() },
         dataView: dataViewWithTimefieldMock,
         density: DataGridDensity.COMPACT,
         rowHeight: 0,

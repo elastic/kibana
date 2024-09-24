@@ -23,7 +23,7 @@ export interface SummaryColumnGetterDeps {
 }
 
 export const getSummaryColumn = ({ data, params }: SummaryColumnGetterDeps) => {
-  const { dataView, density, rowHeight } = params;
+  const { actions, dataView, density, rowHeight } = params;
   const shouldShowFieldHandler = createGetShouldShowFieldHandler(dataView);
 
   return (props: SummaryColumnProps) => (
@@ -31,6 +31,7 @@ export const getSummaryColumn = ({ data, params }: SummaryColumnGetterDeps) => {
       {...props}
       data={data}
       density={density}
+      onFilter={actions.addFilter}
       rowHeight={rowHeight}
       shouldShowFieldHandler={shouldShowFieldHandler}
     />
