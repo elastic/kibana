@@ -14,7 +14,7 @@ import { RuleSystemAction } from '@kbn/alerting-types';
 import { ADD_ACTION_TEXT } from '../translations';
 import { RuleActionsConnectorsModal } from './rule_actions_connectors_modal';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
-import { ActionConnector, RuleAction } from '../../common/types';
+import { ActionConnector, RuleAction, RuleFormParamsErrors } from '../../common/types';
 import { DEFAULT_FREQUENCY, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { RuleActionsItem } from './rule_actions_item';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
@@ -24,6 +24,7 @@ export const RuleActions = () => {
 
   const {
     formData: { actions, consumer },
+    plugins: { actionTypeRegistry },
     selectedRuleType,
     connectorTypes,
   } = useRuleFormState();
@@ -39,22 +40,38 @@ export const RuleActions = () => {
   }, []);
 
   const onSelectConnector = useCallback(
-    (connector: ActionConnector) => {
+    async (connector: ActionConnector) => {
       const { id, actionTypeId } = connector;
+      const uuid = uuidv4();
+      const params = {};
+
       dispatch({
         type: 'addAction',
         payload: {
           id,
           actionTypeId,
-          uuid: uuidv4(),
-          params: {},
+          uuid,
+          params,
           group: selectedRuleType.defaultActionGroupId,
           frequency: DEFAULT_FREQUENCY,
         },
       });
+
+      const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
+        .get(actionTypeId)
+        ?.validateParams(params);
+
+      dispatch({
+        type: 'setActionParamsError',
+        payload: {
+          uuid,
+          errors: res.errors,
+        },
+      });
+
       onModalClose();
     },
-    [dispatch, onModalClose, selectedRuleType]
+    [dispatch, onModalClose, selectedRuleType, actionTypeRegistry]
   );
 
   const producerId = useMemo(() => {

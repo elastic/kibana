@@ -35,6 +35,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
 
   const {
     formData: { actions },
+    connectors,
     baseErrors = {},
     paramsErrors = {},
     actionsErrors = {},
@@ -42,13 +43,21 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
   } = useRuleFormState();
 
   const hasErrors = useMemo(() => {
+    const hasBrokenConnectors = actions.some((action) => {
+      return !connectors.find((connector) => connector.id === action.id);
+    });
+
+    if (hasBrokenConnectors) {
+      return true;
+    }
+
     return hasRuleErrors({
       baseErrors,
       paramsErrors,
       actionsErrors,
       actionsParamsErrors,
     });
-  }, [baseErrors, paramsErrors, actionsErrors, actionsParamsErrors]);
+  }, [actions, connectors, baseErrors, paramsErrors, actionsErrors, actionsParamsErrors]);
 
   const saveButtonText = useMemo(() => {
     if (isEdit) {

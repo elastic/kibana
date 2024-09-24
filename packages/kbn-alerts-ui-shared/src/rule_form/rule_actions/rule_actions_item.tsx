@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Suspense, useCallback, useState } from 'react';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +25,7 @@ import {
   EuiBadge,
   RecursivePartial,
   EuiBetaBadge,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import {
   ActionVariable,
@@ -52,6 +53,8 @@ import { getSelectedActionGroup } from '../utils';
 import { RuleActionsMessage } from './rule_actions_message';
 import {
   ACTION_ERROR_TOOLTIP,
+  ACTION_UNABLE_TO_LOAD_CONNECTOR_DESCRIPTION,
+  ACTION_UNABLE_TO_LOAD_CONNECTOR_TITLE,
   ACTION_WARNING_TITLE,
   TECH_PREVIEW_DESCRIPTION,
   TECH_PREVIEW_LABEL,
@@ -156,14 +159,13 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const dispatch = useRuleFormDispatch();
   const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
-  const actionType = connectorTypes.find(({ id }) => id === action.actionTypeId)!;
-  const connector = connectors.find(({ id }) => id === action.id)!;
+  const actionType = connectorTypes.find(({ id }) => id === action.actionTypeId);
+  const connector = connectors.find(({ id }) => id === action.id);
 
-  const actionParamsError = actionsParamsErrors[action.uuid!] || {};
-
-  const showActionGroupErrorIcon = (): boolean => {
+  const showActionGroupErrorIcon = useMemo(() => {
+    const actionParamsError = actionsParamsErrors[action.uuid!] || {};
     return !isOpen && some(actionParamsError, (error) => !isEmpty(error));
-  };
+  }, [isOpen, action, actionsParamsErrors]);
 
   const selectedActionGroup = getSelectedActionGroup({
     group: action.group,
@@ -412,102 +414,11 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     [action, dispatch]
   );
 
-  return (
-    <EuiAccordion
-      initialIsOpen
-      data-test-subj="ruleActionsItem"
-      borders="all"
-      style={{
-        backgroundColor: subdued,
-        borderRadius: euiTheme.border.radius.medium,
-      }}
-      id={action.id}
-      onToggle={setIsOpen}
-      buttonProps={{
-        style: {
-          width: '100%',
-        },
-      }}
-      arrowProps={{
-        css: css`
-          margin-left: ${euiTheme.size.m};
-        `,
-      }}
-      extraAction={
-        <EuiButtonIcon
-          data-test-subj="ruleActionsItemDeleteButton"
-          style={{
-            marginRight: euiTheme.size.l,
-          }}
-          aria-label={i18n.translate(
-            'alertsUIShared.ruleActionsSystemActionsItem.deleteActionAriaLabel',
-            {
-              defaultMessage: 'delete action',
-            }
-          )}
-          iconType="trash"
-          color="danger"
-          onClick={() => onDelete(action.uuid!)}
-        />
-      }
-      buttonContentClassName="eui-fullWidth"
-      buttonContent={
-        <EuiPanel color="subdued" paddingSize="m">
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {showActionGroupErrorIcon() ? (
-                <EuiToolTip content={ACTION_ERROR_TOOLTIP}>
-                  <EuiIcon
-                    data-test-subj="action-group-error-icon"
-                    type="warning"
-                    color="danger"
-                    size="l"
-                  />
-                </EuiToolTip>
-              ) : (
-                <Suspense fallback={null}>
-                  <EuiIcon size="l" type={actionTypeModel.iconClass} />
-                </Suspense>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>{ACTION_TITLE(connector)}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                <strong>{actionType?.name}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            {(selectedActionGroup || action.frequency?.summary) && !isOpen && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge iconType="clock">
-                  {action.frequency?.summary
-                    ? SUMMARY_GROUP_TITLE
-                    : RUN_WHEN_GROUP_TITLE(selectedActionGroup!.name.toLocaleLowerCase())}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-            {warning && !isOpen && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning">
-                  {ACTION_WARNING_TITLE}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-            {actionTypeModel.isExperimental && (
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  alignment="middle"
-                  data-test-subj="ruleActionsSystemActionsItemBetaBadge"
-                  label={TECH_PREVIEW_LABEL}
-                  tooltipContent={TECH_PREVIEW_DESCRIPTION}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPanel>
-      }
-    >
+  const accordionContent = useMemo(() => {
+    if (!connector) {
+      return null;
+    }
+    return (
       <EuiFlexGroup
         direction="column"
         style={{
@@ -552,6 +463,194 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
+    );
+  }, [
+    action,
+    connector,
+    producerId,
+    euiTheme,
+    plain,
+    index,
+    tab,
+    templateFields,
+    useDefaultMessage,
+    warning,
+    onNotifyWhenChange,
+    onActionGroupChange,
+    onAlertsFilterChange,
+    onTimeframeChange,
+    onParamsChange,
+  ]);
+
+  const noConnectorContent = useMemo(() => {
+    return (
+      <EuiEmptyPrompt
+        iconType="magnifyWithExclamation"
+        title={<h2>{ACTION_UNABLE_TO_LOAD_CONNECTOR_TITLE}</h2>}
+        body={ACTION_UNABLE_TO_LOAD_CONNECTOR_DESCRIPTION}
+      />
+    );
+  }, []);
+
+  const accordionIcon = useMemo(() => {
+    if (!connector) {
+      return (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={ACTION_UNABLE_TO_LOAD_CONNECTOR_TITLE}>
+            <EuiIcon
+              data-test-subj="action-group-error-icon"
+              type="warning"
+              color="danger"
+              size="l"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
+    }
+
+    return (
+      <EuiFlexItem grow={false}>
+        {showActionGroupErrorIcon ? (
+          <EuiToolTip content={ACTION_ERROR_TOOLTIP}>
+            <EuiIcon
+              data-test-subj="action-group-error-icon"
+              type="warning"
+              color="danger"
+              size="l"
+            />
+          </EuiToolTip>
+        ) : (
+          <Suspense fallback={null}>
+            <EuiIcon size="l" type={actionTypeModel.iconClass} />
+          </Suspense>
+        )}
+      </EuiFlexItem>
+    );
+  }, [connector, showActionGroupErrorIcon, actionTypeModel]);
+
+  const connectorTitle = useMemo(() => {
+    const title = connector ? ACTION_TITLE(connector) : actionTypeModel.actionTypeTitle;
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiText>{title}</EuiText>
+      </EuiFlexItem>
+    );
+  }, [connector, actionTypeModel]);
+
+  const actionTypeTitle = useMemo(() => {
+    if (!connector || !actionType) {
+      return null;
+    }
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          <strong>{actionType.name}</strong>
+        </EuiText>
+      </EuiFlexItem>
+    );
+  }, [connector, actionType]);
+
+  const runWhenTitle = useMemo(() => {
+    if (!connector) {
+      return null;
+    }
+    if (isOpen) {
+      return null;
+    }
+    if (selectedActionGroup || action.frequency?.summary) {
+      return (
+        <EuiFlexItem grow={false}>
+          <EuiBadge iconType="clock">
+            {action.frequency?.summary
+              ? SUMMARY_GROUP_TITLE
+              : RUN_WHEN_GROUP_TITLE(selectedActionGroup!.name.toLocaleLowerCase())}
+          </EuiBadge>
+        </EuiFlexItem>
+      );
+    }
+  }, [connector, isOpen, selectedActionGroup, action]);
+
+  const warningIcon = useMemo(() => {
+    if (!connector) {
+      return null;
+    }
+    if (isOpen) {
+      return null;
+    }
+    if (warning) {
+      return (
+        <EuiFlexItem grow={false}>
+          <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning">
+            {ACTION_WARNING_TITLE}
+          </EuiBadge>
+        </EuiFlexItem>
+      );
+    }
+  }, [connector, isOpen, warning]);
+
+  return (
+    <EuiAccordion
+      initialIsOpen
+      data-test-subj="ruleActionsItem"
+      borders="all"
+      style={{
+        backgroundColor: subdued,
+        borderRadius: euiTheme.border.radius.medium,
+      }}
+      id={action.id}
+      onToggle={setIsOpen}
+      buttonProps={{
+        style: {
+          width: '100%',
+        },
+      }}
+      arrowProps={{
+        css: css`
+          margin-left: ${euiTheme.size.m};
+        `,
+      }}
+      extraAction={
+        <EuiButtonIcon
+          data-test-subj="ruleActionsItemDeleteButton"
+          style={{
+            marginRight: euiTheme.size.l,
+          }}
+          aria-label={i18n.translate(
+            'alertsUIShared.ruleActionsSystemActionsItem.deleteActionAriaLabel',
+            {
+              defaultMessage: 'delete action',
+            }
+          )}
+          iconType="trash"
+          color="danger"
+          onClick={() => onDelete(action.uuid!)}
+        />
+      }
+      buttonContentClassName="eui-fullWidth"
+      buttonContent={
+        <EuiPanel color="subdued" paddingSize="m">
+          <EuiFlexGroup alignItems="center" responsive={false}>
+            {accordionIcon}
+            {connectorTitle}
+            {actionTypeTitle}
+            {runWhenTitle}
+            {warningIcon}
+            {actionTypeModel.isExperimental && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  alignment="middle"
+                  data-test-subj="ruleActionsSystemActionsItemBetaBadge"
+                  label={TECH_PREVIEW_LABEL}
+                  tooltipContent={TECH_PREVIEW_DESCRIPTION}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiPanel>
+      }
+    >
+      {connector && accordionContent}
+      {!connector && noConnectorContent}
     </EuiAccordion>
   );
 };

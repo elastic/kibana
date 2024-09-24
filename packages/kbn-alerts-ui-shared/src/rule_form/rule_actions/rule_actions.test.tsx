@@ -16,10 +16,12 @@ import {
   getAction,
   getSystemAction,
   getConnector,
+  getActionTypeModel,
 } from '../../common/test_utils/actions_test_utils';
 import userEvent from '@testing-library/user-event';
-import { ActionConnector } from '../../common/types';
+import { ActionConnector, ActionTypeModel } from '../../common/types';
 import { RuleActionsItemProps } from './rule_actions_item';
+import { TypeRegistry } from '../../common/type_registry';
 
 const http = httpServiceMock.createStartContract();
 
@@ -88,6 +90,10 @@ jest.mock('../../common/hooks', () => ({
   useLoadRuleTypeAadTemplateField: jest.fn(),
 }));
 
+const mockValidate = jest.fn().mockResolvedValue({
+  errors: {},
+});
+
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
 const { useLoadConnectors, useLoadConnectorTypes, useLoadRuleTypeAadTemplateField } =
   jest.requireMock('../../common/hooks');
@@ -106,6 +112,20 @@ const mockOnChange = jest.fn();
 
 describe('ruleActions', () => {
   beforeEach(() => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(
+      getActionTypeModel('1', {
+        id: 'actionType-1',
+        validateParams: mockValidate,
+      })
+    );
+    actionTypeRegistry.register(
+      getActionTypeModel('2', {
+        id: 'actionType-2',
+        validateParams: mockValidate,
+      })
+    );
+
     useLoadConnectors.mockReturnValue({
       data: mockConnectors,
       isInitialLoading: false,
@@ -121,6 +141,7 @@ describe('ruleActions', () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         http,
+        actionTypeRegistry,
       },
       formData: {
         actions: [...mockActions, ...mockSystemActions],

@@ -539,6 +539,20 @@ export const ACTION_WARNING_TITLE = i18n.translate(
   }
 );
 
+export const ACTION_UNABLE_TO_LOAD_CONNECTOR_TITLE = i18n.translate(
+  'alertsUIShared.ruleActionsItem.actionUnableToLoadConnectorTitle',
+  {
+    defaultMessage: 'Unable to find connector',
+  }
+);
+
+export const ACTION_UNABLE_TO_LOAD_CONNECTOR_DESCRIPTION = i18n.translate(
+  'alertsUIShared.ruleActionsItem.actionUnableToLoadConnectorTitle',
+  {
+    defaultMessage: `Create a connector and try again. If you can't create a connector, contact your system administrator.`,
+  }
+);
+
 export const TECH_PREVIEW_LABEL = i18n.translate('alertsUIShared.technicalPreviewBadgeLabel', {
   defaultMessage: 'Technical preview',
 });
