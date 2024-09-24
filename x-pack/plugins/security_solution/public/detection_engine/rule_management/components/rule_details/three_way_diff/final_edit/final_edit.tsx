@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { SetFieldResolvedValueFn } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
-import { NameEdit, nameSchema } from './fields/name';
-import type { DiffableRule } from '../../../../../../../common/api/detection_engine';
-import { FieldFormWrapper } from './field_form_wrapper';
+import { DiffableCommonFields } from '../../../../../../../common/api/detection_engine';
+import type {
+  DiffableRule,
+  DiffableRuleTypes,
+} from '../../../../../../../common/api/detection_engine';
 import { FinalEditContextProvider } from './final_edit_context';
+import { CommonRuleFieldEdit } from './common_rule_field_edit';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface FinalEditProps {
   fieldName: string;
@@ -29,19 +33,44 @@ export function FinalEdit({
     <FinalEditContextProvider
       value={{ fieldName, finalDiffableRule, setReadOnlyMode, setFieldResolvedValue }}
     >
-      <FinalEditField fieldName={fieldName} />
+      <FieldEdit fieldName={fieldName} ruleType={finalDiffableRule.type} />
     </FinalEditContextProvider>
   );
 }
 
 interface FinalEditFieldProps {
   fieldName: string;
+  ruleType: DiffableRuleTypes;
 }
 
-function FinalEditField({ fieldName }: FinalEditFieldProps) {
-  if (fieldName === 'name') {
-    return <FieldFormWrapper component={NameEdit} fieldFormSchema={nameSchema} />;
+function FieldEdit({ fieldName, ruleType }: FinalEditFieldProps) {
+  const { data: commonField } = useMemo(
+    () => DiffableCommonFields.keyof().safeParse(fieldName),
+    [fieldName]
+  );
+
+  if (commonField) {
+    return <CommonRuleFieldEdit fieldName={commonField} />;
   }
 
-  return <span>{'Field not yet implemented'}</span>;
+  switch (ruleType) {
+    case 'query':
+      return <span>{'Rule type not yet implemented'}</span>;
+    case 'saved_query':
+      return <span>{'Rule type not yet implemented'}</span>;
+    case 'eql':
+      return <span>{'Rule type not yet implemented'}</span>;
+    case 'esql':
+      return <span>{'Rule type not yet implemented'}</span>;
+    case 'threat_match':
+      return <span>{'Rule type not yet implemented'}</span>;
+    case 'threshold':
+      return <span>{'Rule type not yet implemented'}</span>;
+    case 'machine_learning':
+      return <span>{'Rule type not yet implemented'}</span>;
+    case 'new_terms':
+      return <span>{'Rule type not yet implemented'}</span>;
+    default:
+      return assertUnreachable(ruleType);
+  }
 }
