@@ -21,6 +21,7 @@ export interface CreateKubernetesOnboardingFlowRouteResponse {
   onboardingId: string;
   elasticsearchUrl: string;
   elasticAgentVersion: string;
+  cloudSetup: string;
 }
 
 export interface HasKubernetesDataRouteResponse {
@@ -68,6 +69,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       apiKeyEncoded,
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
       elasticAgentVersion,
+      cloudSetup: JSON.stringify(plugins.cloud?.setup),
     };
   },
 });
