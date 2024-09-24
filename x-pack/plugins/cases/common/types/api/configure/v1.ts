@@ -18,7 +18,11 @@ import {
   MAX_TEMPLATE_TAG_LENGTH,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
-import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../../domain';
+import {
+  CustomFieldTextTypeRt,
+  CustomFieldToggleTypeRt,
+  CustomFieldListTypeRt,
+} from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
@@ -64,8 +68,30 @@ export const ToggleCustomFieldConfigurationRt = rt.intersection([
   ),
 ]);
 
+export const ListCustomFieldConfigurationRt = rt.intersection([
+  rt.strict({ type: CustomFieldListTypeRt }),
+  CustomFieldConfigurationWithoutTypeRt,
+  rt.strict({
+    options: rt.array(
+      rt.strict({
+        text: rt.string,
+        value: rt.string,
+      })
+    ),
+  }),
+  rt.exact(
+    rt.partial({
+      defaultValue: rt.union([rt.string, rt.null]),
+    })
+  ),
+]);
+
 export const CustomFieldsConfigurationRt = limitedArraySchema({
-  codec: rt.union([TextCustomFieldConfigurationRt, ToggleCustomFieldConfigurationRt]),
+  codec: rt.union([
+    TextCustomFieldConfigurationRt,
+    ToggleCustomFieldConfigurationRt,
+    ListCustomFieldConfigurationRt,
+  ]),
   min: 0,
   max: MAX_CUSTOM_FIELDS_PER_CASE,
   fieldName: 'customFields',

@@ -51,6 +51,10 @@ export const TOGGLE_LABEL = i18n.translate('xpack.cases.customFields.toggleLabel
   defaultMessage: 'Toggle',
 });
 
+export const LIST_LABEL = i18n.translate('xpack.cases.customFields.listLabel', {
+  defaultMessage: 'List',
+});
+
 export const FIELD_TYPE = i18n.translate('xpack.cases.customFields.fieldType', {
   defaultMessage: 'Field type',
 });
@@ -125,5 +129,16 @@ export const POPULATED_WITH_DEFAULT = i18n.translate(
   'xpack.cases.customFields.fieldOptions.populatedWithDefault',
   {
     defaultMessage: 'This field is populated with the default value.',
+  }
+);
+
+export const ADD_LIST_OPTION = i18n.translate('xpack.cases.customFields.addListOption', {
+  defaultMessage: 'Add option',
+});
+
+export const LIST_OPTION_PLACEHOLDER_TEXT = i18n.translate(
+  'xpack.cases.customFields.listOptionPlaceholderText',
+  {
+    defaultMessage: 'Option text',
   }
 );

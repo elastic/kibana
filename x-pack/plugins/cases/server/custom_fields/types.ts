@@ -11,9 +11,11 @@ export interface ICasesCustomField {
   isFilterable: boolean;
   isSortable: boolean;
   savedObjectMappingType: string;
-  validateFilteringValues: (values: Array<string | number | boolean | null>) => void;
-  getDefaultValue?: () => boolean | string | null;
+  validateFilteringValues: (values: FilteringValues) => void;
+  getDefaultValue?: () => boolean | string | null | string[];
 }
+
+export type FilteringValues = Array<string[] | string | number | boolean | null>;
 
 export interface CasesCustomFieldsMap {
   get: (type: CustomFieldTypes) => ICasesCustomField | null;
