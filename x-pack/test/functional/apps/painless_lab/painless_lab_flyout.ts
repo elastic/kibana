@@ -8,10 +8,25 @@
 import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const TEST_SCRIPT = `return 1;`;
+const TEST_SCRIPT_REQUEST = `POST _scripts/painless/_execute
+{
+  "script": {
+    "source": """return 1;""",
+    "params": {
+      "string_parameter": "string value",
+      "number_parameter": 1.5,
+      "boolean_parameter": true
+    }
+  }
+}`;
+const TEST_SCRIPT_RESPONSE = `"1"`;
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const testSubjects = getService('testSubjects');
+  const monacoEditor = getService('monacoEditor');
 
   describe('Painless lab', function describeIndexTests() {
     before(async () => {
@@ -22,20 +37,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click show API request button and flyout should appear in page', async () => {
+      // replace the default script with a simpler one
+      await monacoEditor.setCodeEditorValue(TEST_SCRIPT);
       await testSubjects.click('btnViewRequest');
-
       await testSubjects.existOrFail('painlessLabRequestFlyoutHeader', { timeout: 10 * 1000 });
     });
 
-    it('validate request body is not empty', async () => {
+    it('validate request body is the expected', async () => {
       const requestText = await testSubjects.getVisibleText('painlessLabFlyoutRequest');
-      expect(requestText.length === 0).to.be(false);
+      expect(requestText).equal(TEST_SCRIPT_REQUEST);
     });
 
-    it('validate response body is not empty', async () => {
+    it('validate response body is the expected', async () => {
       await testSubjects.findService.clickByCssSelector('#response');
-      const responseText = await testSubjects.getVisibleText('painlessLabFlyoutResponse');
-      expect(responseText.length === 0).to.be(false);
+      await retry.waitFor('Wait for response to change', async () => {
+        return (
+          (await testSubjects.getVisibleText('painlessLabFlyoutResponse')) === TEST_SCRIPT_RESPONSE
+        );
+      });
     });
   });
 }
