@@ -118,6 +118,7 @@ const getMockRule = (overwrites: Pick<Rule, 'investigation_fields'>): Rule => ({
   updated_by: 'elastic',
   related_integrations: [],
   required_fields: [],
+  rule_source: { type: 'internal' },
   setup: '',
   ...overwrites,
 });

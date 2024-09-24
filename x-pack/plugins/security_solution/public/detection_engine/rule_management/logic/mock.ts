@@ -53,6 +53,7 @@ export const savedRuleMock: RuleResponse = {
   version: 1,
   revision: 1,
   exceptions_list: [],
+  rule_source: { type: 'internal' },
 };
 
 export const rulesMock: FetchRulesResponse = {
@@ -99,6 +100,7 @@ export const rulesMock: FetchRulesResponse = {
       version: 1,
       revision: 1,
       exceptions_list: [],
+      rule_source: { type: 'internal' },
     },
     {
       actions: [],
@@ -138,6 +140,7 @@ export const rulesMock: FetchRulesResponse = {
       version: 1,
       revision: 1,
       exceptions_list: [],
+      rule_source: { type: 'internal' },
     },
   ],
 };

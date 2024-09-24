@@ -7,6 +7,7 @@
 
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RequiredOptional } from '@kbn/zod-helpers';
+import snakecaseKeys from 'snakecase-keys';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   transformAlertToRuleAction,
@@ -66,5 +67,6 @@ export const internalRuleToAPIResponse = (
     actions: [...actions, ...(systemActions ?? [])],
     // Execution summary
     execution_summary: executionSummary ?? undefined,
+    rule_source: snakecaseKeys(normalizedRuleParams.ruleSource, { deep: true }),
   };
 };
