@@ -2092,18 +2092,18 @@
                                       "additionalProperties": false,
                                       "nullable": true,
                                       "properties": {
-                                        "from": {
-                                          "description": "Start of the gap range.",
+                                        "gte": {
+                                          "description": "End of the gap range.",
                                           "type": "string"
                                         },
-                                        "to": {
-                                          "description": "End of the gap range.",
+                                        "lte": {
+                                          "description": "Start of the gap range.",
                                           "type": "string"
                                         }
                                       },
                                       "required": [
-                                        "from",
-                                        "to"
+                                        "lte",
+                                        "gte"
                                       ],
                                       "type": "object"
                                     },
@@ -3307,18 +3307,18 @@
                                       "additionalProperties": false,
                                       "nullable": true,
                                       "properties": {
-                                        "from": {
-                                          "description": "Start of the gap range.",
+                                        "gte": {
+                                          "description": "End of the gap range.",
                                           "type": "string"
                                         },
-                                        "to": {
-                                          "description": "End of the gap range.",
+                                        "lte": {
+                                          "description": "Start of the gap range.",
                                           "type": "string"
                                         }
                                       },
                                       "required": [
-                                        "from",
-                                        "to"
+                                        "lte",
+                                        "gte"
                                       ],
                                       "type": "object"
                                     },
@@ -4505,18 +4505,18 @@
                                       "additionalProperties": false,
                                       "nullable": true,
                                       "properties": {
-                                        "from": {
-                                          "description": "Start of the gap range.",
+                                        "gte": {
+                                          "description": "End of the gap range.",
                                           "type": "string"
                                         },
-                                        "to": {
-                                          "description": "End of the gap range.",
+                                        "lte": {
+                                          "description": "Start of the gap range.",
                                           "type": "string"
                                         }
                                       },
                                       "required": [
-                                        "from",
-                                        "to"
+                                        "lte",
+                                        "gte"
                                       ],
                                       "type": "object"
                                     },
@@ -5990,18 +5990,18 @@
                                       "additionalProperties": false,
                                       "nullable": true,
                                       "properties": {
-                                        "from": {
-                                          "description": "Start of the gap range.",
+                                        "gte": {
+                                          "description": "End of the gap range.",
                                           "type": "string"
                                         },
-                                        "to": {
-                                          "description": "End of the gap range.",
+                                        "lte": {
+                                          "description": "Start of the gap range.",
                                           "type": "string"
                                         }
                                       },
                                       "required": [
-                                        "from",
-                                        "to"
+                                        "lte",
+                                        "gte"
                                       ],
                                       "type": "object"
                                     },

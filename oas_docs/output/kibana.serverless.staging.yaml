@@ -1479,15 +1479,15 @@ paths:
                                     nullable: true
                                     type: object
                                     properties:
-                                      from:
-                                        description: Start of the gap range.
-                                        type: string
-                                      to:
+                                      gte:
                                         description: End of the gap range.
                                         type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
                                     required:
-                                      - from
-                                      - to
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
@@ -2634,15 +2634,15 @@ paths:
                                     nullable: true
                                     type: object
                                     properties:
-                                      from:
-                                        description: Start of the gap range.
-                                        type: string
-                                      to:
+                                      gte:
                                         description: End of the gap range.
                                         type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
                                     required:
-                                      - from
-                                      - to
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
@@ -3760,15 +3760,15 @@ paths:
                                     nullable: true
                                     type: object
                                     properties:
-                                      from:
-                                        description: Start of the gap range.
-                                        type: string
-                                      to:
+                                      gte:
                                         description: End of the gap range.
                                         type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
                                     required:
-                                      - from
-                                      - to
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
@@ -4984,15 +4984,15 @@ paths:
                                     nullable: true
                                     type: object
                                     properties:
-                                      from:
-                                        description: Start of the gap range.
-                                        type: string
-                                      to:
+                                      gte:
                                         description: End of the gap range.
                                         type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
                                     required:
-                                      - from
-                                      - to
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
@@ -27522,15 +27522,15 @@ components:
           description: Range of the execution gap
           type: object
           properties:
-            from:
-              description: Start of the execution gap
+            gte:
+              description: Start date of the execution gap
               type: string
-            to:
-              description: End of the execution gap
+            lte:
+              description: End date of the execution gap
               type: string
           required:
-            - from
-            - to
+            - gte
+            - lte
         total_enrichment_duration_ms:
           description: >-
             Total time spent enriching documents during current rule execution
