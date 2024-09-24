@@ -76,7 +76,6 @@ export interface DataViewMgmtServiceConstructorArgs {
 
 export interface DataViewMgmtState {
   dataView?: DataView;
-  allowedTypes: SavedObjectManagementTypeInfo[];
   relationships: SavedObjectRelationWithTitle[];
   fields: DataViewField[];
   scriptedFields: DataViewField[];
@@ -89,12 +88,10 @@ export interface DataViewMgmtState {
   fieldConflictCount: number;
   tags: Array<{ key: string; 'data-test-subj': string; name: string }>;
   isRefreshing: boolean;
-  defaultIndex: string;
   conflictFieldsUrl: string;
 }
 
 const defaultDataViewEditorState: DataViewMgmtState = {
-  allowedTypes: [],
   relationships: [],
   fields: [],
   scriptedFields: [],
@@ -103,7 +100,6 @@ const defaultDataViewEditorState: DataViewMgmtState = {
   fieldConflictCount: 0,
   tags: [],
   isRefreshing: true,
-  defaultIndex: '',
   conflictFieldsUrl: '',
 };
 
