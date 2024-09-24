@@ -52,11 +52,22 @@ paths:
                     required: [persistPinnedEventOnTimeline]
                     properties:
                       persistPinnedEventOnTimeline:
-                        allOf:
-                          - $ref: '../model/components.schema.yaml#/components/schemas/PinnedEvent'
-                          - type: object
-                            properties:
-                              code:
-                                type: number
-                              message:
-                                type: string
+                        $ref: '#/components/schemas/PersistPinnedEventResponse'
+
+components:
+  schemas:
+    PersistPinnedEventResponse:
+      oneOf:
+        - allOf:
+            - $ref: '../model/components.schema.yaml#/components/schemas/PinnedEvent'
+            - $ref: '#/components/schemas/PinnedEventBaseResponseBody'
+        - type: object
+          nullable: true
+    PinnedEventBaseResponseBody:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: number
+        message:
+          type: string
