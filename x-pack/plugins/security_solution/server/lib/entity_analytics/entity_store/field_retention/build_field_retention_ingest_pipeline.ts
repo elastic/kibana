@@ -37,6 +37,12 @@ export const buildFieldRetentionIngestPipeline = ({
   ...getDotExpanderProcessors(allEntityFields),
   ...getFieldProcessors(fieldRetentionDefinition),
   ...getRemoveEmptyFieldProcessors(allEntityFields),
+  arrayToSingleValueProcessor({
+    field: `${fieldRetentionDefinition.entityType}.risk.calculated_level`,
+  }),
+  arrayToSingleValueProcessor({
+    field: 'asset.criticality',
+  }),
   {
     remove: {
       ignore_failure: true,
@@ -74,6 +80,25 @@ export const buildFieldRetentionIngestPipeline = ({
       ]
     : []),
 ];
+
+const arrayToSingleValueProcessor = ({ field }: { field: string }): IngestProcessorContainer => {
+  const ctxField = `ctx.${field}`;
+  const fieldBrackets = convertPathToBracketNotation(ctxField);
+  return {
+    script: {
+      lang: 'painless',
+      source: `
+      if (!(${isFieldMissingOrEmpty(ctxField)})){
+        if (${fieldBrackets} instanceof List) {
+          ctx.${field} = ${fieldBrackets}[0];
+        } else if (${fieldBrackets} instanceof Set) {
+          ctx.${field} = ${fieldBrackets}.toArray()[0];
+        }
+      }
+    `,
+    },
+  };
+};
 
 const debugAddContextStep = (): IngestProcessorContainer => ({
   script: {
@@ -177,7 +202,7 @@ const collectValuesProcessor = ({ field, maxLength }: CollectValues) => {
       lang: 'painless',
       source: `
   if (${fieldBrackets} == null) {
-    ${fieldBrackets} = [];
+    ${fieldBrackets} = new ArrayList();
   }
 
   List combinedItems = new ArrayList();
@@ -186,7 +211,7 @@ const collectValuesProcessor = ({ field, maxLength }: CollectValues) => {
 
   if (combinedItems.size() < params.max_length && ctx.${ENRICH_FIELD} != null && ${enrichFieldBrackets} != null) {
     int remaining = params.max_length - combinedItems.size();
-    combinedItems.addAll(${enrichFieldBrackets}.subList(0, Math.min(remaining, ${enrichFieldBrackets}.size())));
+    combinedItems.addAll(${enrichFieldBrackets}.subList(0, (int) Math.min(remaining, ${enrichFieldBrackets}.size())));
   }
 
   ${fieldBrackets} = combinedItems.subList(0, (int) Math.min(params.max_length, combinedItems.size()));
