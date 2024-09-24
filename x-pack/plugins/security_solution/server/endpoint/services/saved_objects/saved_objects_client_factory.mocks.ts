@@ -26,9 +26,16 @@ export const createSavedObjectsClientFactoryMock = (
     savedObjectsServiceStart = savedObjectsServiceMock.createStartContract(),
     httpServiceSetup = coreMock.createSetup().http,
   } = dependencies;
+  const service = new SavedObjectsClientFactory(savedObjectsServiceStart, httpServiceSetup);
+  const soClient = service.createInternalUnscopedSoClient(false);
+  const createInternalScopedSoClientSpy = jest.spyOn(service, 'createInternalScopedSoClient');
+  const createInternalUnscopedSoClientSpy = jest.spyOn(service, 'createInternalUnscopedSoClient');
+
+  createInternalScopedSoClientSpy.mockReturnValue(soClient);
+  createInternalUnscopedSoClientSpy.mockReturnValue(soClient);
 
   return {
-    service: new SavedObjectsClientFactory(savedObjectsServiceStart, httpServiceSetup),
+    service,
     dependencies: { savedObjectsServiceStart, httpServiceSetup },
   };
 };

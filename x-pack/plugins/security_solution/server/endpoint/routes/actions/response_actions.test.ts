@@ -142,7 +142,9 @@ describe('Response actions', () => {
       const routerMock = httpServiceMock.createRouter();
       mockResponse = httpServerMock.createResponseFactory();
       const startContract = createMockEndpointAppContextServiceStartContract();
-      (startContract.messageSigningService?.sign as jest.Mock).mockImplementation(() => {
+      (
+        startContract.fleetStartServices.messageSigningService?.sign as jest.Mock
+      ).mockImplementation(() => {
         return {
           data: 'thisisthedata',
           signature: 'thisisasignature',

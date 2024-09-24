@@ -94,8 +94,7 @@ describe('test endpoint routes', () => {
     startContract = createMockEndpointAppContextServiceStartContract();
 
     (
-      startContract.endpointFleetServicesFactory.asInternalUser()
-        .packagePolicy as jest.Mocked<PackagePolicyClient>
+      startContract.fleetStartServices.packagePolicyService as jest.Mocked<PackagePolicyClient>
     ).list.mockImplementation(() => {
       return Promise.resolve({
         items: [],
@@ -108,10 +107,10 @@ describe('test endpoint routes', () => {
     endpointAppContextService = new EndpointAppContextService();
     endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
     endpointAppContextService.start({ ...startContract });
-    mockAgentClient = startContract.endpointFleetServicesFactory.asInternalUser()
-      .agent as jest.Mocked<AgentClient>;
-    mockAgentPolicyService = startContract.endpointFleetServicesFactory.asInternalUser()
-      .agentPolicy as jest.Mocked<AgentPolicyServiceInterface>;
+    mockAgentClient = startContract.fleetStartServices.agentService
+      .asInternalUser as jest.Mocked<AgentClient>;
+    mockAgentPolicyService = startContract.fleetStartServices
+      .agentPolicyService as jest.Mocked<AgentPolicyServiceInterface>;
 
     registerEndpointRoutes(routerMock, {
       ...createMockEndpointAppContext(),
