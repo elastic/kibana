@@ -86,20 +86,20 @@ export const sendPutPackagePolicy = (
  * Get a status summary for all Agents that are currently assigned to a given agent policy
  *
  * @param http
- * @param policyId
+ * @param policyIds
  * @param options
  */
 export const sendGetFleetAgentStatusForPolicy = (
   http: HttpStart,
   /** the Agent (fleet) policy id */
-  policyId: string,
+  policyIds: string[],
   options: Exclude<HttpFetchOptions, 'query'> = {}
 ): Promise<GetAgentStatusResponse> => {
   return http.get(INGEST_API_FLEET_AGENT_STATUS, {
     ...options,
     version: API_VERSIONS.public.v1,
     query: {
-      policyId,
+      policyIds,
     },
   });
 };

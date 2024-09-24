@@ -14,6 +14,7 @@ import {
   type SavedObjectsType,
   MAIN_SAVED_OBJECT_INDEX,
   ALL_SAVED_OBJECT_INDICES,
+  TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
 import {
@@ -26,7 +27,6 @@ import {
   currentVersion,
   type KibanaMigratorTestKit,
   getEsClient,
-  getAggregatedTypesCountAllIndices,
 } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
 import '../jest_matchers';
@@ -319,7 +319,10 @@ describe.skip('split .kibana index into multiple system indices', () => {
       });
       const esClient = await getEsClient();
 
-      const breakdownBefore = await getAggregatedTypesCountAllIndices(esClient);
+      const breakdownBefore = await getAggregatedTypesCount(esClient, [
+        MAIN_SAVED_OBJECT_INDEX,
+        TASK_MANAGER_SAVED_OBJECT_INDEX,
+      ]);
       expect(breakdownBefore).toEqual({
         '.kibana': {
           'apm-telemetry': 1,
@@ -368,7 +371,10 @@ describe.skip('split .kibana index into multiple system indices', () => {
 
       await esClient.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
-      const breakdownAfter = await getAggregatedTypesCountAllIndices(esClient);
+      const breakdownAfter = await getAggregatedTypesCount(esClient, [
+        MAIN_SAVED_OBJECT_INDEX,
+        TASK_MANAGER_SAVED_OBJECT_INDEX,
+      ]);
       expect(breakdownAfter).toEqual({
         '.kibana': {
           'apm-telemetry': 1,
