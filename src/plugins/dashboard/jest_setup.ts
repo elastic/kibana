@@ -14,6 +14,24 @@
  * Refer to the "Caution" section here:
  *   https://jestjs.io/docs/jest-object#jestmockmodulename-factory-options
  */
-// Start the services with stubs
-import { setStubServices } from './public/services/mocks';
-setStubServices();
+import {
+  mockDashboardBackupService,
+  mockDashboardContentManagementService,
+  setStubKibanaServices,
+} from './public/services/mocks';
+
+// Start the kibana services with stubs
+setStubKibanaServices();
+
+// Mock the dashboad services
+jest.mock('./public/services/dashboard_content_management_service', () => {
+  return {
+    dashboardContentManagementService: mockDashboardContentManagementService,
+  };
+});
+
+jest.mock('./public/services/dashboard_backup_service', () => {
+  return {
+    dashboardBackupService: mockDashboardBackupService,
+  };
+});

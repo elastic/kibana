@@ -31,7 +31,7 @@ import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard
 import {
   SaveDashboardReturn,
   SavedDashboardInput,
-} from '../../../services/dashboard_content_management/types';
+} from '../../../services/dashboard_content_management_service/types';
 import { dashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import {
   coreServices,

@@ -32,7 +32,9 @@ import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
 
 import { setKibanaServices } from './kibana_services';
-import { DashboardCapabilities } from '../../common';
+import { DashboardAttributes, DashboardCapabilities } from '../../common';
+import { LoadDashboardReturn } from './dashboard_content_management_service/types';
+import { SearchDashboardsResponse } from './dashboard_content_management_service/lib/find_dashboards';
 
 const defaultDashboardCapabilities: DashboardCapabilities = {
   show: true,
@@ -43,7 +45,7 @@ const defaultDashboardCapabilities: DashboardCapabilities = {
   storeSearchSession: true,
 };
 
-export const setStubServices = () => {
+export const setStubKibanaServices = () => {
   const core = coreMock.createStart();
   (core.application.capabilities as any).dashboard = defaultDashboardCapabilities;
 
@@ -71,4 +73,76 @@ export const setStubServices = () => {
     usageCollection: usageCollectionPluginMock.createSetupContract(),
     visualizations: visualizationsPluginMock.createStartContract(),
   });
+};
+
+export const mockDashboardContentManagementService = {
+  loadDashboardState: jest.fn().mockImplementation(() =>
+    Promise.resolve({
+      dashboardInput: {},
+    } as LoadDashboardReturn)
+  ),
+  saveDashboardState: jest.fn(),
+  findDashboards: {
+    search: jest.fn().mockImplementation(({ search, size }) => {
+      const sizeToUse = size ?? 10;
+      const hits: SearchDashboardsResponse['hits'] = [];
+      for (let i = 0; i < sizeToUse; i++) {
+        hits.push({
+          type: 'dashboard',
+          id: `dashboard${i}`,
+          attributes: {
+            description: `dashboard${i} desc`,
+            title: `dashboard${i} - ${search} - title`,
+          },
+          references: [] as SearchDashboardsResponse['hits'][0]['references'],
+        } as SearchDashboardsResponse['hits'][0]);
+      }
+      return Promise.resolve({
+        total: sizeToUse,
+        hits,
+      });
+    }),
+    findById: jest.fn(),
+    findByIds: jest.fn().mockImplementation(() =>
+      Promise.resolve([
+        {
+          id: `dashboardUnsavedOne`,
+          status: 'success',
+          attributes: {
+            title: `Dashboard Unsaved One`,
+          } as unknown as DashboardAttributes,
+        },
+        {
+          id: `dashboardUnsavedTwo`,
+          status: 'success',
+          attributes: {
+            title: `Dashboard Unsaved Two`,
+          } as unknown as DashboardAttributes,
+        },
+        {
+          id: `dashboardUnsavedThree`,
+          status: 'success',
+          attributes: {
+            title: `Dashboard Unsaved Three`,
+          } as unknown as DashboardAttributes,
+        },
+      ])
+    ),
+    findByTitle: jest.fn(),
+  },
+  deleteDashboards: jest.fn(),
+  checkForDuplicateDashboardTitle: jest.fn(),
+  updateDashboardMeta: jest.fn(),
+};
+
+export const mockDashboardBackupService = {
+  clearState: jest.fn(),
+  getState: jest.fn().mockReturnValue(undefined),
+  setState: jest.fn(),
+  getViewMode: jest.fn(),
+  storeViewMode: jest.fn(),
+  getDashboardIdsWithUnsavedChanges: jest
+    .fn()
+    .mockReturnValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
+  dashboardHasUnsavedEdits: jest.fn(),
 };

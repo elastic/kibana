@@ -36,7 +36,7 @@ import {
 import {
   LoadDashboardReturn,
   SavedDashboardInput,
-} from '../../../services/dashboard_content_management/types';
+} from '../../../services/dashboard_content_management_service/types';
 import { dashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import { coreServices, dataService, embeddableService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';

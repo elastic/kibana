@@ -47,7 +47,7 @@ import { DashboardEmbedSettings } from '../dashboard_app/types';
 import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants';
 import { openSettingsFlyout } from '../dashboard_container/embeddable/api';
 import { DashboardRedirect } from '../dashboard_container/types';
-import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
+import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
 import {
   coreServices,
   dataService,

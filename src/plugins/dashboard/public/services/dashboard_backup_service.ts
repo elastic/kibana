@@ -18,7 +18,7 @@ import type { DashboardContainerInput } from '../../common';
 import { backupServiceStrings } from '../dashboard_container/_dashboard_container_strings';
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { coreServices, spacesService } from './kibana_services';
-import { SavedDashboardInput } from './dashboard_content_management/types';
+import { SavedDashboardInput } from './dashboard_content_management_service/types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
