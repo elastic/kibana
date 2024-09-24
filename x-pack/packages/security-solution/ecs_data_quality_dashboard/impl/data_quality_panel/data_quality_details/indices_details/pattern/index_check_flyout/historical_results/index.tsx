@@ -19,7 +19,7 @@ import {
   OnTimeChangeProps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { Fragment, useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, { FC, Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 
 import { useIsMounted } from '../../../../../hooks/use_is_mounted';
 import { useDataQualityContext } from '../../../../../data_quality_context';
@@ -70,7 +70,8 @@ export const initialPaginationState: PaginationReducerState = {
   rowSize: DEFAULT_HISTORICAL_RESULTS_PAGE_SIZE,
 };
 
-export const HistoricalResultsComponent: React.FC<Props> = ({ indexName }) => {
+export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
+  const [accordionState, setAccordionState] = useState<Record<number, boolean>>(() => ({}));
   const { historicalResultsState, fetchHistoricalResults } = useHistoricalResultsContext();
 
   const {
@@ -323,6 +324,12 @@ export const HistoricalResultsComponent: React.FC<Props> = ({ indexName }) => {
             <StyledAccordion
               id={historicalResultsAccordionId}
               buttonElement="div"
+              onToggle={(isOpen) => {
+                setAccordionState((prevState) => ({
+                  ...prevState,
+                  [result.checkedAt]: isOpen,
+                }));
+              }}
               buttonContent={
                 <EuiFlexGroup wrap={true} alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
@@ -331,18 +338,20 @@ export const HistoricalResultsComponent: React.FC<Props> = ({ indexName }) => {
                   <EuiFlexItem grow={true}>
                     <StyledText size="s">{getFormattedCheckTime(result.checkedAt)}</StyledText>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <EuiTextColor color={getCheckTextColor(result.incompatibleFieldCount)}>
-                        {formatNumber(result.incompatibleFieldCount)}
-                      </EuiTextColor>{' '}
-                      {COUNTED_INCOMPATIBLE_FIELDS(result.incompatibleFieldCount)}
-                    </EuiText>
-                  </EuiFlexItem>
+                  {!accordionState[result.checkedAt] && (
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <EuiTextColor color={getCheckTextColor(result.incompatibleFieldCount)}>
+                          {formatNumber(result.incompatibleFieldCount)}
+                        </EuiTextColor>{' '}
+                        {COUNTED_INCOMPATIBLE_FIELDS(result.incompatibleFieldCount)}
+                      </EuiText>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               }
             >
-              <HistoricalResult indexName={indexName} result={result} />
+              <HistoricalResult indexName={indexName} historicalResult={result} />
             </StyledAccordion>
           </Fragment>
         ))

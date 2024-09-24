@@ -35,7 +35,7 @@ import {
 } from './markdown';
 import { mockPartitionedFieldMetadata } from '../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
 import { mockAllowedValues } from '../mock/allowed_values/mock_allowed_values';
-import { PartitionedFieldMetadata, UnallowedValueCount } from '../types';
+import { UnallowedValueCount } from '../types';
 import {
   eventCategory,
   hostNameWithTextMapping,
@@ -157,7 +157,7 @@ describe('getSummaryTableMarkdownRow', () => {
         docsCount: 4,
         formatBytes,
         formatNumber,
-        incompatible: 3,
+        incompatibleFieldsCount: 3,
         ilmPhase: 'unmanaged',
         isILMAvailable: true,
         indexName: 'auditbeat-custom-index-1',
@@ -173,7 +173,7 @@ describe('getSummaryTableMarkdownRow', () => {
         docsCount: 4,
         formatBytes,
         formatNumber,
-        incompatible: undefined, // <--
+        incompatibleFieldsCount: undefined, // <--
         ilmPhase: undefined, // <--
         indexName: 'auditbeat-custom-index-1',
         isILMAvailable: true,
@@ -189,7 +189,7 @@ describe('getSummaryTableMarkdownRow', () => {
         docsCount: 4,
         formatBytes,
         formatNumber,
-        incompatible: undefined, // <--
+        incompatibleFieldsCount: undefined, // <--
         ilmPhase: undefined, // <--
         indexName: 'auditbeat-custom-index-1',
         isILMAvailable: false,
@@ -205,7 +205,7 @@ describe('getSummaryTableMarkdownRow', () => {
         docsCount: 4,
         formatBytes,
         formatNumber,
-        incompatible: undefined, // <--
+        incompatibleFieldsCount: undefined, // <--
         ilmPhase: undefined, // <--
         indexName: 'auditbeat-custom-index-1',
         isILMAvailable: false,
@@ -213,6 +213,22 @@ describe('getSummaryTableMarkdownRow', () => {
         sizeInBytes: undefined,
       })
     ).toEqual('| -- | auditbeat-custom-index-1 | 4 (0.0%) | -- |\n');
+  });
+
+  test('it returns the expected row when patternDocsCount is undefined', () => {
+    expect(
+      getSummaryTableMarkdownRow({
+        docsCount: 4,
+        formatBytes,
+        formatNumber,
+        incompatibleFieldsCount: undefined, // <--
+        ilmPhase: undefined, // <--
+        indexName: 'auditbeat-custom-index-1',
+        isILMAvailable: false,
+        patternDocsCount: undefined,
+        sizeInBytes: undefined,
+      })
+    ).toEqual('| -- | auditbeat-custom-index-1 | 4 | -- |\n');
   });
 });
 
@@ -254,7 +270,7 @@ describe('getSummaryTableMarkdownComment', () => {
         ilmPhase: 'unmanaged',
         indexName: 'auditbeat-custom-index-1',
         isILMAvailable: true,
-        partitionedFieldMetadata: mockPartitionedFieldMetadata,
+        incompatibleFieldsCount: 3,
         patternDocsCount: 57410,
         sizeInBytes: 28413,
       })
@@ -272,7 +288,7 @@ describe('getSummaryTableMarkdownComment', () => {
         ilmPhase: 'unmanaged',
         indexName: 'auditbeat-custom-index-1',
         isILMAvailable: false,
-        partitionedFieldMetadata: mockPartitionedFieldMetadata,
+        incompatibleFieldsCount: 3,
         patternDocsCount: 57410,
         sizeInBytes: undefined,
       })
@@ -290,7 +306,7 @@ describe('getSummaryTableMarkdownComment', () => {
         ilmPhase: 'unmanaged',
         indexName: 'auditbeat-custom-index-1',
         isILMAvailable: false,
-        partitionedFieldMetadata: mockPartitionedFieldMetadata,
+        incompatibleFieldsCount: 3,
         patternDocsCount: 57410,
         sizeInBytes: undefined,
       })
@@ -677,11 +693,11 @@ describe('getIncompatibleFieldsMarkdownTablesComment', () => {
   test('it returns the expected comment when the index has `incompatibleMappings` and `incompatibleValues`', () => {
     expect(
       getIncompatibleFieldsMarkdownTablesComment({
-        incompatibleMappings: [
+        incompatibleMappingsFields: [
           mockPartitionedFieldMetadata.incompatible[1],
           mockPartitionedFieldMetadata.incompatible[2],
         ],
-        incompatibleValues: [mockPartitionedFieldMetadata.incompatible[0]],
+        incompatibleValuesFields: [mockPartitionedFieldMetadata.incompatible[0]],
         indexName: 'auditbeat-custom-index-1',
       })
     ).toEqual(
@@ -692,8 +708,8 @@ describe('getIncompatibleFieldsMarkdownTablesComment', () => {
   test('it returns the expected comment when the index does NOT have `incompatibleMappings` and `incompatibleValues`', () => {
     expect(
       getIncompatibleFieldsMarkdownTablesComment({
-        incompatibleMappings: [], // <-- no `incompatibleMappings`
-        incompatibleValues: [], // <-- no `incompatibleValues`
+        incompatibleMappingsFields: [], // <-- no `incompatibleMappings`
+        incompatibleValuesFields: [], // <-- no `incompatibleValues`
         indexName: 'auditbeat-custom-index-1',
       })
     ).toEqual('\n\n\n');
@@ -710,7 +726,15 @@ describe('getAllIncompatibleMarkdownComments', () => {
         ilmPhase: 'unmanaged',
         isILMAvailable: true,
         indexName: 'auditbeat-custom-index-1',
-        partitionedFieldMetadata: mockPartitionedFieldMetadata,
+        incompatibleMappingsFields: [
+          mockPartitionedFieldMetadata.incompatible[1],
+          mockPartitionedFieldMetadata.incompatible[2],
+        ],
+        incompatibleValuesFields: [mockPartitionedFieldMetadata.incompatible[0]],
+        sameFamilyFieldsCount: 0,
+        customFieldsCount: 4,
+        ecsCompliantFieldsCount: 2,
+        allFieldsCount: 9,
         patternDocsCount: 57410,
         sizeInBytes: 28413,
       })
@@ -724,11 +748,6 @@ describe('getAllIncompatibleMarkdownComments', () => {
   });
 
   test('it returns the expected comment when `incompatible` is empty', () => {
-    const emptyIncompatible: PartitionedFieldMetadata = {
-      ...mockPartitionedFieldMetadata,
-      incompatible: [], // <-- empty
-    };
-
     expect(
       getAllIncompatibleMarkdownComments({
         docsCount: 4,
@@ -737,7 +756,12 @@ describe('getAllIncompatibleMarkdownComments', () => {
         ilmPhase: 'unmanaged',
         indexName: 'auditbeat-custom-index-1',
         isILMAvailable: true,
-        partitionedFieldMetadata: emptyIncompatible,
+        incompatibleMappingsFields: [],
+        incompatibleValuesFields: [],
+        sameFamilyFieldsCount: 0,
+        customFieldsCount: 4,
+        ecsCompliantFieldsCount: 2,
+        allFieldsCount: 9,
         patternDocsCount: 57410,
         sizeInBytes: 28413,
       })
@@ -750,11 +774,6 @@ describe('getAllIncompatibleMarkdownComments', () => {
   });
 
   test('it returns the expected comment when `isILMAvailable` is false', () => {
-    const emptyIncompatible: PartitionedFieldMetadata = {
-      ...mockPartitionedFieldMetadata,
-      incompatible: [], // <-- empty
-    };
-
     expect(
       getAllIncompatibleMarkdownComments({
         docsCount: 4,
@@ -763,7 +782,12 @@ describe('getAllIncompatibleMarkdownComments', () => {
         ilmPhase: 'unmanaged',
         indexName: 'auditbeat-custom-index-1',
         isILMAvailable: false,
-        partitionedFieldMetadata: emptyIncompatible,
+        incompatibleMappingsFields: [],
+        incompatibleValuesFields: [],
+        sameFamilyFieldsCount: 0,
+        customFieldsCount: 4,
+        ecsCompliantFieldsCount: 2,
+        allFieldsCount: 9,
         patternDocsCount: 57410,
         sizeInBytes: undefined,
       })
@@ -776,11 +800,6 @@ describe('getAllIncompatibleMarkdownComments', () => {
   });
 
   test('it returns the expected comment when `sizeInBytes` is not an integer', () => {
-    const emptyIncompatible: PartitionedFieldMetadata = {
-      ...mockPartitionedFieldMetadata,
-      incompatible: [], // <-- empty
-    };
-
     expect(
       getAllIncompatibleMarkdownComments({
         docsCount: 4,
@@ -789,7 +808,12 @@ describe('getAllIncompatibleMarkdownComments', () => {
         ilmPhase: 'unmanaged',
         indexName: 'auditbeat-custom-index-1',
         isILMAvailable: false,
-        partitionedFieldMetadata: emptyIncompatible,
+        incompatibleMappingsFields: [],
+        incompatibleValuesFields: [],
+        sameFamilyFieldsCount: 0,
+        customFieldsCount: 4,
+        ecsCompliantFieldsCount: 2,
+        allFieldsCount: 9,
         patternDocsCount: 57410,
         sizeInBytes: undefined,
       })
@@ -812,11 +836,11 @@ describe('getTabCountsMarkdownComment', () => {
   test('it returns a comment with the expected counts', () => {
     expect(
       getTabCountsMarkdownComment({
-        incompatible: 3,
-        sameFamily: 0,
-        custom: 4,
-        ecsCompliant: 2,
-        all: 9,
+        incompatibleFieldsCount: 3,
+        sameFamilyFieldsCount: 0,
+        customFieldsCount: 4,
+        ecsCompliantFieldsCount: 2,
+        allFieldsCount: 9,
       })
     ).toBe(
       '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n'
