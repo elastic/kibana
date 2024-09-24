@@ -142,84 +142,61 @@ export const streamGraph = async ({
       if (done) return;
 
       const event = value;
-
-      const processOpenAIEvent = () => {
-        if (event.event === 'on_llm_stream') {
-          const chunk = event.data?.chunk;
-          const msg = chunk.message;
-          if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
-            // I don't think we hit this anymore because of our check for AGENT_NODE_TAG
-            // however, no harm to keep it in
-            /* empty */
-          } else if (!didEnd) {
-            push({ payload: msg.content, type: 'content' });
-            finalMessage += msg.content;
-          }
-        } else if (event.event === 'on_llm_end' && !didEnd) {
-          const generations = event.data.output?.generations[0];
-          if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
-            handleStreamEnd(generations[0]?.text ?? finalMessage);
-          }
-        }
-      };
-
-      const processSimpleChatModelEvent = () => {
-        if (event.event === 'on_llm_stream') {
-          const chunk = event.data?.chunk;
-
-          const msg = isOssModel ? chunk.message.content : chunk.content;
-          if (finalOutputIndex === -1) {
-            currentOutput += msg;
-            // Remove whitespace to simplify parsing
-            const noWhitespaceOutput = currentOutput.replace(/\s/g, '');
-            if (noWhitespaceOutput.includes(finalOutputStartToken)) {
-              const nonStrippedToken = '"action_input": "';
-              finalOutputIndex = currentOutput.lastIndexOf(nonStrippedToken);
-              const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
-              extraOutput = currentOutput.substring(contentStartIndex);
-              push({ payload: extraOutput, type: 'content' });
-              finalMessage += extraOutput;
-            }
-          } else if (!streamingFinished && !didEnd) {
-            if (msg.startsWith('"') && finalMessage.endsWith('\\')) {
-              push({ payload: msg, type: 'content' });
-              finalMessage += msg;
-              return;
-            }
-            const finalOutputEndIndex = msg.search(finalOutputStopRegex);
-            if (finalOutputEndIndex !== -1) {
-              extraOutput = msg.substring(0, finalOutputEndIndex);
-              streamingFinished = true;
-              if (extraOutput.length > 0) {
-                push({ payload: extraOutput, type: 'content' });
-                finalMessage += extraOutput;
-              }
-            } else {
-              push({ payload: msg, type: 'content' });
-              finalMessage += msg;
-            }
-          }
-        } else if (event.event === 'on_llm_end' && streamingFinished && !didEnd) {
-          // Sometimes llama returns extra escape backslash characters which breaks the markdown.
-          // One of the solutions that I've found is to use `JSON.parse` to remove those.
-          // console.log(`[TEST] finalMessage 1: ${finalMessage}`);
-          finalMessage = JSON.parse(`{"finalMessage":"${finalMessage}"}`).finalMessage;
-          // console.log(`[TEST] finalMessage 2: ${finalMessage}`);
-          handleStreamEnd(finalMessage);
-        }
-      };
-
       // only process events that are part of the agent run
       if ((event.tags || []).includes(AGENT_NODE_TAG)) {
         if (event.name === 'ActionsClientChatOpenAI') {
-          if (isOssModel) {
-            processSimpleChatModelEvent();
-          } else {
-            processOpenAIEvent();
+          if (event.event === 'on_llm_stream') {
+            const chunk = event.data?.chunk;
+            const msg = chunk.message;
+            if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
+              // I don't think we hit this anymore because of our check for AGENT_NODE_TAG
+              // however, no harm to keep it in
+              /* empty */
+            } else if (!didEnd) {
+              push({ payload: msg.content, type: 'content' });
+              finalMessage += msg.content;
+            }
+          } else if (event.event === 'on_llm_end' && !didEnd) {
+            const generations = event.data.output?.generations[0];
+            if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
+              handleStreamEnd(generations[0]?.text ?? finalMessage);
+            }
           }
         }
         if (event.name === 'ActionsClientSimpleChatModel') {
-          processSimpleChatModelEvent();
+          if (event.event === 'on_llm_stream') {
+            const chunk = event.data?.chunk;
+
+            const msg = chunk.content;
+            if (finalOutputIndex === -1) {
+              currentOutput += msg;
+              // Remove whitespace to simplify parsing
+              const noWhitespaceOutput = currentOutput.replace(/\s/g, '');
+              if (noWhitespaceOutput.includes(finalOutputStartToken)) {
+                const nonStrippedToken = '"action_input": "';
+                finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
+                const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
+                extraOutput = currentOutput.substring(contentStartIndex);
+                push({ payload: extraOutput, type: 'content' });
+                finalMessage += extraOutput;
+              }
+            } else if (!streamingFinished && !didEnd) {
+              const finalOutputEndIndex = msg.search(finalOutputStopRegex);
+              if (finalOutputEndIndex !== -1) {
+                extraOutput = msg.substring(0, finalOutputEndIndex);
+                streamingFinished = true;
+                if (extraOutput.length > 0) {
+                  push({ payload: extraOutput, type: 'content' });
+                  finalMessage += extraOutput;
+                }
+              } else {
+                push({ payload: chunk.content, type: 'content' });
+                finalMessage += chunk.content;
+              }
+            }
+          } else if (event.event === 'on_llm_end' && streamingFinished && !didEnd) {
+            handleStreamEnd(finalMessage);
+          }
         }
       }
 
