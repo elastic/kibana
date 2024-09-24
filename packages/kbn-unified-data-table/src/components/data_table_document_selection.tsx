@@ -26,10 +26,10 @@ import { UnifiedDataTableContext } from '../table_context';
 
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
   const { euiTheme } = useEuiTheme();
-  const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } =
+  const { selectedDocs, expanded, getRowByIndex, isDarkMode, setSelectedDocs } =
     useContext(UnifiedDataTableContext);
-  const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);
-  const checked = useMemo(() => selectedDocs.includes(doc.id), [selectedDocs, doc.id]);
+  const doc = useMemo(() => getRowByIndex(rowIndex), [getRowByIndex, rowIndex]);
+  const checked = useMemo(() => (doc ? selectedDocs.includes(doc.id) : false), [doc, selectedDocs]);
 
   const toggleDocumentSelectionLabel = i18n.translate('unifiedDataTable.grid.selectDoc', {
     defaultMessage: `Select document ''{rowNumber}''`,
@@ -45,6 +45,10 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
       setCellProps({ style: undefined });
     }
   }, [expanded, doc, setCellProps, isDarkMode]);
+
+  if (!doc) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup
