@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render, act, fireEvent } from '@testing-library/react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -49,12 +49,11 @@ describe('DatasetFilter', () => {
     onToggleDataset: () => {},
   });
 
-  it('Renders all statuses', () => {
-    act(() => {
-      fireEvent.click(getByRole('button'));
-    });
+  it('Renders all statuses', async () => {
+    fireEvent.click(getByRole('button'));
 
-    expect(getByText('elastic_agent')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('elastic_agent')).toBeInTheDocument());
+
     expect(getByText('elastic_agent.filebeat')).toBeInTheDocument();
     expect(getByText('elastic_agent.fleet_server')).toBeInTheDocument();
     expect(getByText('elastic_agent.metricbeat')).toBeInTheDocument();

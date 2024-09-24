@@ -24,6 +24,7 @@ import {
 } from '../../__mocks__/table_context';
 import { UnifiedDataTableContext } from '../table_context';
 import { getDocId } from '@kbn/discover-utils';
+import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { servicesMock } from '../../__mocks__/services';
@@ -408,8 +409,9 @@ describe('document selection', () => {
       );
       return {
         getButton: async () => {
+          const user = userEvent.setup();
           const menuButton = await screen.findByTestId('unifiedDataTableSelectionBtn');
-          menuButton.click();
+          await user.click(menuButton);
           return screen.queryByRole('button', { name: /Compare/ });
         },
       };
@@ -425,19 +427,20 @@ describe('document selection', () => {
       const { getButton } = renderCompareBtn({ setIsCompareActive });
       const button = await getButton();
       expect(button).toBeInTheDocument();
-      expect(button?.getAttribute('disabled')).toBeNull();
-      button?.click();
+      expect(button!.getAttribute('disabled')).toBeNull();
+      await userEvent.click(button!);
       expect(setIsCompareActive).toHaveBeenCalledWith(true);
     });
 
     it('should disable the button if limit is reached', async () => {
+      const user = userEvent.setup();
       const selectedDocIds = Array.from({ length: 500 }, (_, i) => i.toString());
       const setIsCompareActive = jest.fn();
       const { getButton } = renderCompareBtn({ selectedDocIds, setIsCompareActive });
       const button = await getButton();
       expect(button).toBeInTheDocument();
-      expect(button?.getAttribute('disabled')).toBe('');
-      button?.click();
+      expect(button!.getAttribute('disabled')).toBe('');
+      await user.click(button!);
       expect(setIsCompareActive).not.toHaveBeenCalled();
     });
   });

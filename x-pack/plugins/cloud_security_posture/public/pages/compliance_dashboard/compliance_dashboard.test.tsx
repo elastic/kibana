@@ -9,6 +9,7 @@ import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { BaseCspSetupStatus, CspStatusCode } from '@kbn/cloud-security-posture-common';
+import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard, getDefaultTab } from '.';
@@ -619,7 +620,9 @@ describe('<ComplianceDashboard />', () => {
     });
   });
 
-  it('Show CSPM installation prompt if CSPM is not installed and KSPM is installed ,NO AGENT', () => {
+  it('Show CSPM installation prompt if CSPM is not installed and KSPM is installed ,NO AGENT', async () => {
+    const user = userEvent.setup();
+
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -647,7 +650,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage(cloudPosturePages.kspm_dashboard.path);
 
-    fireEvent.click(screen.getByTestId(CLOUD_DASHBOARD_TAB));
+    await user.click(screen.getByTestId(CLOUD_DASHBOARD_TAB));
 
     expectIdsInDoc({
       be: [CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
@@ -661,7 +664,9 @@ describe('<ComplianceDashboard />', () => {
     });
   });
 
-  it('Show KSPM installation prompt if KSPM is not installed and CSPM is installed , NO AGENT', () => {
+  it('Show KSPM installation prompt if KSPM is not installed and CSPM is installed , NO AGENT', async () => {
+    const user = userEvent.setup();
+
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -676,6 +681,7 @@ describe('<ComplianceDashboard />', () => {
         },
       })
     );
+
     (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
@@ -689,7 +695,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    fireEvent.click(screen.getByTestId(KUBERNETES_DASHBOARD_TAB));
+    await user.click(screen.getByTestId(KUBERNETES_DASHBOARD_TAB));
 
     expectIdsInDoc({
       be: [KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],

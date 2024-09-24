@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, act, type RenderResult, fireEvent, waitFor } from '@testing-library/react';
+import { render, type RenderResult, fireEvent, waitFor } from '@testing-library/react';
 import { TestProvider } from '../../../../../mocks/test_provider';
 import { ReviewStep } from './review_step';
 import { ActionsProvider } from '../../state';
@@ -70,9 +70,7 @@ describe('ReviewStep', () => {
 
   describe('when edit pipeline button is clicked', () => {
     beforeEach(() => {
-      act(() => {
-        result.getByTestId('editPipelineButton').click();
-      });
+      fireEvent.click(result.getByTestId('editPipelineButton'));
     });
 
     it('should open pipeline editor', () => {
@@ -81,9 +79,7 @@ describe('ReviewStep', () => {
 
     describe('when saving pipeline without changes', () => {
       beforeEach(() => {
-        act(() => {
-          result.getByTestId('savePipelineButton').click();
-        });
+        fireEvent.click(result.getByTestId('savePipelineButton'));
       });
 
       it('should call setResults', () => {
@@ -93,19 +89,15 @@ describe('ReviewStep', () => {
 
     describe('when saving pipeline with changes', () => {
       beforeEach(async () => {
-        act(() => {
-          fireEvent.change(result.getByTestId('mockCodeEditor'), {
-            target: { value: JSON.stringify(customPipeline) },
-          });
+        fireEvent.change(result.getByTestId('mockCodeEditor'), {
+          target: { value: JSON.stringify(customPipeline) },
         });
       });
 
       describe('when check pipeline is successful', () => {
         beforeEach(async () => {
-          await act(async () => {
-            result.getByTestId('savePipelineButton').click();
-            await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
-          });
+          fireEvent.click(result.getByTestId('savePipelineButton'));
+          await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
         });
 
         it('should call setIsGenerating', () => {
@@ -129,10 +121,8 @@ describe('ReviewStep', () => {
           mockRunCheckPipelineResults.mockImplementationOnce(() => {
             throw new Error('test error');
           });
-          await act(async () => {
-            result.getByTestId('savePipelineButton').click();
-            await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
-          });
+          fireEvent.click(result.getByTestId('savePipelineButton'));
+          await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
         });
 
         it('should check pipeline', () => {
@@ -153,10 +143,8 @@ describe('ReviewStep', () => {
           mockRunCheckPipelineResults.mockReturnValueOnce({
             results: { ...mockResults, docs: [] },
           });
-          await act(async () => {
-            result.getByTestId('savePipelineButton').click();
-            await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
-          });
+          fireEvent.click(result.getByTestId('savePipelineButton'));
+          await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
         });
 
         it('should check pipeline', () => {

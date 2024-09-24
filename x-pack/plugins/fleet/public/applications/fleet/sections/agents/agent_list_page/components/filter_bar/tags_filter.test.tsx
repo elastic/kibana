@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 
@@ -19,6 +20,7 @@ describe('TagsFilter', () => {
   }
 
   it('should remove one tag on clicking selected tag', async () => {
+    const user = userEvent.setup();
     const tags = ['tag1', 'tag2', 'tag3'];
     const selectedTags = ['tag1', 'tag2', 'tag3'];
     const onSelectedTagsChange = jest.fn();
@@ -29,9 +31,9 @@ describe('TagsFilter', () => {
     };
     const { getByText, getByTestId } = render(props);
     const filterButton = getByTestId('agentList.tagsFilter');
-    filterButton.click();
+    await user.click(filterButton);
     const tag = getByText('tag1');
-    tag.click();
+    await user.click(tag);
     expect(onSelectedTagsChange).toHaveBeenCalledWith(['tag2', 'tag3']);
   });
 });
