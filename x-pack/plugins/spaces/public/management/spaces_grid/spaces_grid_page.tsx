@@ -152,9 +152,7 @@ export class SpacesGridPage extends Component<Props, State> {
             box: {
               placeholder: i18n.translate(
                 'xpack.spaces.management.spacesGridPage.searchPlaceholder',
-                {
-                  defaultMessage: 'Search',
-                }
+                { defaultMessage: 'Search' }
               ),
             },
           }}

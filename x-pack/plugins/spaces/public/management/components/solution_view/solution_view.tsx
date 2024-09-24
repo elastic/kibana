@@ -41,9 +41,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           <EuiIcon type="logoElasticsearch" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.searchOptionLabel',
-            {
-              defaultMessage: 'Search',
-            }
+            { defaultMessage: 'Search' }
           )}
         </>
       ),
@@ -56,9 +54,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           <EuiIcon type="logoObservability" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.obltOptionLabel',
-            {
-              defaultMessage: 'Observability',
-            }
+            { defaultMessage: 'Observability' }
           )}
         </>
       ),
@@ -71,9 +67,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           <EuiIcon type="logoSecurity" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.securityOptionLabel',
-            {
-              defaultMessage: 'Security',
-            }
+            { defaultMessage: 'Security' }
           )}
         </>
       ),
@@ -86,9 +80,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           <EuiIcon type="logoKibana" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicOptionLabel',
-            {
-              defaultMessage: 'Classic',
-            }
+            { defaultMessage: 'Classic' }
           )}
         </>
       ),
@@ -167,9 +159,7 @@ export const SolutionView: FunctionComponent<Props> = ({
               }}
               placeholder={i18n.translate(
                 'xpack.spaces.management.navigation.solutionViewDefaultValue',
-                {
-                  defaultMessage: 'Select solution view',
-                }
+                { defaultMessage: 'Select solution view' }
               )}
               isInvalid={validator.validateSolutionView(space, isEditing).isInvalid}
             />
