@@ -21,6 +21,7 @@ import {
   overviewDegradedFieldsSectionTitle,
   overviewDegradedFieldsSectionTitleTooltip,
   overviewDegradedFieldToggleSwitch,
+  overviewDegradedFieldToggleSwitchTooltip,
   overviewQualityIssuesAccordionTechPreviewBadge,
 } from '../../../../../common/translations';
 import { DegradedFieldTable } from './table';
@@ -36,14 +37,17 @@ export function DegradedFields() {
     useDegradedFields();
 
   const latestBackingIndexToggle = (
-    <EuiSwitch
-      label={overviewDegradedFieldToggleSwitch}
-      checked={showCurrentQualityIssues}
-      onChange={toggleCurrentQualityIssues}
-      aria-describedby={toggleTextSwitchId}
-      compressed
-      data-test-subj="datasetQualityDetailsOverviewDegradedFieldToggleSwitch"
-    />
+    <>
+      <EuiSwitch
+        label={overviewDegradedFieldToggleSwitch}
+        checked={showCurrentQualityIssues}
+        onChange={toggleCurrentQualityIssues}
+        aria-describedby={toggleTextSwitchId}
+        compressed
+        data-test-subj="datasetQualityDetailsOverviewDegradedFieldToggleSwitch"
+      />
+      <EuiIconTip content={overviewDegradedFieldToggleSwitchTooltip} position="top" />
+    </>
   );
 
   const accordionTitle = (

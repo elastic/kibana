@@ -17,8 +17,11 @@ import { useKibanaContextForPlugin } from '../utils';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import {
   degradedFieldCauseFieldIgnored,
+  degradedFieldCauseFieldIgnoredTooltip,
   degradedFieldCauseFieldLimitExceeded,
+  degradedFieldCauseFieldLimitExceededTooltip,
   degradedFieldCauseFieldMalformed,
+  degradedFieldCauseFieldMalformedTooltip,
 } from '../../common/translations';
 
 export type DegradedFieldSortField = keyof DegradedField;
@@ -123,6 +126,7 @@ export function useDegradedFields() {
     if (degradedFieldAnalysis.isFieldLimitIssue) {
       return {
         potentialCause: degradedFieldCauseFieldLimitExceeded,
+        tooltipContent: degradedFieldCauseFieldLimitExceededTooltip,
         shouldDisplayMitigation: true,
         shouldDisplayValues: false,
       };
@@ -138,6 +142,7 @@ export function useDegradedFields() {
       if (isAnyValueExceedingIgnoreAbove) {
         return {
           potentialCause: degradedFieldCauseFieldIgnored,
+          tooltipContent: degradedFieldCauseFieldIgnoredTooltip,
           shouldDisplayMitigation: false,
           shouldDisplayValues: true,
         };
@@ -147,6 +152,7 @@ export function useDegradedFields() {
     // 3rd check if its a ignore_malformed issue. There is no check, at the moment.
     return {
       potentialCause: degradedFieldCauseFieldMalformed,
+      tooltipContent: degradedFieldCauseFieldMalformedTooltip,
       shouldDisplayMitigation: false,
       shouldDisplayValues: false,
     };

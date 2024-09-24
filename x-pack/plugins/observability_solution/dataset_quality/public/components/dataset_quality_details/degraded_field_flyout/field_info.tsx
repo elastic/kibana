@@ -14,6 +14,7 @@ import {
   EuiHorizontalRule,
   EuiTextColor,
   EuiTitle,
+  EuiToolTip,
   formatNumber,
 } from '@elastic/eui';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -22,6 +23,7 @@ import { NUMBER_FORMAT } from '../../../../common/constants';
 import {
   countColumnName,
   degradedFieldCurrentFieldLimitColumnName,
+  degradedFieldMaximumCharacterLimitColumnName,
   degradedFieldPotentialCauseColumnName,
   degradedFieldValuesColumnName,
   lastOccurrenceColumnName,
@@ -91,9 +93,13 @@ export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) 
           data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-cause"
           grow={2}
         >
-          <EuiBadge color="hollow" css={{ maxWidth: '135px' }}>
-            <strong>{degradedFieldAnalysisResult?.potentialCause}</strong>
-          </EuiBadge>
+          <div>
+            <EuiToolTip position="top" content={degradedFieldAnalysisResult?.tooltipContent}>
+              <EuiBadge color="hollow">
+                <strong>{degradedFieldAnalysisResult?.potentialCause}</strong>
+              </EuiBadge>
+            </EuiToolTip>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
@@ -121,6 +127,23 @@ export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) 
 
       {!isAnalysisInProgress && degradedFieldAnalysisResult?.shouldDisplayValues && (
         <>
+          <EuiFlexGroup
+            data-test-subj={'datasetQualityDetailsDegradedFieldFlyoutFieldsList-characterLimit'}
+          >
+            <EuiFlexItem grow={1}>
+              <EuiTitle size="xxs">
+                <span>{degradedFieldMaximumCharacterLimitColumnName}</span>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem
+              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-characterLimit"
+              css={{ maxWidth: '64%' }}
+              grow={2}
+            >
+              <span>{degradedFieldAnalysis?.fieldMapping?.ignore_above}</span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule margin="s" />
           <EuiFlexGroup
             data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-values`}
           >
