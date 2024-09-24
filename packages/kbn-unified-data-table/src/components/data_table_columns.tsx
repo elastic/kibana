@@ -182,7 +182,13 @@ function buildEuiGridColumn({
     cellActions = columnCellActions;
   } else {
     cellActions = dataViewField
-      ? buildCellActions(dataViewField, toastNotifications, valueToStringConverter, onFilter)
+      ? buildCellActions(
+          dataViewField,
+          isPlainRecord,
+          toastNotifications,
+          valueToStringConverter,
+          onFilter
+        )
       : [];
 
     if (columnCellActions?.length && cellActionsHandling === 'append') {
