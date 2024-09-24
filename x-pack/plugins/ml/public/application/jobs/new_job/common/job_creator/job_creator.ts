@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
+
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -22,6 +23,8 @@ import {
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import { createDatafeedId } from '../../../../../../common/util/job_utils';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -44,6 +47,7 @@ import { collectAggs } from './util/general';
 import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import type { MlCalendar } from '../../../../../../common/types/calendars';
+import type { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
 import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
