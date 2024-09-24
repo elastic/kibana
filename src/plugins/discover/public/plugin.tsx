@@ -151,7 +151,7 @@ export class DiscoverPlugin
     this.stopUrlTracking = stopUrlTracker;
 
     const ebtContextManager = new DiscoverEBTContextManager();
-    ebtContextManager.register({ core });
+    ebtContextManager.initialize({ core });
 
     core.application.register({
       id: PLUGIN_ID,

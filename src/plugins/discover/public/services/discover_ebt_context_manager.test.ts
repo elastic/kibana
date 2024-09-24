@@ -22,7 +22,7 @@ describe('DiscoverEBTContextManager', () => {
 
   describe('register', () => {
     it('should register the context provider', () => {
-      discoverEBTContextManager.register({ core: coreSetupMock });
+      discoverEBTContextManager.initialize({ core: coreSetupMock });
 
       expect(coreSetupMock.analytics.registerContextProvider).toHaveBeenCalledWith({
         name: 'discover_context',
@@ -47,7 +47,7 @@ describe('DiscoverEBTContextManager', () => {
     it('should update the profiles with the provided props', () => {
       const dscProfiles = ['profile1', 'profile2'];
       const dscProfiles2 = ['profile21', 'profile22'];
-      discoverEBTContextManager.register({ core: coreSetupMock });
+      discoverEBTContextManager.initialize({ core: coreSetupMock });
       discoverEBTContextManager.enable();
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
@@ -60,7 +60,7 @@ describe('DiscoverEBTContextManager', () => {
     it('should not update the profiles if profile list did not change', () => {
       const dscProfiles = ['profile1', 'profile2'];
       const dscProfiles2 = ['profile1', 'profile2'];
-      discoverEBTContextManager.register({ core: coreSetupMock });
+      discoverEBTContextManager.initialize({ core: coreSetupMock });
       discoverEBTContextManager.enable();
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
@@ -72,7 +72,7 @@ describe('DiscoverEBTContextManager', () => {
 
     it('should not update the profiles if not enabled yet', () => {
       const dscProfiles = ['profile1', 'profile2'];
-      discoverEBTContextManager.register({ core: coreSetupMock });
+      discoverEBTContextManager.initialize({ core: coreSetupMock });
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
@@ -80,7 +80,7 @@ describe('DiscoverEBTContextManager', () => {
 
     it('should not update the profiles after resetting unless enabled again', () => {
       const dscProfiles = ['profile1', 'profile2'];
-      discoverEBTContextManager.register({ core: coreSetupMock });
+      discoverEBTContextManager.initialize({ core: coreSetupMock });
       discoverEBTContextManager.enable();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);

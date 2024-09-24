@@ -12,7 +12,7 @@ import { isEqual } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 
 export interface DiscoverEBTContextProps {
-  dscProfiles: string[]; // Discover Context Awareness Profiles
+  discoverProfiles: string[]; // Discover Context Awareness Profiles
 }
 export type DiscoverEBTContext = BehaviorSubject<DiscoverEBTContextProps>;
 
@@ -23,22 +23,21 @@ export class DiscoverEBTContextManager {
   constructor() {}
 
   // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
-  public register({ core }: { core: CoreSetup }) {
+  public initialize({ core }: { core: CoreSetup }) {
     const context$ = new BehaviorSubject<DiscoverEBTContextProps>({
-      dscProfiles: [],
+      discoverProfiles: [],
     });
 
     core.analytics.registerContextProvider({
       name: 'discover_context',
       context$,
       schema: {
-        dscProfiles: {
+        discoverProfiles: {
           type: 'array',
           items: {
             type: 'keyword',
             _meta: {
-              description:
-                'List of profiles which are activated by Discover Context Awareness logic',
+              description: 'List of active Discover context awareness profiles',
             },
           },
         },
@@ -53,20 +52,20 @@ export class DiscoverEBTContextManager {
     this.isEnabled = true;
   }
 
-  public updateProfilesContextWith(dscProfiles: DiscoverEBTContextProps['dscProfiles']) {
+  public updateProfilesContextWith(discoverProfiles: DiscoverEBTContextProps['discoverProfiles']) {
     if (
       this.isEnabled &&
       this.ebtContext$ &&
-      !isEqual(this.ebtContext$.getValue().dscProfiles, dscProfiles)
+      !isEqual(this.ebtContext$.getValue().discoverProfiles, discoverProfiles)
     ) {
       this.ebtContext$.next({
-        dscProfiles,
+        discoverProfiles,
       });
     }
   }
 
   public getProfilesContext() {
-    return this.ebtContext$?.getValue()?.dscProfiles;
+    return this.ebtContext$?.getValue()?.discoverProfiles;
   }
 
   public disableAndReset() {
