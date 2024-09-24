@@ -45,7 +45,7 @@ describe('ProcessTreeAlerts component', () => {
       expect(renderResult.queryByText(ALERT_RULE_NAME!)).toBeTruthy();
       expect(renderResult.queryByText(ALERT_STATUS!)).toBeTruthy();
 
-      expect(renderResult).toMatchSnapshot();
+      expect(renderResult.container).toMatchSnapshot();
     });
 
     it('should execute onClick callback', async () => {

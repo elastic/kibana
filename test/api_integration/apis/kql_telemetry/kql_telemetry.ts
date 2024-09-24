@@ -11,7 +11,10 @@ import expect from '@kbn/expect';
 import { get } from 'lodash';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { KQL_TELEMETRY_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -36,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/internal/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ opt_in: true })
         .expect(200);
 
@@ -55,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/internal/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ opt_in: false })
         .expect(200);
 
@@ -74,6 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/internal/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ opt_in: true })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -87,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/internal/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ opt_in: false })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -101,6 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({ opt_in: 'notabool' })
           .expect(400),
         supertest

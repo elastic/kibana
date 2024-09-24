@@ -111,11 +111,25 @@ export interface KVState {
   packageName: string;
   dataStreamName: string;
   kvProcessor: ESProcessorItem;
+  grokPattern: string;
   logSamples: string[];
   kvLogMessages: string[];
   jsonSamples: string[];
   finalized: boolean;
   header: boolean;
+  errors: object;
+  additionalProcessors: object[];
+  ecsVersion: string;
+}
+
+export interface UnstructuredLogState {
+  lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
+  grokPatterns: string[];
+  logSamples: string[];
+  jsonSamples: string[];
+  finalized: boolean;
   errors: object;
   additionalProcessors: object[];
   ecsVersion: string;

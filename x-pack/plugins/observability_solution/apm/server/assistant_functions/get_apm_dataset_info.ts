@@ -164,6 +164,7 @@ export function registerGetApmDatasetInfoFunction({
           `,
         },
       };
-    }
+    },
+    ['observability']
   );
 }

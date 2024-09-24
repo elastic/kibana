@@ -33,6 +33,7 @@ steps:
         CHECK_SYNTHETICS_MINIMUM_RUNS: 3
         MAX_FAILURES: 2
         CHECK_SYNTHETIC_MAX_POLL: 50
+        DEPLOYMENT_SLICES: ${DEPLOYMENT_SLICES:-""}
     soft_fail: true
 
   - wait: ~

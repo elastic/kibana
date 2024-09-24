@@ -73,6 +73,7 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
 export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   assistantStreamingEnabled: boolean;
   actionTypeId: string;
+  isEnabledKnowledgeBase: boolean;
   model?: string;
 }> = {
   eventType: 'invoke_assistant_success',
@@ -96,12 +97,19 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
         optional: true,
       },
     },
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is knowledge base enabled',
+      },
+    },
   },
 };
 
 export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   errorMessage: string;
   assistantStreamingEnabled: boolean;
+  isEnabledKnowledgeBase: boolean;
   actionTypeId: string;
   model?: string;
 }> = {
@@ -130,6 +138,12 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
       _meta: {
         description: 'LLM model',
         optional: true,
+      },
+    },
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is knowledge base enabled',
       },
     },
   },

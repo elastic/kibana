@@ -8,15 +8,14 @@
  */
 
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 
 export interface LogsContextService {
   isLogsIndexPattern(indexPattern: unknown): boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LogsContextServiceDeps {
-  // We will probably soon add uiSettings as a dependency
-  // to consume user configured indices
+  logsDataAccessPlugin?: LogsDataAccessPluginStart;
 }
 
 export const DEFAULT_ALLOWED_LOGS_BASE_PATTERNS = [
@@ -28,15 +27,36 @@ export const DEFAULT_ALLOWED_LOGS_BASE_PATTERNS = [
   'winlogbeat',
 ];
 
-export const createLogsContextService = (_deps: LogsContextServiceDeps = {}) => {
-  // This is initially an hard-coded set of well-known base patterns,
-  // we can extend this allowed list with any setting coming from uiSettings
-  const ALLOWED_LOGS_DATA_SOURCES = [createRegExpPatternFrom(DEFAULT_ALLOWED_LOGS_BASE_PATTERNS)];
+export const DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP = createRegExpPatternFrom(
+  DEFAULT_ALLOWED_LOGS_BASE_PATTERNS
+);
 
+export const createLogsContextService = async ({
+  logsDataAccessPlugin,
+}: LogsContextServiceDeps) => {
+  let logSources: string[] | undefined;
+
+  if (logsDataAccessPlugin) {
+    const logSourcesService = logsDataAccessPlugin.services.logSourcesService;
+    logSources = (await logSourcesService.getLogSources())
+      .map((logSource) => logSource.indexPattern)
+      .join(',') // TODO: Will be replaced by helper in: https://github.com/elastic/kibana/pull/192003
+      .split(',');
+  }
+
+  const ALLOWED_LOGS_DATA_SOURCES = [
+    DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP,
+    ...(logSources ? logSources : []),
+  ];
+
+  return getLogsContextService(ALLOWED_LOGS_DATA_SOURCES);
+};
+
+export const getLogsContextService = (allowedDataSources: Array<string | RegExp>) => {
   const isLogsIndexPattern = (indexPattern: unknown) => {
     return (
       typeof indexPattern === 'string' &&
-      testPatternAgainstAllowedList(ALLOWED_LOGS_DATA_SOURCES)(indexPattern)
+      testPatternAgainstAllowedList(allowedDataSources)(indexPattern)
     );
   };
 

@@ -458,7 +458,7 @@ export default function Expressions(props: Props) {
       />
       {errors.filterQuery && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
-          {errors.filterQuery}
+          {errors.filterQuery as React.ReactNode}
         </EuiFormErrorText>
       )}
       <EuiSpacer size="l" />

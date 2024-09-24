@@ -192,8 +192,10 @@ export const useAddBulkToTimelineAction = ({
     [dispatch, createTimeline, selectedEventIds, tableId]
   );
 
-  const onActionClick: BulkActionsConfig['onClick'] | CustomBulkAction['onClick'] = useCallback(
-    (items: TimelineItem[] | undefined, isAllSelected: boolean, setLoading, clearSelection) => {
+  const onActionClick = useCallback<
+    NonNullable<BulkActionsConfig['onClick'] | CustomBulkAction['onClick']>
+  >(
+    (items, isAllSelected, setLoading, clearSelection) => {
       if (!items) return;
       /*
        * Trigger actions table passed isAllSelected param

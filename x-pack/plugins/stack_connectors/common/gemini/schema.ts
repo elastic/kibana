@@ -29,14 +29,17 @@ export const RunActionParamsSchema = schema.object({
   raw: schema.maybe(schema.boolean()),
 });
 
-export const RunApiResponseSchema = schema.object({
-  candidates: schema.any(),
-  usageMetadata: schema.object({
-    promptTokenCount: schema.number(),
-    candidatesTokenCount: schema.number(),
-    totalTokenCount: schema.number(),
-  }),
-});
+export const RunApiResponseSchema = schema.object(
+  {
+    candidates: schema.any(),
+    usageMetadata: schema.object({
+      promptTokenCount: schema.number(),
+      candidatesTokenCount: schema.number(),
+      totalTokenCount: schema.number(),
+    }),
+  },
+  { unknowns: 'ignore' } // unknown keys will NOT fail validation, but will be removed
+);
 
 export const RunActionResponseSchema = schema.object(
   {

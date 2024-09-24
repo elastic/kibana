@@ -3,7 +3,7 @@ type: object
 required:
   - subAction
   - subActionParams
-description: The `pushToService` subaction for Jira, ServiceNow ITSM, ServiceNow SecOps, Swimlane, and Webhook - Case Management connectors.
+description: The `pushToService` subaction for Jira, ServiceNow ITSM, ServiceNow SecOps, Swimlane, TheHive, and Webhook - Case Management connectors.
 properties: 
   subAction:
     type: string
@@ -16,7 +16,7 @@ properties:
     properties:
       comments:
         type: array
-        description: Additional information that is sent to Jira, ServiceNow ITSM, ServiceNow SecOps, or Swimlane.
+        description: Additional information that is sent to Jira, ServiceNow ITSM, ServiceNow SecOps, Swimlane, or TheHive.
         items:
           type: object
           properties:
@@ -28,7 +28,7 @@ properties:
               description: A unique identifier for the comment.
       incident:
         type: object
-        description: Information necessary to create or update a Jira, ServiceNow ITSM, ServiveNow SecOps, or Swimlane incident.
+        description: Information necessary to create or update a Jira, ServiceNow ITSM, ServiveNow SecOps, Swimlane, or TheHive incident.
         properties:
           alertId:
             type: string
@@ -52,7 +52,7 @@ properties:
               NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that ServiceNow creates a separate incident record for every generated alert that uses a unique alert ID. If the rule generates multiple alerts that use the same alert IDs, ServiceNow creates and continually updates a single incident record for the alert.
           description:
             type: string
-            description: The description of the incident for Jira, ServiceNow ITSM, ServiceNow SecOps, Swimlane, and Webhook - Case Management connectors.
+            description: The description of the incident for Jira, ServiceNow ITSM, ServiceNow SecOps, Swimlane, TheHive, and Webhook - Case Management connectors.
           dest_ip:
             description: >
               A list of destination IP addresses related to the security incident for ServiceNow SecOps connectors. The IPs are added as observables to the security incident.
@@ -113,8 +113,10 @@ properties:
             type: string
             description: The rule name for Swimlane connectors.
           severity:
-            type: string
-            description: The severity of the incident for ServiceNow ITSM and Swimlane connectors.
+            type: integer
+            description: >
+              The severity of the incident for ServiceNow ITSM, Swimlane, and TheHive connectors.
+              In TheHive connectors, the severity value ranges from 1 (low) to 4 (critical) with a default value of 2 (medium).
           short_description:
             type: string
             description: >
@@ -139,12 +141,19 @@ properties:
             type: array
             items:
               type: string
-            description: A list of tags for Webhook - Case Management connectors.
+            description: A list of tags for TheHive and Webhook - Case Management connectors.
           title:
             type: string
             description: >
-              A title for the incident for Jira and Webhook - Case Management connectors.
+              A title for the incident for Jira, TheHive, and Webhook - Case Management connectors.
               It is used for searching the contents of the knowledge base.
+          tlp:
+            type: integer
+            minimum: 0
+            maximum: 4
+            default: 2
+            description: >
+              The traffic light protocol designation for the incident in TheHive connectors. Valid values include: 0 (clear), 1 (green), 2 (amber), 3 (amber and strict), and 4 (red).
           urgency:
             type: string
             description: The urgency of the incident for ServiceNow ITSM connectors.

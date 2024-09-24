@@ -135,7 +135,7 @@ export const SavedBookEditor = ({
             })}
           >
             <EuiFieldText
-              value={authorName}
+              value={authorName ?? ''}
               onChange={(e) => attributesManager.authorName.next(e.target.value)}
             />
           </EuiFormRow>
@@ -145,7 +145,7 @@ export const SavedBookEditor = ({
             })}
           >
             <EuiFieldText
-              value={bookTitle}
+              value={bookTitle ?? ''}
               onChange={(e) => attributesManager.bookTitle.next(e.target.value)}
             />
           </EuiFormRow>
@@ -155,7 +155,7 @@ export const SavedBookEditor = ({
             })}
           >
             <EuiFieldNumber
-              value={numberOfPages}
+              value={numberOfPages ?? ''}
               onChange={(e) => attributesManager.numberOfPages.next(+e.target.value)}
             />
           </EuiFormRow>
@@ -165,7 +165,7 @@ export const SavedBookEditor = ({
             })}
           >
             <EuiTextArea
-              value={synopsis}
+              value={synopsis ?? ''}
               onChange={(e) => attributesManager.bookSynopsis.next(e.target.value)}
             />
           </EuiFormRow>
