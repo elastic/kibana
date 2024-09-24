@@ -51,7 +51,7 @@ $visLegendWidth: 150px;
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
-  
+
   @include euiScrollBar;
   .visLegend__button {
     font-size: $euiFontSizeXS;
