@@ -150,7 +150,7 @@ export class DataViewMgmtService {
     this.internalState$.next({ ...this.state$.getValue(), ...newState });
   };
 
-  private getKbnUrl = (dataViewId: string) =>
+  private getConflictFieldsKbnUrl = (dataViewId: string) =>
     setStateToKbnUrl(
       APP_STATE_STORAGE_KEY,
       {

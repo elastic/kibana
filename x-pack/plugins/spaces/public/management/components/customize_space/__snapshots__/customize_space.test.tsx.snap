@@ -5,7 +5,7 @@ exports[`renders correctly 1`] = `
   dataTestSubj="generalPanel"
 >
   <EuiDescribedFormGroup
-    description="Give your space a name that's memorable."
+    description="Give your space a meaningful name and description."
     fullWidth={true}
     title={
       <EuiTitle
