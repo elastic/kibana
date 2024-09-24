@@ -57,6 +57,7 @@ export {
   getVisibleColumns,
   canPrependTimeFieldColumn,
   DiscoverFlyouts,
+  dismissAllFlyoutsExceptFor,
   dismissFlyouts,
 } from './src';
 

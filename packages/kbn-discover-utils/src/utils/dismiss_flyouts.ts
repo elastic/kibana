@@ -13,7 +13,7 @@ export enum DiscoverFlyouts {
   esqlDocs = 'esqlDocs',
 }
 
-const ALL_FLYOUTS = Object.values(DiscoverFlyouts);
+const AllDiscoverFlyouts = Object.values(DiscoverFlyouts);
 
 const getFlyoutCloseButton = (flyout: DiscoverFlyouts): HTMLElement | null => {
   switch (flyout) {
@@ -28,11 +28,21 @@ const getFlyoutCloseButton = (flyout: DiscoverFlyouts): HTMLElement | null => {
   }
 };
 
-export const dismissFlyouts = (selectedFlyouts: DiscoverFlyouts[] = ALL_FLYOUTS) => {
+export const dismissFlyouts = (
+  selectedFlyouts: DiscoverFlyouts[] = AllDiscoverFlyouts,
+  excludedFlyout?: DiscoverFlyouts
+) => {
   selectedFlyouts.forEach((flyout) => {
+    if (flyout === excludedFlyout) {
+      return;
+    }
     const closeButton = getFlyoutCloseButton(flyout);
     if (closeButton) {
       closeButton.click?.();
     }
   });
+};
+
+export const dismissAllFlyoutsExceptFor = (excludedFlyout: DiscoverFlyouts) => {
+  dismissFlyouts(AllDiscoverFlyouts, excludedFlyout);
 };
