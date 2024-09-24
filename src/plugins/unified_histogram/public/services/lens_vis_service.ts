@@ -503,7 +503,32 @@ export class LensVisService {
       }
       const suggestions = this.lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
       if (suggestions.length) {
-        return suggestions[0];
+        const suggestion = suggestions[0];
+        const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
+        // the suggestions api will suggest a numeric column as a metric and not as a breakdown,
+        // so we need to adjust it here
+        if (
+          breakdownColumn &&
+          breakdownColumn.meta?.type === 'number' &&
+          suggestion &&
+          'layers' in suggestionVisualizationState &&
+          Array.isArray(suggestionVisualizationState.layers)
+        ) {
+          return {
+            ...suggestion,
+            visualizationState: {
+              ...(suggestionVisualizationState ?? {}),
+              layers: suggestionVisualizationState.layers.map((layer) => {
+                return {
+                  ...layer,
+                  accessors: ['results'],
+                  splitAccessor: breakdownColumn.name,
+                };
+              }),
+            },
+          };
+        }
+        return suggestion;
       }
     }
 
