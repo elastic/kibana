@@ -13,6 +13,7 @@ import { FieldDefinition } from '@kbn/management-settings-types';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { Clause } from '@elastic/eui/src/components/search_bar/query/ast';
 import { useServices } from '../services';
+import { CATEGORY_FIELD } from '../query_input';
 import { useSettings } from './use_settings';
 
 /**
@@ -33,7 +34,7 @@ export const useFields = (scope: UiSettingsScope, query?: Query): FieldDefinitio
     const clauses: Clause[] = query.ast.clauses.map((clause) =>
       // If the clause value contains `:` and is not a category filter, add it as a term clause
       // This allows searching for settings that include `:` in their names
-      clause.type === 'field' && clause.field !== 'categories'
+      clause.type === 'field' && clause.field !== CATEGORY_FIELD
         ? {
             type: 'term',
             match: 'must',
