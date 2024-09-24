@@ -17,7 +17,13 @@ import {
   Query,
   TimeRange,
 } from '@kbn/es-query';
-import { PublishingSubject, getUnchangingComparator } from '@kbn/presentation-publishing';
+import {
+  PublishingSubject,
+  StateComparators,
+  getUnchangingComparator,
+} from '@kbn/presentation-publishing';
+import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { Visualization } from '../..';
 import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
@@ -29,6 +35,7 @@ import type {
   GetStateType,
   LensEmbeddableStartServices,
   LensRuntimeState,
+  ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
   VisualizationContextHelper,
 } from '../types';
@@ -183,7 +190,7 @@ function createViewUnderlyingDataApis(
   getState: GetStateType,
   visualizationContextHelper: VisualizationContextHelper,
   services: LensEmbeddableStartServices
-) {
+): ViewInDiscoverCallbacks {
   let viewUnderlyingDataArgs: undefined | ViewUnderlyingDataArgs;
 
   return {
@@ -212,7 +219,12 @@ export function initializeActionApi(
   titleApi: { panelTitle: PublishingSubject<string | undefined> },
   visualizationContextHelper: VisualizationContextHelper,
   services: LensEmbeddableStartServices
-) {
+): {
+  api: ViewInDiscoverCallbacks & HasDynamicActions;
+  comparators: StateComparators<DynamicActionsSerializedState>;
+  serialize: () => {};
+  cleanup: () => void;
+} {
   const dynamicActionsApi = services.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
     uuid,
     () => titleApi.panelTitle.getValue(),

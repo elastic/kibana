@@ -6,13 +6,25 @@
  */
 
 import { noop } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
+import type { Adapters } from '@kbn/inspector-plugin/public';
 import { getLensInspectorService } from '../../lens_inspector_service';
 import { emptySerializer } from '../helper';
-import type { LensEmbeddableStartServices } from '../types';
+import type { LensEmbeddableStartServices, LensInspectorAdapters } from '../types';
 
-export function initializeInspector(services: LensEmbeddableStartServices) {
+export function initializeInspector(services: LensEmbeddableStartServices): {
+  api: LensInspectorAdapters;
+  comparators: {};
+  serialize: () => {};
+  cleanup: () => void;
+} {
+  const inspectorApi = getLensInspectorService(services.inspector);
+
   return {
-    api: getLensInspectorService(services.inspector),
+    api: {
+      ...inspectorApi,
+      adapters$: new BehaviorSubject<Adapters>(inspectorApi.getInspectorAdapters()),
+    },
     comparators: {},
     serialize: emptySerializer,
     cleanup: noop,

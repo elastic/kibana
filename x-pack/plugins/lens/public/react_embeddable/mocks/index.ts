@@ -9,6 +9,8 @@ import { BehaviorSubject } from 'rxjs';
 import faker from 'faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import { PhaseEvent } from '@kbn/presentation-publishing';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
 import { DOC_TYPE } from '../../../common/constants';
 import { LensApi, LensRendererProps, LensSerializedState } from '../types';
 
@@ -45,21 +47,30 @@ const LensApiMock: LensApi = {
   supportedTriggers: jest.fn(() => []),
   canLinkToLibrary: jest.fn(async () => false),
   canUnlinkFromLibrary: jest.fn(async () => false),
+  unlinkFromLibrary: jest.fn(),
   checkForDuplicateTitle: jest.fn(),
   /** New embeddable api inherited methods */
+  resetUnsavedChanges: jest.fn(),
+  serializeState: jest.fn(),
+  snapshotRuntimeState: jest.fn(),
+  saveToLibrary: jest.fn(async () => 'saved-id'),
+  getByValueRuntimeSnapshot: jest.fn(),
+  updateState: jest.fn(),
+  onEdit: jest.fn(),
+  isEditingEnabled: jest.fn(() => true),
+  getTypeDisplayName: jest.fn(() => 'Lens'),
+  setPanelTitle: jest.fn(),
+  setHidePanelTitle: jest.fn(),
   phase$: new BehaviorSubject<PhaseEvent | undefined>({
     id: faker.random.uuid(),
     status: 'rendered',
     timeToEvent: 1000,
   }),
   unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
-  resetUnsavedChanges: jest.fn(),
-  serializeState: jest.fn(),
-  snapshotRuntimeState: jest.fn(),
-  saveToLibrary: jest.fn(async () => 'saved-id'),
-  getByReferenceState: jest.fn(),
-  getByValueState: jest.fn(),
-  updateState: jest.fn(),
+  dataViews: new BehaviorSubject<DataView[] | undefined>(undefined),
+  libraryId$: new BehaviorSubject<string | undefined>(undefined),
+  savedObjectId: new BehaviorSubject<string | undefined>(undefined),
+  adapters$: new BehaviorSubject<Adapters>({}),
 };
 
 const LensSerializedStateMock: LensSerializedState = {

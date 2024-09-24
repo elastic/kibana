@@ -23,9 +23,8 @@ import { UserMessages } from './user_messages/container';
 import { useMessages } from './user_messages/use_messages';
 import { initializeEditApi } from './initializers/inizialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
-import { initializeLibraryServices } from './initializers/initialize_library_services';
+import { initializePanelAndLibraryServices } from './initializers/initialize_panel_and_library_services';
 import { initializeObservables } from './initializers/initialize_observables';
-import { initializePanelSettings } from './initializers/initialize_panel_settings';
 import { initializeSearchContext } from './initializers/initialize_search_context';
 import { initializeData } from './initializers/initialize_data';
 import { initializeVisualizationContext } from './initializers/initialize_visualization_context';
@@ -59,7 +58,7 @@ export const createLensEmbeddableFactory = (
      *                  from the Lens component container to the Lens embeddable.
      * @returns an object with the Lens API and the React component to render in the Embeddable
      */
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       /**
        * Observables declared here are the bridge between the outer world
        * and the embeddable. They are updated within a subscribe callback
@@ -84,8 +83,7 @@ export const createLensEmbeddableFactory = (
        * Mind: the getState argument is ok to pass as long as it is lazy evaluated (i.e. called within a function).
        * If there's something that should be immediately computed use the "state" deserialized variable.
        */
-      const stateConfig = initializeStateManagement(state);
-      const panelConfig = initializePanelSettings(state, parentApi);
+      const stateConfig = initializeStateManagement(initialState);
       const inspectorConfig = initializeInspector(services);
       const editConfig = initializeEditApi(
         uuid,
@@ -96,18 +94,24 @@ export const createLensEmbeddableFactory = (
         services,
         inspectorConfig.api,
         parentApi,
-        state.savedObjectId
+        initialState.savedObjectId
       );
 
-      const libraryConfig = initializeLibraryServices(getState, services);
-      const searchContextConfig = initializeSearchContext(state);
+      const libraryConfig = initializePanelAndLibraryServices(
+        initialState,
+        getState,
+        parentApi,
+        stateConfig,
+        services
+      );
+      const searchContextConfig = initializeSearchContext(initialState);
       const dataConfig = initializeData(getState, observables.variables);
       const integrationsConfig = initializeIntegrations(getState);
       const actionsConfig = initializeActionApi(
         uuid,
-        state,
+        initialState,
         getState,
-        panelConfig.api,
+        libraryConfig.api,
         visualizationContextHelper,
         services
       );
@@ -119,7 +123,6 @@ export const createLensEmbeddableFactory = (
       function getState(): LensRuntimeState {
         return {
           ...stateConfig.serialize(),
-          ...panelConfig.serialize(),
           ...actionsConfig.serialize(),
           ...editConfig.serialize(),
           ...inspectorConfig.serialize(),
@@ -137,7 +140,6 @@ export const createLensEmbeddableFactory = (
        */
       const api: LensApi = buildApi(
         {
-          ...panelConfig.api,
           ...editConfig.api,
           ...inspectorConfig.api,
           ...searchContextConfig.api,
@@ -146,16 +148,17 @@ export const createLensEmbeddableFactory = (
           ...actionsConfig.api,
           ...integrationsConfig.api,
           ...stateConfig.api,
+          ...observables.api,
         },
         {
           ...stateConfig.comparators,
-          ...panelConfig.comparators,
           ...editConfig.comparators,
           ...inspectorConfig.comparators,
           ...searchContextConfig.comparators,
           ...observables.comparators,
           ...actionsConfig.comparators,
           ...integrationsConfig.comparators,
+          ...libraryConfig.comparators,
         }
       );
 
@@ -203,7 +206,6 @@ export const createLensEmbeddableFactory = (
           // On unmount call all the cleanups
           useEffect(() => {
             return () => {
-              panelConfig.cleanup();
               editConfig.cleanup();
               inspectorConfig.cleanup();
               searchContextConfig.cleanup();
@@ -211,6 +213,7 @@ export const createLensEmbeddableFactory = (
               expression.cleanup();
               actionsConfig.cleanup();
               integrationsConfig.cleanup();
+              libraryConfig.cleanup();
             };
           }, []);
 

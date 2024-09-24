@@ -46,6 +46,10 @@ export function initializeObservables(parentApi: unknown) {
     comparators: {
       renderMode: viewModeComparator,
       abortController: abortControllerComparator,
+      viewMode: viewModeComparator,
+    },
+    api: {
+      viewMode: viewMode$,
     },
   };
 }

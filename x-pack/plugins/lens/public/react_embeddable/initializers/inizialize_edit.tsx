@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { apiHasAppContext, apiPublishesViewMode } from '@kbn/presentation-publishing';
+import {
+  HasEditCapabilities,
+  HasSupportedTriggers,
+  apiHasAppContext,
+  apiPublishesViewMode,
+} from '@kbn/presentation-publishing';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
+import { i18n } from '@kbn/i18n';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
   GetStateType,
@@ -45,21 +51,18 @@ export function initializeEditApi(
   getState: GetStateType,
   updateState: (newState: LensRuntimeState) => void,
   isTextBasedLanguage: (currentState: LensRuntimeState) => boolean,
-  { viewMode$, hasRenderCompleted$ }: ReactiveConfigs['variables'],
+  { viewMode$, dataLoading$ }: ReactiveConfigs['variables'],
   startDependencies: LensEmbeddableStartServices,
   inspectorApi: LensInspectorAdapters,
   parentApi?: unknown,
   savedObjectId?: string
-) {
+): {
+  api: HasSupportedTriggers & HasEditCapabilities;
+  comparators: {};
+  serialize: () => {};
+  cleanup: () => void;
+} {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
-  if (!parentApi || !apiHasAppContext(parentApi)) {
-    return {
-      api: { supportedTriggers, openConfigPanel: async () => null },
-      comparators: {},
-      serialize: emptySerializer,
-      cleanup: noop,
-    };
-  }
 
   // update view mode if necessary
   if (apiPublishesViewMode(parentApi)) {
@@ -71,6 +74,9 @@ export function initializeEditApi(
    */
   const navigateToLensEditor =
     (stateTransfer: EmbeddableStateTransfer, skipAppLeave?: boolean) => async () => {
+      if (!parentApi || !apiHasAppContext(parentApi)) {
+        return;
+      }
       const parentApiContext = parentApi.getAppContext();
       await stateTransfer.navigateToEditor(APP_ID, {
         path: getEditPath(savedObjectId),
@@ -91,7 +97,7 @@ export function initializeEditApi(
     getState,
     updateState,
     startDependencies,
-    hasRenderCompleted$,
+    dataLoading$,
     panelManagementApi,
     inspectorApi,
     navigateToLensEditor,
@@ -124,8 +130,15 @@ export function initializeEditApi(
     serialize: emptySerializer,
     cleanup: noop,
     api: {
+      getTypeDisplayName: () =>
+        i18n.translate('xpack.lens.embeddableDisplayName', {
+          defaultMessage: 'Lens',
+        }),
       supportedTriggers,
       onEdit: async () => {
+        if (!parentApi || !apiHasAppContext(parentApi)) {
+          return;
+        }
         const rootEmbeddable = parentApi;
         const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
         const ConfigPanel = await openInlineEditor();
@@ -137,9 +150,12 @@ export function initializeEditApi(
        * Check everything here: user/app permissions and the current inline editing state
        */
       isEditingEnabled: () => {
-        return canEdit() && panelManagementApi.isEditingEnabled();
+        return apiHasAppContext(parentApi) && canEdit() && panelManagementApi.isEditingEnabled();
       },
       getEditHref: async () => {
+        if (!parentApi || !apiHasAppContext(parentApi)) {
+          return;
+        }
         const currentState = getState();
         return getEditPath(
           savedObjectId,

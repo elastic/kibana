@@ -7,7 +7,7 @@
 
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
@@ -42,7 +42,7 @@ export function prepareInlineEditPanel(
     | 'uiSettings'
     | 'attributeService'
   >,
-  renderComplete$: BehaviorSubject<boolean> | undefined,
+  dataLoading$: PublishingSubject<boolean | undefined> | undefined,
   panelManagementApi: PanelManagementApi,
   inspectorApi: LensInspectorAdapters,
   navigateToLensEditor?: (
@@ -108,7 +108,7 @@ export function prepareInlineEditPanel(
         updateSuggestion={updateSuggestion}
         datasourceId={activeDatasourceId}
         lensAdapters={inspectorApi.getInspectorAdapters()}
-        renderComplete$={renderComplete$}
+        dataLoading$={dataLoading$}
         panelId={uuid}
         savedObjectId={currentState.savedObjectId}
         navigateToLensEditor={
@@ -131,7 +131,9 @@ export function prepareInlineEditPanel(
         }}
         onApply={(newAttributes) => {
           panelManagementApi.onStopEditing(false, { ...getState(), attributes: newAttributes });
-          onApply?.(newAttributes);
+          if (newAttributes.visualizationType != null) {
+            onApply?.(newAttributes);
+          }
         }}
         hideTimeFilterInfo={hideTimeFilterInfo}
       />

@@ -8,11 +8,12 @@ import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { generateId } from '../../../id_generator';
 import { setupPanelManagement } from '../../../react_embeddable/inline_editing/panel_management';
 import { prepareInlineEditPanel } from '../../../react_embeddable/inline_editing/setup_inline_editing';
 import { mountInlineEditPanel } from '../../../react_embeddable/inline_editing/mount';
-import { LensRuntimeState } from '../../../react_embeddable/types';
+import type { TypedLensByValueInput, LensRuntimeState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { LensChartLoadEvent } from './types';
 
@@ -20,7 +21,7 @@ const asyncNoop = async () => {};
 
 export function isEmbeddableEditActionCompatible(
   core: CoreStart,
-  attributes: LensRuntimeState['attributes']
+  attributes: TypedLensByValueInput['attributes']
 ) {
   // for ES|QL is compatible only when advanced setting is enabled
   const query = attributes.state.query;
@@ -39,11 +40,11 @@ export async function executeEditEmbeddableAction({
 }: {
   deps: LensPluginStartDependencies;
   core: CoreStart;
-  attributes: LensRuntimeState['attributes'];
+  attributes: TypedLensByValueInput['attributes'];
   lensEvent: LensChartLoadEvent;
   container?: HTMLElement | null;
-  onUpdate: (newAttributes: LensRuntimeState['attributes']) => void;
-  onApply?: (newAttributes: LensRuntimeState['attributes']) => void;
+  onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => void;
+  onApply?: (newAttributes: TypedLensByValueInput['attributes']) => void;
   onCancel?: () => void;
 }) {
   const isCompatibleAction = isEmbeddableEditActionCompatible(core, attributes);
@@ -57,9 +58,10 @@ export async function executeEditEmbeddableAction({
     () => ({
       attributes,
     }),
-    (newState: LensRuntimeState) => onUpdate(newState.attributes),
+    (newState: LensRuntimeState) =>
+      onUpdate(newState.attributes as TypedLensByValueInput['attributes']),
     { coreStart: core, ...deps },
-    lensEvent?.renderComplete$,
+    lensEvent?.dataLoading$,
     panelManagementApi,
     {
       getInspectorAdapters: () => lensEvent?.adapters,
@@ -67,6 +69,7 @@ export async function executeEditEmbeddableAction({
         return { close: asyncNoop, onClose: Promise.resolve() };
       },
       closeInspector: asyncNoop,
+      adapters$: new BehaviorSubject(lensEvent?.adapters),
     }
   );
 

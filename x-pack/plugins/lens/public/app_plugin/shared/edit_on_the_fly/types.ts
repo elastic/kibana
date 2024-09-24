@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type {
@@ -49,7 +49,7 @@ export interface EditConfigPanelProps {
   /** Lens visualizations can be either created from ESQL (textBased) or from dataviews (formBased) */
   datasourceId: 'formBased' | 'textBased';
   /** Embeddable output observable, useful for dashboard flyout  */
-  renderComplete$?: BehaviorSubject<boolean>;
+  dataLoading$?: PublishingSubject<boolean | undefined>;
   /** Contains the active data, necessary for some panel configuration such as coloring */
   lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   /** Optional callback called when updating the by reference embeddable */

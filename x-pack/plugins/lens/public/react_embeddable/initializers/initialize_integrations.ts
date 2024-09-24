@@ -14,8 +14,14 @@ import {
 import { noop } from 'lodash';
 import { emptySerializer } from '../helper';
 import type { GetStateType } from '../types';
+import type { IntegrationCallbacks } from '../types';
 
-export function initializeIntegrations(getState: GetStateType) {
+export function initializeIntegrations(getState: GetStateType): {
+  api: Omit<IntegrationCallbacks, 'updateState'>;
+  cleanup: () => void;
+  serialize: () => {};
+  comparators: {};
+} {
   const isTextBasedLanguage = () => {
     const currentState = getState().attributes;
     return !isOfQueryType(currentState?.state.query);

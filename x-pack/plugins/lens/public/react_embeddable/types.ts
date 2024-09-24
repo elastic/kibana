@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DefaultEmbeddableApi, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { AggregateQuery, ExecutionContextSearch, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
 import {
   HasEditCapabilities,
-  HasLibraryTransforms,
-  HasParentApi,
+  HasInPlaceLibraryTransforms,
   HasSupportedTriggers,
   PublishesDataLoading,
+  PublishesDataViews,
+  PublishesSavedObjectId,
   PublishesUnifiedSearch,
+  PublishesWritablePanelTitle,
+  PublishingSubject,
   SerializedTitles,
-  StateComparators,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
@@ -84,13 +86,6 @@ interface LensApiProps {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface LensStateProps {}
 
-export interface LensInitType<Api extends LensApiProps = {}, Props extends LensStateProps = {}> {
-  api: Api;
-  comparators: StateComparators<Props>;
-  serialize: () => Props;
-  cleanup: () => void;
-}
-
 export type LensSavedObjectAttributes = Omit<LensDocument, 'savedObjectId' | 'type'>;
 
 export interface VisualizationContext {
@@ -142,6 +137,9 @@ export interface PreventableEvent {
 interface LensByValue {
   // by-value
   attributes?: Simplify<LensSavedObjectAttributes>;
+}
+
+export interface LensOverrides {
   /**
    * Overrides can tweak the style of the final embeddable and are executed at the end of the Lens rendering pipeline.
    * Each visualization type offers various type of overrides, per component (i.e. 'setting', 'axisX', 'partition', etc...)
@@ -161,19 +159,19 @@ interface LensByValue {
  * Lens embeddable props broken down by type
  */
 
-interface LensByReference {
+export interface LensByReference {
   // by-reference
   savedObjectId?: string;
 }
 
 type LensPropsVariants = LensByValue & LensByReference;
 
-interface ViewInDiscoverCallbacks extends LensApiProps {
+export interface ViewInDiscoverCallbacks extends LensApiProps {
   canViewUnderlyingData: () => Promise<boolean>;
   getViewUnderlyingDataArgs: () => ViewUnderlyingDataArgs | undefined;
 }
 
-interface IntegrationCallbacks extends LensApiProps {
+export interface IntegrationCallbacks extends LensApiProps {
   isTextBasedLanguage: () => boolean | undefined;
   getTextBasedLanguage: () => string | undefined;
   getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
@@ -183,7 +181,11 @@ interface IntegrationCallbacks extends LensApiProps {
 
 export interface LensPublicCallbacks extends LensApiProps {
   onBrushEnd?: (data: Simplify<BrushTriggerEvent['data'] & PreventableEvent>) => void;
-  onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
+  onLoad?: (
+    isLoading: boolean,
+    adapters?: Partial<DefaultInspectorAdapters>,
+    dataLoading$?: PublishingSubject<boolean | undefined>
+  ) => void;
   onFilter?: (
     data: Simplify<(ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) & PreventableEvent>
   ) => void;
@@ -206,17 +208,25 @@ export interface LensUnifiedSearchContext {
   searchSessionId?: string;
 }
 
-type LensKibanaContextProps = LensUnifiedSearchContext & {
-  palette?: PaletteOutput;
-};
-
-interface LensPanelProps {
+export interface LensPanelProps {
   id?: string;
   renderMode?: ViewMode;
   disableTriggers?: boolean;
   syncColors?: boolean;
   syncTooltips?: boolean;
   syncCursor?: boolean;
+  palette?: PaletteOutput;
+}
+
+/**
+ * This set of props are exposes by the Lens component too
+ */
+export interface LensSharedProps {
+  executionContext?: KibanaExecutionContext;
+  style?: React.CSSProperties;
+  className?: string;
+  noPadding?: boolean;
+  viewMode?: ViewMode;
 }
 
 interface LensRequestHandlersProps {
@@ -237,9 +247,11 @@ interface LensRequestHandlersProps {
  */
 export type LensSerializedState = Simplify<
   LensPropsVariants &
-    LensKibanaContextProps &
+    LensOverrides &
+    LensUnifiedSearchContext &
     LensPanelProps &
     SerializedTitles &
+    LensSharedProps &
     Partial<DynamicActionsSerializedState>
 >;
 
@@ -248,6 +260,7 @@ export type LensSerializedState = Simplify<
  */
 export type LensComponentProps = Simplify<
   LensRequestHandlersProps &
+    LensSharedProps &
     LensStateProps & {
       /**
        * When enabled the Lens component will render as a dashboard panel
@@ -265,12 +278,6 @@ export type LensComponentProps = Simplify<
        * Toggles the inspector
        */
       showInspector?: boolean;
-
-      executionContext?: KibanaExecutionContext;
-      style?: React.CSSProperties;
-      className?: string;
-      noPadding?: boolean;
-      viewMode?: ViewMode;
     }
 >;
 
@@ -303,25 +310,42 @@ export type LensRendererProps = Simplify<LensRendererPrivateProps>;
 export type LensRuntimeState = Simplify<
   Omit<ComponentSerializedProps, 'attributes'> & {
     attributes: NonNullable<LensSerializedState['attributes']>;
-  } & LensComponentForwardedProps
+  } & Pick<LensComponentForwardedProps, 'viewMode' | 'abortController' | 'executionContext'>
 >;
 
 export interface LensInspectorAdapters {
   getInspectorAdapters: () => Adapters;
   inspect: (options?: InspectorOptions) => OverlayRef;
   closeInspector: () => Promise<void>;
+  // expose a handler for the inspector adapters
+  // to be able to subscribe to changes
+  // a typical use case is the inline editing, where the editor
+  // needs to be updated on data changes
+  adapters$: PublishingSubject<Adapters>;
 }
 
 export type LensApi = Simplify<
-  DefaultEmbeddableApi<LensRuntimeState> &
-    Partial<HasEditCapabilities> &
-    LensInspectorAdapters &
+  DefaultEmbeddableApi<LensSerializedState, LensRuntimeState> &
+    // This is used by actions to operate the edit action
+    HasEditCapabilities &
+    // This is used by dashboard/container to show filters/queries on the panel
     PublishesUnifiedSearch &
-    HasSupportedTriggers &
-    LensRequestHandlersProps &
-    HasLibraryTransforms &
+    // Let the container know the loading state
     PublishesDataLoading &
-    Partial<HasParentApi<unknown>> &
+    // Let the container know the used data views
+    PublishesDataViews &
+    // Let the container operate on panel title
+    PublishesWritablePanelTitle &
+    // This embeddable can narrow down specific triggers usage
+    HasSupportedTriggers &
+    // Offers methods to operate from/on the linked saved object
+    HasInPlaceLibraryTransforms &
+    // Let the container know the saved object id
+    PublishesSavedObjectId &
+    // Lens specific API methods:
+    // Let the container know when the data has been loaded/updated
+    LensInspectorAdapters &
+    LensRequestHandlersProps &
     LensApiCallbacks
 >;
 
@@ -402,6 +426,4 @@ export type LensByValueInput = Omit<LensRendererPrivateProps, 'savedObjectId'>;
 export type LensByReferenceInput = Omit<LensRendererPrivateProps, 'attributes'>;
 export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
-export type LensEmbeddableOutput = {
-  indexPatterns?: DataView[];
-} & EmbeddableOutput;
+export type LensEmbeddableOutput = LensApi;

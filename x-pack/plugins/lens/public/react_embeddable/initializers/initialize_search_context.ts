@@ -6,12 +6,23 @@
  */
 
 import { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import { getUnchangingComparator, initializeTimeRange } from '@kbn/presentation-publishing';
+import {
+  PublishesUnifiedSearch,
+  PublishingSubject,
+  StateComparators,
+  getUnchangingComparator,
+  initializeTimeRange,
+} from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
 import { buildObservableVariable } from '../helper';
-import { LensRuntimeState } from '../types';
+import { LensRuntimeState, LensUnifiedSearchContext } from '../types';
 
-export function initializeSearchContext(state: LensRuntimeState) {
+export function initializeSearchContext(state: LensRuntimeState): {
+  api: PublishesUnifiedSearch & { searchSessionId$: PublishingSubject<string | undefined> };
+  comparators: StateComparators<LensUnifiedSearchContext>;
+  serialize: () => LensUnifiedSearchContext;
+  cleanup: () => void;
+} {
   const [searchSessionId$] = buildObservableVariable<string | undefined>('');
 
   const [filters$, filtersComparator] = buildObservableVariable<Filter[] | undefined>(undefined);

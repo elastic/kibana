@@ -45,6 +45,7 @@ export function loadEmbeddableData(
     viewMode$,
     hasRenderCompleted$,
     state$,
+    dataLoading$,
   }: ReactiveConfigs['variables'] & { state$: BehaviorSubject<LensRuntimeState> },
   services: LensEmbeddableStartServices,
   { getVisualizationContext, updateVisualizationContext }: VisualizationContextHelper,
@@ -78,6 +79,8 @@ export function loadEmbeddableData(
 
   async function reload() {
     resetRuntimeMessages();
+    // notify about data loading
+    dataLoading$.next(true);
 
     const currentState = getState();
 
@@ -110,7 +113,11 @@ export function loadEmbeddableData(
       updateVisualizationContext({
         activeData: adapters?.tables?.tables,
       });
-      onLoad?.(false, adapters);
+      // data has loaded
+      dataLoading$.next(false);
+      // The third argument here is an observable to let the
+      // consumer to be notified on data change
+      onLoad?.(false, adapters, dataLoading$);
     };
 
     const { params, abortController, ...rest } = await getExpressionRendererParams(currentState, {

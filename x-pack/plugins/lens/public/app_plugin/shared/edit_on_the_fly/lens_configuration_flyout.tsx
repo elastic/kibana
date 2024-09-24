@@ -65,7 +65,7 @@ export function LensEditConfigurationFlyout({
   saveByRef,
   savedObjectId,
   updateByRefInput,
-  renderComplete$,
+  dataLoading$,
   lensAdapters,
   navigateToLensEditor,
   displayFlyoutHeader,
@@ -114,7 +114,11 @@ export function LensEditConfigurationFlyout({
 
   const dispatch = useLensDispatch();
   useEffect(() => {
-    const s = renderComplete$?.subscribe(() => {
+    const s = dataLoading$?.subscribe((isDataLoading) => {
+      // go thru only when the loading is complete
+      if (isDataLoading) {
+        return;
+      }
       const activeData: Record<string, Datatable> = {};
       const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
       const [table] = Object.values(adaptersTables || {});
@@ -131,7 +135,7 @@ export function LensEditConfigurationFlyout({
       }
     });
     return () => s?.unsubscribe();
-  }, [dispatch, renderComplete$, layers]);
+  }, [dispatch, dataLoading$, layers]);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -296,11 +300,8 @@ export function LensEditConfigurationFlyout({
     datasourceStates,
     textBasedMode,
     visualization.state,
-    visualization.activeId,
     activeVisualization,
     attributes,
-    savedObjectId,
-    closeFlyout,
     datasourceMap,
     saveByRef,
     updateByRefInput,
