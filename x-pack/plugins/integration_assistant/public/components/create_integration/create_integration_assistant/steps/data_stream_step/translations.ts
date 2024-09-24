@@ -219,7 +219,7 @@ export const ERROR_TRANSLATION = {
   [UNSUPPORTED_LOG_SAMPLES_FORMAT_ERROR_CODE]: i18n.translate(
     'xpack.plugins.integration_assistant.server.errors.unsupportedLogSamples',
     {
-      defaultMessage: 'Unsupported log format in the samples',
+      defaultMessage: 'Unsupported log format in the samples.',
     }
   ),
 };
