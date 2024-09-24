@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFormRow, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
@@ -17,6 +17,7 @@ export const MIN_LATEST_ALERTS = 10;
 export const MAX_LATEST_ALERTS = 100;
 export const TICK_INTERVAL = 10;
 export const RANGE_CONTAINER_WIDTH = 300; // px
+const LABEL_WRAPPER_MIN_WIDTH = 95; // px
 
 interface Props {
   knowledgeBase: KnowledgeBaseConfig;
@@ -26,6 +27,20 @@ interface Props {
 const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }: Props) => {
   return (
     <>
+      <EuiFormRow
+        display="columnCompressedSwitch"
+        label={i18n.ALERTS_LABEL}
+        css={css`
+          .euiFormRow__labelWrapper {
+            min-width: ${LABEL_WRAPPER_MIN_WIDTH}px !important;
+          }
+        `}
+      >
+        <></>
+      </EuiFormRow>
+
+      <EuiSpacer size="xs" />
+
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem
           css={css`
