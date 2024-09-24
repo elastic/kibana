@@ -1741,10 +1741,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@95.10.1":
-  version "95.10.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.10.1.tgz#f3fb356ad49ba45e42981e39748693ba392567fe"
-  integrity sha512-1kqyx/NfiQE/bKMf1E3uJEpYZnQnPBrI5zO0l2FB+fs7Naf7wT7zq1VFRzNLn/r1x6mnou8wJ+VlouHCI+prLw==
+"@elastic/eui@95.11.0":
+  version "95.11.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.11.0.tgz#40e8124ac54c625ba7160cb84a378507abdeaf40"
+  integrity sha512-O688EbhrgSrV9j54mnK4xLyhv+imkBv5ti7isqLxJtd0L7Fe2A1d6EaA11Qv5plOwwC+cGsrkrDnlSqi1MtNoQ==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -4971,6 +4971,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-editor@link:packages/kbn-esql-editor":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-utils@link:packages/kbn-esql-utils":
   version "0.0.0"
   uid ""
@@ -5471,7 +5475,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/language-documentation-popover@link:packages/kbn-language-documentation-popover":
+"@kbn/language-documentation@link:packages/kbn-language-documentation":
   version "0.0.0"
   uid ""
 
@@ -5695,6 +5699,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-field-stats-flyout@link:x-pack/packages/ml/field_stats_flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-in-memory-table@link:x-pack/packages/ml/in_memory_table":
   version "0.0.0"
   uid ""
@@ -5720,6 +5728,10 @@
   uid ""
 
 "@kbn/ml-number-utils@link:x-pack/packages/ml/number_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-parse-interval@link:x-pack/packages/ml/parse_interval":
   version "0.0.0"
   uid ""
 
@@ -5764,6 +5776,10 @@
   uid ""
 
 "@kbn/ml-url-state@link:x-pack/packages/ml/url_state":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-validators@link:x-pack/packages/ml/validators":
   version "0.0.0"
   uid ""
 
@@ -6932,10 +6948,6 @@
   uid ""
 
 "@kbn/testing-embedded-lens-plugin@link:x-pack/examples/testing_embedded_lens":
-  version "0.0.0"
-  uid ""
-
-"@kbn/text-based-editor@link:packages/kbn-text-based-editor":
   version "0.0.0"
   uid ""
 

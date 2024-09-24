@@ -50,7 +50,19 @@
         "label": "InventoryServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /internal/inventory/entities\": ",
+          "{ \"GET /internal/inventory/entities/types\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/inventory/entities/types\", undefined, ",
+          "InventoryRouteHandlerResources",
+          ", { entityTypes: (\"service\" | \"host\" | \"container\")[]; }, ",
+          "InventoryRouteCreateOptions",
+          ">; \"GET /internal/inventory/entities\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -76,7 +88,9 @@
           "PartialC",
           "<{ entityTypes: ",
           "Type",
-          "<(\"service\" | \"host\" | \"container\")[], string, unknown>; }>]>; }>, ",
+          "<(\"service\" | \"host\" | \"container\")[], string, unknown>; kuery: ",
+          "StringC",
+          "; }>]>; }>, ",
           "InventoryRouteHandlerResources",
           ", { entities: ",
           "LatestEntity",
