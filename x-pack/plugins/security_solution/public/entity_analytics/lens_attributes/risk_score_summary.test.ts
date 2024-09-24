@@ -12,6 +12,7 @@ import { RiskSeverity } from '../../../common/search_strategy';
 import type { MetricVisualizationState } from '@kbn/lens-plugin/public';
 import { wrapper } from '../../common/components/visualization_actions/mocks';
 import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
+import type { Query } from '@kbn/es-query';
 
 jest.mock('../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
@@ -77,6 +78,6 @@ describe('getRiskScoreSummaryAttributes', () => {
       { wrapper }
     );
 
-    expect(result?.current?.state.query.query).toBe(query);
+    expect((result?.current?.state.query as Query).query).toBe(query);
   });
 });

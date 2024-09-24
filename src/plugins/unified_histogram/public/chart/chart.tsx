@@ -8,7 +8,6 @@
  */
 
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
@@ -69,7 +68,7 @@ export interface ChartProps {
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: LensEmbeddableOutput['dataLoading'];
   isChartLoading?: boolean;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -103,7 +102,7 @@ export function Chart({
   disabledActions,
   input$: originalInput$,
   lensAdapters,
-  lensEmbeddableOutput$,
+  dataLoading$,
   isChartLoading,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -392,7 +391,7 @@ export function Chart({
           services={services}
           visContext={visContext}
           lensAdapters={lensAdapters}
-          lensEmbeddableOutput$={lensEmbeddableOutput$}
+          dataLoading$={dataLoading$}
           isFlyoutVisible
           setIsFlyoutVisible={setIsFlyoutVisible}
           isPlainRecord
