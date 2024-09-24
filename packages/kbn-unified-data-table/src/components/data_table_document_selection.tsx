@@ -45,6 +45,10 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
     values: { rowNumber: rowIndex + 1 },
   });
 
+  if (!record) {
+    return null;
+  }
+
   return (
     <EuiFlexGroup
       responsive={false}
@@ -71,13 +75,13 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
   );
 };
 
-export const SelectAllButton = () => {
-  const { selectedDocsState, pageIndex, pageSize, rows } = useContext(UnifiedDataTableContext);
+export const getSelectAllButton = (rows: DataTableRecord[]) => () => {
+  const { selectedDocsState, pageIndex, pageSize } = useContext(UnifiedDataTableContext);
   const { getCountOfFilteredSelectedDocs, deselectSomeDocs, selectMoreDocs } = selectedDocsState;
 
   const docIdsFromCurrentPage = useMemo(() => {
     return getDocIdsForCurrentPage(rows, pageIndex, pageSize);
-  }, [rows, pageIndex, pageSize]);
+  }, [pageIndex, pageSize]);
 
   const countOfSelectedDocs = useMemo(() => {
     return docIdsFromCurrentPage?.length
@@ -200,6 +204,7 @@ export function DataTableDocumentToolbarBtn({
       // Copy results to clipboard as text
       <DataTableCopyRowsAsText
         key="copyRowsAsText"
+        rows={rows}
         toastNotifications={toastNotifications}
         columns={columns}
         onCompleted={closePopover}
@@ -207,6 +212,7 @@ export function DataTableDocumentToolbarBtn({
       // Copy results to clipboard as JSON
       <DataTableCopyRowsAsJson
         key="copyRowsAsJson"
+        rows={rows}
         toastNotifications={toastNotifications}
         onCompleted={closePopover}
       />,
@@ -272,17 +278,18 @@ export function DataTableDocumentToolbarBtn({
       </EuiContextMenuItem>,
     ];
   }, [
-    isFilterActive,
-    isPlainRecord,
-    setIsFilterActive,
-    clearAllSelectedDocs,
+    enableComparisonMode,
     selectedDocsCount,
     docIdsInSelectionOrder,
-    enableComparisonMode,
     setIsCompareActive,
     toastNotifications,
     columns,
     closePopover,
+    rows,
+    isFilterActive,
+    isPlainRecord,
+    setIsFilterActive,
+    clearAllSelectedDocs,
   ]);
 
   const toggleSelectionToolbar = useCallback(

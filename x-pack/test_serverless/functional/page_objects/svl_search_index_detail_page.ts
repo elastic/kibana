@@ -115,11 +115,17 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectShouldDefaultToDataTab() {
       expect(await browser.getCurrentUrl()).contain('/data');
     },
-    async withDataChangeTabs(tab: 'dataTab' | 'mappingsTab') {
+    async withDataChangeTabs(tab: 'dataTab' | 'mappingsTab' | 'settingsTab') {
       await testSubjects.click(tab);
     },
-    async expectUrlShouldChangeTo(tab: 'data' | 'mappings') {
+    async expectUrlShouldChangeTo(tab: 'data' | 'mappings' | 'settings') {
       expect(await browser.getCurrentUrl()).contain(`/${tab}`);
+    },
+    async expectMappingsComponentIsVisible() {
+      await testSubjects.existOrFail('indexDetailsMappingsToggleViewButton', { timeout: 2000 });
+    },
+    async expectSettingsComponentIsVisible() {
+      await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
     },
   };
 }
