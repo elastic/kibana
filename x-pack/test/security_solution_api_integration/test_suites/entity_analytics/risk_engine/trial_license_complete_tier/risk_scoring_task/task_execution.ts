@@ -280,6 +280,33 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ]);
           });
+
+          it('filters deleted asset criticality data when calculating score', async () => {
+            await assetCriticalityRoutes.upsert({
+              id_field: 'host.name',
+              id_value: 'host-2',
+              criticality_level: 'high_impact',
+            });
+            await assetCriticalityRoutes.delete('host.name', 'host-2');
+            await waitForAssetCriticalityToBePresent({ es, log });
+            await riskEngineRoutes.init();
+            await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
+            const riskScores = await readRiskScores(es);
+
+            expect(riskScores.length).to.be.greaterThan(0);
+            const assetCriticalityLevels = riskScores.map(
+              (riskScore) => riskScore.host?.risk.criticality_level
+            );
+            const assetCriticalityModifiers = riskScores.map(
+              (riskScore) => riskScore.host?.risk.criticality_modifier
+            );
+
+            expect(assetCriticalityLevels).to.not.contain('deleted');
+            expect(assetCriticalityModifiers).to.contain(2);
+
+            const scoreWithCriticality = riskScores.find((score) => score.host?.name === 'host-2');
+            expect(normalizeScores([scoreWithCriticality!])[0].criticality_level).to.be(undefined);
+          });
         });
       });
     });
