@@ -195,7 +195,6 @@ export const saveDashboardState = async ({
             references: allReferences,
           },
         });
-
     const newId = result.item.id;
 
     if (newId) {

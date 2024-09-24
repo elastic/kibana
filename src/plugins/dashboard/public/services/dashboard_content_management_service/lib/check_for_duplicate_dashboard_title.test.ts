@@ -7,17 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentClient } from '@kbn/content-management-plugin/public';
 import { checkForDuplicateDashboardTitle } from './check_for_duplicate_dashboard_title';
 import { extractTitleAndCount } from '../../../dashboard_container/embeddable/api/lib/extract_title_and_count';
-
-type ContentManagementStart = Parameters<typeof checkForDuplicateDashboardTitle>[1];
+import { contentManagementService } from '../../kibana_services';
 
 describe('checkForDuplicateDashboardTitle', () => {
-  const mockedContentManagementClient = {
-    search: jest.fn(),
-  } as unknown as ContentClient;
-
   const newTitle = 'Shiny dashboard (1)';
 
   afterEach(() => {
@@ -35,9 +29,7 @@ describe('checkForDuplicateDashboardTitle', () => {
       },
     ];
 
-    (
-      mockedContentManagementClient.search as jest.MockedFunction<ContentClient['search']>
-    ).mockImplementationOnce(() =>
+    contentManagementService.client.search = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         hits: pageResults,
         pagination: {
@@ -46,17 +38,14 @@ describe('checkForDuplicateDashboardTitle', () => {
       })
     );
 
-    await checkForDuplicateDashboardTitle(
-      {
-        title: newTitle,
-        lastSavedTitle: baseDashboardName,
-        copyOnSave: true,
-        isTitleDuplicateConfirmed: false,
-      },
-      { client: mockedContentManagementClient } as ContentManagementStart
-    );
+    await checkForDuplicateDashboardTitle({
+      title: newTitle,
+      lastSavedTitle: baseDashboardName,
+      copyOnSave: true,
+      isTitleDuplicateConfirmed: false,
+    });
 
-    expect(mockedContentManagementClient.search).toHaveBeenCalledWith(
+    expect(contentManagementService.client.search).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({
           text: `${baseDashboardName}*`,
@@ -86,9 +75,7 @@ describe('checkForDuplicateDashboardTitle', () => {
 
     const onTitleDuplicate = jest.fn();
 
-    (
-      mockedContentManagementClient.search as jest.MockedFunction<ContentClient['search']>
-    ).mockImplementationOnce(() =>
+    contentManagementService.client.search = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         hits: pageResults,
         pagination: {
@@ -97,18 +84,15 @@ describe('checkForDuplicateDashboardTitle', () => {
       })
     );
 
-    await checkForDuplicateDashboardTitle(
-      {
-        title: userTitleInput,
-        lastSavedTitle: baseDashboardName,
-        copyOnSave: true,
-        isTitleDuplicateConfirmed: false,
-        onTitleDuplicate,
-      },
-      { client: mockedContentManagementClient } as ContentManagementStart
-    );
+    await checkForDuplicateDashboardTitle({
+      title: userTitleInput,
+      lastSavedTitle: baseDashboardName,
+      copyOnSave: true,
+      isTitleDuplicateConfirmed: false,
+      onTitleDuplicate,
+    });
 
-    expect(mockedContentManagementClient.search).toHaveBeenCalledWith(
+    expect(contentManagementService.client.search).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({
           text: 'Shiny dashboard*',

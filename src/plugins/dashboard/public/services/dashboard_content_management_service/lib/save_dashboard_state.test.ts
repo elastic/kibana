@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { DashboardContainerInput } from '../../../../common';
 import { getSampleDashboardInput } from '../../../mocks';
-import { coreServices, dataService, embeddableService } from '../../kibana_services';
+import {
+  contentManagementService,
+  coreServices,
+  dataService,
+  embeddableService,
+} from '../../kibana_services';
 import { saveDashboardState } from './save_dashboard_state';
 
-const contentManagement = contentManagementMock.createStartContract();
-
-contentManagement.client.create = jest.fn().mockImplementation(({ options }) => {
+contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {
   if (options.id === undefined) {
     return { item: { id: 'newlyGeneratedId' } };
   }
@@ -23,7 +25,7 @@ contentManagement.client.create = jest.fn().mockImplementation(({ options }) => 
   throw new Error('Update should be used when id is provided');
 });
 
-contentManagement.client.update = jest.fn().mockImplementation(({ id }) => {
+contentManagementService.client.update = jest.fn().mockImplementation(({ id }) => {
   if (id === undefined) {
     throw new Error('Update needs an id');
   }
@@ -33,6 +35,7 @@ contentManagement.client.update = jest.fn().mockImplementation(({ id }) => {
 dataService.query.timefilter.timefilter.getTime = jest
   .fn()
   .mockReturnValue({ from: 'then', to: 'now' });
+
 embeddableService.extract = jest
   .fn()
   .mockImplementation((attributes) => ({ state: attributes, references: [] }));
@@ -50,11 +53,10 @@ describe('Save dashboard state', () => {
       } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogaloo',
       saveOptions: {},
-      contentManagement,
     });
 
     expect(result.id).toBe('Boogaloo');
-    expect(contentManagement.client.update).toHaveBeenCalledWith(
+    expect(contentManagementService.client.update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'Boogaloo' })
     );
     expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -72,12 +74,11 @@ describe('Save dashboard state', () => {
       } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogaloonie',
       saveOptions: { saveAsCopy: true },
-      contentManagement,
     });
 
     expect(result.id).toBe('newlyGeneratedId');
     expect(result.redirectRequired).toBe(true);
-    expect(contentManagement.client.create).toHaveBeenCalledWith(
+    expect(contentManagementService.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
         options: { references: [] },
       })
@@ -98,12 +99,11 @@ describe('Save dashboard state', () => {
       } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
-      contentManagement,
     });
 
     expect(result.id).toBe('newlyGeneratedId');
 
-    expect(contentManagement.client.create).toHaveBeenCalledWith(
+    expect(contentManagementService.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           panelsJSON: expect.not.stringContaining('neverGonnaGetThisId'),
@@ -122,11 +122,10 @@ describe('Save dashboard state', () => {
       panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
-      contentManagement,
     });
 
     expect(result.id).toBe('newlyGeneratedId');
-    expect(contentManagement.client.create).toHaveBeenCalledWith(
+    expect(contentManagementService.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
         options: expect.objectContaining({
           references: expect.arrayContaining([
@@ -141,7 +140,7 @@ describe('Save dashboard state', () => {
   });
 
   it('should return an error when the save fails.', async () => {
-    contentManagement.client.create = jest.fn().mockRejectedValue('Whoops');
+    contentManagementService.client.create = jest.fn().mockRejectedValue('Whoops');
     const result = await saveDashboardState({
       currentState: {
         ...getSampleDashboardInput(),
@@ -150,7 +149,6 @@ describe('Save dashboard state', () => {
       } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
-      contentManagement,
     });
 
     expect(result.id).toBeUndefined();

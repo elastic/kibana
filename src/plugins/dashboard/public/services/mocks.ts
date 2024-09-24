@@ -150,5 +150,5 @@ export const mockDashboardBackupService = {
 export const mockDashboardContentManagementCache = {
   fetchDashboard: jest.fn(),
   addDashboard: jest.fn(),
-  deletDashboard: jest.fn(),
+  deleteDashboard: jest.fn(),
 };
