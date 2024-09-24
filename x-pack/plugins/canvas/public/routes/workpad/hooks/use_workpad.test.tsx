@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { useWorkpad } from './use_workpad';
 import { spacesService } from '../../../services/kibana_services';
 
@@ -62,7 +63,7 @@ describe('useWorkpad', () => {
       workpad: workpadResponse,
     });
 
-    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    const { unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
     try {
       await waitFor(() => expect(mockDispatch).toHaveBeenCalledTimes(3));
@@ -88,7 +89,7 @@ describe('useWorkpad', () => {
       aliasId,
     });
 
-    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    const { unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
     try {
       await waitFor(() => expect(mockDispatch).toHaveBeenCalledTimes(3));
@@ -118,7 +119,7 @@ describe('useWorkpad', () => {
       aliasPurpose: 'savedObjectConversion',
     });
 
-    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    const { unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
     try {
       await waitFor(() => expect(mockRedirectLegacyUrl).toHaveBeenCalled());
       expect(mockRedirectLegacyUrl).toBeCalledWith({

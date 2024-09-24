@@ -10,7 +10,7 @@ import React from 'react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender } from '@testing-library/react';
+import { render as reactRender, waitFor } from '@testing-library/react';
 import type { Action, Reducer, Store } from 'redux';
 import { QueryClient } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -151,6 +151,11 @@ export interface AppContextTestRender {
    * Renders a hook within a mocked security solution app context
    */
   renderHook: ReactHooksRenderer['renderHook'];
+
+  /**
+   * Waits the return value of the callback provided to is truthy
+   */
+  waitFor: typeof waitFor;
 
   /**
    * A helper utility for rendering specifically hooks that wrap ReactQuery
@@ -323,7 +328,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     waitForHook: WaitForReactHookState = 'isSuccess',
     options: RenderHookOptions<TProps> = {}
   ) => {
-    const { result: hookResult, waitFor } = renderHook<TProps, TResult>(hookFn, options);
+    const { result: hookResult } = renderHook<TProps, TResult>(hookFn, options);
 
     if (waitForHook) {
       await waitFor(() => {
@@ -400,6 +405,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     setExperimentalFlag,
     getUserPrivilegesMockSetter,
     queryClient,
+    waitFor,
   };
 };
 
