@@ -1,0 +1,20 @@
+openapi: 3.0.3
+info:
+  title: Common Splunk Rules Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    Title:
+      type: string
+      minLength: 1
+      description: The Splunk rule name.
+    Search:
+      type: string
+      minLength: 1
+      description: The Splunk rule search query.
+    Description:
+      type: string
+      minLength: 1
+      description: The Splunk rule description.
