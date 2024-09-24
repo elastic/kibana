@@ -26,8 +26,8 @@ import {
   getReindexingBaselineTypes,
 } from '../kibana_migrator_test_kit.fixtures';
 
-export const logFilePathFirstRun = join(__dirname, 'dot_kibana_split_1st_run.test.log');
-export const logFilePathSecondRun = join(__dirname, 'dot_kibana_split_2nd_run.test.log');
+export const logFilePathFirstRun = join(__dirname, 'single_migrator_failures_1st_run.test.log');
+export const logFilePathSecondRun = join(__dirname, 'single_migrator_failures_2nd_run.test.log');
 
 const kibanaSplitIndex = `${defaultKibanaIndex}_split`;
 const tasksToNewIndex = getReindexingBaselineTypes(true).map((type) => {
@@ -74,6 +74,7 @@ describe('split .kibana index into multiple system indices', () => {
         settings: {
           migrations: {
             discardUnknownObjects: nextMinor,
+            discardCorruptObjects: nextMinor,
           },
         },
       });
@@ -249,6 +250,7 @@ describe('split .kibana index into multiple system indices', () => {
         settings: {
           migrations: {
             discardUnknownObjects: nextMinor,
+            discardCorruptObjects: nextMinor,
           },
         },
       });
