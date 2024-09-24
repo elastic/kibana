@@ -554,7 +554,7 @@ export class LensVisService {
     const breakdown = breakdownColumn ? `, ${breakdownColumn.name}` : '';
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp ${breakdown} | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp${breakdown} | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
     );
   };
 
