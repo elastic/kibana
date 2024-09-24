@@ -16,32 +16,30 @@ export function initializeEditApi(
   parentApi?: unknown,
   savedObjectId?: string
 ) {
-  if (!parentApi || !apiHasAppContext(parentApi)) {
-    return {};
-  }
-
-  return {
-    getTypeDisplayName: () => {
-      return MAP_EMBEDDABLE_NAME;
-    },
-    onEdit: async () => {
-      const parentApiContext = parentApi.getAppContext();
-      const stateTransfer = getEmbeddableService().getStateTransfer();
-      await stateTransfer.navigateToEditor(APP_ID, {
-        path: getEditPath(savedObjectId),
-        state: {
-          embeddableId: uuid,
-          valueInput: getState(),
-          originatingApp: parentApiContext.currentAppId,
-          originatingPath: parentApiContext.getCurrentPath?.(),
+  return !parentApi || !apiHasAppContext(parentApi)
+    ? {}
+    : {
+        getTypeDisplayName: () => {
+          return MAP_EMBEDDABLE_NAME;
         },
-      });
-    },
-    isEditingEnabled: () => {
-      return getMapsCapabilities().save as boolean;
-    },
-    getEditHref: async () => {
-      return getHttp().basePath.prepend(getFullPath(savedObjectId));
-    },
-  };
+        onEdit: async () => {
+          const parentApiContext = parentApi.getAppContext();
+          const stateTransfer = getEmbeddableService().getStateTransfer();
+          await stateTransfer.navigateToEditor(APP_ID, {
+            path: getEditPath(savedObjectId),
+            state: {
+              embeddableId: uuid,
+              valueInput: getState(),
+              originatingApp: parentApiContext.currentAppId,
+              originatingPath: parentApiContext.getCurrentPath?.(),
+            },
+          });
+        },
+        isEditingEnabled: () => {
+          return getMapsCapabilities().save as boolean;
+        },
+        getEditHref: async () => {
+          return getHttp().basePath.prepend(getFullPath(savedObjectId));
+        },
+      };
 }
