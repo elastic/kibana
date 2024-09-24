@@ -185,9 +185,6 @@ export class CreateSpacePage extends Component<Props, State> {
     return (
       <div data-test-subj="spaces-create-page">
         <CustomizeSpace
-          title={i18n.translate('xpack.spaces.management.manageSpacePage.generalTitle', {
-            defaultMessage: 'General',
-          })}
           space={this.state.space}
           onChange={this.onSpaceChange}
           editingExistingSpace={this.editingExistingSpace()}
@@ -202,10 +199,6 @@ export class CreateSpacePage extends Component<Props, State> {
               onChange={this.onSolutionViewChange}
               validator={this.validator}
               isEditing={this.editingExistingSpace()}
-              sectionTitle={i18n.translate(
-                'xpack.spaces.management.manageSpacePage.navigationTitle',
-                { defaultMessage: 'Navigation' }
-              )}
             />
           </>
         )}

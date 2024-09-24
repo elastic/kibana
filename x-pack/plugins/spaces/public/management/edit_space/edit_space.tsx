@@ -202,7 +202,7 @@ export const EditSpace: FC<PageProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={true} al>
+                <EuiFlexItem grow={true}>
                   <EuiFlexGroup justifyContent="spaceBetween">
                     <EuiFlexItem grow={true}>
                       <EuiTitle size="l">

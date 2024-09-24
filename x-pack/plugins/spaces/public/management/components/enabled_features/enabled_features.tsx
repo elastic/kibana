@@ -10,7 +10,6 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -29,12 +28,7 @@ export const EnabledFeatures: FunctionComponent<Props> = (props) => {
   const canManageRoles = services.application?.capabilities.management?.security?.roles === true;
 
   return (
-    <SectionPanel
-      title={i18n.translate('xpack.spaces.management.manageSpacePage.featuresTitle', {
-        defaultMessage: 'Features',
-      })}
-      data-test-subj="enabled-features-panel"
-    >
+    <SectionPanel data-test-subj="enabled-features-panel">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xs">

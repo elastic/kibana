@@ -229,17 +229,15 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
           <EuiSpacer />
           <EuiCallOut
             color="warning"
-            iconType="help"
-            title="Warning"
-            data-test-subj="space-edit-page-user-impact-warning"
-          >
-            {i18n.translate(
+            iconType="iInCircle"
+            title={i18n.translate(
               'xpack.spaces.management.spaceDetails.spaceChangesWarning.impactAllUsersInSpace',
               {
-                defaultMessage: 'The changes made will impact all users in the space.',
+                defaultMessage: 'The changes will apply to all users of the space.',
               }
             )}
-          </EuiCallOut>
+            data-test-subj="space-edit-page-user-impact-warning"
+          />
         </>
       )
     );

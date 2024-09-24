@@ -331,7 +331,7 @@ export class SpacesGridPage extends Component<Props, State> {
             return (
               <FormattedMessage
                 id="xpack.spaces.management.spacesGridPage.allFeaturesEnabled"
-                defaultMessage="All features visible"
+                defaultMessage="All features"
               />
             );
           }
@@ -377,7 +377,7 @@ export class SpacesGridPage extends Component<Props, State> {
       config.push({
         field: 'solution',
         name: i18n.translate('xpack.spaces.management.spacesGridPage.solutionColumnName', {
-          defaultMessage: 'Solution View',
+          defaultMessage: 'Solution view',
         }),
         sortable: true,
         render: (solution: Space['solution'], record: Space) => (
