@@ -76,6 +76,7 @@ export interface DataViewMgmtServiceConstructorArgs {
 
 export interface DataViewMgmtState {
   dataView?: DataView;
+  allowedTypes: SavedObjectManagementTypeInfo[];
   relationships: SavedObjectRelationWithTitle[];
   fields: DataViewField[];
   scriptedFields: DataViewField[];
@@ -88,10 +89,12 @@ export interface DataViewMgmtState {
   fieldConflictCount: number;
   tags: Array<{ key: string; 'data-test-subj': string; name: string }>;
   isRefreshing: boolean;
+  defaultIndex: string;
   conflictFieldsUrl: string;
 }
 
 const defaultDataViewEditorState: DataViewMgmtState = {
+  allowedTypes: [],
   relationships: [],
   fields: [],
   scriptedFields: [],
@@ -100,6 +103,7 @@ const defaultDataViewEditorState: DataViewMgmtState = {
   fieldConflictCount: 0,
   tags: [],
   isRefreshing: true,
+  defaultIndex: '',
   conflictFieldsUrl: '',
 };
 
@@ -129,6 +133,7 @@ export class DataViewMgmtService {
     // allowed types are set once and never change
     this.allowedTypes = new Promise((resolve) => {
       savedObjectsManagement.getAllowedTypes().then((resp) => {
+        this.updateState({ allowedTypes: resp });
         resolve(resp);
       });
     });
@@ -239,7 +244,7 @@ export class DataViewMgmtService {
       fieldConflictCount: fields.filter((field) => field.type === 'conflict').length,
       tags: await this.getTags(dataView),
       isRefreshing: false,
-      conflictFieldsUrl: this.getKbnUrl(dataView.id!),
+      conflictFieldsUrl: this.getConflictFieldsKbnUrl(dataView.id!),
       scriptedFields: dataView.getScriptedFields(),
     });
 
@@ -261,7 +266,7 @@ export class DataViewMgmtService {
     }
     await this.services.uiSettings.set('defaultIndex', dataView.id);
 
-    this.updateState({ tags: await this.getTags(dataView) });
+    this.updateState({ tags: await this.getTags(dataView), defaultIndex: dataView.id });
   }
 
   setScriptedFieldLangSelection(index: number) {
