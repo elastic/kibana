@@ -70,7 +70,7 @@ const SummaryCell = ({
     <DataGridCellServicesProvider services={{ data, dataView }}>
       <EuiFlexGroup gutterSize={gutterSize} direction={isSingleLine ? 'row' : 'column'}>
         {shouldRenderResource && (
-          <EuiFlexItem grow={false} css={{ marginTop: -2.5 }}>
+          <EuiFlexItem grow={false} css={{ lineHeight: 'normal', marginTop: -1 }}>
             <Resource fields={resourceFields} limited={isSingleLine} />
           </EuiFlexItem>
         )}
