@@ -12,9 +12,10 @@ import { isEmpty } from 'lodash';
 import {
   APP_INTEGRATIONS_PATH,
   APP_PATH,
+  APP_UI_ID,
   ONBOARDING_PATH,
 } from '../../../../../../common/constants';
-import { FLEET_URL_QUERY } from './const';
+import { ONBOARDING_APP_ID, ONBOARDING_LINK } from './const';
 
 export const PackageList = lazy(async () => ({
   default: await import('@kbn/fleet-plugin/public')
@@ -60,10 +61,12 @@ export const getFilteredCards = (
 
 const addPathParamToUrl = (url: string, onboardingLink: string) => {
   const encoded = encodeURIComponent(onboardingLink);
+  const paramsString = `${ONBOARDING_LINK}=${encoded}&${ONBOARDING_APP_ID}=${APP_UI_ID}`;
+
   if (url.indexOf('?') >= 0) {
-    return `${url}&${FLEET_URL_QUERY}=${encoded}`;
+    return `${url}&${paramsString}`;
   }
-  return `${url}?${FLEET_URL_QUERY}=${encoded}`;
+  return `${url}?${paramsString}`;
 };
 
 const getOnboardingPath = (basePath?: string): string | null => {

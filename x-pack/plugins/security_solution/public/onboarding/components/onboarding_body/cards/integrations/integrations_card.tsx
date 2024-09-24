@@ -5,20 +5,21 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer, EuiLink, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
 import { CardCallOut } from '../common/card_callout';
 import { AvailablePackages } from './available_packages';
 import { useAddIntegrationsUrl } from '../../../../../common/hooks/use_add_integrations_url';
+import { LinkAnchor } from '../../../../../common/components/links';
 
 export const IntegrationsCard: OnboardingCardComponent = ({
   setComplete,
   checkCompleteMetadata, // this is undefined before the first checkComplete call finishes
 }) => {
   const integrationsInstalled: number | undefined = checkCompleteMetadata?.integrationsInstalled;
-  const { onClick } = useAddIntegrationsUrl();
+  const { href, onClick } = useAddIntegrationsUrl();
 
   return (
     <OnboardingCardContentPanel>
@@ -27,25 +28,30 @@ export const IntegrationsCard: OnboardingCardComponent = ({
           <CardCallOut
             color="primary"
             text={
-              <>
-                {i18n.translate(
-                  'xpack.securitySolution.onboarding.integrationsCard.callout.completeText',
-                  {
-                    defaultMessage:
-                      '{count} {count, plural, one {integration has} other {integrations have}} been added',
-                    values: { count: integrationsInstalled },
-                  }
-                )}{' '}
-                <EuiLink onClick={onClick}>
-                  {i18n.translate(
-                    'xpack.securitySolution.onboarding.integrationsCard.button.completeLink',
-                    {
-                      defaultMessage: 'Manage integrations',
-                    }
-                  )}
-                  <EuiIcon type="arrowRight" size="s" />
-                </EuiLink>
-              </>
+              <FormattedMessage
+                id="xpack.securitySolution.onboarding.integrationsCard.callout.completeLabel"
+                defaultMessage={`
+      {desc1} {desc2}
+    `}
+                values={{
+                  desc1: (
+                    <FormattedMessage
+                      id="xpack.securitySolution.onboarding.integrationsCard.callout.completeText"
+                      defaultMessage="{count} {count, plural, one {integration has} other {integrations have}} been added"
+                      values={{ count: integrationsInstalled }}
+                    />
+                  ),
+                  desc2: (
+                    <LinkAnchor onClick={onClick} href={href}>
+                      <FormattedMessage
+                        id="xpack.securitySolution.onboarding.integrationsCard.button.completeLink"
+                        defaultMessage="Manage integrations"
+                      />
+                      <EuiIcon type="arrowRight" size="s" />
+                    </LinkAnchor>
+                  ),
+                }}
+              />
             }
           />
 

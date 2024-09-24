@@ -8,7 +8,8 @@
 import type { CategoryFacet } from '@kbn/fleet-plugin/public';
 import type { Tab } from './types';
 
-export const FLEET_URL_QUERY = 'onboardingLink';
+export const ONBOARDING_LINK = 'onboardingLink';
+export const ONBOARDING_APP_ID = 'onboardingAppId';
 export const SEARCH_FILTER_CATEGORIES: CategoryFacet[] = [];
 export const SCROLL_ELEMENT_ID = 'integrations-scroll-container';
 export const WITH_SEARCH_BOX_HEIGHT = '517px';

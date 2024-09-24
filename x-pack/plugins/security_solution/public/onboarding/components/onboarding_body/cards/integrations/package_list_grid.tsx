@@ -31,9 +31,8 @@ import {
 
 interface WrapperProps {
   useAvailablePackages: AvailablePackagesHookType;
-  setComplete: (complete: boolean) => void;
 }
-export const PackageListGrid = React.memo(({ useAvailablePackages, setComplete }: WrapperProps) => {
+export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProps) => {
   const { spaceId } = useOnboardingContext();
   const scrollElement = useRef(null);
   const [selectedTabId, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
@@ -42,15 +41,18 @@ export const PackageListGrid = React.memo(({ useAvailablePackages, setComplete }
   );
   const [searchTermFromStorage, setSearchTermToStorage] = useStoredIntegrationSearchTerm(spaceId);
   const [toggleIdSelected, setToggleIdSelected] = useState<string>(selectedTabId);
-  const onChange = (optionId: string) => {
-    setToggleIdSelected(optionId);
-    setSelectedTabIdToStorage(optionId);
-  };
+  const onTabChange = useCallback(
+    (id: string) => {
+      setToggleIdSelected(id);
+      setSelectedTabIdToStorage(id);
+    },
+    [setToggleIdSelected, setSelectedTabIdToStorage]
+  );
 
   const {
     filteredCards,
     isLoading,
-    searchTerm: searchQuery,
+    searchTerm,
     setCategory,
     setSearchTerm,
     setSelectedSubCategory,
@@ -61,17 +63,31 @@ export const PackageListGrid = React.memo(({ useAvailablePackages, setComplete }
   const { showSearchTools, customCardNames, selectedCategory, selectedSubCategory } =
     useTabMetaData(toggleIdSelected);
 
+  const onSearchTermChanged = useCallback(
+    (searchQuery: string) => {
+      setSearchTerm(searchQuery);
+      setSearchTermToStorage(searchQuery);
+    },
+    [setSearchTerm, setSearchTermToStorage]
+  );
+
   useEffect(() => {
     setCategory(selectedCategory);
     setSelectedSubCategory(selectedSubCategory);
-    setSearchTerm(''); // Reset search term when changing tabs
+    if (!showSearchTools) {
+      // If search tools are not shown, clear the search term to avoid unexpected filtering
+      onSearchTermChanged('');
+    }
   }, [
+    onSearchTermChanged,
     searchTermFromStorage,
     selectedCategory,
     selectedSubCategory,
     setCategory,
     setSearchTerm,
     setSelectedSubCategory,
+    showSearchTools,
+    toggleIdSelected,
   ]);
 
   const list: IntegrationCardItem[] = useIntegrationCardList({
@@ -79,15 +95,9 @@ export const PackageListGrid = React.memo(({ useAvailablePackages, setComplete }
     customCardNames,
   });
 
-  const onSearchTermChanged = useCallback(
-    (searchTerm: string) => {
-      setSearchTerm(searchTerm);
-      setSearchTermToStorage(searchTerm);
-    },
-    [setSearchTerm, setSearchTermToStorage]
-  );
-
-  if (isLoading) return <EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_HEIGHT} />;
+  if (isLoading) {
+    return <EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_HEIGHT} />;
+  }
 
   return (
     <EuiFlexGroup
@@ -105,7 +115,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages, setComplete }
           idSelected={toggleIdSelected}
           isFullWidth
           legend="Categories"
-          onChange={(id) => onChange(id)}
+          onChange={onTabChange}
           options={INTEGRATION_TABS}
           type="single"
         />
@@ -123,7 +133,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages, setComplete }
             categories={SEARCH_FILTER_CATEGORIES} // We do not want to show categories and subcategories as the search bar filter
             list={list}
             scrollElementId={SCROLL_ELEMENT_ID}
-            searchTerm={searchQuery ?? ''}
+            searchTerm={searchTerm}
             selectedCategory={selectedCategory}
             selectedSubCategory={selectedSubCategory}
             setCategory={setCategory}
