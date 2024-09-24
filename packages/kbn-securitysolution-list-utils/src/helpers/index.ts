@@ -1053,12 +1053,6 @@ export const hasWrongOperatorWithWildcard = (
   });
 };
 
-const checkKeysInArray = (array, key1, key2) => {
-  return array.some((obj) => {
-    return (key1 in obj && key2 in obj) || (key1 in obj === false && key2 in obj === false);
-  });
-};
-
 /**
  * Event filters helper where given an exceptions list,
  * determine if both 'subject_name' and 'trusted' are
@@ -1067,7 +1061,7 @@ const checkKeysInArray = (array, key1, key2) => {
 export const hasPartialCodeSignatureEntry = (
   items: ExceptionsBuilderReturnExceptionItem[]
 ): boolean => {
-  const os = items[0]?.os_types[0];
+  const os = items[0]?.os_types ?? ['windows'];
   let name = false;
   let trusted = false;
   let nestedName = false;
@@ -1084,7 +1078,7 @@ export const hasPartialCodeSignatureEntry = (
       });
     } else if (
       e.field === 'process.code_signature.subject_name' ||
-      (os === 'macos' && e.field === 'process.code_signature.team_id')
+      (os.includes('macos') && e.field === 'process.code_signature.team_id')
     ) {
       name = true;
     } else if (e.field === 'process.code_signature.trusted') {
