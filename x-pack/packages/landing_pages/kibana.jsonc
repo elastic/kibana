@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
-  "id": "@kbn/ml-landing-links",
+  "id": "@kbn/landing-pages",
   "owner": "@elastic/security-threat-hunting-explore"
 }

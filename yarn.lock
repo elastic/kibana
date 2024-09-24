@@ -5463,6 +5463,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/landing-pages@link:x-pack/packages/landing_pages":
+  version "0.0.0"
+  uid ""
+
 "@kbn/langchain@link:x-pack/packages/kbn-langchain":
   version "0.0.0"
   uid ""
@@ -5704,10 +5708,6 @@
   uid ""
 
 "@kbn/ml-kibana-theme@link:x-pack/packages/ml/kibana_theme":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ml-landing-links@link:x-pack/packages/ml/landing_links":
   version "0.0.0"
   uid ""
 

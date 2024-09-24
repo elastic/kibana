@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/ml/landing_links'],
+  roots: ['<rootDir>/x-pack/packages/landing_pages'],
 };
