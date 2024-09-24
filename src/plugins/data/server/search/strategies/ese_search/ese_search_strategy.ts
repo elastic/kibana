@@ -9,7 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs';
+import { catchError, mergeMap, tap } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
@@ -23,6 +23,7 @@ import {
   getDefaultAsyncGetParams,
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
+  toKibanaResponse,
 } from './request_utils';
 import {
   toAsyncKibanaSearchResponse,
@@ -145,6 +146,12 @@ export const enhancedEsSearchStrategyProvider = (
       pollInterval: searchConfig.asyncSearch.pollInterval,
       ...options,
     }).pipe(
+      mergeMap(async (response) => {
+        if (!options.asstream) {
+          return await toKibanaResponse(response);
+        }
+        return response;
+      }),
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
       catchError((e) => {

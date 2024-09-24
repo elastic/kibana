@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mergeMap, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { toKibanaResponse } from '@kbn/data-plugin/server/search/strategies/ese_search/request_utils';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
@@ -66,9 +65,6 @@ export abstract class AbstractSearchStrategy {
             { ...req.body.searchSession, abortSignal }
           )
           .pipe(
-            mergeMap(async (data) => {
-              return await toKibanaResponse(data);
-            }),
             tap((data) => {
               if (trackingEsSearchMeta?.requestId && trackedEsSearches) {
                 trackedEsSearches[trackingEsSearchMeta.requestId] = {

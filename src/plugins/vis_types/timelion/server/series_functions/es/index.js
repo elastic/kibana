@@ -135,38 +135,7 @@ export default new Datasource('es', {
         },
         { ...tlConfig.context, abortSignal }
       )
-      .toPromise()
-      .then(async (result) => {
-        if (result.rawResponse) {
-          if (result.rawResponse.pipe) {
-            let body = '';
-            const rawResponse = result.rawResponse;
-            const streamPromise = new Promise((resolve, reject) => {
-              rawResponse.on('data', (chunk) => {
-                body += chunk.toString(); // Append incoming data chunks
-              });
-
-              rawResponse.on('end', () => {
-                resolve(JSON.parse(body));
-              });
-
-              rawResponse.on('error', (e) => {
-                reject(e);
-              });
-            });
-            result = (await streamPromise).response;
-          } else return result;
-        }
-
-        return {
-          id: result.id,
-          isPartial: result.is_partial,
-          isComplete: result.is_complete,
-          rawResponse: {
-            ...result,
-          },
-        };
-      });
+      .toPromise();
 
     if (!resp.rawResponse._shards.total) {
       throw new Error(

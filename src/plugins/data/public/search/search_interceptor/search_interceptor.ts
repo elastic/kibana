@@ -315,6 +315,7 @@ export class SearchInterceptor {
           ...options,
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal: searchAbortController.getSignal(),
+          stream: true,
           isSearchStored,
         }
       )
