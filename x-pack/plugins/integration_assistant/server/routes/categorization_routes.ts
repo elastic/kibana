@@ -21,7 +21,7 @@ import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
-import { handleRecursionError } from './routes_util';
+import { handleError } from './routes_util';
 import { RECURSION_LIMIT_ERROR_CODE } from '../../common/constants';
 
 export function registerCategorizationRoutes(
@@ -103,7 +103,7 @@ export function registerCategorizationRoutes(
             return res.ok({ body: CategorizationResponse.parse(results) });
           } catch (err) {
             try {
-              handleRecursionError(err, RECURSION_LIMIT_ERROR_CODE);
+              handleError(err, RECURSION_LIMIT_ERROR_CODE);
             } catch (e) {
               if (isErrorThatHandlesItsOwnResponse(e)) {
                 return e.sendResponse(res);

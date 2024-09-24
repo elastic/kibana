@@ -17,7 +17,7 @@ import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse, UnsupportedLogFormatError } from '../lib/errors';
-import { handleRecursionError } from './routes_util';
+import { handleError } from './routes_util';
 import {
   RECURSION_LIMIT_ANALYZE_LOGS_ERROR_CODE,
   UNSUPPORTED_LOG_SAMPLES_FORMAT_ERROR_CODE,
@@ -93,7 +93,7 @@ export function registerAnalyzeLogsRoutes(
           return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });
         } catch (err) {
           try {
-            handleRecursionError(err, RECURSION_LIMIT_ANALYZE_LOGS_ERROR_CODE);
+            handleError(err, RECURSION_LIMIT_ANALYZE_LOGS_ERROR_CODE);
           } catch (e) {
             if (isErrorThatHandlesItsOwnResponse(e)) {
               return e.sendResponse(res);
