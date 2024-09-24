@@ -135,7 +135,7 @@ export const CalendarFormDst: FC<Props> = ({
         <>
           <MlPageHeader>
             <FormattedMessage
-              id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+              id="xpack.ml.calendarsEdit.calendarForm.createCalendarDstTitle"
               defaultMessage="Create new DST calendar"
             />
           </MlPageHeader>

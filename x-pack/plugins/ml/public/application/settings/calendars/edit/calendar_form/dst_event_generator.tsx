@@ -60,13 +60,13 @@ export const DstEventGenerator: FC<Props> = ({ addEvents }) => {
         <EuiFlexItem grow={false}>
           <EuiButton
             key="ml_import_event"
-            data-test-subj="mlCalendarImportEventsButton"
+            data-test-subj="mlCalendarDstGenerateEventsButton"
             iconType="importAction"
             onClick={generateEvents}
             isDisabled={selectedTimeZones.length === 0}
           >
             <FormattedMessage
-              id="xpack.ml.calendarsEdit.eventsTable.importEventsButtonLabel"
+              id="xpack.ml.calendarsEdit.eventsTable.generateDstEventsButtonLabel"
               defaultMessage="Generate DST events"
             />
           </EuiButton>
