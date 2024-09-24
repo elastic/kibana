@@ -12,12 +12,17 @@ import { stringEnum, unionWithNullType } from '../../../utility_types';
 
 import type { Maybe } from '../../../search_strategy';
 import { Direction } from '../../../search_strategy';
-import type { PinnedEvent } from '../pinned_events/pinned_events_route';
 import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
 import { ErrorSchema } from './error_schema';
 import type { DataProviderType } from './components.gen';
 import {
+  BareNote,
+  BarePinnedEvent,
   DataProviderTypeEnum,
+  FavoriteTimelineResponse,
+  type FavoriteTimelineResult,
+  type Note,
+  PinnedEvent,
   RowRendererId,
   RowRendererIdEnum,
   SortFieldTimeline,
@@ -31,8 +36,13 @@ import {
 } from './components.gen';
 
 export {
+  BareNote,
+  BarePinnedEvent,
   DataProviderType,
   DataProviderTypeEnum,
+  FavoriteTimelineResponse,
+  Note,
+  PinnedEvent,
   RowRendererId,
   RowRendererIdEnum,
   SortFieldTimeline,
@@ -44,6 +54,8 @@ export {
   TimelineType,
   TimelineTypeEnum,
 };
+
+export type BarePinnedEventWithoutExternalRefs = Omit<BarePinnedEvent, 'timelineId'>;
 
 /**
  * Outcome is a property of the saved object resolve api
@@ -83,23 +95,11 @@ export const BareNoteSchema = runtimeTypes.intersection([
   }),
 ]);
 
-export type BareNote = runtimeTypes.TypeOf<typeof BareNoteSchema>;
-
 /**
  * This type represents a note type stored in a saved object that does not include any fields that reference
  * other saved objects.
  */
 export type BareNoteWithoutExternalRefs = Omit<BareNote, 'timelineId'>;
-
-export const BareNoteWithoutExternalRefsSchema = runtimeTypes.partial({
-  timelineId: unionWithNullType(runtimeTypes.string),
-  eventId: unionWithNullType(runtimeTypes.string),
-  note: unionWithNullType(runtimeTypes.string),
-  created: unionWithNullType(runtimeTypes.number),
-  createdBy: unionWithNullType(runtimeTypes.string),
-  updated: unionWithNullType(runtimeTypes.number),
-  updatedBy: unionWithNullType(runtimeTypes.string),
-});
 
 export const NoteRuntimeType = runtimeTypes.intersection([
   BareNoteSchema,
@@ -108,16 +108,6 @@ export const NoteRuntimeType = runtimeTypes.intersection([
     version: runtimeTypes.string,
   }),
 ]);
-
-export type Note = runtimeTypes.TypeOf<typeof NoteRuntimeType>;
-
-export interface ResponseNote {
-  code?: Maybe<number>;
-
-  message?: Maybe<string>;
-
-  note: Note;
-}
 
 /*
  *  ColumnHeader Types
@@ -488,27 +478,6 @@ export const importTimelineResultSchema = runtimeTypes.exact(
 );
 
 export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;
-
-const favoriteTimelineResult = runtimeTypes.partial({
-  fullName: unionWithNullType(runtimeTypes.string),
-  userName: unionWithNullType(runtimeTypes.string),
-  favoriteDate: unionWithNullType(runtimeTypes.number),
-});
-
-export type FavoriteTimelineResult = runtimeTypes.TypeOf<typeof favoriteTimelineResult>;
-
-export const responseFavoriteTimeline = runtimeTypes.partial({
-  savedObjectId: runtimeTypes.string,
-  version: runtimeTypes.string,
-  code: unionWithNullType(runtimeTypes.number),
-  message: unionWithNullType(runtimeTypes.string),
-  templateTimelineId: unionWithNullType(runtimeTypes.string),
-  templateTimelineVersion: unionWithNullType(runtimeTypes.number),
-  timelineType: unionWithNullType(TimelineTypeLiteralRt),
-  favorite: unionWithNullType(runtimeTypes.array(favoriteTimelineResult)),
-});
-
-export type ResponseFavoriteTimeline = runtimeTypes.TypeOf<typeof responseFavoriteTimeline>;
 
 export const pageInfoTimeline = runtimeTypes.type({
   pageIndex: runtimeTypes.number,

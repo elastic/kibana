@@ -23,7 +23,7 @@ export async function createInvestigationItem(
   const now = Date.now();
   const investigationItem = {
     id: v4(),
-    createdBy: user.username,
+    createdBy: user.profile_uid!,
     createdAt: now,
     updatedAt: now,
     ...params,

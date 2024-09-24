@@ -793,7 +793,7 @@ describe('Walker.params()', () => {
 
   test('can collect all params from grouping functions', () => {
     const query =
-      'ROW x=1, time=2024-07-10 | stats z = avg(x) by bucket(time, 20, ?t_start,?t_end)';
+      'ROW x=1, time=2024-07-10 | stats z = avg(x) by bucket(time, 20, ?_tstart,?_tend)';
     const { ast } = getAstAndSyntaxErrors(query);
     const params = Walker.params(ast);
 
@@ -802,13 +802,13 @@ describe('Walker.params()', () => {
         type: 'literal',
         literalType: 'param',
         paramType: 'named',
-        value: 't_start',
+        value: '_tstart',
       },
       {
         type: 'literal',
         literalType: 'param',
         paramType: 'named',
-        value: 't_end',
+        value: '_tend',
       },
     ]);
   });

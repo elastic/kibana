@@ -12,6 +12,7 @@ import {
   isIosAgentName,
   isJavaAgentName,
   isRumAgentName,
+  hasOpenTelemetryPrefix,
   OpenTelemetryAgentName,
   OPEN_TELEMETRY_AGENT_NAMES,
 } from '@kbn/elastic-agent-utils';
@@ -66,6 +67,15 @@ const darkAgentIcons: { [key: string]: string } = {
   rust: darkRustIcon,
 };
 
+const sanitizeAgentName = (agentName: string) => {
+  if (hasOpenTelemetryPrefix(agentName)) {
+    // for OpenTelemetry only split the agent name by `/` and take the second part, format is `(opentelemetry|otlp)/{agentName}/{details}`
+    return agentName.split('/')[1];
+  }
+
+  return agentName;
+};
+
 // This only needs to be exported for testing purposes, since we stub the SVG
 // import values in test.
 export function getAgentIconKey(agentName: string) {
@@ -90,11 +100,10 @@ export function getAgentIconKey(agentName: string) {
     return 'android';
   }
 
-  // Remove "opentelemetry/" prefix
-  const agentNameWithoutPrefix = lowercasedAgentName.replace(/^opentelemetry\//, '');
+  const cleanAgentName = sanitizeAgentName(lowercasedAgentName);
 
-  if (Object.keys(agentIcons).includes(agentNameWithoutPrefix)) {
-    return agentNameWithoutPrefix;
+  if (Object.keys(agentIcons).includes(cleanAgentName)) {
+    return cleanAgentName;
   }
 
   // OpenTelemetry-only agents

@@ -9,7 +9,7 @@ import AdmZip from 'adm-zip';
 import nunjucks from 'nunjucks';
 import { getDataPath } from '@kbn/utils';
 import { join as joinPath } from 'path';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 import type { DataStream, Integration } from '../../common';
 import { createSync, ensureDirSync, generateUniqueId, removeDirSync } from '../util';
 import { createAgentInput } from './agent';
@@ -104,6 +104,8 @@ function createChangelog(packageDir: string): void {
 
 function createReadme(packageDir: string, integration: Integration) {
   const readmeDirPath = joinPath(packageDir, '_dev/build/docs/');
+  const mainReadmeDirPath = joinPath(packageDir, 'docs/');
+  ensureDirSync(mainReadmeDirPath);
   ensureDirSync(readmeDirPath);
   const readmeTemplate = nunjucks.render('package_readme.md.njk', {
     package_name: integration.name,
@@ -111,6 +113,7 @@ function createReadme(packageDir: string, integration: Integration) {
   });
 
   createSync(joinPath(readmeDirPath, 'README.md'), readmeTemplate);
+  createSync(joinPath(mainReadmeDirPath, 'README.md'), readmeTemplate);
 }
 
 async function createZipArchive(workingDir: string, packageDirectoryName: string): Promise<Buffer> {
@@ -225,7 +228,7 @@ export function renderPackageManifestYAML(integration: Integration): string {
     uniqueInputsList // inputs
   );
 
-  return safeDump(packageData);
+  return dump(packageData);
 }
 
 function createPackageManifest(packageDir: string, integration: Integration): void {
