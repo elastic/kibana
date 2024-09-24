@@ -22,7 +22,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
     private logger: Logger
   ) {}
 
-  async install(slo: SLODefinition, startTransform?: boolean): Promise<TransformId> {
+  async install(slo: SLODefinition): Promise<TransformId> {
     const transformParams = await this.generator.generate(slo);
     try {
       await retryTransientEsErrors(
@@ -31,9 +31,6 @@ export class DefaultSummaryTransformManager implements TransformManager {
           logger: this.logger,
         }
       );
-      if (startTransform) {
-        await this.start(transformParams.transform_id);
-      }
     } catch (err) {
       this.logger.error(`Cannot create summary transform for SLO [${slo.id}]`);
       if (err.meta?.body?.error?.type === 'security_exception') {

@@ -15,10 +15,14 @@ import { SLOIdConflict, SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
 export interface SLORepository {
-  save(slo: SLODefinition, options?: { throwOnConflict: boolean }): Promise<SLODefinition>;
+  getExistingSavedObjectId(
+    slo: SLODefinition,
+    options?: { throwOnConflict: boolean }
+  ): Promise<string | undefined>;
+  save(slo: SLODefinition, options?: { existingSavedObjectId?: string }): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
-  deleteById(id: string, ignore404?: boolean): Promise<void>;
+  deleteById(id: string, ignoreNotFound?: boolean): Promise<void>;
   search(
     search: string,
     pagination: Pagination,
@@ -29,24 +33,26 @@ export interface SLORepository {
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
 
-  async save(slo: SLODefinition, options = { throwOnConflict: false }): Promise<SLODefinition> {
-    let existingSavedObjectId;
+  async getExistingSavedObjectId(slo: SLODefinition, options = { throwOnConflict: false }) {
     const findResponse = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
-      page: 1,
-      perPage: 1,
+      perPage: 0,
       filter: `slo.attributes.id:(${slo.id})`,
     });
     if (findResponse.total === 1) {
       if (options.throwOnConflict) {
         throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
       }
-
-      existingSavedObjectId = findResponse.saved_objects[0].id;
+      return findResponse.saved_objects[0].id;
     }
+  }
 
+  async save(
+    slo: SLODefinition,
+    options?: { existingSavedObjectId: string }
+  ): Promise<SLODefinition> {
     await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, toStoredSLO(slo), {
-      id: existingSavedObjectId,
+      id: options?.existingSavedObjectId,
       overwrite: true,
     });
 
@@ -73,7 +79,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     return slo;
   }
 
-  async deleteById(id: string, ignore404 = false): Promise<void> {
+  async deleteById(id: string, ignoreNotFound = false): Promise<void> {
     const response = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       page: 1,
@@ -82,7 +88,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     });
 
     if (response.total === 0) {
-      if (ignore404) {
+      if (ignoreNotFound) {
         return;
       }
       throw new SLONotFound(`SLO [${id}] not found`);

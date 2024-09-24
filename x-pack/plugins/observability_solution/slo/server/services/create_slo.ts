@@ -48,8 +48,13 @@ export class CreateSLO {
 
     const rollbackOperations = [];
 
+    const existingSavedObjectId = await this.repository.getExistingSavedObjectId(slo, {
+      throwOnConflict: true,
+    });
+
     // can be done async as we are not using the result
-    void this.repository.save(slo, { throwOnConflict: true });
+    void this.repository.save(slo, { existingSavedObjectId });
+
     rollbackOperations.push(() => this.repository.deleteById(slo.id, true));
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
@@ -58,7 +63,7 @@ export class CreateSLO {
       const sloPipelinePromise = this.createPipeline(getSLOPipelineTemplate(slo));
       rollbackOperations.push(() => this.deletePipeline(getSLOPipelineId(slo.id, slo.revision)));
 
-      const rollupTransformPromise = this.transformManager.install(slo, true);
+      const rollupTransformPromise = this.transformManager.install(slo);
       rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
       rollbackOperations.push(() => this.transformManager.stop(rollupTransformId));
 
@@ -70,11 +75,13 @@ export class CreateSLO {
         this.deletePipeline(getSLOSummaryPipelineId(slo.id, slo.revision))
       );
 
-      const summaryTransformPromise = this.summaryTransformManager.install(slo, true);
+      const summaryTransformPromise = this.summaryTransformManager.install(slo);
       rollbackOperations.push(() => this.summaryTransformManager.uninstall(summaryTransformId));
       rollbackOperations.push(() => this.summaryTransformManager.stop(summaryTransformId));
 
       const tempDocPromise = this.createTempSummaryDocument(slo);
+
+      rollbackOperations.push(() => this.deleteTempSummaryDocument(slo));
 
       await Promise.all([
         sloPipelinePromise,
@@ -82,6 +89,11 @@ export class CreateSLO {
         summaryPipelinePromise,
         summaryTransformPromise,
         tempDocPromise,
+      ]);
+
+      await Promise.all([
+        this.transformManager.start(rollupTransformId),
+        this.summaryTransformManager.start(summaryTransformId),
       ]);
     } catch (err) {
       this.logger.error(
@@ -113,6 +125,18 @@ export class CreateSLO {
           index: SLO_SUMMARY_TEMP_INDEX_NAME,
           id: `slo-${slo.id}`,
           document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
+          refresh: true,
+        }),
+      { logger: this.logger }
+    );
+  }
+
+  async deleteTempSummaryDocument(slo: SLODefinition) {
+    return await retryTransientEsErrors(
+      () =>
+        this.esClient.delete({
+          index: SLO_SUMMARY_TEMP_INDEX_NAME,
+          id: `slo-${slo.id}`,
           refresh: true,
         }),
       { logger: this.logger }
