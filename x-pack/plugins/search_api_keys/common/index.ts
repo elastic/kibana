@@ -8,3 +8,5 @@
 export const PLUGIN_ID = 'searchApiKeys';
 export const PLUGIN_NAME = 'searchApiKeys';
 export const PLUGIN_PATH = '/app/api_key';
+
+export const API_KEY_NAME = 'Unrestricted API Key';

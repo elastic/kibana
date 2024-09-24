@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiCode,
@@ -19,8 +20,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ApiKeyFlyoutWrapper } from './api_key_flyout_wrapper';
 import { useSearchApiKey, Status } from '../hooks/use_search_api_key';
-
-const hiddenKeyPreview = '•'.repeat(30);
 
 export const ApiKeyForm = () => {
   const { euiTheme } = useEuiTheme();
@@ -40,11 +39,25 @@ export const ApiKeyForm = () => {
           </h6>
         </EuiTitle>
       </EuiFlexItem>
-      {apiKey && (
+      {status === Status.showUserPrivilegesError && (
+        <EuiFlexItem grow={0}>
+          <EuiBadge data-test-subj="apiKeyFormNoUserPrivileges">
+            {i18n.translate('xpack.searchApiKeys.apiKeyForm.noUserPrivileges', {
+              defaultMessage: "You don't have access to manage API keys",
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {status !== Status.showCreateButton && (
         <>
           <EuiFlexItem grow={0}>
-            <EuiCode language="text" color="success" css={{ color: euiTheme.colors.successText }}>
-              {status === Status.showHiddenKey ? hiddenKeyPreview : apiKey}
+            <EuiCode
+              language="text"
+              color="success"
+              css={{ color: euiTheme.colors.successText }}
+              data-test-subj="apiKeyFormAPIKey"
+            >
+              {apiKey}
             </EuiCode>
           </EuiFlexItem>
           {status === Status.showPreviewKey && (
@@ -53,6 +66,7 @@ export const ApiKeyForm = () => {
                 iconType="copy"
                 color="success"
                 onClick={handleAddToClipboard}
+                data-test-subj="apiKeyFormAPIKeyCopyButton"
                 aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.copyButton', {
                   defaultMessage: 'Copy button',
                 })}
@@ -65,6 +79,7 @@ export const ApiKeyForm = () => {
                 iconType="eye"
                 color="success"
                 onClick={showAPIKey}
+                data-test-subj="showAPIKeyButton"
                 aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.showApiKey', {
                   defaultMessage: 'Show API Key',
                 })}
@@ -81,6 +96,7 @@ export const ApiKeyForm = () => {
             iconSide="left"
             iconType="key"
             onClick={() => setShowFlyout(true)}
+            data-test-subj="createAPIKeyButton"
           >
             <FormattedMessage
               id="xpack.searchApiKeys.apiKeyForm.createButton"

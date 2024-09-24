@@ -13,6 +13,7 @@ import { APIRoutes } from '../../common/types';
 import { getAPIKeyById } from '../lib/get_key_by_id';
 import { createAPIKey } from '../lib/create_key';
 import { fetchClusterHasApiKeys, fetchUserStartPrivileges } from '../lib/privileges';
+import { API_KEY_NAME } from '../../common';
 
 export function registerRoutes(router: IRouter, logger: Logger) {
   router.post(
@@ -85,7 +86,7 @@ export function registerRoutes(router: IRouter, logger: Logger) {
           });
         }
 
-        const apiKey = await createAPIKey('Onboarding API Key', client, logger);
+        const apiKey = await createAPIKey(API_KEY_NAME, client, logger);
 
         return response.ok({
           body: apiKey,

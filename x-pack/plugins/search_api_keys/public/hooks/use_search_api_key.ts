@@ -10,12 +10,14 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { APIKeyCreationResponse, APIRoutes } from '../../common/types';
 
 const API_KEY_STORAGE_KEY = 'searchApiKey';
+const API_KEY_MASK = '•'.repeat(60);
 
 export enum Status {
   loading = 'loading',
   showCreateButton = 'showCreateButton',
   showHiddenKey = 'showHiddenKey',
   showPreviewKey = 'showPreviewKey',
+  showUserPrivilegesError = 'showUserPrivilegesError',
 }
 
 interface ApiKeyState {
@@ -51,7 +53,7 @@ export const useSearchApiKey = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const handleSaveKey = useCallback(({ id, encoded }: { id: string; encoded: string }) => {
     sessionStorage.setItem(API_KEY_STORAGE_KEY, JSON.stringify({ id, encoded }));
-    dispatch({ type: 'SET_API_KEY', apiKey: encoded, status: Status.showPreviewKey });
+    dispatch({ type: 'SET_API_KEY', apiKey: encoded, status: Status.showHiddenKey });
   }, []);
   const handleShowKeyVisibility = useCallback(() => {
     dispatch({ type: 'SET_STATUS', status: Status.showPreviewKey });
@@ -82,6 +84,8 @@ export const useSearchApiKey = () => {
       } catch (err) {
         if (err.response?.status === 400) {
           dispatch({ type: 'SET_STATUS', status: Status.showCreateButton });
+        } else if (err.response?.status === 403) {
+          dispatch({ type: 'SET_STATUS', status: Status.showUserPrivilegesError });
         } else {
           throw err;
         }
@@ -121,6 +125,7 @@ export const useSearchApiKey = () => {
             dispatch({
               type: 'CLEAR_API_KEY',
             });
+            await createApiKey();
           }
         } else {
           await createApiKey();
@@ -132,7 +137,7 @@ export const useSearchApiKey = () => {
   }, [validateApiKey, createApiKey]);
 
   return {
-    apiKey: state.apiKey,
+    apiKey: state.status === Status.showHiddenKey ? API_KEY_MASK : state.apiKey,
     showAPIKey: handleShowKeyVisibility,
     handleSaveKey,
     status: state.status,

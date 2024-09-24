@@ -8,6 +8,7 @@
 import { ApiKeyFlyout } from '@kbn/security-api-key-management';
 import React from 'react';
 import { useCurrentUser } from '../hooks/use_current_user';
+import { API_KEY_NAME } from '../../common';
 
 interface ApiKeyFlyoutWrapperProps {
   onClose: () => void;
@@ -17,5 +18,12 @@ interface ApiKeyFlyoutWrapperProps {
 export const ApiKeyFlyoutWrapper: React.FC<ApiKeyFlyoutWrapperProps> = ({ onClose, onSuccess }) => {
   const user = useCurrentUser();
 
-  return <ApiKeyFlyout onCancel={onClose} onSuccess={onSuccess} currentUser={user} />;
+  return (
+    <ApiKeyFlyout
+      onCancel={onClose}
+      onSuccess={onSuccess}
+      currentUser={user}
+      defaultName={API_KEY_NAME}
+    />
+  );
 };
