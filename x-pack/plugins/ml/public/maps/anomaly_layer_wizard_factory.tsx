@@ -46,9 +46,11 @@ export class AnomalyLayerWizardFactory {
   }> {
     const [coreStart, pluginStart] = await this.getStartServices();
     const { jobsApiProvider } = await import('../application/services/ml_api_service/jobs');
+    const { MlLocatorDefinition } = await import('@kbn/ml-locator');
 
     const httpService = new HttpService(coreStart.http);
     const mlJobsService = jobsApiProvider(httpService);
+    pluginStart.share.url.locators.create(new MlLocatorDefinition());
     const mlLocator = pluginStart.share.url.locators.get(ML_APP_LOCATOR);
 
     return { mlJobsService, mlLocator };

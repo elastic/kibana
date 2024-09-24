@@ -82,7 +82,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   anomaly,
 }) => {
   const {
-    services: { ml, http, application },
+    services: { http, application },
   } = useKibanaContextForPlugin();
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -122,7 +122,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
     },
   });
 
-  const viewAnomalyInMachineLearningLink = useMlHref(ml?.locator, http.basePath.get(), {
+  const viewAnomalyInMachineLearningLink = useMlHref(http.basePath.get(), {
     page: ML_PAGES.SINGLE_METRIC_VIEWER,
     pageState: {
       jobIds: [anomaly.jobId],

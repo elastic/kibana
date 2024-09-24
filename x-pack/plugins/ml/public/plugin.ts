@@ -19,7 +19,7 @@ import { take } from 'rxjs';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -52,7 +52,6 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { MlLocatorDefinition, type MlLocator, type MlLocatorParams } from '@kbn/ml-locator';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
@@ -121,8 +120,6 @@ export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
-  private locator: undefined | MlLocator;
-
   private sharedMlServices: MlSharedServices | undefined;
 
   private isServerless: boolean = false;
@@ -141,10 +138,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     initExperimentalFeatures(this.experimentalFeatures, initializerContext.config.get());
   }
 
-  setup(
-    core: MlCoreSetup,
-    pluginsSetup: MlSetupDependencies
-  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
+  setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies): { elasticModels?: ElasticModels } {
     this.sharedMlServices = getMlSharedServices(core.http);
 
     core.application.register({
@@ -197,10 +191,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         );
       },
     });
-
-    if (pluginsSetup.share) {
-      this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
-    }
 
     if (pluginsSetup.management) {
       registerManagementSection(
@@ -300,7 +290,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       .subscribe();
 
     return {
-      locator: this.locator,
       elasticModels: this.sharedMlServices.elasticModels,
     };
   }
@@ -309,13 +298,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     core: CoreStart,
     deps: MlStartDependencies
   ): {
-    locator?: LocatorPublic<MlLocatorParams>;
     elasticModels?: ElasticModels;
     mlApi?: MlApi;
     components: { AnomalySwimLane: typeof AnomalySwimLane };
   } {
     return {
-      locator: this.locator,
       elasticModels: this.sharedMlServices?.elasticModels,
       mlApi: this.sharedMlServices?.mlApi,
       components: {

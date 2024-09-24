@@ -33,10 +33,7 @@ export function MLExplorerLink({ jobId, external, children }: Props) {
 }
 
 export function useExplorerHref({ jobId }: { jobId: string }) {
-  const {
-    core,
-    plugins: { ml },
-  } = useApmPluginContext();
+  const { core } = useApmPluginContext();
   const { urlParams } = useLegacyUrlParams();
 
   const {
@@ -45,7 +42,7 @@ export function useExplorerHref({ jobId }: { jobId: string }) {
     rangeTo = 'now',
   } = urlParams;
 
-  const href = useMlHref(ml?.locator, core.http.basePath.get(), {
+  const href = useMlHref(core.http.basePath.get(), {
     page: ML_PAGES.ANOMALY_EXPLORER,
     pageState: {
       jobIds: [jobId],

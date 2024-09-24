@@ -5,22 +5,46 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { DependencyList } from 'react';
 
-import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { MlLocatorDefinition } from './ml_locator';
 import type { MlLocatorParams } from './types';
+
+function useKibanaShareService() {
+  const {
+    services: { share },
+  } = useKibana<{
+    share: SharePluginStart;
+  }>();
+
+  if (!share) {
+    throw new Error('Kibana share service not available.');
+  }
+
+  return share;
+}
 
 /**
  * Provides a URL to ML plugin page
  * TODO remove basePath parameter
  */
 export const useMlHref = (
-  mlLocator: LocatorPublic<MlLocatorParams> | undefined,
   basePath: string | undefined,
   params: MlLocatorParams,
   dependencies?: DependencyList
 ) => {
+  const share = useKibanaShareService();
+
+  const mlLocator = useMemo(
+    () => share.url.locators.create(new MlLocatorDefinition()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   return mlLocator
     ? mlLocator.useUrl(params, undefined, dependencies)
     : basePath !== undefined

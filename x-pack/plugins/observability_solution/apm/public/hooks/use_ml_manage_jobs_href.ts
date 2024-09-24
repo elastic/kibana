@@ -10,10 +10,7 @@ import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_contex
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 
 export function useMlManageJobsHref({ jobId }: { jobId?: string } = {}) {
-  const {
-    core,
-    plugins: { ml },
-  } = useApmPluginContext();
+  const { core } = useApmPluginContext();
 
   const { urlParams } = useLegacyUrlParams();
 
@@ -23,7 +20,7 @@ export function useMlManageJobsHref({ jobId }: { jobId?: string } = {}) {
     rangeTo = 'now',
   } = urlParams;
 
-  const mlADLink = useMlHref(ml?.locator, core.http.basePath.get(), {
+  const mlADLink = useMlHref(core.http.basePath.get(), {
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     pageState: {
       groupIds: ['apm'],

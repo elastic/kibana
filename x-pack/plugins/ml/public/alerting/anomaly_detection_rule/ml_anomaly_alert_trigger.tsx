@@ -16,7 +16,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { ML_ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { parseInterval } from '@kbn/ml-parse-interval';
-import { ML_PAGES } from '@kbn/ml-locator';
+import { MlLocatorDefinition, ML_PAGES } from '@kbn/ml-locator';
 
 import type { MlCapabilities } from '../../../common/types/capabilities';
 import type { MlCoreSetup } from '../../plugin';
@@ -66,7 +66,8 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     if (!mlCapabilities.canCreateJob) return;
 
     getStartServices().then((startServices) => {
-      const locator = startServices[2].locator;
+      const share = startServices[1].share;
+      const locator = share.url.locators.create(new MlLocatorDefinition());
       if (!locator) return;
       locator.getUrl({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB }).then((url) => {
         if (mounted) {

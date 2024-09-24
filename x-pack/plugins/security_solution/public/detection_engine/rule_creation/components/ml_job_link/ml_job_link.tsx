@@ -23,10 +23,9 @@ interface MlJobLinkProps {
 
 const MlJobLinkComponent: React.FC<MlJobLinkProps> = ({ jobId, jobName }) => {
   const {
-    services: { http, ml },
+    services: { http },
   } = useKibana();
   const jobUrl = useMlHref(
-    ml?.locator,
     http.basePath.get(),
     {
       page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,

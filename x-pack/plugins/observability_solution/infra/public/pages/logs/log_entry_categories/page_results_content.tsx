@@ -52,7 +52,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
 
   const {
-    services: { ml, http },
+    services: { http },
   } = useKibanaContextForPlugin();
 
   const { logViewStatus } = useLogViewContext();
@@ -197,7 +197,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     autoRefresh.isPaused ? null : autoRefresh.interval
   );
 
-  const analyzeInMlLink = useMlHref(ml?.locator, http.basePath.get(), {
+  const analyzeInMlLink = useMlHref(http.basePath.get(), {
     page: ML_PAGES.ANOMALY_EXPLORER,
     pageState: {
       jobIds: [jobIds[logEntryCategoriesJobType]],

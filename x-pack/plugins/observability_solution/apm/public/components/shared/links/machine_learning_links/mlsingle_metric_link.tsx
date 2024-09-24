@@ -49,10 +49,7 @@ function useSingleMetricHref({
   serviceName?: string;
   transactionType?: string;
 }) {
-  const {
-    core,
-    plugins: { ml },
-  } = useApmPluginContext();
+  const { core } = useApmPluginContext();
   const { urlParams } = useLegacyUrlParams();
 
   const {
@@ -71,7 +68,7 @@ function useSingleMetricHref({
         }
       : {};
 
-  const href = useMlHref(ml?.locator, core.http.basePath.get(), {
+  const href = useMlHref(core.http.basePath.get(), {
     page: ML_PAGES.SINGLE_METRIC_VIEWER,
     pageState: {
       jobIds: [jobId],

@@ -22,11 +22,10 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   timeRange: TimeRange;
 }> = ({ categorizationJobId, categoryId, dataset, timeRange }) => {
   const {
-    services: { ml, http, application },
+    services: { http, application },
   } = useKibanaContextForPlugin();
 
   const viewAnomalyInMachineLearningLink = useMlHref(
-    ml?.locator,
     http.basePath.get(),
     {
       page: ML_PAGES.SINGLE_METRIC_VIEWER,

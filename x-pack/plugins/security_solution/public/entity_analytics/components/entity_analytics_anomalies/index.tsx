@@ -53,10 +53,10 @@ export const EntityAnalyticsAnomalies = () => {
   const [recentlyEnabledJobIds, setRecentlyEnabledJobIds] = useState<string[]>([]);
 
   const {
-    services: { ml, http, docLinks },
+    services: { http, docLinks },
   } = useKibana();
 
-  const jobsUrl = useMlHref(ml?.locator, http.basePath.get(), {
+  const jobsUrl = useMlHref(http.basePath.get(), {
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
   });
 
