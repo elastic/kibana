@@ -15090,7 +15090,8 @@ paths:
                       type: string
                   required:
                     - noteId
-                - type: object
+                - nullable: true
+                  type: object
                   properties:
                     noteIds:
                       items:
@@ -15121,19 +15122,18 @@ paths:
       parameters:
         - in: query
           name: documentIds
-          required: true
           schema:
             $ref: '#/components/schemas/Security_Solution_Timeline_API_DocumentIds'
         - in: query
           name: page
           schema:
             nullable: true
-            type: number
+            type: string
         - in: query
           name: perPage
           schema:
             nullable: true
-            type: number
+            type: string
         - in: query
           name: search
           schema:
@@ -15156,6 +15156,13 @@ paths:
             type: string
       responses:
         '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                oneOf:
+                  - $ref: >-
+                      #/components/schemas/Security_Solution_Timeline_API_GetNotesResult
+                  - type: object
           description: Indicates the requested notes were returned.
       summary: Get notes
       tags:
@@ -15205,19 +15212,8 @@ paths:
                     type: object
                     properties:
                       persistNote:
-                        type: object
-                        properties:
-                          code:
-                            type: number
-                          message:
-                            type: string
-                          note:
-                            $ref: >-
-                              #/components/schemas/Security_Solution_Timeline_API_Note
-                        required:
-                          - code
-                          - message
-                          - note
+                        $ref: >-
+                          #/components/schemas/Security_Solution_Timeline_API_ResponseNote
                     required:
                       - persistNote
                 required:
@@ -15589,15 +15585,8 @@ paths:
                     type: object
                     properties:
                       persistPinnedEventOnTimeline:
-                        allOf:
-                          - $ref: >-
-                              #/components/schemas/Security_Solution_Timeline_API_PinnedEvent
-                          - type: object
-                            properties:
-                              code:
-                                type: number
-                              message:
-                                type: string
+                        $ref: >-
+                          #/components/schemas/Security_Solution_Timeline_API_PersistPinnedEventResponse
                     required:
                       - persistPinnedEventOnTimeline
                 required:
@@ -32400,7 +32389,6 @@ components:
           nullable: true
           type: string
         timelineId:
-          nullable: true
           type: string
         updated:
           nullable: true
@@ -32409,6 +32397,28 @@ components:
           nullable: true
           type: string
       required:
+        - timelineId
+    Security_Solution_Timeline_API_BarePinnedEvent:
+      type: object
+      properties:
+        created:
+          nullable: true
+          type: number
+        createdBy:
+          nullable: true
+          type: string
+        eventId:
+          type: string
+        timelineId:
+          type: string
+        updated:
+          nullable: true
+          type: number
+        updatedBy:
+          nullable: true
+          type: string
+      required:
+        - eventId
         - timelineId
     Security_Solution_Timeline_API_ColumnHeaderResult:
       type: object
@@ -32584,6 +32594,18 @@ components:
           type: string
         script:
           type: string
+    Security_Solution_Timeline_API_GetNotesResult:
+      type: object
+      properties:
+        notes:
+          items:
+            $ref: '#/components/schemas/Security_Solution_Timeline_API_Note'
+          type: array
+        totalCount:
+          type: number
+      required:
+        - totalCount
+        - notes
     Security_Solution_Timeline_API_ImportTimelineResult:
       type: object
       properties:
@@ -32644,34 +32666,38 @@ components:
               type: string
             version:
               type: string
+          required:
+            - noteId
+            - version
+    Security_Solution_Timeline_API_PersistPinnedEventResponse:
+      oneOf:
+        - allOf:
+            - $ref: '#/components/schemas/Security_Solution_Timeline_API_PinnedEvent'
+            - $ref: >-
+                #/components/schemas/Security_Solution_Timeline_API_PinnedEventBaseResponseBody
+        - nullable: true
+          type: object
     Security_Solution_Timeline_API_PinnedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Security_Solution_Timeline_API_BarePinnedEvent'
+        - type: object
+          properties:
+            pinnedEventId:
+              type: string
+            version:
+              type: string
+          required:
+            - pinnedEventId
+            - version
+    Security_Solution_Timeline_API_PinnedEventBaseResponseBody:
       type: object
       properties:
-        created:
-          nullable: true
+        code:
           type: number
-        createdBy:
-          nullable: true
-          type: string
-        eventId:
-          type: string
-        pinnedEventId:
-          type: string
-        timelineId:
-          type: string
-        updated:
-          nullable: true
-          type: number
-        updatedBy:
-          nullable: true
-          type: string
-        version:
+        message:
           type: string
       required:
-        - eventId
-        - pinnedEventId
-        - timelineId
-        - version
+        - code
     Security_Solution_Timeline_API_QueryMatchResult:
       type: object
       properties:
@@ -32716,6 +32742,19 @@ components:
           type: object
         readable:
           type: boolean
+    Security_Solution_Timeline_API_ResponseNote:
+      type: object
+      properties:
+        code:
+          type: number
+        message:
+          type: string
+        note:
+          $ref: '#/components/schemas/Security_Solution_Timeline_API_Note'
+      required:
+        - code
+        - message
+        - note
     Security_Solution_Timeline_API_RowRendererId:
       enum:
         - alert

@@ -40,13 +40,7 @@ import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
 import { toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
-
-export interface FormValues extends Partial<Space> {
-  customIdentifier?: boolean;
-  avatarType?: 'initials' | 'image';
-  customAvatarInitials?: boolean;
-  customAvatarColor?: boolean;
-}
+import type { CustomizeSpaceFormValues } from '../types';
 
 interface Props {
   getFeatures: FeaturesPluginStart['getFeatures'];
@@ -62,7 +56,7 @@ interface Props {
 }
 
 interface State {
-  space: FormValues;
+  space: CustomizeSpaceFormValues;
   features: KibanaFeature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
@@ -77,7 +71,7 @@ interface State {
   };
 }
 
-export class ManageSpacePage extends Component<Props, State> {
+export class CreateSpacePage extends Component<Props, State> {
   private readonly validator: SpaceValidator;
 
   constructor(props: Props) {
@@ -189,7 +183,7 @@ export class ManageSpacePage extends Component<Props, State> {
     const { showAlteringActiveSpaceDialog } = this.state;
 
     return (
-      <div data-test-subj="spaces-edit-page">
+      <div data-test-subj="spaces-create-page">
         <CustomizeSpace
           title={i18n.translate('xpack.spaces.management.manageSpacePage.generalTitle', {
             defaultMessage: 'General',
@@ -363,7 +357,7 @@ export class ManageSpacePage extends Component<Props, State> {
     this.onSpaceChange(space);
   };
 
-  public onSpaceChange = (updatedSpace: FormValues) => {
+  public onSpaceChange = (updatedSpace: CustomizeSpaceFormValues) => {
     this.setState({
       space: updatedSpace,
     });

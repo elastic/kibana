@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-
-import { TimelineTypeLiteralRt } from '../model/api';
-
-export const cleanDraftTimelineSchema = rt.type({
-  timelineType: TimelineTypeLiteralRt,
-});
+export const TAB_ID_CONTENT = 'content';
+export const TAB_ID_ROLES = 'roles';
+export const TAB_ID_GENERAL = 'general';
