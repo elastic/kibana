@@ -12,14 +12,14 @@ import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-manageme
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   type ControlGroupChainingSystem,
-  type ControlStyle,
+  type ControlLabelPosition,
   type ControlWidth,
   CONTROL_CHAINING_OPTIONS,
-  CONTROL_STYLE_OPTIONS,
+  CONTROL_LABEL_POSITION_OPTIONS,
   CONTROL_WIDTH_OPTIONS,
   DEFAULT_CONTROL_CHAINING,
   DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_STYLE,
+  DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
 } from '@kbn/controls-plugin/common';
 import { FilterStateStore } from '@kbn/es-query';
@@ -83,12 +83,14 @@ export const controlGroupInputSchema = schema.object({
     }
   ),
   controlStyle: schema.oneOf(
-    Object.values(CONTROL_STYLE_OPTIONS).map((value) => schema.literal(value)) as [
-      Type<ControlStyle>
+    Object.values(CONTROL_LABEL_POSITION_OPTIONS).map((value) => schema.literal(value)) as [
+      Type<ControlLabelPosition>
     ],
     {
-      defaultValue: DEFAULT_CONTROL_STYLE,
-      meta: { description: 'Style of the controls. For example, "oneLine", "twoLine".' },
+      defaultValue: DEFAULT_CONTROL_LABEL_POSITION,
+      meta: {
+        description: 'Position of the labels for controls. For example, "oneLine", "twoLine".',
+      },
     }
   ),
   chainingSystem: schema.oneOf(

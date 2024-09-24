@@ -29,6 +29,30 @@ export const buildLargeDocument = ({
   return doc;
 };
 
+export const buildLargeNestedDocument = ({
+  fieldsPerObject,
+  levels,
+  fieldSize,
+}: {
+  fieldsPerObject: number;
+  levels: number;
+  fieldSize: number;
+}): Record<string, unknown> => {
+  if (levels === 1) {
+    return buildLargeDocument({ numFields: fieldsPerObject, fieldSize });
+  } else {
+    const doc: Record<string, unknown> = {};
+    range(fieldsPerObject).forEach((idx) => {
+      doc[`level_${levels}_field${idx}`] = buildLargeNestedDocument({
+        fieldsPerObject,
+        levels: levels - 1,
+        fieldSize,
+      });
+    });
+    return doc;
+  }
+};
+
 export const addTimestampToDoc = ({
   timestamp = new Date(),
   doc,

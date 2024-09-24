@@ -210,9 +210,9 @@
                 "section": "def-public.ChromeNavLink",
                 "text": "ChromeNavLink"
               },
-              "[]>; }; getIsSideNavCollapsed$: () => ",
+              "[]>; }; sideNav: { getIsCollapsed$: () => ",
               "Observable",
-              "<boolean>; }; http: { basePath: ",
+              "<boolean>; }; }; http: { basePath: ",
               "BasePathService",
               "; getLoadingCount$(): ",
               "Observable",

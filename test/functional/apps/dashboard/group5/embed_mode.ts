@@ -57,7 +57,7 @@ export default function ({
       await browser.setWindowSize(1300, 900);
     });
 
-    // Fails in with chrome 128+ https://github.com/elastic/kibana/issues/163207
+    // Fails in chrome 128+ https://github.com/elastic/kibana-operations/issues/199
     describe.skip('default URL params', () => {
       it('hides the chrome', async () => {
         const globalNavShown = await globalNav.exists();
@@ -92,7 +92,7 @@ export default function ({
       });
     });
 
-    // Fails in with chrome 128+ https://github.com/elastic/kibana/issues/163207
+    // Fails in chrome 128+ https://github.com/elastic/kibana-operations/issues/199
     describe.skip('non-default URL params', () => {
       it('shows or hides elements based on URL params', async () => {
         const currentUrl = await browser.getCurrentUrl();

@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
-import { ControlStyle } from './control_group/types';
+import { CONTROL_LABEL_POSITION_OPTIONS, CONTROL_WIDTH_OPTIONS } from './constants';
+
+export type ControlWidth = (typeof CONTROL_WIDTH_OPTIONS)[keyof typeof CONTROL_WIDTH_OPTIONS];
+export type ControlLabelPosition =
+  (typeof CONTROL_LABEL_POSITION_OPTIONS)[keyof typeof CONTROL_LABEL_POSITION_OPTIONS];
 
 export type TimeSlice = [number, number];
 
@@ -20,23 +22,19 @@ export interface ParentIgnoreSettings {
   ignoreValidations?: boolean;
 }
 
-export type ControlInput = EmbeddableInput & {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  timeslice?: TimeSlice;
-  controlStyle?: ControlStyle;
-  ignoreParentSettings?: ParentIgnoreSettings;
-};
+export interface DefaultControlState {
+  grow?: boolean;
+  width?: ControlWidth;
+}
 
-export type DataControlInput = ControlInput & {
-  fieldName: string;
+export interface SerializedControlState<ControlStateType extends object = object>
+  extends DefaultControlState {
+  type: string;
+  explicitInput: { id: string } & ControlStateType;
+}
+
+export interface DefaultDataControlState extends DefaultControlState {
   dataViewId: string;
-};
-
-export type ControlInputTransform = (
-  newState: Partial<ControlInput>,
-  controlType: string
-) => Partial<ControlInput>;
-
-export type { ControlStyle, ControlWidth } from './control_group/types';
+  fieldName: string;
+  title?: string; // custom control label
+}

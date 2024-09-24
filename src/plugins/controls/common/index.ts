@@ -7,43 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ControlInputTransform, ParentIgnoreSettings } from './types';
-
-// Control Group exports
-export {
-  CONTROL_GROUP_TYPE,
-  type ControlsPanels,
-  type ControlGroupInput,
-  type ControlPanelState,
-  type ControlGroupTelemetry,
-  type RawControlGroupAttributes,
-  type PersistableControlGroupInput,
-  type SerializableControlGroupInput,
-  type ControlGroupChainingSystem,
-  type ControlStyle,
-  type ControlWidth,
-  persistableControlGroupInputKeys,
-} from './control_group/types';
-export {
-  rawControlGroupAttributesToControlGroupInput,
-  rawControlGroupAttributesToSerializable,
-  serializableToRawControlGroupAttributes,
-  getDefaultControlGroupPersistableInput,
-  persistableControlGroupInputIsEqual,
-  getDefaultControlGroupInput,
-} from './control_group/control_group_persistence';
+export type {
+  ControlLabelPosition,
+  ControlWidth,
+  DefaultControlState,
+  DefaultDataControlState,
+  ParentIgnoreSettings,
+  SerializedControlState,
+} from './types';
 
 export {
   DEFAULT_CONTROL_CHAINING,
   DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
-  DEFAULT_CONTROL_STYLE,
   CONTROL_WIDTH_OPTIONS,
-  CONTROL_STYLE_OPTIONS,
   CONTROL_CHAINING_OPTIONS,
-} from './control_group/control_group_constants';
+  CONTROL_LABEL_POSITION_OPTIONS,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+} from './constants';
 
-// Control Type exports
-export { OPTIONS_LIST_CONTROL, type OptionsListEmbeddableInput } from './options_list/types';
-export { type RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from './range_slider/types';
-export { TIME_SLIDER_CONTROL } from './time_slider/types';
+export { CONTROL_GROUP_TYPE } from './control_group';
+
+export type {
+  ControlGroupChainingSystem,
+  ControlGroupEditorConfig,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlPanelState,
+  ControlPanelsState,
+} from './control_group';

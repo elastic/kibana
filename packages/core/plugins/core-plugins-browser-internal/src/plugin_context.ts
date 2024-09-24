@@ -82,6 +82,7 @@ export function createPluginSetupContext<
     },
     customBranding: deps.customBranding,
     fatalErrors: deps.fatalErrors,
+    featureFlags: deps.featureFlags,
     executionContext: deps.executionContext,
     http: {
       ...deps.http,
@@ -147,6 +148,7 @@ export function createPluginStartContext<
     customBranding: deps.customBranding,
     docLinks: deps.docLinks,
     executionContext: deps.executionContext,
+    featureFlags: deps.featureFlags,
     http: {
       ...deps.http,
       staticAssets: {

@@ -9,12 +9,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
-  ControlGroupChainingSystem,
-  ControlStyle,
-  ControlsPanels,
+  type ControlGroupChainingSystem,
+  type ControlLabelPosition,
+  type ControlsPanels,
   DEFAULT_CONTROL_CHAINING,
-  DEFAULT_CONTROL_STYLE,
-  RawControlGroupAttributes,
+  DEFAULT_CONTROL_LABEL_POSITION,
 } from '@kbn/controls-plugin/common';
 import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
 
@@ -50,7 +49,7 @@ function controlGroupInputOut(
     ...restInput,
     panels,
     ...(ignoreParentSettingsJSON && { ignoreParentSettings: JSON.parse(ignoreParentSettingsJSON) }),
-    controlStyle: (controlStyle as ControlStyle) ?? DEFAULT_CONTROL_STYLE,
+    controlStyle: (controlStyle as ControlLabelPosition) ?? DEFAULT_CONTROL_LABEL_POSITION,
     chainingSystem: (chainingSystem as ControlGroupChainingSystem) ?? DEFAULT_CONTROL_CHAINING,
   };
 }
@@ -85,7 +84,7 @@ export function dashboardAttributesOut(
 
 function controlGroupInputIn(
   controlGroupInput?: ControlGroupAttributes
-): RawControlGroupAttributes | undefined {
+): DashboardSavedObjectAttributes['controlGroupInput'] | undefined {
   if (!controlGroupInput) {
     return;
   }

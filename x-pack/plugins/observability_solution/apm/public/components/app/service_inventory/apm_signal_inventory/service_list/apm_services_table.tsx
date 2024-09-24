@@ -10,18 +10,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiLink,
-  EuiSpacer,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getSurveyFeedbackURL } from '@kbn/observability-shared-plugin/public';
+import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { ServiceHealthStatus } from '../../../../../../common/service_health_status';
 import {
   ServiceInventoryFieldName,
@@ -33,7 +31,7 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../../../common/utils/formatters';
-import { KibanaEnvironmentContext } from '../../../../../context/kibana_environment_context/kibana_environment_context';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { Breakpoints, useBreakpoints } from '../../../../../hooks/use_breakpoints';
@@ -56,9 +54,8 @@ import {
   SortFunction,
   TableSearchBar,
 } from '../../../../shared/managed_table';
-import { TryItButton } from '../../../../shared/try_it_button';
-import { HealthBadge } from './health_badge';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
+import { HealthBadge } from './health_badge';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -305,9 +302,6 @@ interface Props {
   maxCountExceeded: boolean;
   onChangeSearchQuery: (searchQuery: string) => void;
   onChangeRenderedItems: (renderedItems: ServiceListItem[]) => void;
-  isTableSearchBarEnabled: boolean;
-  isSavingSetting: boolean;
-  onChangeTableSearchBarVisibility: () => void;
 }
 export function ApmServicesTable({
   status,
@@ -325,17 +319,13 @@ export function ApmServicesTable({
   maxCountExceeded,
   onChangeSearchQuery,
   onChangeRenderedItems,
-  isTableSearchBarEnabled,
-  isSavingSetting,
-  onChangeTableSearchBarVisibility,
 }: Props) {
-  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
   const breakpoints = useBreakpoints();
+  const { core } = useApmPluginContext();
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
-
   const { query } = useApmParams('/services');
   const { kuery } = query;
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
@@ -367,6 +357,11 @@ export function ApmServicesTable({
     serviceOverflowCount,
   ]);
 
+  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
+    apmEnableServiceInventoryTableSearchBar,
+    true
+  );
+
   const tableSearchBar: TableSearchBar<ServiceListItem> = useMemo(() => {
     return {
       isEnabled: isTableSearchBarEnabled,
@@ -376,56 +371,12 @@ export function ApmServicesTable({
       placeholder: i18n.translate('xpack.apm.servicesTable.filterServicesPlaceholder', {
         defaultMessage: 'Search services by name',
       }),
+      techPreview: true,
     };
   }, [isTableSearchBarEnabled, maxCountExceeded, onChangeSearchQuery]);
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
-      <EuiFlexItem>
-        <TryItButton
-          isFeatureEnabled={isTableSearchBarEnabled}
-          linkLabel={
-            isTableSearchBarEnabled
-              ? i18n.translate('xpack.apm.serviceList.disableFastFilter', {
-                  defaultMessage: 'Disable fast filter',
-                })
-              : i18n.translate('xpack.apm.serviceList.enableFastFilter', {
-                  defaultMessage: 'Enable fast filter',
-                })
-          }
-          onClick={onChangeTableSearchBarVisibility}
-          isLoading={isSavingSetting}
-          popoverContent={
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.apm.serviceList.turnOffFastFilter', {
-                  defaultMessage:
-                    'Fast filtering allows you to instantly search for your services using free text.',
-                })}
-              </EuiFlexItem>
-              {isTableSearchBarEnabled && (
-                <EuiFlexItem grow={false}>
-                  <EuiLink
-                    data-test-subj="apmServiceListGiveFeedbackLink"
-                    href={getSurveyFeedbackURL({
-                      formUrl: 'https://ela.st/service-inventory-fast-filter-feedback',
-                      kibanaVersion,
-                      isCloudEnv,
-                      isServerlessEnv,
-                    })}
-                    target="_blank"
-                  >
-                    {i18n.translate('xpack.apm.serviceList.giveFeedbackFlexItemLabel', {
-                      defaultMessage: 'Give feedback',
-                    })}
-                  </EuiLink>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          }
-        />
-        <EuiSpacer size="s" />
-      </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexEnd">
           {fallbackToTransactions && (

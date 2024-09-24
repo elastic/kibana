@@ -16,8 +16,10 @@ import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings_query';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
+import type { BulkAction } from '../../api';
 import { performInstallSpecificRules } from '../../api';
 import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
+import { useBulkActionMutation } from '../use_bulk_action_mutation';
 
 export const PERFORM_SPECIFIC_RULES_INSTALLATION_KEY = [
   'POST',
@@ -25,11 +27,16 @@ export const PERFORM_SPECIFIC_RULES_INSTALLATION_KEY = [
   PERFORM_RULE_INSTALLATION_URL,
 ];
 
+export interface UsePerformSpecificRulesInstallParams {
+  rules: InstallSpecificRulesRequest['rules'];
+  enable?: boolean;
+}
+
 export const usePerformSpecificRulesInstallMutation = (
   options?: UseMutationOptions<
     PerformRuleInstallationResponseBody,
     Error,
-    InstallSpecificRulesRequest['rules']
+    UsePerformSpecificRulesInstallParams
   >
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
@@ -40,15 +47,15 @@ export const usePerformSpecificRulesInstallMutation = (
     useInvalidateFetchPrebuiltRulesInstallReviewQuery();
   const invalidateRuleStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
+  const { mutateAsync } = useBulkActionMutation();
 
   return useMutation<
     PerformRuleInstallationResponseBody,
     Error,
-    InstallSpecificRulesRequest['rules']
+    UsePerformSpecificRulesInstallParams
   >(
-    (rulesToInstall: InstallSpecificRulesRequest['rules']) => {
-      return performInstallSpecificRules(rulesToInstall);
-    },
+    (rulesToInstall: UsePerformSpecificRulesInstallParams) =>
+      performInstallSpecificRules(rulesToInstall.rules),
     {
       ...options,
       mutationKey: PERFORM_SPECIFIC_RULES_INSTALLATION_KEY,
@@ -61,6 +68,14 @@ export const usePerformSpecificRulesInstallMutation = (
         invalidateFetchPrebuiltRulesInstallReview();
         invalidateRuleStatus();
         invalidateFetchCoverageOverviewQuery();
+
+        const [response, , { enable }] = args;
+
+        if (response && enable) {
+          const ruleIdsToEnable = response.results.created.map((rule) => rule.id);
+          const bulkAction: BulkAction = { type: 'enable', ids: ruleIdsToEnable };
+          mutateAsync({ bulkAction });
+        }
 
         if (options?.onSettled) {
           options.onSettled(...args);

@@ -8,4 +8,4 @@
  */
 
 export type { DashboardAttributes, GridData, SavedDashboardPanel } from './types';
-export { dashboardAttributesSchema } from './v2';
+export { controlGroupInputSchema, dashboardAttributesSchema } from './v2';

@@ -95,6 +95,7 @@ export const AGENT_FLYOUT = {
 export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT = {
   TITLE: 'createAgentPolicyFlyoutTitle',
   CREATE_BUTTON: 'createAgentPolicyButton',
+  ADVANCED_OPTIONS_TOGGLE: 'advancedOptionsButton',
   COLLECT_LOGS_CHECKBOX: 'collectLogsCheckbox',
   COLLECT_METRICS_CHECKBOX: 'collectMetricsCheckbox',
 };
@@ -163,7 +164,8 @@ export const SETTINGS_OUTPUTS_KAFKA = {
   PARTITIONING_EVENTS_INPUT: 'settingsOutputsFlyout.kafkaPartitionTypeRandomInput',
   PARTITIONING_HASH_INPUT: 'settingsOutputsFlyout.kafkaPartitionTypeHashInput',
   TOPICS_PANEL: 'settingsOutputsFlyout.kafkaTopicsPanel',
-  TOPICS_DEFAULT_TOPIC_INPUT: 'settingsOutputsFlyout.kafkaDefaultTopicInput',
+  TOPICS_DEFAULT_TOPIC_INPUT: 'settingsOutputsFlyout.kafkaStaticTopicInput',
+  TOPICS_DYNAMIC_TOPIC_INPUT: 'settingsOutputsFlyout.kafkaDynamicTopicInput',
   HEADERS_PANEL: 'settingsOutputsFlyout.kafkaHeadersPanel',
   HEADERS_KEY_INPUT: 'settingsOutputsFlyout.kafkaHeadersKeyInput0',
   HEADERS_VALUE_INPUT: 'settingsOutputsFlyout.kafkaHeadersValueInput0',

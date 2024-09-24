@@ -13,16 +13,16 @@ import {
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
 } from '../v1';
 
+export const controlGroupInputSchema = controlGroupInputSchemaV1.extends(
+  {
+    showApplySelections: schema.maybe(schema.boolean()),
+  },
+  { unknowns: 'ignore' }
+);
+
 export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
   {
-    controlGroupInput: schema.maybe(
-      controlGroupInputSchemaV1.extends(
-        {
-          showApplySelections: schema.maybe(schema.boolean()),
-        },
-        { unknowns: 'ignore' }
-      )
-    ),
+    controlGroupInput: schema.maybe(controlGroupInputSchema),
   },
   { unknowns: 'ignore' }
 );

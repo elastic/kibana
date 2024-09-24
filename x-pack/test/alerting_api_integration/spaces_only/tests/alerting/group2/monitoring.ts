@@ -14,7 +14,8 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function monitoringAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('monitoring', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/193072
+  describe.skip('monitoring', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(async () => await objectRemover.removeAll());
