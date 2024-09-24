@@ -385,8 +385,8 @@ export class HttpConfig implements IHttpConfig {
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
 
-    // default to `false` to allow overriding in FTR tests
-    this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
+    // default to `true` to restrict internal APIs if not set through config.
+    this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? true;
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
     this.oas = rawHttpConfig.oas;
