@@ -170,12 +170,7 @@ export function PackageCard({
     if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
       application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
         path: url.slice(INTEGRATIONS_BASE_PATH.length),
-        state: {
-          fromIntegrations,
-          onCancelUrl: application.getUrlForApp('securitySolutionUI', {
-            path: '/get_started',
-          }),
-        },
+        state: { fromIntegrations },
       });
     } else if (url.startsWith('http') || url.startsWith('https')) {
       window.open(url, '_blank');
