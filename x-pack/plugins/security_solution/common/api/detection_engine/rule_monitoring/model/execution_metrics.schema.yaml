@@ -29,13 +29,13 @@ components:
           description: Range of the execution gap
           type: object
           required:
-            - from
-            - to
+            - gte
+            - lte
           properties:
-            from:
-              description: Start of the execution gap
+            gte:
+              description: Start date of the execution gap
               type: string
-            to:
-              description: End of the execution gap
+            lte:
+              description: End date of the execution gap
               type: string
 

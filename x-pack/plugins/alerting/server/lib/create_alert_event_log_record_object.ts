@@ -47,8 +47,8 @@ interface CreateAlertEventLogRecordParams {
   gap?: {
     status: string;
     range: {
-      from: string;
-      to: string;
+      gte: string;
+      lte: string;
     };
   };
 }

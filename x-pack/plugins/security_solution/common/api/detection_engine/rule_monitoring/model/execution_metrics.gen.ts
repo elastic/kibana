@@ -40,13 +40,13 @@ export const RuleExecutionMetrics = z.object({
   gap_range: z
     .object({
       /**
-       * Start of the execution gap
+       * Start date of the execution gap
        */
-      from: z.string(),
+      gte: z.string(),
       /**
-       * End of the execution gap
+       * End date of the execution gap
        */
-      to: z.string(),
+      lte: z.string(),
     })
     .optional(),
 });

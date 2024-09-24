@@ -197,10 +197,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
                     },
                     gap_range: {
                       properties: {
-                        from: {
+                        gte: {
                           type: 'date',
                         },
-                        to: {
+                        lte: {
                           type: 'date',
                         },
                       },

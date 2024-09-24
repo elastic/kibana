@@ -107,14 +107,8 @@ exports.EcsCustomPropertyMappings = {
                     ignore_above: 1024,
                   },
                   range: {
-                    properties: {
-                      from: {
-                        type: 'date',
-                      },
-                      to: {
-                        type: 'date',
-                      },
-                    },
+                    type: 'date_range',
+                    format: 'strict_date_optional_time||epoch_millis',
                   },
                   intervals: {
                     type: 'nested',
@@ -197,14 +191,8 @@ exports.EcsCustomPropertyMappings = {
                         type: 'long',
                       },
                       gap_range: {
-                        properties: {
-                          from: {
-                            type: 'date',
-                          },
-                          to: {
-                            type: 'date',
-                          },
-                        },
+                        type: 'date_range',
+                        format: 'strict_date_optional_time||epoch_millis',
                       },
                       rule_type_run_duration_ms: {
                         type: 'long',

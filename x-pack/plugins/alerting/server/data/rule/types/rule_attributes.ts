@@ -87,8 +87,8 @@ export interface RuleMonitoringLastRunMetricsAttributes {
   total_alerts_created?: number | null;
   gap_duration_s?: number | null;
   gap_range?: {
-    from: string;
-    to: string;
+    gte: string;
+    lte: string;
   } | null;
 }
 

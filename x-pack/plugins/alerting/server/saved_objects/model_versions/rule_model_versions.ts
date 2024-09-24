@@ -31,8 +31,8 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
                         properties: {
                           gap_range: {
                             properties: {
-                              from: { type: 'date' },
-                              to: { type: 'date' },
+                              lte: { type: 'date' },
+                              gte: { type: 'date' },
                             },
                           },
                         },

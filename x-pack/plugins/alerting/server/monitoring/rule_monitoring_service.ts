@@ -87,7 +87,7 @@ export class RuleMonitoringService {
     this.monitoring.run.last_run.metrics.gap_duration_s = gapDurationS;
   }
 
-  private setLastRunMetricsGapRange(gap: { from: string; to: string } | null) {
+  private setLastRunMetricsGapRange(gap: { lte: string; gte: string } | null) {
     this.monitoring.run.last_run.metrics.gap_range = gap;
   }
 

@@ -3502,8 +3502,8 @@ describe('Task Runner', () => {
             timestamp: '2021-09-01T00:00:00.000Z',
             metrics: {
               gap_range: {
-                from: '2021-09-01T00:00:00.000Z',
-                to: '2021-09-01T00:00:00.000Z',
+                gte: '2021-09-01T00:00:00.000Z',
+                lte: '2021-09-01T00:00:00.001Z',
               },
             },
           },
@@ -3514,7 +3514,7 @@ describe('Task Runner', () => {
     await taskRunner.run();
 
     expect(alertingEventLogger.reportGap).toHaveBeenCalledWith({
-      gap: { from: '2021-09-01T00:00:00.000Z', to: '2021-09-01T00:00:00.000Z' },
+      gap: { gte: '2021-09-01T00:00:00.000Z', lte: '2021-09-01T00:00:00.001Z' },
     });
   });
 

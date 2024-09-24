@@ -125,8 +125,8 @@ export const monitoringSchema = schema.object({
         gap_range: schema.maybe(
           schema.nullable(
             schema.object({
-              from: schema.string(),
-              to: schema.string(),
+              gte: schema.string(),
+              lte: schema.string(),
             })
           )
         ),

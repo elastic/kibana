@@ -168,8 +168,8 @@ Below is a document in the expected structure, with descriptions of the fields:
             total_enrichment_duration_ms: "total time spent enriching documents during current rule execution cycle",
             execution_gap_duration_s: "duration in seconds of execution gap",
             gap_range: {
-              from: "Gap range start date",
-              to: "Gap range end date",
+              gte: "Gap range start date",
+              lte: "Gap range end date",
             }
           }
         }

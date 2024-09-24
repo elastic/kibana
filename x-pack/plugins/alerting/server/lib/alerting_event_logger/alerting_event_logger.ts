@@ -398,8 +398,8 @@ export class AlertingEventLogger {
     gap,
   }: {
     gap: {
-      from: string;
-      to: string;
+      lte: string;
+      gte: string;
     };
   }): void {
     if (!this.isInitialized || !this.context || !this.ruleData) {
@@ -513,8 +513,8 @@ export function createGapRecord(
   gap: {
     status: string;
     range: {
-      from: string;
-      to: string;
+      gte: string;
+      lte: string;
     };
   }
 ) {

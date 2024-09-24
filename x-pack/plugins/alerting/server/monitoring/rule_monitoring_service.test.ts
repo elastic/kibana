@@ -176,8 +176,8 @@ describe('RuleMonitoringService', () => {
       const ruleMonitoringService = new RuleMonitoringService();
       const { setLastRunMetricsGapRange } = ruleMonitoringService.getLastRunMetricsSetters();
       setLastRunMetricsGapRange({
-        from: '2020-01-01T00:00:00.000Z',
-        to: '2020-01-01T01:00:00.000Z',
+        gte: '2020-01-01T00:00:00.000Z',
+        lte: '2020-01-01T01:00:00.000Z',
       });
 
       const {
@@ -185,8 +185,8 @@ describe('RuleMonitoringService', () => {
           last_run: { metrics },
         },
       } = ruleMonitoringService.getMonitoring();
-      expect(metrics.gap_range?.from).toEqual('2020-01-01T00:00:00.000Z');
-      expect(metrics.gap_range?.to).toEqual('2020-01-01T01:00:00.000Z');
+      expect(metrics.gap_range?.gte).toEqual('2020-01-01T00:00:00.000Z');
+      expect(metrics.gap_range?.lte).toEqual('2020-01-01T01:00:00.000Z');
     });
   });
 });
