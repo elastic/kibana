@@ -21,7 +21,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const start = '2024-09-20T11:00:00.000Z';
   const end = '2024-09-20T11:01:00.000Z';
   const type = 'logs';
-  const dataset = 'synth.1';
+  const dataset = 'synth.good';
   const namespace = 'default';
   const serviceName = 'my-service';
   const hostName = 'synth-host';
