@@ -114,10 +114,9 @@ describe('useMetricsExplorerData Hook', () => {
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
 
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
     const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
@@ -128,9 +127,8 @@ describe('useMetricsExplorerData Hook', () => {
     const { result } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
     const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
@@ -141,8 +139,7 @@ describe('useMetricsExplorerData Hook', () => {
     act(() => {
       result.current.fetchNextPage();
     });
-    await waitFor(() => null);
-    expect(result.current.isLoading).toBe(false);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     const { series: nextSeries } = result.current.data!.pages[1];
     expect(nextSeries).toBeDefined();
     expect(nextSeries.length).toBe(3);
@@ -155,17 +152,15 @@ describe('useMetricsExplorerData Hook', () => {
     expect(result.current.data).toBeUndefined();
     expect(result.current.error).toEqual(null);
     expect(result.current.isLoading).toBe(true);
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data).toBeUndefined();
     expect(result.current.error).toEqual(error);
-    expect(result.current.isLoading).toBe(false);
     mockedFetch.mockResolvedValue(resp as any);
     act(() => {
       result.current.refetch();
     });
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe(null);
   });
 
@@ -174,9 +169,8 @@ describe('useMetricsExplorerData Hook', () => {
     const { result, rerender } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
     const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
@@ -192,9 +186,8 @@ describe('useMetricsExplorerData Hook', () => {
       timestamps,
     });
     expect(result.current.isLoading).toBe(true);
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
   });
 
   it('should not paginate on time change', async () => {
@@ -202,9 +195,8 @@ describe('useMetricsExplorerData Hook', () => {
     const { result, rerender } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
     const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
@@ -216,8 +208,7 @@ describe('useMetricsExplorerData Hook', () => {
       timestamps: { fromTimestamp: 1678378092225, toTimestamp: 1678381693477, interval: '>=10s' },
     });
     expect(result.current.isLoading).toBe(true);
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
   });
 });

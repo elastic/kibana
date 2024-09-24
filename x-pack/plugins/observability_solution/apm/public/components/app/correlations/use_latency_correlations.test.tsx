@@ -8,7 +8,9 @@
 import React, { ReactNode } from 'react';
 import { merge } from 'lodash';
 import { createMemoryHistory } from 'history';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react-hooks';
+
+import { act, waitFor } from '@testing-library/react';
 
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -131,7 +133,7 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should receive partial updates and finish running', async () => {
-      const { result, unmount, waitFor } = renderHook(() => useLatencyCorrelations(), {
+      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
         wrapper,
       });
 
@@ -253,7 +255,7 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should stop and return an error after more than 100ms', async () => {
-      const { result, unmount, waitFor } = renderHook(() => useLatencyCorrelations(), {
+      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
         wrapper,
         initialProps: {
           error: true,
@@ -277,7 +279,7 @@ describe('useLatencyCorrelations', () => {
 
   describe('when canceled', () => {
     it('should stop running', async () => {
-      const { result, unmount, waitFor } = renderHook(() => useLatencyCorrelations(), {
+      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
         wrapper,
       });
 

@@ -11,6 +11,7 @@ import React, { FC } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import * as ReactQuery from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -88,14 +89,14 @@ describe('useFetchAlertsFieldsQuery', () => {
   });
 
   it('should call the api only once', async () => {
-    const { result, rerender, waitForValueToChange } = renderHook(
+    const { result, rerender } = renderHook(
       () => useFetchAlertsFieldsQuery({ http: mockHttpClient, featureIds: ['apm'] }),
       {
         wrapper,
       }
     );
 
-    await waitForValueToChange(() => result.current.data);
+    await waitFor(() => result.current.data);
 
     expect(mockHttpGet).toHaveBeenCalledTimes(1);
     expect(result.current.data).toEqual({
