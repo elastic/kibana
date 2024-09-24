@@ -28,7 +28,6 @@ import {
   apiPublishesTimeRange,
   apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
-  apiPublishesViewMode,
   fetch$,
   getUnchangingComparator,
   initializeTimeRange,
@@ -146,10 +145,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
     } = initializeTimeRange(state);
 
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
-
-    const viewMode$ = apiPublishesViewMode(parentApi)
-      ? parentApi.viewMode
-      : new BehaviorSubject('view');
 
     const executionContext = apiHasExecutionContext(parentApi)
       ? parentApi.executionContext
