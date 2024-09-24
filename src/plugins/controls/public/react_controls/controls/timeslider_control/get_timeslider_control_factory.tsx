@@ -36,22 +36,23 @@ import {
   roundDownToNextStepSizeFactor,
   roundUpToNextStepSizeFactor,
 } from './time_utils';
-import { Services, Timeslice, TimesliderControlApi, TimesliderControlState } from './types';
+import { Timeslice, TimesliderControlApi, TimesliderControlState } from './types';
 
 const displayName = i18n.translate('controls.timesliderControl.displayName', {
   defaultMessage: 'Time slider',
 });
 
-export const getTimesliderControlFactory = (
-  services: Services
-): ControlFactory<TimesliderControlState, TimesliderControlApi> => {
+export const getTimesliderControlFactory = (): ControlFactory<
+  TimesliderControlState,
+  TimesliderControlApi
+> => {
   return {
     type: TIME_SLIDER_CONTROL,
     getIconType: () => 'search',
     getDisplayName: () => displayName,
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
-        initTimeRangeSubscription(controlGroupApi, services);
+        initTimeRangeSubscription(controlGroupApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
       const isPopoverOpen$ = new BehaviorSubject(false);

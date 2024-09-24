@@ -29,10 +29,19 @@ export function getSystemMessageInstructions({
     If a tool does not have properties, leave them out.
 
     It is EXTREMELY important that you generate valid JSON between the \`\`\`json and \`\`\` delimiters.
-    
-    You may call them like this.
 
-    Given the following tool:
+    IMPORTANT: make sure you start and end a tool call with the ${TOOL_USE_START} and ${TOOL_USE_END} markers, it MUST
+    be included in the tool call.
+
+    You may call tools like this:
+
+    ${TOOL_USE_START}
+    \`\`\`json
+    ${JSON.stringify({ name: '[name of the tool]', input: { myProperty: 'myValue' } })}
+    \`\`\`\
+    ${TOOL_USE_END}
+
+    For example, given the following tool:
 
     ${JSON.stringify({
       name: 'my_tool',
@@ -55,13 +64,15 @@ export function getSystemMessageInstructions({
     \`\`\`\
     ${TOOL_USE_END}
 
-    Given the following tool:
+    Another example: given the following tool:
+
     ${JSON.stringify({
       name: 'my_tool_without_parameters',
       description: 'A tool to call without parameters',
     })}
 
-    Use it the following way: 
+    Use it the following way:
+
     ${TOOL_USE_START}
     \`\`\`json
     ${JSON.stringify({ name: 'my_tool_without_parameters', input: {} })}
@@ -77,7 +88,7 @@ export function getSystemMessageInstructions({
         ...(fn.parameters ? { parameters: fn.parameters } : {}),
       }))
     )}
-    
+
     `;
   }
 

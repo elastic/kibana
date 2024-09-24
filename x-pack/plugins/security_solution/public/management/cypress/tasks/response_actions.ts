@@ -42,6 +42,12 @@ export const validateAvailableCommands = () => {
     cy.getByTestSubj(`command-type-${command}`);
   });
 };
+export const selectIsolateAndSaveWithoutEnabling = (ruleName: string) => {
+  cy.getByTestSubj(`command-type-isolate`).click();
+  cy.getByTestSubj('create-enabled-false').click();
+  cy.contains(`${ruleName} was created`);
+};
+
 export const addEndpointResponseAction = () => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
     cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click();
@@ -58,6 +64,26 @@ export const fillUpNewRule = (name = 'Test', description = 'Test') => {
   cy.getByTestSubj('create-new-rule').click();
   cy.getByTestSubj('stepDefineRule').within(() => {
     cy.getByTestSubj('queryInput').first().type('_id:*{enter}');
+  });
+  cy.getByTestSubj('define-continue').click();
+  cy.getByTestSubj('detectionEngineStepAboutRuleName').within(() => {
+    cy.getByTestSubj('input').type(name);
+  });
+  cy.getByTestSubj('detectionEngineStepAboutRuleDescription').within(() => {
+    cy.getByTestSubj('input').type(description);
+  });
+  cy.getByTestSubj('about-continue').click();
+  cy.getByTestSubj('schedule-continue').click();
+};
+export const fillUpNewEsqlRule = (name = 'Test', description = 'Test', query: string) => {
+  loadPage('app/security/rules/management');
+  cy.getByTestSubj('create-new-rule').click();
+  cy.getByTestSubj('stepDefineRule').within(() => {
+    cy.getByTestSubj('esqlRuleType').click();
+    cy.getByTestSubj('detectionEngineStepDefineRuleEsqlQueryBar').within(() => {
+      cy.getByTestSubj('globalQueryBar').click();
+      cy.getByTestSubj('kibanaCodeEditor').type(query);
+    });
   });
   cy.getByTestSubj('define-continue').click();
   cy.getByTestSubj('detectionEngineStepAboutRuleName').within(() => {

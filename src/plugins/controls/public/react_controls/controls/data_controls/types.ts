@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import {
   HasEditCapabilities,
@@ -61,12 +58,6 @@ export const isDataControlFactory = (
 ): factory is DataControlFactory<any, any> => {
   return typeof (factory as DataControlFactory).isFieldCompatible === 'function';
 };
-
-export interface DataControlServices {
-  core: CoreStart;
-  data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
-}
 
 interface DataControlField {
   field: DataViewField;

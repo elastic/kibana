@@ -35,6 +35,8 @@
     "@kbn/server-route-repository-client",
     "@kbn/react-kibana-context-render",
     "@kbn/es-types",
-    "@kbn/entities-schema"
+    "@kbn/entities-schema",
+    "@kbn/i18n-react",
+    "@kbn/io-ts-utils"
   ]
 }

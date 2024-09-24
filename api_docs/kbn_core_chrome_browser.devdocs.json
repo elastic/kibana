@@ -2732,23 +2732,19 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeStart.getIsSideNavCollapsed$",
-            "type": "Function",
+            "id": "def-public.ChromeStart.sideNav",
+            "type": "Object",
             "tags": [],
-            "label": "getIsSideNavCollapsed$",
-            "description": [
-              "\nGet an observable of the current collapsed state of the side nav."
-            ],
+            "label": "sideNav",
+            "description": [],
             "signature": [
-              "() => ",
+              "{ getIsCollapsed$(): ",
               "Observable",
-              "<boolean>"
+              "<boolean>; setIsCollapsed(isCollapsed: boolean): void; }"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",

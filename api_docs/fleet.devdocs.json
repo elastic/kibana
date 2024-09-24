@@ -1509,42 +1509,6 @@
                 "path": "x-pack/plugins/cloud_defend/server/lib/telemetry/collectors/installation_stats_collector.ts"
               },
               {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/view/index.tsx"
               },
@@ -1697,7 +1661,7 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              "{ privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined"
+              "{ [key: string]: any; privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
@@ -2950,7 +2914,7 @@
                         "section": "def-common.PackagePolicyConfigRecord",
                         "text": "PackagePolicyConfigRecord"
                       },
-                      " | undefined; elasticsearch?: { privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; overrides?: { inputs?: { [key: string]: any; } | undefined; } | null | undefined; }"
+                      " | undefined; elasticsearch?: { [key: string]: any; privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; overrides?: { inputs?: { [key: string]: any; } | undefined; } | null | undefined; }"
                     ],
                     "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
                     "deprecated": false,
@@ -22069,7 +22033,7 @@
             "label": "data_stream",
             "description": [],
             "signature": [
-              "{ dataset: string; type: string; }"
+              "{ dataset: string; type?: string | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -23840,42 +23804,6 @@
                 "path": "x-pack/plugins/cloud_defend/server/lib/telemetry/collectors/installation_stats_collector.ts"
               },
               {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/fleet_integration/osquery_managed_policy_create_import_extension.tsx"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/view/index.tsx"
               },
@@ -24028,7 +23956,7 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              "{ privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined"
+              "{ [key: string]: any; privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,

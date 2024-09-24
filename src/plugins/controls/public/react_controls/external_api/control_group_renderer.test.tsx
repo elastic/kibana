@@ -9,26 +9,22 @@
 
 import React from 'react';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { Filter } from '@kbn/es-query';
 import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { act, render, waitFor } from '@testing-library/react';
 
 import { ControlGroupRendererApi } from '.';
+import { CONTROL_GROUP_TYPE } from '../..';
 import { getControlGroupEmbeddableFactory } from '../control_group/get_control_group_factory';
 import { ControlGroupRenderer, ControlGroupRendererProps } from './control_group_renderer';
-import { CONTROL_GROUP_TYPE } from '../..';
 
 type ParentApiType = PublishesUnifiedSearch & {
   unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;
 };
 
 describe('control group renderer', () => {
-  const core = coreMock.createStart();
-  const dataViews = dataViewPluginMocks.createStartContract();
-  const factory = getControlGroupEmbeddableFactory({ core, dataViews });
+  const factory = getControlGroupEmbeddableFactory();
   const buildControlGroupSpy = jest.spyOn(factory, 'buildEmbeddable');
 
   const mountControlGroupRenderer = async (

@@ -19,7 +19,6 @@ import {
 import {
   HasEditCapabilities,
   HasParentApi,
-  PublishesDataLoading,
   PublishesDisabledActionIds,
   PublishesFilters,
   PublishesTimeslice,
@@ -35,8 +34,8 @@ import {
   ControlGroupEditorConfig,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
+  ControlLabelPosition,
   ControlPanelState,
-  ControlStyle,
   DefaultControlState,
   ParentIgnoreSettings,
 } from '../../../common';
@@ -54,7 +53,6 @@ export type ControlGroupApi = PresentationContainer &
   PublishesDataViews &
   HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
-  PublishesDataLoading &
   Pick<PublishesUnsavedChanges<ControlGroupRuntimeState>, 'unsavedChanges'> &
   PublishesTimeslice &
   PublishesDisabledActionIds &
@@ -62,7 +60,7 @@ export type ControlGroupApi = PresentationContainer &
     allowExpensiveQueries$: PublishingSubject<boolean>;
     autoApplySelections$: PublishingSubject<boolean>;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
-    labelPosition: PublishingSubject<ControlStyle>;
+    labelPosition: PublishingSubject<ControlLabelPosition>;
 
     asyncResetUnsavedChanges: () => Promise<void>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;

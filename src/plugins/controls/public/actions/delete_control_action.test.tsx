@@ -9,22 +9,15 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { ViewMode } from '@kbn/presentation-publishing';
-
 import { getOptionsListControlFactory } from '../react_controls/controls/data_controls/options_list_control/get_options_list_control_factory';
 import { OptionsListControlApi } from '../react_controls/controls/data_controls/options_list_control/types';
 import {
   getMockedBuildApi,
   getMockedControlGroupApi,
 } from '../react_controls/controls/mocks/control_mocks';
-import { pluginServices } from '../services';
 import { DeleteControlAction } from './delete_control_action';
-
-const mockDataViews = dataViewPluginMocks.createStartContract();
-const mockCore = coreMock.createStart();
+import { coreServices } from '../services/kibana_services';
 
 const dashboardApi = {
   viewMode: new BehaviorSubject<ViewMode>('view'),
@@ -38,11 +31,7 @@ const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
 
 let controlApi: OptionsListControlApi;
 beforeAll(async () => {
-  const controlFactory = getOptionsListControlFactory({
-    core: mockCore,
-    data: dataPluginMock.createStartContract(),
-    dataViews: mockDataViews,
-  });
+  const controlFactory = getOptionsListControlFactory();
 
   const uuid = 'testControl';
   const control = await controlFactory.buildControl(
@@ -72,7 +61,7 @@ test('Execute throws an error when called with an embeddable not in a parent', a
 describe('Execute should open a confirm modal', () => {
   test('Canceling modal will keep control', async () => {
     const spyOn = jest.fn().mockResolvedValue(false);
-    pluginServices.getServices().overlays.openConfirm = spyOn;
+    coreServices.overlays.openConfirm = spyOn;
 
     const deleteControlAction = new DeleteControlAction();
     await deleteControlAction.execute({ embeddable: controlApi });
@@ -83,7 +72,7 @@ describe('Execute should open a confirm modal', () => {
 
   test('Confirming modal will delete control', async () => {
     const spyOn = jest.fn().mockResolvedValue(true);
-    pluginServices.getServices().overlays.openConfirm = spyOn;
+    coreServices.overlays.openConfirm = spyOn;
 
     const deleteControlAction = new DeleteControlAction();
     await deleteControlAction.execute({ embeddable: controlApi });

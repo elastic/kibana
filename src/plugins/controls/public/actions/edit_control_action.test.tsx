@@ -9,9 +9,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import dateMath from '@kbn/datemath';
 import type { TimeRange } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
@@ -23,12 +20,10 @@ import {
   getMockedControlGroupApi,
 } from '../react_controls/controls/mocks/control_mocks';
 import { getTimesliderControlFactory } from '../react_controls/controls/timeslider_control/get_timeslider_control_factory';
+import { dataService } from '../services/kibana_services';
 import { EditControlAction } from './edit_control_action';
 
-const mockDataViews = dataViewPluginMocks.createStartContract();
-const mockCore = coreMock.createStart();
-const dataStartServiceMock = dataPluginMock.createStartContract();
-dataStartServiceMock.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
+dataService.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
   const now = new Date();
   return {
     min: dateMath.parse(timeRange.from, { forceNow: now }),
@@ -48,11 +43,7 @@ const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
 
 let optionsListApi: OptionsListControlApi;
 beforeAll(async () => {
-  const controlFactory = getOptionsListControlFactory({
-    core: mockCore,
-    data: dataStartServiceMock,
-    dataViews: mockDataViews,
-  });
+  const controlFactory = getOptionsListControlFactory();
 
   const optionsListUuid = 'optionsListControl';
   const optionsListControl = await controlFactory.buildControl(
@@ -73,10 +64,7 @@ beforeAll(async () => {
 
 describe('Incompatible embeddables', () => {
   test('Action is incompatible with embeddables that are not editable', async () => {
-    const timeSliderFactory = getTimesliderControlFactory({
-      core: mockCore,
-      data: dataStartServiceMock,
-    });
+    const timeSliderFactory = getTimesliderControlFactory();
     const timeSliderUuid = 'timeSliderControl';
     const timeSliderControl = await timeSliderFactory.buildControl(
       {},

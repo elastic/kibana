@@ -20,7 +20,7 @@ import type {
   OptionsListResponse,
   OptionsListSuccessResponse,
 } from '../../../../../common/options_list/types';
-import type { DataControlServices } from '../types';
+import { coreServices, dataService } from '../../../../services/kibana_services';
 
 const REQUEST_CACHE_SIZE = 50; // only store a max of 50 responses
 const REQUEST_CACHE_TTL = 1000 * 60; // time to live = 1 minute
@@ -80,8 +80,7 @@ export class OptionsListFetchCache {
 
   public async runFetchRequest(
     request: OptionsListRequest,
-    abortSignal: AbortSignal,
-    services: DataControlServices
+    abortSignal: AbortSignal
   ): Promise<OptionsListResponse> {
     const requestHash = this.getRequestHash(request);
 
@@ -90,11 +89,11 @@ export class OptionsListFetchCache {
     } else {
       const index = request.dataView.getIndexPattern();
 
-      const timeService = services.data.query.timefilter.timefilter;
+      const timeService = dataService.query.timefilter.timefilter;
       const { query, filters, dataView, timeRange, field, ...passThroughProps } = request;
       const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
       const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
-      const config = getEsQueryConfig(services.core.uiSettings);
+      const config = getEsQueryConfig(coreServices.uiSettings);
       const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [], config)];
 
       const requestBody = {
@@ -105,7 +104,7 @@ export class OptionsListFetchCache {
         runtimeFieldMap: dataView.toSpec?.().runtimeFieldMap,
       };
 
-      const result = await services.core.http.fetch<OptionsListResponse>(
+      const result = await coreServices.http.fetch<OptionsListResponse>(
         `/internal/controls/optionsList/${index}`,
         {
           version: '1',

@@ -14391,10 +14391,6 @@
                 "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
               },
               {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/data_views/data_views.stub.ts"
-              },
-              {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
               },

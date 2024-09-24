@@ -9,26 +9,22 @@
 
 import React from 'react';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { coreServices, dataViewsService } from '../../../../services/kibana_services';
 import { getMockedBuildApi, getMockedControlGroupApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
 
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';
   const controlGroupApi = getMockedControlGroupApi();
-  const mockDataViews = dataViewPluginMocks.createStartContract();
-  const mockCore = coreMock.createStart();
 
   const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
 
-  mockDataViews.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
+  dataViewsService.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
       throw new Error(`Simulated error: no data view found for id ${id}`);
     }
@@ -60,11 +56,7 @@ describe('Options List Control Api', () => {
     return stubDataView;
   });
 
-  const factory = getOptionsListControlFactory({
-    core: mockCore,
-    data: dataPluginMock.createStartContract(),
-    dataViews: mockDataViews,
-  });
+  const factory = getOptionsListControlFactory();
 
   describe('filters$', () => {
     test('should not set filters$ when selectedOptions is not provided', async () => {
@@ -177,7 +169,7 @@ describe('Options List Control Api', () => {
 
   describe('make selection', () => {
     beforeAll(() => {
-      mockCore.http.fetch = jest.fn().mockResolvedValue({
+      coreServices.http.fetch = jest.fn().mockResolvedValue({
         suggestions: [
           { value: 'woof', docCount: 10 },
           { value: 'bark', docCount: 15 },

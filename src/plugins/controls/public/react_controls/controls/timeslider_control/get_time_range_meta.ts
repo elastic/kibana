@@ -9,6 +9,7 @@
 
 import { EuiRangeTick } from '@elastic/eui';
 import { TimeRange } from '@kbn/es-query';
+import { coreServices, dataService } from '../../../services/kibana_services';
 import {
   FROM_INDEX,
   getStepSize,
@@ -17,7 +18,6 @@ import {
   roundUpToNextStepSizeFactor,
   TO_INDEX,
 } from './time_utils';
-import { Services } from './types';
 
 export interface TimeRangeMeta {
   format: string;
@@ -29,12 +29,9 @@ export interface TimeRangeMeta {
   timeRangeMin: number;
 }
 
-export function getTimeRangeMeta(
-  timeRange: TimeRange | undefined,
-  services: Services
-): TimeRangeMeta {
-  const nextBounds = timeRangeToBounds(timeRange ?? getDefaultTimeRange(services), services);
-  const ticks = getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], getTimezone(services));
+export function getTimeRangeMeta(timeRange: TimeRange | undefined): TimeRangeMeta {
+  const nextBounds = timeRangeToBounds(timeRange ?? getDefaultTimeRange());
+  const ticks = getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], getTimezone());
   const { format, stepSize } = getStepSize(ticks);
   return {
     format,
@@ -47,17 +44,17 @@ export function getTimeRangeMeta(
   };
 }
 
-export function getTimezone(services: Services) {
-  return services.core.uiSettings.get('dateFormat:tz', 'Browser');
+export function getTimezone() {
+  return coreServices.uiSettings.get('dateFormat:tz', 'Browser');
 }
 
-function getDefaultTimeRange(services: Services) {
-  const defaultTimeRange = services.core.uiSettings.get('timepicker:timeDefaults');
+function getDefaultTimeRange() {
+  const defaultTimeRange = coreServices.uiSettings.get('timepicker:timeDefaults');
   return defaultTimeRange ? defaultTimeRange : { from: 'now-15m', to: 'now' };
 }
 
-function timeRangeToBounds(timeRange: TimeRange, services: Services): [number, number] {
-  const timeRangeBounds = services.data.query.timefilter.timefilter.calculateBounds(timeRange);
+function timeRangeToBounds(timeRange: TimeRange): [number, number] {
+  const timeRangeBounds = dataService.query.timefilter.timefilter.calculateBounds(timeRange);
   return timeRangeBounds.min === undefined || timeRangeBounds.max === undefined
     ? [Date.now() - 1000 * 60 * 15, Date.now()]
     : [timeRangeBounds.min.valueOf(), timeRangeBounds.max.valueOf()];

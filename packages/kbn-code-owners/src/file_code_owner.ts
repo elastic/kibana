@@ -8,9 +8,10 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { createFailError } from '@kbn/dev-cli-errors';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { join as joinPath } from 'path';
 import { existsSync, readFileSync } from 'fs';
+import { run } from '@kbn/dev-cli-runner';
 
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
@@ -20,6 +21,10 @@ export interface PathWithOwners {
   teams: string;
   ignorePattern: Ignore;
 }
+const existOrThrow = (targetFile: string) => {
+  if (existsSync(targetFile) === false)
+    throw createFailError(`Unable to determine code owners: file ${targetFile} Not Found`);
+};
 
 /**
  * Get the .github/CODEOWNERS entries, prepared for path matching.
@@ -29,9 +34,7 @@ export interface PathWithOwners {
  */
 export function getPathsWithOwnersReversed(): PathWithOwners[] {
   const codeownersPath = joinPath(REPO_ROOT, '.github', 'CODEOWNERS');
-  if (existsSync(codeownersPath) === false) {
-    throw createFailError(`Unable to determine code owners: file ${codeownersPath} not found`);
-  }
+  existOrThrow(codeownersPath);
   const codeownersContent = readFileSync(codeownersPath, { encoding: 'utf8', flag: 'r' });
   const codeownersLines = codeownersContent.split(/\r?\n/);
   const codeowners = codeownersLines
@@ -65,4 +68,33 @@ export function getCodeOwnersForFile(
   const match = pathsWithOwners.find((p) => p.ignorePattern.test(filePath).ignored);
 
   return match?.teams;
+}
+
+/**
+ * Run the getCodeOwnersForFile() method above.
+ * Report back to the cli with either success and the owner(s), or a failure.
+ *
+ * This function depends on a --file param being passed on the cli, like this:
+ * $ node scripts/get_owners_for_file.js --file SOME-FILE
+ */
+export async function runGetOwnersForFileCli() {
+  run(
+    async ({ flags, log }) => {
+      const targetFile = flags.file as string;
+      if (!targetFile) throw createFlagError(`Missing --flag argument`);
+      existOrThrow(targetFile); // This call is duplicated in getPathsWithOwnersReversed(), so this is a short circuit
+      const result = getCodeOwnersForFile(targetFile);
+      if (result) log.success(result);
+      else log.error(`Ownership of file [${targetFile}] is UNKNOWN`);
+    },
+    {
+      description: 'Report file ownership from GitHub CODEOWNERS file.',
+      flags: {
+        string: ['file'],
+        help: `
+      --file             Required, path to the file to report owners for.
+              `,
+      },
+    }
+  );
 }

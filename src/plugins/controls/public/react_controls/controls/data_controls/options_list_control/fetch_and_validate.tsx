@@ -26,13 +26,11 @@ import { isValidSearch } from '../../../../../common/options_list/is_valid_searc
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { ControlFetchContext } from '../../../control_group/control_fetch';
 import { ControlStateManager } from '../../types';
-import { DataControlServices } from '../types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlApi } from './types';
 
 export function fetchAndValidate$({
   api,
-  services,
   stateManager,
 }: {
   api: Pick<OptionsListControlApi, 'dataViews' | 'field$' | 'setBlockingError' | 'parentApi'> &
@@ -41,7 +39,6 @@ export function fetchAndValidate$({
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
-  services: DataControlServices;
   stateManager: ControlStateManager<
     Pick<OptionsListComponentState, 'requestSize' | 'runPastTimeout' | 'searchTechnique' | 'sort'>
   > & {
@@ -126,7 +123,7 @@ export function fetchAndValidate$({
         const newAbortController = new AbortController();
         abortController = newAbortController;
         try {
-          return await requestCache.runFetchRequest(request, newAbortController.signal, services);
+          return await requestCache.runFetchRequest(request, newAbortController.signal);
         } catch (error) {
           return { error };
         }
