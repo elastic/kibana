@@ -29,6 +29,11 @@ const logFactory =
   (message: string): void =>
     logger.info(`[task ${taskId}]: ${message}`);
 
+const debugLogFactory =
+  (logger: Logger, taskId: string) =>
+  (message: string): void =>
+    logger.debug(`[task ${taskId}]: ${message}`);
+
 const getTaskName = (): string => TYPE;
 
 const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION}`;
@@ -148,6 +153,7 @@ export const runTask = async ({
   const state = taskInstance.state as EntityStoreFieldRetentionTaskState;
   const taskId = taskInstance.id;
   const log = logFactory(logger, taskId);
+  const debugLog = debugLogFactory(logger, taskId);
   try {
     const taskStartTime = moment().utc().toISOString();
     log('running task');
@@ -169,12 +175,15 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
+    debugLog('fetching engines');
     const { engines } = await entityStoreDataClient.list();
+    debugLog(`fetched engines: ${engines.length}`);
 
     for (const engine of engines) {
       if (engine.type) {
         // TODO: why is this optional?
         const start = Date.now();
+        debugLog(`executing field retention enrich policy for ${engine.type}`);
         await entityStoreDataClient.executeFieldRetentionEnrichPolicy(engine.type);
         log(`executed field retention enrich policy for ${engine.type} in ${Date.now() - start}ms`);
       }

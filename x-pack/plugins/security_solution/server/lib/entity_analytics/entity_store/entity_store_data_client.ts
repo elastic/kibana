@@ -159,7 +159,7 @@ export class EntityStoreDataClient {
       return m.destination;
     });
 
-    await this.options.esClient.ingest.putPipeline({
+    const pipeline = {
       id: `${definition.id}-latest@platform`,
       body: {
         _meta: {
@@ -173,7 +173,11 @@ export class EntityStoreDataClient {
           allEntityFields,
         }),
       },
-    });
+    };
+
+    this.options.logger.debug(`Attempting to create pipeline: ${JSON.stringify(pipeline)}`);
+
+    await this.options.esClient.ingest.putPipeline(pipeline);
   }
 
   private async createEntityIndex(entityType: EntityType) {
