@@ -10,7 +10,7 @@ import {
   type EuiBasicTableColumn,
   EuiButton,
   EuiCallOut,
-  EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
@@ -19,6 +19,7 @@ import {
   EuiPageSection,
   EuiSpacer,
   EuiText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
 
@@ -279,28 +280,47 @@ export class SpacesGridPage extends Component<Props, State> {
           defaultMessage: 'Space',
         }),
         sortable: true,
-        render: (value: string, rowRecord: Space) => (
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <EuiLink
-                {...reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord))}
-                data-test-subj={`${rowRecord.id}-hyperlink`}
+        render: (value: string, rowRecord: Space) => {
+          const SpaceName = () => {
+            const isCurrent = this.state.activeSpace?.id === rowRecord.id;
+            const isWide = useIsWithinBreakpoints(['xl']);
+            const gridColumns = isCurrent && isWide ? 2 : 1;
+            return (
+              <EuiFlexGrid
+                responsive={false}
+                columns={gridColumns}
+                alignItems="center"
+                gutterSize="s"
               >
-                {value}
-              </EuiLink>
-            </EuiFlexItem>
-            {this.state.activeSpace?.id === rowRecord.id && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="primary" data-test-subj={`spacesListCurrentBadge-${rowRecord.id}`}>
-                  {i18n.translate('xpack.spaces.management.spacesGridPage.currentSpaceMarkerText', {
-                    defaultMessage: 'current',
-                  })}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        ),
+                <EuiFlexItem>
+                  <EuiLink
+                    {...reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord))}
+                    data-test-subj={`${rowRecord.id}-hyperlink`}
+                  >
+                    {value}
+                  </EuiLink>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {isCurrent && (
+                    <EuiBadge
+                      color="primary"
+                      data-test-subj={`spacesListCurrentBadge-${rowRecord.id}`}
+                    >
+                      {i18n.translate(
+                        'xpack.spaces.management.spacesGridPage.currentSpaceMarkerText',
+                        { defaultMessage: 'current' }
+                      )}
+                    </EuiBadge>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGrid>
+            );
+          };
+
+          return <SpaceName />;
+        },
         'data-test-subj': 'spacesListTableRowNameCell',
+        width: '15%',
       },
       {
         field: 'description',
@@ -309,7 +329,7 @@ export class SpacesGridPage extends Component<Props, State> {
         }),
         sortable: true,
         truncateText: true,
-        width: '30%',
+        width: '45%',
       },
     ];
 
