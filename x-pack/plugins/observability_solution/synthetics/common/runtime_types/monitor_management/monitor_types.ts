@@ -173,7 +173,8 @@ export type ICMPFields = t.TypeOf<typeof ICMPFieldsCodec>;
 export const HTTPSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.METADATA]: MetadataCodec,
-    [ConfigKey.MAX_REDIRECTS]: t.string,
+    // string is for yaml config and number for public api
+    [ConfigKey.MAX_REDIRECTS]: t.union([t.string, t.number]),
     [ConfigKey.URLS]: getNonEmptyStringCodec('url'),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
@@ -320,6 +321,11 @@ export const MonitorFieldsCodec = t.intersection([
   BrowserFieldsCodec,
 ]);
 
+export const MonitorFieldsResultCodec = t.intersection([
+  MonitorFieldsCodec,
+  t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
+]);
+
 // Monitor, represents one of (Icmp | Tcp | Http | Browser) decrypted
 export const SyntheticsMonitorCodec = t.union([
   HTTPFieldsCodec,
@@ -338,7 +344,7 @@ export const EncryptedSyntheticsMonitorCodec = t.union([
 
 export const SyntheticsMonitorWithIdCodec = t.intersection([
   SyntheticsMonitorCodec,
-  t.interface({ id: t.string }),
+  t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
 ]);
 
 const HeartbeatFieldsCodec = t.intersection([
@@ -357,7 +363,10 @@ const HeartbeatFieldsCodec = t.intersection([
 ]);
 
 export const HeartbeatConfigCodec = t.intersection([
-  SyntheticsMonitorWithIdCodec,
+  SyntheticsMonitorCodec,
+  t.interface({
+    id: t.string,
+  }),
   t.partial({
     fields_under_root: t.boolean,
     fields: HeartbeatFieldsCodec,
@@ -402,6 +411,7 @@ export type BrowserFields = t.TypeOf<typeof BrowserFieldsCodec>;
 export type BrowserSimpleFields = t.TypeOf<typeof BrowserSimpleFieldsCodec>;
 export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedFieldsCodec>;
 export type MonitorFields = t.TypeOf<typeof MonitorFieldsCodec>;
+export type MonitorFieldsResult = t.TypeOf<typeof MonitorFieldsResultCodec>;
 export type HeartbeatFields = t.TypeOf<typeof HeartbeatFieldsCodec>;
 export type SyntheticsMonitor = t.TypeOf<typeof SyntheticsMonitorCodec>;
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;

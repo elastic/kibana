@@ -1741,10 +1741,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@95.10.1":
-  version "95.10.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.10.1.tgz#f3fb356ad49ba45e42981e39748693ba392567fe"
-  integrity sha512-1kqyx/NfiQE/bKMf1E3uJEpYZnQnPBrI5zO0l2FB+fs7Naf7wT7zq1VFRzNLn/r1x6mnou8wJ+VlouHCI+prLw==
+"@elastic/eui@95.11.0":
+  version "95.11.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.11.0.tgz#40e8124ac54c625ba7160cb84a378507abdeaf40"
+  integrity sha512-O688EbhrgSrV9j54mnK4xLyhv+imkBv5ti7isqLxJtd0L7Fe2A1d6EaA11Qv5plOwwC+cGsrkrDnlSqi1MtNoQ==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -5699,6 +5699,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-field-stats-flyout@link:x-pack/packages/ml/field_stats_flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-in-memory-table@link:x-pack/packages/ml/in_memory_table":
   version "0.0.0"
   uid ""
@@ -5724,6 +5728,10 @@
   uid ""
 
 "@kbn/ml-number-utils@link:x-pack/packages/ml/number_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-parse-interval@link:x-pack/packages/ml/parse_interval":
   version "0.0.0"
   uid ""
 
@@ -5768,6 +5776,10 @@
   uid ""
 
 "@kbn/ml-url-state@link:x-pack/packages/ml/url_state":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-validators@link:x-pack/packages/ml/validators":
   version "0.0.0"
   uid ""
 
@@ -7698,10 +7710,10 @@
     express "^4.18.2"
     strict-event-emitter "^0.5.1"
 
-"@mswjs/interceptors@^0.35.6":
-  version "0.35.6"
-  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.35.6.tgz#66c522036bc01fa6be87b46b49cc378b837bf510"
-  integrity sha512-PpD687w7qLxVMK176bpQjbzU9O0VC75QnBK5U1lKd29s4hIuxfTItUD6raNKyQ6BN8b64/8HE34RuYTkwH9uPQ==
+"@mswjs/interceptors@^0.35.8":
+  version "0.35.8"
+  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.35.8.tgz#f36e5907e05593e33037ef4519aac7815fa3509f"
+  integrity sha512-PFfqpHplKa7KMdoQdj5td03uG05VK2Ng1dG0sP4pT9h0dGSX2v9txYt/AnrzPb/vAmfyBBC0NQV7VaBEX+efgQ==
   dependencies:
     "@open-draft/deferred-promise" "^2.2.0"
     "@open-draft/logger" "^0.3.0"
@@ -23822,16 +23834,16 @@ msgpackr@^1.9.9:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@^2.4.5:
-  version "2.4.8"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.4.8.tgz#306b6ba1ae09d0d09bac08009a83eeb622578d73"
-  integrity sha512-a+FUW1m5yT8cV9GBy0L/cbNg0EA4//SKEzgu3qFrpITrWYeZmqfo7dqtM74T2lAl69jjUjjCaEhZKaxG2Ns8DA==
+msw@^2.4.7:
+  version "2.4.9"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.4.9.tgz#350a84cedb90b578a32c7764431e3750900f8407"
+  integrity sha512-1m8xccT6ipN4PTqLinPwmzhxQREuxaEJYdx4nIbggxP8aM7r1e71vE7RtOUSQoAm1LydjGfZKy7370XD/tsuYg==
   dependencies:
     "@bundled-es-modules/cookie" "^2.0.0"
     "@bundled-es-modules/statuses" "^1.0.1"
     "@bundled-es-modules/tough-cookie" "^0.1.6"
     "@inquirer/confirm" "^3.0.0"
-    "@mswjs/interceptors" "^0.35.6"
+    "@mswjs/interceptors" "^0.35.8"
     "@open-draft/until" "^2.1.0"
     "@types/cookie" "^0.6.0"
     "@types/statuses" "^2.0.4"

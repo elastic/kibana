@@ -19,12 +19,12 @@ import { i18n } from '@kbn/i18n';
 
 import { MAX_SPACE_INITIALS } from '../../../../common';
 import { encode, imageTypes } from '../../../../common/lib/dataurl';
-import type { FormValues } from '../../edit_space/manage_space_page';
 import type { SpaceValidator } from '../../lib';
+import type { CustomizeSpaceFormValues } from '../../types';
 
 interface Props {
-  space: FormValues;
-  onChange: (space: FormValues) => void;
+  space: CustomizeSpaceFormValues;
+  onChange: (space: CustomizeSpaceFormValues) => void;
   validator: SpaceValidator;
 }
 
@@ -127,7 +127,7 @@ export class CustomizeSpaceAvatar extends Component<Props> {
             onChange={(avatarType: string) =>
               this.props.onChange({
                 ...space,
-                avatarType: avatarType as FormValues['avatarType'],
+                avatarType: avatarType as CustomizeSpaceFormValues['avatarType'],
               })
             }
             buttonSize="m"

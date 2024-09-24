@@ -14,7 +14,7 @@ import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monit
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
 import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
-import { mergeSourceMonitor } from './helper';
+import { mergeSourceMonitor } from './formatters/saved_object_to_monitor';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
@@ -34,9 +34,9 @@ import {
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
-import { mapSavedObjectToMonitor } from './helper';
 import { inlineToProjectZip } from '../../common/inline_to_zip';
 import { SyntheticsServerSetup } from '../../types';
+import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -49,7 +49,11 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         monitorId: schema.string(),
       }),
       query: schema.object({
-        ui: schema.maybe(schema.boolean()),
+        internal: schema.maybe(
+          schema.boolean({
+            defaultValue: false,
+          })
+        ),
       }),
       body: schema.any(),
     },
@@ -58,7 +62,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const { request, response, spaceId, server } = routeContext;
     const { logger } = server;
     const monitor = request.body as SyntheticsMonitor;
-    const reqQuery = request.query as { ui?: boolean };
+    const reqQuery = request.query as { internal?: boolean };
     const { monitorId } = request.params;
 
     if (!monitor || typeof monitor !== 'object' || isEmpty(monitor) || Array.isArray(monitor)) {
@@ -89,7 +93,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       const previousMonitor = await getDecryptedMonitor(server, monitorId, spaceId);
       const normalizedPreviousMonitor = normalizeSecrets(previousMonitor).attributes;
 
-      if (normalizedPreviousMonitor.origin !== 'ui' && !reqQuery.ui) {
+      if (normalizedPreviousMonitor.origin !== 'ui' && !reqQuery.internal) {
         return response.badRequest(getInvalidOriginError(monitor));
       }
 
@@ -173,9 +177,13 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
-      return mapSavedObjectToMonitor(
-        editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>
-      );
+      return mapSavedObjectToMonitor({
+        internal: reqQuery.internal,
+        monitor: {
+          ...(editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>),
+          created_at: previousMonitor.created_at,
+        },
+      });
     } catch (updateErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(updateErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
