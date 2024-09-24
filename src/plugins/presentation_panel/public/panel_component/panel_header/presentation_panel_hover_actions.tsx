@@ -66,9 +66,9 @@ const QUICK_ACTION_IDS = {
     'ACTION_VIEW_SAVED_SEARCH',
   ],
   view: ['ACTION_OPEN_IN_DISCOVER', 'ACTION_VIEW_SAVED_SEARCH', 'openInspector', 'togglePanel'],
-};
+} as const;
 
-const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'];
+const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
 const ALL_ROUNDED_CORNERS = `border-radius: ${euiThemeVars.euiBorderRadius};
 `;
