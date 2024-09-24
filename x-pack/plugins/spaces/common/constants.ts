@@ -31,3 +31,12 @@ export const MAX_SPACE_INITIALS = 2;
  * The path to enter a space.
  */
 export const ENTER_SPACE_PATH = '/spaces/enter';
+
+/**
+ * The API version numbers used with the versioned router.
+ */
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+};
