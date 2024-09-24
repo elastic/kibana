@@ -28,12 +28,14 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   let t2Analyst: TestAgent;
+  let admin: TestAgent;
   let webhookAction: RuleAction;
 
   describe('@serverless @serverlessQA t2_analyst actions API behaviors', () => {
     before(async () => {
+      admin = await utils.createSuperTest('admin');
       t2Analyst = await utils.createSuperTest('t2_analyst');
-      webhookAction = await createWebHookRuleAction(supertest);
+      webhookAction = await createWebHookRuleAction(admin);
     });
 
     after(async () => {
