@@ -9,7 +9,7 @@ import { ConfigKey, SyntheticsMonitor } from '../../../common/runtime_types';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 
 describe('hydrateMonitorFields', () => {
-  it.only('creates expected zip b64 project field value for inline browser monitor', async () => {
+  it('creates expected zip b64 project field value for inline browser monitor', async () => {
     const normalizedMonitor: SyntheticsMonitor = {
       // @ts-expect-error extra field
       type: 'browser',
@@ -62,24 +62,24 @@ step('fail', () => {
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
     };
 
-    const api = new AddEditMonitorAPI({
-      request: {
-        query: {
-          preserve_namespace: true,
+    const api = new AddEditMonitorAPI(
+      {
+        request: {
+          query: {
+            preserve_namespace: true,
+          },
         },
-      },
-      server: {
-        logger: jest.fn(),
-      },
-    } as any);
+        server: {
+          logger: jest.fn(),
+        },
+      } as any,
+      {} as any
+    );
     const hydratedMonitor = await api.hydrateMonitorFields({
       normalizedMonitor,
       newMonitorId: 'testMonitorId',
     });
 
-    console.log('hydratedMonitor', JSON.stringify(hydratedMonitor));
-
-    console.log('field', hydratedMonitor['source.project.content']);
     expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeDefined();
     // zip is not deterministic, so we can't check the exact value
     expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT].length).toBeGreaterThan(0);
@@ -138,7 +138,7 @@ step('fail', () => {
       'ssl.verification_mode': 'full',
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
     };
-    const api = new AddEditMonitorAPI(routeContext as any);
+    const api = new AddEditMonitorAPI(routeContext as any, {} as any);
     const hydratedMonitor = await api.hydrateMonitorFields({
       normalizedMonitor,
       newMonitorId,

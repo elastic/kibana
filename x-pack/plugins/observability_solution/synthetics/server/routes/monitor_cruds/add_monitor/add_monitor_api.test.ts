@@ -16,12 +16,15 @@ describe('AddNewMonitorsPublicAPI', () => {
         enabled: true,
       },
     } as any);
-    const api = new AddEditMonitorAPI({
-      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
-      request: {
-        body: {},
-      },
-    } as any);
+    const api = new AddEditMonitorAPI(
+      {
+        syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+        request: {
+          body: {},
+        },
+      } as any,
+      {} as any
+    );
     let result = await api.normalizeMonitor({ schedule: '3' } as any, {} as any);
     expect(result.schedule).toEqual({ number: '3', unit: 'm' });
 
@@ -55,12 +58,15 @@ describe('AddNewMonitorsPublicAPI', () => {
     const syntheticsService = new SyntheticsService({
       config: {},
     } as any);
-    const api = new AddEditMonitorAPI({
-      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
-      request: {
-        body: {},
-      },
-    } as any);
+    const api = new AddEditMonitorAPI(
+      {
+        syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+        request: {
+          body: {},
+        },
+      } as any,
+      {} as any
+    );
     it('should normalize tcp', async () => {
       expect(
         await api.normalizeMonitor(

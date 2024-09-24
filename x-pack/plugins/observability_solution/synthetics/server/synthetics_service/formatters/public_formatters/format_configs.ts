@@ -126,7 +126,7 @@ export const formatHeartbeatRequest = async (
           monitor[ConfigKey.CONFIG_ID],
           logger
         )
-      : '',
+      : (monitor as BrowserSimpleFields)[ConfigKey.SOURCE_PROJECT_CONTENT] ?? '',
   };
 };
 

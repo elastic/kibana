@@ -142,7 +142,6 @@ export const deleteMonitor = async ({
         /* Type cast encrypted saved objects to decrypted saved objects for delete flow only.
          * Deletion does not require all monitor fields */
       ] as SyntheticsMonitorWithId[],
-      savedObjectsClient,
       spaceId
     );
 

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
+
+import { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SyntheticsServerSetup } from '../../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
@@ -166,11 +167,7 @@ export class SyntheticsMonitorClient {
 
     return { failedPolicyUpdates, publicSyncErrors };
   }
-  async deleteMonitors(
-    monitors: SyntheticsMonitorWithId[],
-    savedObjectsClient: SavedObjectsClientContract,
-    spaceId: string
-  ) {
+  async deleteMonitors(monitors: SyntheticsMonitorWithId[], spaceId: string) {
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, spaceId);
 
     const publicDeletePromise = this.syntheticsService.deleteConfigs(
@@ -183,7 +180,6 @@ export class SyntheticsMonitorClient {
 
   async testNowConfigs(
     monitor: { monitor: MonitorFields; id: string; testRunId: string },
-    savedObjectsClient: SavedObjectsClientContract,
     allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string,
     runOnce?: true

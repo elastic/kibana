@@ -6,7 +6,7 @@
  */
 
 import { inlineToProjectZip } from './inline_to_zip';
-import { unzipFile } from './unzipt_project_code';
+import { unzipFile } from './unzip_project_code';
 
 describe('inlineToProjectZip', () => {
   it('should return base64 encoded zip data', async () => {
@@ -14,11 +14,7 @@ describe('inlineToProjectZip', () => {
 step('goto', () => page.goto('https://elastic.co'));
 step('throw error', () => { throw new Error('error'); });
 `;
-    const monitorId = 'testMonitorId';
-    const logger = jest.fn();
-
-    // @ts-expect-error not checking logger functionality
-    const result = await inlineToProjectZip(inlineJourney, monitorId, logger);
+    const result = await inlineToProjectZip(inlineJourney, 'testMonitorId', jest.fn() as any);
 
     expect(result.length).toBeGreaterThan(0);
     expect(await unzipFile(result)).toEqual(

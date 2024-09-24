@@ -34,7 +34,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     // usually id is auto generated, but this is useful for testing
     const { id } = request.query;
 
-    const addMonitorAPI = new AddEditMonitorAPI(routeContext);
+    const addMonitorAPI = new AddEditMonitorAPI(routeContext, server.logger);
 
     const {
       locations,

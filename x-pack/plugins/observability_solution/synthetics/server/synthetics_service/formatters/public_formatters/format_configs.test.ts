@@ -22,7 +22,10 @@ import {
   ScheduleUnit,
   SyntheticsMonitor,
   VerificationMode,
+  BrowserSensitiveSimpleFields,
 } from '../../../../common/runtime_types';
+import { unzipFile } from '../../../common/unzip_project_code';
+import { inlineToProjectZip } from '../../../common/inline_to_zip';
 
 const testHTTPConfig: Partial<MonitorFields> = {
   type: 'http' as MonitorTypeEnum,
@@ -307,11 +310,10 @@ describe('formatHeartbeatRequest', () => {
         heartbeatId,
         spaceId: 'test-space-id',
       },
-      // @ts-expect-error not checking logger functionality
-      jest.fn(),
+      jest.fn() as any,
       '{"a":"param"}'
     );
-    expect(actual).toEqual({
+    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...testBrowserConfig,
       id: heartbeatId,
       fields: {
@@ -324,8 +326,22 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
+      [ConfigKey.SOURCE_INLINE]: '',
       fields_under_root: true,
     });
+    const projectContent = (actual as BrowserSensitiveSimpleFields)[
+      ConfigKey.SOURCE_PROJECT_CONTENT
+    ];
+    expect(projectContent.length).toBeGreaterThan(0);
+    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
+      "import { journey, step, expect } from '@elastic/synthetics';
+
+      journey('inline', ({ page, context, browser, params, request }) => {
+      step('Go to https://www.google.com/', async () => {
+        await page.goto('https://www.google.com/');
+      });
+      });"
+    `);
   });
 
   it('uses monitor id when custom heartbeat id is not defined', async () => {
@@ -337,11 +353,10 @@ describe('formatHeartbeatRequest', () => {
         heartbeatId: monitorId,
         spaceId: 'test-space-id',
       },
-      // @ts-expect-error not checking logger functionality
-      jest.fn(),
+      jest.fn() as any,
       JSON.stringify({ key: 'value' })
     );
-    expect(actual).toEqual({
+    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...testBrowserConfig,
       id: monitorId,
       fields: {
@@ -355,8 +370,23 @@ describe('formatHeartbeatRequest', () => {
         },
       },
       fields_under_root: true,
+      [ConfigKey.SOURCE_INLINE]: '',
       params: '{"key":"value"}',
     });
+
+    const projectContent = (actual as BrowserSensitiveSimpleFields)[
+      ConfigKey.SOURCE_PROJECT_CONTENT
+    ];
+    expect(projectContent.length).toBeGreaterThan(0);
+    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
+      "import { journey, step, expect } from '@elastic/synthetics';
+
+      journey('inline', ({ page, context, browser, params, request }) => {
+      step('Go to https://www.google.com/', async () => {
+        await page.goto('https://www.google.com/');
+      });
+      });"
+    `);
   });
 
   it('sets project fields as null when project id is not defined', async () => {
@@ -369,10 +399,9 @@ describe('formatHeartbeatRequest', () => {
         heartbeatId: monitorId,
         spaceId: 'test-space-id',
       },
-      // @ts-expect-error not checking logger functionality
-      jest.fn()
+      jest.fn() as any
     );
-    expect(actual).toEqual({
+    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...monitor,
       id: monitorId,
       fields: {
@@ -385,8 +414,22 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
+      [ConfigKey.SOURCE_INLINE]: '',
       fields_under_root: true,
     });
+    const projectContent = (actual as BrowserSensitiveSimpleFields)[
+      ConfigKey.SOURCE_PROJECT_CONTENT
+    ];
+    expect(projectContent.length).toBeGreaterThan(0);
+    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
+      "import { journey, step, expect } from '@elastic/synthetics';
+
+      journey('inline', ({ page, context, browser, params, request }) => {
+      step('Go to https://www.google.com/', async () => {
+        await page.goto('https://www.google.com/');
+      });
+      });"
+    `);
   });
 
   it('sets project fields as null when project id is empty', async () => {
@@ -403,7 +446,7 @@ describe('formatHeartbeatRequest', () => {
       jest.fn()
     );
 
-    expect(actual).toEqual({
+    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...monitor,
       id: monitorId,
       fields: {
@@ -416,8 +459,22 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
+      [ConfigKey.SOURCE_INLINE]: '',
       fields_under_root: true,
     });
+    const projectContent = (actual as BrowserSensitiveSimpleFields)[
+      ConfigKey.SOURCE_PROJECT_CONTENT
+    ];
+    expect(projectContent.length).toBeGreaterThan(0);
+    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
+      "import { journey, step, expect } from '@elastic/synthetics';
+
+      journey('inline', ({ page, context, browser, params, request }) => {
+      step('Go to https://www.google.com/', async () => {
+        await page.goto('https://www.google.com/');
+      });
+      });"
+    `);
   });
 
   it('supports run once', async () => {
@@ -434,7 +491,7 @@ describe('formatHeartbeatRequest', () => {
       jest.fn()
     );
 
-    expect(actual).toEqual({
+    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...testBrowserConfig,
       id: monitorId,
       fields: {
@@ -447,8 +504,22 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
+      [ConfigKey.SOURCE_INLINE]: '',
       fields_under_root: true,
     });
+    const projectContent = (actual as BrowserSensitiveSimpleFields)[
+      ConfigKey.SOURCE_PROJECT_CONTENT
+    ];
+    expect(projectContent.length).toBeGreaterThan(0);
+    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
+      "import { journey, step, expect } from '@elastic/synthetics';
+
+      journey('inline', ({ page, context, browser, params, request }) => {
+      step('Go to https://www.google.com/', async () => {
+        await page.goto('https://www.google.com/');
+      });
+      });"
+    `);
   });
 
   it('supports test_run_id', async () => {
@@ -466,7 +537,7 @@ describe('formatHeartbeatRequest', () => {
       jest.fn()
     );
 
-    expect(actual).toEqual({
+    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...testBrowserConfig,
       id: monitorId,
       fields: {
@@ -479,8 +550,22 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
+      [ConfigKey.SOURCE_INLINE]: '',
       fields_under_root: true,
     });
+    const projectContent = (actual as BrowserSensitiveSimpleFields)[
+      ConfigKey.SOURCE_PROJECT_CONTENT
+    ];
+    expect(projectContent.length).toBeGreaterThan(0);
+    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
+      "import { journey, step, expect } from '@elastic/synthetics';
+
+      journey('inline', ({ page, context, browser, params, request }) => {
+      step('Go to https://www.google.com/', async () => {
+        await page.goto('https://www.google.com/');
+      });
+      });"
+    `);
   });
 
   it('supports empty params', async () => {
@@ -498,7 +583,7 @@ describe('formatHeartbeatRequest', () => {
       jest.fn()
     );
 
-    expect(actual).toEqual({
+    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...testBrowserConfig,
       params: '',
       id: monitorId,
@@ -512,6 +597,91 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
+      [ConfigKey.SOURCE_INLINE]: '',
+      fields_under_root: true,
+    });
+    const projectContent = (actual as BrowserSensitiveSimpleFields)[
+      ConfigKey.SOURCE_PROJECT_CONTENT
+    ];
+    expect(projectContent.length).toBeGreaterThan(0);
+    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
+      "import { journey, step, expect } from '@elastic/synthetics';
+
+      journey('inline', ({ page, context, browser, params, request }) => {
+      step('Go to https://www.google.com/', async () => {
+        await page.goto('https://www.google.com/');
+      });
+      });"
+    `);
+  });
+
+  it('does not perform a zip if inline source is missing', async () => {
+    const monitorId = 'test-monitor-id';
+    const actual = await formatHeartbeatRequest(
+      {
+        monitor: { ...testBrowserConfig, [ConfigKey.SOURCE_INLINE]: '' } as SyntheticsMonitor,
+        configId: monitorId,
+        heartbeatId: monitorId,
+        spaceId: 'test-space-id',
+      },
+      jest.fn() as any
+    );
+
+    expect(actual).toEqual({
+      ...testBrowserConfig,
+      id: monitorId,
+      fields: {
+        config_id: monitorId,
+        'monitor.project.name': testBrowserConfig.project_id,
+        'monitor.project.id': testBrowserConfig.project_id,
+        run_once: undefined,
+        test_run_id: undefined,
+        meta: {
+          space_id: 'test-space-id',
+        },
+      },
+      [ConfigKey.SOURCE_INLINE]: '',
+      [ConfigKey.SOURCE_PROJECT_CONTENT]: '',
+      fields_under_root: true,
+    });
+  });
+
+  it('retains project string if there is no inline content', async () => {
+    const monitorId = 'test-monitor-id';
+    const projectZipInput = await inlineToProjectZip(
+      "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
+      monitorId,
+      jest.fn() as any
+    );
+    const actual = await formatHeartbeatRequest(
+      {
+        monitor: {
+          ...testBrowserConfig,
+          [ConfigKey.SOURCE_INLINE]: '',
+          [ConfigKey.SOURCE_PROJECT_CONTENT]: projectZipInput,
+        } as SyntheticsMonitor,
+        configId: monitorId,
+        heartbeatId: monitorId,
+        spaceId: 'test-space-id',
+      },
+      jest.fn() as any
+    );
+
+    expect(actual).toEqual({
+      ...testBrowserConfig,
+      id: monitorId,
+      fields: {
+        config_id: monitorId,
+        'monitor.project.name': testBrowserConfig.project_id,
+        'monitor.project.id': testBrowserConfig.project_id,
+        run_once: undefined,
+        test_run_id: undefined,
+        meta: {
+          space_id: 'test-space-id',
+        },
+      },
+      [ConfigKey.SOURCE_INLINE]: '',
+      [ConfigKey.SOURCE_PROJECT_CONTENT]: projectZipInput,
       fields_under_root: true,
     });
   });

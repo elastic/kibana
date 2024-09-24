@@ -10,6 +10,7 @@ import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { Logger } from '@kbn/logging';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getSavedObjectKqlFilter } from '../../common';
@@ -18,6 +19,7 @@ import { monitorAttributes, syntheticsMonitorType } from '../../../../common/typ
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
 import {
+  BrowserSensitiveSimpleFields,
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   MonitorTypeEnum,
@@ -40,6 +42,7 @@ import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monit
 import { formatSecrets } from '../../../synthetics_service/utils';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import { inlineToProjectZip } from '../../../common/inline_to_zip';
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
@@ -52,7 +55,7 @@ export type CreateMonitorPayLoad = MonitorFields & {
 export class AddEditMonitorAPI {
   routeContext: RouteContext;
   allPrivateLocations?: PrivateLocationAttributes[];
-  constructor(routeContext: RouteContext) {
+  constructor(routeContext: RouteContext, private readonly logger: Logger) {
     this.routeContext = routeContext;
   }
 
@@ -67,7 +70,7 @@ export class AddEditMonitorAPI {
     const newMonitorId = id ?? uuidV4();
 
     let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitorAttributes> | null = null;
-    const monitorWithNamespace = this.hydrateMonitorFields({
+    const monitorWithNamespace = await this.hydrateMonitorFields({
       normalizedMonitor,
       newMonitorId,
     });
@@ -293,7 +296,7 @@ export class AddEditMonitorAPI {
     }
   };
 
-  hydrateMonitorFields({
+  async hydrateMonitorFields({
     newMonitorId,
     normalizedMonitor,
   }: {
@@ -306,6 +309,9 @@ export class AddEditMonitorAPI {
       string,
       { preserve_namespace?: boolean }
     >;
+    const inlineSource = (normalizedMonitor as BrowserSensitiveSimpleFields)?.[
+      ConfigKey.SOURCE_INLINE
+    ] as string | undefined;
     return {
       ...normalizedMonitor,
       [ConfigKey.MONITOR_QUERY_ID]:
@@ -314,6 +320,9 @@ export class AddEditMonitorAPI {
       [ConfigKey.NAMESPACE]: preserveNamespace
         ? normalizedMonitor[ConfigKey.NAMESPACE]
         : this.getMonitorNamespace(normalizedMonitor[ConfigKey.NAMESPACE]),
+      [ConfigKey.SOURCE_PROJECT_CONTENT]: !!inlineSource
+        ? await inlineToProjectZip(inlineSource, newMonitorId, this.logger)
+        : '',
     };
   }
 

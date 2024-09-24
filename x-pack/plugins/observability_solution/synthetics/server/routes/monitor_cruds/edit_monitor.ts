@@ -72,7 +72,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       return response.badRequest(getInvalidOriginError(monitor));
     }
 
-    const editMonitorAPI = new AddEditMonitorAPI(routeContext);
+    const editMonitorAPI = new AddEditMonitorAPI(routeContext, server.logger);
     if (monitor.name) {
       const nameError = await editMonitorAPI.validateUniqueMonitorName(monitor.name, monitorId);
       if (nameError) {
@@ -254,7 +254,11 @@ export const syncEditedMonitor = async ({
 }) => {
   const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
   try {
-    const monitorWithId = await refreshInlineZip(normalizedMonitor, previousMonitor, server);
+    const monitorWithId = await refreshInlineZip(
+      normalizedMonitor,
+      decryptedPreviousMonitor,
+      server
+    );
     const formattedMonitor = formatSecrets(monitorWithId);
 
     const editedSOPromise = savedObjectsClient.update<MonitorFields>(
