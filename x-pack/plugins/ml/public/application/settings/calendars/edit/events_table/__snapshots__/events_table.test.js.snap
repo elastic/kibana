@@ -62,7 +62,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
       Object {
         "sort": Object {
           "direction": "asc",
-          "field": "description",
+          "field": "start_time",
         },
       }
     }
@@ -167,7 +167,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
       Object {
         "sort": Object {
           "direction": "asc",
-          "field": "description",
+          "field": "start_time",
         },
       }
     }
