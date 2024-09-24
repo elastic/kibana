@@ -156,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const state = kbnRison.encode({
             dataSource: { type: 'esql' },
             query: {
-              esql: 'from metrics-*',
+              esql: 'from my-example-*',
             },
           });
           await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
@@ -333,7 +333,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.discover.waitUntilSearchingHasFinished();
-          await dataViews.switchToAndValidate('metrics-*');
+          await dataViews.switchToAndValidate('my-example-*');
 
           await retry.try(async () => {
             await testSubjects.missingOrFail('discoverDataTableMessageValue');
