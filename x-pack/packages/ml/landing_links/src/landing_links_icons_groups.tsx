@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import type { NavigationLink } from '../types';
+import type { NavigationLink } from '@kbn/security-solution-navigation';
 import { LandingLinkIcon } from './landing_links_icons';
 import { LandingColumnLinks } from './landing_links';
 

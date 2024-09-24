@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-import { LinkAnchor } from '../links';
-import type { NavigationLink } from '../types';
+import { LinkAnchor } from '@kbn/security-solution-navigation';
+import type { NavigationLink } from '@kbn/security-solution-navigation';
 import { BetaBadge } from './beta_badge';
 import { getKibanaLinkProps } from './utils';
 

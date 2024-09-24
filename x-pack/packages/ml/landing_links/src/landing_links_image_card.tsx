@@ -7,8 +7,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { withLink } from '../links';
-import type { NavigationLink } from '../types';
+import { withLink } from '@kbn/security-solution-navigation';
+import type { NavigationLink } from '@kbn/security-solution-navigation';
 import { BetaBadge } from './beta_badge';
 import { getKibanaLinkProps } from './utils';
 

@@ -7,9 +7,17 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { LinkCategoryType, SecurityPageName } from '../constants';
-import { mockNavigateTo, mockGetAppUrl } from '../../mocks/navigation';
-import type { AccordionLinkCategory, NavigationLink, TitleLinkCategory } from '../types';
+import {
+  LinkCategoryType,
+  SecurityPageName,
+  mockNavigateTo,
+  mockGetAppUrl,
+} from '@kbn/security-solution-navigation';
+import type {
+  AccordionLinkCategory,
+  NavigationLink,
+  TitleLinkCategory,
+} from '@kbn/security-solution-navigation';
 import { LandingLinksIconsCategoriesGroups } from './landing_links_icons_categories_groups';
 
 jest.mock('../navigation');

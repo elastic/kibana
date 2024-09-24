@@ -7,9 +7,9 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
-import type { NavigationLink, LinkCategories } from '../types';
+import type { NavigationLink, LinkCategories } from '@kbn/security-solution-navigation';
+import { LinkCategoryType } from '@kbn/security-solution-navigation';
 import { LandingLinksIcons } from './landing_links_icons';
-import { LinkCategoryType } from '../constants';
 
 export interface LandingLinksIconsCategoriesProps {
   links: Readonly<NavigationLink[]>;

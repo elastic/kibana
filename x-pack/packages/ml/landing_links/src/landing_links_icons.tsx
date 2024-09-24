@@ -8,7 +8,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { NavigationLink } from '../types';
+import type { NavigationLink } from '@kbn/security-solution-navigation';
 import { BetaBadge } from './beta_badge';
 import { LandingLink } from './landing_links';
 

@@ -7,10 +7,10 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import type { NavigationLink } from '../types';
+import type { NavigationLink } from '@kbn/security-solution-navigation';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { LandingLinksImagesProps } from './landing_links_images_cards';
 import { LandingLinksImageCard as LandingLinksImageCardComponent } from './landing_links_image_card';
-import { NavigationProvider } from '../context';
 
 const items: NavigationLink[] = [
   {

@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
+import type { NavigationLink } from '@kbn/security-solution-navigation';
 import * as i18n from './translations';
-import type { NavigationLink } from '../types';
 import LandingLinksImageCard from './landing_links_image_card';
 
 export interface LandingLinksImagesProps {

@@ -7,11 +7,10 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import type { AccordionLinkCategory, NavigationLink } from '../types';
+import type { AccordionLinkCategory, NavigationLink } from '@kbn/security-solution-navigation';
+import { LinkCategoryType, NavigationProvider } from '@kbn/security-solution-navigation';
 import type { LandingLinksIconsCategoriesGroupsProps } from './landing_links_icons_categories_groups';
 import { LandingLinksIconsCategoriesGroups as LandingLinksIconsCategoriesGroupsComponent } from './landing_links_icons_categories_groups';
-import { NavigationProvider } from '../context';
-import { LinkCategoryType } from '../constants';
 
 const items: NavigationLink[] = [
   {

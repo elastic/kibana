@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isSecurityId, type WrappedLinkProps } from '../links';
-import type { NavigationLink } from '../types';
+import { isSecurityId, type WrappedLinkProps } from '@kbn/security-solution-navigation';
+import type { NavigationLink } from '@kbn/security-solution-navigation';
 
 export const getKibanaLinkProps = ({
   item,

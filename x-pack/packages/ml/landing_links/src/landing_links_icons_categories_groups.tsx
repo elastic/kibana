@@ -18,7 +18,11 @@ import {
   EuiTitle,
   type IconType,
 } from '@elastic/eui';
-import type { NavigationLink, TitleLinkCategory, AccordionLinkCategory } from '../types';
+import type {
+  NavigationLink,
+  TitleLinkCategory,
+  AccordionLinkCategory,
+} from '@kbn/security-solution-navigation';
 import { LandingColumnLinks } from './landing_links';
 
 export interface LandingLinksIconsCategoriesGroupsProps {

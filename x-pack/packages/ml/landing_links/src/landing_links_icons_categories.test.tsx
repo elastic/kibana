@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SecurityPageName } from '../constants';
-import { mockNavigateTo, mockGetAppUrl } from '../../mocks/navigation';
-import type { LinkCategories, NavigationLink } from '../types';
+import { SecurityPageName, mockNavigateTo, mockGetAppUrl } from '@kbn/security-solution-navigation';
+import type { LinkCategories, NavigationLink } from '@kbn/security-solution-navigation';
 import { LandingLinksIconsCategories } from './landing_links_icons_categories';
 import { BETA } from './beta_badge';
 

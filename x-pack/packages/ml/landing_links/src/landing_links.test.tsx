@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SecurityPageName } from '../constants';
-import { mockNavigateTo, mockGetAppUrl } from '../../mocks/navigation';
+import { SecurityPageName, mockNavigateTo, mockGetAppUrl } from '@kbn/security-solution-navigation';
 import { LandingColumnLinks } from './landing_links';
-import type { NavigationLink } from '../types';
+import type { NavigationLink } from '@kbn/security-solution-navigation';
 
 jest.mock('../navigation');
 

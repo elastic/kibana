@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SecurityPageName } from '../constants';
-import { mockGetAppUrl } from '../../mocks/navigation';
+import { SecurityPageName, mockGetAppUrl } from '@kbn/security-solution-navigation';
 import { LandingLinksImageCards } from './landing_links_images_cards';
 
 jest.mock('../navigation');

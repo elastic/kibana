@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { getKibanaLinkProps } from './utils';
-import * as links from '../links';
-import type { NavigationLink } from '../types';
+import * as links from '@kbn/security-solution-navigation';
+import type { NavigationLink } from '@kbn/security-solution-navigation';
 
 const item: NavigationLink = {
   id: 'internal-id',
