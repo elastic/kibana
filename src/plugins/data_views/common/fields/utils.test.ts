@@ -12,6 +12,7 @@ import { shortenDottedString } from './utils';
 describe('shortenDottedString', () => {
   test('should convert a dot.notated.string into a short string', () => {
     expect(shortenDottedString('dot.notated.string')).toBe('d.n.string');
+    expect(shortenDottedString('dot..notated.string')).toBe('d..n.string');
   });
 
   test('should ignore non-string values', () => {

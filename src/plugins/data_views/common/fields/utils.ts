@@ -37,7 +37,7 @@ export function shortenDottedString(input: string): string {
       if (i === split.length - 1) {
         return acc + part;
       }
-      return acc + part[0] + '.';
+      return acc + (part[0] ? part[0] : '') + '.';
     }, '');
   }
 
