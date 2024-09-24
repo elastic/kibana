@@ -24,7 +24,7 @@ interface StreamGraphParams {
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
   logger: Logger;
-  isOssLlm?: boolean;
+  isOssModel?: boolean;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   traceOptions?: TraceOptions;
@@ -37,7 +37,7 @@ interface StreamGraphParams {
  * @param assistantGraph
  * @param inputs
  * @param logger
- * @param isOssLlm
+ * @param isOssModel
  * @param onLlmResponse
  * @param request
  * @param traceOptions
@@ -48,7 +48,7 @@ export const streamGraph = async ({
   assistantGraph,
   inputs,
   logger,
-  isOssLlm,
+  isOssModel,
   onLlmResponse,
   request,
   traceOptions,
@@ -167,7 +167,7 @@ export const streamGraph = async ({
         if (event.event === 'on_llm_stream') {
           const chunk = event.data?.chunk;
 
-          let msg = isOssLlm ? chunk.message.content : chunk.content;
+          let msg = isOssModel ? chunk.message.content : chunk.content;
           if (finalOutputIndex === -1) {
             currentOutput += msg;
             // Remove whitespace to simplify parsing
@@ -206,7 +206,7 @@ export const streamGraph = async ({
       // only process events that are part of the agent run
       if ((event.tags || []).includes(AGENT_NODE_TAG)) {
         if (event.name === 'ActionsClientChatOpenAI') {
-          if (isOssLlm) {
+          if (isOssModel) {
             processSimpleChatModelEvent();
           } else {
             processOpenAIEvent();

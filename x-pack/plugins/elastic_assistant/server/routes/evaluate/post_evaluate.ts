@@ -212,7 +212,7 @@ export const postEvaluateRoute = (
                 (!connectorApiUrl ||
                   connectorApiUrl === OPENAI_CHAT_URL ||
                   connectorApiProvider === OpenAiProviderType.AzureAi);
-              const isOssLlm = isOpeAIType && !isOpenAI;
+              const isOssModel = isOpeAIType && !isOpenAI;
               const llmClass = getLlmClass(llmType, true);
               const createLlmInstance = () =>
                 new llmClass({
@@ -271,6 +271,7 @@ export const postEvaluateRoute = (
                 isEnabledKnowledgeBase,
                 kbDataClient: dataClients?.kbDataClient,
                 llm,
+                isOssModel,
                 logger,
                 modelExists: isEnabledKnowledgeBase,
                 request: skeletonRequest,
@@ -306,7 +307,9 @@ export const postEvaluateRoute = (
                 : await createStructuredChatAgent({
                     llm,
                     tools,
-                    prompt: isOssLlm ? ossLlmStructuredChatAgentPrompt : structuredChatAgentPrompt,
+                    prompt: isOssModel
+                      ? ossLlmStructuredChatAgentPrompt
+                      : structuredChatAgentPrompt,
                     streamRunnable: false,
                   });
 
@@ -349,7 +352,7 @@ export const postEvaluateRoute = (
               return output;
             };
 
-            const evalOutput = await evaluate(predict, {
+            const evalOutput = evaluate(predict, {
               data: datasetName ?? '',
               evaluators: [], // Evals to be managed in LangSmith for now
               experimentPrefix: name,

@@ -65,7 +65,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     (!connectorApiUrl ||
       connectorApiUrl === OPENAI_CHAT_URL ||
       connectorApiProvider === OpenAiProviderType.AzureAi);
-  const isOssLlm = isOpeAIType && !isOpenAI;
+  const isOssModel = isOpeAIType && !isOpenAI;
   const llmClass = getLlmClass(llmType, bedrockChatEnabled);
 
   /**
@@ -132,7 +132,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   };
 
   const tools: StructuredTool[] = assistantTools.flatMap(
-    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance() }) ?? []
+    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance(), isOssModel }) ?? []
   );
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
@@ -166,7 +166,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     : await createStructuredChatAgent({
         llm: createLlmInstance(),
         tools,
-        prompt: isOssLlm
+        prompt: isOssModel
           ? formatPromptStructured(systemPrompts.ossLlm, systemPrompt)
           : formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
         streamRunnable: isStream,
@@ -198,7 +198,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       assistantGraph,
       inputs,
       logger,
-      isOssLlm,
+      isOssModel,
       onLlmResponse,
       request,
       traceOptions,

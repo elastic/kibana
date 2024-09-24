@@ -42,7 +42,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
   getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { connectorId, inference, logger, request } = params as ESQLToolParams;
+    const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;
     if (inference == null || connectorId == null) return null;
 
     const callNaturalLanguageToEsql = async (question: string) => {
@@ -51,6 +51,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
           client: inference.getClient({ request }),
           connectorId,
           input: question,
+          ...(isOssModel ? { functionCalling: 'simulated' } : {}),
           logger: {
             debug: (source) => {
               logger.debug(typeof source === 'function' ? source() : source);
