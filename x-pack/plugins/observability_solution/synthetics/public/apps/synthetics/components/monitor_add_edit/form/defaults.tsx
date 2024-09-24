@@ -62,14 +62,14 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
 
   let formMonitorType = monitor[ConfigKey.FORM_MONITOR_TYPE];
   const monitorType = monitor[ConfigKey.MONITOR_TYPE];
-  const monitorWithFormMonitorType = {
-    ...monitor,
-  };
-
   let schedule = monitor[ConfigKey.SCHEDULE];
   if (schedule?.unit === 's') {
     schedule = { number: `${schedule.number}s`, unit: 's' as ScheduleUnit };
   }
+  const monitorWithFormMonitorType = {
+    ...monitor,
+    [ConfigKey.SCHEDULE]: schedule,
+  };
 
   const params = monitorWithFormMonitorType[ConfigKey.PARAMS];
   if (typeof params !== 'string' && params) {
