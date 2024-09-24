@@ -70,6 +70,26 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
     schedule.number = `${schedule.number}s`;
   }
 
+  const params = monitorWithFormMonitorType[ConfigKey.PARAMS];
+  if (typeof params !== 'string' && params) {
+    try {
+      monitorWithFormMonitorType[ConfigKey.PARAMS] = JSON.stringify(params);
+    } catch (e) {
+      // ignore
+    }
+  }
+  const browserMonitor = monitor as BrowserFields;
+
+  const pwOptions = browserMonitor[ConfigKey.PLAYWRIGHT_OPTIONS];
+  if (typeof pwOptions !== 'string' && pwOptions) {
+    try {
+      (monitorWithFormMonitorType as BrowserFields)[ConfigKey.PLAYWRIGHT_OPTIONS] =
+        JSON.stringify(pwOptions);
+    } catch (e) {
+      // ignore
+    }
+  }
+
   // handle default monitor types from Uptime, which don't contain `ConfigKey.FORM_MONITOR_TYPE`
   if (!formMonitorType) {
     formMonitorType =
@@ -81,7 +101,6 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
 
   switch (formMonitorType) {
     case FormMonitorType.MULTISTEP:
-      const browserMonitor = monitor as BrowserFields;
       return {
         ...monitorWithFormMonitorType,
         'source.inline': {
