@@ -8,6 +8,7 @@
 import type { EuiSuperSelectOption, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiBetaBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -25,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../../common';
+import { SOLUTION_VIEW_CLASSIC } from '../../../../common/constants';
 import type { SpaceValidator } from '../../lib';
 import { SectionPanel } from '../section_panel';
 
@@ -105,6 +107,7 @@ export const SolutionView: FunctionComponent<Props> = ({
   sectionTitle,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const showClassicDefaultViewCallout = isEditing && space.solution == null;
 
   return (
     <SectionPanel title={sectionTitle} dataTestSubj="navigationPanel">
@@ -152,7 +155,13 @@ export const SolutionView: FunctionComponent<Props> = ({
           >
             <EuiSuperSelect
               options={getOptions(euiTheme)}
-              valueOfSelected={space.solution}
+              valueOfSelected={
+                space.solution
+                  ? space.solution
+                  : showClassicDefaultViewCallout
+                  ? SOLUTION_VIEW_CLASSIC
+                  : undefined
+              }
               data-test-subj="solutionViewSelect"
               onChange={(solution) => {
                 onChange({ ...space, solution });
@@ -164,6 +173,28 @@ export const SolutionView: FunctionComponent<Props> = ({
               isInvalid={validator.validateSolutionView(space, isEditing).isInvalid}
             />
           </EuiFormRow>
+
+          {showClassicDefaultViewCallout && (
+            <>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.spaces.management.manageSpacePage.solutionViewSelect.classicDefaultViewCallout"
+                  defaultMessage="Affects all users of the space"
+                />
+              </EuiText>
+
+              <EuiSpacer />
+              <EuiCallOut
+                color="primary"
+                size="s"
+                iconType="iInCircle"
+                title={i18n.translate(
+                  'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicDefaultViewCallout',
+                  { defaultMessage: 'By default your current view is Classic' }
+                )}
+              />
+            </>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </SectionPanel>
