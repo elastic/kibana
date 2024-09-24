@@ -13,6 +13,7 @@ import { AlertStatusMetaData } from '../../../../common/runtime_types/alert_rule
 import {
   FINAL_SUMMARY_FILTER,
   getTimespanFilter,
+  SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
 import { OverviewPing } from '../../../../common/runtime_types';
 import { createEsParams, SyntheticsEsClient } from '../../../lib';
@@ -71,7 +72,7 @@ export async function queryMonitorStatusAlert({
           query: {
             bool: {
               filter: [
-                FINAL_SUMMARY_FILTER,
+                ...(includeRetests ? [SUMMARY_FILTER] : [FINAL_SUMMARY_FILTER]),
                 getTimespanFilter({ from: range.from, to: range.to }),
                 {
                   terms: {
