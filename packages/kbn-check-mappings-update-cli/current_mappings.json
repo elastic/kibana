@@ -1119,6 +1119,9 @@
       "install_version": {
         "type": "keyword"
       },
+      "installed_entity_definitions": {
+        "type": "keyword"
+      },
       "installed_es": {
         "properties": {
           "deferred": {

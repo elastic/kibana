@@ -331,6 +331,7 @@
     "install_started_at",
     "install_status",
     "install_version",
+    "installed_entity_definitions",
     "installed_es",
     "installed_es.deferred",
     "installed_es.id",
