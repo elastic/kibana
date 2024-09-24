@@ -12,9 +12,7 @@ import { PluginConfigProvider, usePluginConfig } from './plugin_config_context';
 
 describe('usePluginConfig()', () => {
   it('throws an error if the context value was not set before using the hook', () => {
-    const { result } = renderHook(() => usePluginConfig());
-
-    expect(result.error).not.toEqual(undefined);
+    expect(() => renderHook(() => usePluginConfig())).toThrowError();
   });
 
   it('returns the plugin config what was set through the provider', () => {
@@ -40,7 +38,6 @@ describe('usePluginConfig()', () => {
       },
     });
 
-    expect(result.error).toEqual(undefined);
     expect(result.current).toEqual(config);
   });
 });

@@ -58,7 +58,7 @@ describe('useTimelineLastEventTime', () => {
     (useKibana as jest.Mock).mockReturnValue(mockUseKibana);
   });
 
-  it('should init', async () => {
+  it('should init', () => {
     const { result } = renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(() =>
       useTimelineLastEventTime({
         indexKey: LastEventIndexKey.hostDetails,

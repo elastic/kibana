@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { useKibana } from '../../../../common/lib/kibana';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
@@ -57,7 +57,7 @@ describe('AttachToCaseButton', () => {
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Attach to case');
 
-    button.click();
+    fireEvent.click(button);
 
     expect(getByTestId('timeline-modal-attach-timeline-to-new-case')).toBeInTheDocument();
     expect(getByTestId('timeline-modal-attach-timeline-to-new-case')).toHaveTextContent(
@@ -81,11 +81,11 @@ describe('AttachToCaseButton', () => {
 
     const { getByTestId } = renderAttachToCaseButton();
 
-    getByTestId('timeline-modal-attach-to-case-dropdown-button').click();
+    fireEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
 
     await waitForEuiPopoverOpen();
 
-    getByTestId('timeline-modal-attach-timeline-to-existing-case').click();
+    fireEvent.click(getByTestId('timeline-modal-attach-timeline-to-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/create',
@@ -103,11 +103,11 @@ describe('AttachToCaseButton', () => {
 
     const { getByTestId } = renderAttachToCaseButton();
 
-    getByTestId('timeline-modal-attach-to-case-dropdown-button').click();
+    fireEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
 
     await waitForEuiPopoverOpen();
 
-    getByTestId('timeline-modal-attach-timeline-to-existing-case').click();
+    fireEvent.click(getByTestId('timeline-modal-attach-timeline-to-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/case-id',

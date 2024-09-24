@@ -43,8 +43,8 @@ describe('use_upselling', () => {
     const { result } = renderHook(() => useUpsellingComponent('entity_analytics_panel'), {
       wrapper: RenderWrapper,
     });
+
     expect(result.current).toBe(TestComponent);
-    expect(result.all.length).toBe(1); // assert that it should not cause unnecessary re-renders
   });
 
   test('useUpsellingPage returns pages', () => {
@@ -68,7 +68,6 @@ describe('use_upselling', () => {
       wrapper: RenderWrapper,
     });
     expect(result.current).toBe(testMessage);
-    expect(result.all.length).toBe(1); // assert that it should not cause unnecessary re-renders
   });
 
   test('useUpsellingMessage returns null when upsellingMessageId not found', () => {

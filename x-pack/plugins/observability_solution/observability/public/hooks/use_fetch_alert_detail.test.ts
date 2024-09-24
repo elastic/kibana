@@ -171,7 +171,7 @@ describe('useFetchAlertDetail', () => {
   });
 
   it('does not populate the results when the request is canceled', async () => {
-    // FIXME: this test cases doesn't do what the suite claims it does
+    // FIXME: this test case doesn't do what the suite claims it does
 
     const { result, unmount } = renderHook<string, [boolean, AlertData | null]>(() =>
       useFetchAlertDetail('123')
