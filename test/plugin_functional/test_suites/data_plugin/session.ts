@@ -23,6 +23,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const toasts = getService('toasts');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
+  const browser = getService('browser');
 
   const getSessionIds = async () => {
     const sessionsBtn = await testSubjects.find('showSessionsButton');
@@ -32,9 +34,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     return sessionIds.split(',');
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/192510
-  // Failing: See https://github.com/elastic/kibana/issues/192510
-  describe.skip('Session management', function describeSessionManagementTests() {
+  describe('Session management', function describeSessionManagementTests() {
     describe('Discover', () => {
       before(async () => {
         await common.navigateToApp('discover');
@@ -115,6 +115,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       it('starts a session on filter change', async () => {
+        // For some reason, when loading the dashboard, sometimes the filter doesn't show up, so we
+        // refresh until it shows up
+        await retry.waitFor('make sure filter is loaded', async () => {
+          const hasFilter = await filterBar.hasFilter('animal', 'dog');
+          if (!hasFilter) await browser.refresh();
+          return hasFilter;
+        });
         await filterBar.removeFilter('animal');
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
