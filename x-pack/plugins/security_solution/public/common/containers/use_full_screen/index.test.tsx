@@ -17,21 +17,21 @@ describe('useFullScreen', () => {
     let result: RenderHookResult<GlobalFullScreen, {}>['result'];
 
     test('Default values with no data grid in the dom', async () => {
-      await act(async () => {
-        const WrapperContainer: RenderOptions['wrapper'] = ({ children }) => (
-          <div className="euiDataGrid--fullScreen">
-            <TestProviders>{children}</TestProviders>
-          </div>
-        );
-        ({ result } = renderHook(() => useGlobalFullScreen(), {
-          wrapper: WrapperContainer,
-        }));
-        await waitFor(() => null);
-        expect(result.current.globalFullScreen).toEqual(false);
-      });
+      const WrapperContainer: RenderOptions['wrapper'] = ({ children }) => (
+        <div className="euiDataGrid--fullScreen">
+          <TestProviders>{children}</TestProviders>
+        </div>
+      );
+      ({ result } = renderHook(() => useGlobalFullScreen(), {
+        wrapper: WrapperContainer,
+      }));
+      await waitFor(() => null);
+      expect(result.current.globalFullScreen).toEqual(false);
+
       act(() => {
         result.current.setGlobalFullScreen(true);
       });
+
       expect(result.current.globalFullScreen).toEqual(true);
       cleanup();
     });
@@ -45,44 +45,42 @@ describe('useFullScreen', () => {
     });
 
     test('setting globalFullScreen to true should not remove the chrome removal class and data grid remains open and full screen', async () => {
-      await act(async () => {
-        const WrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-          useEffect(() => {
-            document.body.classList.add('euiDataGrid__restrictBody');
-          }, []);
-          return (
-            <div className="euiDataGrid--fullScreen">
-              <TestProviders>{children}</TestProviders>
-            </div>
-          );
-        };
-        ({ result } = renderHook(() => useGlobalFullScreen(), {
-          wrapper: WrapperContainer,
-        }));
-        await waitFor(() => null);
-      });
+      const WrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+        useEffect(() => {
+          document.body.classList.add('euiDataGrid__restrictBody');
+        }, []);
+        return (
+          <div className="euiDataGrid--fullScreen">
+            <TestProviders>{children}</TestProviders>
+          </div>
+        );
+      };
+
+      ({ result } = renderHook(() => useGlobalFullScreen(), {
+        wrapper: WrapperContainer,
+      }));
+
+      await waitFor(() => null);
       act(() => {
         result.current.setGlobalFullScreen(true);
       });
       expect(document.querySelector('.euiDataGrid__restrictBody')).toBeTruthy();
     });
     test('setting globalFullScreen to false should remove the chrome removal class and data grid remains open and full screen', async () => {
-      await act(async () => {
-        const WrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-          useEffect(() => {
-            document.body.classList.add('euiDataGrid__restrictBody');
-          }, []);
-          return (
-            <div className="euiDataGrid--fullScreen">
-              <TestProviders>{children}</TestProviders>
-            </div>
-          );
-        };
-        ({ result } = renderHook(() => useGlobalFullScreen(), {
-          wrapper: WrapperContainer,
-        }));
-        await waitFor(() => null);
-      });
+      const WrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+        useEffect(() => {
+          document.body.classList.add('euiDataGrid__restrictBody');
+        }, []);
+        return (
+          <div className="euiDataGrid--fullScreen">
+            <TestProviders>{children}</TestProviders>
+          </div>
+        );
+      };
+      ({ result } = renderHook(() => useGlobalFullScreen(), {
+        wrapper: WrapperContainer,
+      }));
+      await waitFor(() => null);
       act(() => {
         result.current.setGlobalFullScreen(false);
       });

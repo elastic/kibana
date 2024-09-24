@@ -43,11 +43,9 @@ describe('useQueryToggle', () => {
     jest.clearAllMocks();
   });
   it('Toggles local storage', async () => {
-    await act(async () => {
-      ({ result } = renderHook(() => useQueryToggle('queryId')));
-      await waitFor(() => null);
-      expect(result.current.toggleStatus).toEqual(true);
-    });
+    ({ result } = renderHook(() => useQueryToggle('queryId')));
+    await waitFor(() => null);
+    expect(result.current.toggleStatus).toEqual(true);
     act(() => {
       result.current.setToggleStatus(false);
     });
@@ -56,11 +54,9 @@ describe('useQueryToggle', () => {
     cleanup();
   });
   it('null storage key, do not set', async () => {
-    await act(async () => {
-      ({ result } = renderHook(() => useQueryToggle()));
-      await waitFor(() => null);
-      expect(result.current.toggleStatus).toEqual(true);
-    });
+    ({ result } = renderHook(() => useQueryToggle()));
+    await waitFor(() => null);
+    expect(result.current.toggleStatus).toEqual(true);
     act(() => {
       result.current.setToggleStatus(false);
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
@@ -47,7 +47,10 @@ describe('Policy details artifacts list', () => {
   let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
   let policy: PolicyData;
   let handleOnDeleteActionCallbackMock: jest.Mock;
+  let user: ReturnType<typeof userEvent.setup>;
+
   beforeEach(() => {
+    user = userEvent.setup();
     policy = endpointGenerator.generatePolicyPackagePolicy();
     mockedContext = createAppRootMockRenderer();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
@@ -57,25 +60,23 @@ describe('Policy details artifacts list', () => {
       canCreateArtifactsByPolicy: true,
     });
     render = async (canWriteArtifact = true) => {
-      await act(async () => {
-        renderResult = mockedContext.render(
-          <PolicyArtifactsList
-            policy={policy}
-            apiClient={EventFiltersApiClient.getInstance(mockedContext.coreStart.http)}
-            searchableFields={[...SEARCHABLE_FIELDS]}
-            labels={POLICY_ARTIFACT_LIST_LABELS}
-            onDeleteActionCallback={handleOnDeleteActionCallbackMock}
-            canWriteArtifact={canWriteArtifact}
-            getPolicyArtifactsPath={getPolicyEventFiltersPath}
-            getArtifactPath={getEventFiltersListPath}
-            CardDecorator={undefined}
-          />
-        );
-        await waitFor(() => expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalled());
-        await waitFor(() =>
-          expect(renderResult.queryByTestId('artifacts-collapsed-list-loader')).toBeFalsy()
-        );
-      });
+      renderResult = mockedContext.render(
+        <PolicyArtifactsList
+          policy={policy}
+          apiClient={EventFiltersApiClient.getInstance(mockedContext.coreStart.http)}
+          searchableFields={[...SEARCHABLE_FIELDS]}
+          labels={POLICY_ARTIFACT_LIST_LABELS}
+          onDeleteActionCallback={handleOnDeleteActionCallbackMock}
+          canWriteArtifact={canWriteArtifact}
+          getPolicyArtifactsPath={getPolicyEventFiltersPath}
+          getArtifactPath={getEventFiltersListPath}
+          CardDecorator={undefined}
+        />
+      );
+      await waitFor(() => expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(renderResult.queryByTestId('artifacts-collapsed-list-loader')).toBeFalsy()
+      );
       return renderResult;
     };
 
@@ -110,7 +111,7 @@ describe('Policy details artifacts list', () => {
       expect(renderResult.getAllByTestId('artifacts-collapsed-list-card')).toHaveLength(1);
     });
 
-    await userEvent.click(
+    await user.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-expandCollapse')
     );
 
@@ -121,7 +122,7 @@ describe('Policy details artifacts list', () => {
 
   it('should change the address location when a filter is applied', async () => {
     await render();
-    await userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
+    await user.type(renderResult.getByTestId('searchField'), 'search me{enter}');
     expect(history.location.search).toBe('?filter=search%20me');
   });
 
@@ -135,7 +136,7 @@ describe('Policy details artifacts list', () => {
         })
       )
     );
-    await userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
+    await user.type(renderResult.getByTestId('searchField'), 'search me{enter}');
     await waitFor(() => {
       expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenLastCalledWith(
         getDefaultQueryParameters(
@@ -154,7 +155,7 @@ describe('Policy details artifacts list', () => {
     );
     await render();
     // click the actions button
-    await userEvent.click(
+    await user.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-actions-button')
     );
     expect(renderResult.queryByTestId('view-full-details-action')).toBeTruthy();
@@ -168,7 +169,7 @@ describe('Policy details artifacts list', () => {
       getFoundExceptionListItemSchemaMock()
     );
     await render();
-    await userEvent.click(
+    await user.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-actions-button')
     );
 
@@ -192,7 +193,7 @@ describe('Policy details artifacts list', () => {
       );
       await render(false);
       // click the actions button
-      await userEvent.click(
+      await user.click(
         await renderResult.findByTestId('artifacts-collapsed-list-card-header-actions-button')
       );
       expect(renderResult.queryByTestId('remove-from-policy-action')).toBeFalsy();

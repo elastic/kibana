@@ -413,6 +413,9 @@ describe('useStateProps', () => {
         searchSessionId: '123',
       })
     );
+
+    await waitFor(() => null);
+
     const {
       onTopPanelHeightChange,
       onTimeIntervalChange,
@@ -422,9 +425,11 @@ describe('useStateProps', () => {
       onBreakdownFieldChange,
       onSuggestionContextChange,
     } = result.current;
+
     act(() => {
       onTopPanelHeightChange(200);
     });
+
     expect(stateService.setTopPanelHeight).toHaveBeenLastCalledWith(200);
     act(() => {
       onTimeIntervalChange('1d');
@@ -474,6 +479,7 @@ describe('useStateProps', () => {
     );
     (stateService.setLensRequestAdapter as jest.Mock).mockClear();
     expect(stateService.setLensRequestAdapter).not.toHaveBeenCalled();
+
     act(() => {
       stateService.setChartHidden(true);
     });

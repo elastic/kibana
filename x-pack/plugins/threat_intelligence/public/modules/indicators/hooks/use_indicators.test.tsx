@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useIndicators, UseIndicatorsParams, UseIndicatorsValue } from './use_indicators';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchIndicators } from '../services/fetch_indicators';
@@ -53,7 +53,7 @@ describe('useIndicators()', () => {
       expect(indicatorsQuery).toHaveBeenCalledTimes(1);
 
       // isLoading should turn to false eventually
-      await hookResult.waitFor(() => !hookResult.result.current.isLoading);
+      await waitFor(() => expect(hookResult.result.current.isLoading).toBe(false));
       expect(hookResult.result.current.isLoading).toEqual(false);
     });
   });
@@ -101,7 +101,7 @@ describe('useIndicators()', () => {
         expect.any(AbortSignal)
       );
 
-      await hookResult.waitFor(() => !hookResult.result.current.isLoading);
+      await waitFor(() => expect(hookResult.result.current.isLoading).toBe(false));
 
       expect(hookResult.result.current).toMatchInlineSnapshot(`
         Object {

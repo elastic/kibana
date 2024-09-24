@@ -12,7 +12,7 @@ import { of } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import type { UseSearchAlertsQueryParams } from './use_search_alerts_query';
 import { AlertsQueryContext } from '../contexts/alerts_query_context';
 import { useSearchAlertsQuery } from './use_search_alerts_query';
@@ -126,10 +126,10 @@ describe('useSearchAlertsQuery', () => {
   });
 
   it('returns the response correctly', async () => {
-    const { result, waitForValueToChange } = renderHook(() => useSearchAlertsQuery(params), {
+    const { result } = renderHook(() => useSearchAlertsQuery(params), {
       wrapper,
     });
-    await waitForValueToChange(() => result.current.data);
+    await waitFor(() => result.current.data);
     expect(result.current.data).toEqual(
       expect.objectContaining({
         ...expectedResponse,

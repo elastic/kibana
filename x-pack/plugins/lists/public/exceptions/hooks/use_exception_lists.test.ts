@@ -47,8 +47,6 @@ describe('useExceptionLists', () => {
       })
     );
 
-    await waitFor(() => null);
-
     expect(result.current).toEqual([
       true,
       [],

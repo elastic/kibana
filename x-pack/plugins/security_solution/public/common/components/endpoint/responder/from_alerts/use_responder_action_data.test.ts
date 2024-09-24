@@ -25,7 +25,7 @@ import type { AppContextTestRender } from '../../../../mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../../mock/endpoint';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../../common/endpoint/constants';
 import { endpointMetadataHttpMocks } from '../../../../../management/pages/endpoint_hosts/mocks';
-import { type RenderHookResult, waitFor } from '@testing-library/react';
+import { type RenderHookResult, waitFor, act } from '@testing-library/react';
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import {
@@ -170,7 +170,7 @@ describe('use responder action data hooks', () => {
 
       it('should show action enabled if host metadata was retrieved and host is enrolled', async () => {
         const { result } = renderHook();
-        // await waitFor(() => result.current.isDisabled);
+        await waitFor(() => expect(result.current.isDisabled).toBe(true));
 
         expect(result.current).toEqual(getExpectedResponderActionData());
       });
@@ -182,7 +182,8 @@ describe('use responder action data hooks', () => {
           });
         });
         const { result } = renderHook();
-        await waitFor(() => result.current.tooltip);
+
+        await waitFor(() => null);
 
         expect(result.current).toEqual(
           getExpectedResponderActionData({
@@ -267,8 +268,12 @@ describe('use responder action data hooks', () => {
 
     it('should call `onClick` prop when action is enabled', async () => {
       const { result } = renderHook();
-      await waitFor(() => result.current.isDisabled);
-      result.current.handleResponseActionsClick();
+
+      await waitFor(() => expect(result.current.isDisabled).toBe(false));
+
+      act(() => {
+        result.current.handleResponseActionsClick();
+      });
 
       expect(onClickMock).toHaveBeenCalled();
     });
@@ -276,7 +281,10 @@ describe('use responder action data hooks', () => {
     it('should not call `onCLick` prop when action is disabled', () => {
       hookProps.agentType = 'sentinel_one';
       const { result } = renderHook();
-      result.current.handleResponseActionsClick();
+
+      act(() => {
+        result.current.handleResponseActionsClick();
+      });
 
       expect(onClickMock).not.toHaveBeenCalled();
     });

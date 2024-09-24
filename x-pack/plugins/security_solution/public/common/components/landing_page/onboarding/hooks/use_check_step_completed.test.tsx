@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useCheckStepCompleted } from './use_check_step_completed';
 import {
   EnablePrebuiltRulesSteps,
@@ -38,7 +38,7 @@ describe('useCheckStepCompleted', () => {
     const mockAutoCheck = jest.fn().mockResolvedValue(true);
     const mockToggleTask = jest.fn();
 
-    const { waitFor } = renderHook(() =>
+    renderHook(() =>
       useCheckStepCompleted({
         autoCheckIfStepCompleted: mockAutoCheck,
         cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
@@ -68,7 +68,7 @@ describe('useCheckStepCompleted', () => {
     });
     const mockToggleTask = jest.fn();
 
-    const { waitFor } = renderHook(() =>
+    renderHook(() =>
       useCheckStepCompleted({
         autoCheckIfStepCompleted: mockAutoCheck,
         cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,

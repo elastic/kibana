@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react';
-import { act } from 'react-test-renderer';
+import { renderHook, act } from '@testing-library/react';
 import { UnifiedHistogramChartContext } from '../../types';
 import { useChartActions } from './use_chart_actions';
 

@@ -16,7 +16,7 @@ import type { ResponseActionsApiCommandNames } from '../../../../../../common/en
 import { agentStatusMocks } from '../../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import type React from 'react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
@@ -101,8 +101,10 @@ describe('useHostIsolationAction', () => {
 
   it('should call `closePopover` callback when menu item `onClick` is called', async () => {
     const { result } = render();
-    await waitFor(() => result.current);
-    result.current[0].onClick!({} as unknown as React.MouseEvent);
+    await waitFor(() => null);
+    act(() => {
+      result.current[0].onClick!({} as unknown as React.MouseEvent);
+    });
 
     expect(hookProps.closePopover).toHaveBeenCalled();
   });
@@ -186,7 +188,9 @@ describe('useHostIsolationAction', () => {
     );
     const { result } = render();
     await waitFor(() => result.current);
-    result.current[0].onClick!({} as unknown as React.MouseEvent);
+    act(() => {
+      result.current[0].onClick!({} as unknown as React.MouseEvent);
+    });
 
     expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('unisolateHost');
   });
