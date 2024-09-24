@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -13,6 +14,7 @@ import { getFieldInputValue } from '@kbn/management-settings-utilities';
 import { useUpdate } from '@kbn/management-settings-utilities';
 
 import { debounce } from 'lodash';
+import { OnInputChangeFn } from '@kbn/management-settings-types';
 import { useServices } from '../services';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
@@ -39,7 +41,7 @@ export const ArrayInput = ({
   const onUpdate = useUpdate({ onInputChange, field });
 
   const updateValue = useCallback(
-    async (newValue: string, onUpdateFn) => {
+    async (newValue: string, onUpdateFn: OnInputChangeFn<'array'>) => {
       const parsedValue = newValue
         .replace(REGEX, ',')
         .split(',')

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -65,12 +66,12 @@ test('can remove a specific WHERE command', () => {
 
   const print = () =>
     new Visitor()
+      .on('visitExpression', (ctx) => '<expr>')
       .on('visitColumnExpression', (ctx) => ctx.node.name)
       .on(
         'visitFunctionCallExpression',
         (ctx) => `${ctx.node.name}(${[...ctx.visitArguments()].join(', ')})`
       )
-      .on('visitExpression', (ctx) => '<expr>')
       .on('visitCommand', (ctx) => {
         if (ctx.node.name === 'where') {
           const args = [...ctx.visitArguments()].join(', ');
@@ -84,12 +85,12 @@ test('can remove a specific WHERE command', () => {
 
   const removeFilter = (field: string) => {
     query.ast = new Visitor()
+      .on('visitExpression', (ctx) => ctx.node)
       .on('visitColumnExpression', (ctx) => (ctx.node.name === field ? null : ctx.node))
       .on('visitFunctionCallExpression', (ctx) => {
         const args = [...ctx.visitArguments()];
         return args.some((arg) => arg === null) ? null : ctx.node;
       })
-      .on('visitExpression', (ctx) => ctx.node)
       .on('visitCommand', (ctx) => {
         if (ctx.node.name === 'where') {
           ctx.node.args = [...ctx.visitArguments()].filter(Boolean);
@@ -116,6 +117,9 @@ test('can remove a specific WHERE command', () => {
 
 export const prettyPrint = (ast: ESQLAstQueryNode) =>
   new Visitor()
+    .on('visitExpression', (ctx) => {
+      return '<EXPRESSION>';
+    })
     .on('visitSourceExpression', (ctx) => {
       return ctx.node.name;
     })
@@ -140,9 +144,6 @@ export const prettyPrint = (ast: ESQLAstQueryNode) =>
     })
     .on('visitInlineCastExpression', (ctx) => {
       return '<CAST>';
-    })
-    .on('visitExpression', (ctx) => {
-      return '<EXPRESSION>';
     })
     .on('visitCommandOption', (ctx) => {
       let args = '';

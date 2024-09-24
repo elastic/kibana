@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, of } from 'rxjs';
@@ -69,13 +70,38 @@ describe('Navigation Plugin', () => {
     expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith('es');
   });
 
+  it('should not load the active space on non authenticated pages', async () => {
+    const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+    coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+
+    const activeSpace$ = of({ solution: 'es' } as Pick<Space, 'solution'>);
+    activeSpace$.pipe = jest.fn().mockReturnValue(activeSpace$);
+    activeSpace$.subscribe = jest.fn().mockReturnValue(activeSpace$);
+    spaces.getActiveSpace$ = jest.fn().mockReturnValue(activeSpace$);
+
+    plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(activeSpace$.pipe).not.toHaveBeenCalled();
+    expect(activeSpace$.subscribe).not.toHaveBeenCalled();
+
+    // Test that the activeSpace$ observable is accessed when not an anonymous path
+    coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
+    plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(activeSpace$.pipe).toHaveBeenCalled();
+    expect(activeSpace$.subscribe).toHaveBeenCalled();
+  });
+
   describe('addSolutionNavigation()', () => {
     it('should update the solution navigation definitions', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup();
+      const { plugin, coreStart, unifiedSearch, spaces } = setup();
 
       const { addSolutionNavigation } = plugin.start(coreStart, {
         unifiedSearch,
-        cloud,
+        spaces,
       });
       await new Promise((resolve) => setTimeout(resolve));
 
@@ -154,13 +180,29 @@ describe('Navigation Plugin', () => {
   });
 
   describe('isSolutionNavEnabled$', () => {
-    // This test will need to be changed when we remove the feature flag
-    it('should be off by default', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup();
+    it('should be off if spaces plugin not available', async () => {
+      const { plugin, coreStart, unifiedSearch } = setup();
 
       const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
         unifiedSearch,
-        cloud,
+      });
+      await new Promise((resolve) => setTimeout(resolve));
+
+      const isEnabled = await firstValueFrom(isSolutionNavEnabled$);
+      expect(isEnabled).toBe(false);
+    });
+
+    it('should be off if spaces plugin `isSolutionViewEnabled` = false', async () => {
+      const { plugin, coreStart, unifiedSearch, spaces } = setup();
+      spaces.getActiveSpace$ = jest
+        .fn()
+        .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
+
+      spaces.isSolutionViewEnabled = false;
+
+      const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
+        unifiedSearch,
+        spaces,
       });
       await new Promise((resolve) => setTimeout(resolve));
 

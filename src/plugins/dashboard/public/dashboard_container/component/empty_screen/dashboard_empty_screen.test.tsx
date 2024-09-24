@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,7 +14,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { buildMockDashboard } from '../../../mocks';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
 import { pluginServices } from '../../../services/plugin_services';
-import { DashboardContainerContext } from '../../embeddable/dashboard_container';
+import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
+import { DashboardApi } from '../../../dashboard_api/types';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 pluginServices.getServices().visualizations.getAliases = jest
@@ -22,11 +24,11 @@ pluginServices.getServices().visualizations.getAliases = jest
 
 describe('DashboardEmptyScreen', () => {
   function mountComponent(viewMode: ViewMode) {
-    const dashboardContainer = buildMockDashboard({ overrides: { viewMode } });
+    const dashboardApi = buildMockDashboard({ overrides: { viewMode } }) as DashboardApi;
     return mountWithIntl(
-      <DashboardContainerContext.Provider value={dashboardContainer}>
+      <DashboardContext.Provider value={dashboardApi}>
         <DashboardEmptyScreen />
-      </DashboardContainerContext.Provider>
+      </DashboardContext.Provider>
     );
   }
 

@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
 import { AttackChain } from '../../../attack/attack_chain';
-import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
+import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import { buildAlertsKqlFilter } from '../../../../detections/components/alerts_table/actions';
 import { getTacticMetadata } from '../../../helpers';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_markdown_formatter';
@@ -34,19 +34,21 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
   const summaryMarkdownWithReplacements = useMemo(
     () =>
-      Object.entries<string>(replacements ?? {}).reduce(
-        (acc, [key, value]) => acc.replace(key, value),
-        summaryMarkdown
-      ),
+      Object.entries<string>(replacements ?? {}).reduce((acc, [key, value]) => {
+        const regex = new RegExp(key, 'g');
+
+        return acc.replace(regex, value);
+      }, summaryMarkdown),
     [replacements, summaryMarkdown]
   );
 
   const detailsMarkdownWithReplacements = useMemo(
     () =>
-      Object.entries<string>(replacements ?? {}).reduce(
-        (acc, [key, value]) => acc.replace(key, value),
-        detailsMarkdown
-      ),
+      Object.entries<string>(replacements ?? {}).reduce((acc, [key, value]) => {
+        const regex = new RegExp(key, 'g');
+
+        return acc.replace(regex, value);
+      }, detailsMarkdown),
     [detailsMarkdown, replacements]
   );
 

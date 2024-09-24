@@ -74,7 +74,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   const {
     services: {
       notifications,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
@@ -163,7 +163,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
 
   async function fetchJobs() {
     try {
-      const resp = await mlApiServices.jobs.jobsWithTimerange(dateFormatTz);
+      const resp = await mlApi.jobs.jobsWithTimerange(dateFormatTz);
       const normalizedJobs = normalizeTimes(resp.jobs, dateFormatTz, DEFAULT_GANTT_BAR_WIDTH);
       const { groups: groupsWithTimerange, groupsMap } = getGroupsFromJobs(normalizedJobs);
       setJobs(normalizedJobs);

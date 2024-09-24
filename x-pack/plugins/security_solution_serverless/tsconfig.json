@@ -45,5 +45,6 @@
     "@kbn/discover-plugin",
     "@kbn/logging",
     "@kbn/integration-assistant-plugin",
+    "@kbn/cloud-security-posture-common",
   ]
 }

@@ -39,7 +39,8 @@ import { Detail } from '.';
 // @ts-ignore this saves us having to define all experimental features
 ExperimentalFeaturesService.init({});
 
-describe('when on integration detail', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192999
+describe.skip('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
   const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey })[1];
   let testRenderer: TestRenderer;

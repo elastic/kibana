@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
@@ -13,16 +14,17 @@ import {
   DataLoadingState,
   type SortOrder,
   renderCustomToolbar,
+  UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLRow } from '@kbn/es-types';
-import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -44,13 +46,6 @@ interface ESQLDataGridProps {
   initialRowHeight?: number;
   controlColumnIds?: string[];
 }
-type DataTableColumnsMeta = Record<
-  string,
-  {
-    type: DatatableColumnMeta['type'];
-    esType?: DatatableColumnMeta['esType'];
-  }
->;
 
 const sortOrder: SortOrder[] = [];
 const DEFAULT_INITIAL_ROW_HEIGHT = 5;
@@ -67,7 +62,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
-  const onSetColumns = useCallback((columns) => {
+  const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
   }, []);
 
@@ -146,7 +141,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [props.share?.url.locators]);
 
   const renderToolbar = useCallback(
-    (customToolbarProps) => {
+    (customToolbarProps: UnifiedDataTableRenderCustomToolbarProps) => {
       const discoverLink = discoverLocator?.getRedirectUrl({
         dataViewSpec: props.dataView.toSpec(),
         timeRange: props.data.query.timefilter.timefilter.getTime(),

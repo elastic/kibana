@@ -10,7 +10,7 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['geoFileUpload', 'maps']);
+  const { geoFileUpload, maps } = getPageObjects(['geoFileUpload', 'maps']);
   const security = getService('security');
   const retry = getService('retry');
 
@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }) {
         'geoall_data_writer',
         'global_index_pattern_management_all',
       ]);
-      await PageObjects.maps.openNewMap();
+      await maps.openNewMap();
     });
 
     after(async () => {
@@ -30,39 +30,39 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should preview part of geojson file', async () => {
-      await PageObjects.maps.clickAddLayer();
-      await PageObjects.maps.selectFileUploadCard();
-      await PageObjects.geoFileUpload.previewGeoJsonFile(
+      await maps.clickAddLayer();
+      await maps.selectFileUploadCard();
+      await geoFileUpload.previewGeoJsonFile(
         path.join(__dirname, 'files', 'world_countries_v7.geo.json')
       );
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.waitForLayersToLoad();
 
-      const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
+      const numberOfLayers = await maps.getNumberOfLayers();
       expect(numberOfLayers).to.be(2);
 
-      const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('world_countries_v7');
+      const tooltipText = await maps.getLayerTocTooltipMsg('world_countries_v7');
       expect(tooltipText).to.be('world_countries_v7\nResults limited to 76 features, 41% of file.');
     });
 
     it('should import geojson', async () => {
       indexName = uuidv4();
-      await PageObjects.geoFileUpload.setIndexName(indexName);
-      await PageObjects.geoFileUpload.uploadFile();
+      await geoFileUpload.setIndexName(indexName);
+      await geoFileUpload.uploadFile();
 
-      const statusText = await PageObjects.geoFileUpload.getFileUploadStatusCalloutMsg();
+      const statusText = await geoFileUpload.getFileUploadStatusCalloutMsg();
       expect(statusText).to.be('File upload complete\nIndexed 250 features.');
     });
 
     it('should add as document layer', async () => {
-      await PageObjects.geoFileUpload.addFileAsDocumentLayer();
-      await PageObjects.maps.waitForLayersToLoad();
+      await geoFileUpload.addFileAsDocumentLayer();
+      await maps.waitForLayersToLoad();
 
-      const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
+      const numberOfLayers = await maps.getNumberOfLayers();
       expect(numberOfLayers).to.be(2);
 
       await retry.try(async () => {
-        await PageObjects.maps.waitForLayersToLoad();
-        const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg(indexName);
+        await maps.waitForLayersToLoad();
+        const tooltipText = await maps.getLayerTocTooltipMsg(indexName);
         expect(tooltipText).to.be(`${indexName}\nFound ~281 documents. This count is approximate.`);
       });
     });

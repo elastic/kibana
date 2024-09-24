@@ -11,7 +11,8 @@ import { TestProvidersComponent } from '../mocks/test_providers';
 import { UpdateStatus } from './update_status';
 
 describe('<UpdateStatus />', () => {
-  it('should render Updated now', () => {
+  // Flaky: https://github.com/elastic/kibana/issues/186996
+  it.skip('should render Updated now', () => {
     const result = render(<UpdateStatus updatedAt={Date.now()} isUpdating={false} />, {
       wrapper: TestProvidersComponent,
     });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '@kbn/esql-ast';
@@ -107,7 +108,7 @@ function addVariableFromAssignment(
     const rightHandSideArgType = getAssignRightHandSideType(assignOperation.args[1], fields);
     addToVariableOccurrencies(variables, {
       name: assignOperation.args[0].name,
-      type: rightHandSideArgType || 'double' /* fallback to number */,
+      type: (rightHandSideArgType as string) || 'double' /* fallback to number */,
       location: assignOperation.args[0].location,
     });
   }
@@ -156,9 +157,9 @@ export function collectVariables(
 ): Map<string, ESQLVariable[]> {
   const variables = new Map<string, ESQLVariable[]>();
   for (const command of commands) {
-    if (['row', 'eval', 'stats', 'metrics'].includes(command.name)) {
+    if (['row', 'eval', 'stats', 'inlinestats', 'metrics'].includes(command.name)) {
       collectVariablesFromList(command.args, fields, queryString, variables);
-      if (command.name === 'stats') {
+      if (command.name === 'stats' || command.name === 'inlinestats') {
         const commandOptionsWithAssignment = command.args.filter(
           (arg) => isOptionItem(arg) && arg.name === 'by'
         ) as ESQLCommandOption[];

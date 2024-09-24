@@ -149,12 +149,19 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     }
   }, [isDetectionsSourcerer, isTimelineSourcerer, pollForSignalIndex]);
 
-  const { activePatterns, indicesExist, loading } = useSourcererDataView(scopeId);
+  const { indicesExist, loading, sourcererDataView } = useSourcererDataView(scopeId);
+
+  const activePatterns = useMemo(
+    () => (sourcererDataView?.title || '')?.split(',').filter(Boolean) as string[],
+    [sourcererDataView?.title]
+  );
+
   const [missingPatterns, setMissingPatterns] = useState<string[]>(
     activePatterns && activePatterns.length > 0
       ? sourcererMissingPatterns.filter((p) => activePatterns.includes(p))
       : []
   );
+
   useEffect(() => {
     if (activePatterns && activePatterns.length > 0) {
       setMissingPatterns(sourcererMissingPatterns.filter((p) => activePatterns.includes(p)));
@@ -248,7 +255,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   const onChangeDataView = useCallback(
-    (newSelectedOption) => {
+    (newSelectedOption: string) => {
       setDataViewId(newSelectedOption);
       setIndexPatternsByDataView(newSelectedOption);
     },

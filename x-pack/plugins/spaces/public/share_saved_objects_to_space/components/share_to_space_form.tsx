@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './share_to_space_form.scss';
-
 import { EuiCallOut, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 

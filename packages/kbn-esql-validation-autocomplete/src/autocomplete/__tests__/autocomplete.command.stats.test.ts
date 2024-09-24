@@ -1,15 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { FieldType, FunctionReturnType } from '../../definitions/types';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
-import { setup, getFunctionSignaturesByReturnType, getFieldNamesByType } from './helpers';
-
-const ESQL_NUMERIC_TYPES = ESQL_NUMBER_TYPES as unknown as string[];
+import { allStarConstant } from '../complete_items';
+import { getAddDateHistogramSnippet } from '../factories';
+import { roundParameterTypes } from './constants';
+import {
+  setup,
+  getFunctionSignaturesByReturnType,
+  getFieldNamesByType,
+  getLiteralsByType,
+} from './helpers';
 
 const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
   agg: true,
@@ -37,6 +45,9 @@ const allGroupingFunctions = getFunctionSignaturesByReturnType(
   undefined,
   'by'
 );
+
+// types accepted by the AVG function
+const avgTypes: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
 
 describe('autocomplete.suggest', () => {
   describe('STATS <aggregates> [ BY <grouping> ]', () => {
@@ -84,65 +95,70 @@ describe('autocomplete.suggest', () => {
             scalar: true,
           }).map((s) => ({ ...s, text: `${s.text},` })),
         ]);
-
         await assertSuggestions('from a | stats round(/', [
-          ...getFunctionSignaturesByReturnType('stats', ESQL_NUMERIC_TYPES, {
+          ...getFunctionSignaturesByReturnType('stats', roundParameterTypes, {
             agg: true,
             grouping: true,
           }),
-          ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+          ...getFieldNamesByType(roundParameterTypes),
           ...getFunctionSignaturesByReturnType(
             'eval',
-            ESQL_NUMERIC_TYPES,
+            roundParameterTypes,
             { scalar: true },
             undefined,
             ['round']
           ),
         ]);
         await assertSuggestions('from a | stats round(round(/', [
-          ...getFunctionSignaturesByReturnType('stats', ESQL_NUMERIC_TYPES, { agg: true }),
-          ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+          ...getFunctionSignaturesByReturnType('stats', roundParameterTypes, { agg: true }),
+          ...getFieldNamesByType(roundParameterTypes),
           ...getFunctionSignaturesByReturnType(
             'eval',
-            ESQL_NUMERIC_TYPES,
+            ESQL_NUMBER_TYPES,
             { scalar: true },
             undefined,
             ['round']
           ),
         ]);
         await assertSuggestions('from a | stats avg(round(/', [
-          ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+          ...getFieldNamesByType(roundParameterTypes),
           ...getFunctionSignaturesByReturnType(
             'eval',
-            ESQL_NUMERIC_TYPES,
+            ESQL_NUMBER_TYPES,
             { scalar: true },
             undefined,
             ['round']
           ),
         ]);
         await assertSuggestions('from a | stats avg(/', [
-          ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-          ...getFunctionSignaturesByReturnType('eval', ESQL_NUMERIC_TYPES, { scalar: true }),
+          ...getFieldNamesByType(avgTypes),
+          ...getFunctionSignaturesByReturnType('eval', avgTypes, {
+            scalar: true,
+          }),
         ]);
         await assertSuggestions('from a | stats round(avg(/', [
-          ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-          ...getFunctionSignaturesByReturnType(
-            'eval',
-            ESQL_NUMERIC_TYPES,
-            { scalar: true },
-            undefined,
-            ['round']
-          ),
+          ...getFieldNamesByType(avgTypes),
+          ...getFunctionSignaturesByReturnType('eval', avgTypes, { scalar: true }, undefined, [
+            'round',
+          ]),
         ]);
       });
 
       test('when typing inside function left paren', async () => {
         const { assertSuggestions } = await setup();
         const expected = [
-          ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date', 'boolean', 'ip']),
+          ...getFieldNamesByType([
+            ...ESQL_COMMON_NUMERIC_TYPES,
+            'date',
+            'boolean',
+            'ip',
+            'version',
+            'text',
+            'keyword',
+          ]),
           ...getFunctionSignaturesByReturnType(
             'stats',
-            [...ESQL_COMMON_NUMERIC_TYPES, 'date', 'boolean', 'ip'],
+            [...ESQL_COMMON_NUMERIC_TYPES, 'date', 'boolean', 'ip', 'version', 'text', 'keyword'],
             {
               scalar: true,
             }
@@ -158,14 +174,10 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | stats avg(b/) by stringField', [
-          ...getFieldNamesByType('double'),
-          ...getFunctionSignaturesByReturnType(
-            'eval',
-            ['double', 'integer', 'long', 'unsigned_long'],
-            {
-              scalar: true,
-            }
-          ),
+          ...getFieldNamesByType(avgTypes),
+          ...getFunctionSignaturesByReturnType('eval', avgTypes, {
+            scalar: true,
+          }),
         ]);
       });
 
@@ -198,6 +210,7 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
         const expected = [
           'var0 = ',
+          getAddDateHistogramSnippet(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -220,6 +233,7 @@ describe('autocomplete.suggest', () => {
         const fields = getFieldNamesByType('any').map((field) => `${field} `);
         await assertSuggestions('from a | stats a=c by d, /', [
           'var0 = ',
+          getAddDateHistogramSnippet(),
           ...fields,
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -231,6 +245,7 @@ describe('autocomplete.suggest', () => {
         ]);
         await assertSuggestions('from a | stats avg(b) by c, /', [
           'var0 = ',
+          getAddDateHistogramSnippet(),
           ...fields,
           ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
           ...allGroupingFunctions,
@@ -252,11 +267,13 @@ describe('autocomplete.suggest', () => {
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
+          getAddDateHistogramSnippet(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, var0 = /', [
+          getAddDateHistogramSnippet(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -272,6 +289,39 @@ describe('autocomplete.suggest', () => {
           'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day)/',
           [',', '| ', '+ $0', '- $0']
         );
+      });
+      test('on space within bucket()', async () => {
+        const { assertSuggestions } = await setup();
+        await assertSuggestions('from a | stats avg(b) by BUCKET(/, 50, ?_tstart, ?_tend)', [
+          // Note there's no space or comma in the suggested field names
+          ...getFieldNamesByType(['date', ...ESQL_COMMON_NUMERIC_TYPES]),
+          ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
+            scalar: true,
+          }),
+        ]);
+        await assertSuggestions('from a | stats avg(b) by BUCKET(  /  , 50, ?_tstart, ?_tend)', [
+          // Note there's no space or comma in the suggested field names
+          ...getFieldNamesByType(['date', ...ESQL_COMMON_NUMERIC_TYPES]),
+          ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
+            scalar: true,
+          }),
+        ]);
+
+        await assertSuggestions(
+          'from a | stats avg(b) by BUCKET(dateField, /50, ?_tstart, ?_tend)',
+          [
+            ...getLiteralsByType('time_literal'),
+            ...getFunctionSignaturesByReturnType('eval', ['integer', 'date_period'], {
+              scalar: true,
+            }),
+          ]
+        );
+      });
+
+      test('count(/) to suggest * for all', async () => {
+        const { suggest } = await setup();
+        const suggestions = await suggest('from a | stats count(/)');
+        expect(suggestions).toContain(allStarConstant);
       });
     });
   });

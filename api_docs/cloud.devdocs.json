@@ -59,6 +59,20 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.csp",
+            "type": "string",
+            "tags": [],
+            "label": "csp",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudConfigType.base_url",
             "type": "string",
             "tags": [],
@@ -459,19 +473,23 @@
           },
           {
             "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.elasticsearchUrl",
-            "type": "string",
+            "id": "def-public.CloudStart.fetchElasticsearchConfig",
+            "type": "Function",
             "tags": [],
-            "label": "elasticsearchUrl",
+            "label": "fetchElasticsearchConfig",
             "description": [
-              "\nThe full URL to the elasticsearch cluster."
+              "\nFetches the full URL to the elasticsearch cluster."
             ],
             "signature": [
-              "string | undefined"
+              "() => Promise<",
+              "PublicElasticsearchConfigType",
+              ">"
             ],
             "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "cloud",
@@ -602,6 +620,24 @@
         },
         {
           "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.csp",
+          "type": "string",
+          "tags": [
+            "note"
+          ],
+          "label": "csp",
+          "description": [
+            "\nThe cloud service provider identifier.\n"
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
           "id": "def-public.CloudSetup.baseUrl",
           "type": "string",
           "tags": [],
@@ -698,19 +734,23 @@
         },
         {
           "parentPluginId": "cloud",
-          "id": "def-public.CloudSetup.elasticsearchUrl",
-          "type": "string",
+          "id": "def-public.CloudSetup.fetchElasticsearchConfig",
+          "type": "Function",
           "tags": [],
-          "label": "elasticsearchUrl",
+          "label": "fetchElasticsearchConfig",
           "description": [
-            "\nThe full URL to the elasticsearch cluster."
+            "\nFetches the full URL to the elasticsearch cluster."
           ],
           "signature": [
-            "string | undefined"
+            "() => Promise<",
+            "PublicElasticsearchConfigType",
+            ">"
           ],
           "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "cloud",
@@ -929,6 +969,24 @@
           "label": "cloudId",
           "description": [
             "\nThis is the ID of the Cloud deployment to which the Kibana instance belongs.\n"
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.csp",
+          "type": "string",
+          "tags": [
+            "note"
+          ],
+          "label": "csp",
+          "description": [
+            "\nThe cloud service provider identifier.\n"
           ],
           "signature": [
             "string | undefined"

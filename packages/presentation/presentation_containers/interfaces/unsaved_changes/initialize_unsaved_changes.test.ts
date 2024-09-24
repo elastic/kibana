@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -12,14 +13,14 @@ import {
   initializeUnsavedChanges,
 } from './initialize_unsaved_changes';
 import { PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
+import { waitFor } from '@testing-library/react';
 
 interface TestState {
   key1: string;
   key2: string;
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/189811
-describe.skip('unsavedChanges api', () => {
+describe('unsavedChanges api', () => {
   const lastSavedState = {
     key1: 'original key1 value',
     key2: 'original key2 value',
@@ -47,33 +48,42 @@ describe.skip('unsavedChanges api', () => {
 
   test('should have unsaved changes when state changes', async () => {
     key1$.next('modified key1 value');
-    await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
-    expect(api?.unsavedChanges.value).toEqual({
-      key1: 'modified key1 value',
-    });
+    await waitFor(
+      () =>
+        expect(api?.unsavedChanges.value).toEqual({
+          key1: 'modified key1 value',
+        }),
+      {
+        interval: COMPARATOR_SUBJECTS_DEBOUNCE + 1,
+      }
+    );
   });
 
   test('should have no unsaved changes after save', async () => {
     key1$.next('modified key1 value');
-    await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
-    expect(api?.unsavedChanges.value).not.toBeUndefined();
+    await waitFor(() => expect(api?.unsavedChanges.value).not.toBeUndefined(), {
+      interval: COMPARATOR_SUBJECTS_DEBOUNCE + 1,
+    });
 
     // trigger save
     parentApi.saveNotification$.next();
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(api?.unsavedChanges.value).toBeUndefined();
+    await waitFor(() => expect(api?.unsavedChanges.value).toBeUndefined(), {
+      interval: COMPARATOR_SUBJECTS_DEBOUNCE + 1,
+    });
   });
 
   test('should have no unsaved changes after reset', async () => {
     key1$.next('modified key1 value');
-    await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
-    expect(api?.unsavedChanges.value).not.toBeUndefined();
+    await waitFor(() => expect(api?.unsavedChanges.value).not.toBeUndefined(), {
+      interval: COMPARATOR_SUBJECTS_DEBOUNCE + 1,
+    });
 
     // trigger reset
     api?.resetUnsavedChanges();
 
-    await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
-    expect(api?.unsavedChanges.value).toBeUndefined();
+    await waitFor(() => expect(api?.unsavedChanges.value).toBeUndefined(), {
+      interval: COMPARATOR_SUBJECTS_DEBOUNCE + 1,
+    });
   });
 });

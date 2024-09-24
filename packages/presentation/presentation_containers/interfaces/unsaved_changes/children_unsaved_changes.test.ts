@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, skip } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { childrenUnsavedChanges$, DEBOUNCE_TIME } from './children_unsaved_changes';
+import { waitFor } from '@testing-library/react';
 
-// Failing: See https://github.com/elastic/kibana/issues/189823
-// FLAKY: https://github.com/elastic/kibana/issues/189822
-describe.skip('childrenUnsavedChanges$', () => {
+describe('childrenUnsavedChanges$', () => {
   const child1Api = {
     unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
     resetUnsavedChanges: () => undefined,
@@ -35,40 +35,64 @@ describe.skip('childrenUnsavedChanges$', () => {
 
   test('should emit on subscribe', async () => {
     const subscription = childrenUnsavedChanges$(children$).subscribe(onFireMock);
-    await new Promise((resolve) => setTimeout(resolve, DEBOUNCE_TIME + 1));
 
-    expect(onFireMock).toHaveBeenCalledTimes(1);
-    const childUnsavedChanges = onFireMock.mock.calls[0][0];
-    expect(childUnsavedChanges).toBeUndefined();
+    await waitFor(
+      () => {
+        expect(onFireMock).toHaveBeenCalledTimes(1);
+        const childUnsavedChanges = onFireMock.mock.calls[0][0];
+        expect(childUnsavedChanges).toBeUndefined();
+      },
+      {
+        interval: DEBOUNCE_TIME + 1,
+      }
+    );
 
     subscription.unsubscribe();
   });
 
   test('should emit when child has new unsaved changes', async () => {
-    const subscription = childrenUnsavedChanges$(children$).pipe(skip(1)).subscribe(onFireMock);
-    await new Promise((resolve) => setTimeout(resolve, DEBOUNCE_TIME + 1));
-    expect(onFireMock).toHaveBeenCalledTimes(0);
+    const subscription = childrenUnsavedChanges$(children$).subscribe(onFireMock);
+    await waitFor(
+      () => {
+        expect(onFireMock).toHaveBeenCalledTimes(1);
+      },
+      {
+        interval: DEBOUNCE_TIME + 1,
+      }
+    );
 
     child1Api.unsavedChanges.next({
       key1: 'modified value',
     });
-    await new Promise((resolve) => setTimeout(resolve, DEBOUNCE_TIME + 1));
 
-    expect(onFireMock).toHaveBeenCalledTimes(1);
-    const childUnsavedChanges = onFireMock.mock.calls[0][0];
-    expect(childUnsavedChanges).toEqual({
-      child1: {
-        key1: 'modified value',
+    await waitFor(
+      () => {
+        expect(onFireMock).toHaveBeenCalledTimes(2);
+        const childUnsavedChanges = onFireMock.mock.calls[1][0];
+        expect(childUnsavedChanges).toEqual({
+          child1: {
+            key1: 'modified value',
+          },
+        });
       },
-    });
+      {
+        interval: DEBOUNCE_TIME + 1,
+      }
+    );
 
     subscription.unsubscribe();
   });
 
   test('should emit when children changes', async () => {
-    const subscription = childrenUnsavedChanges$(children$).pipe(skip(1)).subscribe(onFireMock);
-    await new Promise((resolve) => setTimeout(resolve, DEBOUNCE_TIME + 1));
-    expect(onFireMock).toHaveBeenCalledTimes(0);
+    const subscription = childrenUnsavedChanges$(children$).subscribe(onFireMock);
+    await waitFor(
+      () => {
+        expect(onFireMock).toHaveBeenCalledTimes(1);
+      },
+      {
+        interval: DEBOUNCE_TIME + 1,
+      }
+    );
 
     // add child
     children$.next({
@@ -78,15 +102,21 @@ describe.skip('childrenUnsavedChanges$', () => {
         resetUnsavedChanges: () => undefined,
       },
     });
-    await new Promise((resolve) => setTimeout(resolve, DEBOUNCE_TIME + 1));
 
-    expect(onFireMock).toHaveBeenCalledTimes(1);
-    const childUnsavedChanges = onFireMock.mock.calls[0][0];
-    expect(childUnsavedChanges).toEqual({
-      child3: {
-        key1: 'modified value',
+    await waitFor(
+      () => {
+        expect(onFireMock).toHaveBeenCalledTimes(2);
+        const childUnsavedChanges = onFireMock.mock.calls[1][0];
+        expect(childUnsavedChanges).toEqual({
+          child3: {
+            key1: 'modified value',
+          },
+        });
       },
-    });
+      {
+        interval: DEBOUNCE_TIME + 1,
+      }
+    );
 
     subscription.unsubscribe();
   });

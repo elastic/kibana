@@ -13,6 +13,7 @@ import type {
 } from '@kbn/security-solution-features/keys';
 
 export interface ProductFeaturesConfigurator {
+  attackDiscovery: () => ProductFeaturesConfig;
   security: () => ProductFeaturesConfig<SecuritySubFeatureId>;
   cases: () => ProductFeaturesConfig<CasesSubFeatureId>;
   securityAssistant: () => ProductFeaturesConfig<AssistantSubFeatureId>;

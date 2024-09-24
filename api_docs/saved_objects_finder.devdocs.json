@@ -420,7 +420,7 @@
               },
               {
                 "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+                "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
               },
               {
                 "plugin": "graph",
@@ -549,9 +549,9 @@
         "signature": [
           {
             "pluginId": "@kbn/content-management-utils",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-common.SOWithMetadata",
+            "section": "def-server.SOWithMetadata",
             "text": "SOWithMetadata"
           },
           "<T>"

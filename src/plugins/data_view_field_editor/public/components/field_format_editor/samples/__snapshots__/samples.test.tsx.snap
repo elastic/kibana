@@ -2,17 +2,12 @@
 
 exports[`FormatEditorSamples should render normally 1`] = `
 <EuiFormRow
-  describedByIds={Array []}
-  display="row"
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   label={
     <Memo(MemoizedFormattedMessage)
       defaultMessage="Samples"
       id="indexPatternFieldEditor.samplesHeader"
     />
   }
-  labelType="label"
 >
   <EuiBasicTable
     className="kbnFieldFormatEditor__samples"

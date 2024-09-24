@@ -28,6 +28,7 @@ import { DropIllustration } from '@kbn/chart-icons';
 import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
+import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -192,6 +193,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   // NOTE: initialRenderTime is only set once when the component mounts
   const visualizationRenderStartTime = useRef<number>(NaN);
   const dataReceivedTime = useRef<number>(NaN);
+  const esTookTime = useRef<number>(0);
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
@@ -206,6 +208,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           value1: dataReceivedTime.current - visualizationRenderStartTime.current,
           key2: 'time_to_render',
           value2: currentTime - dataReceivedTime.current,
+          key3: 'es_took',
+          value3: esTookTime.current,
         });
       }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
@@ -263,6 +267,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               searchService: plugins.data.search,
             }
           );
+
+          const timings = getSuccessfulRequestTimings(adapters);
+          esTookTime.current = timings ? timings.esTookTotal : 0;
         }
 
         if (requestWarnings.length) {

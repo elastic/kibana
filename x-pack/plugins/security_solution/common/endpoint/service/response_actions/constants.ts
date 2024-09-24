@@ -176,12 +176,30 @@ export const RESPONSE_ACTIONS_ZIP_PASSCODE: Readonly<Record<ResponseActionAgentT
   });
 
 /**
- * Map of Agent Type to alert field that holds the Agent ID for that agent type
+ * Map of Agent Type to alert fields that holds the Agent ID for that agent type.
+ * Multiple alert fields are supported since different data sources define the agent
+ * id in different paths.
+ *
+ * NOTE:  there are utilities in `x-pack/plugins/security_solution/public/common/lib/endpoint/utils`
+ *        that facilitate working with alert (ECS) fields to determine if the give event/alert supports
+ *        response actions, including:
+ *        - `getAgentTypeForAgentIdField()`
+ *        - `getEventDetailsAgentIdField()`
+ *        - `isResponseActionsAlertAgentIdField()`
  */
-export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD: Readonly<
-  Record<ResponseActionAgentType, string>
+export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
+  Record<ResponseActionAgentType, string[]>
 > = Object.freeze({
-  endpoint: 'agent.id',
-  sentinel_one: 'observer.serial_number',
-  crowdstrike: 'device.id',
+  endpoint: ['agent.id'],
+  sentinel_one: [
+    'sentinel_one.alert.agent.id',
+    'sentinel_one.threat.agent.id',
+    'sentinel_one.activity.agent.id',
+    'sentinel_one.agent.agent.id',
+  ],
+  crowdstrike: ['device.id'],
 });
+
+export const SUPPORTED_AGENT_ID_ALERT_FIELDS: Readonly<string[]> = Object.values(
+  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS
+).flat();

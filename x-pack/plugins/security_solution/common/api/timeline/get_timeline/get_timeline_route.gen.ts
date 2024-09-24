@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { TimelineResponse } from '../model/components.gen';
 
@@ -25,7 +25,7 @@ export const GetTimelineRequestQuery = z.object({
    */
   template_timeline_id: z.string().optional(),
   /**
-   * The ID of the timeline to retrieve
+   * The ID of the Timeline to retrieve.
    */
   id: z.string().optional(),
 });

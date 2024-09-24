@@ -19,7 +19,7 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawRu
 
 function isEmptyObject(obj: {}) {
   for (const attr in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, attr)) {
+    if (Object.hasOwn(obj, attr)) {
       return false;
     }
   }

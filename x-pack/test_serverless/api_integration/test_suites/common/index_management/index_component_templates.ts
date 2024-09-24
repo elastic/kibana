@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Update', () => {
+    describe('Update #1', () => {
       const COMPONENT_NAME = 'test_update_component_template';
       const COMPONENT = {
         template: {
@@ -208,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Update', () => {
+    describe('Update #2', () => {
       const COMPONENT_NAME = 'test_update_component_template';
       const COMPONENT = {
         template: {

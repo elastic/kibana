@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
@@ -17,7 +17,7 @@ import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import * as mock from '../mocks/mock_analyzer_data';
 
-jest.mock('../../../../common/containers/alerts/use_alert_prevalence_from_process_tree', () => ({
+jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;

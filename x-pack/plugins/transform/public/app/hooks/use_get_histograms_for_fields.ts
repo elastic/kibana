@@ -12,11 +12,11 @@ import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import type { SavedSearchQuery } from '@kbn/ml-query-utils';
 
-import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 import type {
   FieldHistogramsRequestSchema,
   FieldHistogramsResponseSchema,
-} from '../../../common/api_schemas/field_histograms';
+} from '../../../server/routes/api_schemas/field_histograms';
+import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
 

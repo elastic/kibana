@@ -26,7 +26,7 @@ const stories: Meta<AssetDetailsStoryArgs> = {
   component: AssetDetails,
   argTypes: {
     tabId: {
-      options: assetDetailsProps.tabs.filter(({ id }) => id !== 'linkToApm').map(({ id }) => id),
+      options: assetDetailsProps.tabs.map(({ id }) => id),
       defaultValue: 'overview',
       control: {
         type: 'radio',
@@ -53,7 +53,7 @@ const PageTabTemplate: Story<AssetDetailsStoryArgs> = (args) => {
 const FlyoutTemplate: Story<AssetDetailsStoryArgs> = (args) => {
   const [isOpen, setIsOpen] = useState(false);
   const closeFlyout = () => setIsOpen(false);
-  const options = assetDetailsProps.tabs.filter(({ id }) => id !== 'linkToApm').map(({ id }) => id);
+  const options = assetDetailsProps.tabs.map(({ id }) => id);
   const [{ tabId }, updateArgs] = useArgs();
 
   return (

@@ -7,28 +7,22 @@
 import Boom from '@hapi/boom';
 import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { EntityServiceListItem } from '../../../../common/entities/types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServiceEntities } from './get_service_entities';
-import { getServiceEntitySummary } from '../get_service_entity_summary';
-import { ServiceEntities } from '../types';
-import { getServiceEntitiesHistoryTimeseries } from '../get_service_entities_history_timeseries';
-
-export interface EntityServicesResponse {
-  services: EntityServiceListItem[];
-}
+import { getServiceEntitySummary } from './get_service_entity_summary';
+import { getEntityHistoryServicesTimeseries } from '../get_entity_history_services_timeseries';
 
 const serviceEntitiesSummaryRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/entities/services/{serviceName}/summary',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: t.intersection([environmentRt, rangeRt]),
+    query: environmentRt,
   }),
   options: { tags: ['access:apm'] },
-  async handler(resources): Promise<ServiceEntities> {
+  async handler(resources) {
     const { context, params, request } = resources;
     const coreContext = await context.core;
 
@@ -38,12 +32,10 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
     });
 
     const { serviceName } = params.path;
-    const { start, end, environment } = params.query;
+    const { environment } = params.query;
 
     return getServiceEntitySummary({
       entitiesESClient,
-      start,
-      end,
       serviceName,
       environment,
     });
@@ -56,7 +48,7 @@ const servicesEntitiesRoute = createApmServerRoute({
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  async handler(resources): Promise<EntityServicesResponse> {
+  async handler(resources) {
     const { context, params, request } = resources;
     const coreContext = await context.core;
 
@@ -104,7 +96,7 @@ const servicesEntitiesDetailedStatisticsRoute = createApmServerRoute({
       throw Boom.badRequest(`serviceNames cannot be empty`);
     }
 
-    const serviceEntitiesTimeseries = await getServiceEntitiesHistoryTimeseries({
+    const serviceEntitiesTimeseries = await getEntityHistoryServicesTimeseries({
       start,
       end,
       serviceNames,

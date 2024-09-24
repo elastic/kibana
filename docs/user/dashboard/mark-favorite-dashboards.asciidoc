@@ -1,0 +1,9 @@
+= Keep track of your favorite dashboards
+
+You can mark any dashboards as favorite, using the ✩ **star icon**.
+
+All dashboards marked as favorite are gathered in the **Starred** tab so you can find them quickly.
+
+The list of starred dashboards is personal. Dashboards marked as favorite by other users only appear for those users.
+
+image:images/dashboard-starred-list.png[List of starred dashboards]

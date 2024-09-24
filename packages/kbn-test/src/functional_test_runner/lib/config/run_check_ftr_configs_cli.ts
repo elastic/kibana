@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import execa from 'execa';
 import { readFileSync } from 'fs';
 import Path from 'path';
@@ -125,7 +127,8 @@ export async function runCheckFtrConfigsCli() {
 
       const invalid = possibleConfigs.filter((path) => !allFtrConfigs.includes(path));
       if (invalid.length) {
-        const invalidList = invalid.map((path) => Path.relative(REPO_ROOT, path)).join('\n  - ');
+        const invalidList =
+          ' - ' + invalid.map((path) => Path.relative(REPO_ROOT, path)).join('\n - ');
         log.error(
           `The following files look like FTR configs which are not listed in one of manifest files:\n${invalidList}\n
 Make sure to add your new FTR config to the correct manifest file.\n

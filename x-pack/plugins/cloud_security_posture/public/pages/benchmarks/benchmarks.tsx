@@ -21,6 +21,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { extractErrorMessage } from '@kbn/cloud-security-posture-common';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
@@ -29,7 +31,7 @@ import {
   useCspBenchmarkIntegrationsV2,
   UseCspBenchmarkIntegrationsProps,
 } from './use_csp_benchmark_integrations';
-import { extractErrorMessage, getBenchmarkCisName } from '../../../common/utils/helpers';
+import { getBenchmarkCisName } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
 import {
   LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY,
@@ -37,7 +39,6 @@ import {
 } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 
 const SEARCH_DEBOUNCE_MS = 300;

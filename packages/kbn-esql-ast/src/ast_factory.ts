@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
@@ -30,6 +31,7 @@ import {
   type MetaCommandContext,
   type MetricsCommandContext,
   IndexPatternContext,
+  InlinestatsCommandContext,
 } from './antlr/esql_parser';
 import { default as ESQLParserListener } from './antlr/esql_parser_listener';
 import {
@@ -51,7 +53,7 @@ import {
   visitDissect,
   visitGrok,
   collectBooleanExpression,
-  visitOrderExpression,
+  visitOrderExpressions,
   getPolicyName,
   getMatchField,
   getEnrichClauses,
@@ -198,6 +200,23 @@ export class AstListener implements ESQLParserListener {
   }
 
   /**
+   * Exit a parse tree produced by `esql_parser.inlinestatsCommand`.
+   * @param ctx the parse tree
+   */
+  exitInlinestatsCommand(ctx: InlinestatsCommandContext) {
+    const command = createCommand('inlinestats', ctx);
+    this.ast.push(command);
+
+    // STATS expression is optional
+    if (ctx._stats) {
+      command.args.push(...collectAllFields(ctx.fields(0)));
+    }
+    if (ctx._grouping) {
+      command.args.push(...visitByOption(ctx, ctx._stats ? ctx.fields(1) : ctx.fields(0)));
+    }
+  }
+
+  /**
    * Exit a parse tree produced by `esql_parser.limitCommand`.
    * @param ctx the parse tree
    */
@@ -219,7 +238,7 @@ export class AstListener implements ESQLParserListener {
   exitSortCommand(ctx: SortCommandContext) {
     const command = createCommand('sort', ctx);
     this.ast.push(command);
-    command.args.push(...visitOrderExpression(ctx.orderExpression_list()));
+    command.args.push(...visitOrderExpressions(ctx.orderExpression_list()));
   }
 
   /**

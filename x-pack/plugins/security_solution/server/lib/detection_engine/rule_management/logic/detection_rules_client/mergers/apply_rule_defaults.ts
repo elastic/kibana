@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   RuleCreateProps,
   RuleSource,
@@ -20,7 +21,6 @@ import {
   normalizeThresholdObject,
 } from '../../../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { addEcsToRequiredFields } from '../../../utils/utils';
 
 export const RULE_DEFAULTS = {
   enabled: false,
@@ -86,6 +86,7 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         event_category_override: props.event_category_override,
         tiebreaker_field: props.tiebreaker_field,
         alert_suppression: props.alert_suppression,
+        response_actions: props.response_actions,
       };
     }
     case 'esql': {
@@ -94,6 +95,7 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         language: props.language,
         query: props.query,
         alert_suppression: props.alert_suppression,
+        response_actions: props.response_actions,
       };
     }
     case 'threat_match': {
@@ -176,6 +178,7 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         language: props.language ?? 'kuery',
         data_view_id: props.data_view_id,
         alert_suppression: props.alert_suppression,
+        response_actions: props.response_actions,
       };
     }
     default: {

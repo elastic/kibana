@@ -54,7 +54,7 @@ describe("Migrate existing indices' ILM policy deprecations", () => {
             ],
           },
           "level": "warning",
-          "message": "New reporting indices will be managed by the \\"kibana-reporting\\" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets the hidden system index pattern \\".kibana-reporting*\\".",
+          "message": "New reporting indices will be managed by the \\"kibana-reporting\\" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets the hidden system index pattern \\".reporting-*,.kibana-reporting*\\".",
           "title": "Found reporting indices managed by custom ILM policy.",
         },
       ]

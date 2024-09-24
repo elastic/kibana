@@ -17,15 +17,11 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
-import { ServerlessRoleName } from '../../support/roles';
 
-describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    initializeDataViews();
-  });
-
+// Failing: See https://github.com/elastic/kibana/issues/192128
+describe.skip('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
+    initializeDataViews();
   });
 
   it('should properly show static values in form and results', () => {

@@ -12,12 +12,14 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { TestCaseConnector } from './mocks';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { ConnectorUsageCollector } from '../usage';
 
 describe('CaseConnector', () => {
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;
   let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
   let service: TestCaseConnector;
+  let connectorUsageCollector: ConnectorUsageCollector;
   const pushToServiceIncidentParamsSchema = {
     name: schema.string(),
     category: schema.nullable(schema.string()),
@@ -57,6 +59,11 @@ describe('CaseConnector', () => {
       },
       pushToServiceIncidentParamsSchema
     );
+
+    connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   describe('Sub actions', () => {
@@ -191,7 +198,7 @@ describe('CaseConnector', () => {
 
   describe('pushToService', () => {
     it('should create an incident if externalId is null', async () => {
-      const res = await service.pushToService(pushToServiceParams);
+      const res = await service.pushToService(pushToServiceParams, connectorUsageCollector);
       expect(res).toEqual({
         id: 'create-incident',
         title: 'Test incident',
@@ -201,10 +208,13 @@ describe('CaseConnector', () => {
     });
 
     it('should update an incident if externalId is not null', async () => {
-      const res = await service.pushToService({
-        incident: { ...pushToServiceParams.incident, externalId: 'test-id' },
-        comments: [],
-      });
+      const res = await service.pushToService(
+        {
+          incident: { ...pushToServiceParams.incident, externalId: 'test-id' },
+          comments: [],
+        },
+        connectorUsageCollector
+      );
 
       expect(res).toEqual({
         id: 'update-incident',
@@ -215,13 +225,16 @@ describe('CaseConnector', () => {
     });
 
     it('should add comments', async () => {
-      const res = await service.pushToService({
-        ...pushToServiceParams,
-        comments: [
-          { comment: 'comment-1', commentId: 'comment-id-1' },
-          { comment: 'comment-2', commentId: 'comment-id-2' },
-        ],
-      });
+      const res = await service.pushToService(
+        {
+          ...pushToServiceParams,
+          comments: [
+            { comment: 'comment-1', commentId: 'comment-id-1' },
+            { comment: 'comment-2', commentId: 'comment-id-2' },
+          ],
+        },
+        connectorUsageCollector
+      );
 
       expect(res).toEqual({
         id: 'create-incident',
@@ -242,11 +255,14 @@ describe('CaseConnector', () => {
     });
 
     it.each([[undefined], [null]])('should throw if externalId is %p', async (comments) => {
-      const res = await service.pushToService({
-        ...pushToServiceParams,
-        // @ts-expect-error
-        comments,
-      });
+      const res = await service.pushToService(
+        {
+          ...pushToServiceParams,
+          // @ts-expect-error
+          comments,
+        },
+        connectorUsageCollector
+      );
 
       expect(res).toEqual({
         id: 'create-incident',
@@ -257,10 +273,13 @@ describe('CaseConnector', () => {
     });
 
     it('should not add comments if comments are an empty array', async () => {
-      const res = await service.pushToService({
-        ...pushToServiceParams,
-        comments: [],
-      });
+      const res = await service.pushToService(
+        {
+          ...pushToServiceParams,
+          comments: [],
+        },
+        connectorUsageCollector
+      );
 
       expect(res).toEqual({
         id: 'create-incident',

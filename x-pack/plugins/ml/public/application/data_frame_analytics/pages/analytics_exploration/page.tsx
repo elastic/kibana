@@ -20,7 +20,7 @@ import { RegressionExploration } from './components/regression_exploration';
 import { ClassificationExploration } from './components/classification_exploration';
 
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
+import { useMlKibana, useMlApi } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
 import type { AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
@@ -39,7 +39,7 @@ export const Page: FC<{
   } = useMlKibana();
   const {
     dataFrameAnalytics: { getDataFrameAnalytics },
-  } = useMlApiContext();
+  } = useMlApi();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
   const jobIdToUse = jobId ?? analyticsId?.job_id;
   const [analysisTypeToUse, setAnalysisTypeToUse] = useState<

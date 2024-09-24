@@ -1,7 +1,7 @@
 get:
   summary: Get latest output health
   tags:
-    - Outputs
+    - Fleet outputs
   responses:
     '200':
       description: OK

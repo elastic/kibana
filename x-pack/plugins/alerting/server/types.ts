@@ -11,7 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
-import z from 'zod';
+import z from '@kbn/zod';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
@@ -36,7 +36,7 @@ import {
   RulesSettingsClient,
   RulesSettingsFlappingClient,
   RulesSettingsQueryDelayClient,
-} from './rules_settings_client';
+} from './rules_settings';
 import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {
@@ -102,7 +102,6 @@ export interface RuleExecutorServices<
   ActionGroupIds extends string = never,
   AlertData extends RuleAlertData = RuleAlertData
 > {
-  searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
@@ -121,8 +120,9 @@ export interface RuleExecutorServices<
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
   share: SharePluginStart;
-  dataViews: DataViewsContract;
   ruleResultService?: PublicRuleResultService;
+  getDataViews: () => Promise<DataViewsContract>;
+  getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
 }
 
 export interface RuleExecutorOptions<

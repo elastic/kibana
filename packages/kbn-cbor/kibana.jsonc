@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/cbor",
+  "owner": "@elastic/kibana-operations"
+}

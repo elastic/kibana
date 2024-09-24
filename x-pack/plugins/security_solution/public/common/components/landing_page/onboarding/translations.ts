@@ -27,6 +27,20 @@ export const GET_STARTED_PAGE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const GET_STARTED_DATA_INGESTION_HUB_SUBTITLE = i18n.translate(
+  'xpack.securitySolution.onboarding.subTitle',
+  {
+    defaultMessage: `Welcome to Elastic Security`,
+  }
+);
+
+export const GET_STARTED_DATA_INGESTION_HUB_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.onboarding.description',
+  {
+    defaultMessage: `Follow these steps to set up your workspace.`,
+  }
+);
+
 export const CURRENT_PLAN_LABEL = i18n.translate(
   'xpack.securitySolution.onboarding.currentPlan.label',
   {

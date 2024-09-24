@@ -8,7 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { Observable } from 'rxjs';
 import { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';

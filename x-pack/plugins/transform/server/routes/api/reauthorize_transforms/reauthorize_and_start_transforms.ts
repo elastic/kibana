@@ -8,11 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
-import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 import type {
   ReauthorizeTransformsRequestSchema,
   ReauthorizeTransformsResponseSchema,
-} from '../../../../common/api_schemas/reauthorize_transforms';
+} from '../../api_schemas/reauthorize_transforms';
+import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 
 import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
 

@@ -7,7 +7,6 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "config.ts",
     "config.mock.ts",
     "common/**/*.json",
     "public/**/*.json",

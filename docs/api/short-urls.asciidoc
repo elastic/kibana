@@ -1,7 +1,14 @@
 [[short-urls-api]]
 == Short URLs APIs
 
-Manage {kib} short URLs.
+experimental[] Manage {kib} short URLs.
+
+The following short urls APIs are available:
+
+* <<short-urls-api-create, Create short URL API>>
+* <<short-urls-api-get, Get short URL API>>
+* <<short-urls-api-delete, Delete short URL API>>
+* <<short-urls-api-resolve, Resolve short URL API>>
 
 include::short-urls/create-short-url.asciidoc[]
 include::short-urls/get-short-url.asciidoc[]

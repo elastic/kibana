@@ -9,25 +9,48 @@ import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { TraceSearchType } from '../../../../common/trace_explorer';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
-import { Breadcrumb } from '../../app/breadcrumb';
-import { ServiceInventory } from '../../app/service_inventory';
-import { ServiceMapHome } from '../../app/service_map';
-import { TopTracesOverview } from '../../app/top_traces_overview';
-import { TraceExplorer } from '../../app/trace_explorer';
-import { TraceExplorerAggregatedCriticalPath } from '../../app/trace_explorer/trace_explorer_aggregated_critical_path';
-import { TraceExplorerWaterfall } from '../../app/trace_explorer/trace_explorer_waterfall';
-import { TraceOverview } from '../../app/trace_overview';
-import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 import { RedirectTo } from '../redirect_to';
-import { ServiceGroupTemplate } from '../templates/service_group_template';
 import { dependencies } from './dependencies';
 import { legacyBackends } from './legacy_backends';
 import { storageExplorer } from './storage_explorer';
+import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
+
+const ServiceGroupTemplate = dynamic(() =>
+  import('../templates/service_group_template').then((mod) => ({
+    default: mod.ServiceGroupTemplate,
+  }))
+);
+const ServiceInventory = dynamic(() =>
+  import('../../app/service_inventory').then((mod) => ({ default: mod.ServiceInventory }))
+);
+const ServiceMapHome = dynamic(() =>
+  import('../../app/service_map').then((mod) => ({ default: mod.ServiceMapHome }))
+);
+const TopTracesOverview = dynamic(() =>
+  import('../../app/top_traces_overview').then((mod) => ({ default: mod.TopTracesOverview }))
+);
+const TraceExplorer = dynamic(() =>
+  import('../../app/trace_explorer').then((mod) => ({ default: mod.TraceExplorer }))
+);
+const TraceExplorerAggregatedCriticalPath = dynamic(() =>
+  import('../../app/trace_explorer/trace_explorer_aggregated_critical_path').then((mod) => ({
+    default: mod.TraceExplorerAggregatedCriticalPath,
+  }))
+);
+const TraceExplorerWaterfall = dynamic(() =>
+  import('../../app/trace_explorer/trace_explorer_waterfall').then((mod) => ({
+    default: mod.TraceExplorerWaterfall,
+  }))
+);
+const TraceOverview = dynamic(() =>
+  import('../../app/trace_overview').then((mod) => ({ default: mod.TraceOverview }))
+);
 
 function serviceGroupPage<TPath extends string>({
   path,
@@ -50,11 +73,13 @@ function serviceGroupPage<TPath extends string>({
   return {
     [path]: {
       element: (
-        <Breadcrumb title={title} href={path}>
-          <ServiceGroupTemplate pageTitle={title} serviceGroupContextTab={serviceGroupContextTab}>
-            {element}
-          </ServiceGroupTemplate>
-        </Breadcrumb>
+        <ServiceGroupTemplate
+          pageTitle={title}
+          pagePath={path}
+          serviceGroupContextTab={serviceGroupContextTab}
+        >
+          {element}
+        </ServiceGroupTemplate>
       ),
       params: t.type({
         query: t.type({ serviceGroup: t.string }),

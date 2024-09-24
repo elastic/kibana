@@ -18,14 +18,14 @@ describe('ActionConnectorWarnings', () => {
     const wrapper = render(
       <ActionConnectorWarnings actionConnectorsWarnings={[]} importedActionConnectorsCount={0} />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.queryByTestId('actionConnectorsWarningsCallOut')).not.toBeInTheDocument();
   });
   test('should not render if importedActionConnectorsCount is truthy and empty warnings array', () => {
     const wrapper = render(
       <ActionConnectorWarnings actionConnectorsWarnings={[]} importedActionConnectorsCount={2} />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.queryByTestId('actionConnectorsWarningsCallOut')).not.toBeInTheDocument();
   });
   test('should render if 1 connectors were imported and use the warning message with the correct imported number', () => {
@@ -43,7 +43,7 @@ describe('ActionConnectorWarnings', () => {
       />
     );
     const { getByTestId } = wrapper;
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(getByTestId('actionConnectorsWarningsCallOutTitle').textContent).toBe(
       '1 connector imported'
     );
@@ -66,7 +66,7 @@ describe('ActionConnectorWarnings', () => {
       />
     );
     const { getByTestId } = wrapper;
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(getByTestId('actionConnectorsWarningsCallOutTitle').textContent).toBe(
       '2 connectors imported'
     );
@@ -92,7 +92,7 @@ describe('ActionConnectorWarnings', () => {
       />
     );
     const { getByTestId } = wrapper;
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(getByTestId('actionConnectorsWarningsCallOutTitle').textContent).toBe(
       '2 connectors imported'
     );

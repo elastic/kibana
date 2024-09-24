@@ -172,9 +172,12 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       // If the selected conversation is deleted, we need to select a new conversation to prevent a crash creating a conversation that already exists
       const isSelectedConversationDeleted =
         defaultSelectedConversationId &&
-        conversationSettings[defaultSelectedConversationId] == null;
+        // sometimes the key is a title, so do not rely on conversationSettings[defaultSelectedConversationId]
+        !Object.values(conversationSettings).some(({ id }) => id === defaultSelectedConversationId);
+
       const newSelectedConversation: Conversation | undefined =
         Object.values(conversationSettings)[0];
+
       if (isSelectedConversationDeleted && newSelectedConversation != null) {
         onConversationSelected({
           cId: newSelectedConversation.id,

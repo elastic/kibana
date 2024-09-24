@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StaticHeader } from '../../../shared_components';
 import {
   DatasourceMap,
@@ -13,7 +14,7 @@ import {
   VisualizationLayerWidgetProps,
   VisualizationMap,
 } from '../../../types';
-import { ChartSwitch } from './chart_switch';
+import { ChartSwitchPopover } from './chart_switch/chart_switch_popover';
 
 export function LayerHeader({
   activeVisualizationId,
@@ -53,8 +54,24 @@ export function LayerHeader({
     return <StaticHeader label={description.label} icon={description.icon} />;
   }
 
-  return (
-    <ChartSwitch
+  const SubtypeSwitch = activeVisualization.getSubtypeSwitch?.(layerConfigProps);
+
+  return SubtypeSwitch ? (
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem>
+        <ChartSwitchPopover
+          datasourceMap={datasourceMap}
+          visualizationMap={availableVisualizationMap}
+          framePublicAPI={layerConfigProps.frame}
+          layerId={layerConfigProps.layerId}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <SubtypeSwitch />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    <ChartSwitchPopover
       datasourceMap={datasourceMap}
       visualizationMap={availableVisualizationMap}
       framePublicAPI={layerConfigProps.frame}

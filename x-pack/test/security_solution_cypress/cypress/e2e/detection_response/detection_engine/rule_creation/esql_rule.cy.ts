@@ -49,6 +49,7 @@ import {
   fillAboutRuleMinimumAndContinue,
   skipScheduleRuleAction,
   interceptEsqlQueryFieldsRequest,
+  createRuleWithNonBlockingErrors,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -179,6 +180,32 @@ describe(
         getDefineContinueButton().click();
 
         cy.get(ESQL_QUERY_BAR).contains('Error validating ES|QL');
+      });
+
+      it('shows syntax error when query is syntactically invalid - prioritizing it over missing metadata operator error', function () {
+        const invalidNonAggregatingQuery = 'from auditbeat* | limit 5 test';
+        selectEsqlRuleType();
+        fillEsqlQueryBar(invalidNonAggregatingQuery);
+        getDefineContinueButton().click();
+
+        cy.get(ESQL_QUERY_BAR).contains(
+          `Error validating ES|QL: "SyntaxError: extraneous input 'test' expecting <EOF>"`
+        );
+      });
+
+      it('shows confirmation modal about existing non-blocking validation errors', function () {
+        const nonExistingDataSourceQuery = 'from fake* metadata _id, _version, _index | limit 5';
+        selectEsqlRuleType();
+        fillEsqlQueryBar(nonExistingDataSourceQuery);
+        getDefineContinueButton().click();
+
+        fillRuleName();
+        fillDescription();
+        getAboutContinueButton().click();
+
+        fillScheduleRuleAndContinue(rule);
+
+        createRuleWithNonBlockingErrors();
       });
     });
 

@@ -13,6 +13,7 @@ import { ILicenseState } from '../../lib';
 import { BASE_ACTION_API_PATH } from '../../../common';
 import { verifyAccessAndContext } from '../verify_access_and_context';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { connectorResponseSchemaV1 } from '../../../common/routes/connector/response';
 
 export const bodySchema = schema.object({
   name: schema.string({
@@ -40,7 +41,15 @@ export const createActionRoute = (
         deprecated: true,
       },
       validate: {
-        body: bodySchema,
+        request: {
+          body: bodySchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+            body: () => connectorResponseSchemaV1,
+          },
+        },
       },
     },
     router.handleLegacyErrors(

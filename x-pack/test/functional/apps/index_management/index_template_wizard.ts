@@ -25,7 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    describe('Create', async () => {
+    describe('Create', () => {
       before(async () => {
         // Click Create Template button
         await testSubjects.click('createTemplateButton');
@@ -102,7 +102,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Mappings step', async () => {
+    describe('Mappings step', () => {
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('indexManagement');
         // Navigate to the index templates tab

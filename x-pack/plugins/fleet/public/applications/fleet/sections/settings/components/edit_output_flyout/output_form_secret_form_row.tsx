@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  type EuiFormRowProps,
   EuiIcon,
   EuiLink,
   EuiPanel,
@@ -24,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 export const SecretFormRow: React.FC<{
   fullWidth?: boolean;
-  children: ConstructorParameters<typeof EuiFormRow>[0]['children'];
+  children: EuiFormRowProps['children'];
   useSecretsStorage: boolean;
   isConvertedToSecret?: boolean;
   onToggleSecretStorage: (secretEnabled: boolean) => void;

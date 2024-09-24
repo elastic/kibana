@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -20,6 +21,8 @@ import { Scenario } from '../cli/scenario';
 import { Logger } from '../lib/utils/create_logger';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { parseLogsScenarioOpts, parseStringToBoolean } from './helpers/logs_scenario_opts_parser';
+import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -38,10 +41,16 @@ const DEFAULT_SCENARIO_OPTS = {
   logsRate: 1,
   ingestHosts: true,
   ingestTraces: true,
+  logsdb: false,
 };
 
 const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOptions) => {
+  const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
+
   return {
+    bootstrap: async ({ logsEsClient }) => {
+      if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
+    },
     generate: ({ range, clients: { logsEsClient, infraEsClient, apmEsClient } }) => {
       const {
         numSpaces,
@@ -58,6 +67,10 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
         ingestHosts,
         ingestTraces,
       } = { ...DEFAULT_SCENARIO_OPTS, ...(runOptions.scenarioOpts || {}) };
+
+      const parsedIngestHosts = parseStringToBoolean(`${ingestHosts}`);
+      const parsedIngestTraces = parseStringToBoolean(`${ingestTraces}`);
+
       const { logger } = runOptions;
 
       killIfUnknownScenarioOptions(logger, runOptions.scenarioOpts || {});
@@ -189,7 +202,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
           const customFields = getExtraFields(numCustomFields, isMalformed, customFieldPrefix);
 
           return log
-            .create()
+            .create({ isLogsDb })
             .dataset(dataset)
             .message(message)
             .logLevel(logLevel)
@@ -220,7 +233,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
         });
 
       return [
-        ...(ingestHosts
+        ...(parsedIngestHosts
           ? [
               withClient(
                 infraEsClient,
@@ -228,7 +241,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
               ),
             ]
           : []),
-        ...(ingestTraces
+        ...(parsedIngestTraces
           ? [
               withClient(
                 apmEsClient,

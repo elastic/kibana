@@ -184,7 +184,7 @@ export function useAIAssistChat({
       if (messagesRef.current.length === 0) return null;
 
       const chatRequest: ChatRequest = {
-        messages: messagesRef.current,
+        messages: messagesRef.current.slice(0, messagesRef.current.length - 1),
         options,
         data,
       };

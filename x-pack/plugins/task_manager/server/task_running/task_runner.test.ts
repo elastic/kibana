@@ -35,16 +35,19 @@ import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {
-  calculateDelay,
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
 } from './task_runner';
 import { schema } from '@kbn/config-schema';
+import { CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
+import * as nextRunAtUtils from '../lib/get_next_run_at';
+import { configMock } from '../config.mock';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
+const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -769,6 +772,36 @@ describe('TaskManagerRunner', () => {
       expect(instance.enabled).not.toBeDefined();
     });
 
+    test('skips marking task as running for mget claim strategy', async () => {
+      const { runner, store } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+        strategy: CLAIM_STRATEGY_MGET,
+      });
+      const result = await runner.markTaskAsRunning();
+
+      expect(result).toBe(true);
+      expect(apm.startTransaction).not.toHaveBeenCalled();
+      expect(mockApmTrans.end).not.toHaveBeenCalled();
+
+      expect(runner.id).toEqual('foo');
+      expect(runner.taskType).toEqual('bar');
+      expect(runner.toString()).toEqual('bar "foo"');
+
+      expect(store.update).not.toHaveBeenCalled();
+    });
+
     describe('TaskEvents', () => {
       test('emits TaskEvent when a task is marked as running', async () => {
         const id = _.random(1, 20).toString();
@@ -947,6 +980,8 @@ describe('TaskManagerRunner', () => {
       expect(instance.params).toEqual({ a: 'b' });
       expect(instance.state).toEqual({ hey: 'there' });
       expect(instance.enabled).not.toBeDefined();
+
+      expect(getNextRunAtSpy).not.toHaveBeenCalled();
     });
 
     test('reschedules tasks that have an schedule', async () => {
@@ -977,6 +1012,8 @@ describe('TaskManagerRunner', () => {
       expect(instance.runAt.getTime()).toBeGreaterThan(minutesFromNow(9).getTime());
       expect(instance.runAt.getTime()).toBeLessThanOrEqual(minutesFromNow(10).getTime());
       expect(instance.enabled).not.toBeDefined();
+
+      expect(getNextRunAtSpy).toHaveBeenCalled();
     });
 
     test('expiration returns time after which timeout will have elapsed from start', async () => {
@@ -1054,6 +1091,8 @@ describe('TaskManagerRunner', () => {
       expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
         validate: true,
       });
+
+      expect(getNextRunAtSpy).not.toHaveBeenCalled();
     });
 
     test('reschedules tasks that return a schedule', async () => {
@@ -1084,6 +1123,11 @@ describe('TaskManagerRunner', () => {
       expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
         validate: true,
       });
+
+      expect(getNextRunAtSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ schedule }),
+        expect.any(Number)
+      );
     });
 
     test(`doesn't reschedule recurring tasks that throw an unrecoverable error`, async () => {
@@ -2061,6 +2105,97 @@ describe('TaskManagerRunner', () => {
         );
         expect(onTaskEvent).toHaveBeenCalledTimes(2);
       });
+
+      test('emits TaskEvent when failing to update a recurring task', async () => {
+        const id = _.random(1, 20).toString();
+        const runAt = minutesFromNow(_.random(5));
+        const onTaskEvent = jest.fn();
+        const { runner, instance, store } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+            schedule: { interval: '1m' },
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { runAt, state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        const error = new Error('fail');
+
+        store.update.mockImplementation(() => {
+          throw error;
+        });
+
+        await expect(runner.run()).rejects.toThrowError('fail');
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asErr({
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.Failed,
+                isExpired: false,
+                error,
+              })
+            )
+          )
+        );
+      });
+
+      test('emits TaskEvent when failing to update a non-recurring task', async () => {
+        const id = _.random(1, 20).toString();
+        const runAt = minutesFromNow(_.random(5));
+        const onTaskEvent = jest.fn();
+        const { runner, instance, store } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { runAt, state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        const error = new Error('fail');
+
+        store.update.mockImplementation(() => {
+          throw error;
+        });
+
+        await expect(runner.run()).rejects.toThrowError('fail');
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asErr({
+                task: instance,
+                persistence: TaskPersistence.NonRecurring,
+                result: TaskRunResult.Failed,
+                isExpired: false,
+                error,
+              })
+            )
+          )
+        );
+      });
     });
 
     test('does not update saved object if task expires', async () => {
@@ -2183,6 +2318,32 @@ describe('TaskManagerRunner', () => {
 
       expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(true);
     });
+
+    it(`should return true if attempts = max attempts and in claiming status`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+          attempts: 5,
+          status: TaskStatus.Claiming,
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(true);
+    });
+
+    it(`should return false if attempts = max attempts and in running status`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+          attempts: 5,
+          status: TaskStatus.Running,
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(false);
+    });
   });
 
   describe('removeTask()', () => {
@@ -2253,26 +2414,6 @@ describe('TaskManagerRunner', () => {
         `Error encountered when running onTaskRemoved() hook for testbar2 "foo": Fail`
       );
     });
-
-    describe('calculateDelay', () => {
-      it('returns 30s on the first attempt', () => {
-        expect(calculateDelay(1)).toBe(30000);
-      });
-
-      it('returns delay with jitter', () => {
-        const delay = calculateDelay(5);
-        // with jitter should be random between 0 and 40 min (inclusive)
-        expect(delay).toBeGreaterThanOrEqual(0);
-        expect(delay).toBeLessThanOrEqual(2400000);
-      });
-
-      it('returns delay capped at 1 hour', () => {
-        const delay = calculateDelay(10);
-        // with jitter should be random between 0 and 1 hr (inclusive)
-        expect(delay).toBeGreaterThanOrEqual(0);
-        expect(delay).toBeLessThanOrEqual(60 * 60 * 1000);
-      });
-    });
   });
 
   interface TestOpts {
@@ -2280,6 +2421,7 @@ describe('TaskManagerRunner', () => {
     definitions?: TaskDefinitionRegistry;
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
+    strategy?: string;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -2351,11 +2493,15 @@ describe('TaskManagerRunner', () => {
       onTaskEvent: opts.onTaskEvent,
       executionContext,
       usageCounter,
-      eventLoopDelayConfig: {
-        monitor: true,
-        warn_threshold: 5000,
-      },
+      config: configMock.create({
+        event_loop_delay: {
+          monitor: true,
+          warn_threshold: 5000,
+        },
+      }),
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
+      strategy: opts.strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY,
+      getPollInterval: () => 500,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

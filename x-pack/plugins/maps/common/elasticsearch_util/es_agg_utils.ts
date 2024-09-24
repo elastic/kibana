@@ -44,7 +44,7 @@ export function extractPropertiesFromBucket(
 ): BucketProperties {
   const properties: BucketProperties = {};
   for (const key in bucket) {
-    if (ignoreKeys.includes(key) || !bucket.hasOwnProperty(key)) {
+    if (ignoreKeys.includes(key) || !Object.hasOwn(bucket, key)) {
       continue;
     }
 
@@ -72,7 +72,7 @@ export function extractPropertiesFromBucket(
       ) {
         const values = bucket[key].values;
         for (const k in values) {
-          if (values.hasOwnProperty(k)) {
+          if (Object.hasOwn(values, k)) {
             properties[key] = values[k];
             break;
           }

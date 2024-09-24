@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { NonEmptyString, User } from '../common_attributes.gen';
 
@@ -137,13 +137,17 @@ export const PromptUpdateProps = z.object({
   consumer: z.string().optional(),
 });
 
-export type PerformBulkActionRequestBody = z.infer<typeof PerformBulkActionRequestBody>;
-export const PerformBulkActionRequestBody = z.object({
+export type PerformPromptsBulkActionRequestBody = z.infer<
+  typeof PerformPromptsBulkActionRequestBody
+>;
+export const PerformPromptsBulkActionRequestBody = z.object({
   delete: BulkActionBase.optional(),
   create: z.array(PromptCreateProps).optional(),
   update: z.array(PromptUpdateProps).optional(),
 });
-export type PerformBulkActionRequestBodyInput = z.input<typeof PerformBulkActionRequestBody>;
+export type PerformPromptsBulkActionRequestBodyInput = z.input<
+  typeof PerformPromptsBulkActionRequestBody
+>;
 
-export type PerformBulkActionResponse = z.infer<typeof PerformBulkActionResponse>;
-export const PerformBulkActionResponse = PromptsBulkCrudActionResponse;
+export type PerformPromptsBulkActionResponse = z.infer<typeof PerformPromptsBulkActionResponse>;
+export const PerformPromptsBulkActionResponse = PromptsBulkCrudActionResponse;

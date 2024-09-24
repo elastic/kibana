@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { RuleCreateProps } from '../../../model/rule_schema/rule_schemas.gen';
 import { BulkCrudRulesResponse } from '../response_schema.gen';

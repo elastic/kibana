@@ -97,7 +97,7 @@ export function getOnPremApmServerInstructionSet({
         defaultMessage: 'Check APM Server status',
       }),
       success: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.successMessage', {
-        defaultMessage: 'You have correctly setup APM Server',
+        defaultMessage: 'You have correctly set up APM Server',
       }),
       error: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.errorMessage', {
         defaultMessage:

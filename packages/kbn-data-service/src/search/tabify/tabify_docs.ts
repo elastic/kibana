@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -48,7 +49,7 @@ function flattenAccum(
   params?: TabifyDocsOptions
 ) {
   for (const k in obj) {
-    if (!obj.hasOwnProperty(k)) {
+    if (!Object.hasOwn(obj, k)) {
       continue;
     }
     const val = obj[k];
@@ -97,7 +98,11 @@ function flattenAccum(
  * @param indexPattern The index pattern for the requested index if available.
  * @param params Parameters how to flatten the hit
  */
-export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDocsOptions) {
+export function flattenHit(
+  hit: Hit,
+  indexPattern?: DataView,
+  params?: TabifyDocsOptions & { flattenedFieldsComparator?: FlattenedFieldsComparator }
+) {
   const flat = {} as Record<string, any>;
 
   flattenAccum(flat, hit.fields || {}, '', indexPattern, params);
@@ -114,7 +119,7 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
     // merged, since we would otherwise duplicate values, since ignore_field_values and _source
     // contain the same values.
     for (const fieldName in hit.ignored_field_values) {
-      if (!hit.ignored_field_values.hasOwnProperty(fieldName)) {
+      if (!Object.hasOwn(hit.ignored_field_values, fieldName)) {
         continue;
       }
       const fieldValue = hit.ignored_field_values[fieldName];
@@ -146,15 +151,37 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
 
   // Use a proxy to make sure that keys are always returned in a specific order,
   // so we have a guarantee on the flattened order of keys.
-  return makeProxy(flat, indexPattern);
+  return makeProxy(flat, indexPattern, params?.flattenedFieldsComparator);
 }
 
-function makeProxy(flat: Record<string, any>, indexPattern?: DataView) {
-  function comparator(a: string | symbol, b: string | symbol) {
-    const aIsMeta = indexPattern?.metaFields?.includes(String(a));
-    const bIsMeta = indexPattern?.metaFields?.includes(String(b));
+export const getFlattenedFieldsComparator = (indexPattern?: DataView) => {
+  const metaFields = new Set(indexPattern?.metaFields);
+  const lowerMap = new Map<string, string>();
+  let aLower: string | undefined;
+  let bLower: string | undefined;
+
+  const compareLower = (a: string, b: string) => {
+    aLower = lowerMap.get(a);
+    if (aLower === undefined) {
+      aLower = a.toLowerCase();
+      lowerMap.set(a, aLower);
+    }
+    bLower = lowerMap.get(b);
+    if (bLower === undefined) {
+      bLower = b.toLowerCase();
+      lowerMap.set(b, bLower);
+    }
+    return aLower < bLower ? -1 : aLower > bLower ? 1 : 0;
+  };
+
+  return (a: string | symbol, b: string | symbol) => {
+    if (typeof a === 'symbol' || typeof b === 'symbol') {
+      return 0;
+    }
+    const aIsMeta = metaFields.has(a);
+    const bIsMeta = metaFields.has(b);
     if (aIsMeta && bIsMeta) {
-      return String(a).localeCompare(String(b));
+      return compareLower(a, b);
     }
     if (aIsMeta) {
       return 1;
@@ -162,12 +189,35 @@ function makeProxy(flat: Record<string, any>, indexPattern?: DataView) {
     if (bIsMeta) {
       return -1;
     }
-    return String(a).localeCompare(String(b));
-  }
+    return compareLower(a, b);
+  };
+};
+
+export type FlattenedFieldsComparator = ReturnType<typeof getFlattenedFieldsComparator>;
+
+function makeProxy(
+  flat: Record<string, any>,
+  indexPattern?: DataView,
+  flattenedFieldsComparator?: FlattenedFieldsComparator
+) {
+  let cachedKeys: Array<string | symbol> | undefined;
 
   return new Proxy(flat, {
+    defineProperty: (...args) => {
+      cachedKeys = undefined;
+      return Reflect.defineProperty(...args);
+    },
+    deleteProperty: (...args) => {
+      cachedKeys = undefined;
+      return Reflect.deleteProperty(...args);
+    },
     ownKeys: (target) => {
-      return Reflect.ownKeys(target).sort(comparator);
+      if (!cachedKeys) {
+        cachedKeys = Reflect.ownKeys(target).sort(
+          flattenedFieldsComparator ?? getFlattenedFieldsComparator(indexPattern)
+        );
+      }
+      return cachedKeys;
     },
   });
 }

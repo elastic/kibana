@@ -6,6 +6,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, DocLinksStart } from '@kbn/core/public';
+import { BrowserUrlService } from '@kbn/share-plugin/public';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { ObservabilityFetchDataPlugins } from '../../../../typings/fetch_overview_data';
 import { paths } from '../../../../../common/locators/paths';
 
@@ -23,8 +25,10 @@ export interface ObservabilityStatusContent {
 
 export const getContent = (
   http: HttpSetup,
-  docLinks: DocLinksStart
+  docLinks: DocLinksStart,
+  urlService: BrowserUrlService
 ): ObservabilityStatusContent[] => {
+  const { logsLocator } = getLogsLocatorsFromUrlService(urlService);
   return [
     {
       id: 'infra_logs',
@@ -41,9 +45,9 @@ export const getContent = (
       addLink: http.basePath.prepend('/app/integrations/browse?q=logs'),
       learnMoreLink: docLinks.links.observability.monitorLogs,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.logs.goToAppTitle', {
-        defaultMessage: 'Show log stream',
+        defaultMessage: 'Show Logs Explorer',
       }),
-      goToAppLink: http.basePath.prepend('/app/logs/stream'),
+      goToAppLink: logsLocator.getRedirectUrl({}),
       weight: 1,
     },
     {

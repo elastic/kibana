@@ -119,21 +119,15 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.click('.euiForm');
     await page.click('text=To: Email is required for selected email connector');
   });
-  step(
-    'Click .euiComboBox.euiComboBox--fullWidth.euiComboBox-isInvalid .euiFormControlLayout .euiFormControlLayout__childrenWrapper .euiComboBox__inputWrap',
-    async () => {
-      await page.click(
-        '.euiComboBox.euiComboBox--fullWidth.euiComboBox-isInvalid .euiFormControlLayout .euiFormControlLayout__childrenWrapper .euiComboBox__inputWrap'
-      );
-      await page.fill(
-        'text=To BccCombo box. Selected. Combo box input. Type some text or, to display a list >> input[role="combobox"]',
-        'test@gmail.com'
-      );
-      await page.isDisabled('button:has-text("Apply changes")');
-      await page.click('[aria-label="Account menu"]');
-      await page.click('text=Log out');
-    }
-  );
+  step('Fill email fields', async () => {
+    await page
+      .getByTestId('toEmailAddressInput')
+      .getByTestId('comboBoxSearchInput')
+      .fill('test@gmail.com');
+    await page.isDisabled('button:has-text("Apply changes")');
+    await page.click('[aria-label="Account menu"]');
+    await page.click('text=Log out');
+  });
 
   step('Login to kibana with readonly', async () => {
     await syntheticsApp.loginToKibana('viewer', 'changeme');

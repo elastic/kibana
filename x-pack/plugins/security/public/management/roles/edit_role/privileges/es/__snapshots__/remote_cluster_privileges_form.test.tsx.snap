@@ -32,11 +32,7 @@ exports[`it renders without crashing 1`] = `
         >
           <EuiFlexItem>
             <EuiFormRow
-              describedByIds={Array []}
-              display="row"
               fullWidth={true}
-              hasChildLabel={true}
-              hasEmptyLabelSpace={false}
               isInvalid={false}
               label={
                 <Memo(MemoizedFormattedMessage)
@@ -44,7 +40,6 @@ exports[`it renders without crashing 1`] = `
                   id="xpack.security.management.editRole.remoteClusterPrivilegeForm.clustersFormRowLabel"
                 />
               }
-              labelType="label"
             >
               <RemoteClusterComboBox
                 data-test-subj="remoteClusterClustersInput0"
@@ -67,11 +62,7 @@ exports[`it renders without crashing 1`] = `
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
-              describedByIds={Array []}
-              display="row"
               fullWidth={true}
-              hasChildLabel={true}
-              hasEmptyLabelSpace={false}
               isInvalid={false}
               label={
                 <Memo(MemoizedFormattedMessage)
@@ -79,7 +70,6 @@ exports[`it renders without crashing 1`] = `
                   id="xpack.security.management.editRole.remoteClusterPrivilegeForm.privilegesFormRowLabel"
                 />
               }
-              labelType="label"
             >
               <EuiComboBox
                 async={false}

@@ -18,7 +18,9 @@ import {
   MARK_ALERT_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
   SEND_ALERT_TO_TIMELINE_BTN,
-  SELECT_AGGREGATION_CHART,
+  ALERT_CHARTS_TOGGLE_BUTTON,
+  SELECT_COUNTS_TABLE,
+  SELECT_TREEMAP,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
   CLOSE_FLYOUT,
@@ -264,12 +266,20 @@ export const openAlerts = () => {
   cy.get(OPEN_ALERT_BTN).click();
 };
 
-export const selectCountTable = () => {
-  cy.get(SELECT_AGGREGATION_CHART).click({ force: true });
+export const toggleKPICharts = () => {
+  cy.get(ALERT_CHARTS_TOGGLE_BUTTON).click();
+};
+
+export const selectAlertsCountTable = () => {
+  cy.get(SELECT_COUNTS_TABLE).click();
 };
 
 export const selectAlertsHistogram = () => {
   cy.get(SELECT_HISTOGRAM).click();
+};
+
+export const selectAlertsTreemap = () => {
+  cy.get(SELECT_TREEMAP).click();
 };
 
 export const goToAcknowledgedAlerts = () => {

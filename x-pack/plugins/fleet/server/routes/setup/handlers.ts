@@ -13,6 +13,7 @@ import { defaultFleetErrorHandler } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import { isSecretStorageEnabled } from '../../services/secrets';
+import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 
 export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
   const coreContext = await context.core;
@@ -24,7 +25,14 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const isFleetServerMissing = !(await hasFleetServers(esClient, soClient));
+
+    const [hasFleetServersRes, useSecretsStorage, isSpaceAwarenessEnabledRes] = await Promise.all([
+      hasFleetServers(esClient, soClient),
+      isSecretStorageEnabled(esClient, soClient),
+      isSpaceAwarenessEnabled(),
+    ]);
+
+    const isFleetServerMissing = !hasFleetServersRes;
 
     const isFleetServerStandalone =
       appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
@@ -43,13 +51,12 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       missingOptionalFeatures.push('encrypted_saved_object_encryption_key_required');
     }
 
-    const useSecretsStorage = await isSecretStorageEnabled(esClient, soClient);
-
     const body: GetFleetStatusResponse = {
       isReady: missingRequirements.length === 0,
       missing_requirements: missingRequirements,
       missing_optional_features: missingOptionalFeatures,
       is_secrets_storage_enabled: useSecretsStorage,
+      is_space_awareness_enabled: isSpaceAwarenessEnabledRes,
     };
 
     const packageVerificationKeyId = await getGpgKeyIdOrUndefined();

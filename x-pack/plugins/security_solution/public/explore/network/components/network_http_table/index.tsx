@@ -12,7 +12,7 @@ import { networkActions, networkModel, networkSelectors } from '../../store';
 import type { NetworkHttpEdges } from '../../../../../common/search_strategy';
 import { NetworkHttpFields } from '../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import type { Criteria, ItemsPerRow, SiemTables } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 
 import { getNetworkHttpColumns } from './columns';
@@ -64,7 +64,7 @@ const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
       ? networkModel.NetworkTableType.http
       : networkModel.NetworkDetailsTableType.http;
 
-  const updateLimitPagination = useCallback(
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) =>
       dispatch(
         networkActions.updateNetworkTable({
@@ -76,7 +76,7 @@ const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
     [dispatch, type, tableType]
   );
 
-  const updateActivePage = useCallback(
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
     (newPage) =>
       dispatch(
         networkActions.updateNetworkTable({
