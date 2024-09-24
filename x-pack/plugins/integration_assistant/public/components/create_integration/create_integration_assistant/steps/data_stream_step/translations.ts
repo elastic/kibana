@@ -204,20 +204,20 @@ export const RETRY = i18n.translate('xpack.integrationAssistant.step.dataStream.
 
 export const ERROR_TRANSLATION = {
   [RECURSION_LIMIT_ANALYZE_LOGS_ERROR_CODE]: i18n.translate(
-    'xpack.plugins.integration_assistant.server.errors.recursionLimitAnalyzeLogsErrorMessage',
+    'xpack.integrationAssistant.errors.recursionLimitAnalyzeLogsErrorMessage',
     {
       defaultMessage:
         'Please verify the format of log samples is correct and try again. Try with a fewer samples if error persists.',
     }
   ),
   [RECURSION_LIMIT_ERROR_CODE]: i18n.translate(
-    'xpack.plugins.integration_assistant.server.errors.recursionLimitReached',
+    'xpack.integrationAssistant.errors.recursionLimitReached',
     {
       defaultMessage: 'Max attempts exceeded. Please try again.',
     }
   ),
   [UNSUPPORTED_LOG_SAMPLES_FORMAT_ERROR_CODE]: i18n.translate(
-    'xpack.plugins.integration_assistant.server.errors.unsupportedLogSamples',
+    'xpack.integrationAssistant.errors.unsupportedLogSamples',
     {
       defaultMessage: 'Unsupported log format in the samples.',
     }
