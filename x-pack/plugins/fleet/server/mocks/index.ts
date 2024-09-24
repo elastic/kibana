@@ -283,6 +283,7 @@ export function createUninstallTokenServiceMock(): DeeplyMockedKeys<UninstallTok
 export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContract> => {
   const fleetAuthzMock = createFleetAuthzMock();
   const fleetArtifactsClient = createArtifactsClientMock();
+  const fleetActionsClient = createFleetActionsClientMock();
 
   const startContract: DeeplyMockedKeys<FleetStartContract> = {
     fleetSetupCompleted: jest.fn(async () => {}),
@@ -296,7 +297,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     createFilesClient: createFleetFilesClientFactoryMock(),
     messageSigningService: createMessageSigningServiceMock(),
     uninstallTokenService: createUninstallTokenServiceMock(),
-    createFleetActionsClient: jest.fn((_) => createFleetActionsClientMock()),
+    createFleetActionsClient: jest.fn((_) => fleetActionsClient),
     getPackageSpecTagId: jest.fn(getPackageSpecTagId),
   };
 
