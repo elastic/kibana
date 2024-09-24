@@ -18,9 +18,10 @@ interface NewObj {
   };
 }
 
-interface Field {
+export interface Field {
   name: string;
   type: string;
+  description?: string;
   fields?: Field[];
 }
 
@@ -235,7 +236,7 @@ export function mergeSamples(objects: any[]): string {
 }
 
 export function flattenObjectsList(
-  obj: any[]
+  obj: Field[]
 ): Array<{ name: string; type: string; description?: string }> {
   const result = flattenObject(obj);
 
@@ -243,7 +244,7 @@ export function flattenObjectsList(
 }
 
 function flattenObject(
-  obj: any[],
+  obj: Field[],
   parentKey: string = '',
   separator: string = '.'
 ): Array<{ name: string; type: string; description?: string }> {
@@ -272,6 +273,6 @@ function sortListOfObjects(
   objectsList: Array<{ name: string; type: string; description?: string }>
 ): Array<{ name: string; type: string; description?: string }> {
   return objectsList.sort((a, b) => {
-    return (a.name || '').localeCompare(b.name || '');
+    return a.name.localeCompare(b.name);
   });
 }

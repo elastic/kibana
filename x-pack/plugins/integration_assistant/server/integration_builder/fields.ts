@@ -7,10 +7,8 @@
 
 import nunjucks from 'nunjucks';
 import { load } from 'js-yaml';
-import { flattenObjectsList } from '../util/samples';
+import { Field, flattenObjectsList } from '../util/samples';
 import { createSync, generateFields, mergeSamples } from '../util';
-import { Docs } from '../../common';
-
 export function createFieldMapping(
   packageName: string,
   dataStreamName: string,
@@ -27,7 +25,7 @@ function createBaseFields(
   specificDataStreamDir: string,
   packageName: string,
   dataStreamName: string
-): Docs[] {
+): Field[] {
   const datasetName = `${packageName}.${dataStreamName}`;
   const baseFields = nunjucks.render('base_fields.yml.njk', {
     module: packageName,
@@ -35,18 +33,18 @@ function createBaseFields(
   });
   createSync(`${specificDataStreamDir}/base-fields.yml`, baseFields);
 
-  return load(baseFields) as Docs[];
+  return load(baseFields) as Field[];
 }
 
-function createCustomFields(specificDataStreamDir: string, pipelineResults: object[]): Docs[] {
+function createCustomFields(specificDataStreamDir: string, pipelineResults: object[]): Field[] {
   const mergedResults = mergeSamples(pipelineResults);
   const fieldKeys = generateFields(mergedResults);
   createSync(`${specificDataStreamDir}/fields/fields.yml`, fieldKeys);
 
-  return load(fieldKeys) as Docs[];
+  return load(fieldKeys) as Field[];
 }
 
-function mergeFields(baseFields: object[], customFields: object[]): object[] {
+function mergeFields(baseFields: Field[], customFields: Field[]): Field[] {
   const fields = [...baseFields, ...customFields];
 
   return flattenObjectsList(fields);
