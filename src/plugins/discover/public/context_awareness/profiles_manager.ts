@@ -53,7 +53,7 @@ export interface GetProfilesOptions {
 export class ProfilesManager {
   private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
-  public readonly ebtContextManager: DiscoverEBTContextManager;
+  private readonly ebtContextManager: DiscoverEBTContextManager;
 
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;

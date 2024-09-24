@@ -28,13 +28,12 @@ describe('DiscoverEBTContextManager', () => {
         name: 'discover_context',
         context$: expect.any(BehaviorSubject),
         schema: {
-          dscProfiles: {
+          discoverProfiles: {
             type: 'array',
             items: {
               type: 'keyword',
               _meta: {
-                description:
-                  'List of profiles which are activated by Discover Context Awareness logic',
+                description: 'List of active Discover context awareness profiles',
               },
             },
           },
