@@ -28,7 +28,7 @@ import {
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { LensRuntimeState, TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import {
@@ -218,7 +218,7 @@ export function LensEditConfigurationFlyout({
         updateByRefInput?.(savedObjectId);
       }
     }
-    onCancelCallback();
+    onCancelCallback?.();
     closeFlyout?.();
   }, [
     attributesChanged,
@@ -239,6 +239,9 @@ export function LensEditConfigurationFlyout({
   );
 
   const onApply = useCallback(() => {
+    if (visualization.activeId == null) {
+      return;
+    }
     const dsStates = Object.fromEntries(
       Object.entries(datasourceStates).map(([id, ds]) => {
         const dsState = ds.state;
@@ -260,7 +263,7 @@ export function LensEditConfigurationFlyout({
           activeVisualization,
         })
       : [];
-    const attrs: LensRuntimeState['attributes'] = {
+    const attrs: TypedLensSerializedState['attributes'] = {
       ...attributes,
       state: {
         ...attributes.state,
@@ -288,8 +291,6 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    // @TODO: fix this later
-    // @ts-expect-error
     onApplyCallback?.(attrs);
     closeFlyout?.();
   }, [

@@ -31,7 +31,7 @@ import { initializeVisualizationContext } from './initializers/initialize_visual
 import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
-import { apiHasLensComponentCallbacks } from './renderer/type_guards';
+import { apiHasLensComponentCallbacks } from './type_guards';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -81,7 +81,7 @@ export const createLensEmbeddableFactory = (
        * - cleanup: a function to clean up any resources when the component is unmounted
        *
        * Mind: the getState argument is ok to pass as long as it is lazy evaluated (i.e. called within a function).
-       * If there's something that should be immediately computed use the "state" deserialized variable.
+       * If there's something that should be immediately computed use the "initialState" deserialized variable.
        */
       const stateConfig = initializeStateManagement(initialState);
       const inspectorConfig = initializeInspector(services);
@@ -104,7 +104,7 @@ export const createLensEmbeddableFactory = (
         stateConfig,
         services
       );
-      const searchContextConfig = initializeSearchContext(initialState);
+      const searchContextConfig = initializeSearchContext(initialState, parentApi);
       const dataConfig = initializeData(getState, observables.variables);
       const integrationsConfig = initializeIntegrations(getState);
       const actionsConfig = initializeActionApi(

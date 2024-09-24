@@ -10,7 +10,13 @@ import {
   apiPublishesPanelTitle,
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { LensApiCallbacks, LensApi } from './types';
+import { isObject } from 'lodash';
+import {
+  LensApiCallbacks,
+  LensApi,
+  LensComponentForwardedProps,
+  LensPublicCallbacks,
+} from './types';
 
 function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
   const fns = [
@@ -32,3 +38,31 @@ export const isLensApi = (api: unknown): api is LensApi => {
       apiPublishesUnifiedSearch(api)
   );
 };
+
+export function apiHasLensComponentCallbacks(api: unknown): api is LensPublicCallbacks {
+  return (
+    isObject(api) &&
+    ['onFilter', 'onBrushEnd', 'onLoad', 'onTableRowClick', 'onBeforeBadgesRender'].some((fn) =>
+      Object.hasOwn(api, fn)
+    )
+  );
+}
+
+export function apiHasLensComponentProps(api: unknown): api is LensComponentForwardedProps {
+  return (
+    isObject(api) &&
+    ['style', 'className', 'noPadding', 'viewMode', 'abortController'].some((prop) =>
+      Object.hasOwn(api, prop)
+    )
+  );
+}
+
+export function apiHasAbortController(api: unknown): api is { abortController: AbortController } {
+  return isObject(api) && Object.hasOwn(api, 'abortController');
+}
+
+export function apiHasLastReloadRequestTime(
+  api: unknown
+): api is { lastReloadRequestTime: number } {
+  return isObject(api) && Object.hasOwn(api, 'lastReloadRequestTime');
+}

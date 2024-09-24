@@ -41,7 +41,7 @@ export interface EditConfigPanelProps {
   updatePanelState: (
     datasourceState: unknown,
     visualizationState: unknown,
-    visualiationId?: string
+    visualizationId?: string
   ) => void;
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */
@@ -80,9 +80,9 @@ export interface EditConfigPanelProps {
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   hidesSuggestions?: boolean;
   /** Apply button handler */
-  onApply: (attrs: TypedLensSerializedState['attributes']) => void;
+  onApply?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Cancel button handler */
-  onCancel: () => void;
+  onCancel?: () => void;
   // in cases where the embeddable is not filtered by time
   // (e.g. through unified search) set this property to true
   hideTimeFilterInfo?: boolean;

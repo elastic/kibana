@@ -13,7 +13,7 @@ import { ReactiveConfigs } from './initialize_observables';
 import { GetStateType } from '../types';
 
 export function initializeData(
-  getState: GetStateType,
+  getLatestState: GetStateType,
   { dataLoading$ }: ReactiveConfigs['variables']
 ): {
   api: PublishesDataLoading & HasSerializableState;
@@ -24,7 +24,7 @@ export function initializeData(
   return {
     api: {
       dataLoading: dataLoading$,
-      serializeState: () => ({ rawState: getState(), references: [] }),
+      serializeState: () => ({ rawState: getLatestState(), references: [] }),
     },
     comparators: {},
     cleanup: noop,

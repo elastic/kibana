@@ -30,7 +30,7 @@ import type {
   LensSharedProps,
 } from '../types';
 import { createComparatorForStatePortion } from './initialize_state_management';
-import { apiHasLensComponentProps } from '../renderer/type_guards';
+import { apiHasLensComponentProps } from '../type_guards';
 
 // Convenience type for the serialized props of this initializer
 type SerializedProps = SerializedTitles &
@@ -41,7 +41,7 @@ type SerializedProps = SerializedTitles &
 
 export function initializePanelAndLibraryServices(
   initialState: LensRuntimeState,
-  getState: () => LensRuntimeState,
+  getLatestState: () => LensRuntimeState,
   parentApi: unknown,
   {
     variables,
@@ -71,7 +71,7 @@ export function initializePanelAndLibraryServices(
       savedObjectId: savedObjectId$,
       libraryId$: savedObjectId$,
       saveToLibrary: async (_title: string) => {
-        const state = getState();
+        const state = getLatestState();
         const savedObjectId = await attributeService.saveToLibrary(
           state.attributes,
           state.attributes.references
@@ -94,8 +94,8 @@ export function initializePanelAndLibraryServices(
           copyOnSave: false,
         });
       },
-      canLinkToLibrary: async () => !getState().savedObjectId,
-      canUnlinkFromLibrary: async () => Boolean(getState().savedObjectId),
+      canLinkToLibrary: async () => !getLatestState().savedObjectId,
+      canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
       unlinkFromLibrary: () => {
         savedObjectId$.next(undefined);
         if ((titlesApi.panelTitle.getValue() ?? '').length === 0) {
@@ -108,7 +108,7 @@ export function initializePanelAndLibraryServices(
         defaultPanelDescription$.next(undefined);
       },
       getByValueRuntimeSnapshot(): object {
-        const { savedObjectId, ...rest } = getState();
+        const { savedObjectId, ...rest } = getLatestState();
         return rest;
       },
     },

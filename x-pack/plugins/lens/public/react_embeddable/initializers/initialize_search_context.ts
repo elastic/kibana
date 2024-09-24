@@ -10,30 +10,43 @@ import {
   PublishesUnifiedSearch,
   PublishingSubject,
   StateComparators,
-  getUnchangingComparator,
   initializeTimeRange,
 } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
+import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { buildObservableVariable } from '../helper';
 import { LensRuntimeState, LensUnifiedSearchContext } from '../types';
 
-export function initializeSearchContext(state: LensRuntimeState): {
+export function initializeSearchContext(
+  initialState: LensRuntimeState,
+  parentApi: unknown
+): {
   api: PublishesUnifiedSearch & { searchSessionId$: PublishingSubject<string | undefined> };
   comparators: StateComparators<LensUnifiedSearchContext>;
   serialize: () => LensUnifiedSearchContext;
   cleanup: () => void;
 } {
-  const [searchSessionId$] = buildObservableVariable<string | undefined>('');
-
-  const [filters$, filtersComparator] = buildObservableVariable<Filter[] | undefined>(undefined);
-  const [query$, queryComparator] = buildObservableVariable<Query | AggregateQuery | undefined>(
-    undefined
+  const [searchSessionId$, searchSessionComparator] = buildObservableVariable<string | undefined>(
+    apiPublishesSearchSession(parentApi) ? parentApi.searchSessionId$ : undefined
   );
+
+  const [lastReloadRequestTime, lastReloadRequestTimeComparator] = buildObservableVariable<
+    number | undefined
+  >(undefined);
+
+  const [filters$, filtersComparator] = buildObservableVariable<Filter[] | undefined>(
+    initialState.filters
+  );
+
+  const [query$, queryComparator] = buildObservableVariable<Query | AggregateQuery | undefined>(
+    initialState.query
+  );
+
   const [timeslice$, timesliceComparator] = buildObservableVariable<[number, number] | undefined>(
     undefined
   );
 
-  const timeRange = initializeTimeRange(state);
+  const timeRange = initializeTimeRange(initialState);
   return {
     api: {
       searchSessionId$,
@@ -48,7 +61,8 @@ export function initializeSearchContext(state: LensRuntimeState): {
       filters: filtersComparator,
       timeslice: timesliceComparator,
       ...timeRange.comparators,
-      searchSessionId: getUnchangingComparator<LensRuntimeState, 'searchSessionId'>(),
+      searchSessionId: searchSessionComparator,
+      lastReloadRequestTime: lastReloadRequestTimeComparator,
     },
     cleanup: noop,
     serialize: () => ({
@@ -56,6 +70,7 @@ export function initializeSearchContext(state: LensRuntimeState): {
       filters: filters$.getValue(),
       query: query$.getValue(),
       timeslice: timeslice$.getValue(),
+      lastReloadRequestTime: lastReloadRequestTime.getValue(),
       ...timeRange.serialize(),
     }),
   };

@@ -16,24 +16,24 @@ import { emptySerializer } from '../helper';
 import type { GetStateType } from '../types';
 import type { IntegrationCallbacks } from '../types';
 
-export function initializeIntegrations(getState: GetStateType): {
+export function initializeIntegrations(getLatestState: GetStateType): {
   api: Omit<IntegrationCallbacks, 'updateState'>;
   cleanup: () => void;
   serialize: () => {};
   comparators: {};
 } {
   const isTextBasedLanguage = () => {
-    const currentState = getState().attributes;
+    const currentState = getLatestState().attributes;
     return !isOfQueryType(currentState?.state.query);
   };
   return {
     api: {
       // TODO: workout why we have this duplicated
-      getFullAttributes: () => getState().attributes,
-      getSavedVis: () => getState().attributes,
+      getFullAttributes: () => getLatestState().attributes,
+      getSavedVis: () => getLatestState().attributes,
       isTextBasedLanguage,
       getTextBasedLanguage: () => {
-        const query = getState().attributes?.state.query;
+        const query = getLatestState().attributes?.state.query;
         if (!query || !isOfAggregateQueryType(query)) {
           return;
         }

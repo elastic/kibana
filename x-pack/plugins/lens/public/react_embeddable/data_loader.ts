@@ -27,7 +27,7 @@ import { prepareCallbacks } from './expressions/callbacks';
 import { buildUserMessagesHelper } from './user_messages/methods';
 import { getLogError } from './expressions/telemetry';
 import type { SharingSavedObjectProps } from '../types';
-import { apiHasLensComponentCallbacks } from './renderer/type_guards';
+import { apiHasLensComponentCallbacks } from './type_guards';
 
 /**
  * The function computes the expression used to render the panel and produces the necessary props

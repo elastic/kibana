@@ -206,6 +206,7 @@ export interface LensUnifiedSearchContext {
   timeRange?: TimeRange;
   timeslice?: [number, number];
   searchSessionId?: string;
+  lastReloadRequestTime?: number;
 }
 
 export interface LensPanelProps {

@@ -215,7 +215,7 @@ function createViewUnderlyingDataApis(
 export function initializeActionApi(
   uuid: string,
   initialState: LensRuntimeState,
-  getState: GetStateType,
+  getLatestState: GetStateType,
   titleApi: { panelTitle: PublishingSubject<string | undefined> },
   visualizationContextHelper: VisualizationContextHelper,
   services: LensEmbeddableStartServices
@@ -235,7 +235,7 @@ export function initializeActionApi(
   return {
     api: {
       ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
-      ...createViewUnderlyingDataApis(getState, visualizationContextHelper, services),
+      ...createViewUnderlyingDataApis(getLatestState, visualizationContextHelper, services),
     },
     comparators: {
       ...(dynamicActionsApi?.dynamicActionsComparator ?? {

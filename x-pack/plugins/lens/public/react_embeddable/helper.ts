@@ -49,7 +49,7 @@ export function makeComparator<T extends unknown>(
 }
 
 export function buildObservableVariable<T extends unknown>(
-  variable: T | PublishingSubject<NonNullable<T>>
+  variable: T | PublishingSubject<T>
 ): ObservableFactoryReturnType<T> {
   if (variable instanceof BehaviorSubject) {
     return [variable, makeComparator(variable as BehaviorSubject<T>)];

@@ -9,7 +9,7 @@ import { type ViewMode } from '@kbn/presentation-publishing';
 
 import { buildObservableVariable } from '../helper';
 import { ExpressionWrapperProps } from '../types';
-import { apiHasAbortController, apiHasLensComponentProps } from '../renderer/type_guards';
+import { apiHasAbortController, apiHasLensComponentProps } from '../type_guards';
 
 export function initializeObservables(parentApi: unknown) {
   const [viewMode$, viewModeComparator] = buildObservableVariable<ViewMode | undefined>(
