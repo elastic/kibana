@@ -33,7 +33,7 @@ export const DEFAULT_LEGEND: WaffleLegendOptions = {
 };
 
 export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
-  metric: { type: 'cpuTotal' },
+  metric: { type: 'cpuV2' },
   groupBy: [],
   nodeType: 'host',
   view: 'map',

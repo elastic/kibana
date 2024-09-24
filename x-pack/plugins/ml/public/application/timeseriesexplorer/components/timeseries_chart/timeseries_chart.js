@@ -24,6 +24,8 @@ import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-u
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 
+import { getTableItemClosestToTimestamp } from '../../../../../common/util/anomalies_table_utils';
+
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -161,9 +163,18 @@ class TimeseriesChartIntl extends Component {
   rowMouseenterSubscriber = null;
   rowMouseleaveSubscriber = null;
 
-  constructor(props) {
+  constructor(props, constructorContext) {
     super(props);
     this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
+
+    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
+      constructorContext.services.uiSettings,
+      constructorContext.services.mlServices.mlApi,
+      constructorContext.services.mlServices.mlResultsService
+    );
+    this.getTimeBuckets = timeBucketsServiceFactory(
+      constructorContext.services.uiSettings
+    ).getTimeBuckets;
   }
 
   componentWillUnmount() {
@@ -179,15 +190,6 @@ class TimeseriesChartIntl extends Component {
   }
 
   componentDidMount() {
-    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
-      this.context.services.uiSettings,
-      this.context.services.mlServices.mlApiServices,
-      this.context.services.mlServices.mlResultsService
-    );
-    this.getTimeBuckets = timeBucketsServiceFactory(
-      this.context.services.uiSettings
-    ).getTimeBuckets;
-
     const { svgWidth, svgHeight } = this.props;
     const { focusHeight: focusHeightIncoming, focusChartHeight: focusChartIncoming } = svgHeight
       ? getChartHeights(svgHeight)
@@ -1582,13 +1584,7 @@ class TimeseriesChartIntl extends Component {
   showAnomalyPopover(marker, circle) {
     const anomalyTime = marker.date.getTime();
 
-    // The table items could be aggregated, so we have to find the item
-    // that has the closest timestamp to the selected anomaly from the chart.
-    const tableItem = this.props.tableData.anomalies.reduce((closestItem, currentItem) => {
-      const closestItemDelta = Math.abs(anomalyTime - closestItem.source.timestamp);
-      const currentItemDelta = Math.abs(anomalyTime - currentItem.source.timestamp);
-      return currentItemDelta < closestItemDelta ? currentItem : closestItem;
-    }, this.props.tableData.anomalies[0]);
+    const tableItem = getTableItemClosestToTimestamp(this.props.tableData.anomalies, anomalyTime);
 
     if (tableItem) {
       // Overwrite the timestamp of the possibly aggregated table item with the

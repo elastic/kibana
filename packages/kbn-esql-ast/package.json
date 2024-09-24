@@ -2,7 +2,7 @@
     "name": "@kbn/esql-ast",
     "version": "1.0.0",
     "private": true,
-    "license": "SSPL-1.0 OR Elastic License 2.0",
+    "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
     "scripts": {
         "build:antlr4:esql": "antlr -Dlanguage=TypeScript src/antlr/esql_lexer.g4 src/antlr/esql_parser.g4 && node ./scripts/fix_generated_antlr.js && node ./scripts/esql_update_ast_script.js",
         "prebuild:antlr4": "brew bundle --file=./scripts/antlr4_tools/brewfile",

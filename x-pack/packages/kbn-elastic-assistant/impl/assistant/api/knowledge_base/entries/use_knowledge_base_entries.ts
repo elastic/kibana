@@ -10,6 +10,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
+  FindKnowledgeBaseEntriesRequestQuery,
   FindKnowledgeBaseEntriesResponse,
 } from '@kbn/elastic-assistant-common';
 
@@ -17,8 +18,21 @@ import { useCallback } from 'react';
 
 export interface UseKnowledgeBaseEntriesParams {
   http: HttpSetup;
+  query: FindKnowledgeBaseEntriesRequestQuery;
   signal?: AbortSignal | undefined;
 }
+
+const defaultQuery: FindKnowledgeBaseEntriesRequestQuery = {
+  page: 1,
+  per_page: 100,
+};
+
+export const KNOWLEDGE_BASE_ENTRY_QUERY_KEY = [
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
+  defaultQuery.page,
+  defaultQuery.per_page,
+  API_VERSIONS.internal.v1,
+];
 
 /**
  * Hook for fetching Knowledge Base Entries.
@@ -27,24 +41,16 @@ export interface UseKnowledgeBaseEntriesParams {
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
- * @param {Function} [options.onFetch] - transformation function for kb entries fetch result
+ * @param {Function} [options.query] - Query params to include, like filters, pagination, etc.
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {useQuery} hook for fetching Knowledge Base Entries
+ * @returns hook for fetching Knowledge Base Entries
  */
-const query = {
-  page: 1,
-  perPage: 100,
-};
-
-export const KNOWLEDGE_BASE_ENTRY_QUERY_KEY = [
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
-  query.page,
-  query.perPage,
-  API_VERSIONS.internal.v1,
-];
-
-export const useKnowledgeBaseEntries = ({ http, signal }: UseKnowledgeBaseEntriesParams) =>
+export const useKnowledgeBaseEntries = ({
+  http,
+  query = defaultQuery,
+  signal,
+}: UseKnowledgeBaseEntriesParams) =>
   useQuery(
     KNOWLEDGE_BASE_ENTRY_QUERY_KEY,
     async () =>

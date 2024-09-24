@@ -8,7 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import {
-  PerformBulkActionRequestBody,
+  PerformPromptsBulkActionRequestBody,
   PromptCreateProps,
   PromptResponse,
   PromptUpdateProps,
@@ -123,7 +123,7 @@ export const getQueryPromptParams = (isUpdate?: boolean): PromptCreateProps | Pr
       };
 };
 
-export const getPerformBulkActionSchemaMock = (): PerformBulkActionRequestBody => ({
+export const getPerformBulkActionSchemaMock = (): PerformPromptsBulkActionRequestBody => ({
   create: [getQueryPromptParams(false) as PromptCreateProps],
   delete: {
     ids: ['99403909-ca9b-49ba-9d7a-7e5320e68d05'],

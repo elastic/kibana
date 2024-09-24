@@ -241,6 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
             max_attempts: 2,
+            labels: {},
           });
         }
       } finally {
@@ -425,6 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv6: true,
             ipv4: true,
             max_attempts: 2,
+            labels: {},
           });
         }
       } finally {
@@ -542,6 +544,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv4: true,
             params: '',
             max_attempts: 2,
+            labels: {},
           });
         }
       } finally {
@@ -656,6 +659,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv6: true,
             params: '',
             max_attempts: 2,
+            labels: {},
           });
         }
       } finally {
@@ -1730,6 +1734,7 @@ export default function ({ getService }: FtrProviderContext) {
             monitors: [
               {
                 ...projectMonitors.monitors[0],
+                namespace: 'custom_namespace',
                 privateLocations: ['Test private location 0'],
                 enabled: false,
               },
@@ -1758,6 +1763,7 @@ export default function ({ getService }: FtrProviderContext) {
             projectId: project,
             locationId: testPolicyId,
             locationName: 'Test private location 0',
+            namespace: 'custom_namespace',
           })
         );
       } finally {

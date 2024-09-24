@@ -376,7 +376,7 @@ export const ActionTypeForm = ({
       throttleUnit={actionThrottleUnit}
       hasAlertsMappings={hasAlertsMappings}
       onNotifyWhenChange={useCallback(
-        (notifyWhen) => {
+        (notifyWhen: RuleNotifyWhenType) => {
           setActionFrequencyProperty('notifyWhen', notifyWhen, index);
         },
         [setActionFrequencyProperty, index]

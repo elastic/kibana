@@ -407,7 +407,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
             if (outcome === 'authorized') {
               expectSavedObjectSuccessResponse(response, exactMatchId);
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -429,7 +429,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
             if (outcome === 'authorized') {
               expectSavedObjectSuccessResponse(response, inexactMatchIdA, 'conflict_1a_space_2');
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -450,7 +450,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
             if (outcome === 'authorized') {
               expectSavedObjectSuccessResponse(response, inexactMatchIdB, 'conflict_1b_space_2');
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -471,7 +471,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
             if (outcome === 'authorized') {
               expectSavedObjectSuccessResponse(response, inexactMatchIdC, 'conflict_1c_space_2');
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -492,7 +492,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
             if (outcome === 'authorized') {
               expectSavedObjectSuccessResponse(response, ambiguousConflictId, 'conflict_2_space_2');
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);

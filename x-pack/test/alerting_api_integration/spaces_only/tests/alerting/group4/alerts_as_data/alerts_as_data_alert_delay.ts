@@ -70,7 +70,8 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
     '.internal.alerts-observability.test.alerts.alerts-default-000001';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
-  describe('alerts as data', () => {
+  describe('alerts as data', function () {
+    this.tags('skipFIPS');
     before(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
@@ -81,7 +82,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
     });
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
       await es.deleteByQuery({
         index: [alertsAsDataIndex, alwaysFiringAlertsAsDataIndex],
         query: { match_all: {} },

@@ -1,0 +1,34 @@
+# GREATEST
+
+The GREATEST function returns the maximum value from multiple columns.
+
+## Syntax
+
+`GREATEST(first, rest)`
+
+### Parameters
+
+#### first
+
+The first column to evaluate.
+
+#### rest
+
+The remaining columns to evaluate.
+
+## Examples
+
+```esql
+ROW a = 10, b = 20
+| EVAL g = GREATEST(a, b)
+```
+
+```esql
+ROW x = "apple", y = "banana", z = "cherry"
+| EVAL max_fruit = GREATEST(x, y, z)
+```
+
+## Notes
+
+- When applied to `keyword` or `text` fields, the GREATEST function returns the last string in alphabetical order.
+- When applied to `boolean` columns, it returns `true` if any values are `true`.

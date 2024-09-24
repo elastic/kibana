@@ -45,3 +45,25 @@ export const updateLatestExecutedState = async (context: InstallContext) => {
     }
   }
 };
+
+export const cleanupLatestExecutedState = async (context: InstallContext) => {
+  const { logger, savedObjectsClient, packageInstallContext } = context;
+  const { packageInfo } = packageInstallContext;
+  const { name: pkgName } = packageInfo;
+
+  try {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id: pkgName,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+    logger.debug(`Cleaning up latest executed state`);
+    return await withPackageSpan('Clean up latest executed state', () =>
+      savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+        latest_executed_state: {},
+      })
+    );
+  } catch (err) {
+    logger.error(`Failed to clean up latest executed state: ${err}`);
+  }
+};

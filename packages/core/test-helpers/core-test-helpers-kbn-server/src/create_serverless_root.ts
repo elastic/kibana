@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -14,6 +15,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { esTestConfig } from '@kbn/test';
 import { CliArgs } from '@kbn/config';
+import { kibanaDevServiceAccount } from '@kbn/dev-utils';
+import { systemIndicesSuperuser } from '@kbn/test';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
 export type TestServerlessESUtils = Pick<TestElasticsearchUtils, 'stop' | 'es'> & {
@@ -27,7 +30,6 @@ export interface TestServerlessUtils {
 }
 
 const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
-
 const projectType: ServerlessProjectType = 'es';
 
 /**
@@ -97,8 +99,6 @@ function createServerlessES() {
         kill: true,
         waitForReady: true,
         ...esServerlessImageParams,
-        // security is enabled by default, if needed kibana requires serviceAccountToken
-        esArgs: ['xpack.security.enabled=false'],
       });
       const client = getServerlessESClient({ port: esPort });
 
@@ -116,6 +116,7 @@ const getServerlessESClient = ({ port }: { port: number }) => {
   return new Client({
     node: `http://localhost:${port}`,
     Connection: HttpConnection,
+    auth: { ...systemIndicesSuperuser },
   });
 };
 
@@ -130,6 +131,7 @@ const getServerlessDefault = () => {
     },
     elasticsearch: {
       hosts: [`http://localhost:${esTestConfig.getPort()}`],
+      serviceAccountToken: kibanaDevServiceAccount.token,
     },
     migrations: {
       algorithm: 'zdt',

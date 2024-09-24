@@ -12,6 +12,7 @@ import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mus
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 import {
@@ -38,7 +39,8 @@ export const createExternalService = (
   actionId: string,
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  connectorUsageCollector: ConnectorUsageCollector
 ): ExternalService => {
   const {
     createCommentJson,
@@ -117,6 +119,7 @@ export const createExternalService = (
         logger,
         configurationUtilities,
         sslOverrides,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -162,6 +165,7 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
+        connectorUsageCollector,
       });
 
       const { status, statusText, data } = res;
@@ -246,6 +250,7 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -319,6 +324,7 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({

@@ -96,7 +96,7 @@ declare type BasicTableColumns =
   | UsersColumns
   | UsersTableColumns;
 
-declare type SiemTables = BasicTableProps<BasicTableColumns>;
+export declare type SiemTables = BasicTableProps<BasicTableColumns>;
 
 // Using telescoping templates to remove 'any' that was polluting downstream column type checks
 export interface BasicTableProps<T> {

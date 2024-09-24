@@ -28,7 +28,7 @@ import {
   INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 
-import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
+import type { PreviewMappingsProperties } from '../../../server/routes/api_schemas/transforms';
 
 import { getErrorMessage } from '../../../common/utils/errors';
 
@@ -270,7 +270,7 @@ export const useTransformConfigData = (
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
-      const cellValue = pageData.hasOwnProperty(adjustedRowIndex)
+      const cellValue = Object.hasOwn(pageData, adjustedRowIndex)
         ? pageData[adjustedRowIndex][columnId] ?? null
         : null;
 

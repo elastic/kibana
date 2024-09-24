@@ -18,18 +18,22 @@ import { VisualizationsSection } from './visualizations_section';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { DocumentDetailsContext } from '../../shared/context';
-import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../hooks/use_expand_section');
-jest.mock('../../../../common/containers/alerts/use_alert_prevalence_from_process_tree', () => ({
+jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
   useTimelineDataFilters: jest.fn(),
@@ -68,6 +72,7 @@ const renderVisualizationsSection = (contextValue = panelContextValue) =>
 
 describe('<VisualizationsSection />', () => {
   beforeEach(() => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,

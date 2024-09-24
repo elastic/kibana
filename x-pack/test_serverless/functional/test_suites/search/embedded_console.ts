@@ -7,13 +7,14 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-type PageObjects = Pick<ReturnType<FtrProviderContext['getPageObjects']>, 'svlCommonNavigation'>;
+type PageObjects = Pick<ReturnType<FtrProviderContext['getPageObjects']>, 'embeddedConsole'>;
 
 export async function testHasEmbeddedConsole(pageObjects: PageObjects) {
-  await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleControlBarExists();
-  await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
-  await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-  await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeOpen();
-  await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-  await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+  await pageObjects.embeddedConsole.expectEmbeddedConsoleControlBarExists();
+  await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeClosed();
+  await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
+  await pageObjects.embeddedConsole.expectEmbeddedConsoleHaveFullscreenToggle();
+  await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+  await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
+  await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeClosed();
 }

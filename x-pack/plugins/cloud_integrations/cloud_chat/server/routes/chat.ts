@@ -24,20 +24,12 @@ export const registerChatRoute = ({
   trialEndDate,
   trialBuffer,
   isDev,
-  getChatVariant,
-  getChatDisabledThroughExperiments,
 }: {
   router: IRouter;
   chatIdentitySecret: string;
   trialEndDate?: Date;
   trialBuffer: number;
   isDev: boolean;
-  getChatVariant: () => Promise<ChatVariant>;
-  /**
-   * Returns true if chat is disabled in LaunchDarkly
-   * Meant to be used as a runtime kill switch
-   */
-  getChatDisabledThroughExperiments: () => Promise<boolean>;
 }) => {
   router.get(
     {
@@ -45,7 +37,7 @@ export const registerChatRoute = ({
       validate: {},
     },
     async (context, request, response) => {
-      const { security } = await context.core;
+      const { security, featureFlags } = await context.core;
       const user = security.authc.getCurrentUser();
 
       if (!user) {
@@ -85,7 +77,8 @@ export const registerChatRoute = ({
         });
       }
 
-      if (await getChatDisabledThroughExperiments()) {
+      // Meant to be used as a runtime kill switch via LaunchDarkly
+      if (!(await featureFlags.getBooleanValue('cloud-chat.enabled', true).catch(() => false))) {
         return response.badRequest({
           body: 'Chat is disabled through experiments',
         });
@@ -96,7 +89,10 @@ export const registerChatRoute = ({
         token,
         email: userEmail,
         id: userId,
-        chatVariant: await getChatVariant(),
+        chatVariant: await featureFlags.getStringValue<ChatVariant>(
+          'cloud-chat.chat-variant',
+          'header'
+        ),
       };
       return response.ok({ body });
     }

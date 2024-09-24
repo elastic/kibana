@@ -151,7 +151,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         resetAllFields: (resultFields) => resetAllFields(resultFields),
         // @ts-expect-error upgrade typescript v5.1.6
         updateField: (resultFields, { fieldName, settings }) =>
-          resultFields.hasOwnProperty(fieldName)
+          Object.hasOwn(resultFields, fieldName)
             ? { ...resultFields, [fieldName]: settings }
             : resultFields,
       },

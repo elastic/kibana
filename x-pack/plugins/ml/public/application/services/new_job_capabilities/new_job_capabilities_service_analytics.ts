@@ -25,8 +25,9 @@ import {
   TOP_CLASSES,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { useMlApi } from '../../contexts/kibana';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
-import { ml } from '../ml_api_service';
+import type { MlApi } from '../ml_api_service';
 
 // Keep top nested field and remove all <nested_field>.* fields
 export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPatternTitle: string) {
@@ -59,13 +60,21 @@ export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPattern
   return fields;
 }
 
-class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
+export class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
+  private _mlApiService: MlApi;
+
+  constructor(mlApiService: MlApi) {
+    super();
+    this._mlApiService = mlApiService;
+  }
+
   public async initializeFromDataVIew(dataView: DataView) {
     try {
-      const resp: NewJobCapsResponse = await ml.dataFrameAnalytics.newJobCapsAnalytics(
-        dataView.getIndexPattern(),
-        dataView.type === DataViewType.ROLLUP
-      );
+      const resp: NewJobCapsResponse =
+        await this._mlApiService.dataFrameAnalytics.newJobCapsAnalytics(
+          dataView.getIndexPattern(),
+          dataView.type === DataViewType.ROLLUP
+        );
 
       const allFields = removeNestedFieldChildren(resp, dataView.getIndexPattern());
 
@@ -216,4 +225,16 @@ class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
   }
 }
 
-export const newJobCapsServiceAnalytics = new NewJobCapsServiceAnalytics();
+// This is to retain the singleton behavior of the previous direct instantiation and export.
+let newJobCapsServiceAnalytics: NewJobCapsServiceAnalytics;
+export const mlJobCapsServiceAnalyticsFactory = (mlApi: MlApi) => {
+  if (newJobCapsServiceAnalytics) return newJobCapsServiceAnalytics;
+
+  newJobCapsServiceAnalytics = new NewJobCapsServiceAnalytics(mlApi);
+  return newJobCapsServiceAnalytics;
+};
+
+export const useNewJobCapsServiceAnalytics = () => {
+  const mlApi = useMlApi();
+  return mlJobCapsServiceAnalyticsFactory(mlApi);
+};

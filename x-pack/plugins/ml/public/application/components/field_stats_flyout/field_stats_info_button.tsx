@@ -55,7 +55,7 @@ export const FieldStatsInfoButton = ({
               data-test-subj={`mlInspectFieldStatsButton-${field.id}`}
               disabled={disabled === true}
               size="xs"
-              iconType="inspect"
+              iconType="fieldStatistics"
               css={{ color: isEmpty ? themeVars.euiTheme.euiColorDisabled : undefined }}
               onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
                 if (ev.type === 'click') {

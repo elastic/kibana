@@ -15,7 +15,7 @@ export function processDistanceResponse(response: any, countPropertyName: string
   const propertiesMap: PropertiesMap = new Map<string, BucketProperties>();
   const buckets: any = response?.aggregations?.distance?.buckets ?? {};
   for (const docId in buckets) {
-    if (buckets.hasOwnProperty(docId)) {
+    if (Object.hasOwn(buckets, docId)) {
       const bucket = buckets[docId];
 
       // skip empty buckets

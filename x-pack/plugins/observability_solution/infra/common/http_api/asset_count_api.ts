@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { dateRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-
-const AssetTypeRT = rt.type({
-  assetType: rt.literal('host'),
-});
+import { AssetTypeRT } from './shared/asset_type';
 
 export const GetInfraAssetCountRequestBodyPayloadRT = rt.intersection([
   rt.partial({
     query: rt.UnknownRecord,
   }),
   rt.type({
-    sourceId: rt.string,
-    from: dateRt,
-    to: dateRt,
+    from: isoToEpochRt,
+    to: isoToEpochRt,
   }),
 ]);
 
@@ -35,13 +31,13 @@ export const GetInfraAssetCountResponsePayloadRT = rt.intersection([
 export type GetInfraAssetCountRequestParamsPayload = rt.TypeOf<
   typeof GetInfraAssetCountRequestParamsPayloadRT
 >;
-export type GetInfraAssetCountRequestBodyPayload = Omit<
-  rt.TypeOf<typeof GetInfraAssetCountRequestBodyPayloadRT>,
-  'from' | 'to'
-> & {
-  from: string;
-  to: string;
-};
+export type GetInfraAssetCountRequestBodyPayload = rt.TypeOf<
+  typeof GetInfraAssetCountRequestBodyPayloadRT
+>;
+
+export type GetInfraAssetCountRequestBodyPayloadClient = rt.OutputOf<
+  typeof GetInfraAssetCountRequestBodyPayloadRT
+>;
 
 export type GetInfraAssetCountResponsePayload = rt.TypeOf<
   typeof GetInfraAssetCountResponsePayloadRT

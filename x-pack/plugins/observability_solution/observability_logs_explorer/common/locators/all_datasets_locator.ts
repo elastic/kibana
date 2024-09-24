@@ -6,11 +6,11 @@
  */
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { AllDatasetSelection } from '@kbn/logs-explorer-plugin/common';
 import {
   AllDatasetsLocatorParams,
   ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
+import { AllDatasetSelection } from '@kbn/logs-explorer-plugin/common';
 import { ObsLogsExplorerLocatorDependencies } from './types';
 import { constructLocatorPath } from './utils';
 
@@ -25,7 +25,7 @@ export class AllDatasetsLocatorDefinition implements LocatorDefinition<AllDatase
     const { useHash } = this.deps;
 
     return constructLocatorPath({
-      dataSourceSelection: AllDatasetSelection.create().toPlainSelection(),
+      dataSourceSelection: AllDatasetSelection.getLocatorPlainSelection(),
       locatorParams: params,
       useHash,
     });

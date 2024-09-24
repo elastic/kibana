@@ -9,8 +9,10 @@ import { isRight } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { HttpFetchQuery, HttpHeadersInit, HttpSetup } from '@kbn/core/public';
 import { FETCH_STATUS, AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
-import { InspectorRequestProps } from '@kbn/observability-shared-plugin/public/contexts/inspector/inspector_context';
+import type { InspectorRequestProps } from '@kbn/observability-shared-plugin/public/contexts/inspector/inspector_context';
+
 type Params = HttpFetchQuery & { version?: string };
+
 class ApiService {
   private static instance: ApiService;
   private _http!: HttpSetup;

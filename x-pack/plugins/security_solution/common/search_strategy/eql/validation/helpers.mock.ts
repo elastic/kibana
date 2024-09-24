@@ -56,6 +56,32 @@ export const getEqlResponseWithValidationErrors = (): ErrorResponse => ({
   },
 });
 
+export const getEqlResponseWithMappingError = (): ErrorResponse => ({
+  error: {
+    root_cause: [
+      {
+        type: 'mapping_exception',
+        reason: "Inaccessible index 'restricted-*'",
+      },
+    ],
+    type: 'mapping_exception',
+    reason: "Inaccessible index 'restricted-*'",
+  },
+});
+
+export const getEqlResponseWithParsingError = (): ErrorResponse => ({
+  error: {
+    root_cause: [
+      {
+        type: 'parsing_exception',
+        reason: "line 1:5: missing 'where' at 'demo'",
+      },
+    ],
+    type: 'parsing_exception',
+    reason: "line 1:5: missing 'where' at 'demo'",
+  },
+});
+
 export const getEqlResponseWithNonValidationError = (): TransportResult['body'] => ({
   error: {
     root_cause: [

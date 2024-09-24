@@ -36,7 +36,7 @@ import {
 } from '@kbn/ml-runtime-field-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
 
-import { useCurrentThemeVars, useMlApiContext, useMlKibana } from '../../contexts/kibana';
+import { useCurrentThemeVars, useMlApi, useMlKibana } from '../../contexts/kibana';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../vega_chart';
@@ -117,7 +117,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   dataView,
   query,
 }) => {
-  const { esSearch } = useMlApiContext();
+  const { esSearch } = useMlApi();
   const kibana = useMlKibana();
   const {
     services: { application, data },

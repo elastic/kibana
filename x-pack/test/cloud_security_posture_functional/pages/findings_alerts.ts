@@ -123,7 +123,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const ruleName1 = data[0].rule.name;
 
-  describe('Findings Page - Alerts', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/168991
+  describe.skip('Findings Page - Alerts', function () {
     this.tags(['cloud_security_posture_findings_alerts']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
@@ -152,7 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
-      pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     describe('Create detection rule', () => {

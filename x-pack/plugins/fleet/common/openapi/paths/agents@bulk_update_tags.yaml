@@ -1,7 +1,7 @@
 post:
   summary: Bulk update agent tags
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK

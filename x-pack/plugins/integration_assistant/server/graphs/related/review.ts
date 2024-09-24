@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { ESProcessorItem, Pipeline } from '../../../common';
-import type { RelatedState } from '../../types';
+import type { Pipeline } from '../../../common';
+import type { RelatedState, SimplifiedProcessors, SimplifiedProcessor } from '../../types';
+import type { RelatedNodeParams } from './types';
 import { combineProcessors } from '../../util/processors';
 import { RELATED_REVIEW_PROMPT } from './prompts';
 
-export async function handleReview(
-  state: RelatedState,
-  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
-) {
+export async function handleReview({
+  state,
+  model,
+}: RelatedNodeParams): Promise<Partial<RelatedState>> {
   const relatedReviewPrompt = RELATED_REVIEW_PROMPT;
   const outputParser = new JsonOutputParser();
   const relatedReviewGraph = relatedReviewPrompt.pipe(model).pipe(outputParser);
@@ -25,10 +23,16 @@ export async function handleReview(
   const currentProcessors = (await relatedReviewGraph.invoke({
     current_processors: JSON.stringify(state.currentProcessors, null, 2),
     ex_answer: state.exAnswer,
+    previous_error: state.previousError,
     pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
-  })) as ESProcessorItem[];
+  })) as SimplifiedProcessor[];
 
-  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
+  const processors = {
+    type: 'related',
+    processors: currentProcessors,
+  } as SimplifiedProcessors;
+
+  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, processors);
 
   return {
     currentPipeline,

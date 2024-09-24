@@ -110,7 +110,7 @@ describe('SentinelOneActionsClient class', () => {
         params: {
           subAction: 'isolateHost',
           subActionParams: {
-            uuid: '1-2-3',
+            ids: '1-2-3',
           },
         },
       });
@@ -244,7 +244,7 @@ describe('SentinelOneActionsClient class', () => {
         params: {
           subAction: 'releaseHost',
           subActionParams: {
-            uuid: '1-2-3',
+            ids: '1-2-3',
           },
         },
       });
@@ -935,7 +935,7 @@ describe('SentinelOneActionsClient class', () => {
         params: {
           subAction: SUB_ACTION.FETCH_AGENT_FILES,
           subActionParams: {
-            agentUUID: '1-2-3',
+            agentId: '1-2-3',
             files: [getFileReqOptions.parameters.path],
             zipPassCode: RESPONSE_ACTIONS_ZIP_PASSCODE.sentinel_one,
           },
@@ -1030,7 +1030,7 @@ describe('SentinelOneActionsClient class', () => {
     it('should query for the activity log entry record after successful submit of action', async () => {
       await s1ActionsClient.getFile(getFileReqOptions);
 
-      expect(connectorActionsMock.execute).toHaveBeenNthCalledWith(3, {
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
         params: {
           subAction: SUB_ACTION.GET_ACTIVITIES,
           subActionParams: {
@@ -1040,7 +1040,7 @@ describe('SentinelOneActionsClient class', () => {
             sortOrder: 'asc',
             // eslint-disable-next-line @typescript-eslint/naming-convention
             createdAt__gte: expect.any(String),
-            agentIds: '1845174760470303882',
+            agentIds: '1-2-3',
           },
         },
       });
@@ -1327,7 +1327,7 @@ describe('SentinelOneActionsClient class', () => {
           subAction: 'downloadAgentFile',
           subActionParams: {
             activityId: 'activity-1',
-            agentUUID: '123',
+            agentId: '123',
           },
         },
       });
@@ -1444,7 +1444,7 @@ describe('SentinelOneActionsClient class', () => {
         params: {
           subAction: 'executeScript',
           subActionParams: {
-            filter: { uuids: '1-2-3' },
+            filter: { ids: '1-2-3' },
             script: {
               inputParams: '--terminate --processes "foo" --force',
               outputDestination: 'SentinelCloud',
@@ -1588,7 +1588,7 @@ describe('SentinelOneActionsClient class', () => {
         params: {
           subAction: 'executeScript',
           subActionParams: {
-            filter: { uuids: '1-2-3' },
+            filter: { ids: '1-2-3' },
             script: {
               inputParams: '',
               outputDestination: 'SentinelCloud',

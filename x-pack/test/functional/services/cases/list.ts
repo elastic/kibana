@@ -51,7 +51,7 @@ export function CasesTableServiceProvider(
 
     async deleteCase(index: number = 0) {
       await toasts.dismissAll();
-      this.openRowActions(index);
+      await this.openRowActions(index);
       await testSubjects.existOrFail('cases-bulk-action-delete');
       await testSubjects.click('cases-bulk-action-delete');
       await testSubjects.existOrFail('confirmModalConfirmButton', {
@@ -209,8 +209,8 @@ export function CasesTableServiceProvider(
         return;
       }
 
+      await testSubjects.click('options-filter-popover-button-owner');
       await retry.waitFor(`filterByOwner popover opened`, async () => {
-        await testSubjects.click('options-filter-popover-button-owner');
         return await testSubjects.exists('options-filter-popover-panel-owner');
       });
 
@@ -262,7 +262,7 @@ export function CasesTableServiceProvider(
 
       const statusButton = await find.byCssSelector('[data-test-subj*="case-action-status-panel-"');
 
-      statusButton.click();
+      await statusButton.click();
 
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
@@ -280,7 +280,7 @@ export function CasesTableServiceProvider(
         '[data-test-subj*="case-action-severity-panel-"'
       );
 
-      statusButton.click();
+      await statusButton.click();
 
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
@@ -310,7 +310,7 @@ export function CasesTableServiceProvider(
 
       for (const caseIndex of selectedCases) {
         assertCaseExists(caseIndex, rows.length);
-        rows[caseIndex].click();
+        await rows[caseIndex].click();
       }
 
       await this.openBulkActions();
@@ -333,7 +333,7 @@ export function CasesTableServiceProvider(
 
       for (const caseIndex of selectedCases) {
         assertCaseExists(caseIndex, rows.length);
-        rows[caseIndex].click();
+        await rows[caseIndex].click();
       }
 
       await this.openBulkActions();
@@ -361,7 +361,7 @@ export function CasesTableServiceProvider(
 
       for (const caseIndex of selectedCases) {
         assertCaseExists(caseIndex, rows.length);
-        rows[caseIndex].click();
+        await rows[caseIndex].click();
       }
 
       await this.openBulkActions();
@@ -386,7 +386,7 @@ export function CasesTableServiceProvider(
 
       for (const caseIndex of selectedCases) {
         assertCaseExists(caseIndex, rows.length);
-        rows[caseIndex].click();
+        await rows[caseIndex].click();
       }
 
       await this.openBulkActions();

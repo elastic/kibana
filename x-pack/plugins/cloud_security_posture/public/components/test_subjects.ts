@@ -85,3 +85,5 @@ export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   CREDENTIALS_FILE: 'credentials_file_test_id',
   CREDENTIALS_JSON: 'credentials_json_test_id',
 };
+
+export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';

@@ -1,7 +1,7 @@
 get:
   summary: Get output by ID
   tags:
-    - Outputs
+    - Fleet outputs
   responses:
     '200':
       description: OK
@@ -24,7 +24,7 @@ parameters:
 delete:
   summary: Delete output by ID
   tags:
-    - Outputs
+    - Fleet outputs
   operationId: delete-output
   responses:
     '200':
@@ -45,7 +45,7 @@ delete:
 put:
   summary: Update output by ID
   tags:
-    - Outputs
+    - Fleet outputs
   operationId: update-output
   requestBody:
     content:

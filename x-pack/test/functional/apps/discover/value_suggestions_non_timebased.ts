@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['common', 'settings', 'context', 'header']);
+  const { common } = getPageObjects(['common']);
 
   describe('value suggestions non time based', function describeIndexTests() {
     before(async function () {
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows all autosuggest options for a filter in discover context app', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
       await queryBar.setQuery('type.keyword : ');
       await queryBar.expectSuggestions({ count: 1, contains: '"apache"' });
     });

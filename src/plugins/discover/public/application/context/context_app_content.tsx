@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
+import React, { Fragment, useCallback, useMemo, useState, FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -27,8 +28,11 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { DataLoadingState } from '@kbn/unified-data-table';
+import { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { useQuerySubscriber } from '@kbn/unified-field-list';
+import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
@@ -40,9 +44,16 @@ import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
+import {
+  DISCOVER_CELL_ACTIONS_TRIGGER,
+  useAdditionalCellActions,
+  useProfileAccessor,
+} from '../../context_awareness';
+import { createDataSource } from '../../../common/data_sources';
 
 export interface ContextAppContentProps {
   columns: string[];
+  grid?: DiscoverGridSettings;
   onAddColumn: (columnsName: string) => void;
   onRemoveColumn: (columnsName: string) => void;
   onSetColumns: (columnsNames: string[], hideTimeColumn: boolean) => void;
@@ -74,6 +85,7 @@ const ActionBarMemoized = React.memo(ActionBar);
 
 export function ContextAppContent({
   columns,
+  grid,
   onAddColumn,
   onRemoveColumn,
   onSetColumns,
@@ -94,7 +106,6 @@ export function ContextAppContent({
 }: ContextAppContentProps) {
   const { uiSettings: config, uiActions } = useDiscoverServices();
   const services = useDiscoverServices();
-  const [gridSettings, setGridSettings] = useState<DiscoverGridSettings>();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const isAnchorLoading =
@@ -129,6 +140,7 @@ export function ContextAppContent({
     },
     [setAppState]
   );
+
   const sort = useMemo(() => {
     return [[dataView.timeFieldName!, SortDirection.desc]];
   }, [dataView]);
@@ -151,14 +163,33 @@ export function ContextAppContent({
     [addFilter, dataView, onAddColumn, onRemoveColumn]
   );
 
-  const onResize = useCallback(
+  const onResize = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
     (colSettings) => {
-      setGridSettings((currentGridSettings) =>
-        onResizeGridColumn(colSettings, currentGridSettings)
-      );
+      setAppState({ grid: onResizeGridColumn(colSettings, grid) });
     },
-    [setGridSettings]
+    [grid, setAppState]
   );
+
+  const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
+  const cellRenderers = useMemo(() => {
+    const getCellRenderers = getCellRenderersAccessor(() => ({}));
+    return getCellRenderers();
+  }, [getCellRenderersAccessor]);
+
+  const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
+  const { filters } = useQuerySubscriber({ data: services.data });
+  const timeRange = useObservable(
+    services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
+    services.timefilter.getTime()
+  );
+
+  const cellActionsMetadata = useAdditionalCellActions({
+    dataSource,
+    dataView,
+    query: undefined,
+    filters,
+    timeRange,
+  });
 
   return (
     <Fragment>
@@ -199,6 +230,9 @@ export function ContextAppContent({
           <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
             <DiscoverGridMemoized
               ariaLabelledBy="surDocumentsAriaLabel"
+              cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+              cellActionsMetadata={cellActionsMetadata}
+              cellActionsHandling="append"
               columns={columns}
               rows={rows}
               dataView={dataView}
@@ -221,8 +255,9 @@ export function ContextAppContent({
               renderDocumentView={renderDocumentView}
               services={services}
               configHeaderRowHeight={3}
-              settings={gridSettings}
+              settings={grid}
               onResize={onResize}
+              externalCustomRenderers={cellRenderers}
             />
           </CellActionsProvider>
         </div>
@@ -242,7 +277,7 @@ export function ContextAppContent({
   );
 }
 
-const WrapperWithPadding: FC<PropsWithChildren<unknown>> = ({ children }) => {
+const WrapperWithPadding: FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const padding = useEuiPaddingSize('s');
 
   return (

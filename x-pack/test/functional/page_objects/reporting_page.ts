@@ -202,7 +202,7 @@ export class ReportingPageObject extends FtrService {
       const titleColumn = await row.findByTestSubject('reportingListItemObjectTitle');
       const title = await titleColumn.getVisibleText();
       if (title === reportTitle) {
-        titleColumn.click();
+        await titleColumn.click();
         return;
       }
     }

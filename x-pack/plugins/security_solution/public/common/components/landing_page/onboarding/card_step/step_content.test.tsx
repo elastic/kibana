@@ -4,41 +4,52 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
-import { render } from '@testing-library/react';
 import { StepContent } from './step_content';
-import { QuickStartSectionCardsId, SectionId } from '../types';
-import { overviewVideoSteps } from '../sections';
+import { AddAndValidateYourDataCardsId, SectionId } from '../types';
+import { viewDashboardSteps } from '../sections';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 jest.mock('../context/step_context');
-jest.mock('../../../../lib/kibana');
+jest.mock('@kbn/security-solution-navigation/src/context');
+jest.mock('../../../../lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+        },
+      },
+    },
+  }),
+}));
 
 describe('StepContent', () => {
   const toggleTaskCompleteStatus = jest.fn();
 
   const props = {
-    cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+    cardId: AddAndValidateYourDataCardsId.viewDashboards,
     indicesExist: false,
-    sectionId: SectionId.quickStart,
-    step: overviewVideoSteps[0],
+    sectionId: SectionId.addAndValidateYourData,
+    step: viewDashboardSteps[0],
     toggleTaskCompleteStatus,
   };
 
   it('renders step content when hasStepContent is true and isExpandedStep is true', () => {
     const mockProps = { ...props, hasStepContent: true, isExpandedStep: true };
-    const { getByTestId, getByText } = render(<StepContent {...mockProps} />);
+    const wrapper = mountWithIntl(<StepContent {...mockProps} />);
 
-    const splitPanelElement = getByTestId('split-panel');
+    const splitPanelElement = wrapper.find('[data-test-subj="split-panel"]');
+
+    expect(splitPanelElement.exists()).toBe(true);
 
     expect(
-      getByText(
-        'Elastic Security unifies analytics, EDR, cloud security capabilities, and more into a SaaS solution that helps you improve your organization’s security posture, defend against a wide range of threats, and prevent breaches.'
-      )
-    ).toBeInTheDocument();
-    expect(
-      getByText('To explore the platform’s core features, watch the video:')
-    ).toBeInTheDocument();
-
-    expect(splitPanelElement).toBeInTheDocument();
+      wrapper
+        .text()
+        .includes(
+          'Use dashboards to visualize data and stay up-to-date with key information. Create your own, or use Elastic’s default dashboards — including alerts, user authentication events, known vulnerabilities, and more.'
+        )
+    ).toBe(true);
   });
 });

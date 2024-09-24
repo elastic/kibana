@@ -189,7 +189,7 @@ Grant full access to all features in the Default space for `my_kibana_role_1` an
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT api/security/role
+$ curl -X POST api/security/roles
 {
   "roles": {
     "my_kibana_role_1": {

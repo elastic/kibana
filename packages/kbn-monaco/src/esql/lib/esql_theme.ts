@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { euiThemeVars, darkMode } from '@kbn/ui-theme';
@@ -21,27 +22,15 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ...buildRuleGroup(
       [
         'explain',
-        'row',
-        'limit',
         'ws',
         'assign',
         'comma',
         'dot',
-        'first',
-        'last',
         'opening_bracket',
         'closing_bracket',
         'quoted_identifier',
-        'src_ws',
         'unquoted_identifier',
         'pipe',
-        'not',
-        'percent',
-        'integer_literal',
-        'decimal_literal',
-        'src_unquoted_identifier',
-        'src_quoted_identifier',
-        'string',
       ],
       euiThemeVars.euiTextColor
     ),
@@ -56,14 +45,15 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     // commands
     ...buildRuleGroup(
       [
-        'metrics',
+        'dev_metrics',
+        'meta',
         'metadata',
+        'dev_match',
         'mv_expand',
         'stats',
-        'inlinestats',
+        'dev_inlinestats',
         'dissect',
         'grok',
-        'project',
         'keep',
         'rename',
         'drop',
@@ -77,8 +67,8 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'rlike',
         'in',
         'as',
-        'expr_ws',
         'limit',
+        'dev_lookup',
         'null',
         'enrich',
         'on',
@@ -113,6 +103,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'asterisk', // '*'
         'slash', // '/'
         'percent', // '%'
+        'cast_op', // '::'
       ],
       euiThemeVars.euiColorPrimaryText
     ),
@@ -124,15 +115,49 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'multiline_comment',
         'expr_line_comment',
         'expr_multiline_comment',
-        'src_line_comment',
-        'src_multiline_comment',
+        'explain_line_comment',
+        'explain_multiline_comment',
+        'project_line_comment',
+        'project_multiline_comment',
+        'rename_line_comment',
+        'rename_multiline_comment',
+        'from_line_comment',
+        'from_multiline_comment',
+        'enrich_line_comment',
+        'enrich_multiline_comment',
+        'mvexpand_line_comment',
+        'mvexpand_multiline_comment',
+        'enrich_field_line_comment',
+        'enrich_field_multiline_comment',
+        'lookup_line_comment',
+        'lookup_multiline_comment',
+        'lookup_field_line_comment',
+        'lookup_field_multiline_comment',
+        'show_line_comment',
+        'show_multiline_comment',
+        'meta_line_comment',
+        'meta_multiline_comment',
+        'setting',
+        'setting_line_comment',
+        'settting_multiline_comment',
+        'metrics_line_comment',
+        'metrics_multiline_comment',
+        'closing_metrics_line_comment',
+        'closing_metrics_multiline_comment',
       ],
       euiThemeVars.euiColorDisabledText
     ),
 
     // values
     ...buildRuleGroup(
-      ['quoted_string', 'integer_literal', 'decimal_literal', 'named_or_positional_param'],
+      [
+        'quoted_string',
+        'integer_literal',
+        'decimal_literal',
+        'named_or_positional_param',
+        'param',
+        'timespan_literal',
+      ],
       euiThemeVars.euiColorSuccessText
     ),
   ],

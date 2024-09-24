@@ -6,8 +6,11 @@
  */
 import { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
-import { SyntheticsCommonState } from '../../common/runtime_types/alert_rules/common';
-import { StaleDownConfig } from './status_rule/status_rule_executor';
+import {
+  AlertOverviewStatus,
+  StaleDownConfig,
+  SyntheticsCommonState,
+} from '../../common/runtime_types/alert_rules/common';
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -193,7 +196,7 @@ describe('setRecoveredAlertsContext', () => {
     publicBaseUrl: 'https://localhost:5601',
   } as IBasePath;
 
-  const upConfigs = {
+  const upConfigs: AlertOverviewStatus['upConfigs'] = {
     [idWithLocation]: {
       configId,
       monitorQueryId: 'stale-config',
@@ -237,7 +240,7 @@ describe('setRecoveredAlertsContext', () => {
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: Record<string, StaleDownConfig> = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',
@@ -274,6 +277,7 @@ describe('setRecoveredAlertsContext', () => {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
         monitorName: 'test-monitor',
         recoveryReason: 'the monitor has been deleted',
+        'kibana.alert.reason': 'the monitor has been deleted',
         recoveryStatus: 'has been deleted',
         monitorUrl: '(unavailable)',
         monitorUrlLabel: 'URL',
@@ -310,7 +314,7 @@ describe('setRecoveredAlertsContext', () => {
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: Record<string, StaleDownConfig> = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',
@@ -350,6 +354,7 @@ describe('setRecoveredAlertsContext', () => {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
         monitorName: 'test-monitor',
         recoveryReason: 'this location has been removed from the monitor',
+        'kibana.alert.reason': 'this location has been removed from the monitor',
         recoveryStatus: 'has recovered',
         stateId: '123456',
         status: 'recovered',
@@ -383,7 +388,7 @@ describe('setRecoveredAlertsContext', () => {
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: Record<string, StaleDownConfig> = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',
@@ -420,6 +425,8 @@ describe('setRecoveredAlertsContext', () => {
         monitorName: 'test-monitor',
         status: 'up',
         recoveryReason:
+          'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
+        'kibana.alert.reason':
           'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
         recoveryStatus: 'is now up',
         locationId: location,

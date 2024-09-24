@@ -11,9 +11,12 @@ import { SingleDatasetSelection } from './single_dataset_selection';
 import { DataSourceSelectionPlain } from './types';
 import { UnresolvedDatasetSelection } from './unresolved_dataset_selection';
 
-export const hydrateDataSourceSelection = (dataSourceSelection: DataSourceSelectionPlain) => {
+export const hydrateDataSourceSelection = (
+  dataSourceSelection: DataSourceSelectionPlain,
+  allSelection: AllDatasetSelection
+) => {
   if (dataSourceSelection.selectionType === 'all') {
-    return AllDatasetSelection.create();
+    return allSelection;
   } else if (dataSourceSelection.selectionType === 'single') {
     return SingleDatasetSelection.fromSelection(dataSourceSelection.selection);
   } else if (dataSourceSelection.selectionType === 'dataView') {

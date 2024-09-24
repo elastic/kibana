@@ -73,7 +73,6 @@
     "@kbn/presentation-panel-plugin",
     "@kbn/content-management-table-list-view-common",
     "@kbn/shared-ux-utility",
-    "@kbn/managed-content-badge",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-browser-mocks",
@@ -84,6 +83,11 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
     "@kbn/recently-accessed",
+    "@kbn/content-management-content-insights-public",
+    "@kbn/content-management-content-insights-server",
+    "@kbn/managed-content-badge",
+    "@kbn/content-management-favorites-public",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }

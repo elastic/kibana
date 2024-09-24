@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
@@ -18,7 +19,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
 import { Artifact } from '../artifact';
 import { parseSettings, SettingsFilter } from '../settings';
-import { log as defaultLog } from '../utils/log';
+import { log as defaultLog, isFile, copyFileSync } from '../utils';
 import { InstallArchiveOptions } from './types';
 
 const isHttpUrl = (str: string) => {
@@ -41,6 +42,7 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
     log = defaultLog,
     esArgs = [],
     disableEsTmpDir = process.env.FTR_DISABLE_ES_TMPDIR?.toLowerCase() === 'true',
+    resources,
   } = options || {};
 
   let dest = archive;
@@ -83,6 +85,23 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
     ['bootstrap.password', password],
     ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
   ]);
+
+  // copy resources to ES config directory
+  if (resources) {
+    resources.forEach((resource) => {
+      if (!isFile(resource)) {
+        throw new Error(
+          `Invalid resource: '${resource}'.\nOnly valid files can be copied to ES config directory`
+        );
+      }
+
+      const filename = path.basename(resource);
+      const destPath = path.resolve(installPath, 'config', filename);
+
+      copyFileSync(resource, destPath);
+      log.info('moved %s in config to %s', resource, destPath);
+    });
+  }
 
   return { installPath, disableEsTmpDir };
 }

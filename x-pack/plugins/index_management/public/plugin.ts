@@ -15,7 +15,10 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import { IndexManagementPluginSetup, IndexManagementPluginStart } from '@kbn/index-management';
+import {
+  IndexManagementPluginSetup,
+  IndexManagementPluginStart,
+} from '@kbn/index-management-shared-types';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
@@ -42,6 +45,7 @@ export class IndexMgmtUIPlugin
     enableLegacyTemplates: boolean;
     enableIndexStats: boolean;
     enableDataStreamStats: boolean;
+    enableSizeAndDocCount: boolean;
     editableIndexSettings: 'all' | 'limited';
     isIndexManagementUiEnabled: boolean;
     enableMappingsSourceFieldSection: boolean;
@@ -60,6 +64,7 @@ export class IndexMgmtUIPlugin
       enableLegacyTemplates,
       enableIndexStats,
       enableDataStreamStats,
+      enableSizeAndDocCount,
       editableIndexSettings,
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
@@ -71,6 +76,7 @@ export class IndexMgmtUIPlugin
       enableLegacyTemplates: enableLegacyTemplates ?? true,
       enableIndexStats: enableIndexStats ?? true,
       enableDataStreamStats: enableDataStreamStats ?? true,
+      enableSizeAndDocCount: enableSizeAndDocCount ?? false,
       editableIndexSettings: editableIndexSettings ?? 'all',
       enableMappingsSourceFieldSection: enableMappingsSourceFieldSection ?? true,
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,

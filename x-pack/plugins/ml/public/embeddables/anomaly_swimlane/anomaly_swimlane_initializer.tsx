@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useMlLink } from '../../application/contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
-import type { MlApiServices } from '../../application/services/ml_api_service';
+import type { MlApi } from '../../application/services/ml_api_service';
 import { extractInfluencers } from '../../../common/util/job_utils';
 import { JobSelectorControl } from '../../alerting/job_selector';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
@@ -43,7 +43,7 @@ export interface AnomalySwimlaneInitializerProps {
   >;
   onCreate: (swimlaneProps: ExplicitInput) => void;
   onCancel: () => void;
-  adJobsApiService: MlApiServices['jobs'];
+  adJobsApiService: MlApi['jobs'];
 }
 
 export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = ({

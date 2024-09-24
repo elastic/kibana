@@ -20,16 +20,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { HttpSetup } from '@kbn/core/public';
-import { CloudSecurityPostureStartServices } from '../../types';
-import { useKibana } from '../../common/hooks/use_kibana';
-import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { RuleStateUpdateRequest, useChangeCspRuleState } from './use_change_csp_rule_state';
-import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
-import { fetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
+import { useChangeCspRuleState } from './use_change_csp_rule_state';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
@@ -50,7 +44,6 @@ type GetColumnProps = Pick<
   RulesTableProps,
   'onRuleClick' | 'selectedRules' | 'setSelectedRules'
 > & {
-  mutateRulesStates: (ruleStateUpdateRequest: RuleStateUpdateRequest) => void;
   items: CspBenchmarkRulesWithStates[];
   setIsAllRulesSelectedThisPage: (isAllRulesSelected: boolean) => void;
   isAllRulesSelectedThisPage: boolean;
@@ -58,8 +51,6 @@ type GetColumnProps = Pick<
     currentPageRulesArray: CspBenchmarkRulesWithStates[],
     selectedRulesArray: CspBenchmarkRulesWithStates[]
   ) => boolean;
-  http: HttpSetup;
-  startServices: CloudSecurityPostureStartServices;
 };
 
 export const RulesTable = ({
@@ -111,8 +102,6 @@ export const RulesTable = ({
 
   const [isAllRulesSelectedThisPage, setIsAllRulesSelectedThisPage] = useState<boolean>(false);
 
-  const { mutate: mutateRulesStates } = useChangeCspRuleState();
-
   const isCurrentPageRulesASubset = (
     currentPageRulesArray: CspBenchmarkRulesWithStates[],
     selectedRulesArray: CspBenchmarkRulesWithStates[]
@@ -128,16 +117,13 @@ export const RulesTable = ({
     return true;
   };
 
-  const { http, notifications, analytics, i18n: i18nStart, theme } = useKibana().services;
   useEffect(() => {
     if (selectedRules.length >= items.length && items.length > 0 && selectedRules.length > 0)
       setIsAllRulesSelectedThisPage(true);
     else setIsAllRulesSelectedThisPage(false);
   }, [items.length, selectedRules.length]);
 
-  const startServices = { notifications, analytics, i18n: i18nStart, theme };
   const columns = getColumns({
-    mutateRulesStates,
     selectedRules,
     setSelectedRules,
     items,
@@ -145,8 +131,6 @@ export const RulesTable = ({
     isAllRulesSelectedThisPage,
     isCurrentPageRulesASubset,
     onRuleClick,
-    http,
-    startServices,
   });
 
   return (
@@ -168,15 +152,12 @@ export const RulesTable = ({
 };
 
 const getColumns = ({
-  mutateRulesStates,
   selectedRules,
   setSelectedRules,
   items,
   isAllRulesSelectedThisPage,
   isCurrentPageRulesASubset,
   onRuleClick,
-  http,
-  startServices,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStates>> => [
   {
     field: 'action',
@@ -281,52 +262,43 @@ const getColumns = ({
     align: 'right',
     width: '100px',
     truncateText: true,
-    render: (_name, rule: CspBenchmarkRulesWithStates) => {
-      const rulesObjectRequest = {
-        benchmark_id: rule?.metadata.benchmark.id,
-        benchmark_version: rule?.metadata.benchmark.version,
-        /* Rule number always exists from 8.7 */
-        rule_number: rule?.metadata.benchmark.rule_number!,
-        rule_id: rule?.metadata.id,
-      };
-      const isRuleMuted = rule?.state === 'muted';
-      const nextRuleState = isRuleMuted ? 'unmute' : 'mute';
-      const changeCspRuleStateFn = async () => {
-        if (rule?.metadata.benchmark.rule_number) {
-          // Calling this function this way to make sure it didn't get called on every single row render, its only being called when user click on the switch button
-          const detectionRulesForSelectedRule = (
-            await fetchDetectionRulesByTags(
-              getFindingsDetectionRuleSearchTags(rule.metadata),
-              { match: 'all' },
-              http
-            )
-          ).total;
-
-          mutateRulesStates({
-            newState: nextRuleState,
-            ruleIds: [rulesObjectRequest],
-          });
-
-          showChangeBenchmarkRuleStatesSuccessToast(startServices, isRuleMuted, {
-            numberOfRules: 1,
-            numberOfDetectionRules: detectionRulesForSelectedRule || 0,
-          });
-        }
-      };
-      return (
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              className="eui-textTruncate"
-              checked={!isRuleMuted}
-              onChange={changeCspRuleStateFn}
-              data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
-              label=""
-              compressed={true}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    },
+    render: (_name, rule: CspBenchmarkRulesWithStates) => <RuleStateSwitch rule={rule} />,
   },
 ];
+
+const RuleStateSwitch = ({ rule }: { rule: CspBenchmarkRulesWithStates }) => {
+  const isRuleMuted = rule?.state === 'muted';
+  const nextRuleState = isRuleMuted ? 'unmute' : 'mute';
+
+  const { mutate: mutateRulesStates } = useChangeCspRuleState();
+
+  const rulesObjectRequest = {
+    benchmark_id: rule?.metadata.benchmark.id,
+    benchmark_version: rule?.metadata.benchmark.version,
+    /* Rule number always exists from 8.7 */
+    rule_number: rule?.metadata.benchmark.rule_number!,
+    rule_id: rule?.metadata.id,
+  };
+  const changeCspRuleStateFn = async () => {
+    if (rule?.metadata.benchmark.rule_number) {
+      mutateRulesStates({
+        newState: nextRuleState,
+        ruleIds: [rulesObjectRequest],
+      });
+    }
+  };
+  return (
+    <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          className="eui-textTruncate"
+          checked={!isRuleMuted}
+          onChange={changeCspRuleStateFn}
+          data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
+          label=""
+          compressed={true}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

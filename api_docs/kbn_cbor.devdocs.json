@@ -1,0 +1,171 @@
+{
+  "id": "@kbn/cbor",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/cbor",
+        "id": "def-common.KbnCbor",
+        "type": "Class",
+        "tags": [],
+        "label": "KbnCbor",
+        "description": [],
+        "path": "packages/kbn-cbor/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cbor",
+            "id": "def-common.KbnCbor.encode",
+            "type": "Function",
+            "tags": [],
+            "label": "encode",
+            "description": [],
+            "signature": [
+              "(data: unknown) => any"
+            ],
+            "path": "packages/kbn-cbor/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cbor",
+                "id": "def-common.KbnCbor.encode.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "packages/kbn-cbor/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cbor",
+            "id": "def-common.KbnCbor.decode",
+            "type": "Function",
+            "tags": [],
+            "label": "decode",
+            "description": [],
+            "signature": [
+              "(uint8: any) => any"
+            ],
+            "path": "packages/kbn-cbor/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cbor",
+                "id": "def-common.KbnCbor.decode.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "uint8",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/kbn-cbor/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cbor",
+        "id": "def-common.decode",
+        "type": "Function",
+        "tags": [],
+        "label": "decode",
+        "description": [],
+        "signature": [
+          "(uint8: any) => any"
+        ],
+        "path": "packages/kbn-cbor/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cbor",
+            "id": "def-common.decode.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "uint8",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-cbor/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cbor",
+        "id": "def-common.encode",
+        "type": "Function",
+        "tags": [],
+        "label": "encode",
+        "description": [],
+        "signature": [
+          "(data: unknown) => any"
+        ],
+        "path": "packages/kbn-cbor/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cbor",
+            "id": "def-common.encode.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-cbor/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

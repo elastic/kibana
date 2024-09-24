@@ -4,42 +4,6 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
-  # Clean up server definitions
-  - target: '$.servers.*'
-    description: Remove all servers so we can add our own.
-    remove: true
-  - target: '$.servers'
-    description: Add server into the now empty server array.
-    update:
-      - url: https://{kibana_url}
-        variables:
-          kibana_url:
-            default: localhost:5601
-  # Remove operation-level security definitions
-  - target: "$.paths['/api/status']['get'].security"
-    description: Remove system security definitions
-    remove: true
-  # Add document-level security definitions
-  - target: '$.components.securitySchemes'
-    description: Add an API key security scheme
-    update:
-      apiKeyAuth:
-        in: header
-        name: Authorization
-        type: apiKey
-        description: You must create an API key and use the encoded value in the request header. To learn about creating keys, go to [API keys](https://www.elastic.co/guide/en/kibana/current/api-keys.html).
-  - target: '$.components.securitySchemes'
-    description: Add an basic security scheme
-    update:
-      basicAuth:
-        type: http
-        scheme: basic
-  - target: '$'
-    description: Add document-level security.
-    update:
-      security:
-        - apiKeyAuth: []
-        - basicAuth: []
   # Add an introduction to spaces
   - target: '$'
     description: Add an extra page about spaces
@@ -101,14 +65,10 @@ actions:
     description: Change displayName
     update:
       x-displayName: "Machine learning"
-  - target: '$.tags[?(@.name=="saved objects")]'
+  - target: '$.tags[?(@.name=="slo")]'
     description: Change displayName
     update:
-      x-displayName: "Saved objects"
-  # - target: '$.tags[?(@.name=="slo")]'
-  #   description: Change displayName
-  #   update:
-  #     x-displayName: "Service level objectives"
+      x-displayName: "Service level objectives"
   - target: '$.tags[?(@.name=="system")]'
     description: Change displayName
     update:

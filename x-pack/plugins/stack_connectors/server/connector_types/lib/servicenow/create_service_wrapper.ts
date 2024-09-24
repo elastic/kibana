@@ -6,7 +6,10 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import {
+  ConnectorUsageCollector,
+  ConnectorTokenClientContract,
+} from '@kbn/actions-plugin/server/types';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { ExternalService, ExternalServiceCredentials, SNProductsConfigValue } from './types';
 
@@ -21,6 +24,7 @@ interface CreateServiceWrapperOpts<T = ExternalService> {
   serviceConfig: SNProductsConfigValue;
   connectorTokenClient: ConnectorTokenClientContract;
   createServiceFn: ServiceFactory<T>;
+  connectorUsageCollector: ConnectorUsageCollector;
 }
 
 export function createServiceWrapper<T = ExternalService>({
@@ -31,6 +35,7 @@ export function createServiceWrapper<T = ExternalService>({
   serviceConfig,
   connectorTokenClient,
   createServiceFn,
+  connectorUsageCollector,
 }: CreateServiceWrapperOpts<T>): T {
   const { config } = credentials;
   const { apiUrl: url } = config as ServiceNowPublicConfigurationType;
@@ -50,5 +55,6 @@ export function createServiceWrapper<T = ExternalService>({
     configurationUtilities,
     serviceConfig,
     axiosInstance,
+    connectorUsageCollector,
   });
 }

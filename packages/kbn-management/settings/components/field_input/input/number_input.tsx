@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -12,6 +13,7 @@ import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
 import { debounce } from 'lodash';
+import { OnInputChangeFn } from '@kbn/management-settings-types';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { useServices } from '../services';
@@ -36,7 +38,7 @@ export const NumberInput = ({
   const onUpdate = useUpdate({ onInputChange, field });
 
   const updateValue = useCallback(
-    async (newValue: number, onUpdateFn) => {
+    async (newValue: number, onUpdateFn: OnInputChangeFn<'number'>) => {
       const validationResponse = await validateChange(field.id, newValue);
       if (validationResponse.successfulValidation && !validationResponse.valid) {
         onUpdateFn({

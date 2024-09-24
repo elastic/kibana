@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 
 import {
-  GetInfraMetricsRequestBodyPayload,
+  GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
 } from '@kbn/infra-plugin/common/http_api/infra';
 import { DATES } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const ENDPOINT = '/api/metrics/infra';
+const ENDPOINT = '/api/metrics/infra/host';
 
 const normalizeNewLine = (text: string) => {
   return text.replaceAll(/(\s{2,}|\\n\\s)/g, ' ');
@@ -23,39 +23,20 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  const basePayload: GetInfraMetricsRequestBodyPayload = {
-    type: 'host',
+  const basePayload: GetInfraMetricsRequestBodyPayloadClient = {
     limit: 10,
     metrics: [
-      {
-        type: 'cpu',
-      },
-      {
-        type: 'cpuTotal',
-      },
-      {
-        type: 'diskSpaceUsage',
-      },
-      {
-        type: 'memory',
-      },
-      {
-        type: 'memoryFree',
-      },
-      {
-        type: 'normalizedLoad1m',
-      },
-      {
-        type: 'rx',
-      },
-      {
-        type: 'tx',
-      },
+      'cpu',
+      'cpuV2',
+      'diskSpaceUsage',
+      'memory',
+      'memoryFree',
+      'normalizedLoad1m',
+      'rx',
+      'tx',
     ],
-    range: {
-      from: new Date(DATES['8.0.0'].logs_and_metrics.min).toISOString(),
-      to: new Date(DATES['8.0.0'].logs_and_metrics.max).toISOString(),
-    },
+    from: new Date(DATES['8.0.0'].logs_and_metrics.min).toISOString(),
+    to: new Date(DATES['8.0.0'].logs_and_metrics.max).toISOString(),
     query: { bool: { must_not: [], filter: [], should: [], must: [] } },
   };
 
@@ -64,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     invalidBody,
     expectedHTTPCode,
   }: {
-    body?: GetInfraMetricsRequestBodyPayload;
+    body?: GetInfraMetricsRequestBodyPayloadClient;
     invalidBody?: any;
     expectedHTTPCode: number;
   }) => {
@@ -85,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('fetch hosts', () => {
       it('should return metrics for a host', async () => {
-        const body: GetInfraMetricsRequestBodyPayload = { ...basePayload, limit: 1 };
+        const body: GetInfraMetricsRequestBodyPayloadClient = { ...basePayload, limit: 1 };
         const response = await makeRequest({ body, expectedHTTPCode: 200 });
 
         expect(response.body.nodes).length(1);
@@ -98,27 +79,24 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             metrics: [
               { name: 'cpu', value: 0.44708333333333333 },
-              { name: 'cpuTotal', value: 0 },
-              { name: 'diskSpaceUsage', value: 0 },
+              { name: 'cpuV2', value: null },
+              { name: 'diskSpaceUsage', value: null },
               { name: 'memory', value: 0.4563333333333333 },
               { name: 'memoryFree', value: 8573890560 },
               { name: 'normalizedLoad1m', value: 0.7375000000000002 },
               { name: 'rx', value: null },
               { name: 'tx', value: null },
             ],
+            hasSystemMetrics: true,
             name: 'gke-observability-8--observability-8--bc1afd95-f0zc',
           },
         ]);
       });
 
       it('should return all hosts if query params is not sent', async () => {
-        const body: GetInfraMetricsRequestBodyPayload = {
+        const body: GetInfraMetricsRequestBodyPayloadClient = {
           ...basePayload,
-          metrics: [
-            {
-              type: 'memory',
-            },
-          ],
+          metrics: ['memory'],
           query: undefined,
         };
 
@@ -131,6 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
               { name: 'host.ip', value: null },
             ],
             metrics: [{ name: 'memory', value: 0.4563333333333333 }],
+            hasSystemMetrics: true,
             name: 'gke-observability-8--observability-8--bc1afd95-f0zc',
           },
           {
@@ -140,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
               { name: 'host.ip', value: null },
             ],
             metrics: [{ name: 'memory', value: 0.32066666666666666 }],
+            hasSystemMetrics: true,
             name: 'gke-observability-8--observability-8--bc1afd95-ngmh',
           },
           {
@@ -149,19 +129,16 @@ export default function ({ getService }: FtrProviderContext) {
               { name: 'host.ip', value: null },
             ],
             metrics: [{ name: 'memory', value: 0.2346666666666667 }],
+            hasSystemMetrics: true,
             name: 'gke-observability-8--observability-8--bc1afd95-nhhw',
           },
         ]);
       });
 
       it('should return 3 hosts when filtered by "host.os.name=CentOS Linux"', async () => {
-        const body: GetInfraMetricsRequestBodyPayload = {
+        const body: GetInfraMetricsRequestBodyPayloadClient = {
           ...basePayload,
-          metrics: [
-            {
-              type: 'cpuTotal',
-            },
-          ],
+          metrics: ['cpuV2'],
           query: { bool: { filter: [{ term: { 'host.os.name': 'CentOS Linux' } }] } },
         };
         const response = await makeRequest({ body, expectedHTTPCode: 200 });
@@ -175,13 +152,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 0 hosts when filtered by "host.os.name=Ubuntu"', async () => {
-        const body: GetInfraMetricsRequestBodyPayload = {
+        const body: GetInfraMetricsRequestBodyPayloadClient = {
           ...basePayload,
-          metrics: [
-            {
-              type: 'cpuTotal',
-            },
-          ],
+          metrics: ['cpuV2'],
           query: { bool: { filter: [{ term: { 'host.os.name': 'Ubuntu' } }] } },
         };
         const response = await makeRequest({ body, expectedHTTPCode: 200 });
@@ -192,13 +165,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return 0 hosts when filtered by not "host.name=gke-observability-8--observability-8--bc1afd95-nhhw"', async () => {
-      const body: GetInfraMetricsRequestBodyPayload = {
+      const body: GetInfraMetricsRequestBodyPayloadClient = {
         ...basePayload,
-        metrics: [
-          {
-            type: 'cpuTotal',
-          },
-        ],
+        metrics: ['cpuV2'],
         query: {
           bool: {
             must_not: [
@@ -218,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('endpoint validations', () => {
       it('should fail when limit is 0', async () => {
-        const body: GetInfraMetricsRequestBodyPayload = { ...basePayload, limit: 0 };
+        const body: GetInfraMetricsRequestBodyPayloadClient = { ...basePayload, limit: 0 };
         const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
@@ -227,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail when limit is negative', async () => {
-        const body: GetInfraMetricsRequestBodyPayload = { ...basePayload, limit: -2 };
+        const body: GetInfraMetricsRequestBodyPayloadClient = { ...basePayload, limit: -2 };
         const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
@@ -236,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail when limit above 500', async () => {
-        const body: GetInfraMetricsRequestBodyPayload = { ...basePayload, limit: 501 };
+        const body: GetInfraMetricsRequestBodyPayloadClient = { ...basePayload, limit: 501 };
         const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
@@ -245,30 +214,30 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail when metric is invalid', async () => {
-        const invalidBody = { ...basePayload, metrics: [{ type: 'any' }] };
+        const invalidBody = { ...basePayload, metrics: ['any'] };
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "cpuTotal" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx" | "rxV2" | "txV2"'
+          '[request body]: Failed to validate: in metrics/0: "any" does not match expected type "cpu" | "cpuV2" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx" | "rxV2" | "txV2"'
         );
       });
 
       it('should pass when limit is 1', async () => {
-        const body: GetInfraMetricsRequestBodyPayload = { ...basePayload, limit: 1 };
+        const body: GetInfraMetricsRequestBodyPayloadClient = { ...basePayload, limit: 1 };
         await makeRequest({ body, expectedHTTPCode: 200 });
       });
 
       it('should pass when limit is 500', async () => {
-        const body: GetInfraMetricsRequestBodyPayload = { ...basePayload, limit: 500 };
+        const body: GetInfraMetricsRequestBodyPayloadClient = { ...basePayload, limit: 500 };
         await makeRequest({ body, expectedHTTPCode: 200 });
       });
 
-      it('should fail when range is not informed', async () => {
-        const invalidBody = { ...basePayload, range: undefined };
+      it('should fail when from and to are not informed', async () => {
+        const invalidBody = { ...basePayload, from: undefined, to: undefined };
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in range: undefined does not match expected type { from: Date, to: Date }'
+          '[request body]: Failed to validate: in from: undefined does not match expected type isoToEpochRt in to: undefined does not match expected type isoToEpochRt'
         );
       });
     });
@@ -290,12 +259,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('fetch hosts', () => {
         it('should return metrics for a host with alert count', async () => {
-          const body: GetInfraMetricsRequestBodyPayload = {
+          const body: GetInfraMetricsRequestBodyPayloadClient = {
             ...basePayload,
-            range: {
-              from: '2018-10-17T19:42:21.208Z',
-              to: '2018-10-17T19:58:03.952Z',
-            },
+            from: '2018-10-17T19:42:21.208Z',
+            to: '2018-10-17T19:58:03.952Z',
             limit: 1,
           };
           const response = await makeRequest({ body, expectedHTTPCode: 200 });

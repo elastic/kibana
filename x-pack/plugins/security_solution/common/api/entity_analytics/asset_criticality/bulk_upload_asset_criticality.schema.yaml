@@ -1,3 +1,4 @@
+# ⚠️ Updating this file? Also update the public API docs at https://github.com/elastic/security-docs/tree/main/docs/advanced-entity-analytics/api
 openapi: 3.0.0
 info:
   version: '2023-10-31'
@@ -8,7 +9,11 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: BulkUpsertAssetCriticalityRecords
-      summary: Bulk upsert asset criticality data, creating or updating records as needed
+      summary: Bulk upsert asset criticality records
+      description: |
+        Bulk upsert up to 1000 asset criticality records.
+
+        If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
       requestBody:
         content:
           application/json:
