@@ -23,7 +23,7 @@ export function getIndexTemplate(esNames: EsNames) {
     template: {
       settings: {
         hidden: true,
-        number_of_shards: 1,
+        number_of_shards: 3,
         auto_expand_replicas: '0-1',
       },
       lifecycle: {
