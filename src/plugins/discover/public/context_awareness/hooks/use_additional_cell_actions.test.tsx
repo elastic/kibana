@@ -108,7 +108,7 @@ describe('useAdditionalCellActions', () => {
     expect(mockActions).toHaveLength(1);
     expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual(['root-action-2']);
     await act(() => discoverServiceMock.profilesManager.resolveDataSourceProfile({}));
-    rerender();
+    rerender(initialProps);
     expect(result.current.instanceId).toEqual('3');
     expect(mockActions).toHaveLength(2);
     expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual([

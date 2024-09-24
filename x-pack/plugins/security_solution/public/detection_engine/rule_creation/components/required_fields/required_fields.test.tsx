@@ -46,7 +46,8 @@ describe('RequiredFields form part', () => {
 
     render(<TestForm indexPatternFields={indexPatternFields} />);
 
-    await addRequiredFieldRow();
+    addRequiredFieldRow();
+
     await selectFirstEuiComboBoxOption({
       comboBoxToggleButton: getSelectToggleButtonForName('empty'),
     });
@@ -64,7 +65,7 @@ describe('RequiredFields form part', () => {
 
     render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
 
-    await addRequiredFieldRow();
+    addRequiredFieldRow();
 
     await selectFirstEuiComboBoxOption({
       comboBoxToggleButton: getSelectToggleButtonForName('empty'),
@@ -82,7 +83,7 @@ describe('RequiredFields form part', () => {
 
     render(<TestForm indexPatternFields={indexPatternFields} />);
 
-    await addRequiredFieldRow();
+    addRequiredFieldRow();
 
     await selectEuiComboBoxOption({
       comboBoxToggleButton: getSelectToggleButtonForName('empty'),
@@ -92,7 +93,7 @@ describe('RequiredFields form part', () => {
     expect(screen.getByDisplayValue('field1')).toBeVisible();
     expect(screen.getByDisplayValue('string')).toBeVisible();
 
-    await addRequiredFieldRow();
+    addRequiredFieldRow();
 
     await selectEuiComboBoxOption({
       comboBoxToggleButton: getSelectToggleButtonForName('empty'),
@@ -106,7 +107,7 @@ describe('RequiredFields form part', () => {
   it('user can add his own custom field name and type', async () => {
     render(<TestForm indexPatternFields={[]} />);
 
-    await addRequiredFieldRow();
+    addRequiredFieldRow();
 
     await typeInCustomComboBoxOption({
       comboBoxToggleButton: getSelectToggleButtonForName('empty'),
@@ -150,9 +151,7 @@ describe('RequiredFields form part', () => {
 
     render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
 
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('removeRequiredFieldButton-field1'));
-    });
+    fireEvent.click(screen.getByTestId('removeRequiredFieldButton-field1'));
 
     expect(screen.queryByDisplayValue('field1')).toBeNull();
   });
@@ -168,7 +167,7 @@ describe('RequiredFields form part', () => {
 
     render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
 
-    await addRequiredFieldRow();
+    addRequiredFieldRow();
 
     const emptyRowOptions = await getDropdownOptions(getSelectToggleButtonForName('empty'));
     expect(emptyRowOptions).toEqual(['field2', 'field3']);
@@ -197,7 +196,7 @@ describe('RequiredFields form part', () => {
 
     expect(screen.getByTestId(ADD_REQUIRED_FIELD_BUTTON_TEST_ID)).toBeEnabled();
 
-    await addRequiredFieldRow();
+    addRequiredFieldRow();
 
     expect(screen.getByTestId(ADD_REQUIRED_FIELD_BUTTON_TEST_ID)).toBeDisabled();
   });
@@ -305,7 +304,7 @@ describe('RequiredFields form part', () => {
 
       render(<TestForm indexPatternFields={indexPatternFields} />);
 
-      await addRequiredFieldRow();
+      addRequiredFieldRow();
 
       expect(screen.queryByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeNull();
     });
@@ -313,7 +312,7 @@ describe('RequiredFields form part', () => {
     it(`doesn't display a warning when field is invalid`, async () => {
       render(<TestForm />);
 
-      await addRequiredFieldRow();
+      addRequiredFieldRow();
 
       await typeInCustomComboBoxOption({
         comboBoxToggleButton: getSelectToggleButtonForName('empty'),
@@ -330,7 +329,7 @@ describe('RequiredFields form part', () => {
     it('form is invalid when only field name is empty', async () => {
       render(<TestForm />);
 
-      await addRequiredFieldRow();
+      addRequiredFieldRow();
 
       await typeInCustomComboBoxOption({
         comboBoxToggleButton: getSelectToggleButtonForType('empty'),
@@ -350,7 +349,7 @@ describe('RequiredFields form part', () => {
     it('form is invalid when only field type is empty', async () => {
       render(<TestForm />);
 
-      await addRequiredFieldRow();
+      addRequiredFieldRow();
 
       await typeInCustomComboBoxOption({
         comboBoxToggleButton: getSelectToggleButtonForName('empty'),
@@ -377,7 +376,7 @@ describe('RequiredFields form part', () => {
 
       render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
 
-      await addRequiredFieldRow();
+      addRequiredFieldRow();
 
       await typeInCustomComboBoxOption({
         comboBoxToggleButton: getSelectToggleButtonForName('empty'),
@@ -399,9 +398,9 @@ describe('RequiredFields form part', () => {
 
       render(<TestForm onSubmit={handleSubmit} />);
 
-      await addRequiredFieldRow();
+      addRequiredFieldRow();
 
-      await submitForm();
+      submitForm();
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: [{ name: '', type: '' }],
@@ -416,7 +415,7 @@ describe('RequiredFields form part', () => {
 
       render(<TestForm onSubmit={handleSubmit} />);
 
-      await submitForm();
+      submitForm();
 
       await waitFor(() => {
         expect(handleSubmit).toHaveBeenCalledWith({
@@ -433,11 +432,9 @@ describe('RequiredFields form part', () => {
 
       render(<TestForm initialState={initialState} onSubmit={handleSubmit} />);
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('removeRequiredFieldButton-field1'));
-      });
+      fireEvent.click(screen.getByTestId('removeRequiredFieldButton-field1'));
 
-      await submitForm();
+      submitForm();
 
       await waitFor(() => {
         expect(handleSubmit).toHaveBeenCalledWith({
@@ -456,13 +453,13 @@ describe('RequiredFields form part', () => {
 
       render(<TestForm indexPatternFields={indexPatternFields} onSubmit={handleSubmit} />);
 
-      await addRequiredFieldRow();
+      addRequiredFieldRow();
 
       await selectFirstEuiComboBoxOption({
         comboBoxToggleButton: getSelectToggleButtonForName('empty'),
       });
 
-      await submitForm();
+      submitForm();
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: [{ name: 'field1', type: 'string' }],
@@ -487,7 +484,7 @@ describe('RequiredFields form part', () => {
         />
       );
 
-      await submitForm();
+      submitForm();
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: [{ name: 'field1', type: 'string' }],
@@ -523,7 +520,7 @@ describe('RequiredFields form part', () => {
         optionText: 'date',
       });
 
-      await submitForm();
+      submitForm();
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: [{ name: 'field2', type: 'date' }],
@@ -550,7 +547,7 @@ describe('RequiredFields form part', () => {
 
       expect(screen.queryByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeVisible();
 
-      await submitForm();
+      submitForm();
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: [{ name: 'name-that-does-not-exist', type: 'type-that-does-not-exist' }],
@@ -579,10 +576,8 @@ async function getDropdownOptions(dropdownToggleButton: HTMLElement): Promise<st
   return options;
 }
 
-export function addRequiredFieldRow(): Promise<void> {
-  return act(async () => {
-    fireEvent.click(screen.getByText('Add required field'));
-  });
+export function addRequiredFieldRow() {
+  fireEvent.click(screen.getByText('Add required field'));
 }
 
 function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
@@ -608,34 +603,32 @@ type SelectEuiComboBoxOptionParameters =
       optionIndex?: undefined;
     };
 
-function selectEuiComboBoxOption({
+async function selectEuiComboBoxOption({
   comboBoxToggleButton,
   optionIndex,
   optionText,
 }: SelectEuiComboBoxOptionParameters): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
+  await showEuiComboBoxOptions(comboBoxToggleButton);
 
-    const options = Array.from(
-      document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
-    );
+  const options = Array.from(
+    document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
+  );
 
-    if (typeof optionText === 'string') {
-      const optionToSelect = options.find((option) => option.textContent === optionText);
+  if (typeof optionText === 'string') {
+    const optionToSelect = options.find((option) => option.textContent === optionText);
 
-      if (!optionToSelect) {
-        throw new Error(
-          `Could not find option with text "${optionText}". Available options: ${options
-            .map((option) => option.textContent)
-            .join(', ')}`
-        );
-      }
-
-      fireEvent.click(optionToSelect);
-    } else {
-      fireEvent.click(options[optionIndex]);
+    if (!optionToSelect) {
+      throw new Error(
+        `Could not find option with text "${optionText}". Available options: ${options
+          .map((option) => option.textContent)
+          .join(', ')}`
+      );
     }
-  });
+
+    fireEvent.click(optionToSelect);
+  } else {
+    fireEvent.click(options[optionIndex]);
+  }
 }
 
 function selectFirstEuiComboBoxOption({
@@ -680,10 +673,8 @@ function getSelectToggleButtonForType(value: string): HTMLElement {
     .querySelector('[data-test-subj="comboBoxToggleListButton"]') as HTMLElement;
 }
 
-function submitForm(): Promise<void> {
-  return act(async () => {
-    fireEvent.click(screen.getByText('Submit'));
-  });
+function submitForm() {
+  fireEvent.click(screen.getByText('Submit'));
 }
 
 interface TestFormProps {

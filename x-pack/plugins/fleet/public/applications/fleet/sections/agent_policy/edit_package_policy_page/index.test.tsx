@@ -413,9 +413,7 @@ describe('edit package policy page', () => {
 
     render();
 
-    await waitFor(() => {
-      expect(renderResult.getByTestId('errorBoundaryFatalHeader')).toBeVisible();
-    });
+    await waitFor(() => expect(renderResult.getByTestId('errorBoundaryFatalHeader')).toBeVisible());
   });
 
   it('should show ready for upgrade if package useLatestPackageVersion and no conflicts', async () => {

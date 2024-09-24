@@ -64,7 +64,7 @@ describe('useFetchAlertDetail', () => {
   });
 
   it('initially is not loading and does not have data', async () => {
-    const { result } = renderHook<string, [boolean, AlertData | null]>(() =>
+    const { result } = renderHook<[boolean, AlertData | null], string>(() =>
       useFetchAlertDetail(id)
     );
 
@@ -76,7 +76,7 @@ describe('useFetchAlertDetail', () => {
       throw new Error('an http error');
     });
 
-    const { result } = renderHook<string, [boolean, AlertData | null]>(() =>
+    const { result } = renderHook<[boolean, AlertData | null], string>(() =>
       useFetchAlertDetail('123')
     );
 
@@ -86,7 +86,7 @@ describe('useFetchAlertDetail', () => {
   });
 
   it('retrieves the alert data', async () => {
-    const { result } = renderHook<string, [boolean, AlertData | null]>(() =>
+    const { result } = renderHook<[boolean, AlertData | null], string>(() =>
       useFetchAlertDetail(id)
     );
 
@@ -173,11 +173,9 @@ describe('useFetchAlertDetail', () => {
   it('does not populate the results when the request is canceled', async () => {
     // FIXME: this test case doesn't do what the suite claims it does
 
-    const { result, unmount } = renderHook<string, [boolean, AlertData | null]>(() =>
+    const { result, unmount } = renderHook<[boolean, AlertData | null], string>(() =>
       useFetchAlertDetail('123')
     );
-
-    await waitFor(() => null);
 
     act(() => {
       unmount();

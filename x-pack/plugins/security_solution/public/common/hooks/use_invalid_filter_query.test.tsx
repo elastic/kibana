@@ -210,8 +210,8 @@ describe('useInvalidFilterQuery', () => {
       initialProps: props,
       wrapper: getWrapper(store),
     });
-    rerender();
-    rerender();
+    rerender(props);
+    rerender(props);
 
     expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledTimes(1);
   });

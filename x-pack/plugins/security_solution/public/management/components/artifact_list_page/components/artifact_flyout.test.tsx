@@ -144,9 +144,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       let getByTestId: (typeof renderResult)['getByTestId'];
 
       beforeEach(async () => {
-        await act(async () => {
-          await render();
-        });
+        await render();
 
         getByTestId = renderResult.getByTestId;
 
@@ -186,9 +184,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     describe('and submit is successful', () => {
       beforeEach(async () => {
-        await act(async () => {
-          await render();
-        });
+        await render();
 
         await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
 

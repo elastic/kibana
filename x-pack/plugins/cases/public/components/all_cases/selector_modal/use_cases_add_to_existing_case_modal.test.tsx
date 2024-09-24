@@ -95,12 +95,11 @@ describe('use cases add to existing case modal hook', () => {
   });
 
   it('should throw if called outside of a cases context', () => {
-    const { result } = renderHook(() => {
-      useCasesAddToExistingCaseModal(defaultParams());
-    });
-    expect(result.error?.message).toContain(
-      'useCasesContext must be used within a CasesProvider and have a defined value'
-    );
+    expect(() =>
+      renderHook(() => {
+        useCasesAddToExistingCaseModal(defaultParams());
+      })
+    ).toThrow('useCasesContext must be used within a CasesProvider');
   });
 
   it('should dispatch the open action when invoked', () => {

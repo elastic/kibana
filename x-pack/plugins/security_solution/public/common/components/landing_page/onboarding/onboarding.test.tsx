@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { OnboardingComponent } from './onboarding';
 import {
   AddIntegrationsSteps,
@@ -112,9 +113,10 @@ describe('OnboardingComponent', () => {
       );
     });
 
-    it('on closing the callout should store dismissal state in local storage', () => {
+    it('on closing the callout should store dismissal state in local storage', async () => {
+      const user = userEvent.setup();
       render();
-      renderResult.getByTestId('euiDismissCalloutButton').click();
+      await user.click(renderResult.getByTestId('euiDismissCalloutButton'));
       expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
       expect(mockedStorageSet).toHaveBeenCalledWith('securitySolution.showAvcBanner', false);
     });

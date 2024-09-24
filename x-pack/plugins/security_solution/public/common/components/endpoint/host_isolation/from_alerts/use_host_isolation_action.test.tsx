@@ -89,7 +89,6 @@ describe('useHostIsolationAction', () => {
       }
 
       const { result } = render();
-      await waitFor(() => result.current);
 
       expect(result.current).toEqual([
         buildExpectedMenuItemResult({

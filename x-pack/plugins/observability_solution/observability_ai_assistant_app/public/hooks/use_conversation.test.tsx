@@ -95,24 +95,23 @@ describe('useConversation', () => {
   });
 
   describe('with initial messages and a conversation id', () => {
-    beforeEach(() => {
-      hookResult = renderHook(useConversation, {
-        initialProps: {
-          chatService: mockChatService,
-          connectorId: 'my-connector',
-          initialMessages: [
-            {
-              '@timestamp': new Date().toISOString(),
-              message: { content: '', role: MessageRole.User },
-            },
-          ],
-          initialConversationId: 'foo',
-        },
-        wrapper,
-      });
-    });
     it('throws an error', () => {
-      expect(hookResult.result.error).toBeTruthy();
+      expect(() =>
+        renderHook(useConversation, {
+          initialProps: {
+            chatService: mockChatService,
+            connectorId: 'my-connector',
+            initialMessages: [
+              {
+                '@timestamp': new Date().toISOString(),
+                message: { content: '', role: MessageRole.User },
+              },
+            ],
+            initialConversationId: 'foo',
+          },
+          wrapper,
+        })
+      ).toThrow();
     });
   });
 
@@ -438,25 +437,25 @@ describe('useConversation', () => {
 
   describe('when the title is updated', () => {
     describe('without a stored conversation', () => {
-      beforeEach(() => {
-        hookResult = renderHook(useConversation, {
-          initialProps: {
-            chatService: mockChatService,
-            connectorId: 'my-connector',
-            initialMessages: [
-              {
-                '@timestamp': new Date().toISOString(),
-                message: { content: '', role: MessageRole.User },
-              },
-            ],
-            initialConversationId: 'foo',
-          },
-          wrapper,
-        });
-      });
-
       it('throws an error', () => {
-        expect(() => hookResult.result.current.saveTitle('my-new-title')).toThrow();
+        expect(() =>
+          renderHook(useConversation, {
+            initialProps: {
+              chatService: mockChatService,
+              connectorId: 'my-connector',
+              initialMessages: [
+                {
+                  '@timestamp': new Date().toISOString(),
+                  message: { content: '', role: MessageRole.User },
+                },
+              ],
+              initialConversationId: 'foo',
+            },
+            wrapper,
+          })
+        ).toThrow(
+          expect.stringMatching(/Cannot set initialMessages if initialConversationId is set/)
+        );
       });
     });
 

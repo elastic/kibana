@@ -6,7 +6,8 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import { render, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { disableConsoleWarning } from '../../../../../utils/test_helpers';
 import * as stories from './waterfall_container.stories';
@@ -25,12 +26,14 @@ describe('WaterfallContainer', () => {
   });
 
   it('expands and contracts the accordion', async () => {
+    const user = userEvent.setup();
+
     const { getAllByRole } = render(<Example />);
     const buttons = await waitFor(() => getAllByRole('button'));
     const parentItem = buttons[1];
     const childItem = buttons[2];
 
-    fireEvent.click(parentItem);
+    await user.click(parentItem);
 
     expect(parentItem).toHaveAttribute('aria-expanded', 'false');
     expect(childItem).toHaveAttribute('aria-expanded', 'true');

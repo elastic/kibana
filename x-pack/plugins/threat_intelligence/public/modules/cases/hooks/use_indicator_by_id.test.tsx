@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useIndicatorById, UseIndicatorByIdValue } from './use_indicator_by_id';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchIndicatorById } from '../services/fetch_indicator_by_id';
@@ -49,7 +49,7 @@ describe('useIndicatorById()', () => {
       expect(indicatorsQuery).toHaveBeenCalledTimes(1);
 
       // isLoading should turn to false eventually
-      await hookResult.waitFor(() => !hookResult.result.current.isLoading);
+      await waitFor(() => !hookResult.result.current.isLoading);
       expect(hookResult.result.current.isLoading).toEqual(false);
     });
   });

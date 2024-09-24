@@ -10,6 +10,7 @@ import {
   HostCellWithFlyoutRendererProps,
 } from './with_expandable_flyout';
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 
 const renderTestComponents = (props?: Partial<HostCellWithFlyoutRendererProps>) => {
@@ -43,11 +44,12 @@ const renderTestComponents = (props?: Partial<HostCellWithFlyoutRendererProps>) 
 };
 
 describe('With Expandable Flyout', () => {
-  it('should open Expandable Flyout on Click', () => {
+  it('should open Expandable Flyout on Click', async () => {
+    const user = userEvent.setup();
     renderTestComponents();
 
     expect(screen.getByTestId('host-details-button')).toBeVisible();
-    screen.getByTestId('host-details-button').click();
+    await user.click(screen.getByTestId('host-details-button'));
     expect(screen.getByTestId('host-name-flyout')).toBeVisible();
     expect(screen.getByText('Host Flyout Header - test-host-name')).toBeVisible();
   });

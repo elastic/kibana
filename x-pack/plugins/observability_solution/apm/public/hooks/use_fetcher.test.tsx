@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, type RenderHookResult, waitFor } from '@testing-library/react';
+import { renderHook, type RenderHookResult, waitFor, act } from '@testing-library/react';
 import React, { type ReactNode, type PropsWithChildren } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -55,7 +55,9 @@ describe('useFetcher', () => {
     });
 
     it('should still show loading spinner after 100ms', async () => {
-      jest.advanceTimersByTime(100);
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
 
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -66,7 +68,9 @@ describe('useFetcher', () => {
     });
 
     it('should show success after 1 second', async () => {
-      jest.advanceTimersByTime(1000);
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
 
       await waitFor(() => null);
 
@@ -106,7 +110,9 @@ describe('useFetcher', () => {
     });
 
     it('should still show loading spinner after 100ms', async () => {
-      jest.advanceTimersByTime(100);
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
 
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -117,7 +123,10 @@ describe('useFetcher', () => {
     });
 
     it('should show error after 1 second', async () => {
-      jest.advanceTimersByTime(1000);
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
       await waitFor(() => null);
 
       expect(hook.result.current).toEqual({

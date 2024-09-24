@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../test';
 import { clusterResponseMock } from '../mocks';
 import { TreeNav } from '.';
@@ -45,6 +46,7 @@ describe('TreeNav component', () => {
   });
 
   it('shows the tree path according with the selected view type', async () => {
+    const user = userEvent.setup();
     renderResult = mockedContext.render(<TreeNavContainer />);
 
     const logicalViewPath = 'cluster / namespace / pod / container image';
@@ -55,25 +57,28 @@ describe('TreeNav component', () => {
     const infraStructureViewRadio = renderResult.getByTestId(
       'treeNavType_generated-idinfrastructure'
     );
-    infraStructureViewRadio.click();
 
+    await user.click(infraStructureViewRadio);
     expect(renderResult.getByText('cluster / node / pod / container image')).toBeInTheDocument();
 
-    logicViewButton.click();
+    await user.click(logicViewButton);
+
     expect(renderResult.getByText(logicalViewPath)).toBeInTheDocument();
   });
 
   it('collapses / expands the tree nav when clicking on collapse button', async () => {
+    const user = userEvent.setup();
+
     renderResult = mockedContext.render(<TreeNavContainer />);
 
     expect(renderResult.getByText(/cluster/i)).toBeVisible();
 
     const collapseButton = await renderResult.getByLabelText(/collapse/i);
-    collapseButton.click();
+    await user.click(collapseButton);
     expect(renderResult.getByText(/cluster/i)).not.toBeVisible();
 
     const expandButton = await renderResult.getByLabelText(/expand/i);
-    expandButton.click();
+    await user.click(expandButton);
     expect(renderResult.getByText(/cluster/i)).toBeVisible();
   });
 });

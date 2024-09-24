@@ -21,6 +21,11 @@ describe('useContainerMetricsTable hook', () => {
   >;
 
   it('should call useInfrastructureNodeMetrics hook with event.module filter in filterClauseDsl query', () => {
+    useInfrastructureNodeMetricsMock.mockImplementation(() => ({
+      data: { state: 'unknown' },
+      isLoading: false,
+    }));
+
     const filterClauseDsl = {
       bool: {
         filter: [{ terms: { 'container.id': 'gke-edge-oblt-pool-1-9a60016d-lgg9' } }],

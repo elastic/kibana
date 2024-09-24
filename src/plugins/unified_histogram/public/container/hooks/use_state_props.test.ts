@@ -9,8 +9,8 @@
 
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { renderHook } from '@testing-library/react';
-import { act } from 'react-test-renderer';
+import { renderHook, waitFor, act } from '@testing-library/react';
+// import { act } from 'react-test-renderer';
 import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionContext } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
@@ -402,7 +402,7 @@ describe('useStateProps', () => {
     `);
   });
 
-  it('should execute callbacks correctly', () => {
+  it('should execute callbacks correctly', async () => {
     const stateService = getStateService({ initialState });
     const { result } = renderHook(() =>
       useStateProps({
@@ -414,7 +414,19 @@ describe('useStateProps', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          onTopPanelHeightChange: expect.any(Function),
+          onTimeIntervalChange: expect.any(Function),
+          onTotalHitsChange: expect.any(Function),
+          onChartHiddenChange: expect.any(Function),
+          onChartLoad: expect.any(Function),
+          onBreakdownFieldChange: expect.any(Function),
+          onSuggestionContextChange: expect.any(Function),
+        })
+      )
+    );
 
     const {
       onTopPanelHeightChange,

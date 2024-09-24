@@ -11,9 +11,6 @@ import { DataViewFieldBase } from '@kbn/es-query';
 import { ReactElement } from 'react';
 import { act, renderHook } from '@testing-library/react';
 
-import TestRenderer from 'react-test-renderer';
-const { act: actTestRenderer } = TestRenderer;
-
 import { fields } from '../../fields/index.mock';
 import { useField } from '../use_field';
 
@@ -479,7 +476,7 @@ describe('useField', () => {
         useField({ indexPattern, onChange: onChangeMock, isRequired: true })
       );
 
-      actTestRenderer(() => {
+      act(() => {
         result.current.handleTouch();
       });
       expect(result.current.isInvalid).toBeTruthy();
@@ -489,7 +486,7 @@ describe('useField', () => {
         useField({ indexPattern, onChange: onChangeMock, isRequired: true, selectedField })
       );
 
-      actTestRenderer(() => {
+      act(() => {
         result.current.handleTouch();
       });
       expect(result.current.isInvalid).toBeFalsy();
@@ -497,7 +494,7 @@ describe('useField', () => {
     it('should return isInvalid equals false when isRequired is false', () => {
       const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
 
-      actTestRenderer(() => {
+      act(() => {
         result.current.handleTouch();
       });
       expect(result.current.isInvalid).toBeFalsy();

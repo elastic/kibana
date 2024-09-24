@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 
 const createWrapper = () => {
@@ -24,9 +24,7 @@ const renderUseQuery = (result: { items: any[] }) =>
 describe('usePolicies', () => {
   it('should have undefined data during loading state', async () => {
     const mockPolicies = { items: [] };
-    const { result, waitFor } = renderUseQuery(mockPolicies);
-
-    await waitFor(() => result.current.isLoading);
+    const { result } = renderUseQuery(mockPolicies);
 
     expect(result.current.isLoading).toBeTruthy();
     expect(result.current.data).toBeUndefined();
@@ -41,7 +39,7 @@ describe('usePolicies', () => {
         },
       ],
     };
-    const { result, waitFor } = renderUseQuery(mockPolicies);
+    const { result } = renderUseQuery(mockPolicies);
 
     await waitFor(() => result.current.isSuccess);
 

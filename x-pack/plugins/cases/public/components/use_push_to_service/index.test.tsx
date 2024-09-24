@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import type { ReturnUsePushToService, UsePushToService } from '.';
 import { usePushToService } from '.';
@@ -232,7 +232,7 @@ describe('usePushToService', () => {
   });
 
   it('refresh case view page after push', async () => {
-    const { result, waitFor } = renderHook<
+    const { result } = renderHook<
       React.PropsWithChildren<UsePushToService>,
       ReturnUsePushToService
     >(() => usePushToService(defaultArgs), {

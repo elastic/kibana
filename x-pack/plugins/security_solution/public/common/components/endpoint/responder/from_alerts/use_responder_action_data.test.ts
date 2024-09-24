@@ -95,7 +95,9 @@ describe('use responder action data hooks', () => {
       it('should call `onClick()` function prop when is pass to the hook', () => {
         alertDetailItemData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
         const { result } = renderHook();
-        result.current.handleResponseActionsClick();
+        act(() => {
+          result.current.handleResponseActionsClick();
+        });
 
         expect(onClickMock).toHaveBeenCalled();
       });
@@ -103,7 +105,9 @@ describe('use responder action data hooks', () => {
       it('should NOT call `onClick` if the action is disabled', () => {
         alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo');
         const { result } = renderHook();
-        result.current.handleResponseActionsClick();
+        act(() => {
+          result.current.handleResponseActionsClick();
+        });
 
         expect(onClickMock).not.toHaveBeenCalled();
       });
@@ -170,7 +174,7 @@ describe('use responder action data hooks', () => {
 
       it('should show action enabled if host metadata was retrieved and host is enrolled', async () => {
         const { result } = renderHook();
-        await waitFor(() => expect(result.current.isDisabled).toBe(true));
+        await waitFor(() => expect(result.current.isDisabled).toBe(false));
 
         expect(result.current).toEqual(getExpectedResponderActionData());
       });
@@ -181,9 +185,10 @@ describe('use responder action data hooks', () => {
             statusCode: 404,
           });
         });
+
         const { result } = renderHook();
 
-        await waitFor(() => null);
+        await waitFor(() => expect(result.current.tooltip).not.toEqual('Loading'));
 
         expect(result.current).toEqual(
           getExpectedResponderActionData({
@@ -201,7 +206,7 @@ describe('use responder action data hooks', () => {
         metadataApiMocks.responseProvider.metadataDetails.mockReturnValue(hostMetadata);
 
         const { result } = renderHook();
-        await waitFor(() => result.current.tooltip);
+        await waitFor(() => expect(result.current.tooltip).not.toEqual('Loading'));
 
         expect(result.current).toEqual(
           getExpectedResponderActionData({
@@ -218,7 +223,7 @@ describe('use responder action data hooks', () => {
           });
         });
         const { result } = renderHook();
-        await waitFor(() => result.current.tooltip);
+        await waitFor(() => expect(result.current.tooltip).not.toEqual('Loading'));
 
         expect(result.current).toEqual(
           getExpectedResponderActionData({
@@ -250,7 +255,7 @@ describe('use responder action data hooks', () => {
 
     it('should show action enabled when agentType is Endpoint and host is enabled', async () => {
       const { result } = renderHook();
-      await waitFor(() => result.current.isDisabled);
+      await waitFor(() => expect(result.current.isDisabled).toBe(false));
 
       expect(result.current).toEqual(getExpectedResponderActionData());
     });

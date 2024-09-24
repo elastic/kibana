@@ -147,9 +147,9 @@ describe('Saved query management list component', () => {
       },
     };
     render(wrapSavedQueriesListComponentInContext(newProps));
-    await waitFor(() => {
-      expect(screen.queryByRole('listbox', { name: 'Query list' })).not.toBeInTheDocument();
-    });
+    await waitFor(() =>
+      expect(screen.queryByRole('listbox', { name: 'Query list' })).not.toBeInTheDocument()
+    );
     expect(screen.queryAllByText(/No saved queries/)[0]).toBeInTheDocument();
   });
 

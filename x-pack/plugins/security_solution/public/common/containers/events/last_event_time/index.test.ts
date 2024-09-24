@@ -59,7 +59,7 @@ describe('useTimelineLastEventTime', () => {
   });
 
   it('should init', () => {
-    const { result } = renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(() =>
+    const { result } = renderHook<[boolean, UseTimelineLastEventTimeArgs], string>(() =>
       useTimelineLastEventTime({
         indexKey: LastEventIndexKey.hostDetails,
         details: {},
@@ -74,7 +74,7 @@ describe('useTimelineLastEventTime', () => {
   });
 
   it('should call search strategy', async () => {
-    renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(() =>
+    renderHook<[boolean, UseTimelineLastEventTimeArgs], string>(() =>
       useTimelineLastEventTime({
         indexKey: LastEventIndexKey.hostDetails,
         details: {},
@@ -91,7 +91,7 @@ describe('useTimelineLastEventTime', () => {
   });
 
   it('should set response', async () => {
-    const { result } = renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(() =>
+    const { result } = renderHook<[boolean, UseTimelineLastEventTimeArgs], string>(() =>
       useTimelineLastEventTime({
         indexKey: LastEventIndexKey.hostDetails,
         details: {},

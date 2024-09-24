@@ -99,184 +99,239 @@ describe('useSettingsUpdater', () => {
     jest.clearAllMocks();
   });
   it('should set all state variables to their initial values when resetSettings is called', async () => {
-    await act(async () => {
-      const { result } = renderHook(() =>
-        useSettingsUpdater(
-          mockConversations,
-          {
-            data: [...mockSystemPrompts, ...mockQuickPrompts],
-            page: 1,
-            perPage: 100,
-            total: 10,
-          },
-          conversationsLoaded,
-          promptsLoaded,
-          anonymizationFields
-        )
-      );
-      await waitFor(() => null);
-      const {
-        setConversationSettings,
-        setConversationsSettingsBulkActions,
-        setUpdatedKnowledgeBaseSettings,
-        setUpdatedAssistantStreamingEnabled,
-        resetSettings,
-        setPromptsBulkActions,
-      } = result.current;
+    const { result } = renderHook(() =>
+      useSettingsUpdater(
+        mockConversations,
+        {
+          data: [...mockSystemPrompts, ...mockQuickPrompts],
+          page: 1,
+          perPage: 100,
+          total: 10,
+        },
+        conversationsLoaded,
+        promptsLoaded,
+        anonymizationFields
+      )
+    );
+    await waitFor(() => null);
+    const {
+      setConversationSettings,
+      setConversationsSettingsBulkActions,
+      setUpdatedKnowledgeBaseSettings,
+      setUpdatedAssistantStreamingEnabled,
+      resetSettings,
+      setPromptsBulkActions,
+    } = result.current;
 
+    act(() => {
       setConversationSettings(updatedValues.conversations);
       setConversationsSettingsBulkActions({});
       setPromptsBulkActions({});
       setUpdatedAnonymizationData(updatedValues.updatedAnonymizationData);
       setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
       setUpdatedAssistantStreamingEnabled(updatedValues.assistantStreamingEnabled);
-
-      expect(result.current.conversationSettings).toEqual(updatedValues.conversations);
-      expect(result.current.quickPromptSettings).toEqual(updatedValues.allQuickPrompts);
-      expect(result.current.systemPromptSettings).toEqual(updatedValues.allSystemPrompts);
-      expect(result.current.updatedAnonymizationData).toEqual(anonymizationFields);
-      expect(result.current.knowledgeBase).toEqual(updatedValues.knowledgeBase);
-      expect(result.current.assistantStreamingEnabled).toEqual(
-        updatedValues.assistantStreamingEnabled
-      );
-
-      resetSettings();
-
-      expect(result.current.conversationSettings).toEqual(mockConversations);
-      expect(result.current.quickPromptSettings).toEqual(mockValues.allQuickPrompts);
-      expect(result.current.systemPromptSettings).toEqual(mockValues.allSystemPrompts);
-      expect(result.current.anonymizationFieldsBulkActions).toEqual(
-        mockValues.anonymizationFieldsBulkActions
-      );
-      expect(result.current.knowledgeBase).toEqual(mockValues.knowledgeBase);
-      expect(result.current.assistantStreamingEnabled).toEqual(
-        mockValues.assistantStreamingEnabled
-      );
     });
+
+    expect(result.current.conversationSettings).toEqual(updatedValues.conversations);
+    expect(result.current.quickPromptSettings).toEqual(updatedValues.allQuickPrompts);
+    expect(result.current.systemPromptSettings).toEqual(updatedValues.allSystemPrompts);
+    expect(result.current.updatedAnonymizationData).toEqual(anonymizationFields);
+    expect(result.current.knowledgeBase).toEqual(updatedValues.knowledgeBase);
+    expect(result.current.assistantStreamingEnabled).toEqual(
+      updatedValues.assistantStreamingEnabled
+    );
+
+    await act(async () => {
+      resetSettings();
+    });
+
+    expect(result.current.conversationSettings).toEqual(mockConversations);
+    expect(result.current.quickPromptSettings).toEqual(mockValues.allQuickPrompts);
+    expect(result.current.systemPromptSettings).toEqual(mockValues.allSystemPrompts);
+    expect(result.current.anonymizationFieldsBulkActions).toEqual(
+      mockValues.anonymizationFieldsBulkActions
+    );
+    expect(result.current.knowledgeBase).toEqual(mockValues.knowledgeBase);
+    expect(result.current.assistantStreamingEnabled).toEqual(mockValues.assistantStreamingEnabled);
   });
 
   it('should update all state variables to their updated values when saveSettings is called', async () => {
-    await act(async () => {
-      const { result } = renderHook(() =>
-        useSettingsUpdater(
-          mockConversations,
-          {
-            data: mockSystemPrompts,
-            page: 1,
-            perPage: 100,
-            total: 10,
-          },
-          conversationsLoaded,
-          promptsLoaded,
-          anonymizationFields
-        )
-      );
-      await waitFor(() => null);
-      const {
-        setConversationSettings,
-        setConversationsSettingsBulkActions,
-        setAnonymizationFieldsBulkActions,
-        setUpdatedKnowledgeBaseSettings,
-        setPromptsBulkActions,
-      } = result.current;
+    const { result } = renderHook(() =>
+      useSettingsUpdater(
+        mockConversations,
+        {
+          data: mockSystemPrompts,
+          page: 1,
+          perPage: 100,
+          total: 10,
+        },
+        conversationsLoaded,
+        promptsLoaded,
+        anonymizationFields
+      )
+    );
 
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          setConversationSettings: expect.any(Function),
+          setConversationsSettingsBulkActions: expect.any(Function),
+          setAnonymizationFieldsBulkActions: expect.any(Function),
+          setUpdatedKnowledgeBaseSettings: expect.any(Function),
+          setPromptsBulkActions: expect.any(Function),
+        })
+      )
+    );
+
+    const {
+      setConversationSettings,
+      setConversationsSettingsBulkActions,
+      setAnonymizationFieldsBulkActions,
+      setUpdatedKnowledgeBaseSettings,
+      setPromptsBulkActions,
+    } = result.current;
+
+    act(() => {
       setConversationSettings(updatedValues.conversations);
       setConversationsSettingsBulkActions({ delete: { ids: ['1'] } });
       setAnonymizationFieldsBulkActions({ delete: { ids: ['1'] } });
       setPromptsBulkActions({});
       setUpdatedAnonymizationData(updatedValues.updatedAnonymizationData);
       setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
-
-      await result.current.saveSettings();
-
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/current_user/conversations/_bulk_action',
-        {
-          method: 'POST',
-          version: '1',
-          body: '{"delete":{"ids":["1"]}}',
-        }
-      );
-      expect(setUpdatedAnonymizationData).toHaveBeenCalledWith(
-        updatedValues.updatedAnonymizationData
-      );
-      expect(setKnowledgeBaseMock).toHaveBeenCalledWith(updatedValues.knowledgeBase);
     });
-  });
-  it('should track when alerts count is updated', async () => {
-    await act(async () => {
-      const { result } = renderHook(() =>
-        useSettingsUpdater(
-          mockConversations,
-          {
-            data: mockSystemPrompts,
-            page: 1,
-            perPage: 100,
-            total: 10,
-          },
-          conversationsLoaded,
-          promptsLoaded,
-          anonymizationFields
-        )
-      );
-      await waitFor(() => null);
-      const { setUpdatedKnowledgeBaseSettings } = result.current;
 
+    await act(async () => {
+      await result.current.saveSettings();
+    });
+
+    expect(mockHttp.fetch).toHaveBeenCalledWith(
+      '/internal/elastic_assistant/current_user/conversations/_bulk_action',
+      {
+        method: 'POST',
+        version: '1',
+        body: '{"delete":{"ids":["1"]}}',
+      }
+    );
+    expect(setUpdatedAnonymizationData).toHaveBeenCalledWith(
+      updatedValues.updatedAnonymizationData
+    );
+    expect(setKnowledgeBaseMock).toHaveBeenCalledWith(updatedValues.knowledgeBase);
+  });
+
+  it('should track when alerts count is updated', async () => {
+    const { result } = renderHook(() =>
+      useSettingsUpdater(
+        mockConversations,
+        {
+          data: mockSystemPrompts,
+          page: 1,
+          perPage: 100,
+          total: 10,
+        },
+        conversationsLoaded,
+        promptsLoaded,
+        anonymizationFields
+      )
+    );
+
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          setUpdatedAssistantStreamingEnabled: expect.any(Function),
+          saveSettings: expect.any(Function),
+        })
+      )
+    );
+
+    const { setUpdatedKnowledgeBaseSettings } = result.current;
+
+    act(() => {
       setUpdatedKnowledgeBaseSettings({
         ...updatedValues.knowledgeBase,
       });
-      await result.current.saveSettings();
-      expect(reportAssistantSettingToggled).toHaveBeenCalledWith({ alertsCountUpdated: true });
     });
+
+    await act(async () => {
+      await result.current.saveSettings();
+    });
+
+    expect(reportAssistantSettingToggled).toHaveBeenCalledWith({ alertsCountUpdated: true });
   });
+
   it('should track when streaming is updated', async () => {
-    await act(async () => {
-      const { result } = renderHook(() =>
-        useSettingsUpdater(
-          mockConversations,
-          {
-            data: mockSystemPrompts,
-            page: 1,
-            perPage: 100,
-            total: 10,
-          },
-          conversationsLoaded,
-          promptsLoaded,
-          anonymizationFields
-        )
-      );
-      await waitFor(() => null);
-      const { setUpdatedAssistantStreamingEnabled } = result.current;
+    const { result } = renderHook(() =>
+      useSettingsUpdater(
+        mockConversations,
+        {
+          data: mockSystemPrompts,
+          page: 1,
+          perPage: 100,
+          total: 10,
+        },
+        conversationsLoaded,
+        promptsLoaded,
+        anonymizationFields
+      )
+    );
 
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          setUpdatedAssistantStreamingEnabled: expect.any(Function),
+          saveSettings: expect.any(Function),
+        })
+      )
+    );
+
+    const { setUpdatedAssistantStreamingEnabled } = result.current;
+
+    act(() => {
       setUpdatedAssistantStreamingEnabled(false);
+    });
+
+    await act(async () => {
       await result.current.saveSettings();
-      expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
-        assistantStreamingEnabled: false,
-      });
+    });
+
+    expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
+      assistantStreamingEnabled: false,
     });
   });
-  it('if no settings update, do not track anything', async () => {
-    await act(async () => {
-      const { result } = renderHook(() =>
-        useSettingsUpdater(
-          mockConversations,
-          {
-            data: mockSystemPrompts,
-            page: 1,
-            perPage: 100,
-            total: 10,
-          },
-          conversationsLoaded,
-          promptsLoaded,
-          anonymizationFields
-        )
-      );
-      await waitFor(() => null);
-      const { setUpdatedKnowledgeBaseSettings } = result.current;
 
+  it('if no settings update, do not track anything', async () => {
+    const { result } = renderHook(() =>
+      useSettingsUpdater(
+        mockConversations,
+        {
+          data: mockSystemPrompts,
+          page: 1,
+          perPage: 100,
+          total: 10,
+        },
+        conversationsLoaded,
+        promptsLoaded,
+        anonymizationFields
+      )
+    );
+
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          setUpdatedAssistantStreamingEnabled: expect.any(Function),
+          saveSettings: expect.any(Function),
+        })
+      )
+    );
+
+    const { setUpdatedKnowledgeBaseSettings } = result.current;
+
+    act(() => {
       setUpdatedKnowledgeBaseSettings(mockValues.knowledgeBase);
-      await result.current.saveSettings();
-      expect(reportAssistantSettingToggled).not.toHaveBeenCalledWith();
     });
+
+    await act(async () => {
+      await result.current.saveSettings();
+    });
+    expect(reportAssistantSettingToggled).not.toHaveBeenCalledWith();
   });
 });

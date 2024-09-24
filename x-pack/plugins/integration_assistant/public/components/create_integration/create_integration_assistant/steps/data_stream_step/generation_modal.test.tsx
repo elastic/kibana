@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, act, type RenderResult, waitFor } from '@testing-library/react';
+import { render, type RenderResult, waitFor, fireEvent } from '@testing-library/react';
 import { mockReportEvent } from '../../../../../services/telemetry/mocks/service';
 import { TestProvider } from '../../../../../mocks/test_provider';
 import { GenerationModal } from './generation_modal';
@@ -84,18 +84,16 @@ describe('GenerationModal', () => {
     let result: RenderResult;
     const integrationSettingsNonJSON = deepCopy(integrationSettings);
     beforeEach(async () => {
-      await act(async () => {
-        result = render(
-          <GenerationModal
-            integrationSettings={integrationSettingsNonJSON}
-            connector={connector}
-            onComplete={mockOnComplete}
-            onClose={mockOnClose}
-          />,
-          { wrapper }
-        );
-        await waitFor(() => expect(mockOnComplete).toBeCalled());
-      });
+      result = render(
+        <GenerationModal
+          integrationSettings={integrationSettingsNonJSON}
+          connector={connector}
+          onComplete={mockOnComplete}
+          onClose={mockOnClose}
+        />,
+        { wrapper }
+      );
+      await waitFor(() => expect(mockOnComplete).toBeCalled());
     });
 
     it('should render generation modal', () => {
@@ -165,18 +163,16 @@ describe('GenerationModal', () => {
     const onCompleteResultsJSON = deepCopy(onCompleteResults);
     onCompleteResultsJSON.samplesFormat = integrationSettingsJSON.samplesFormat;
     beforeEach(async () => {
-      await act(async () => {
-        result = render(
-          <GenerationModal
-            integrationSettings={integrationSettingsJSON}
-            connector={connector}
-            onComplete={mockOnComplete}
-            onClose={mockOnClose}
-          />,
-          { wrapper }
-        );
-        await waitFor(() => expect(mockOnComplete).toBeCalled());
-      });
+      result = render(
+        <GenerationModal
+          integrationSettings={integrationSettingsJSON}
+          connector={connector}
+          onComplete={mockOnComplete}
+          onClose={mockOnClose}
+        />,
+        { wrapper }
+      );
+      await waitFor(() => expect(mockOnComplete).toBeCalled());
     });
 
     it('should render generation modal', () => {
@@ -240,20 +236,18 @@ describe('GenerationModal', () => {
         throw new Error(errorMessage);
       });
 
-      await act(async () => {
-        result = render(
-          <GenerationModal
-            integrationSettings={integrationSettings}
-            connector={connector}
-            onComplete={mockOnComplete}
-            onClose={mockOnClose}
-          />,
-          { wrapper }
-        );
-        await waitFor(() =>
-          expect(result.queryByTestId('generationErrorCallout')).toBeInTheDocument()
-        );
-      });
+      result = render(
+        <GenerationModal
+          integrationSettings={integrationSettings}
+          connector={connector}
+          onComplete={mockOnComplete}
+          onClose={mockOnClose}
+        />,
+        { wrapper }
+      );
+      await waitFor(() =>
+        expect(result.queryByTestId('generationErrorCallout')).toBeInTheDocument()
+      );
     });
 
     it('should show the error text', () => {
@@ -279,10 +273,8 @@ describe('GenerationModal', () => {
 
     describe('when the retrying successfully', () => {
       beforeEach(async () => {
-        await act(async () => {
-          result.getByTestId('retryButton').click();
-          await waitFor(() => expect(mockOnComplete).toBeCalled());
-        });
+        fireEvent.click(result.getByTestId('retryButton'));
+        await waitFor(() => expect(mockOnComplete).toBeCalled());
       });
 
       it('should not render the error callout', () => {

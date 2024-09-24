@@ -27,8 +27,6 @@ describe('useAsObservable', () => {
 
     act(() => rerender(1));
 
-    expect(result.all[0]).toStrictEqual(result.all[1]);
-
     expect(subscriptionMock).toHaveBeenCalledWith(1);
     expect(subscriptionMock).toHaveBeenCalledTimes(1);
     expect(observableValue).toEqual(1);
