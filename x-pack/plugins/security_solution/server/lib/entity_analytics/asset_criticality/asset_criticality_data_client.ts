@@ -42,8 +42,8 @@ const createId = ({ idField, idValue }: AssetCriticalityIdParts) => `${idField}:
 export class AssetCriticalityDataClient {
   constructor(private readonly options: AssetCriticalityClientOpts) {}
   /**
-   * It will create idex for asset criticality,
-   * or update mappings if index exists
+   * Create the index for asset criticality,
+   * or update mappings if index already exists
    */
   public async init() {
     await createOrUpdateIndex({
@@ -169,6 +169,16 @@ export class AssetCriticalityDataClient {
     }
   }
 
+  private getImplicitEntityFields = (record: AssetCriticalityUpsert) => {
+    const entityType = record.idField === 'host.name' ? 'host' : 'user';
+    return {
+      [entityType]: {
+        asset: { criticality: record.criticalityLevel },
+        name: record.idValue,
+      },
+    };
+  };
+
   public async upsert(
     record: AssetCriticalityUpsert,
     refresh = 'wait_for' as const
@@ -178,6 +188,10 @@ export class AssetCriticalityDataClient {
       id_field: record.idField,
       id_value: record.idValue,
       criticality_level: record.criticalityLevel,
+      asset: {
+        criticality: record.criticalityLevel,
+      },
+      ...this.getImplicitEntityFields(record),
       '@timestamp': new Date().toISOString(),
     };
 
@@ -253,6 +267,10 @@ export class AssetCriticalityDataClient {
             id_field: record.idField,
             id_value: record.idValue,
             criticality_level: record.criticalityLevel,
+            asset: {
+              criticality: record.criticalityLevel,
+            },
+            ...this.getImplicitEntityFields(record),
             '@timestamp': new Date().toISOString(),
           },
           doc_as_upsert: true,

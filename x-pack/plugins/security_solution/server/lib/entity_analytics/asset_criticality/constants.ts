@@ -33,4 +33,29 @@ export const assetCriticalityFieldMap: FieldMap = {
     array: false,
     required: false,
   },
+  'asset.criticality': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'host.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'host.asset.criticality': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'user.asset.criticality': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
 } as const;

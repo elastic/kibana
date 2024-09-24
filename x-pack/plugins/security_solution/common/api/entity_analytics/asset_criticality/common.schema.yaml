@@ -63,6 +63,31 @@ components:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
         - type: object
           properties:
+            user:
+              type: object
+              properties:
+                name:
+                  type: string
+                asset:
+                  type: object
+                  properties:
+                    criticality:
+                      $ref: '#/components/schemas/AssetCriticalityLevel'
+            host:
+              type: object
+              properties:
+                name:
+                  type: string
+                asset:
+                  type: object
+                  properties:
+                    criticality:
+                      $ref: '#/components/schemas/AssetCriticalityLevel'
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
             '@timestamp':
               type: string
               format: 'date-time'

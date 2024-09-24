@@ -50,6 +50,41 @@ describe('AssetCriticalityDataClient', () => {
               criticality_level: {
                 type: 'keyword',
               },
+              asset: {
+                properties: {
+                  criticality: {
+                    type: 'keyword',
+                  },
+                },
+              },
+              host: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                  },
+                  asset: {
+                    properties: {
+                      criticality: {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                },
+              },
+              user: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                  },
+                  asset: {
+                    properties: {
+                      criticality: {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                },
+              },
               '@timestamp': {
                 type: 'date',
                 ignore_malformed: false,

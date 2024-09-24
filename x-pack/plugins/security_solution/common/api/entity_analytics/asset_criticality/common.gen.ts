@@ -56,6 +56,31 @@ export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
 export type AssetCriticalityRecord = z.infer<typeof AssetCriticalityRecord>;
 export const AssetCriticalityRecord = CreateAssetCriticalityRecord.merge(
   z.object({
+    user: z
+      .object({
+        name: z.string().optional(),
+        asset: z
+          .object({
+            criticality: AssetCriticalityLevel.optional(),
+          })
+          .optional(),
+      })
+      .optional(),
+    host: z
+      .object({
+        name: z.string().optional(),
+        asset: z
+          .object({
+            criticality: AssetCriticalityLevel.optional(),
+          })
+          .optional(),
+      })
+      .optional(),
+    asset: z
+      .object({
+        criticality: AssetCriticalityLevel.optional(),
+      })
+      .optional(),
     /**
      * The time the record was created or updated.
      */
