@@ -21,6 +21,11 @@ import {
   openPreviewPanelAction,
   urlChangedAction,
   changePushVsOverlayAction,
+  setDefaultWidthsAction,
+  changeUserCollapsedWidthAction,
+  changeUserExpandedWidthAction,
+  changeUserSectionWidthsAction,
+  resetAllUserChangedWidthsAction,
 } from './actions';
 import { initialPanelsState, initialUiState } from './state';
 
@@ -154,5 +159,34 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
 export const uiReducer = createReducer(initialUiState, (builder) => {
   builder.addCase(changePushVsOverlayAction, (state, { payload: { type } }) => {
     state.pushVsOverlay = type;
+  });
+
+  builder.addCase(setDefaultWidthsAction, (state, { payload: { right, left, preview } }) => {
+    state.defaultWidths.rightWidth = right;
+    state.defaultWidths.leftWidth = left;
+    state.defaultWidths.previewWidth = preview;
+    state.defaultWidths.rightPercentage = (right / (right + left)) * 100;
+    state.defaultWidths.leftPercentage = (left / (right + left)) * 100;
+    state.defaultWidths.previewPercentage = (right / (right + left)) * 100;
+  });
+
+  builder.addCase(changeUserCollapsedWidthAction, (state, { payload: { width } }) => {
+    state.userFlyoutWidths.collapsedWidth = width;
+  });
+
+  builder.addCase(changeUserExpandedWidthAction, (state, { payload: { width } }) => {
+    state.userFlyoutWidths.expandedWidth = width;
+  });
+
+  builder.addCase(changeUserSectionWidthsAction, (state, { payload: { right, left } }) => {
+    state.userSectionWidths.leftPercentage = left;
+    state.userSectionWidths.rightPercentage = right;
+  });
+
+  builder.addCase(resetAllUserChangedWidthsAction, (state) => {
+    state.userFlyoutWidths.collapsedWidth = undefined;
+    state.userFlyoutWidths.expandedWidth = undefined;
+    state.userSectionWidths.leftPercentage = undefined;
+    state.userSectionWidths.rightPercentage = undefined;
   });
 });

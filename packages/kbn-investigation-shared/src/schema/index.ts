@@ -11,5 +11,6 @@ export * from './investigation';
 export * from './investigation_item';
 export * from './investigation_note';
 export * from './origin';
+export * from './event';
 
 export type * from './investigation';

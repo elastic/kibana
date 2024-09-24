@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  title: Get Entity Store engine 
+  version: '2023-10-31'
+paths:
+  /api/entity_store/engines/{entityType}:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetEntityStoreEngine
+      summary: Get the Entity Store engine
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+          description: The entity type of the store (either 'user' or 'host').
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../common.schema.yaml#/components/schemas/EngineDescriptor'

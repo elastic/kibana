@@ -11,8 +11,9 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { MisconfigurationsPreview } from './misconfiguration_preview';
 
-const mockProps = {
-  hostName: 'testContextID',
+const mockProps: { name: string; fieldName: 'host.name' | 'user.name' } = {
+  name: 'testContextID',
+  fieldName: 'host.name',
 };
 
 describe('MisconfigurationsPreview', () => {
