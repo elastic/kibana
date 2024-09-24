@@ -141,12 +141,13 @@ export const createThreatSignals = async ({
   };
 
   const dataViews = await services.getDataViews();
-  const threatIndexFields = await getFieldsForWildcard({
-    index: threatIndex,
-    language: threatLanguage ?? 'kuery',
-    dataViews,
-    ruleExecutionLogger,
-  });
+  // const threatIndexFields = await getFieldsForWildcard({
+  //   index: threatIndex,
+  //   language: threatLanguage ?? 'kuery',
+  //   dataViews,
+  //   ruleExecutionLogger,
+  // });
+  const threatIndexFields = [];
 
   const threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,

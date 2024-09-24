@@ -104,7 +104,6 @@ export interface RunOpts<TParams extends RuleParams> {
   alertWithSuppression: SuppressedAlertService;
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;
-  inputIndexFields: DataViewFieldBase[];
   experimentalFeatures?: ExperimentalFeatures;
 }
 

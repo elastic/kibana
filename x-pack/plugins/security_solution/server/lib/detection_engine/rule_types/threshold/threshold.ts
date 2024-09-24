@@ -64,7 +64,6 @@ export const thresholdExecutor = async ({
   aggregatableTimestampField,
   exceptionFilter,
   unprocessedExceptions,
-  inputIndexFields,
   spaceId,
   runOpts,
   licensing,
@@ -87,7 +86,6 @@ export const thresholdExecutor = async ({
   aggregatableTimestampField: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
-  inputIndexFields: DataViewFieldBase[];
   spaceId: string;
   runOpts: RunOpts<ThresholdRuleParams>;
   licensing: LicensingPluginSetup;
@@ -135,7 +133,6 @@ export const thresholdExecutor = async ({
       services,
       index: inputIndex,
       exceptionFilter,
-      fields: inputIndexFields,
       loadFields: true,
     });
 
