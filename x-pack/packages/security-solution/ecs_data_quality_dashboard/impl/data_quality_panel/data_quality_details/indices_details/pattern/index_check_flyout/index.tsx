@@ -90,7 +90,10 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
       formatBytes,
       formatNumber,
     });
-  }, [checkIndex, formatBytes, formatNumber, httpFetch, indexName, pattern]);
+    if (selectedTabId === HISTORY) {
+      setSelectedTabId(LATEST_CHECK);
+    }
+  }, [checkIndex, formatBytes, formatNumber, httpFetch, indexName, pattern, selectedTabId]);
 
   useEffect(() => {
     const checkIndexAbortController = checkIndexAbortControllerRef.current;

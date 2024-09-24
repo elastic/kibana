@@ -39,7 +39,6 @@ import {
   EnrichedFieldMetadata,
   IlmPhase,
   IncompatibleFieldMetadata,
-  PartitionedFieldMetadata,
   UnallowedValueCount,
 } from '../types';
 import { getDocsCountPercent } from './stats';
@@ -100,11 +99,11 @@ export const getSummaryTableMarkdownHeader = (includeDocSize: boolean): string =
         DOCS
       )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|`;
 
-export const getResultEmoji = (incompatible: number | undefined): string => {
-  if (incompatible == null) {
+export const getResultEmoji = (incompatibleCount: number | undefined): string => {
+  if (incompatibleCount == null) {
     return EMPTY_PLACEHOLDER;
   } else {
-    return incompatible === 0 ? '✅' : '❌';
+    return incompatibleCount === 0 ? '✅' : '❌';
   }
 };
 
@@ -113,7 +112,7 @@ export const getSummaryTableMarkdownRow = ({
   formatBytes,
   formatNumber,
   ilmPhase,
-  incompatible,
+  incompatibleFieldsCount,
   indexName,
   isILMAvailable,
   patternDocsCount,
@@ -123,29 +122,31 @@ export const getSummaryTableMarkdownRow = ({
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
-  incompatible: number | undefined;
+  incompatibleFieldsCount: number | undefined;
   indexName: string;
   isILMAvailable: boolean;
-  patternDocsCount: number;
+  patternDocsCount?: number;
   sizeInBytes: number | undefined;
-}): string =>
-  isILMAvailable && Number.isInteger(sizeInBytes)
-    ? `| ${getResultEmoji(incompatible)} | ${escapeNewlines(indexName)} | ${formatNumber(
-        docsCount
-      )} (${getDocsCountPercent({
-        docsCount,
-        patternDocsCount,
-      })}) | ${incompatible ?? EMPTY_PLACEHOLDER} | ${
-        ilmPhase != null ? getCodeFormattedValue(ilmPhase) : EMPTY_PLACEHOLDER
-      } | ${formatBytes(sizeInBytes)} |
-`
-    : `| ${getResultEmoji(incompatible)} | ${escapeNewlines(indexName)} | ${formatNumber(
-        docsCount
-      )} (${getDocsCountPercent({
-        docsCount,
-        patternDocsCount,
-      })}) | ${incompatible ?? EMPTY_PLACEHOLDER} |
+}): string => {
+  const emojiColumn = getResultEmoji(incompatibleFieldsCount);
+  const indexNameColumn = escapeNewlines(indexName);
+  const docsCountColumn = formatNumber(docsCount);
+  const incompatibleFieldsCountColumn = formatNumber(incompatibleFieldsCount);
+  const docsCountPercentColumn = patternDocsCount
+    ? `(${getDocsCountPercent({ docsCount, patternDocsCount })}) `
+    : '';
+  const baseColumns = `${emojiColumn} | ${indexNameColumn} | ${docsCountColumn} ${docsCountPercentColumn}| ${incompatibleFieldsCountColumn}`;
+
+  if (isILMAvailable && Number.isInteger(sizeInBytes)) {
+    const ilmPhaseColumn = ilmPhase != null ? getCodeFormattedValue(ilmPhase) : EMPTY_PLACEHOLDER;
+    const sizeColumn = formatBytes(sizeInBytes);
+    return `| ${baseColumns} | ${ilmPhaseColumn} | ${sizeColumn} |
 `;
+  }
+
+  return `| ${baseColumns} |
+`;
+};
 
 export const getMarkdownTableHeader = (headerNames: string[]) => `
 | ${headerNames.map((name) => `${escapeNewlines(name)} | `).join('')}
@@ -158,7 +159,7 @@ export const getSummaryTableMarkdownComment = ({
   ilmPhase,
   indexName,
   isILMAvailable,
-  partitionedFieldMetadata,
+  incompatibleFieldsCount,
   patternDocsCount,
   sizeInBytes,
 }: {
@@ -168,8 +169,8 @@ export const getSummaryTableMarkdownComment = ({
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   isILMAvailable: boolean;
-  partitionedFieldMetadata: PartitionedFieldMetadata;
-  patternDocsCount: number;
+  incompatibleFieldsCount: number;
+  patternDocsCount?: number;
   sizeInBytes: number | undefined;
 }): string =>
   `${getSummaryTableMarkdownHeader(isILMAvailable)}
@@ -180,7 +181,7 @@ ${getSummaryTableMarkdownRow({
   ilmPhase,
   indexName,
   isILMAvailable,
-  incompatible: partitionedFieldMetadata.incompatible.length,
+  incompatibleFieldsCount,
   patternDocsCount,
   sizeInBytes,
 })}
@@ -191,21 +192,21 @@ export const getSummaryMarkdownComment = (indexName: string) =>
 `;
 
 export const getTabCountsMarkdownComment = (tabCounts: {
-  all: number;
-  custom: number;
-  ecsCompliant: number;
-  incompatible: number;
-  sameFamily: number;
+  allFieldsCount: number;
+  customFieldsCount: number;
+  ecsCompliantFieldsCount: number;
+  incompatibleFieldsCount: number;
+  sameFamilyFieldsCount: number;
 }): string =>
   `### **${INCOMPATIBLE_FIELDS}** ${getCodeFormattedValue(
-    `${tabCounts.incompatible}`
+    `${tabCounts.incompatibleFieldsCount}`
   )} **${SAME_FAMILY}** ${getCodeFormattedValue(
-    `${tabCounts.sameFamily}`
+    `${tabCounts.sameFamilyFieldsCount}`
   )} **${CUSTOM_FIELDS}** ${getCodeFormattedValue(
-    `${tabCounts.custom}`
+    `${tabCounts.customFieldsCount}`
   )} **${ECS_COMPLIANT_FIELDS}** ${getCodeFormattedValue(
-    `${tabCounts.ecsCompliant}`
-  )} **${ALL_FIELDS}** ${getCodeFormattedValue(`${tabCounts.all}`)}
+    `${tabCounts.ecsCompliantFieldsCount}`
+  )} **${ALL_FIELDS}** ${getCodeFormattedValue(`${tabCounts.allFieldsCount}`)}
 `;
 
 export const getIncompatibleMappings = (
@@ -247,9 +248,9 @@ export const getAllowedValues = (allowedValues: AllowedValue[] | undefined): str
     : allowedValues.map((x) => getCodeFormattedValue(x.name)).join(', ');
 
 export const getIncompatibleValuesMarkdownTableRows = (
-  incompatibleValues: IncompatibleFieldMetadata[]
+  incompatibleValuesFields: IncompatibleFieldMetadata[]
 ): string =>
-  incompatibleValues
+  incompatibleValuesFields
     .map(
       (x) =>
         `| ${escapeNewlines(x.indexFieldName)} | ${getAllowedValues(
@@ -270,9 +271,9 @@ export const getMarkdownComment = ({
 ${escapePreserveNewlines(suggestedAction)}`;
 
 export const getIncompatibleMappingsMarkdownTableRows = (
-  incompatibleMappings: IncompatibleFieldMetadata[]
+  incompatibleMappingsFields: IncompatibleFieldMetadata[]
 ): string =>
-  incompatibleMappings
+  incompatibleMappingsFields
     .map(
       (x) =>
         `| ${escapeNewlines(x.indexFieldName)} | ${getCodeFormattedValue(
@@ -301,18 +302,18 @@ ${getMarkdownTableRows(enrichedFieldMetadata)}
     : '';
 
 export const getIncompatibleFieldsMarkdownTablesComment = ({
-  incompatibleMappings,
-  incompatibleValues,
+  incompatibleMappingsFields,
+  incompatibleValuesFields,
   indexName,
 }: {
-  incompatibleMappings: IncompatibleFieldMetadata[];
-  incompatibleValues: IncompatibleFieldMetadata[];
+  incompatibleMappingsFields: IncompatibleFieldMetadata[];
+  incompatibleValuesFields: IncompatibleFieldMetadata[];
   indexName: string;
 }): string => `
 ${
-  incompatibleMappings.length > 0
+  incompatibleMappingsFields.length > 0
     ? getMarkdownTable({
-        enrichedFieldMetadata: incompatibleMappings,
+        enrichedFieldMetadata: incompatibleMappingsFields,
         getMarkdownTableRows: getIncompatibleMappingsMarkdownTableRows,
         headerNames: [FIELD, ECS_MAPPING_TYPE_EXPECTED, INDEX_MAPPING_TYPE_ACTUAL],
         title: INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE(indexName),
@@ -320,9 +321,9 @@ ${
     : ''
 }
 ${
-  incompatibleValues.length > 0
+  incompatibleValuesFields.length > 0
     ? getMarkdownTable({
-        enrichedFieldMetadata: incompatibleValues,
+        enrichedFieldMetadata: incompatibleValuesFields,
         getMarkdownTableRows: getIncompatibleValuesMarkdownTableRows,
         headerNames: [FIELD, ECS_VALUES_EXPECTED, DOCUMENT_VALUES_ACTUAL],
         title: INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE(indexName),
@@ -338,7 +339,12 @@ export const getAllIncompatibleMarkdownComments = ({
   ilmPhase,
   indexName,
   isILMAvailable,
-  partitionedFieldMetadata,
+  incompatibleMappingsFields,
+  incompatibleValuesFields,
+  sameFamilyFieldsCount,
+  customFieldsCount,
+  ecsCompliantFieldsCount,
+  allFieldsCount,
   patternDocsCount,
   sizeInBytes,
 }: {
@@ -348,16 +354,20 @@ export const getAllIncompatibleMarkdownComments = ({
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   isILMAvailable: boolean;
-  partitionedFieldMetadata: PartitionedFieldMetadata;
-  patternDocsCount: number;
+  incompatibleMappingsFields: IncompatibleFieldMetadata[];
+  incompatibleValuesFields: IncompatibleFieldMetadata[];
+  sameFamilyFieldsCount: number;
+  customFieldsCount: number;
+  ecsCompliantFieldsCount: number;
+  allFieldsCount: number;
+  patternDocsCount?: number;
   sizeInBytes: number | undefined;
 }): string[] => {
-  const incompatibleMappings = getIncompatibleMappings(partitionedFieldMetadata.incompatible);
-  const incompatibleValues = getIncompatibleValues(partitionedFieldMetadata.incompatible);
-
+  const incompatibleFieldsCount =
+    incompatibleMappingsFields.length + incompatibleValuesFields.length;
   const incompatibleFieldsMarkdownComment =
-    partitionedFieldMetadata.incompatible.length > 0
-      ? getIncompatibleFieldsMarkdownComment(partitionedFieldMetadata.incompatible.length)
+    incompatibleFieldsCount > 0
+      ? getIncompatibleFieldsMarkdownComment(incompatibleFieldsCount)
       : '';
 
   return [
@@ -369,21 +379,21 @@ export const getAllIncompatibleMarkdownComments = ({
       ilmPhase,
       indexName,
       isILMAvailable,
-      partitionedFieldMetadata,
+      incompatibleFieldsCount,
       patternDocsCount,
       sizeInBytes,
     }),
     getTabCountsMarkdownComment({
-      all: partitionedFieldMetadata.all.length,
-      custom: partitionedFieldMetadata.custom.length,
-      ecsCompliant: partitionedFieldMetadata.ecsCompliant.length,
-      incompatible: partitionedFieldMetadata.incompatible.length,
-      sameFamily: partitionedFieldMetadata.sameFamily.length,
+      allFieldsCount,
+      customFieldsCount,
+      ecsCompliantFieldsCount,
+      incompatibleFieldsCount,
+      sameFamilyFieldsCount,
     }),
     incompatibleFieldsMarkdownComment,
     getIncompatibleFieldsMarkdownTablesComment({
-      incompatibleMappings,
-      incompatibleValues,
+      incompatibleMappingsFields,
+      incompatibleValuesFields,
       indexName,
     }),
   ].filter((x) => x !== '');

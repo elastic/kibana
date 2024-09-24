@@ -15,8 +15,8 @@ import { ErrorEmptyPrompt } from '../../error_empty_prompt';
 import { LoadingEmptyPrompt } from '../../loading_empty_prompt';
 import type { MeteringStatsIndex, PatternRollup } from '../../../../../types';
 import { useIndicesCheckContext } from '../../../../../contexts/indices_check_context';
-import { IndexCheckFields } from './index_check_fields';
-import { IndexStatsPanel } from './index_stats_panel';
+import { LatestCheckFields } from './latest_check_fields';
+import { IndexStatsPanel } from '../index_stats_panel';
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import { getIndexPropertiesContainerId } from './utils/get_index_properties_container_id';
 import {
@@ -80,11 +80,9 @@ const LatestResultsComponent: React.FC<Props> = ({
 
   return isCheckComplete ? (
     <div data-index-properties-container={getIndexPropertiesContainerId({ indexName, pattern })}>
-      {ilmPhase && (
-        <IndexStatsPanel docsCount={docsCount} sizeInBytes={sizeInBytes ?? 0} ilmPhase={ilmPhase} />
-      )}
+      <IndexStatsPanel docsCount={docsCount} sizeInBytes={sizeInBytes ?? 0} ilmPhase={ilmPhase} />
       <EuiSpacer />
-      <IndexCheckFields
+      <LatestCheckFields
         docsCount={docsCount}
         ilmPhase={ilmPhase}
         indexName={indexName}

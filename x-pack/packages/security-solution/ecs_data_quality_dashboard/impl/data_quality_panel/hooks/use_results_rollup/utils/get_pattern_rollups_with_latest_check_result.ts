@@ -9,7 +9,11 @@ import type { IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../..
 import { getIndexDocsCountFromRollup } from './stats';
 import { getIlmPhase } from '../../../utils/get_ilm_phase';
 import { getSizeInBytes } from '../../../utils/stats';
-import { getAllIncompatibleMarkdownComments } from '../../../utils/markdown';
+import {
+  getAllIncompatibleMarkdownComments,
+  getIncompatibleMappings,
+  getIncompatibleValues,
+} from '../../../utils/markdown';
 
 export const getPatternRollupsWithLatestCheckResult = ({
   error,
@@ -47,20 +51,35 @@ export const getPatternRollupsWithLatestCheckResult = ({
 
     const sizeInBytes = getSizeInBytes({ indexName, stats: patternRollup.stats });
 
-    const markdownComments =
-      partitionedFieldMetadata != null
-        ? getAllIncompatibleMarkdownComments({
-            docsCount,
-            formatBytes,
-            formatNumber,
-            ilmPhase,
-            indexName,
-            isILMAvailable,
-            partitionedFieldMetadata,
-            patternDocsCount,
-            sizeInBytes,
-          })
-        : [];
+    let markdownComments: string[] = [];
+
+    if (partitionedFieldMetadata != null) {
+      const incompatibleMappingsFields = getIncompatibleMappings(
+        partitionedFieldMetadata.incompatible
+      );
+      const incompatibleValuesFields = getIncompatibleValues(partitionedFieldMetadata.incompatible);
+      const sameFamilyFieldsCount = partitionedFieldMetadata.sameFamily.length;
+      const ecsCompliantFieldsCount = partitionedFieldMetadata.ecsCompliant.length;
+      const customFieldsCount = partitionedFieldMetadata.custom.length;
+      const allFieldsCount = partitionedFieldMetadata.all.length;
+
+      markdownComments = getAllIncompatibleMarkdownComments({
+        docsCount,
+        formatBytes,
+        formatNumber,
+        ilmPhase,
+        indexName,
+        isILMAvailable,
+        incompatibleMappingsFields,
+        incompatibleValuesFields,
+        sameFamilyFieldsCount,
+        ecsCompliantFieldsCount,
+        customFieldsCount,
+        allFieldsCount,
+        patternDocsCount,
+        sizeInBytes,
+      });
+    }
 
     const incompatible = partitionedFieldMetadata?.incompatible.length;
     const sameFamily = partitionedFieldMetadata?.sameFamily.length;

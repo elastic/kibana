@@ -6,89 +6,36 @@
  */
 
 import React from 'react';
-// import { EuiButtonGroup, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-// import styled from 'styled-components';
-//
+import { EuiSpacer } from '@elastic/eui';
+
 import { StorageResult } from '../../../../../../types';
-// import { INCOMPATIBLE_TAB_ID } from './constants';
-// import { getTabs } from './utils/get_tabs';
-//
-// const StyledTabFlexGroup = styled(EuiFlexGroup)`
-//   width: 100%;
-// `;
-//
-// const StyledTabFlexItem = styled.div`
-//   text-overflow: ellipsis;
-//   white-space: nowrap;
-//   overflow: hidden;
-// `;
-//
-// const StyledButtonGroup = styled(EuiButtonGroup)`
-//   button[data-test-subj='incompatibleTab'] {
-//     flex-grow: 1.2;
-//   }
-//   button[data-test-subj='ecsCompliantTab'] {
-//     flex-grow: 1.4;
-//   }
-// `;
+import { IndexStatsPanel } from '../../index_stats_panel';
+import { HistoricalCheckFields } from './historical_check_fields';
 
 export interface Props {
   indexName: string;
-  result: StorageResult;
+  historicalResult: StorageResult;
 }
 
-const HistoricalResultComponent: React.FC<Props> = () => {
-  return <div>{'HistoricalResult'}</div>;
-  // const tabs = useMemo(
-  //   () =>
-  //     getTabs({
-  //       indexName,
-  //     }),
-  //   [indexName]
-  // );
-  //
-  // const [selectedTabId, setSelectedTabId] = useState<string>(INCOMPATIBLE_TAB_ID);
-  //
-  // const tabSelections = useMemo(
-  //   () =>
-  //     tabs.map((tab) => ({
-  //       id: tab.id,
-  //       label: (
-  //         <StyledTabFlexGroup
-  //           responsive={false}
-  //           justifyContent="center"
-  //           gutterSize="s"
-  //           alignItems="center"
-  //           title={tab.name}
-  //         >
-  //           <StyledTabFlexItem>{tab.name}</StyledTabFlexItem>
-  //           {tab.append}
-  //         </StyledTabFlexGroup>
-  //       ),
-  //       textProps: false as false,
-  //     })),
-  //   [tabs]
-  // );
-  //
-  // const handleSelectedTabId = useCallback((optionId: string) => {
-  //   setSelectedTabId(optionId);
-  // }, []);
-  //
-  // return (
-  //   <div data-test-subj="indexCheckFields">
-  //     <StyledButtonGroup
-  //       legend="Historical results check fields tab toggle"
-  //       options={tabSelections}
-  //       idSelected={selectedTabId}
-  //       onChange={handleSelectedTabId}
-  //       buttonSize="compressed"
-  //       color="primary"
-  //       isFullWidth
-  //     />
-  //     <EuiSpacer />
-  //     {tabs.find((tab) => tab.id === selectedTabId)?.content}
-  //   </div>
-  // );
+const HistoricalResultComponent: React.FC<Props> = ({ indexName, historicalResult }) => {
+  const { docsCount, sizeInBytes, ilmPhase, ecsFieldCount, totalFieldCount, customFieldCount } =
+    historicalResult;
+  return (
+    <div>
+      <EuiSpacer />
+      <IndexStatsPanel
+        docsCount={docsCount}
+        sizeInBytes={sizeInBytes ?? 0}
+        ilmPhase={ilmPhase}
+        ecsCompliantFieldsCount={ecsFieldCount}
+        customFieldsCount={customFieldCount}
+        allFieldsCount={totalFieldCount}
+      />
+      <EuiSpacer />
+      <HistoricalCheckFields indexName={indexName} historicalResult={historicalResult} />
+      <EuiSpacer size="m" />
+    </div>
+  );
 };
 
 HistoricalResultComponent.displayName = 'HistoricalResultComponent';
