@@ -1392,7 +1392,7 @@ describe('AlertingEventLogger', () => {
     test('should throw error if alertingEventLogger has not been initialized', () => {
       expect(() =>
         alertingEventLogger.reportGap({
-          gap: { from: '', to: '' },
+          gap: { gte: '', lte: '' },
         })
       ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
     });
@@ -1400,8 +1400,8 @@ describe('AlertingEventLogger', () => {
     test('should report gap event', () => {
       alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       const range = {
-        from: '2022-05-05T15:59:54.480Z',
-        to: '2022-05-05T16:59:54.480Z',
+        gte: '2022-05-05T15:59:54.480Z',
+        lte: '2022-05-05T16:59:54.480Z',
       };
       alertingEventLogger.reportGap({ gap: range });
 
@@ -2027,8 +2027,8 @@ describe('helper functions', () => {
       const record = createGapRecord(ruleContextWithScheduleDelay, ruleDataWithName, [alertSO], {
         status: 'unfilled',
         range: {
-          from: '2022-05-05T15:59:54.480Z',
-          to: '2022-05-05T16:59:54.480Z',
+          gte: '2022-05-05T15:59:54.480Z',
+          lte: '2022-05-05T16:59:54.480Z',
         },
       });
 
@@ -2038,8 +2038,8 @@ describe('helper functions', () => {
       expect(record.event?.category).toEqual([ruleDataWithName.type?.producer]);
 
       expect(record.kibana?.alert?.rule?.gap?.status).toEqual('unfilled');
-      expect(record.kibana?.alert?.rule?.gap?.range?.from).toEqual('2022-05-05T15:59:54.480Z');
-      expect(record.kibana?.alert?.rule?.gap?.range?.to).toEqual('2022-05-05T16:59:54.480Z');
+      expect(record.kibana?.alert?.rule?.gap?.range?.gte).toEqual('2022-05-05T15:59:54.480Z');
+      expect(record.kibana?.alert?.rule?.gap?.range?.lte).toEqual('2022-05-05T16:59:54.480Z');
 
       expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(ruleDataWithName.type?.id);
       expect(record.kibana?.alert?.rule?.consumer).toEqual(ruleDataWithName.consumer);
