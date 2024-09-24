@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import type { OtelDocument } from '@kbn/apm-synthtrace-client';
+import type { OtelDocument } from '../../..';
 import { Serializable } from '../serializable';
-import { generateShortId } from '../utils/generate_id';
 
-export class OtelError extends Serializable<OtelDocument> {
-  constructor(fields: OtelDocument) {
+export interface OtelErrorDocument extends OtelDocument {
+  name?: string;
+  attributes?: {
+    'exception.message'?: string;
+    'exception.type'?: string;
+    'processor.event'?: string;
+    'timestamp.us'?: number;
+  };
+}
+
+export class OtelError extends Serializable<OtelErrorDocument> {
+  constructor(fields: OtelErrorDocument) {
     super({
       ...fields,
-      //   'processor.event': 'error',
-      //   'processor.name': 'error',
-      trace_id: generateShortId(),
     });
-  }
-
-  timestamp(value: number) {
-    const ret = super.timestamp(value);
-    this.fields['timestamp.us'] = value * 1000;
-    return ret;
   }
 }

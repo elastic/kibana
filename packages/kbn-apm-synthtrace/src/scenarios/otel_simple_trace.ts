@@ -5,28 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ApmFields, otel, generateShortId } from '@kbn/apm-synthtrace-client';
+import { otel, generateShortId, OtelDocument } from '@kbn/apm-synthtrace-client';
 import { times } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
-const scenario: Scenario<ApmFields> = async (runOptions) => {
+const scenario: Scenario<OtelDocument> = async (runOptions) => {
   return {
     generate: ({ range, clients: { otelSynthtraceEsClient } }) => {
       const { numOtelTraces = 5 } = runOptions.scenarioOpts || {};
       const { logger } = runOptions;
+      const traceId = generateShortId();
 
-      const otelDocs = times(numOtelTraces / 2).map((index) => otel.create());
+      const otelDocs = times(numOtelTraces / 2).map((index) => otel.create(traceId));
 
       const otelWithMetricsAndErrors = range
         .interval('30s')
         .rate(1)
         .generator((timestamp) =>
           otelDocs.flatMap((oteld) => {
-            const id = generateShortId();
             return [
-              oteld.metric(id).timestamp(timestamp),
-              oteld.transaction(id).timestamp(timestamp),
+              oteld.metric().timestamp(timestamp),
+              oteld.transaction(traceId).timestamp(timestamp),
               // oteld.error(id).timestamp(timestamp),
             ];
           })

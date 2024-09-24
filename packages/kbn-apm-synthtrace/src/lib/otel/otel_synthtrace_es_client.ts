@@ -23,7 +23,7 @@ export class OtelSynthtraceEsClient extends SynthtraceEsClient<OtelDocument> {
       ...options,
       pipeline: otelPipeline(),
     });
-    this.dataStreams = ['.otel-*-synth', '*-synth-*'];
+    this.dataStreams = ['metrics-generic.otel*', 'traces-generic.otel*'];
   }
 }
 
@@ -53,33 +53,33 @@ export function getRoutingTransform() {
       switch (document?.attributes?.['processor.event']) {
         case 'transaction':
         case 'span':
-          index = `.ds-traces-generic.otel-${namespace}-synth-2024.09.09-000001`;
-          // document._index = `.ds-traces-generic.otel-${namespace}-synth-2024.09.09-000001`;
+          index = `traces-generic.otel-${namespace}-synth`;
+          // document._index = `.ds-traces-generic.otel-${namespace}-synth`;
           break;
 
         case 'error':
-          index = `.logs-otel.error-${namespace}-synth-2024.09.09-000001`;
-          // document._index = `logs-otel.error-${namespace}-synth-2024.09.09-000001`;
+          index = `.logs-otel.error-${namespace}-synth`;
+          // document._index = `logs-otel.error-${namespace}-synth`;
           break;
 
         case 'metric':
           const metricsetName = document.attributes['metricset.name'];
-          document._index = `.ds-metrics-otel.service_summary.${document.attributes[
+          document._index = `metrics-otel.service_summary.${document.attributes[
             'metricset.interval'
-          ]!}-${namespace}-synth-2024.09.09-000001`;
+          ]!}-${namespace}-synth`;
 
           // if (metricsetName === 'app') {
-          //   index = `metrics-otel.app.${document?.attributes?.['service.name']}-${namespace}-2024.09.09-000001`;
-          // } else 
+          //   index = `metrics-otel.app.${document?.attributes?.['service.name']}-${namespace}`;
+          // } else
           if (
             metricsetName === 'transaction' ||
             metricsetName === 'service_transaction' ||
             metricsetName === 'service_destination' ||
             metricsetName === 'service_summary'
           ) {
-            index = `.ds-metrics-otel.${metricsetName}.${document.attributes[
+            index = `metrics-otel.${metricsetName}.${document.attributes[
               'metricset.interval'
-            ]!}-${namespace}-2024.09.09-000001`;
+            ]!}-${namespace}-synth`;
           } else {
             index = `metrics-otel.internal-${namespace}`;
           }
