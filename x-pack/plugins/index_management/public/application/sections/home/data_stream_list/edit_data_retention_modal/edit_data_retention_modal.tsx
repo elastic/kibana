@@ -53,6 +53,19 @@ interface Props {
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
 
+const isRetentionBiggerThan = (valueA: string, valueB: string) => {
+  const { size: sizeA, unit: unitA } = splitSizeAndUnits(valueA);
+  const { size: sizeB, unit: unitB } = splitSizeAndUnits(valueB);
+
+  // If the unit for A is bigger than B, then A is always bigger
+  if (unitA === 'd' && unitB !== 'd') {
+    return true;
+  }
+
+  // Otherwise when the units are the same, we can compare the values directly
+  return parseInt(sizeA, 10) > parseInt(sizeB, 10);
+};
+
 const configurationFormSchema: FormSchema = {
   dataRetention: {
     type: FIELD_TYPES.TEXT,
@@ -65,10 +78,28 @@ const configurationFormSchema: FormSchema = {
     formatters: [fieldFormatters.toInt],
     validations: [
       {
-        validator: ({ value, formData }) => {
+        validator: ({ value, formData, customData }) => {
           // If infiniteRetentionPeriod is set, we dont need to validate the data retention field
           if (formData.infiniteRetentionPeriod) {
             return undefined;
+          }
+
+          // If project level data retention is enabled, we need to enforce the global max retention
+          const { globalMaxRetention, enableProjectLevelRetentionChecks } = customData.value as any;
+          if (enableProjectLevelRetentionChecks) {
+            const currentValue = `${value}${formData.timeUnit}`;
+            if (globalMaxRetention && isRetentionBiggerThan(currentValue, globalMaxRetention)) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldMaxError',
+                  {
+                    defaultMessage: 'Maximum data retention period on this project is {maxRetention} days.',
+                    // Remove the unit from the globalMaxRetention value
+                    values: { maxRetention: globalMaxRetention.slice(0, -1) },
+                  }
+                ),
+              };
+            }
           }
 
           if (!value) {
@@ -194,7 +225,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
   const {
     services: { notificationService },
-    config: { enableTogglingDataRetention },
+    config: { enableTogglingDataRetention, enableProjectLevelRetentionChecks },
   } = useAppContext();
 
   const { form } = useForm({
@@ -303,6 +334,10 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
           <UseField
             path="dataRetention"
             component={NumericField}
+            validationData={{
+              globalMaxRetention: lifecycle?.global_max_retention,
+              enableProjectLevelRetentionChecks,
+            }}
             labelAppend={
               <EuiText size="xs">
                 <EuiLink href={documentationService.getUpdateExistingDS()} target="_blank" external>
