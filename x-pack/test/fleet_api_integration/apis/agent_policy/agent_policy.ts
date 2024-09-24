@@ -1473,30 +1473,6 @@ export default function (providerContext: FtrProviderContext) {
         await supertest.get(`/api/fleet/agent_policies/${hostedPolicy.id}`).expect(404);
       });
 
-      it('should allow agentless policies being deleted', async () => {
-        const {
-          body: { item: createdPolicy },
-        } = await supertest
-          .post(`/api/fleet/agent_policies`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'Agentless 1 policy',
-            namespace: 'default',
-            supports_agentless: true,
-            force: true,
-          })
-          .expect(200);
-        const { body } = await supertest
-          .post('/api/fleet/agent_policies/delete')
-          .set('kbn-xsrf', 'xxx')
-          .send({ agentPolicyId: createdPolicy.id });
-
-        expect(body).to.eql({
-          id: createdPolicy.id,
-          name: 'Agentless 1 policy',
-        });
-      });
-
       it('should allow agentless policies with agents being deleted', async () => {
         const {
           body: { item: createdPolicy },
