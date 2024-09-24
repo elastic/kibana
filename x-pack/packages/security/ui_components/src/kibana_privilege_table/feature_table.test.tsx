@@ -15,10 +15,10 @@ import {
   kibanaFeatures,
 } from '@kbn/security-role-management-model/src/__fixtures__';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import type { Role } from '@kbn/security-plugin-types-common';
 
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
 import { FeatureTable } from './feature_table';
-import type { Role } from '@kbn/security-plugin-types-common';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
