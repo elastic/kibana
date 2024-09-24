@@ -110,14 +110,16 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
 
     // Get associated output and proxy (if any) to use for Fleet Server enrollment
     try {
-      const dataOutput = await getDataOutputForAgentPolicy(soClient, scopedAgentPolicy);
-      if (dataOutput.type === 'elasticsearch' && dataOutput.hosts?.[0]) {
-        settingsResponse.fleet_server.es_output = dataOutput;
-        if (dataOutput.proxy_id) {
-          settingsResponse.fleet_server.es_output_proxy = await getFleetProxy(
-            soClient,
-            dataOutput.proxy_id
-          );
+      if (settingsResponse.fleet_server.policies.length > 0) {
+        const dataOutput = await getDataOutputForAgentPolicy(soClient, scopedAgentPolicy);
+        if (dataOutput.type === 'elasticsearch' && dataOutput.hosts?.[0]) {
+          settingsResponse.fleet_server.es_output = dataOutput;
+          if (dataOutput.proxy_id) {
+            settingsResponse.fleet_server.es_output_proxy = await getFleetProxy(
+              soClient,
+              dataOutput.proxy_id
+            );
+          }
         }
       }
     } catch (e) {
