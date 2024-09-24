@@ -30,18 +30,18 @@ const enhanceDataStreams = ({
   dataStreamsStats,
   meteringStats,
   dataStreamsPrivileges,
-  global_max_retention,
+  globalMaxRetention,
 }: {
   dataStreams: IndicesDataStream[];
   dataStreamsStats?: IndicesDataStreamsStatsDataStreamsStatsItem[];
   meteringStats?: MeteringStats[];
   dataStreamsPrivileges?: SecurityHasPrivilegesResponse;
-  global_max_retention?: string;
+  globalMaxRetention?: string;
 }): EnhancedDataStreamFromEs[] => {
   return dataStreams.map((dataStream) => {
     const enhancedDataStream: EnhancedDataStreamFromEs = {
       ...dataStream,
-      ...(global_max_retention ? { global_max_retention } : {}),
+      ...(globalMaxRetention ? { global_max_retention: globalMaxRetention } : {}),
       privileges: {
         delete_index: dataStreamsPrivileges
           ? dataStreamsPrivileges.index[dataStream.name].delete_index
@@ -187,7 +187,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
 
         const lifecycle = await getDataStreamLifecycle(client, name);
         // @ts-ignore - TS doesn't know about the `global_retention` property yet
-        const global_max_retention = lifecycle?.global_retention?.max_retention;
+        const globalMaxRetention = lifecycle?.global_retention?.max_retention;
 
         if (config.isDataStreamStatsEnabled !== false) {
           ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client, name));
@@ -209,7 +209,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             dataStreamsStats,
             meteringStats,
             dataStreamsPrivileges,
-            global_max_retention,
+            globalMaxRetention,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);
           return response.ok({ body });

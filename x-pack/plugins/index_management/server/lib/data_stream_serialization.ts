@@ -26,7 +26,7 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     privileges,
     hidden,
     lifecycle,
-    global_max_retention,
+    global_max_retention: globalMaxRetention,
     next_generation_managed_by: nextGenerationManagedBy,
   } = dataStreamFromEs;
   const meteringStorageSize =
@@ -70,7 +70,7 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     hidden,
     lifecycle: {
       ...lifecycle,
-      global_max_retention,
+      globalMaxRetention,
     },
     nextGenerationManagedBy,
   };

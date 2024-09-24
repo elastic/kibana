@@ -69,7 +69,7 @@ export interface DataStream {
     enabled?: boolean;
     effective_retention?: string;
     retention_determined_by?: string;
-    global_max_retention?: string;
+    globalMaxRetention?: string;
   };
 }
 

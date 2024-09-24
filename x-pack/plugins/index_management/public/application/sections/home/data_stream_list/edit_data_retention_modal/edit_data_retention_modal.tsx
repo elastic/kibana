@@ -93,7 +93,8 @@ const configurationFormSchema: FormSchema = {
                 message: i18n.translate(
                   'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldMaxError',
                   {
-                    defaultMessage: 'Maximum data retention period on this project is {maxRetention} days.',
+                    defaultMessage:
+                      'Maximum data retention period on this project is {maxRetention} days.',
                     // Remove the unit from the globalMaxRetention value
                     values: { maxRetention: globalMaxRetention.slice(0, -1) },
                   }
@@ -335,7 +336,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             path="dataRetention"
             component={NumericField}
             validationData={{
-              globalMaxRetention: lifecycle?.global_max_retention,
+              globalMaxRetention: lifecycle?.globalMaxRetention,
               enableProjectLevelRetentionChecks,
             }}
             labelAppend={

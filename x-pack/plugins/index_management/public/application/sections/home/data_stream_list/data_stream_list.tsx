@@ -86,10 +86,8 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     includeStats: isIncludeStatsChecked,
   });
 
-  const [projectLevelRetentionCallout, setprojectLevelRetentionCallout] = useStateWithLocalStorage<boolean>(
-    SHOW_PROJECT_LEVEL_RETENTION,
-    true
-  );
+  const [projectLevelRetentionCallout, setprojectLevelRetentionCallout] =
+    useStateWithLocalStorage<boolean>(SHOW_PROJECT_LEVEL_RETENTION, true);
   const shouldShowProjectLevelRetention = enableProjectLevelRetentionChecks && cloud?.deploymentUrl;
 
   const [filters, setFilters] = useState<Filters<DataStreamFilterName>>({
@@ -295,7 +293,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     activateHiddenFilter(isSelectedDataStreamHidden(dataStreams!, decodedDataStreamName));
     content = (
       <EuiPageSection paddingSize="none" data-test-subj="dataStreamList">
-        {(shouldShowProjectLevelRetention && projectLevelRetentionCallout) && (
+        {shouldShowProjectLevelRetention && projectLevelRetentionCallout && (
           <>
             <EuiCallOut
               onDismiss={() => setprojectLevelRetentionCallout(false)}
@@ -303,7 +301,8 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               title={i18n.translate(
                 'xpack.idxMgmt.dataStreamList.projectLevelRetentionCallout.titleText',
                 {
-                  defaultMessage: 'You can now configure data stream retention settings for your entire project',
+                  defaultMessage:
+                    'You can now configure data stream retention settings for your entire project',
                 }
               )}
             >
