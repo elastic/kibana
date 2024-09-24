@@ -21,6 +21,8 @@ import { ServiceParams } from './types';
 describe('Registration', () => {
   const renderedVariables = { body: '' };
   const mockRenderParameterTemplates = jest.fn().mockReturnValue(renderedVariables);
+  const mockDeleteEventHandler = jest.fn();
+  const mockSaveEventHandler = jest.fn();
 
   const connector = {
     id: '.test',
@@ -34,6 +36,8 @@ describe('Registration', () => {
     getService: (serviceParams: ServiceParams<TestConfig, TestSecrets>) =>
       new TestSubActionConnector(serviceParams),
     renderParameterTemplates: mockRenderParameterTemplates,
+    postDeleteEventHandler: mockDeleteEventHandler,
+    preSaveEventHandler: mockSaveEventHandler,
   };
 
   const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -62,6 +66,8 @@ describe('Registration', () => {
       executor: expect.any(Function),
       getService: expect.any(Function),
       renderParameterTemplates: expect.any(Function),
+      postDeleteEventHandler: expect.any(Function),
+      preSaveEventHandler: expect.any(Function),
     });
   });
 

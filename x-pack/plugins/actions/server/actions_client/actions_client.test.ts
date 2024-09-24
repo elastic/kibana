@@ -370,6 +370,7 @@ describe('create()', () => {
   });
 
   test('creates an action with all given properties', async () => {
+    const preSaveEvent = jest.fn();
     const savedObjectCreateResult = {
       id: '1',
       type: 'type',
@@ -392,6 +393,9 @@ describe('create()', () => {
         params: { schema: schema.object({}) },
       },
       executor,
+      preSaveEventHandler: async (params) => {
+        preSaveEvent(params);
+      },
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await actionsClient.create({
@@ -428,6 +432,7 @@ describe('create()', () => {
         },
       ]
     `);
+    expect(preSaveEvent).toHaveBeenCalledTimes(1);
   });
 
   test('validates config', async () => {
@@ -2052,6 +2057,38 @@ describe('delete()', () => {
     `);
   });
 
+  test('calls postDeleteEventHandler', async () => {
+    const preDeleteEvent = jest.fn();
+    actionTypeRegistry.register({
+      id: 'my-action-delete',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+      postDeleteEventHandler: async (params) => {
+        preDeleteEvent(params);
+      },
+    });
+
+    const expectedResult = Symbol();
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+    const result = await actionsClient.delete({ id: 'my-action-delete' });
+    expect(result).toEqual(expectedResult);
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        "my-action-delete",
+      ]
+    `);
+    expect(preDeleteEvent).toHaveBeenCalledTimes(1);
+  });
+
   it('throws when trying to delete a preconfigured connector', async () => {
     actionsClient = new ActionsClient({
       logger,
@@ -2129,6 +2166,7 @@ describe('delete()', () => {
 });
 
 describe('update()', () => {
+  const preSaveEvent = jest.fn();
   function updateOperation(): ReturnType<ActionsClient['update']> {
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -2141,6 +2179,9 @@ describe('update()', () => {
         params: { schema: schema.object({}) },
       },
       executor,
+      preSaveEventHandler: async (params) => {
+        preSaveEvent(params);
+      },
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -2315,6 +2356,7 @@ describe('update()', () => {
         "my-action",
       ]
     `);
+    expect(preSaveEvent).toHaveBeenCalledTimes(1);
   });
 
   test('updates an action with isMissingSecrets "true" (set true as the import result), to isMissingSecrets', async () => {

@@ -62,7 +62,6 @@ export const getConversationSearchEsMock = () => {
 
 export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
   title: 'Welcome',
-  replacements: {},
   apiConfig: {
     actionTypeId: '.gen-ai',
     connectorId: '1',
@@ -75,7 +74,6 @@ export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
     {
       content: 'test content',
       role: 'user',
-      isError: false,
       timestamp: '2019-12-13T16:40:33.400Z',
       traceData: {
         traceId: '1',
