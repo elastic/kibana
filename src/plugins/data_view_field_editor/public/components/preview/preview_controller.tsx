@@ -306,6 +306,8 @@ export class PreviewController {
 
       this.setIsSaving(false);
     } catch (e) {
+      console.log('##################### HERE');
+      console.log(e);
       const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
         defaultMessage: 'Failed to save field changes',
       });
