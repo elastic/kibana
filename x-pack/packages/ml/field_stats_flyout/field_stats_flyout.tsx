@@ -26,15 +26,43 @@ import type {
   FieldStatsServices,
 } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
+import { useFieldStatsFlyoutContext } from './use_field_stats_flyout_context';
 import { FieldStatsContent } from './field_stats_content';
 
-export const FieldStatsFlyout: FC<{
+/**
+ * Props for the FieldStatsFlyout component.
+ *
+ * @typedef {Object} FieldStatsFlyoutProps
+ * @property dataView - The data view object.
+ * @property fieldStatsServices - Services required for field statistics.
+ * @property [timeRangeMs] - Optional time range in milliseconds.
+ * @property [dslQuery] - Optional DSL query for filtering field statistics.
+ */
+export interface FieldStatsFlyoutProps {
   dataView: DataView;
   fieldStatsServices: FieldStatsServices;
   timeRangeMs?: TimeRangeMs;
   dslQuery?: FieldStatsProps['dslQuery'];
-}> = ({ dataView, fieldStatsServices, timeRangeMs, dslQuery }) => {
+}
+
+/**
+ * Renders a flyout component for displaying field statistics.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <FieldStatsFlyout
+ *   dataView={dataView}
+ *   fieldStatsServices={fieldStatsServices}
+ *   timeRangeMs={timeRangeMs}
+ *   dslQuery={dslQuery}
+ * />
+ * ```
+ *
+ * @param {Object} props - The component props.
+ */
+export const FieldStatsFlyout: FC<FieldStatsFlyoutProps> = (props) => {
+  const { dataView, fieldStatsServices, timeRangeMs, dslQuery } = props;
   const { setIsFlyoutVisible, isFlyoutVisible, fieldName } = useFieldStatsFlyoutContext();
 
   const closeFlyout = useCallback(() => setIsFlyoutVisible(false), []); // eslint-disable-line react-hooks/exhaustive-deps

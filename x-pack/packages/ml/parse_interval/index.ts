@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-// actual mocks
-export const expandLiteralStrings = jest.fn();
-export const XJsonMode = jest.fn();
-export const getSavedSearch = jest.fn();
-
-// just passing through the reimports
-export { getMlSharedImports } from '@kbn/ml-plugin/public';
+export { parseInterval } from './parse_interval';

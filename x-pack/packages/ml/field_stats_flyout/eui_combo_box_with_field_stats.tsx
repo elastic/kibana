@@ -25,9 +25,25 @@ export const optionCss = css`
   }
 `;
 
-export const EuiComboBoxWithFieldStats: FC<
-  EuiComboBoxProps<string | number | string[] | undefined>
-> = ({ options, ...restProps }) => {
+/**
+ * Props for the EuiComboBoxWithFieldStats component.
+ */
+export type EuiComboBoxWithFieldStatsProps = EuiComboBoxProps<
+  string | number | string[] | undefined
+>;
+
+/**
+ * React component that wraps the EuiComboBox component and adds field statistics functionality.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <EuiComboBoxWithFieldStats options={options} />
+ * ```
+ * @param {EuiComboBoxWithFieldStatsProps} props - The component props.
+ */
+export const EuiComboBoxWithFieldStats: FC<EuiComboBoxWithFieldStatsProps> = (props) => {
+  const { options, ...restProps } = props;
   const { renderOption } = useFieldStatsTrigger();
   const comboBoxOptions: EuiComboBoxOptionOption[] = useMemo(
     () =>
