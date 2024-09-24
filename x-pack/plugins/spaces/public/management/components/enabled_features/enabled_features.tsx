@@ -24,7 +24,7 @@ interface Props {
 
 export const EnabledFeatures: FunctionComponent<Props> = (props) => {
   return (
-    <SectionPanel data-test-subj="enabled-features-panel">
+    <SectionPanel dataTestSubj="enabled-features-panel">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xs">
