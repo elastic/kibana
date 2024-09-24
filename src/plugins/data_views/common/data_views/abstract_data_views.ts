@@ -301,7 +301,8 @@ export abstract class AbstractDataView {
     value: FieldAttrSet[K]
   ) {
     const fieldAttrs = this.fieldAttrs.get(fieldName) || {};
-    this.fieldAttrs.set(fieldName, { ...fieldAttrs, [attrName]: value });
+    fieldAttrs[attrName] = value;
+    this.fieldAttrs.set(fieldName, fieldAttrs);
   }
 
   /**
