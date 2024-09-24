@@ -61,29 +61,20 @@ const SummaryCell = ({
 
   const rowHeight = maybeNullishRowHeight ?? ROWS_HEIGHT_OPTIONS.single;
   const isSingleLine = rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === 1;
-  const shouldCenter = isSingleLine || rowHeight === ROWS_HEIGHT_OPTIONS.auto;
 
   const resourceFields = createResourceFields(row);
   const shouldRenderResource = resourceFields.length > 0;
+  const gutterSize = isSingleLine ? 's' : 'none';
 
   return (
     <DataGridCellServicesProvider services={{ data, dataView }}>
-      <EuiFlexGroup
-        gutterSize="s"
-        wrap={!isSingleLine}
-        style={{ height: '100%' }}
-        {...(shouldCenter && { alignItems: 'center' })}
-      >
+      <EuiFlexGroup gutterSize={gutterSize} direction={isSingleLine ? 'row' : 'column'}>
         {shouldRenderResource && (
-          <EuiFlexItem grow={false}>
-            <Resource
-              fields={resourceFields}
-              limited={isSingleLine}
-              {...(shouldCenter && { alignItems: 'center' })}
-            />
+          <EuiFlexItem grow={false} css={{ marginTop: -2.5 }}>
+            <Resource fields={resourceFields} limited={isSingleLine} />
           </EuiFlexItem>
         )}
-        <Content {...props} isSingleLine={isSingleLine} isCompressed={isCompressed} />
+        <Content {...props} isCompressed={isCompressed} />
       </EuiFlexGroup>
     </DataGridCellServicesProvider>
   );

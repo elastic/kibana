@@ -8,7 +8,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+} from '@elastic/eui';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import {
   ShouldShowFieldInTableHandler,
@@ -20,28 +24,40 @@ import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
   isCompressed: boolean;
-  isSingleLine: boolean;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }
 
 const LogMessage = ({
   field,
   value,
-  className,
+  isCompressed,
 }: {
   field: string;
   value: string;
-  className: string;
+  isCompressed: boolean;
 }) => {
   const shouldRenderFieldName = field !== constants.MESSAGE_FIELD;
-  return (
-    <EuiText size="relative" className={className}>
-      {shouldRenderFieldName && (
-        <strong data-test-subj="discoverDataTableMessageKey">{field} </strong>
-      )}
-      <span data-test-subj="discoverDataTableMessageValue">{value}</span>
-    </EuiText>
-  );
+
+  if (shouldRenderFieldName) {
+    return (
+      <EuiDescriptionList
+        type="inline"
+        compressed={isCompressed}
+        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
+      >
+        <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
+          {field}
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="unifiedDataTable__descriptionListDescription"
+          dangerouslySetInnerHTML={{ __html: value }}
+        />
+      </EuiDescriptionList>
+    );
+  }
+
+  // eslint-disable-next-line react/no-danger
+  return <span dangerouslySetInnerHTML={{ __html: value }} />;
 };
 
 export const Content = ({
@@ -49,7 +65,6 @@ export const Content = ({
   dataView,
   fieldFormats,
   isCompressed,
-  isSingleLine,
   row,
   shouldShowFieldHandler,
 }: ContentProps) => {
@@ -58,7 +73,7 @@ export const Content = ({
   const shouldRenderContent = !!field && !!value;
 
   return shouldRenderContent ? (
-    <LogMessage field={field} value={value} className={isSingleLine ? 'eui-textTruncate' : ''} />
+    <LogMessage field={field} value={value} isCompressed={isCompressed} />
   ) : (
     <FormattedSourceDocument
       columnId={columnId}
