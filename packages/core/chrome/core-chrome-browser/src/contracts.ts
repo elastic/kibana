@@ -173,10 +173,18 @@ export interface ChromeStart {
    */
   getChromeStyle$(): Observable<ChromeStyle>;
 
-  /**
-   * Get an observable of the current collapsed state of the side nav.
-   */
-  getIsSideNavCollapsed$(): Observable<boolean>;
+  sideNav: {
+    /**
+     * Get an observable of the current collapsed state of the side nav.
+     */
+    getIsCollapsed$(): Observable<boolean>;
+
+    /**
+     * Set the collapsed state of the side nav.
+     * @param isCollapsed The collapsed state of the side nav.
+     */
+    setIsCollapsed(isCollapsed: boolean): void;
+  };
 
   /**
    * Get the id of the currently active project navigation or `null` otherwise.

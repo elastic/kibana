@@ -16,20 +16,22 @@ import {
   httpServerMock,
   coreMock,
   securityServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { type MetaWithSaml, registerChatRoute } from './chat';
-import { ChatVariant } from '../../common/types';
 
 describe('chat route', () => {
-  const getChatVariant = async (): Promise<ChatVariant> => 'header';
-  const getChatDisabledThroughExperiments = async (): Promise<boolean> => false;
   let security: ReturnType<typeof securityServiceMock.createRequestHandlerContext>;
   let requestHandlerContextMock: ReturnType<typeof coreMock.createCustomRequestHandlerContext>;
+  let featureFlags: ReturnType<typeof coreFeatureFlagsMock.createRequestHandlerContext>;
 
   beforeEach(() => {
     const core = coreMock.createRequestHandlerContext();
     security = core.security;
+    featureFlags = core.featureFlags;
+    featureFlags.getStringValue.mockResolvedValue('header');
+    featureFlags.getBooleanValue.mockResolvedValue(true);
     requestHandlerContextMock = coreMock.createCustomRequestHandlerContext({ core });
   });
 
@@ -43,8 +45,6 @@ describe('chat route', () => {
       chatIdentitySecret: 'secret',
       trialBuffer: 60,
       trialEndDate: new Date(),
-      getChatVariant,
-      getChatDisabledThroughExperiments,
     });
 
     const [_config, handler] = router.get.mock.calls[0];
@@ -78,8 +78,6 @@ describe('chat route', () => {
       chatIdentitySecret: 'secret',
       trialBuffer: 60,
       trialEndDate: new Date(),
-      getChatVariant,
-      getChatDisabledThroughExperiments,
     });
 
     const [_config, handler] = router.get.mock.calls[0];
@@ -120,8 +118,6 @@ describe('chat route', () => {
       isDev: false,
       chatIdentitySecret: 'secret',
       trialBuffer: 2,
-      getChatVariant,
-      getChatDisabledThroughExperiments,
     });
 
     const [_config, handler] = router.get.mock.calls[0];
@@ -165,8 +161,6 @@ describe('chat route', () => {
       chatIdentitySecret: 'secret',
       trialBuffer: 2,
       trialEndDate,
-      getChatVariant,
-      getChatDisabledThroughExperiments,
     });
 
     const [_config, handler] = router.get.mock.calls[0];
@@ -202,14 +196,13 @@ describe('chat route', () => {
     );
 
     const router = httpServiceMock.createRouter();
+    featureFlags.getBooleanValue.mockResolvedValueOnce(false);
     registerChatRoute({
       router,
       isDev: false,
       chatIdentitySecret: 'secret',
       trialBuffer: 60,
       trialEndDate: new Date(),
-      getChatVariant,
-      getChatDisabledThroughExperiments: async () => true,
     });
     const [_config, handler] = router.get.mock.calls[0];
     await expect(
@@ -249,8 +242,6 @@ describe('chat route', () => {
       chatIdentitySecret: 'secret',
       trialBuffer: 60,
       trialEndDate: new Date(),
-      getChatVariant,
-      getChatDisabledThroughExperiments,
     });
     const [_config, handler] = router.get.mock.calls[0];
     await expect(
@@ -297,8 +288,6 @@ describe('chat route', () => {
       chatIdentitySecret: 'secret',
       trialBuffer: 60,
       trialEndDate: new Date(),
-      getChatVariant,
-      getChatDisabledThroughExperiments,
     });
     const [_config, handler] = router.get.mock.calls[0];
     await expect(
@@ -342,14 +331,13 @@ describe('chat route', () => {
     );
 
     const router = httpServiceMock.createRouter();
+    featureFlags.getStringValue.mockResolvedValueOnce('bubble');
     registerChatRoute({
       router,
       isDev: false,
       chatIdentitySecret: 'secret',
       trialBuffer: 60,
       trialEndDate: new Date(),
-      getChatVariant: async () => 'bubble',
-      getChatDisabledThroughExperiments,
     });
     const [_config, handler] = router.get.mock.calls[0];
     await expect(

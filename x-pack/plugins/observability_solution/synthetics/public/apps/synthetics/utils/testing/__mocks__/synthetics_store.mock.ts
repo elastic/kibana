@@ -30,8 +30,6 @@ export const mockState: SyntheticsAppState = {
     integrationsPopoverOpen: null,
     searchText: '',
     monitorId: '',
-    refreshInterval: 60,
-    refreshPaused: true,
   },
   serviceLocations: {
     throttling: DEFAULT_THROTTLING,
@@ -101,14 +99,6 @@ export const mockState: SyntheticsAppState = {
       sortField: 'name.keyword',
     },
     trendStats: {},
-    data: {
-      total: 0,
-      allMonitorIds: [],
-      monitors: [],
-    },
-    error: null,
-    loaded: false,
-    loading: false,
     flyoutConfig: null,
     groupBy: {
       field: 'none',

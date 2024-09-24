@@ -1168,7 +1168,7 @@
         "signature": [
           "(field: string) => { size: string; unit: string; }"
         ],
-        "path": "x-pack/plugins/index_management/common/lib/data_stream_serialization.ts",
+        "path": "x-pack/plugins/index_management/common/lib/data_stream_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1182,7 +1182,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/index_management/common/lib/data_stream_serialization.ts",
+            "path": "x-pack/plugins/index_management/common/lib/data_stream_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1833,6 +1833,48 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.meteringStorageSizeBytes",
+            "type": "number",
+            "tags": [],
+            "label": "meteringStorageSizeBytes",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.meteringStorageSize",
+            "type": "string",
+            "tags": [],
+            "label": "meteringStorageSize",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.meteringDocsCount",
+            "type": "number",
+            "tags": [],
+            "label": "meteringDocsCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.DataStream._meta",
             "type": "Object",
             "tags": [],
@@ -2016,6 +2058,34 @@
             "type": "number",
             "tags": [],
             "label": "maximum_timestamp",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.EnhancedDataStreamFromEs.metering_size_in_bytes",
+            "type": "number",
+            "tags": [],
+            "label": "metering_size_in_bytes",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.EnhancedDataStreamFromEs.metering_doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "metering_doc_count",
             "description": [],
             "signature": [
               "number | undefined"
