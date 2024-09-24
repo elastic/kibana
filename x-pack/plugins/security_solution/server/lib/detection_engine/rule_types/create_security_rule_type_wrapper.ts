@@ -26,8 +26,6 @@ import {
   hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
-  isQueryParams,
-  isEqlParams,
   getDisabledActionsWarningText,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
@@ -47,7 +45,6 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 import { getInputIndex, DataViewError } from './utils/get_input_output_index';
 import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
-import { getFieldsForWildcard } from './utils/get_fields_for_wildcard';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
 
@@ -139,7 +136,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           } = options;
           let runState = state;
           let inputIndex: string[] = [];
-          let inputIndexFields: DataViewFieldBase[] = [];
+          const inputIndexFields: DataViewFieldBase[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
             params;
@@ -334,21 +331,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               newStatus: RuleExecutionStatusEnum.failed,
               message: gapErrorMessage,
               metrics: { executionGap: remainingGap },
-            });
-          }
-
-          if (
-            !isMachineLearningParams(params) &&
-            !isEsqlParams(params) &&
-            !isQueryParams(params) &&
-            !isEqlParams(params)
-          ) {
-            const dataViews = await services.getDataViews();
-            inputIndexFields = await getFieldsForWildcard({
-              index: inputIndex,
-              dataViews,
-              language: params.language,
-              ruleExecutionLogger,
             });
           }
 

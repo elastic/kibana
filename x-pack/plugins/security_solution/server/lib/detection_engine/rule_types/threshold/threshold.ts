@@ -136,6 +136,7 @@ export const thresholdExecutor = async ({
       index: inputIndex,
       exceptionFilter,
       fields: inputIndexFields,
+      loadFields: true,
     });
 
     // Look for new events over threshold

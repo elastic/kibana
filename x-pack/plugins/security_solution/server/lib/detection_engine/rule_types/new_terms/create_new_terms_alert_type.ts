@@ -136,6 +136,7 @@ export const createNewTermsAlertType = (
         query: params.query,
         exceptionFilter,
         fields: inputIndexFields,
+        loadFields: true,
       };
       const esFilter = await getFilter(filterArgs);
 
