@@ -390,7 +390,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             const { addAgentToPolicyId, ...rest } = parse(search);
             history.replace({ search: stringify(rest) });
           }}
-          agentPolicy={agentPolicies[0]} //fix me
+          agentPolicy={agentPolicies[0]} // fix me
           isIntegrationFlow={true}
           installedPackagePolicy={{
             name: packagePolicy?.package?.name || '',
