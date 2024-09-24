@@ -51,6 +51,11 @@ module.exports = (request, options) => {
     });
   }
 
+  // routes tests to the react-18 alias package
+  if (/^react(?:-dom)?(\/[\s\S]*)?$/.test(request)) {
+    return module.exports(request.replace('react', 'react-18'), options);
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }
