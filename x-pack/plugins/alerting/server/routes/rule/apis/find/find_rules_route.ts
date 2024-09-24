@@ -40,69 +40,70 @@ const buildFindRulesRoute = ({
   usageCounter,
   options: routerOptions,
 }: BuildFindRulesRouteParams) => {
-  router.get(
-    {
-      path,
-      options: routerOptions,
-      validate: {
-        request: {
-          query: findRulesRequestQuerySchemaV1,
-        },
-        response: {
-          200: {
-            body: () => ruleResponseSchemaV1,
-            description: 'Indicates a successful call.',
+  if (path !== INTERNAL_ALERTING_API_FIND_RULES_PATH) {
+    router.get(
+      {
+        path,
+        options: routerOptions,
+        validate: {
+          request: {
+            query: findRulesRequestQuerySchemaV1,
           },
-          400: {
-            description: 'Indicates an invalid schema or parameters.',
-          },
-          403: {
-            description: 'Indicates that this call is forbidden.',
+          response: {
+            200: {
+              body: () => ruleResponseSchemaV1,
+              description: 'Indicates a successful call.',
+            },
+            400: {
+              description: 'Indicates an invalid schema or parameters.',
+            },
+            403: {
+              description: 'Indicates that this call is forbidden.',
+            },
           },
         },
       },
-    },
-    router.handleLegacyErrors(
-      verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+      router.handleLegacyErrors(
+        verifyAccessAndContext(licenseState, async function (context, req, res) {
+          const rulesClient = (await context.alerting).getRulesClient();
 
-        const query: FindRulesRequestQueryV1 = req.query;
+          const query: FindRulesRequestQueryV1 = req.query;
 
-        trackLegacyTerminology(
-          [query.search, query.search_fields, query.sort_field].filter(Boolean) as string[],
-          usageCounter
-        );
+          trackLegacyTerminology(
+            [query.search, query.search_fields, query.sort_field].filter(Boolean) as string[],
+            usageCounter
+          );
 
-        const options = transformFindRulesBodyV1({
-          ...query,
-          has_reference: query.has_reference || undefined,
-          search_fields: searchFieldsAsArray(query.search_fields),
-        });
-
-        if (req.query.fields) {
-          usageCounter?.incrementCounter({
-            counterName: `alertingFieldsUsage`,
-            counterType: 'alertingFieldsUsage',
-            incrementBy: 1,
+          const options = transformFindRulesBodyV1({
+            ...query,
+            has_reference: query.has_reference || undefined,
+            search_fields: searchFieldsAsArray(query.search_fields),
           });
-        }
 
-        const findResult = await rulesClient.find({
-          options,
-          excludeFromPublicApi,
-          includeSnoozeData: true,
-        });
+          if (req.query.fields) {
+            usageCounter?.incrementCounter({
+              counterName: `alertingFieldsUsage`,
+              counterType: 'alertingFieldsUsage',
+              incrementBy: 1,
+            });
+          }
 
-        const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
-          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields);
+          const findResult = await rulesClient.find({
+            options,
+            excludeFromPublicApi,
+            includeSnoozeData: true,
+          });
 
-        return res.ok({
-          body: responseBody,
-        });
-      })
-    )
-  );
-  if (path === INTERNAL_ALERTING_API_FIND_RULES_PATH) {
+          const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
+            transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields);
+
+          return res.ok({
+            body: responseBody,
+          });
+        })
+      )
+    );
+  } else {
     router.post(
       {
         path,
