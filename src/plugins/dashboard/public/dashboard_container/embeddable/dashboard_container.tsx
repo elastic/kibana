@@ -1012,7 +1012,7 @@ export class DashboardContainer
             controlStyle: 'oneLine',
             chainingSystem: 'HIERARCHICAL',
             showApplySelections: false,
-            panels: {},
+            panels: [],
             ignoreParentSettings: {
               ignoreFilters: false,
               ignoreQuery: false,
