@@ -77,6 +77,7 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
   customBranding$: Observable<CustomBranding>;
+  isServerless: boolean;
 }
 
 export function Header({
@@ -90,6 +91,7 @@ export function Header({
   breadcrumbsAppendExtension$,
   globalHelpExtensionMenuLinks$,
   customBranding$,
+  isServerless,
   ...observables
 }: HeaderProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -152,6 +154,7 @@ export function Header({
                     <HeaderNavControls navControls$={observables.navControlsExtension$} />
                   </EuiHideFor>,
                   <HeaderHelpMenu
+                    isServerless={isServerless}
                     globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}

@@ -18,7 +18,6 @@
     "@kbn/i18n",
     "@kbn/config-schema",
     "@kbn/ui-theme",
-    "@kbn/cloud-experiments-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/logging",
     "@kbn/logging-mocks",
