@@ -27,7 +27,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../common';
-import { isReservedSpace } from '../../../common';
 import type { EventTracker } from '../../analytics';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
@@ -36,7 +35,6 @@ import { UnauthorizedPrompt } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
 import { CustomizeSpace } from '../components/customize_space';
-import { DeleteSpacesButton } from '../components/delete_spaces_button';
 import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
 import { toSpaceIdentifier } from '../lib';
@@ -188,7 +186,7 @@ export class CreateSpacePage extends Component<Props, State> {
         <CustomizeSpace
           space={this.state.space}
           onChange={this.onSpaceChange}
-          editingExistingSpace={this.editingExistingSpace()}
+          editingExistingSpace={false}
           validator={this.validator}
         />
 
@@ -199,7 +197,7 @@ export class CreateSpacePage extends Component<Props, State> {
               space={this.state.space}
               onChange={this.onSolutionViewChange}
               validator={this.validator}
-              isEditing={this.editingExistingSpace()}
+              isEditing={false}
             />
           </>
         )}
@@ -242,14 +240,6 @@ export class CreateSpacePage extends Component<Props, State> {
   };
 
   public getTitle = () => {
-    if (this.editingExistingSpace()) {
-      return (
-        <FormattedMessage
-          id="xpack.spaces.management.manageSpacePage.editSpaceTitle"
-          defaultMessage="Edit space"
-        />
-      );
-    }
     return (
       <FormattedMessage
         id="xpack.spaces.management.manageSpacePage.createSpaceTitle"
@@ -259,7 +249,6 @@ export class CreateSpacePage extends Component<Props, State> {
   };
 
   public getChangeImpactWarning = () => {
-    if (!this.editingExistingSpace()) return null;
     const { haveDisabledFeaturesChanged, hasSolutionViewChanged } = this.state;
     if (!haveDisabledFeaturesChanged && !hasSolutionViewChanged) return null;
 
@@ -291,21 +280,12 @@ export class CreateSpacePage extends Component<Props, State> {
       }
     );
 
-    const updateSpaceText = i18n.translate(
-      'xpack.spaces.management.manageSpacePage.updateSpaceButton',
-      {
-        defaultMessage: 'Update space',
-      }
-    );
-
     const cancelButtonText = i18n.translate(
       'xpack.spaces.management.manageSpacePage.cancelSpaceButton',
       {
         defaultMessage: 'Cancel',
       }
     );
-
-    const saveText = this.editingExistingSpace() ? updateSpaceText : createSpaceText;
 
     return (
       <EuiFlexGroup responsive={false}>
@@ -316,7 +296,7 @@ export class CreateSpacePage extends Component<Props, State> {
             data-test-subj="save-space-button"
             isLoading={this.state.saveInProgress}
           >
-            {saveText}
+            {createSpaceText}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -325,27 +305,8 @@ export class CreateSpacePage extends Component<Props, State> {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={true} />
-        {this.getActionButton()}
       </EuiFlexGroup>
     );
-  };
-
-  public getActionButton = () => {
-    if (this.state.space && this.editingExistingSpace() && !isReservedSpace(this.state.space)) {
-      return (
-        <EuiFlexItem grow={false}>
-          <DeleteSpacesButton
-            data-test-subj="delete-space-button"
-            space={this.state.space as Space}
-            spacesManager={this.props.spacesManager}
-            onDelete={this.backToSpacesList}
-            notifications={this.props.notifications}
-          />
-        </EuiFlexItem>
-      );
-    }
-
-    return null;
   };
 
   private onSolutionViewChange = (space: Partial<Space>) => {
@@ -368,14 +329,8 @@ export class CreateSpacePage extends Component<Props, State> {
   public saveSpace = () => {
     this.validator.enableValidation();
 
-    const originalSpace: Space = this.state.originalSpace as Space;
     const space: Space = this.state.space as Space;
-    const { haveDisabledFeaturesChanged, hasSolutionViewChanged } = this.state;
-    const result = this.validator.validateForSave(
-      space,
-      this.editingExistingSpace(),
-      this.props.allowSolutionVisibility
-    );
+    const result = this.validator.validateForSave(space, false, this.props.allowSolutionVisibility);
     if (result.isInvalid) {
       this.setState({
         formError: result,
@@ -384,24 +339,7 @@ export class CreateSpacePage extends Component<Props, State> {
       return;
     }
 
-    if (this.editingExistingSpace()) {
-      const { spacesManager } = this.props;
-
-      spacesManager.getActiveSpace().then((activeSpace) => {
-        const editingActiveSpace = activeSpace.id === originalSpace.id;
-
-        if (editingActiveSpace && (haveDisabledFeaturesChanged || hasSolutionViewChanged)) {
-          this.setState({
-            showAlteringActiveSpaceDialog: true,
-          });
-
-          return;
-        }
-        this.performSave();
-      });
-    } else {
-      this.performSave();
-    }
+    this.performSave();
   };
 
   private loadSpace = async (spaceId: string, featuresPromise: Promise<KibanaFeature[]>) => {
@@ -474,15 +412,8 @@ export class CreateSpacePage extends Component<Props, State> {
       solution,
     };
 
-    let action;
-    const isEditing = this.editingExistingSpace();
     const { spacesManager, eventTracker } = this.props;
-
-    if (isEditing) {
-      action = spacesManager.updateSpace(params);
-    } else {
-      action = spacesManager.createSpace(params);
-    }
+    const action = spacesManager.createSpace(params);
 
     this.setState({ saveInProgress: true });
 
@@ -495,7 +426,7 @@ export class CreateSpacePage extends Component<Props, State> {
         spaceId: id,
         solution,
         solutionPrev: this.state.originalSpace?.solution,
-        action: isEditing ? 'edit' : 'create',
+        action: 'create',
       });
     };
 
@@ -538,6 +469,4 @@ export class CreateSpacePage extends Component<Props, State> {
   };
 
   private backToSpacesList = () => this.props.history.push('/');
-
-  private editingExistingSpace = () => !!this.props.spaceId;
 }
