@@ -328,7 +328,8 @@ export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
       soClient,
       request.query.policyId,
       request.query.kuery,
-      coreContext.savedObjects.client.getCurrentNamespace()
+      coreContext.savedObjects.client.getCurrentNamespace(),
+      request.query.policyIds
     );
 
     const body: GetAgentStatusResponse = { results };
