@@ -12,15 +12,20 @@ import { renderWrapper } from '../../test/mock_server/mock_server_test_provider'
 import { NoFindingsStates } from './no_findings_states';
 import * as statusHandlers from '../../../server/routes/status/status.handlers.mock';
 import * as benchmarksHandlers from '../../../server/routes/benchmarks/benchmarks.handlers.mock';
-import {
-  PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
-  THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT,
-} from '../cloud_posture_page';
+import { PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../cloud_posture_page';
+import { MemoryRouter, Route } from '@kbn/shared-ux-router';
+import { THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT } from '../test_subjects';
 
 const server = setupMockServer();
 
-const renderNoFindingsStates = (postureType: 'cspm' | 'kspm' = 'cspm') => {
-  return renderWrapper(<NoFindingsStates postureType={postureType} />);
+const renderNoFindingsStates = (postureType: 'cspm' | 'kspm' = 'cspm', route = '/') => {
+  return renderWrapper(
+    <MemoryRouter initialEntries={[route]}>
+      <Route>
+        <NoFindingsStates postureType={postureType} />
+      </Route>
+    </MemoryRouter>
+  );
 };
 
 describe('NoFindingsStates', () => {
@@ -28,7 +33,7 @@ describe('NoFindingsStates', () => {
 
   it('shows integrations installation prompt with installation links when integration is not-installed', async () => {
     server.use(statusHandlers.notInstalledHandler);
-    renderNoFindingsStates();
+    renderNoFindingsStates('cspm', '/app/security/cloud_security_posture/findings/configurations');
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
     await waitFor(() => {
@@ -36,7 +41,9 @@ describe('NoFindingsStates', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId(THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT)).toBeInTheDocument();
+      expect(
+        screen.getByTestId(THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT)
+      ).toBeInTheDocument();
     });
 
     await waitFor(() => {
@@ -56,8 +63,26 @@ describe('NoFindingsStates', () => {
     await waitFor(() => {
       expect(screen.getByRole('link', { name: /add wiz integration/i })).toHaveAttribute(
         'href',
-        '/app/integrations/detail/wiz/overview'
+        '/app/fleet/integrations/wiz/add-integration'
       );
+    });
+  });
+
+  it('does not show 3P prompt on not supported pages', async () => {
+    // 3P support is currently determined by the page URL. in this test case we do not provide the required URL
+    server.use(statusHandlers.notInstalledHandler);
+    renderNoFindingsStates();
+
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT)
+      ).not.toBeInTheDocument();
     });
   });
 

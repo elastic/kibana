@@ -291,8 +291,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   const notInstalledVulnerabilities = createNotInstalledObject('cnvm-integration-not-installed');
   const notInstalledCSP = createNotInstalledObject('cloud_posture_page_package_not_installed');
-  const thirdPartyIntegrationsNoFindingsPrompt = createNotInstalledObject(
-    '3p-integrations-no-findings-prompt'
+  const thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt = createNotInstalledObject(
+    '3p-integrations-no-vulnerabilities-findings-prompt'
+  );
+  const thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt = createNotInstalledObject(
+    '3p-integrations-no-misconfigurations-findings-prompt'
   );
 
   const vulnerabilityDataGrid = {
@@ -379,7 +382,8 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     latestVulnerabilitiesTable,
     notInstalledVulnerabilities,
     notInstalledCSP,
-    thirdPartyIntegrationsNoFindingsPrompt,
+    thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt,
+    thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt,
     index,
     vulnerabilitiesIndex,
     waitForPluginInitialized,

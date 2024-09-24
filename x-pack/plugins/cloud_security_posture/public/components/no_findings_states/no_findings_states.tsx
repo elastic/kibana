@@ -33,13 +33,10 @@ import {
   CSPM_NOT_INSTALLED_ACTION_SUBJ,
   KSPM_NOT_INSTALLED_ACTION_SUBJ,
   NO_FINDINGS_STATUS_TEST_SUBJ,
-  THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
+  THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT,
+  THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
 } from '../test_subjects';
-import {
-  CloudPosturePage,
-  PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
-  THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT,
-} from '../cloud_posture_page';
+import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../cloud_posture_page';
 import type { PostureTypes } from '../../../common/types_old';
 import cloudsSVG from '../../assets/illustrations/clouds.svg';
 import misconfigurationsVendorsSVG from '../../assets/illustrations/misconfigurations_vendors.svg';
@@ -265,7 +262,7 @@ const EmptySecurityFindingsPrompt = () => {
         <EuiFlexItem>
           <EuiEmptyPrompt
             style={{ padding: euiTheme.size.l }}
-            data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT}
+            data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT}
             icon={
               <EuiImage
                 size="fullWidth"
@@ -302,7 +299,9 @@ const EmptySecurityFindingsPrompt = () => {
                     fill
                     href={wizAddIntegrationLink}
                     isDisabled={!wizAddIntegrationLink}
-                    data-test-subj={THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON}
+                    data-test-subj={
+                      THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON
+                    }
                   >
                     <FormattedMessage
                       id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.addWizIntegrationButtonTitle"

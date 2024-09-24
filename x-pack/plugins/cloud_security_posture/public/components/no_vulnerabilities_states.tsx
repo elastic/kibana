@@ -27,14 +27,12 @@ import { useLocation } from 'react-router-dom';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
-import {
-  CloudPosturePage,
-  THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT,
-} from './cloud_posture_page';
+import { CloudPosturePage } from './cloud_posture_page';
 import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
   CNVM_NOT_INSTALLED_ACTION_SUBJ,
-  THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
+  THIRD_PARTY_INTEGRATIONS_NO_VULNERABILITIES_FINDINGS_PROMPT,
+  THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
 } from './test_subjects';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
@@ -144,7 +142,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
         <EuiFlexItem>
           <EuiEmptyPrompt
             style={{ padding: euiTheme.size.l }}
-            data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_FINDINGS_PROMPT}
+            data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_VULNERABILITIES_FINDINGS_PROMPT}
             icon={
               <EuiImage
                 size="fullWidth"
@@ -181,7 +179,9 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
                     fill
                     href={wizAddIntegrationLink}
                     isDisabled={!wizAddIntegrationLink}
-                    data-test-subj={THIRD_PARTY_NO_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON}
+                    data-test-subj={
+                      THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON
+                    }
                   >
                     <FormattedMessage
                       id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.addWizIntegrationButtonTitle"
