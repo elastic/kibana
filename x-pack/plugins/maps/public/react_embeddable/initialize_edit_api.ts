@@ -20,13 +20,12 @@ export function initializeEditApi(
     return {};
   }
 
-  const parentApiContext = parentApi.getAppContext();
-
   return {
     getTypeDisplayName: () => {
       return MAP_EMBEDDABLE_NAME;
     },
     onEdit: async () => {
+      const parentApiContext = parentApi.getAppContext();
       const stateTransfer = getEmbeddableService().getStateTransfer();
       await stateTransfer.navigateToEditor(APP_ID, {
         path: getEditPath(savedObjectId),
