@@ -17,35 +17,7 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '2': {
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          monitoring: {
-            properties: {
-              run: {
-                properties: {
-                  last_run: {
-                    properties: {
-                      metrics: {
-                        properties: {
-                          gap_range: {
-                            properties: {
-                              lte: { type: 'date' },
-                              gte: { type: 'date' },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    ],
+    changes: [],
     schemas: {
       forwardCompatibility: rawRuleSchemaV2.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV2,
