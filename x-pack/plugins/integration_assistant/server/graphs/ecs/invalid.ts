@@ -5,11 +5,9 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { GraphRecursionError } from '@langchain/langgraph';
 import type { EcsMappingState } from '../../types';
 import { ECS_INVALID_PROMPT } from './prompts';
 import type { EcsNodeParams } from './types';
-import { RecursionLimitError } from '../../lib/errors';
 
 export async function handleInvalidEcs({
   state,
@@ -20,22 +18,13 @@ export async function handleInvalidEcs({
   const usesFinalMapping = state?.useFinalMapping;
   const mapping = usesFinalMapping ? state.finalMapping : state.currentMapping;
 
-  let result;
-  try {
-    result = await ecsInvalidEcsGraph.invoke({
-      ecs: state.ecs,
-      current_mapping: JSON.stringify(mapping, null, 2),
-      ex_answer: state.exAnswer,
-      combined_samples: state.combinedSamples,
-      invalid_ecs_fields: state.invalidEcsFields,
-    });
-  } catch (e) {
-    if (e instanceof GraphRecursionError) {
-      throw new RecursionLimitError(e.message);
-    } else {
-      throw e;
-    }
-  }
+  const result = await ecsInvalidEcsGraph.invoke({
+    ecs: state.ecs,
+    current_mapping: JSON.stringify(mapping, null, 2),
+    ex_answer: state.exAnswer,
+    combined_samples: state.combinedSamples,
+    invalid_ecs_fields: state.invalidEcsFields,
+  });
 
   return {
     [usesFinalMapping ? 'finalMapping' : 'currentMapping']: result,

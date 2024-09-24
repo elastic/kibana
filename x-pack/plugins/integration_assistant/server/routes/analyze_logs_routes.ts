@@ -17,6 +17,11 @@ import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse, UnsupportedLogFormatError } from '../lib/errors';
+import {
+  RECURSION_LIMIT_ANALYZE_LOGS_ERROR,
+  UNSUPPORTED_LOG_SAMPLES,
+} from '../lib/errors/translations';
+import { handleRecursionError } from './routes_util';
 
 export function registerAnalyzeLogsRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -83,14 +88,18 @@ export function registerAnalyzeLogsRoutes(
           const graphResults = await graph.invoke(logFormatParameters, options);
           const graphLogFormat = graphResults.results.samplesFormat.name;
           if (graphLogFormat === 'unsupported' || graphLogFormat === 'csv') {
-            throw new UnsupportedLogFormatError('Unsupported log format in the samples');
+            throw new UnsupportedLogFormatError(UNSUPPORTED_LOG_SAMPLES);
           }
           return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });
-        } catch (e) {
-          if (isErrorThatHandlesItsOwnResponse(e)) {
-            return e.sendResponse(res);
+        } catch (err) {
+          try {
+            handleRecursionError(err, RECURSION_LIMIT_ANALYZE_LOGS_ERROR);
+          } catch (e) {
+            if (isErrorThatHandlesItsOwnResponse(e)) {
+              return e.sendResponse(res);
+            }
           }
-          return res.badRequest({ body: e });
+          return res.badRequest({ body: err });
         }
       })
     );

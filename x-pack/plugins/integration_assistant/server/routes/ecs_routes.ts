@@ -17,6 +17,8 @@ import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
+import { handleRecursionError } from './routes_util';
+import { RECURSION_LIMIT_ERROR } from '../lib/errors/translations';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -93,11 +95,15 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
           const results = await graph.invoke(parameters, options);
 
           return res.ok({ body: EcsMappingResponse.parse(results) });
-        } catch (e) {
-          if (isErrorThatHandlesItsOwnResponse(e)) {
-            return e.sendResponse(res);
+        } catch (err) {
+          try {
+            handleRecursionError(err, RECURSION_LIMIT_ERROR);
+          } catch (e) {
+            if (isErrorThatHandlesItsOwnResponse(e)) {
+              return e.sendResponse(res);
+            }
           }
-          return res.badRequest({ body: e });
+          return res.badRequest({ body: err });
         }
       })
     );

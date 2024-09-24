@@ -6,13 +6,11 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { GraphRecursionError } from '@langchain/langgraph';
 import type { Pipeline } from '../../../common';
 import type { RelatedState, SimplifiedProcessors, SimplifiedProcessor } from '../../types';
 import type { RelatedNodeParams } from './types';
 import { combineProcessors } from '../../util/processors';
 import { RELATED_REVIEW_PROMPT } from './prompts';
-import { RecursionLimitError } from '../../lib/errors';
 
 export async function handleReview({
   state,
@@ -21,21 +19,14 @@ export async function handleReview({
   const relatedReviewPrompt = RELATED_REVIEW_PROMPT;
   const outputParser = new JsonOutputParser();
   const relatedReviewGraph = relatedReviewPrompt.pipe(model).pipe(outputParser);
-  let currentProcessors: SimplifiedProcessor[] = [];
-  try {
-    currentProcessors = (await relatedReviewGraph.invoke({
-      current_processors: JSON.stringify(state.currentProcessors, null, 2),
-      ex_answer: state.exAnswer,
-      previous_error: state.previousError,
-      pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
-    })) as SimplifiedProcessor[];
-  } catch (e) {
-    if (e instanceof GraphRecursionError) {
-      throw new RecursionLimitError(e.message);
-    } else {
-      throw e;
-    }
-  }
+
+  const currentProcessors = (await relatedReviewGraph.invoke({
+    current_processors: JSON.stringify(state.currentProcessors, null, 2),
+    ex_answer: state.exAnswer,
+    previous_error: state.previousError,
+    pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
+  })) as SimplifiedProcessor[];
+
   const processors = {
     type: 'related',
     processors: currentProcessors,

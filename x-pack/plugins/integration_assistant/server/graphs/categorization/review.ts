@@ -6,14 +6,12 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { GraphRecursionError } from '@langchain/langgraph';
 import { CATEGORIZATION_REVIEW_PROMPT } from './prompts';
 import type { Pipeline } from '../../../common';
 import type { CategorizationNodeParams } from './types';
 import type { SimplifiedProcessors, SimplifiedProcessor, CategorizationState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
-import { RecursionLimitError } from '../../lib/errors';
 
 export async function handleReview({
   state,
@@ -22,25 +20,17 @@ export async function handleReview({
   const categorizationReviewPrompt = CATEGORIZATION_REVIEW_PROMPT;
   const outputParser = new JsonOutputParser();
   const categorizationReview = categorizationReviewPrompt.pipe(model).pipe(outputParser);
-  let currentProcessors: SimplifiedProcessor[] = [];
 
-  try {
-    currentProcessors = (await categorizationReview.invoke({
-      current_processors: JSON.stringify(state.currentProcessors, null, 2),
-      pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
-      previous_invalid_categorization: state.previousInvalidCategorization,
-      previous_error: state.previousError,
-      ex_answer: state?.exAnswer,
-      package_name: state?.packageName,
-      compatibility_matrix: JSON.stringify(ECS_EVENT_TYPES_PER_CATEGORY, null, 2),
-    })) as SimplifiedProcessor[];
-  } catch (e) {
-    if (e instanceof GraphRecursionError) {
-      throw new RecursionLimitError(e.message);
-    } else {
-      throw e;
-    }
-  }
+  const currentProcessors = (await categorizationReview.invoke({
+    current_processors: JSON.stringify(state.currentProcessors, null, 2),
+    pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
+    previous_invalid_categorization: state.previousInvalidCategorization,
+    previous_error: state.previousError,
+    ex_answer: state?.exAnswer,
+    package_name: state?.packageName,
+    compatibility_matrix: JSON.stringify(ECS_EVENT_TYPES_PER_CATEGORY, null, 2),
+  })) as SimplifiedProcessor[];
+
   const processors = {
     type: 'categorization',
     processors: currentProcessors,

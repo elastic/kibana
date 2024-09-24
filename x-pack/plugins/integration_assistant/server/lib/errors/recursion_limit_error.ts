@@ -8,8 +8,6 @@
 import { KibanaResponseFactory } from '@kbn/core/server';
 import { ErrorCode, ErrorThatHandlesItsOwnResponse } from './types';
 
-const RECURSION_LIMIT_ERROR = 'Recursion limit reached.';
-
 export class RecursionLimitError extends Error implements ErrorThatHandlesItsOwnResponse {
   private readonly errorCode: ErrorCode = ErrorCode.RECURSION_LIMIT;
 
@@ -20,7 +18,7 @@ export class RecursionLimitError extends Error implements ErrorThatHandlesItsOwn
 
   public sendResponse(res: KibanaResponseFactory) {
     return res.badRequest({
-      body: { message: RECURSION_LIMIT_ERROR, attributes: { errorCode: this.errorCode } },
+      body: { message: this.message, attributes: { errorCode: this.errorCode } },
     });
   }
 }
