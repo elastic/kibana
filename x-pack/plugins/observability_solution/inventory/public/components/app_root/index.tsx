@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import React from 'react';
-import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InventoryContextProvider } from '../inventory_context_provider';
+import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import React from 'react';
+import { InventoryContextProvider } from '../../context/inventory_context_provider';
+import { InventorySearchBarContextProvider } from '../../context/inventory_search_bar_context_provider';
 import { inventoryRouter } from '../../routes/config';
-import { HeaderActionMenuItems } from './header_action_menu';
-import { InventoryStartDependencies } from '../../types';
 import { InventoryServices } from '../../services/types';
+import { InventoryStartDependencies } from '../../types';
+import { HeaderActionMenuItems } from './header_action_menu';
 
 export function AppRoot({
   coreStart,
@@ -38,10 +39,12 @@ export function AppRoot({
   return (
     <InventoryContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
-        <RouterProvider history={history} router={inventoryRouter}>
-          <RouteRenderer />
-          <InventoryHeaderActionMenu appMountParameters={appMountParameters} />
-        </RouterProvider>
+        <InventorySearchBarContextProvider>
+          <RouterProvider history={history} router={inventoryRouter}>
+            <RouteRenderer />
+            <InventoryHeaderActionMenu appMountParameters={appMountParameters} />
+          </RouterProvider>
+        </InventorySearchBarContextProvider>
       </RedirectAppLinks>
     </InventoryContextProvider>
   );

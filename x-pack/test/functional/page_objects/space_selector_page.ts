@@ -288,4 +288,9 @@ export class SpaceSelectorPageObject extends FtrService {
     );
     expect(await msgElem.getVisibleText()).to.be('no spaces found');
   }
+
+  async currentSelectedSpaceTitle() {
+    const spacesNavSelector = await this.testSubjects.find('spacesNavSelector');
+    return spacesNavSelector.getAttribute('title');
+  }
 }
