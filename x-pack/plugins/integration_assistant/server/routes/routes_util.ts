@@ -8,9 +8,9 @@
 import { GraphRecursionError } from '@langchain/langgraph';
 import { RecursionLimitError } from '../lib/errors';
 
-export function handleRecursionError(err: Error, errorMessage: string) {
+export function handleRecursionError(err: Error, errorCode: string) {
   if (err instanceof GraphRecursionError) {
-    throw new RecursionLimitError(errorMessage);
+    throw new RecursionLimitError(err.message, errorCode);
   }
   throw err;
 }

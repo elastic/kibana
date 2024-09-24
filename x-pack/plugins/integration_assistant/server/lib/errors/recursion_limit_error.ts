@@ -6,14 +6,14 @@
  */
 
 import { KibanaResponseFactory } from '@kbn/core/server';
-import { ErrorCode, ErrorThatHandlesItsOwnResponse } from './types';
+import { ErrorThatHandlesItsOwnResponse } from './types';
 
 export class RecursionLimitError extends Error implements ErrorThatHandlesItsOwnResponse {
-  private readonly errorCode: ErrorCode = ErrorCode.RECURSION_LIMIT;
+  private readonly errorCode: string;
 
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(message: string) {
+  constructor(message: string, errorCode: string) {
     super(message);
+    this.errorCode = errorCode;
   }
 
   public sendResponse(res: KibanaResponseFactory) {

@@ -10,8 +10,3 @@ import { KibanaResponseFactory, IKibanaResponse } from '@kbn/core/server';
 export interface ErrorThatHandlesItsOwnResponse extends Error {
   sendResponse(res: KibanaResponseFactory): IKibanaResponse;
 }
-
-export enum ErrorCode {
-  RECURSION_LIMIT = 'recursion-limit-reached',
-  UNSUPPORTED_LOG_FORMAT = 'unsupported-log-format',
-}

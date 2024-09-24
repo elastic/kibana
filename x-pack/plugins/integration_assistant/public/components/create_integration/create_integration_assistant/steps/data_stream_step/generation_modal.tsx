@@ -171,7 +171,7 @@ export const useGeneration = ({
         onComplete(result);
       } catch (e) {
         if (abortController.signal.aborted) return;
-        const errorMessage = `${e.message}${
+        const originalErrorMessage = `${e.message}${
           e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
         }`;
 
@@ -179,10 +179,20 @@ export const useGeneration = ({
           connector,
           integrationSettings,
           durationMs: Date.now() - generationStartedAt,
-          error: errorMessage,
+          error: originalErrorMessage,
         });
 
-        setError(errorMessage);
+        const errorCode = e.body.attributes?.errorCode;
+        let errorMessage;
+        if (errorCode != null) {
+          errorMessage = i18n.ERROR_TRANSLATION[errorCode];
+        }
+
+        if (errorMessage != null) {
+          setError(errorMessage);
+        } else {
+          setError(originalErrorMessage);
+        }
       } finally {
         setIsRequesting(false);
       }
