@@ -8,6 +8,7 @@
 export const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
 
 export const ML_PAGES = {
+  LANDING_PAGE: 'machine_learning-landing',
   ANOMALY_DETECTION_JOBS_MANAGE: 'jobs',
   ANOMALY_EXPLORER: 'explorer',
   SINGLE_METRIC_VIEWER: 'timeseriesexplorer',

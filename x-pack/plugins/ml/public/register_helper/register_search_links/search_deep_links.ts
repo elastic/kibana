@@ -266,6 +266,13 @@ function createDeepLinks(
         path: `/${ML_PAGES.DATA_DRIFT_INDEX_SELECT}`,
       };
     },
+    getLandingDeepLink: (): AppDeepLink<LinkId> => {
+      return {
+        id: 'machine_learning-landing',
+        title: 'Machine learning',
+        path: `/${ML_PAGES.LANDING_PAGE}`,
+      };
+    },
   };
 }
 

@@ -16,6 +16,7 @@ import { useRootNavLink } from '../common/links/nav_links';
 export const MachineLearning: React.FC = () => {
   const link = useRootNavLink(SecurityPageName.mlLanding);
   const { links = [], categories = [], title } = link ?? {};
+  console.log(link, '!!link');
 
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>

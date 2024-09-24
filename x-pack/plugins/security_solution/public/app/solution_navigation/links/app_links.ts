@@ -37,5 +37,7 @@ export const solutionAppLinksSwitcher = (appLinks: AppLinkItems): AppLinkItems =
   // Add ML link
   solutionAppLinks.push(mlAppLink);
 
+  console.log(solutionAppLinks, '!!solutionAppLinks');
+
   return Object.freeze(solutionAppLinks);
 };

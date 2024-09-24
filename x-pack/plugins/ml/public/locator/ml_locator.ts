@@ -115,6 +115,7 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.FILTER_LISTS_NEW:
       case ML_PAGES.CALENDARS_MANAGE:
       case ML_PAGES.CALENDARS_NEW:
+      case ML_PAGES.LANDING_PAGE:
         path = formatGenericMlUrl('', params.page, params.pageState);
         break;
       case ML_PAGES.FILTER_LISTS_EDIT:
@@ -126,7 +127,11 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.NOTIFICATIONS:
         path = formatNotificationsUrl('', params.pageState);
         break;
-
+      // case ML_PAGES.LANDING_PAGE:
+      //   // TODO create a formatLandingUrl
+      //   // path = formatLandingUrl('', params.pageState);
+      //   path = `${ML_PAGES.LANDING_PAGE}`;
+      //   break;
       default:
         throw new Error('Page type is not provided or unknown');
     }
