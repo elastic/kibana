@@ -107,6 +107,12 @@ const keepOldestValueProcessor = ({ field }: KeepOldestValue): IngestProcessorCo
   };
 };
 
+/**
+ * Converts a dot notation path to a bracket notation path
+ * e.g "a.b.c" => "a['b']['c']"
+ * @param {string} path
+ * @return {*}  {string}
+ */
 export const convertPathToBracketNotation = (path: string): string => {
   const parts = path.split('.');
   return (
@@ -128,22 +134,22 @@ export const convertPathToBracketNotation = (path: string): string => {
  * @return {*}  {string[]} The list of progressive paths
  */
 export const getProgressivePathsNoCtx = (path: string): string[] => {
+  // capture groups for the path and the bracket notation
+  // e.g "a['b']['c']" => ["a", "['b']", "['c']"]
   const regex = /([^[\]]+)|(\['[^']+'\])/g;
   const matches = [...path.matchAll(regex)];
-
-  const result: string[] = [];
   let currentPath = '';
+  const paths: string[] = [];
 
   matches.forEach((match) => {
-    currentPath += match[0]; // Bracket parts (e.g., "['b']")
-
-    // Skip the first part if it is 'ctx'
+    currentPath += match[0];
+    // Skip the path if it is 'ctx'
     if (currentPath !== 'ctx') {
-      result.push(currentPath);
+      paths.push(currentPath);
     }
   });
 
-  return result;
+  return paths;
 };
 
 const collectValuesProcessor = ({ field, maxLength }: CollectValues) => {
