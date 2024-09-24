@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { i18n } from '@kbn/i18n';
 
-import { TimelineTypeLiteralRt } from '../model/api';
-
-export const cleanDraftTimelineSchema = rt.type({
-  timelineType: TimelineTypeLiteralRt,
-});
+export const NOTE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldReadOnly.noteLabel',
+  {
+    defaultMessage: 'Investigation guide',
+  }
+);
