@@ -277,7 +277,7 @@ describe('GenerationModal', () => {
       );
     });
 
-    describe('when the retrying successfully', () => {
+    describe('when retrying successfully', () => {
       beforeEach(async () => {
         await act(async () => {
           result.getByTestId('retryButton').click();

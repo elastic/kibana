@@ -182,7 +182,7 @@ export const useGeneration = ({
           error: originalErrorMessage,
         });
 
-        const errorCode = e.body.attributes?.errorCode;
+        const errorCode = e.body?.attributes?.errorCode;
         let errorMessage;
         if (errorCode != null) {
           errorMessage = i18n.ERROR_TRANSLATION[errorCode];
