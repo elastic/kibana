@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/common';
 
 const RUNTIME_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.controls.reactControlExample.controlGroupRuntimeState';

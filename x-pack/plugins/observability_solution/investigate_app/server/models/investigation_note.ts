@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import { investigationNoteSchema } from '@kbn/investigation-shared';
 
-export type InvestigationNote = t.TypeOf<typeof investigationNoteSchema>;
-export type StoredInvestigationNote = t.OutputOf<typeof investigationNoteSchema>;
+export type InvestigationNote = z.infer<typeof investigationNoteSchema>;
+export type StoredInvestigationNote = z.infer<typeof investigationNoteSchema>;

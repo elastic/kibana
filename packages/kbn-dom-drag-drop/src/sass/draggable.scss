@@ -33,9 +33,10 @@
 
   &:focus,
   &:focus-within {
-    @include euiFocusRing;
     pointer-events: none;
     z-index: $domDragDropZLevel2;
+
+    @include euiFocusRing;
   }
 }
 

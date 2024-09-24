@@ -72,7 +72,7 @@
     "@kbn/search-playground",
     "@kbn/search-inference-endpoints",
     "@kbn/utility-types",
-    "@kbn/index-management",
+    "@kbn/index-management-shared-types",
     "@kbn/deeplinks-search",
     "@kbn/react-kibana-context-theme",
     "@kbn/search-types",

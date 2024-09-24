@@ -28,8 +28,13 @@ import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import { FindResponse } from '../ai_assistant_data_clients/find';
+import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
+import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { ESQL_RESOURCE } from './knowledge_base/constants';
+import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
@@ -214,6 +219,39 @@ export const appendMessageToConversation = async ({
   return updatedConversation;
 };
 
+export interface GetSystemPromptFromUserConversationParams {
+  conversationsDataClient: AIAssistantConversationsDataClient;
+  conversationId: string;
+  promptsDataClient: AIAssistantDataClient;
+}
+const extractPromptFromESResult = (result: FindResponse<EsPromptsSchema>): string | undefined => {
+  if (result.total > 0 && result.data.hits.hits.length > 0) {
+    return result.data.hits.hits[0]._source?.content;
+  }
+  return undefined;
+};
+
+export const getSystemPromptFromUserConversation = async ({
+  conversationsDataClient,
+  conversationId,
+  promptsDataClient,
+}: GetSystemPromptFromUserConversationParams): Promise<string | undefined> => {
+  const conversation = await conversationsDataClient.getConversation({ id: conversationId });
+  if (!conversation) {
+    return undefined;
+  }
+  const currentSystemPromptId = conversation.apiConfig?.defaultSystemPromptId;
+  if (!currentSystemPromptId) {
+    return undefined;
+  }
+  const result = await promptsDataClient.findDocuments<EsPromptsSchema>({
+    perPage: 1,
+    page: 1,
+    filter: `_id: "${currentSystemPromptId}"`,
+  });
+  return extractPromptFromESResult(result);
+};
+
 export interface AppendAssistantMessageToConversationParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   messageContent: string;
@@ -284,6 +322,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
+  inference: InferenceServerStart;
   conversationId?: string;
   context: AwaitedProperties<
     Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
@@ -300,6 +339,7 @@ export interface LangChainExecuteParams {
   getElser: GetElser;
   response: KibanaResponseFactory;
   responseLanguage?: string;
+  systemPrompt?: string;
 }
 export const langChainExecute = async ({
   messages,
@@ -311,6 +351,7 @@ export const langChainExecute = async ({
   connectorId,
   context,
   actionsClient,
+  inference,
   request,
   logger,
   conversationId,
@@ -319,6 +360,7 @@ export const langChainExecute = async ({
   response,
   responseLanguage,
   isStream = true,
+  systemPrompt,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
@@ -379,6 +421,7 @@ export const langChainExecute = async ({
     connectorId,
     esClient,
     esStore,
+    inference,
     isStream,
     llmType: getLlmType(actionTypeId),
     langChainMessages,
@@ -389,6 +432,7 @@ export const langChainExecute = async ({
     replacements,
     responseLanguage,
     size: request.body.size,
+    systemPrompt,
     traceOptions: {
       projectName: request.body.langSmithProject,
       tracers: getLangSmithTracer({
@@ -403,12 +447,15 @@ export const langChainExecute = async ({
     executorParams
   );
 
+  const { esqlExists, isModelDeployed } = await getIsKnowledgeBaseEnabled(kbDataClient);
+
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
     model: request.body.model,
     // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
     // tracked here: https://github.com/elastic/security-team/issues/7363
     assistantStreamingEnabled: isStream && actionTypeId === '.gen-ai',
+    isEnabledKnowledgeBase: isModelDeployed && esqlExists,
   });
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };
@@ -612,4 +659,39 @@ export const isV2KnowledgeBaseEnabled = ({
     defaultPluginName: DEFAULT_PLUGIN_NAME,
   });
   return context.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+};
+
+/**
+ * Telemetry function to determine whether knowledge base has been installed
+ * @param kbDataClient
+ */
+export const getIsKnowledgeBaseEnabled = async (
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient | null
+): Promise<{
+  esqlExists: boolean;
+  isModelDeployed: boolean;
+}> => {
+  let esqlExists = false;
+  let isModelDeployed = false;
+  if (kbDataClient != null) {
+    try {
+      isModelDeployed = await kbDataClient.isModelDeployed();
+      if (isModelDeployed) {
+        esqlExists =
+          (
+            await kbDataClient.getKnowledgeBaseDocumentEntries({
+              query: ESQL_DOCS_LOADED_QUERY,
+              required: true,
+            })
+          ).length > 0;
+      }
+    } catch (e) {
+      /* if telemetry related requests fail, fallback to default values */
+    }
+  }
+
+  return {
+    esqlExists,
+    isModelDeployed,
+  };
 };

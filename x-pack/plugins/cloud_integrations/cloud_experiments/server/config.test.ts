@@ -26,9 +26,6 @@ describe('cloudExperiments config', () => {
           client_id: '1234',
           client_log_level: 'none',
         },
-        flag_overrides: {
-          'my-plugin.my-feature-flag': 1234,
-        },
       };
       expect(config.schema.validate(cfg, ctx)).toStrictEqual({
         ...cfg,
@@ -37,31 +34,14 @@ describe('cloudExperiments config', () => {
       });
     });
 
-    test('it should allow any additional config (missing flag_overrides)', () => {
-      const cfg = {
-        enabled: false,
-        launch_darkly: {
-          sdk_key: 'sdk-1234',
-          client_id: '1234',
-          client_log_level: 'none',
-        },
-      };
-      expect(config.schema.validate(cfg, ctx)).toStrictEqual({
-        ...cfg,
-        metadata_refresh_interval: moment.duration(1, 'h'),
-      });
-    });
-
     test('it should allow any additional config (missing launch_darkly)', () => {
       const cfg = {
         enabled: false,
-        flag_overrides: {
-          'my-plugin.my-feature-flag': 1234,
-        },
+        metadata_refresh_interval: '1s',
       };
       expect(config.schema.validate(cfg, ctx)).toStrictEqual({
         ...cfg,
-        metadata_refresh_interval: moment.duration(1, 'h'),
+        metadata_refresh_interval: moment.duration(1, 's'),
       });
     });
   });
@@ -70,11 +50,8 @@ describe('cloudExperiments config', () => {
     describe('in dev mode', () => {
       const ctx = { dev: true };
       test('in dev mode, it allows `launch_darkly` to be empty', () => {
-        expect(
-          config.schema.validate({ enabled: true, flag_overrides: { my_flag: 1 } }, ctx)
-        ).toStrictEqual({
+        expect(config.schema.validate({ enabled: true }, ctx)).toStrictEqual({
           enabled: true,
-          flag_overrides: { my_flag: 1 },
           metadata_refresh_interval: moment.duration(1, 'h'),
         });
       });
@@ -95,58 +72,6 @@ describe('cloudExperiments config', () => {
         ).toThrowErrorMatchingInlineSnapshot(
           `"[launch_darkly.sdk_key]: expected value of type [string] but got [undefined]"`
         );
-      });
-
-      test('in prod mode, it allows `flag_overrides` to be empty', () => {
-        expect(
-          config.schema.validate(
-            {
-              enabled: true,
-              launch_darkly: {
-                sdk_key: 'sdk-1234',
-                client_id: '1234',
-              },
-            },
-            ctx
-          )
-        ).toStrictEqual({
-          enabled: true,
-          launch_darkly: {
-            sdk_key: 'sdk-1234',
-            client_id: '1234',
-            client_log_level: 'none',
-          },
-          metadata_refresh_interval: moment.duration(1, 'h'),
-        });
-      });
-
-      test('in prod mode, it allows `flag_overrides` to be provided', () => {
-        expect(
-          config.schema.validate(
-            {
-              enabled: true,
-              launch_darkly: {
-                sdk_key: 'sdk-1234',
-                client_id: '1234',
-              },
-              flag_overrides: {
-                my_flag: 123,
-              },
-            },
-            ctx
-          )
-        ).toStrictEqual({
-          enabled: true,
-          launch_darkly: {
-            sdk_key: 'sdk-1234',
-            client_id: '1234',
-            client_log_level: 'none',
-          },
-          flag_overrides: {
-            my_flag: 123,
-          },
-          metadata_refresh_interval: moment.duration(1, 'h'),
-        });
       });
     });
   });

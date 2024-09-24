@@ -525,15 +525,16 @@ describe('versioned', () => {
 });
 
 describe('restrictInternalApis', () => {
-  it('is only allowed on serverless', () => {
-    expect(() => config.schema.validate({ restrictInternalApis: false }, {})).toThrow(
-      /a value wasn't expected/
-    );
-    expect(() => config.schema.validate({ restrictInternalApis: true }, {})).toThrow(
-      /a value wasn't expected/
-    );
+  it('is allowed on serverless and traditional', () => {
+    expect(() => config.schema.validate({ restrictInternalApis: false }, {})).not.toThrow();
+    expect(() => config.schema.validate({ restrictInternalApis: true }, {})).not.toThrow();
     expect(
       config.schema.validate({ restrictInternalApis: true }, { serverless: true })
+    ).toMatchObject({
+      restrictInternalApis: true,
+    });
+    expect(
+      config.schema.validate({ restrictInternalApis: true }, { traditional: true })
     ).toMatchObject({
       restrictInternalApis: true,
     });
@@ -541,6 +542,9 @@ describe('restrictInternalApis', () => {
   it('defaults to false', () => {
     expect(
       config.schema.validate({ restrictInternalApis: undefined }, { serverless: true })
+    ).toMatchObject({ restrictInternalApis: false });
+    expect(
+      config.schema.validate({ restrictInternalApis: undefined }, { traditional: true })
     ).toMatchObject({ restrictInternalApis: false });
   });
 });

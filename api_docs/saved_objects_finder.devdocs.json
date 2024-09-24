@@ -420,7 +420,7 @@
               },
               {
                 "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+                "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
               },
               {
                 "plugin": "graph",

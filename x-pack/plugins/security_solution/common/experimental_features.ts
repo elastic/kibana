@@ -53,6 +53,11 @@ export const allowedExperimentalValues = Object.freeze({
   automatedProcessActionsEnabled: true,
 
   /**
+   * Temporary feature flag to enable the Response Actions in Rules UI - intermediate release
+   */
+  automatedResponseActionsForMoreRulesEnabled: false,
+
+  /**
    * Enables the ability to send Response actions to SentinelOne and persist the results
    * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
    * response actions in Response Console.
@@ -84,6 +89,16 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
+   * Space awareness for Elastic Defend management.
+   * Feature depends on Fleet's corresponding features also being enabled:
+   * - `subfeaturePrivileges`
+   * - `useSpaceAwareness`
+   * and Fleet must set it runtime mode to spaces by calling the following API:
+   * - `POST /internal/fleet/enable_space_awareness`
+   */
+  endpointManagementSpaceAwarenessEnabled: false,
+
+  /**
    * Enables new notes
    */
   securitySolutionNotesEnabled: false,
@@ -109,6 +124,11 @@ export const allowedExperimentalValues = Object.freeze({
   assistantBedrockChat: true,
 
   /**
+   * Enables the NaturalLanguageESQLTool and disables the ESQLKnowledgeBaseTool, introduced in `8.16.0`.
+   */
+  assistantNaturalLanguageESQLTool: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -127,6 +147,11 @@ export const allowedExperimentalValues = Object.freeze({
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
+
+  /**
+   * enables logging requests during rule preview
+   */
+  loggingRequestsEnabled: false,
 
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
@@ -184,6 +209,11 @@ export const allowedExperimentalValues = Object.freeze({
   analyzerDatePickersAndSourcererDisabled: false,
 
   /**
+   * Enables visualization: session viewer and analyzer in expandable flyout
+   */
+  visualizationInFlyoutEnabled: false,
+
+  /**
    * Enables an ability to customize Elastic prebuilt rules.
    *
    * Ticket: https://github.com/elastic/kibana/issues/174168
@@ -223,6 +253,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new data ingestion hub
    */
   dataIngestionHubEnabled: false,
+
+  /**
+   * Enables the new Entity Store engine routes
+   */
+  entityStoreEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -1,13 +1,27 @@
-## ASIN
+# ASIN
 
-The `ASIN` function returns the arcsine of the input numeric expression as an angle, expressed in radians.
+The ASIN function returns the arcsine of a given numeric expression as an angle, expressed in radians.
 
-### Examples
+## Syntax
+
+`ASIN(number)`
+
+### Parameters
+
+#### number
+
+This is a numeric value ranging between -1 and 1. If the parameter is `null`, the function will also return `null`.
+
+## Examples
+
+In this example, the ASIN function calculates the arcsine of 0.9:
 
 ```esql
-ROW a = .9
-| EVAL asin = ASIN(a)
+ROW a=.9
+| EVAL asin=ASIN(a)
 ```
+
+In this example, the ASIN function calculates the arcsine of -0.5:
 
 ```esql
 ROW a = -.5

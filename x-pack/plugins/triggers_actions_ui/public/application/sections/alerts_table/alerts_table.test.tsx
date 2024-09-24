@@ -231,10 +231,9 @@ describe('AlertsTable', () => {
       body: jest.fn(),
       footer: jest.fn(),
     })),
-    getRenderCellValue: () =>
-      jest.fn().mockImplementation((props) => {
-        return `${props.colIndex}:${props.rowIndex}`;
-      }),
+    getRenderCellValue: jest.fn().mockImplementation((props) => {
+      return `${props.colIndex}:${props.rowIndex}`;
+    }),
     useBulkActions: () => [
       {
         id: 0,

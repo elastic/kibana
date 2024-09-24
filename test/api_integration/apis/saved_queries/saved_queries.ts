@@ -8,7 +8,10 @@
  */
 
 import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { SavedQueryAttributes, SAVED_QUERY_BASE_URL } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -33,33 +36,46 @@ export default function ({ getService }: FtrProviderContext) {
     supertest
       .post(`${SAVED_QUERY_BASE_URL}/_create`)
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(query);
 
   const updateQuery = (id: string, query: Partial<typeof mockSavedQuery> = mockSavedQuery) =>
     supertest
       .put(`${SAVED_QUERY_BASE_URL}/${id}`)
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(query);
 
   const deleteQuery = (id: string) =>
-    supertest.delete(`${SAVED_QUERY_BASE_URL}/${id}`).set(ELASTIC_HTTP_VERSION_HEADER, '1');
+    supertest
+      .delete(`${SAVED_QUERY_BASE_URL}/${id}`)
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
   const getQuery = (id: string) =>
-    supertest.get(`${SAVED_QUERY_BASE_URL}/${id}`).set(ELASTIC_HTTP_VERSION_HEADER, '1');
+    supertest
+      .get(`${SAVED_QUERY_BASE_URL}/${id}`)
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
   const findQueries = (options: { search?: string; perPage?: number; page?: number } = {}) =>
     supertest
       .post(`${SAVED_QUERY_BASE_URL}/_find`)
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(options);
 
   const countQueries = () =>
-    supertest.get(`${SAVED_QUERY_BASE_URL}/_count`).set(ELASTIC_HTTP_VERSION_HEADER, '1');
+    supertest
+      .get(`${SAVED_QUERY_BASE_URL}/_count`)
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
   const isDuplicateTitle = (title: string, id?: string) =>
     supertest
       .post(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`)
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ title, id });
 
   describe('Saved queries API', function () {

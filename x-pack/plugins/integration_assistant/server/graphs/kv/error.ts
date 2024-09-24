@@ -8,8 +8,8 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { KVState } from '../../types';
 import type { HandleKVNodeParams } from './types';
-import { KV_ERROR_PROMPT } from './prompts';
-import { COMMON_ERRORS, KV_EXAMPLE_ANSWER } from './constants';
+import { KV_ERROR_PROMPT, KV_HEADER_ERROR_PROMPT } from './prompts';
+import { COMMON_ERRORS, KV_EXAMPLE_ANSWER, KV_HEADER_ERROR_EXAMPLE_ANSWER } from './constants';
 import { createKVProcessor } from '../../util/processors';
 import { KVProcessor } from '../../processor_types';
 
@@ -33,6 +33,26 @@ export async function handleKVError({
 
   return {
     kvProcessor,
-    lastExecutedChain: 'kv_error',
+    lastExecutedChain: 'kvError',
+  };
+}
+
+export async function handleHeaderError({
+  state,
+  model,
+}: HandleKVNodeParams): Promise<Partial<KVState>> {
+  const outputParser = new JsonOutputParser();
+  const kvHeaderErrorGraph = KV_HEADER_ERROR_PROMPT.pipe(model).pipe(outputParser);
+  const currentPattern = state.grokPattern;
+
+  const pattern = await kvHeaderErrorGraph.invoke({
+    current_pattern: JSON.stringify(currentPattern, null, 2),
+    errors: JSON.stringify(state.errors, null, 2),
+    ex_answer: JSON.stringify(KV_HEADER_ERROR_EXAMPLE_ANSWER, null, 2),
+  });
+
+  return {
+    grokPattern: pattern.grok_pattern,
+    lastExecutedChain: 'kv_header_error',
   };
 }

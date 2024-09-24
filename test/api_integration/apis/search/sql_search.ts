@@ -8,7 +8,10 @@
  */
 
 import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -31,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/sql`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             params: {
               query: sqlQuery,
@@ -49,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp1 = await supertest
           .post(`/internal/search/sql`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             params: {
               query: sqlQuery,
@@ -61,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp2 = await supertest
           .post(`/internal/search/sql/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({});
 
         expect(resp2.status).to.be(200);
@@ -77,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp1 = await supertest
           .post(`/internal/search/sql`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             params: {
               query: sqlQuery,
@@ -90,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .post(`/internal/search/sql/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({})
           .expect(200);
 
@@ -97,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .delete(`/internal/search/sql/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send()
           .expect(200);
 
@@ -104,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .post(`/internal/search/sql/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({})
           .expect(404);
       });
