@@ -37,9 +37,9 @@ export const getDownloadSourceProxyArgs = (downloadSourceProxy?: FleetProxy) => 
             acc.push(`"${proxyKey}"="${proyVal}"`);
             return acc;
           }, [] as string[])
-          .join(';')}`
+          .join('; ')}}`
       : ''
-  }}`.trim();
+  }`.trim();
   const curl = `${downloadSourceProxy?.url ? `--proxy ${downloadSourceProxy.url}` : ''} ${
     downloadSourceProxy?.proxy_headers
       ? Object.entries(downloadSourceProxy.proxy_headers)

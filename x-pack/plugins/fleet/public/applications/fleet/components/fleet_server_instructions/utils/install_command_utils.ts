@@ -26,17 +26,24 @@ function getArtifact(
   const { windows: windowsDownloadSourceProxyArgs, curl: curlDownloadSourceProxyArgs } =
     getDownloadSourceProxyArgs(downloadSourceProxy);
 
+  const appendWindowsDownloadSourceProxyArgs = windowsDownloadSourceProxyArgs
+    ? ` ${windowsDownloadSourceProxyArgs}`
+    : '';
+  const appendCurlDownloadSourceProxyArgs = curlDownloadSourceProxyArgs
+    ? ` ${curlDownloadSourceProxyArgs}`
+    : '';
+
   const artifactMap: Record<PLATFORM_TYPE, { downloadCommand: string }> = {
     linux: {
       downloadCommand: [
-        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz ${curlDownloadSourceProxyArgs}`,
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz${appendCurlDownloadSourceProxyArgs}`,
         `tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz`,
         `cd elastic-agent-${kibanaVersion}-linux-x86_64`,
       ].join(`\n`),
     },
     mac: {
       downloadCommand: [
-        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-aarch64.tar.gz ${curlDownloadSourceProxyArgs}`,
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-aarch64.tar.gz${appendCurlDownloadSourceProxyArgs}`,
         `tar xzvf elastic-agent-${kibanaVersion}-darwin-aarch64.tar.gz`,
         `cd elastic-agent-${kibanaVersion}-darwin-aarch64`,
       ].join(`\n`),
@@ -44,20 +51,20 @@ function getArtifact(
     windows: {
       downloadCommand: [
         `$ProgressPreference = 'SilentlyContinue'`,
-        `Invoke-WebRequest -Uri ${ARTIFACT_BASE_URL}/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip ${windowsDownloadSourceProxyArgs}`,
+        `Invoke-WebRequest -Uri ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip${appendWindowsDownloadSourceProxyArgs}`,
         `Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
         `cd elastic-agent-${kibanaVersion}-windows-x86_64`,
       ].join(`\n`),
     },
     deb: {
       downloadCommand: [
-        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-amd64.deb ${curlDownloadSourceProxyArgs}`,
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-amd64.deb${appendCurlDownloadSourceProxyArgs}`,
         `sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb`,
       ].join(`\n`),
     },
     rpm: {
       downloadCommand: [
-        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-x86_64.rpm ${curlDownloadSourceProxyArgs}`,
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-x86_64.rpm${appendCurlDownloadSourceProxyArgs}`,
         `sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm`,
       ].join(`\n`),
     },
@@ -71,7 +78,7 @@ function getArtifact(
 
 export function getInstallCommandForPlatform(
   platform: PLATFORM_TYPE,
-  esOutput: string,
+  esOutputHost: string,
   esOutputProxy: FleetProxy | undefined,
   serviceToken: string,
   policyId?: string,
@@ -92,7 +99,7 @@ export function getInstallCommandForPlatform(
     commandArguments.push(['url', fleetServerHost]);
   }
 
-  commandArguments.push(['fleet-server-es', esOutput]);
+  commandArguments.push(['fleet-server-es', esOutputHost]);
   commandArguments.push(['fleet-server-service-token', serviceToken]);
   if (policyId) {
     commandArguments.push(['fleet-server-policy', policyId]);

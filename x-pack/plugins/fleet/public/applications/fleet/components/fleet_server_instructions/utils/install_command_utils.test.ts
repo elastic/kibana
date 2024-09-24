@@ -13,6 +13,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'linux',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1'
       );
 
@@ -31,6 +32,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'mac',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1'
       );
 
@@ -49,6 +51,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'windows',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1'
       );
 
@@ -68,6 +71,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'rpm',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1'
       );
 
@@ -87,6 +91,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'deb',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1'
       );
 
@@ -106,6 +111,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'linux',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         undefined,
         undefined,
@@ -131,6 +137,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'linux',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         'policy-1'
       );
@@ -151,6 +158,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'mac',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         'policy-1'
       );
@@ -171,6 +179,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'windows',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         'policy-1'
       );
@@ -192,6 +201,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'rpm',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         'policy-1'
       );
@@ -213,6 +223,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'deb',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         'policy-1'
       );
@@ -236,6 +247,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'linux',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         'policy-1',
         undefined,
@@ -268,6 +280,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'linux',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         'policy-1',
         'http://fleetserver:8220',
@@ -294,6 +307,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'mac',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         'policy-1',
         'http://fleetserver:8220',
@@ -320,6 +334,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'windows',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         'policy-1',
         'http://fleetserver:8220',
@@ -347,6 +362,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'rpm',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         'policy-1',
         'http://fleetserver:8220',
@@ -374,6 +390,7 @@ describe('getInstallCommandForPlatform', () => {
       const res = getInstallCommandForPlatform(
         'deb',
         'http://elasticsearch:9200',
+        undefined,
         'service-token-1',
         'policy-1',
         'http://fleetserver:8220',
@@ -392,6 +409,506 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
           --fleet-server-port=8220
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent"
+      `);
+    });
+  });
+
+  describe('with simple proxy settings', () => {
+    it('should return the correct command if proxies are set for linux', () => {
+      const res = getInstallCommandForPlatform(
+        'linux',
+        'http://elasticsearch:9200',
+        {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          is_preconfigured: false,
+        },
+        'service-token-1',
+        'policy-1',
+        'http://fleetserver:8220',
+        undefined,
+        undefined,
+        undefined,
+        {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          is_preconfigured: false,
+        }
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz --proxy http://download-src-proxy:2222
+        tar xzvf elastic-agent--linux-x86_64.tar.gz
+        cd elastic-agent--linux-x86_64
+        sudo ./elastic-agent install \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --proxy-url=http://es-proxy:1111"
+      `);
+    });
+
+    it('should return the correct command if proxies are set for mac', () => {
+      const res = getInstallCommandForPlatform(
+        'mac',
+        'http://elasticsearch:9200',
+        {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          is_preconfigured: false,
+        },
+        'service-token-1',
+        'policy-1',
+        'http://fleetserver:8220',
+        undefined,
+        undefined,
+        undefined,
+        {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          is_preconfigured: false,
+        }
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz --proxy http://download-src-proxy:2222
+        tar xzvf elastic-agent--darwin-aarch64.tar.gz
+        cd elastic-agent--darwin-aarch64
+        sudo ./elastic-agent install \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --proxy-url=http://es-proxy:1111"
+      `);
+    });
+
+    it('should return the correct command if proxies are set for windows', () => {
+      const res = getInstallCommandForPlatform(
+        'windows',
+        'http://elasticsearch:9200',
+        {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          is_preconfigured: false,
+        },
+        'service-token-1',
+        'policy-1',
+        'http://fleetserver:8220',
+        undefined,
+        undefined,
+        undefined,
+        {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          is_preconfigured: false,
+        }
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "$ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip -Proxy \\"http://download-src-proxy:2222\\"
+        Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
+        cd elastic-agent--windows-x86_64
+        .\\\\elastic-agent.exe install \`
+          --fleet-server-es=http://elasticsearch:9200 \`
+          --fleet-server-service-token=service-token-1 \`
+          --fleet-server-policy=policy-1 \`
+          --fleet-server-port=8220 \`
+          --proxy-url=http://es-proxy:1111"
+      `);
+    });
+
+    it('should return the correct command if proxies are set for rpm', () => {
+      const res = getInstallCommandForPlatform(
+        'rpm',
+        'http://elasticsearch:9200',
+        {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          is_preconfigured: false,
+        },
+        'service-token-1',
+        'policy-1',
+        'http://fleetserver:8220',
+        undefined,
+        undefined,
+        undefined,
+        {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          is_preconfigured: false,
+        }
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--x86_64.rpm --proxy http://download-src-proxy:2222
+        sudo rpm -vi elastic-agent--x86_64.rpm
+        sudo elastic-agent enroll \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --proxy-url=http://es-proxy:1111
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent"
+      `);
+    });
+
+    it('should return the correct command if proxies are set for deb', () => {
+      const res = getInstallCommandForPlatform(
+        'deb',
+        'http://elasticsearch:9200',
+        {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          is_preconfigured: false,
+        },
+        'service-token-1',
+        'policy-1',
+        'http://fleetserver:8220',
+        undefined,
+        undefined,
+        undefined,
+        {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          is_preconfigured: false,
+        }
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--amd64.deb --proxy http://download-src-proxy:2222
+        sudo dpkg -i elastic-agent--amd64.deb
+        sudo elastic-agent enroll \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --proxy-url=http://es-proxy:1111
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent"
+      `);
+    });
+  });
+
+  describe('with full proxy settings', () => {
+    it('should return the correct command if proxies are set for linux', () => {
+      const res = getInstallCommandForPlatform(
+        'linux',
+        'http://elasticsearch:9200',
+        {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          proxy_headers: {
+            'X-Forwarded-For': 'forwarded-value',
+            'test-header': 'test-value',
+          },
+          is_preconfigured: false,
+        },
+        'service-token-1',
+        'policy-1',
+        'http://fleetserver:8220',
+        undefined,
+        undefined,
+        undefined,
+        {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          proxy_headers: {
+            'Accept-Language': 'en-US,en;q=0.5',
+            'second-header': 'second-value',
+          },
+          is_preconfigured: false,
+        }
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz --proxy http://download-src-proxy:2222 --proxy-header \\"Accept-Language=en-US,en;q=0.5\\" --proxy-header \\"second-header=second-value\\"
+        tar xzvf elastic-agent--linux-x86_64.tar.gz
+        cd elastic-agent--linux-x86_64
+        sudo ./elastic-agent install \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --proxy-url=http://es-proxy:1111 \\\\
+          --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
+          --proxy-header=\\"test-header=test-value\\""
+      `);
+    });
+
+    it('should return the correct command if proxies are set for mac', () => {
+      const res = getInstallCommandForPlatform(
+        'mac',
+        'http://elasticsearch:9200',
+        {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          proxy_headers: {
+            'X-Forwarded-For': 'forwarded-value',
+            'test-header': 'test-value',
+          },
+          is_preconfigured: false,
+        },
+        'service-token-1',
+        'policy-1',
+        'http://fleetserver:8220',
+        undefined,
+        undefined,
+        undefined,
+        {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          proxy_headers: {
+            'Accept-Language': 'en-US,en;q=0.5',
+            'second-header': 'second-value',
+          },
+          is_preconfigured: false,
+        }
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz --proxy http://download-src-proxy:2222 --proxy-header \\"Accept-Language=en-US,en;q=0.5\\" --proxy-header \\"second-header=second-value\\"
+        tar xzvf elastic-agent--darwin-aarch64.tar.gz
+        cd elastic-agent--darwin-aarch64
+        sudo ./elastic-agent install \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --proxy-url=http://es-proxy:1111 \\\\
+          --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
+          --proxy-header=\\"test-header=test-value\\""
+      `);
+    });
+
+    it('should return the correct command if proxies are set for windows', () => {
+      const res = getInstallCommandForPlatform(
+        'windows',
+        'http://elasticsearch:9200',
+        {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          proxy_headers: {
+            'X-Forwarded-For': 'forwarded-value',
+            'test-header': 'test-value',
+          },
+          is_preconfigured: false,
+        },
+        'service-token-1',
+        'policy-1',
+        'http://fleetserver:8220',
+        undefined,
+        undefined,
+        undefined,
+        {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          proxy_headers: {
+            'Accept-Language': 'en-US,en;q=0.5',
+            'second-header': 'second-value',
+          },
+          is_preconfigured: false,
+        }
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "$ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip -Proxy \\"http://download-src-proxy:2222\\" -Headers @{\\"Accept-Language\\"=\\"en-US,en;q=0.5\\"; \\"second-header\\"=\\"second-value\\"}
+        Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
+        cd elastic-agent--windows-x86_64
+        .\\\\elastic-agent.exe install \`
+          --fleet-server-es=http://elasticsearch:9200 \`
+          --fleet-server-service-token=service-token-1 \`
+          --fleet-server-policy=policy-1 \`
+          --fleet-server-port=8220 \`
+          --proxy-url=http://es-proxy:1111 \`
+          --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \`
+          --proxy-header=\\"test-header=test-value\\""
+      `);
+    });
+
+    it('should return the correct command if proxies are set for rpm', () => {
+      const res = getInstallCommandForPlatform(
+        'rpm',
+        'http://elasticsearch:9200',
+        {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          proxy_headers: {
+            'X-Forwarded-For': 'forwarded-value',
+            'test-header': 'test-value',
+          },
+          is_preconfigured: false,
+        },
+        'service-token-1',
+        'policy-1',
+        'http://fleetserver:8220',
+        undefined,
+        undefined,
+        undefined,
+        {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          proxy_headers: {
+            'Accept-Language': 'en-US,en;q=0.5',
+            'second-header': 'second-value',
+          },
+          is_preconfigured: false,
+        }
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--x86_64.rpm --proxy http://download-src-proxy:2222 --proxy-header \\"Accept-Language=en-US,en;q=0.5\\" --proxy-header \\"second-header=second-value\\"
+        sudo rpm -vi elastic-agent--x86_64.rpm
+        sudo elastic-agent enroll \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --proxy-url=http://es-proxy:1111 \\\\
+          --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
+          --proxy-header=\\"test-header=test-value\\"
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent"
+      `);
+    });
+
+    it('should return the correct command if proxies are set for deb', () => {
+      const res = getInstallCommandForPlatform(
+        'deb',
+        'http://elasticsearch:9200',
+        {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          proxy_headers: {
+            'X-Forwarded-For': 'forwarded-value',
+            'test-header': 'test-value',
+          },
+          is_preconfigured: false,
+        },
+        'service-token-1',
+        'policy-1',
+        'http://fleetserver:8220',
+        undefined,
+        undefined,
+        undefined,
+        {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          proxy_headers: {
+            'Accept-Language': 'en-US,en;q=0.5',
+            'second-header': 'second-value',
+          },
+          is_preconfigured: false,
+        }
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--amd64.deb --proxy http://download-src-proxy:2222 --proxy-header \\"Accept-Language=en-US,en;q=0.5\\" --proxy-header \\"second-header=second-value\\"
+        sudo dpkg -i elastic-agent--amd64.deb
+        sudo elastic-agent enroll \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220 \\\\
+          --proxy-url=http://es-proxy:1111 \\\\
+          --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
+          --proxy-header=\\"test-header=test-value\\"
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent"
       `);
