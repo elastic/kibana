@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks';
+
+import { waitFor } from '@testing-library/react';
 import { useRiskScore } from './use_risk_score';
 import { TestProviders } from '../../../common/mock';
 
@@ -218,7 +220,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
           totalCount: 0,
         },
       });
-      const { result, waitFor } = renderHook(() => useRiskScore({ riskEntity }), {
+      const { result } = renderHook(() => useRiskScore({ riskEntity }), {
         wrapper: TestProviders,
       });
       await waitFor(() => {

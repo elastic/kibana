@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 
 import { useIndicesCheck } from '.';
 
@@ -82,9 +83,7 @@ describe('useIndicesCheck', () => {
 
     describe('when checkIndex completes', () => {
       it('should set correct data', async () => {
-        const { result, waitFor } = renderHook(() =>
-          useIndicesCheck({ onCheckCompleted: jest.fn() })
-        );
+        const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
 
         const httpFetchMock = jest.fn((route) => {
           if (route.startsWith('/internal/ecs_data_quality_dashboard/mappings')) {
@@ -124,9 +123,7 @@ describe('useIndicesCheck', () => {
     describe('errors', () => {
       describe('when mappings request errors', () => {
         it('should set mappingsError', async () => {
-          const { result, waitFor } = renderHook(() =>
-            useIndicesCheck({ onCheckCompleted: jest.fn() })
-          );
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
 
           const httpFetchMock = jest.fn((route) => {
             if (route.startsWith('/internal/ecs_data_quality_dashboard/mappings')) {
@@ -160,9 +157,7 @@ describe('useIndicesCheck', () => {
 
       describe('when unallowed values request errors', () => {
         it('should set unallowedValuesError', async () => {
-          const { result, waitFor } = renderHook(() =>
-            useIndicesCheck({ onCheckCompleted: jest.fn() })
-          );
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
 
           const httpFetchMock = jest.fn((route) => {
             if (route.startsWith('/internal/ecs_data_quality_dashboard/mappings')) {
@@ -232,9 +227,7 @@ describe('useIndicesCheck', () => {
             onStart?.();
           });
 
-          const { result, waitFor } = renderHook(() =>
-            useIndicesCheck({ onCheckCompleted: jest.fn() })
-          );
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
 
           act(() =>
             result.current.checkIndex({
@@ -265,9 +258,7 @@ describe('useIndicesCheck', () => {
             onLoadMappingsStart?.();
           });
 
-          const { result, waitFor } = renderHook(() =>
-            useIndicesCheck({ onCheckCompleted: jest.fn() })
-          );
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
 
           act(() =>
             result.current.checkIndex({

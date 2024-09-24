@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
 import { useGetCases } from './use_get_cases';
 import * as api from './api';
@@ -31,7 +32,7 @@ describe('useGetCases', () => {
 
   it('calls getCases with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
-    const { waitFor } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -55,7 +56,7 @@ describe('useGetCases', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { waitFor } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -90,7 +91,7 @@ describe('useGetCases', () => {
     };
 
     const spyOnGetCases = jest.spyOn(api, 'getCases');
-    const { waitFor } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -109,7 +110,7 @@ describe('useGetCases', () => {
     appMockRender = createAppMockRenderer({ owner: [] });
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
-    const { waitFor } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -128,7 +129,7 @@ describe('useGetCases', () => {
     appMockRender = createAppMockRenderer({ owner: ['observability'] });
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
-    const { waitFor } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -147,7 +148,7 @@ describe('useGetCases', () => {
     appMockRender = createAppMockRenderer({ owner: ['observability'] });
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
-    const { waitFor } = renderHook(() => useGetCases({ filterOptions: { owner: ['my-owner'] } }), {
+    renderHook(() => useGetCases({ filterOptions: { owner: ['my-owner'] } }), {
       wrapper: appMockRender.AppWrapper,
     });
 

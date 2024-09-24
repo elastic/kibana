@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, type RenderHookResult } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
+import { waitFor, act } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { delay } from '../utils/test_helpers';
@@ -54,7 +55,9 @@ describe('useFetcher', () => {
     });
 
     it('should still show loading spinner after 100ms', async () => {
-      jest.advanceTimersByTime(100);
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
 
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -65,8 +68,11 @@ describe('useFetcher', () => {
     });
 
     it('should show success after 1 second', async () => {
-      jest.advanceTimersByTime(1000);
-      await hook.waitForNextUpdate();
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      await waitFor(() => null);
 
       expect(hook.result.current).toEqual({
         data: 'response from hook',
@@ -104,7 +110,9 @@ describe('useFetcher', () => {
     });
 
     it('should still show loading spinner after 100ms', async () => {
-      jest.advanceTimersByTime(100);
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
 
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -115,8 +123,11 @@ describe('useFetcher', () => {
     });
 
     it('should show error after 1 second', async () => {
-      jest.advanceTimersByTime(1000);
-      await hook.waitForNextUpdate();
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      await waitFor(() => null);
 
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -149,7 +160,7 @@ describe('useFetcher', () => {
         status: 'loading',
       });
 
-      await hook.waitForNextUpdate();
+      await waitFor(() => null);
 
       // assert: first response has loaded and should be rendered
       expect(hook.result.current).toEqual({
@@ -168,7 +179,11 @@ describe('useFetcher', () => {
         args: ['b'],
       });
 
-      jest.advanceTimersByTime(100);
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+
+      await waitFor(() => null);
 
       // assert: while loading new data the previous data should still be rendered
       expect(hook.result.current).toEqual({
@@ -178,8 +193,11 @@ describe('useFetcher', () => {
         status: 'loading',
       });
 
-      jest.advanceTimersByTime(500);
-      await hook.waitForNextUpdate();
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      await waitFor(() => null);
 
       // assert: "second response" has loaded and should be rendered
       expect(hook.result.current).toEqual({
@@ -216,7 +234,7 @@ describe('useFetcher', () => {
         },
         args: ['b'],
       });
-      await hook.waitForNextUpdate();
+      await waitFor(() => null);
       const thirdResult = hook.result.current;
 
       // assert: rerender with different data returns a new object
