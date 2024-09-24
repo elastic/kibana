@@ -38,7 +38,7 @@ exports[`renders correctly 1`] = `
     <EuiFormRow
       data-test-subj="optionalDescription"
       fullWidth={true}
-      helpText="The description appears on the space selection screen."
+      helpText="Appears on the space selection screen and spaces list."
       isInvalid={false}
       label="Description"
       labelAppend={

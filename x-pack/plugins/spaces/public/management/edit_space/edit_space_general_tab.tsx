@@ -20,6 +20,7 @@ import type { Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
+import { CustomizeAvatar } from '../components/customize_avatar';
 import { CustomizeSpace } from '../components/customize_space';
 import { SolutionView } from '../components/solution_view';
 import { SpaceValidator } from '../lib';
@@ -279,6 +280,10 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
           />
         </>
       )}
+
+      <EuiSpacer />
+
+      <CustomizeAvatar space={formValues} onChange={onChangeSpaceSettings} validator={validator} />
 
       {doShowUserImpactWarning()}
 

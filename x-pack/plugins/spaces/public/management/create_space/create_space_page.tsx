@@ -34,6 +34,7 @@ import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
 import { UnauthorizedPrompt } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
+import { CustomizeAvatar } from '../components/customize_avatar';
 import { CustomizeSpace } from '../components/customize_space';
 import { DeleteSpacesButton } from '../components/delete_spaces_button';
 import { EnabledFeatures } from '../components/enabled_features';
@@ -213,6 +214,14 @@ export class CreateSpacePage extends Component<Props, State> {
             />
           </>
         )}
+
+        <EuiSpacer />
+
+        <CustomizeAvatar
+          space={this.state.space}
+          onChange={this.onSpaceChange}
+          validator={this.validator}
+        />
 
         <EuiSpacer />
 
