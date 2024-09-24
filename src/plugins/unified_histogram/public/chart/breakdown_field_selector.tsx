@@ -31,24 +31,16 @@ export interface BreakdownFieldSelectorProps {
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
 }
 
-const getDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
+const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
   if (esqlColumns) {
     return esqlColumns.map((column) => ({
-      key: column.id,
-      value: column.id,
-      label: column.name,
       name: column.name,
+      displayName: column.name,
       type: column.meta?.type,
     }));
   }
 
-  return dataView.fields.filter(fieldSupportsBreakdown).map((field) => ({
-    key: field.name,
-    value: field.name,
-    label: field.displayName,
-    name: field.name,
-    type: field.type,
-  }));
+  return dataView.fields.filter(fieldSupportsBreakdown);
 };
 
 export const BreakdownFieldSelector = ({
@@ -57,14 +49,14 @@ export const BreakdownFieldSelector = ({
   esqlColumns,
   onBreakdownFieldChange,
 }: BreakdownFieldSelectorProps) => {
-  const fields = useMemo(() => getDropdownFields(dataView, esqlColumns), [dataView, esqlColumns]);
+  const fields = useMemo(() => mapToDropdownFields(dataView, esqlColumns), [dataView, esqlColumns]);
   const fieldOptions: SelectableEntry[] = useMemo(() => {
     const options: SelectableEntry[] = fields
       .map((field) => ({
-        key: field.key,
+        key: field.name,
         name: field.name,
-        label: field.label,
-        value: field.value,
+        label: field.displayName,
+        value: field.name,
         checked:
           breakdown?.field?.name === field.name
             ? ('on' as EuiSelectableOption['checked'])
