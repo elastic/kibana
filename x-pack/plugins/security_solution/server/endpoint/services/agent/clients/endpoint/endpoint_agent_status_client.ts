@@ -16,8 +16,11 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
-    const metadataService = this.options.endpointService.getEndpointMetadataService();
+    const soClient = this.options.soClient;
     const esClient = this.options.esClient;
+    const metadataService = this.options.endpointService.getEndpointMetadataService(
+      soClient.getCurrentNamespace()
+    );
 
     try {
       const agentIdsKql = agentIds.map((agentId) => `agent.id: ${agentId}`).join(' or ');
