@@ -7,15 +7,24 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchBar } from '../search_bar';
 import { getEntityManagerEnablement } from './no_data_config';
 import { useEntityManager } from '../../hooks/use_entity_manager';
 import { Welcome } from '../entity_enablement/welcome_modal';
+import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
+import { EmptyState } from '../empty_states/empty_state';
+
+const pageTitle = {
+  pageTitle: i18n.translate('xpack.inventory.inventoryPageHeaderLabel', {
+    defaultMessage: 'Inventory',
+  }),
+};
 
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
-    services: { observabilityShared },
+    services: { observabilityShared, inventoryAPIClient },
   } = useKibana();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
@@ -32,6 +41,23 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
     toggleWelcomedModal();
   };
 
+  const { value = { hasData: false }, loading: hasDataLoading } = useInventoryAbortableAsync(
+    ({ signal }) => {
+      return inventoryAPIClient.fetch('GET /internal/inventory/has_data', {
+        signal,
+      });
+    },
+    [inventoryAPIClient]
+  );
+
+  if (isEnablementLoading || hasDataLoading) {
+    return (
+      <ObservabilityPageTemplate pageHeader={pageTitle}>
+        <EuiEmptyPrompt icon={<EuiLoadingLogo logo="logoObservability" size="xl" />} />
+      </ObservabilityPageTemplate>
+    );
+  }
+
   return (
     <ObservabilityPageTemplate
       noDataConfig={getEntityManagerEnablement({
@@ -39,23 +65,23 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
         loading: isEnablementLoading,
         onSuccess: handleSuccess,
       })}
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.inventory.inventoryPageHeaderLabel', {
-          defaultMessage: 'Inventory',
-        }),
-      }}
+      pageHeader={pageTitle}
     >
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <SearchBar />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {children}
-          {showWelcomedModal ? (
-            <Welcome onClose={toggleWelcomedModal} onConfirm={toggleWelcomedModal} />
-          ) : null}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {value.hasData ? (
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <SearchBar />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {children}
+            {showWelcomedModal ? (
+              <Welcome onClose={toggleWelcomedModal} onConfirm={toggleWelcomedModal} />
+            ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EmptyState />
+      )}
     </ObservabilityPageTemplate>
   );
 }
