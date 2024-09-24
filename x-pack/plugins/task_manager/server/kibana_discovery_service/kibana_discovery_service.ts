@@ -23,6 +23,8 @@ interface DiscoveryServiceUpsertParams {
   lastSeen: string;
 }
 
+export const DEFAULT_TIMEOUT = 2000;
+
 export class KibanaDiscoveryService {
   private readonly activeNodesLookBack: string;
   private readonly discoveryInterval: number;
@@ -76,7 +78,8 @@ export class KibanaDiscoveryService {
       } finally {
         this.timer = setTimeout(
           async () => await this.scheduleUpsertCurrentNode(),
-          this.discoveryInterval - (Date.now() - lastSeenDate.getTime())
+          // The timeout should not be less than the default timeout of two seconds
+          Math.max(this.discoveryInterval - (Date.now() - lastSeenDate.getTime()), DEFAULT_TIMEOUT)
         );
       }
     }

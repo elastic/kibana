@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { KibanaDiscoveryService } from './kibana_discovery_service';
+import { DEFAULT_TIMEOUT, KibanaDiscoveryService } from './kibana_discovery_service';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { SavedObjectsBulkDeleteResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
@@ -109,6 +109,23 @@ describe('KibanaDiscoveryService', () => {
       jest.runOnlyPendingTimers();
 
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(2);
+    });
+
+    it('timeout should not be less than two seconds', async () => {
+      savedObjectsRepository.find.mockResolvedValueOnce(createFindResponse([]));
+      const kibanaDiscoveryService = new KibanaDiscoveryService({
+        savedObjectsRepository,
+        logger,
+        currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: 500,
+        },
+      });
+      await kibanaDiscoveryService.start();
+
+      expect(setTimeout).toHaveBeenCalledTimes(1);
+      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), DEFAULT_TIMEOUT);
     });
 
     it('reschedules when upsert fails on start', async () => {
