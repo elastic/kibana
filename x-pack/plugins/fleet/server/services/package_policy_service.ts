@@ -164,7 +164,7 @@ export interface PackagePolicyClient {
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string,
-    options: { logger?: Logger; installMissingPackage?: boolean }
+    options?: { logger?: Logger; installMissingPackage?: boolean }
   ): Promise<NewPackagePolicy | undefined>;
 
   runExternalCallbacks<A extends ExternalCallback[0]>(
