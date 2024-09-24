@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mapSavedObjectToMonitor, mergeSourceMonitor } from './helper';
-import { EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
+import { mapSavedObjectToMonitor, mergeSourceMonitor } from './saved_object_to_monitor';
+import { EncryptedSyntheticsMonitor } from '../../../../common/runtime_types';
 
 describe('mergeSourceMonitor', () => {
   it('should merge keys', function () {
@@ -66,8 +66,82 @@ describe('mergeSourceMonitor', () => {
     ]);
   });
 
-  it('should omit null or undefined values', () => {
-    const result = mapSavedObjectToMonitor({ attributes: testMonitor } as any);
+  it('should not omit null or undefined values', () => {
+    const result = mapSavedObjectToMonitor({ monitor: { attributes: testMonitor } } as any);
+
+    expect(result).toEqual({
+      alert: {
+        status: {
+          enabled: true,
+        },
+        tls: {
+          enabled: true,
+        },
+      },
+      config_id: 'ae88f0aa-9c7d-4a5f-96dc-89d65a0ca947',
+      custom_heartbeat_id: 'todos-lightweight-test-projects-default',
+      enabled: true,
+      id: 'todos-lightweight-test-projects-default',
+      ipv4: true,
+      ipv6: true,
+      locations: [
+        {
+          geo: {
+            lat: 41.25,
+            lon: -95.86,
+          },
+          id: 'us_central',
+          isServiceManaged: true,
+          label: 'North America - US Central',
+        },
+      ],
+      max_redirects: 0,
+      mode: 'any',
+      name: 'Todos Lightweight',
+      namespace: 'default',
+      original_space: 'default',
+      proxy_url: '',
+      retest_on_failure: true,
+      revision: 21,
+      schedule: {
+        number: '3',
+        unit: 'm',
+      },
+      'service.name': '',
+      tags: [],
+      timeout: '16',
+      type: 'http',
+      url: '${devUrl}',
+      'url.port': null,
+      ssl: {
+        certificate: '',
+        certificate_authorities: '',
+        supported_protocols: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+        verification_mode: 'full',
+        key: 'test-key',
+      },
+      response: {
+        include_body: 'on_error',
+        include_body_max_bytes: '1024',
+        include_headers: true,
+      },
+      check: {
+        request: {
+          method: 'GET',
+        },
+        response: {
+          status: ['404'],
+        },
+      },
+      params: {},
+    });
+  });
+
+  it('should not omit null or undefined values with ui', () => {
+    const result = mapSavedObjectToMonitor({
+      monitor: { attributes: { ...testMonitor } },
+      internal: true,
+    } as any);
 
     expect(result).toEqual({
       __ui: {
@@ -100,27 +174,37 @@ describe('mergeSourceMonitor', () => {
           label: 'North America - US Central',
         },
       ],
-      max_attempts: 2,
       max_redirects: '0',
       mode: 'any',
       name: 'Todos Lightweight',
       namespace: 'default',
-      origin: 'project',
       original_space: 'default',
       project_id: 'test-projects',
-      'response.include_body': 'on_error',
-      'response.include_body_max_bytes': '1024',
-      'response.include_headers': true,
+      proxy_url: '',
       revision: 21,
       schedule: {
         number: '3',
         unit: 'm',
       },
+      'service.name': '',
+      'ssl.certificate': '',
+      'ssl.certificate_authorities': '',
+      'ssl.key': 'test-key',
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
       'ssl.verification_mode': 'full',
+      'response.include_body': 'on_error',
+      'response.include_body_max_bytes': '1024',
+      'response.include_headers': true,
+      tags: [],
       timeout: '16',
       type: 'http',
-      url: '${devUrl}',
+      'url.port': null,
+      form_monitor_type: 'http',
+      hash: 'f4b6u3Q/PMK5KzEtPeMNzXJBA46rt+yilohaAoqMzqk=',
+      journey_id: 'todos-lightweight',
+      max_attempts: 2,
+      origin: 'project',
+      urls: '${devUrl}',
     });
   });
 });
@@ -179,6 +263,7 @@ const testMonitor = {
   ipv4: true,
   ipv6: true,
   'ssl.certificate_authorities': '',
+  'ssl.key': 'test-key',
   'ssl.certificate': '',
   'ssl.verification_mode': 'full',
   'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
