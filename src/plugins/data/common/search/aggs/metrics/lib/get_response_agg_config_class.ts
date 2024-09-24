@@ -46,7 +46,7 @@ export const create = (parentAgg: IMetricAggConfig, props: Partial<IMetricAggCon
     const subId = String(key);
 
     if (subId.indexOf('.') > -1) {
-      id = parentId + "['" + subId.replace(/'/g, "\\'") + "']";
+      id = parentId + "['" + subId.replace(/[\\']/g, '\\$&') + "']"; // $& means the whole matched string
     } else {
       id = parentId + '.' + subId;
     }
