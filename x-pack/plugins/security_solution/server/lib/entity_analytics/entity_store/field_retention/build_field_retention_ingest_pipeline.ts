@@ -35,13 +35,40 @@ export const buildFieldRetentionIngestPipeline = ({
   },
   ...getDotExpanderProcessors(allEntityFields),
   ...getFieldProcessors(fieldRetentionDefinition),
-  ...(!debugMode ? getRemoveEmptyFieldProcessors(allEntityFields) : []),
   ...(!debugMode
     ? [
+        ...getRemoveEmptyFieldProcessors(allEntityFields),
         {
           remove: {
             ignore_failure: true,
             field: ENRICH_FIELD,
+          },
+        },
+        // the entity definition adds these
+        {
+          remove: {
+            ignore_failure: true,
+            field: 'entity',
+          },
+        },
+        {
+          remove: {
+            ignore_failure: true,
+            field: 'event',
+          },
+        },
+        {
+          remove: {
+            ignore_failure: true,
+            field: 'asset',
+            if: isFieldMissingOrEmpty('ctx.asset'),
+          },
+        },
+        {
+          remove: {
+            ignore_failure: true,
+            field: `${fieldRetentionDefinition.entityType}.risk`,
+            if: isFieldMissingOrEmpty(`ctx.${fieldRetentionDefinition.entityType}.risk`),
           },
         },
       ]
@@ -55,58 +82,92 @@ const getFieldProcessors = (
 };
 
 const isFieldMissingOrEmpty = (field: string): string => {
-  const fieldParts = field.split('.');
-  return fieldParts.reduce((acc, part, index) => {
-    const path = fieldParts
-      .slice(0, index + 1)
-      .map((p) => `['${p}']`)
-      .join('');
-
-    // Check if the current path part is missing or null
-    let condition = `ctx${path} == null`;
-
-    // At the final field level, add the empty array check
-    if (index === fieldParts.length - 1) {
-      const emptyArrayCheck = `(ctx${path} instanceof List && ctx${path}.size() == 0)`;
-      const emptyStringCheck = `(ctx${path} instanceof String && ctx${path}.isEmpty())`;
-      condition += ` || ${emptyArrayCheck} || ${emptyStringCheck}`;
-    }
-
-    return `${acc}${condition}${index < fieldParts.length - 1 ? ' || ' : ''}`;
-  }, '');
+  const progressivePaths = getProgressivePathsNoCtx(convertPathToBracketNotation(field));
+  const lastPath = progressivePaths.at(-1);
+  const emptyArrayCheck = `(${lastPath} instanceof List && ${lastPath}.size() == 0)`;
+  const emptyStringCheck = `(${lastPath} instanceof String && ${lastPath}.isEmpty())`;
+  const emptyObjectCheck = `(${lastPath} instanceof Map && ${lastPath}.size() == 0)`;
+  return [
+    ...progressivePaths.map((path, index) => `${path} == null`),
+    emptyArrayCheck,
+    emptyStringCheck,
+    emptyObjectCheck,
+  ].join(' || ');
 };
 
 const keepOldestValueProcessor = ({ field }: KeepOldestValue): IngestProcessorContainer => {
   const historicalField = `${ENRICH_FIELD}.${field}`;
+  const ctxField = `ctx.${field}`;
   return {
     set: {
-      if: isFieldMissingOrEmpty(field),
+      if: isFieldMissingOrEmpty(ctxField),
       field,
       value: `{{${historicalField}}}`,
     },
   };
 };
 
+export const convertPathToBracketNotation = (path: string): string => {
+  const parts = path.split('.');
+  return (
+    parts[0] +
+    parts
+      .slice(1)
+      .map((part) => `['${part}']`)
+      .join('')
+  );
+};
+
+/**
+ * Converts a dot notation path to a list of progressive paths
+ * e.g "a.b.c" => ["a", "a['b']", "a['b']['c']"]
+ * if the path is "ctx.a.b.c", it will not return a ctx element
+ * because we are only interested in the path after the context
+ *
+ * @param {string} path The path to convert
+ * @return {*}  {string[]} The list of progressive paths
+ */
+export const getProgressivePathsNoCtx = (path: string): string[] => {
+  const regex = /([^[\]]+)|(\['[^']+'\])/g;
+  const matches = [...path.matchAll(regex)];
+
+  const result: string[] = [];
+  let currentPath = '';
+
+  matches.forEach((match) => {
+    currentPath += match[0]; // Bracket parts (e.g., "['b']")
+
+    // Skip the first part if it is 'ctx'
+    if (currentPath !== 'ctx') {
+      result.push(currentPath);
+    }
+  });
+
+  return result;
+};
+
 const collectValuesProcessor = ({ field, maxLength }: CollectValues) => {
+  const fieldBrackets = convertPathToBracketNotation(`ctx.${field}`);
+  const enrichFieldBrackets = convertPathToBracketNotation(`ctx.${ENRICH_FIELD}.${field}`);
   return {
     script: {
       lang: 'painless',
       source: `
-  if (ctx.${field} == null) {
-    ctx.${field} = [];
+  if (${fieldBrackets} == null) {
+    ${fieldBrackets} = [];
   }
 
   List combinedItems = new ArrayList();
 
-  combinedItems.addAll(ctx.${field});
+  combinedItems.addAll(${fieldBrackets});
 
-  if (combinedItems.size() < params.max_length && ctx.${ENRICH_FIELD} != null && ctx.${ENRICH_FIELD}.${field} != null) {
+  if (combinedItems.size() < params.max_length && ctx.${ENRICH_FIELD} != null && ${enrichFieldBrackets} != null) {
     int remaining = params.max_length - combinedItems.size();
-    combinedItems.addAll(ctx.${ENRICH_FIELD}.${field}.subList(0, Math.min(remaining, ctx.${ENRICH_FIELD}.${field}.size())));
+    combinedItems.addAll(${enrichFieldBrackets}.subList(0, Math.min(remaining, ${enrichFieldBrackets}.size())));
   }
 
-  ctx.${field} = combinedItems.subList(0, (int) Math.min(params.max_length, combinedItems.size()));
-            `,
+  ${fieldBrackets} = combinedItems.subList(0, (int) Math.min(params.max_length, combinedItems.size()));
+`,
       params: {
         max_length: maxLength,
       },
@@ -127,7 +188,7 @@ const getRemoveEmptyFieldProcessors = (fields: string[]): IngestProcessorContain
   fields.map((field) => {
     return {
       remove: {
-        if: isFieldMissingOrEmpty(field),
+        if: isFieldMissingOrEmpty(`ctx.${field}`),
         field,
         ignore_missing: true,
       },
