@@ -21,6 +21,7 @@ import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/con
 import { EsqlDocumentBase } from '../doc_base';
 import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
+import type { FunctionCallingMode } from '../../../../common/chat_complete';
 
 export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   chatCompleteApi,
@@ -29,6 +30,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   messages,
   toolOptions: { tools, toolChoice },
   docBase,
+  functionCalling,
   logger,
 }: {
   connectorId: string;
@@ -37,6 +39,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   toolOptions: ToolOptions;
   chatCompleteApi: InferenceClient['chatComplete'];
   docBase: EsqlDocumentBase;
+  functionCalling?: FunctionCallingMode;
   logger: Pick<Logger, 'debug'>;
 }) => {
   return function askLlmToRespond({
@@ -65,6 +68,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
       }),
       chatCompleteApi({
         connectorId,
+        functionCalling,
         system: `${systemMessage}
 
           # Current task

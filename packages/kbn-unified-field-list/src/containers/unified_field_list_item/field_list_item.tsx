@@ -14,6 +14,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { Filter } from '@kbn/es-query';
 import type { SearchMode } from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
 import {
@@ -200,6 +201,10 @@ export interface UnifiedFieldListItemProps {
    * Item size
    */
   size: FieldItemButtonProps<DataViewField>['size'];
+  /**
+   * Custom filters to apply for the field list, ex: namespace custom filter
+   */
+  additionalFilters?: Filter[];
 }
 
 function UnifiedFieldListItemComponent({
@@ -223,6 +228,7 @@ function UnifiedFieldListItemComponent({
   groupIndex,
   itemIndex,
   size,
+  additionalFilters,
 }: UnifiedFieldListItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -288,6 +294,7 @@ function UnifiedFieldListItemComponent({
           multiFields={multiFields}
           dataView={dataView}
           onAddFilter={addFilterAndClosePopover}
+          additionalFilters={additionalFilters}
         />
 
         {searchMode === 'documents' && multiFields && (
