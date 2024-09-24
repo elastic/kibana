@@ -67,6 +67,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
       ConfigKey.NAME,
       ConfigKey.TAGS,
       ConfigKey.PROJECT_ID,
+      ConfigKey.ALERT_CONFIG,
     ],
   });
 
