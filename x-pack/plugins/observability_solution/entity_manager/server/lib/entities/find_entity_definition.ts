@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { compact } from 'lodash';
+import { compact, forEach, reduce } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
+import { NodesIngestTotal } from '@elastic/elasticsearch/lib/api/types';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import {
   generateHistoryTransformId,
@@ -19,7 +20,7 @@ import {
   generateLatestIndexTemplateId,
 } from './helpers/generate_component_id';
 import { BUILT_IN_ID_PREFIX } from './built_in';
-import { EntityDefinitionWithState } from './types';
+import { EntityDefinitionState, EntityDefinitionWithState } from './types';
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 
 export async function findEntityDefinitions({
@@ -29,6 +30,7 @@ export async function findEntityDefinitions({
   id,
   page = 1,
   perPage = 10,
+  includeState = false,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -36,7 +38,8 @@ export async function findEntityDefinitions({
   id?: string;
   page?: number;
   perPage?: number;
-}): Promise<EntityDefinitionWithState[]> {
+  includeState?: boolean;
+}): Promise<EntityDefinition[] | EntityDefinitionWithState[]> {
   const filter = compact([
     typeof builtIn === 'boolean'
       ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${BUILT_IN_ID_PREFIX}*)`
@@ -50,6 +53,10 @@ export async function findEntityDefinitions({
     perPage,
   });
 
+  if (!includeState) {
+    return response.saved_objects.map(({ attributes }) => attributes);
+  }
+
   return Promise.all(
     response.saved_objects.map(async ({ attributes }) => {
       const state = await getEntityDefinitionState(esClient, attributes);
@@ -62,15 +69,18 @@ export async function findEntityDefinitionById({
   id,
   esClient,
   soClient,
+  includeState = false,
 }: {
   id: string;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  includeState?: boolean;
 }) {
   const [definition] = await findEntityDefinitions({
     esClient,
     soClient,
     id,
+    includeState,
     perPage: 1,
   });
 
@@ -80,43 +90,126 @@ export async function findEntityDefinitionById({
 async function getEntityDefinitionState(
   esClient: ElasticsearchClient,
   definition: EntityDefinition
-) {
-  const historyIngestPipelineId = generateHistoryIngestPipelineId(definition);
-  const latestIngestPipelineId = generateLatestIngestPipelineId(definition);
+): Promise<EntityDefinitionState> {
+  const [ingestPipelines, transforms, indexTemplates] = await Promise.all([
+    getIngestPipelineState({ definition, esClient }),
+    getTransformState({ definition, esClient }),
+    getIndexTemplatesState({ definition, esClient }),
+  ]);
+
+  const installed =
+    ingestPipelines.every((pipeline) => pipeline.installed) &&
+    transforms.every((transform) => transform.installed) &&
+    indexTemplates.every((template) => template.installed);
+  const running = transforms.every((transform) => transform.running);
+
+  return {
+    installed,
+    running,
+    components: { transforms, ingestPipelines, indexTemplates },
+  };
+}
+
+async function getTransformState({
+  definition,
+  esClient,
+}: {
+  definition: EntityDefinition;
+  esClient: ElasticsearchClient;
+}) {
   const transformIds = [
     generateHistoryTransformId(definition),
     generateLatestTransformId(definition),
     ...(isBackfillEnabled(definition) ? [generateHistoryBackfillTransformId(definition)] : []),
   ];
-  const [ingestPipelines, indexTemplatesInstalled, transforms] = await Promise.all([
-    esClient.ingest.getPipeline(
-      {
-        id: `${historyIngestPipelineId},${latestIngestPipelineId}`,
-      },
-      { ignore: [404] }
-    ),
-    esClient.indices.existsIndexTemplate({
-      name: `${
-        (generateLatestIndexTemplateId(definition), generateHistoryIndexTemplateId(definition))
-      }`,
-    }),
-    esClient.transform.getTransformStats({
-      transform_id: transformIds,
+
+  const transformStats = await Promise.all(
+    transformIds.map((id) => esClient.transform.getTransformStats({ transform_id: id }))
+  ).then((results) => results.map(({ transforms }) => transforms).flat());
+
+  return transformIds.map((id) => {
+    const stats = transformStats.find((transform) => transform.id === id);
+    if (!stats) {
+      return { id, installed: false, running: false };
+    }
+
+    return {
+      id,
+      installed: true,
+      running: stats.state === 'started' || stats.state === 'indexing',
+      stats,
+    };
+  });
+}
+
+async function getIngestPipelineState({
+  definition,
+  esClient,
+}: {
+  definition: EntityDefinition;
+  esClient: ElasticsearchClient;
+}) {
+  const ingestPipelineIds = [
+    generateHistoryIngestPipelineId(definition),
+    generateLatestIngestPipelineId(definition),
+  ];
+  const [ingestPipelines, ingestPipelinesStats] = await Promise.all([
+    esClient.ingest.getPipeline({ id: ingestPipelineIds.join(',') }, { ignore: [404] }),
+    esClient.nodes.stats({
+      metric: 'ingest',
+      filter_path: ingestPipelineIds.map((id) => `nodes.*.ingest.pipelines.${id}`),
     }),
   ]);
 
-  const ingestPipelinesInstalled = !!(
-    ingestPipelines[historyIngestPipelineId] && ingestPipelines[latestIngestPipelineId]
+  const ingestStatsByPipeline = reduce(
+    ingestPipelinesStats.nodes,
+    (pipelines, { ingest }) => {
+      forEach(ingest?.pipelines, (value: NodesIngestTotal, key: string) => {
+        if (!pipelines[key]) {
+          pipelines[key] = { count: 0, failed: 0 };
+        }
+        pipelines[key].count += value.count ?? 0;
+        pipelines[key].failed += value.failed ?? 0;
+      });
+      return pipelines;
+    },
+    {} as Record<string, { count: number; failed: number }>
   );
-  const transformsInstalled = transforms.count === transformIds.length;
-  const transformsRunning =
-    transformsInstalled &&
-    transforms.transforms.every(
-      (transform) => transform.state === 'started' || transform.state === 'indexing'
-    );
 
-  return {
-    installed: ingestPipelinesInstalled && transformsInstalled && indexTemplatesInstalled,
-    running: transformsRunning,
-  };
+  return ingestPipelineIds.map((id) => ({
+    id,
+    installed: !!ingestPipelines[id],
+    stats: ingestStatsByPipeline[id],
+  }));
+}
+
+async function getIndexTemplatesState({
+  definition,
+  esClient,
+}: {
+  definition: EntityDefinition;
+  esClient: ElasticsearchClient;
+}) {
+  const indexTemplatesIds = [
+    generateLatestIndexTemplateId(definition),
+    generateHistoryIndexTemplateId(definition),
+  ];
+  const templates = await Promise.all(
+    indexTemplatesIds.map((id) =>
+      esClient.indices
+        .getIndexTemplate({ name: id }, { ignore: [404] })
+        .then(({ index_templates: indexTemplates }) => indexTemplates?.[0])
+    )
+  ).then(compact);
+  return indexTemplatesIds.map((id) => {
+    const template = templates.find(({ name }) => name === id);
+    if (!template) {
+      return { id, installed: false };
+    }
+    return {
+      id,
+      installed: true,
+      stats: template.index_template,
+    };
+  });
 }
