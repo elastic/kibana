@@ -58,7 +58,18 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
   );
 
   const onFiltersUpdated = useCallback(
-    (filters: Filter[]) => updateQuery({ filters }),
+    (filters: Filter[]) => {
+      const updatedFilters = filters.map((filter) => {
+        const { $state, meta, ...rest } = filter;
+        return {
+          $state,
+          meta,
+          query: filter?.query ? { ...filter.query } : { ...rest },
+        };
+      });
+
+      updateQuery({ filters: updatedFilters });
+    },
     [updateQuery]
   );
 
