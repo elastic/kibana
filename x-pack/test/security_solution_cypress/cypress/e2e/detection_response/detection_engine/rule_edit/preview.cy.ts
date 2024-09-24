@@ -33,8 +33,7 @@ describe(
   'Detection rules, preview',
   {
     // Currently FF are not supported on MKI environments, so this test should be skipped from MKI environments.
-    // Once `manualRuleRunEnabled` FF is removed, we can remove `@skipInServerlessMKI` as well
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
     env: {
       kbnServerArgs: [
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['loggingRequestsEnabled'])}`,

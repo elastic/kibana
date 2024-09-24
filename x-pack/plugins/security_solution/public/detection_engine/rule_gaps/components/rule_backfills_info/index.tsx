@@ -25,7 +25,6 @@ import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { useUserData } from '../../../../detections/components/user_info';
 import { getBackfillRowsFromResponse } from './utils';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -143,26 +142,16 @@ const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
 };
 
 export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => {
-  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [{ canUserCRUD }] = useUserData();
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const { timelines } = useKibana().services;
-  const { data, isLoading, isError, refetch, dataUpdatedAt } = useFindBackfillsForRules(
-    {
-      ruleIds: [ruleId],
-      page: pageIndex + 1,
-      perPage: pageSize,
-    },
-    {
-      enabled: isManualRuleRunEnabled,
-    }
-  );
-
-  if (!isManualRuleRunEnabled) {
-    return null;
-  }
+  const { data, isLoading, isError, refetch, dataUpdatedAt } = useFindBackfillsForRules({
+    ruleIds: [ruleId],
+    page: pageIndex + 1,
+    perPage: pageSize,
+  });
 
   const backfills: BackfillRow[] = getBackfillRowsFromResponse(data?.data ?? []);
 
