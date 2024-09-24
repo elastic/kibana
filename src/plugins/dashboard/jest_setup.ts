@@ -24,7 +24,7 @@ import {
 // Start the kibana services with stubs
 setStubKibanaServices();
 
-// Mock the dashboad services
+// Mock the dashboard services
 jest.mock('./public/services/dashboard_content_management_service', () => {
   return {
     dashboardContentManagementCache: mockDashboardContentManagementCache,
