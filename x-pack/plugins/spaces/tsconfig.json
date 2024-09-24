@@ -37,7 +37,8 @@
     "@kbn/utility-types-jest",
     "@kbn/security-plugin-types-public",
     "@kbn/cloud-plugin",
-    "@kbn/core-analytics-browser"
+    "@kbn/core-analytics-browser",
+    "@kbn/core-http-router-server-mocks"
   ],
   "exclude": [
     "target/**/*",
