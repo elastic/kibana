@@ -104,7 +104,7 @@ export async function cloneRule<Params extends RuleParams = never>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.CREATE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: ruleName },
         error,
       })
     );

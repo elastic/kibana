@@ -384,8 +384,8 @@ describe('scheduleBackfill()', () => {
         outcome: 'success',
         type: ['access'],
       },
-      kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'my rule name' } },
-      message: 'User has scheduled backfill for rule [id=1] [name:my rule name]',
+      kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeRuleName' } },
+      message: 'User has scheduled backfill for rule [id=1] [name=fakeRuleName]',
     });
     expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
       event: {
@@ -394,8 +394,8 @@ describe('scheduleBackfill()', () => {
         outcome: 'success',
         type: ['access'],
       },
-      kibana: { saved_object: { id: '2', type: RULE_SAVED_OBJECT_TYPE, name: 'my rule name' } },
-      message: 'User has scheduled backfill for rule [id=2] [name:my rule name]',
+      kibana: { saved_object: { id: '2', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeRuleName' } },
+      message: 'User has scheduled backfill for rule [id=2] [name=fakeRuleName]',
     });
 
     expect(backfillClient.bulkQueue).toHaveBeenCalledWith({
@@ -580,6 +580,7 @@ describe('scheduleBackfill()', () => {
       await expect(
         rulesClient.scheduleBackfill(mockData)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized"`);
+
       expect(auditLogger?.log).toHaveBeenCalledWith({
         error: { code: 'Error', message: 'Unauthorized' },
         event: {

@@ -41,7 +41,7 @@ describe('#ruleAuditEvent', () => {
             "type": "alert",
           },
         },
-        "message": "User is creating rule [id=ALERT_ID] [name:fake_name]",
+        "message": "User is creating rule [id=ALERT_ID] [name=fake_name]",
       }
     `);
   });
@@ -72,7 +72,7 @@ describe('#ruleAuditEvent', () => {
             "type": "alert",
           },
         },
-        "message": "User has created rule [id=ALERT_ID] [name:fake_name]",
+        "message": "User has created rule [id=ALERT_ID] [name=fake_name]",
       }
     `);
   });
@@ -107,7 +107,7 @@ describe('#ruleAuditEvent', () => {
             "type": "alert",
           },
         },
-        "message": "Failed attempt to create rule [id=ALERT_ID] [name:fake_name]",
+        "message": "Failed attempt to create rule [id=ALERT_ID] [name=fake_name]",
       }
     `);
   });
@@ -156,7 +156,7 @@ describe('#adHocRunAuditEvent', () => {
         savedObject: {
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
           id: 'AD_HOC_RUN_ID',
-          name: 'fake_name',
+          name: `backfill for rule "fake_name"`,
         },
       })
     ).toMatchInlineSnapshot(`
@@ -175,11 +175,11 @@ describe('#adHocRunAuditEvent', () => {
         "kibana": Object {
           "saved_object": Object {
             "id": "AD_HOC_RUN_ID",
-            "name": "fake_name",
+            "name": "backfill for rule \\"fake_name\\"",
             "type": "ad_hoc_run_params",
           },
         },
-        "message": "User is getting ad hoc run for ad_hoc_run_params [id=AD_HOC_RUN_ID] [name:fake_name]",
+        "message": "User is getting ad hoc run for ad_hoc_run_params [id=AD_HOC_RUN_ID] backfill for rule \\"fake_name\\"",
       }
     `);
   });
@@ -188,7 +188,11 @@ describe('#adHocRunAuditEvent', () => {
     expect(
       adHocRunAuditEvent({
         action: AdHocRunAuditAction.FIND,
-        savedObject: { type: AD_HOC_RUN_SAVED_OBJECT_TYPE, id: 'AD_HOC_RUN_ID', name: 'fake_name' },
+        savedObject: {
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          id: 'AD_HOC_RUN_ID',
+          name: `backfill for rule "fake_name"`,
+        },
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -206,11 +210,11 @@ describe('#adHocRunAuditEvent', () => {
         "kibana": Object {
           "saved_object": Object {
             "id": "AD_HOC_RUN_ID",
-            "name": "fake_name",
+            "name": "backfill for rule \\"fake_name\\"",
             "type": "ad_hoc_run_params",
           },
         },
-        "message": "User has found ad hoc run for ad_hoc_run_params [id=AD_HOC_RUN_ID] [name:fake_name]",
+        "message": "User has found ad hoc run for ad_hoc_run_params [id=AD_HOC_RUN_ID] backfill for rule \\"fake_name\\"",
       }
     `);
   });
@@ -219,7 +223,11 @@ describe('#adHocRunAuditEvent', () => {
     expect(
       adHocRunAuditEvent({
         action: AdHocRunAuditAction.DELETE,
-        savedObject: { type: AD_HOC_RUN_SAVED_OBJECT_TYPE, id: 'AD_HOC_RUN_ID', name: 'fake_name' },
+        savedObject: {
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          id: 'AD_HOC_RUN_ID',
+          name: `backfill for rule "fake_name"`,
+        },
         error: new Error('ERROR_MESSAGE'),
       })
     ).toMatchInlineSnapshot(`
@@ -241,11 +249,11 @@ describe('#adHocRunAuditEvent', () => {
         "kibana": Object {
           "saved_object": Object {
             "id": "AD_HOC_RUN_ID",
-            "name": "fake_name",
+            "name": "backfill for rule \\"fake_name\\"",
             "type": "ad_hoc_run_params",
           },
         },
-        "message": "Failed attempt to delete ad hoc run for ad_hoc_run_params [id=AD_HOC_RUN_ID] [name:fake_name]",
+        "message": "Failed attempt to delete ad hoc run for ad_hoc_run_params [id=AD_HOC_RUN_ID] backfill for rule \\"fake_name\\"",
       }
     `);
   });

@@ -162,7 +162,7 @@ export function ruleAuditEvent({
   error,
 }: RuleAuditEventParams): AuditEvent {
   const doc = savedObject
-    ? [`rule [id=${savedObject.id}]`, savedObject.name && `[name:${savedObject.name}]`]
+    ? [`rule [id=${savedObject.id}]`, savedObject.name && `[name=${savedObject.name}]`]
         .filter(Boolean)
         .join(' ')
     : 'a rule';
