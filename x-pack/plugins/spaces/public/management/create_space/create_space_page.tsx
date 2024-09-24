@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../common';
+import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import type { EventTracker } from '../../analytics';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
@@ -202,16 +203,17 @@ export class CreateSpacePage extends Component<Props, State> {
           </>
         )}
 
-        {this.state.showVisibleFeaturesPicker && (
-          <>
-            <EuiSpacer />
-            <EnabledFeatures
-              space={this.state.space}
-              features={this.state.features}
-              onChange={this.onSpaceChange}
-            />
-          </>
-        )}
+        {this.state.showVisibleFeaturesPicker &&
+          this.state.space.solution === SOLUTION_VIEW_CLASSIC && (
+            <>
+              <EuiSpacer />
+              <EnabledFeatures
+                space={this.state.space}
+                features={this.state.features}
+                onChange={this.onSpaceChange}
+              />
+            </>
+          )}
 
         <EuiSpacer />
 
