@@ -291,21 +291,16 @@ export class TaskRunner<
       state: { previousStartedAt },
     } = this.taskInstance;
 
-    const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
+    const { queryDelaySettings, flappingSettings } =
+      await this.context.rulesSettingsService.getSettings(fakeRequest, spaceId);
     const ruleRunMetricsStore = new RuleRunMetricsStore();
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${rule.name}'`;
-    const queryDelay = await withAlertingSpan('alerting:get-query-delay-settings', () =>
-      rulesSettingsClient.queryDelay().get()
-    );
-    const flappingSettings = await withAlertingSpan('alerting:get-flapping-settings', () =>
-      rulesSettingsClient.flapping().get()
-    );
 
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
       flappingSettings,
       namespace: this.context.spaceIdToNamespace(spaceId),
-      queryDelaySec: queryDelay.delay,
+      queryDelaySec: queryDelaySettings.delay,
       ruleId,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
@@ -678,10 +673,7 @@ export class TaskRunner<
         await withAlertingSpan('alerting:run', () => this.runRule(validatedRuleData))
       );
 
-      // fetch the rule again to ensure we return the correct schedule as it may have
-      // changed during the task execution
-      const data = await getDecryptedRule(this.context, ruleId, spaceId);
-      schedule = asOk(data.rawRule.schedule);
+      schedule = asOk(validatedRuleData.rule.schedule);
     } catch (err) {
       stateWithMetrics = asErr(err);
       schedule = asErr(err);

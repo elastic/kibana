@@ -126,10 +126,24 @@ export const LOGS_SAMPLE_ERROR = {
       defaultMessage: 'Failed to read the logs sample file',
     }
   ),
+  CAN_NOT_READ_WITH_REASON: (reason: string) =>
+    i18n.translate(
+      'xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotReadWithReason',
+      {
+        values: { reason },
+        defaultMessage: 'An error occurred when reading logs sample: {reason}',
+      }
+    ),
   CAN_NOT_PARSE: i18n.translate(
     'xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotParse',
     {
       defaultMessage: 'Cannot parse the logs sample file as either a JSON or NDJSON file',
+    }
+  ),
+  TOO_LARGE_TO_PARSE: i18n.translate(
+    'xpack.integrationAssistant.step.dataStream.logsSample.errorTooLargeToParse',
+    {
+      defaultMessage: 'This logs sample file is too large to parse',
     }
   ),
   NOT_ARRAY: i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.errorNotArray', {
@@ -149,6 +163,12 @@ export const LOGS_SAMPLE_ERROR = {
 export const ANALYZING = i18n.translate('xpack.integrationAssistant.step.dataStream.analyzing', {
   defaultMessage: 'Analyzing',
 });
+export const PROGRESS_ANALYZE_LOGS = i18n.translate(
+  'xpack.integrationAssistant.step.dataStream.progress.analyzeLogs',
+  {
+    defaultMessage: 'Analyzing Sample logs',
+  }
+);
 export const PROGRESS_ECS_MAPPING = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.progress.ecsMapping',
   {

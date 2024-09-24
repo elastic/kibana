@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { legacyExperimentalFieldMap, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 import {
@@ -30,12 +31,12 @@ import { StatusCheckFilters } from '../../common/runtime_types';
 import { SyntheticsEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
 import {
+  AlertOverviewStatus,
   SyntheticsCommonState,
   SyntheticsCommonStateCodec,
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
-import { AlertOverviewStatus } from './status_rule/status_rule_executor';
 import type { MonitorSummaryStatusRule } from './status_rule/types';
 
 export const updateState = (
@@ -298,6 +299,7 @@ export const setRecoveredAlertsContext = ({
       linkMessage,
       ...(isUp ? { status: 'up' } : {}),
       ...(recoveryReason ? { [RECOVERY_REASON]: recoveryReason } : {}),
+      ...(recoveryReason ? { [ALERT_REASON]: recoveryReason } : {}),
       ...(basePath && spaceId && alertUuid
         ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
         : {}),
@@ -357,8 +359,9 @@ export const syntheticsRuleTypeFieldMap = {
   ...legacyExperimentalFieldMap,
 };
 
-export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts = {
+export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityUptimeAlert> = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
   mappings: { fieldMap: syntheticsRuleTypeFieldMap },
   useLegacyAlerts: true,
+  shouldWrite: true,
 };

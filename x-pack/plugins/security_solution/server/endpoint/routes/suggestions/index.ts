@@ -10,7 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import type { RequestHandler, Logger } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
 import {
   type EndpointSuggestionsBody,

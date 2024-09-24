@@ -28,14 +28,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Managed Content', () => {
     before(async () => {
-      esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-      kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/managed_content');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/managed_content');
     });
 
     after(async () => {
-      esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/managed_content');
-      kibanaServer.importExport.savedObjects.clean({ types: ['dashboard'] }); // we do create a new dashboard in this test
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/managed_content'
+      );
+      await kibanaServer.importExport.savedObjects.clean({ types: ['dashboard'] }); // we do create a new dashboard in this test
     });
 
     describe('preventing the user from overwriting managed content', () => {
@@ -110,7 +112,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('maps', async () => {
         await PageObjects.common.navigateToActualUrl(
           'maps',
-          'map/managed-d7ab-46eb-a807-8fed28ed8566'
+          'map/managed-d7ab-46eb-a807-8fed28ed8566',
+          { ensureCurrentUrl: false }
         );
         await PageObjects.maps.waitForLayerAddPanelClosed();
 
@@ -118,7 +121,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.common.navigateToActualUrl(
           'maps',
-          'map/unmanaged-d7ab-46eb-a807-8fed28ed8566'
+          'map/unmanaged-d7ab-46eb-a807-8fed28ed8566',
+          { ensureCurrentUrl: false }
         );
         await PageObjects.maps.waitForLayerAddPanelClosed();
 

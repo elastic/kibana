@@ -11,7 +11,7 @@ const ReadOnlyContext = createContext<{ isReadOnly: boolean; setIsReadOnly: (v: 
   { isReadOnly: false, setIsReadOnly: () => {} }
 );
 
-export const ReadOnlyContextProvider: React.FC = ({ children }) => {
+export const ReadOnlyContextProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const [isReadOnly, setIsReadOnly] = useState(false);
   return (
     <ReadOnlyContext.Provider

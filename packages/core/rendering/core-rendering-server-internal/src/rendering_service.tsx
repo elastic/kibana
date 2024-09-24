@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -50,6 +51,7 @@ type RenderOptions =
   | (RenderingPrebootDeps & {
       status?: never;
       elasticsearch?: never;
+      featureFlags?: never;
       customBranding?: never;
       userSettings?: never;
     });
@@ -84,6 +86,7 @@ export class RenderingService {
 
   public async setup({
     elasticsearch,
+    featureFlags,
     http,
     status,
     uiPlugins,
@@ -105,6 +108,7 @@ export class RenderingService {
     return {
       render: this.render.bind(this, {
         elasticsearch,
+        featureFlags,
         http,
         uiPlugins,
         status,
@@ -124,8 +128,16 @@ export class RenderingService {
     },
     { isAnonymousPage = false, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
-    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings, i18n } =
-      renderOptions;
+    const {
+      elasticsearch,
+      featureFlags,
+      http,
+      uiPlugins,
+      status,
+      customBranding,
+      userSettings,
+      i18n,
+    } = renderOptions;
 
     const env = {
       mode: this.coreContext.env.mode,
@@ -250,6 +262,9 @@ export class RenderingService {
         assetsHrefBase: staticAssetsHrefBase,
         logging: loggingConfig,
         env,
+        featureFlags: {
+          overrides: featureFlags?.getOverrides() || {},
+        },
         clusterInfo,
         apmConfig,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,

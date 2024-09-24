@@ -66,7 +66,7 @@ function useSortableProperties<T>(
 
   return {
     updateSortableProperties: useCallback(
-      (property) => {
+      (property: any) => {
         sortableProperties.sortOn(property);
         callback(omit(sortableProperties.getSortedProperty(), 'getValue'));
       },

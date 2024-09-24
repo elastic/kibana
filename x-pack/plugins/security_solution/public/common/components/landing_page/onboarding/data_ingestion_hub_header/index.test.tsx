@@ -5,21 +5,48 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { DataIngestionHubHeader } from '.';
 import darkRocket from '../images/dark_rocket.png';
 import { useCurrentUser } from '../../../../lib/kibana';
+import { useHeaderCards } from './cards/header_cards';
+import { VideoCard } from './cards/video_card/video_card';
 
-jest.mock('../../../../lib/kibana', () => ({
-  useCurrentUser: jest.fn(),
-  useEuiTheme: jest.fn(() => ({ euiTheme: { colorTheme: 'DARK' } })),
+const mockSpace = {
+  id: 'space',
+  name: 'space',
+  disabledFeatures: [],
+};
+
+jest.mock('../../../../lib/kibana', () => {
+  const original = jest.requireActual('../../../../lib/kibana');
+
+  return {
+    useCurrentUser: jest.fn(),
+    useEuiTheme: jest.fn(() => ({ colorMode: 'DARK' })),
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        spaces: {
+          getActiveSpace: jest.fn().mockResolvedValue(mockSpace),
+        },
+      },
+    }),
+  };
+});
+
+jest.mock('./cards/header_cards', () => ({
+  useHeaderCards: jest.fn(),
 }));
 
 const mockUseCurrentUser = useCurrentUser as jest.Mock;
+const mockUseHeaderCards = useHeaderCards as jest.Mock;
 
 describe('WelcomeHeaderComponent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseHeaderCards.mockReturnValue([]);
   });
 
   it('should render fullName when fullName is provided', () => {
@@ -73,5 +100,23 @@ describe('WelcomeHeaderComponent', () => {
     const { queryByTestId } = render(<DataIngestionHubHeader />);
     const image = queryByTestId('data-ingestion-hub-header-image');
     expect(image).toHaveStyle({ backgroundImage: `url(${darkRocket})` });
+  });
+
+  it('should display the modal when the "video" card is clicked', () => {
+    mockUseHeaderCards.mockReturnValue([
+      <VideoCard
+        spaceId="mockSpaceId"
+        icon={'mockIcon.png'}
+        title={'Video'}
+        description={'Video description'}
+      />,
+    ]);
+    const { getByText, queryByTestId } = render(<DataIngestionHubHeader />);
+
+    const cardElement = getByText('Watch video');
+    fireEvent.click(cardElement);
+
+    const modalElement = queryByTestId('data-ingestion-hub-video-modal');
+    expect(modalElement).toBeInTheDocument();
   });
 });

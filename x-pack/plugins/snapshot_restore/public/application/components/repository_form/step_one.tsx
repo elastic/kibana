@@ -242,7 +242,6 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
           />
         </EuiText>
         <EuiFormRow
-          hasEmptyLabelSpace
           describedByIds={['repositoryTypeDescription']}
           fullWidth
           isInvalid={Boolean(hasValidationErrors && validation.errors.type)}
@@ -290,7 +289,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
       }
       fullWidth
     >
-      <EuiFormRow hasEmptyLabelSpace={true} fullWidth>
+      <EuiFormRow fullWidth>
         <EuiSwitch
           label={
             <FormattedMessage

@@ -31,7 +31,12 @@ export const WelcomeSetup: React.FC<Props> = ({
             text-align: center;
           `}
         >
-          <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
+            direction="column"
+            data-test-subj="welcome-setup"
+          >
             <EuiFlexItem grow={false}>
               <AssistantAnimatedIcon />
             </EuiFlexItem>

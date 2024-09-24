@@ -32,7 +32,8 @@ export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) =>
   return useRequest<GetAgentPoliciesResponse>({
     path: agentPolicyRouteService.getListPath(),
     method: 'get',
-    query,
+    // Make noAgentCount the default as it have a significant performance impact
+    query: { ...(query ?? {}), noAgentCount: query?.noAgentCount === false ? false : true },
     version: API_VERSIONS.public.v1,
   });
 };
@@ -47,14 +48,18 @@ export const useGetAgentPoliciesQuery = (
       sendRequestForRq<GetAgentPoliciesResponse>({
         path: agentPolicyRouteService.getListPath(),
         method: 'get',
-        query,
+        // Make noAgentCount the default as it have a significant performance impact
+        query: { ...(query ?? {}), noAgentCount: query?.noAgentCount === false ? false : true },
         version: API_VERSIONS.public.v1,
       }),
     enabled: options?.enabled,
   });
 };
 
-export const useBulkGetAgentPoliciesQuery = (ids: string[], options?: { full?: boolean }) => {
+export const useBulkGetAgentPoliciesQuery = (
+  ids: string[],
+  options?: { full?: boolean; ignoreMissing?: boolean }
+) => {
   return useQuery<BulkGetAgentPoliciesResponse, RequestError>(['agentPolicies', ids], () =>
     sendRequestForRq<BulkGetAgentPoliciesResponse>({
       path: agentPolicyRouteService.getBulkGetPath(),
@@ -65,11 +70,14 @@ export const useBulkGetAgentPoliciesQuery = (ids: string[], options?: { full?: b
   );
 };
 
-export const sendBulkGetAgentPolicies = (ids: string[], options?: { full?: boolean }) => {
+export const sendBulkGetAgentPolicies = (
+  ids: string[],
+  options?: { full?: boolean; ignoreMissing?: boolean }
+) => {
   return sendRequest<BulkGetAgentPoliciesResponse>({
     path: agentPolicyRouteService.getBulkGetPath(),
     method: 'post',
-    body: JSON.stringify({ ids, full: options?.full }),
+    body: JSON.stringify({ ids, full: options?.full, ignoreMissing: options?.ignoreMissing }),
     version: API_VERSIONS.public.v1,
   });
 };

@@ -22,8 +22,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const INDEX_PATTERN = `index_pattern_${Math.random()}`;
 
   describe('Index Templates', function () {
-    // see details: https://github.com/elastic/kibana/issues/189191
-    this.tags(['failsOnMKI']);
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
     });
@@ -103,7 +101,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
 
         await retry.try(async () => {
-          expect(await testSubjects.getVisibleText('stepTitle')).to.contain(TEST_TEMPLATE_NAME);
+          expect(await testSubjects.getVisibleText('title')).to.contain(TEST_TEMPLATE_NAME);
         });
       });
     });

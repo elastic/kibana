@@ -7,7 +7,7 @@
 /* eslint-disable max-classes-per-file */
 
 import {
-  ElasticsearchClientMock,
+  ScopedClusterClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
@@ -30,12 +30,12 @@ import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 
 describe('TransformManager', () => {
-  let esClientMock: ElasticsearchClientMock;
+  let scopedClusterClientMock: ScopedClusterClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
   const spaceId = 'default';
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
     loggerMock = loggingSystemMock.createLogger();
   });
 
@@ -48,7 +48,7 @@ describe('TransformManager', () => {
         };
         const service = new DefaultTransformManager(
           generators,
-          esClientMock,
+          scopedClusterClientMock,
           loggerMock,
           spaceId,
           dataViewsService
@@ -66,7 +66,7 @@ describe('TransformManager', () => {
         };
         const transformManager = new DefaultTransformManager(
           generators,
-          esClientMock,
+          scopedClusterClientMock,
           loggerMock,
           spaceId,
           dataViewsService
@@ -87,7 +87,7 @@ describe('TransformManager', () => {
       };
       const transformManager = new DefaultTransformManager(
         generators,
-        esClientMock,
+        scopedClusterClientMock,
         loggerMock,
         spaceId,
         dataViewsService
@@ -96,7 +96,9 @@ describe('TransformManager', () => {
 
       const transformId = await transformManager.install(slo);
 
-      expect(esClientMock.transform.putTransform).toHaveBeenCalledTimes(1);
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
+      ).toHaveBeenCalledTimes(1);
       expect(transformId).toBe(`slo-${slo.id}-${slo.revision}`);
     });
   });
@@ -109,7 +111,7 @@ describe('TransformManager', () => {
       };
       const transformManager = new DefaultTransformManager(
         generators,
-        esClientMock,
+        scopedClusterClientMock,
         loggerMock,
         spaceId,
         dataViewsService
@@ -117,7 +119,9 @@ describe('TransformManager', () => {
 
       await transformManager.preview('slo-transform-id');
 
-      expect(esClientMock.transform.previewTransform).toHaveBeenCalledTimes(1);
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.previewTransform
+      ).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -129,7 +133,7 @@ describe('TransformManager', () => {
       };
       const transformManager = new DefaultTransformManager(
         generators,
-        esClientMock,
+        scopedClusterClientMock,
         loggerMock,
         spaceId,
         dataViewsService
@@ -137,7 +141,9 @@ describe('TransformManager', () => {
 
       await transformManager.start('slo-transform-id');
 
-      expect(esClientMock.transform.startTransform).toHaveBeenCalledTimes(1);
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.startTransform
+      ).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -149,7 +155,7 @@ describe('TransformManager', () => {
       };
       const transformManager = new DefaultTransformManager(
         generators,
-        esClientMock,
+        scopedClusterClientMock,
         loggerMock,
         spaceId,
         dataViewsService
@@ -157,7 +163,9 @@ describe('TransformManager', () => {
 
       await transformManager.stop('slo-transform-id');
 
-      expect(esClientMock.transform.stopTransform).toHaveBeenCalledTimes(1);
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.stopTransform
+      ).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -169,7 +177,7 @@ describe('TransformManager', () => {
       };
       const transformManager = new DefaultTransformManager(
         generators,
-        esClientMock,
+        scopedClusterClientMock,
         loggerMock,
         spaceId,
         dataViewsService
@@ -177,11 +185,13 @@ describe('TransformManager', () => {
 
       await transformManager.uninstall('slo-transform-id');
 
-      expect(esClientMock.transform.deleteTransform).toHaveBeenCalledTimes(1);
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
+      ).toHaveBeenCalledTimes(1);
     });
 
     it('retries on transient error', async () => {
-      esClientMock.transform.deleteTransform.mockRejectedValueOnce(
+      scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform.mockRejectedValueOnce(
         new EsErrors.ConnectionError('irrelevant')
       );
       // @ts-ignore defining only a subset of the possible SLI
@@ -190,7 +200,7 @@ describe('TransformManager', () => {
       };
       const transformManager = new DefaultTransformManager(
         generators,
-        esClientMock,
+        scopedClusterClientMock,
         loggerMock,
         spaceId,
         dataViewsService
@@ -198,7 +208,9 @@ describe('TransformManager', () => {
 
       await transformManager.uninstall('slo-transform-id');
 
-      expect(esClientMock.transform.deleteTransform).toHaveBeenCalledTimes(2);
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
+      ).toHaveBeenCalledTimes(2);
     });
   });
 });

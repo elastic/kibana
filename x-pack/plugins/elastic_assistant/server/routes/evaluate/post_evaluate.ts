@@ -33,7 +33,7 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
-import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
+import { DEFAULT_PLUGIN_NAME, isV2KnowledgeBaseEnabled, performChecks } from '../helpers';
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -90,6 +90,7 @@ export const postEvaluateRoute = (
         const logger = assistantContext.logger.get('evaluate');
         const telemetry = assistantContext.telemetry;
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+        const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
         // Perform license, authenticated user and evaluation FF checks
         const checkResponse = performChecks({
@@ -149,13 +150,17 @@ export const postEvaluateRoute = (
           // Default ELSER model
           const elserId = await getElser();
 
+          const inference = ctx.elasticAssistant.inference;
+
           // Data clients
           const anonymizationFieldsDataClient =
             (await assistantContext.getAIAssistantAnonymizationFieldsDataClient()) ?? undefined;
           const conversationsDataClient =
             (await assistantContext.getAIAssistantConversationsDataClient()) ?? undefined;
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient(
+              v2KnowledgeBaseEnabled
+            )) ?? undefined;
           const dataClients: AssistantDataClients = {
             anonymizationFieldsDataClient,
             conversationsDataClient,
@@ -183,7 +188,11 @@ export const postEvaluateRoute = (
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
 
-          const graphs: Array<{ name: string; graph: DefaultAssistantGraph }> = await Promise.all(
+          const graphs: Array<{
+            name: string;
+            graph: DefaultAssistantGraph;
+            llmType: string | undefined;
+          }> = await Promise.all(
             connectors.map(async (connector) => {
               const llmType = getLlmType(connector.actionTypeId);
               const isOpenAI = llmType === 'openai';
@@ -253,6 +262,8 @@ export const postEvaluateRoute = (
                 alertsIndexPattern,
                 // onNewReplacements,
                 replacements,
+                inference,
+                connectorId: connector.id,
                 size,
               };
 
@@ -286,31 +297,34 @@ export const postEvaluateRoute = (
 
               return {
                 name: `${runName} - ${connector.name}`,
+                llmType,
                 graph: getDefaultAssistantGraph({
                   agentRunnable,
-                  conversationId: undefined,
                   dataClients,
                   createLlmInstance,
                   logger,
                   tools,
-                  responseLanguage: 'English',
                   replacements: {},
-                  llmType,
-                  bedrockChatEnabled: true,
-                  isStreaming: false,
                 }),
               };
             })
           );
 
           // Run an evaluation for each graph so they show up separately (resulting in each dataset run grouped by connector)
-          await asyncForEach(graphs, async ({ name, graph }) => {
+          await asyncForEach(graphs, async ({ name, graph, llmType }) => {
             // Wrapper function for invoking the graph (to parse different input/output formats)
             const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
 
               const r = await graph.invoke(
-                { input: input.input }, // TODO: Update to use the correct input format per dataset type
+                {
+                  input: input.input,
+                  conversationId: undefined,
+                  responseLanguage: 'English',
+                  llmType,
+                  bedrockChatEnabled: true,
+                  isStreaming: false,
+                }, // TODO: Update to use the correct input format per dataset type
                 {
                   runName,
                   tags: ['evaluation'],
@@ -325,6 +339,8 @@ export const postEvaluateRoute = (
               evaluators: [], // Evals to be managed in LangSmith for now
               experimentPrefix: name,
               client: new Client({ apiKey: langSmithApiKey }),
+              // prevent rate limiting and unexpected multiple experiment runs
+              maxConcurrency: 5,
             });
             logger.debug(`runResp:\n ${JSON.stringify(evalOutput, null, 2)}`);
           });

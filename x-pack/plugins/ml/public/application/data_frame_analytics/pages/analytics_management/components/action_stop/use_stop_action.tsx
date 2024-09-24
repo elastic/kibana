@@ -12,14 +12,15 @@ import type {
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
 import { isDataFrameAnalyticsFailed, isDataFrameAnalyticsRunning } from '../analytics_list/common';
-import { stopAnalytics } from '../../services/analytics_service';
+import { useStopAnalytics } from '../../services/analytics_service';
 
 import { stopActionNameText, StopActionName } from './stop_action_name';
 
 export type StopAction = ReturnType<typeof useStopAction>;
 export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {
-  const [isModalVisible, setModalVisible] = useState(false);
+  const stopAnalytics = useStopAnalytics();
 
+  const [isModalVisible, setModalVisible] = useState(false);
   const [item, setItem] = useState<DataFrameAnalyticsListRow>();
 
   const closeModal = () => setModalVisible(false);

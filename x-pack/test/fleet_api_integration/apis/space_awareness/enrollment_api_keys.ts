@@ -12,43 +12,34 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import { cleanFleetIndices } from './helpers';
-import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
+  let TEST_SPACE_1: string;
 
-  describe('enrollment api keys', async function () {
+  describe('enrollment api keys', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
-
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.savedObjects.cleanStandardList({
-        space: TEST_SPACE_1,
-      });
-      await cleanFleetIndices(esClient);
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.savedObjects.cleanStandardList({
-        space: TEST_SPACE_1,
-      });
-      await cleanFleetIndices(esClient);
-    });
-
-    setupTestSpaces(providerContext);
 
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
     let defaultSpaceEnrollmentKey1: EnrollmentAPIKey;
     let spaceTest1EnrollmentKey1: EnrollmentAPIKey;
-    // Create agent policies it should create a enrollment key for every keys
+
     before(async () => {
+      TEST_SPACE_1 = spaces.getDefaultTestSpace();
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
+
+      // Create agent policies it should create a enrollment key for every keys
       await apiClient.postEnableSpaceAwareness();
 
       const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
@@ -64,6 +55,15 @@ export default function (providerContext: FtrProviderContext) {
       const defaultSpaceApiKeys = await apiClient.getEnrollmentApiKeys();
       defaultSpaceEnrollmentKey1 = defaultSpaceApiKeys.items[0];
       spaceTest1EnrollmentKey1 = space1ApiKeys.items[0];
+      await spaces.createTestSpace(TEST_SPACE_1);
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
     });
 
     describe('read APIs', () => {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
@@ -12,6 +13,7 @@ import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { ElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
+import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { HttpResources } from '@kbn/core-http-resources-server';
 import type { HttpServiceSetup } from '@kbn/core-http-server';
@@ -51,6 +53,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link ExecutionContextSetup} */
   executionContext: ExecutionContextSetup;
+  /** {@link FeatureFlagsSetup} */
+  featureFlags: FeatureFlagsSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup<RequestHandlerContext> & {
     /** {@link HttpResources} */

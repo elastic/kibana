@@ -5,11 +5,13 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
+import { Pipeline, ESProcessorItem } from '../../../common';
 import type { EcsMappingState } from '../../types';
 import { ECS_TYPES } from './constants';
+import { deepCopy } from '../../util/util';
 
 interface IngestPipeline {
   [key: string]: unknown;
@@ -135,6 +137,9 @@ function needsTypeConversion(sample: unknown, expected: string): boolean {
 }
 
 function generateProcessors(ecsMapping: object, samples: object, basePath: string = ''): object[] {
+  if (Object.keys(ecsMapping).length === 0) {
+    return [];
+  }
   const ecsTypes = ECS_TYPES;
   const valueFieldKeys = new Set(['target', 'confidence', 'date_formats', 'type']);
   const results: object[] = [];
@@ -161,9 +166,10 @@ function generateProcessors(ecsMapping: object, samples: object, basePath: strin
 }
 
 export function createPipeline(state: EcsMappingState): IngestPipeline {
-  const samples = JSON.parse(state.formattedSamples);
+  const samples = JSON.parse(state.combinedSamples);
 
-  const processors = generateProcessors(state.currentMapping, samples);
+  const processors = generateProcessors(state.finalMapping, samples);
+
   // Retrieve all source field names from convert processors to populate single remove processor:
   const fieldsToRemove = processors
     .map((p: any) => p.convert?.field)
@@ -173,7 +179,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
     ecs_version: state.ecsVersion,
     package_name: state.packageName,
     data_stream_name: state.dataStreamName,
-    log_format: state.samplesFormat,
+    log_format: state.samplesFormat.name,
     fields_to_remove: fieldsToRemove,
   };
   const templatesPath = joinPath(__dirname, '../../templates');
@@ -185,6 +191,25 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
   });
   const template = env.getTemplate('pipeline.yml.njk');
   const renderedTemplate = template.render(mappedValues);
-  const ingestPipeline = safeLoad(renderedTemplate) as IngestPipeline;
+  let ingestPipeline = load(renderedTemplate) as Pipeline;
+  if (state.additionalProcessors.length > 0) {
+    ingestPipeline = combineProcessors(ingestPipeline, state.additionalProcessors);
+  }
   return ingestPipeline;
+}
+
+export function combineProcessors(
+  initialPipeline: Pipeline,
+  processors: ESProcessorItem[]
+): Pipeline {
+  // Create a deep copy of the initialPipeline to avoid modifying the original input
+  const currentPipeline = deepCopy(initialPipeline);
+  const currentProcessors = currentPipeline.processors;
+  const combinedProcessors = [
+    ...currentProcessors.slice(0, 2),
+    ...processors,
+    ...currentProcessors.slice(2),
+  ];
+  currentPipeline.processors = combinedProcessors;
+  return currentPipeline;
 }

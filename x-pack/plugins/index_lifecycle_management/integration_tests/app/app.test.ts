@@ -7,6 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
+import * as hooks from '../../public/application/lib/use_is_read_only';
 import { getDefaultHotPhasePolicy } from '../edit_policy/constants';
 import { setupEnvironment } from '../helpers';
 
@@ -41,6 +42,7 @@ jest.mock('@elastic/eui', () => {
 describe('<App />', () => {
   let testBed: AppTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  jest.spyOn(hooks, 'useIsReadOnly').mockReturnValue(false);
 
   describe('new policy creation', () => {
     test('when there are no policies', async () => {
@@ -92,7 +94,7 @@ describe('<App />', () => {
       await actions.clickPolicyNameLink();
       component.update();
 
-      expect(testBed.find('policyTitle').text()).toBe(`${editPolicyTitle} ${SPECIAL_CHARS_NAME}`);
+      expect(testBed.find('policyFlyoutTitle').text()).toBe(SPECIAL_CHARS_NAME);
     });
 
     test('loading edit policy page url works', async () => {
@@ -166,9 +168,7 @@ describe('<App />', () => {
       await actions.clickPolicyNameLink();
       component.update();
 
-      expect(testBed.find('policyTitle').text()).toBe(
-        `${editPolicyTitle} ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
-      );
+      expect(testBed.find('policyFlyoutTitle').text()).toBe(PERCENT_SIGN_WITH_OTHER_CHARS_NAME);
     });
 
     test("loading edit policy page url doesn't work", async () => {
@@ -221,9 +221,7 @@ describe('<App />', () => {
       await actions.clickPolicyNameLink();
       component.update();
 
-      expect(testBed.find('policyTitle').text()).toBe(
-        `${editPolicyTitle} ${PERCENT_SIGN_25_SEQUENCE}`
-      );
+      expect(testBed.find('policyFlyoutTitle').text()).toBe(PERCENT_SIGN_25_SEQUENCE);
     });
 
     test("loading edit policy page url doesn't work", async () => {

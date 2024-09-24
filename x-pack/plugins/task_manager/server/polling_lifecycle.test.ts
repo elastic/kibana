@@ -21,9 +21,10 @@ import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
-import { CLAIM_STRATEGY_MGET } from './config';
+import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
+import { TaskEventType } from './task_events';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -45,6 +46,11 @@ describe('TaskPollingLifecycle', () => {
   const mockTaskStore = taskStoreMock.create({});
   const taskManagerOpts = {
     config: {
+      discovery: {
+        active_nodes_lookback: '30s',
+        interval: 10000,
+      },
+      kibanas_per_partition: 2,
       enabled: true,
       index: 'foo',
       max_attempts: 9,
@@ -95,7 +101,12 @@ describe('TaskPollingLifecycle', () => {
     capacityConfiguration$: of(20),
     pollIntervalConfiguration$: of(100),
     executionContext,
-    taskPartitioner: new TaskPartitioner('test', {} as KibanaDiscoveryService),
+    taskPartitioner: new TaskPartitioner({
+      logger: taskManagerLogger,
+      podName: 'test',
+      kibanaDiscoveryService: {} as KibanaDiscoveryService,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+    }),
   };
 
   beforeEach(() => {
@@ -423,6 +434,130 @@ describe('TaskPollingLifecycle', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
         );
+      });
+    });
+  });
+
+  describe('pollingLifecycleEvents events', () => {
+    test('should emit success event when polling is successful', async () => {
+      clock.restore();
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>
+        of(
+          asOk({
+            docs: [],
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
+          })
+        )
+      );
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const emittedEvents: TaskLifecycleEvent[] = [];
+
+      taskPollingLifecycle.events.subscribe((event: TaskLifecycleEvent) =>
+        emittedEvents.push(event)
+      );
+
+      elasticsearchAndSOAvailability$.next(true);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil('pollingCycleEvent emitted', () => {
+        return !!emittedEvents.find(
+          (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+        );
+      });
+
+      const pollingCycleEvent = emittedEvents.find(
+        (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+      );
+
+      expect(pollingCycleEvent!.event).toEqual({
+        tag: 'ok',
+        value: {
+          result: 'NoTasksClaimed',
+          stats: {
+            tasksUpdated: 0,
+            tasksConflicted: 0,
+            tasksClaimed: 0,
+          },
+        },
+      });
+    });
+
+    test('should emit failure event when polling error occurs', async () => {
+      clock.restore();
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() => {
+        throw new Error('booo');
+      });
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const emittedEvents: TaskLifecycleEvent[] = [];
+
+      taskPollingLifecycle.events.subscribe((event: TaskLifecycleEvent) =>
+        emittedEvents.push(event)
+      );
+
+      elasticsearchAndSOAvailability$.next(true);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil('pollingCycleEvent emitted', () => {
+        return !!emittedEvents.find(
+          (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+        );
+      });
+
+      const pollingCycleEvent = emittedEvents.find(
+        (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+      );
+
+      expect(pollingCycleEvent!.event).toEqual({
+        tag: 'err',
+        error: new Error(`Failed to poll for work: Error: booo`),
+      });
+    });
+
+    test('should emit failure event when polling is successful but individual task errors reported', async () => {
+      clock.restore();
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>
+        of(
+          asOk({
+            docs: [],
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0, tasksErrors: 2 },
+          })
+        )
+      );
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const emittedEvents: TaskLifecycleEvent[] = [];
+
+      taskPollingLifecycle.events.subscribe((event: TaskLifecycleEvent) =>
+        emittedEvents.push(event)
+      );
+
+      elasticsearchAndSOAvailability$.next(true);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil('pollingCycleEvent emitted', () => {
+        return !!emittedEvents.find(
+          (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+        );
+      });
+
+      const pollingCycleEvent = emittedEvents.find(
+        (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+      );
+
+      expect(pollingCycleEvent!.event).toEqual({
+        tag: 'err',
+        error: new Error(`Partially failed to poll for work: some tasks could not be claimed.`),
       });
     });
   });

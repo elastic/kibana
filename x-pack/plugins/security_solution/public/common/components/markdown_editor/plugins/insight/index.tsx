@@ -9,7 +9,7 @@ import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
 import moment from 'moment';
 import React, { useContext, useMemo, useCallback, useState } from 'react';
-import type { RemarkTokenizer } from '@elastic/eui';
+import type { RemarkTokenizer, EuiSelectProps } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiIcon,
@@ -43,7 +43,7 @@ import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
 import { useInsightDataProviders, type Provider } from './use_insight_data_providers';
 import { BasicAlertDataContext } from '../../../../../flyout/document_details/left/components/investigation_guide_view';
-import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
+import { InvestigateInTimelineButton } from '../../../event_details/investigate_in_timeline_button';
 import {
   getTimeRangeSettings,
   parseDateWithDefault,
@@ -382,7 +382,7 @@ const InsightEditorComponent = ({
   const onChange = useCallback((filters: Filter[]) => {
     setProviders(filtersToInsightProviders(filters));
   }, []);
-  const selectOnChange = useCallback(
+  const selectOnChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (event) => {
       relativeTimerangeController.field.onChange(event.target.value);
     },

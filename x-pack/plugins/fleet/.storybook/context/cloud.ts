@@ -24,6 +24,8 @@ export const getCloud = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
       projectId: undefined,
       projectName: undefined,
     },
+    fetchElasticsearchConfig: () =>
+      Promise.resolve({ elasticsearchUrl: 'https://elastisearch-url' }),
   };
 
   return cloud;

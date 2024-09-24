@@ -80,7 +80,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
     this.tags(['esGate']);
     before(async () => {
-      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
+      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     context('with auditbeat data', () => {

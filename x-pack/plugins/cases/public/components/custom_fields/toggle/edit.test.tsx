@@ -55,7 +55,7 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    await userEvent.click(screen.getByRole('switch'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({ ...customField, value: false });
@@ -106,7 +106,7 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    await userEvent.click(screen.getByRole('switch'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({

@@ -1,6 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getMonitoringPermissions With elastic agent package installed should return default logs and metrics permissions if both are enabled 1`] = `
+exports[`getMonitoringPermissions With elastic agent package installed should return default logs permissions if only logs are enabled 1`] = `
+Object {
+  "_elastic_agent_monitoring": Object {
+    "indices": Array [
+      Object {
+        "names": Array [
+          "logs-elastic_agent.metricbeat-testnamespace123",
+        ],
+        "privileges": Array [
+          "auto_configure",
+          "create_doc",
+        ],
+      },
+      Object {
+        "names": Array [
+          "logs-elastic_agent.filebeat-testnamespace123",
+        ],
+        "privileges": Array [
+          "auto_configure",
+          "create_doc",
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`getMonitoringPermissions With elastic agent package installed should return default logs, metrics, traces permissions if all are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
     "indices": Array [
@@ -34,33 +61,6 @@ Object {
       Object {
         "names": Array [
           "metrics-elastic_agent.filebeat-testnamespace123",
-        ],
-        "privileges": Array [
-          "auto_configure",
-          "create_doc",
-        ],
-      },
-    ],
-  },
-}
-`;
-
-exports[`getMonitoringPermissions With elastic agent package installed should return default logs permissions if only logs are enabled 1`] = `
-Object {
-  "_elastic_agent_monitoring": Object {
-    "indices": Array [
-      Object {
-        "names": Array [
-          "logs-elastic_agent.metricbeat-testnamespace123",
-        ],
-        "privileges": Array [
-          "auto_configure",
-          "create_doc",
-        ],
-      },
-      Object {
-        "names": Array [
-          "logs-elastic_agent.filebeat-testnamespace123",
         ],
         "privileges": Array [
           "auto_configure",
@@ -99,53 +99,10 @@ Object {
 }
 `;
 
-exports[`getMonitoringPermissions Without elastic agent package installed should return default logs and metrics permissions if both are enabled 1`] = `
+exports[`getMonitoringPermissions With elastic agent package installed should return default traces permissions if only traces are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
-    "indices": Array [
-      Object {
-        "names": Array [
-          "logs-elastic_agent-testnamespace123",
-          "logs-elastic_agent.elastic_agent-testnamespace123",
-          "logs-elastic_agent.apm_server-testnamespace123",
-          "logs-elastic_agent.filebeat-testnamespace123",
-          "logs-elastic_agent.filebeat_input-testnamespace123",
-          "logs-elastic_agent.fleet_server-testnamespace123",
-          "logs-elastic_agent.metricbeat-testnamespace123",
-          "logs-elastic_agent.osquerybeat-testnamespace123",
-          "logs-elastic_agent.packetbeat-testnamespace123",
-          "logs-elastic_agent.endpoint_security-testnamespace123",
-          "logs-elastic_agent.auditbeat-testnamespace123",
-          "logs-elastic_agent.heartbeat-testnamespace123",
-          "logs-elastic_agent.cloudbeat-testnamespace123",
-          "logs-elastic_agent.cloud_defend-testnamespace123",
-          "logs-elastic_agent.pf_host_agent-testnamespace123",
-          "logs-elastic_agent.pf_elastic_collector-testnamespace123",
-          "logs-elastic_agent.pf_elastic_symbolizer-testnamespace123",
-          "metrics-elastic_agent-testnamespace123",
-          "metrics-elastic_agent.elastic_agent-testnamespace123",
-          "metrics-elastic_agent.apm_server-testnamespace123",
-          "metrics-elastic_agent.filebeat-testnamespace123",
-          "metrics-elastic_agent.filebeat_input-testnamespace123",
-          "metrics-elastic_agent.fleet_server-testnamespace123",
-          "metrics-elastic_agent.metricbeat-testnamespace123",
-          "metrics-elastic_agent.osquerybeat-testnamespace123",
-          "metrics-elastic_agent.packetbeat-testnamespace123",
-          "metrics-elastic_agent.endpoint_security-testnamespace123",
-          "metrics-elastic_agent.auditbeat-testnamespace123",
-          "metrics-elastic_agent.heartbeat-testnamespace123",
-          "metrics-elastic_agent.cloudbeat-testnamespace123",
-          "metrics-elastic_agent.cloud_defend-testnamespace123",
-          "metrics-elastic_agent.pf_host_agent-testnamespace123",
-          "metrics-elastic_agent.pf_elastic_collector-testnamespace123",
-          "metrics-elastic_agent.pf_elastic_symbolizer-testnamespace123",
-        ],
-        "privileges": Array [
-          "auto_configure",
-          "create_doc",
-        ],
-      },
-    ],
+    "indices": Array [],
   },
 }
 `;
@@ -184,6 +141,74 @@ Object {
 }
 `;
 
+exports[`getMonitoringPermissions Without elastic agent package installed should return default logs, metrics, traces permissions if all are enabled 1`] = `
+Object {
+  "_elastic_agent_monitoring": Object {
+    "indices": Array [
+      Object {
+        "names": Array [
+          "logs-elastic_agent-testnamespace123",
+          "logs-elastic_agent.elastic_agent-testnamespace123",
+          "logs-elastic_agent.apm_server-testnamespace123",
+          "logs-elastic_agent.filebeat-testnamespace123",
+          "logs-elastic_agent.filebeat_input-testnamespace123",
+          "logs-elastic_agent.fleet_server-testnamespace123",
+          "logs-elastic_agent.metricbeat-testnamespace123",
+          "logs-elastic_agent.osquerybeat-testnamespace123",
+          "logs-elastic_agent.packetbeat-testnamespace123",
+          "logs-elastic_agent.endpoint_security-testnamespace123",
+          "logs-elastic_agent.auditbeat-testnamespace123",
+          "logs-elastic_agent.heartbeat-testnamespace123",
+          "logs-elastic_agent.cloudbeat-testnamespace123",
+          "logs-elastic_agent.cloud_defend-testnamespace123",
+          "logs-elastic_agent.pf_host_agent-testnamespace123",
+          "logs-elastic_agent.pf_elastic_collector-testnamespace123",
+          "logs-elastic_agent.pf_elastic_symbolizer-testnamespace123",
+          "metrics-elastic_agent-testnamespace123",
+          "metrics-elastic_agent.elastic_agent-testnamespace123",
+          "metrics-elastic_agent.apm_server-testnamespace123",
+          "metrics-elastic_agent.filebeat-testnamespace123",
+          "metrics-elastic_agent.filebeat_input-testnamespace123",
+          "metrics-elastic_agent.fleet_server-testnamespace123",
+          "metrics-elastic_agent.metricbeat-testnamespace123",
+          "metrics-elastic_agent.osquerybeat-testnamespace123",
+          "metrics-elastic_agent.packetbeat-testnamespace123",
+          "metrics-elastic_agent.endpoint_security-testnamespace123",
+          "metrics-elastic_agent.auditbeat-testnamespace123",
+          "metrics-elastic_agent.heartbeat-testnamespace123",
+          "metrics-elastic_agent.cloudbeat-testnamespace123",
+          "metrics-elastic_agent.cloud_defend-testnamespace123",
+          "metrics-elastic_agent.pf_host_agent-testnamespace123",
+          "metrics-elastic_agent.pf_elastic_collector-testnamespace123",
+          "metrics-elastic_agent.pf_elastic_symbolizer-testnamespace123",
+          "traces-elastic_agent-testnamespace123",
+          "traces-elastic_agent.elastic_agent-testnamespace123",
+          "traces-elastic_agent.apm_server-testnamespace123",
+          "traces-elastic_agent.filebeat-testnamespace123",
+          "traces-elastic_agent.filebeat_input-testnamespace123",
+          "traces-elastic_agent.fleet_server-testnamespace123",
+          "traces-elastic_agent.metricbeat-testnamespace123",
+          "traces-elastic_agent.osquerybeat-testnamespace123",
+          "traces-elastic_agent.packetbeat-testnamespace123",
+          "traces-elastic_agent.endpoint_security-testnamespace123",
+          "traces-elastic_agent.auditbeat-testnamespace123",
+          "traces-elastic_agent.heartbeat-testnamespace123",
+          "traces-elastic_agent.cloudbeat-testnamespace123",
+          "traces-elastic_agent.cloud_defend-testnamespace123",
+          "traces-elastic_agent.pf_host_agent-testnamespace123",
+          "traces-elastic_agent.pf_elastic_collector-testnamespace123",
+          "traces-elastic_agent.pf_elastic_symbolizer-testnamespace123",
+        ],
+        "privileges": Array [
+          "auto_configure",
+          "create_doc",
+        ],
+      },
+    ],
+  },
+}
+`;
+
 exports[`getMonitoringPermissions Without elastic agent package installed should return default metrics permissions if only metrics are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
@@ -207,6 +232,40 @@ Object {
           "metrics-elastic_agent.pf_host_agent-testnamespace123",
           "metrics-elastic_agent.pf_elastic_collector-testnamespace123",
           "metrics-elastic_agent.pf_elastic_symbolizer-testnamespace123",
+        ],
+        "privileges": Array [
+          "auto_configure",
+          "create_doc",
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`getMonitoringPermissions Without elastic agent package installed should return default traces permissions if only traces are enabled 1`] = `
+Object {
+  "_elastic_agent_monitoring": Object {
+    "indices": Array [
+      Object {
+        "names": Array [
+          "traces-elastic_agent-testnamespace123",
+          "traces-elastic_agent.elastic_agent-testnamespace123",
+          "traces-elastic_agent.apm_server-testnamespace123",
+          "traces-elastic_agent.filebeat-testnamespace123",
+          "traces-elastic_agent.filebeat_input-testnamespace123",
+          "traces-elastic_agent.fleet_server-testnamespace123",
+          "traces-elastic_agent.metricbeat-testnamespace123",
+          "traces-elastic_agent.osquerybeat-testnamespace123",
+          "traces-elastic_agent.packetbeat-testnamespace123",
+          "traces-elastic_agent.endpoint_security-testnamespace123",
+          "traces-elastic_agent.auditbeat-testnamespace123",
+          "traces-elastic_agent.heartbeat-testnamespace123",
+          "traces-elastic_agent.cloudbeat-testnamespace123",
+          "traces-elastic_agent.cloud_defend-testnamespace123",
+          "traces-elastic_agent.pf_host_agent-testnamespace123",
+          "traces-elastic_agent.pf_elastic_collector-testnamespace123",
+          "traces-elastic_agent.pf_elastic_symbolizer-testnamespace123",
         ],
         "privileges": Array [
           "auto_configure",

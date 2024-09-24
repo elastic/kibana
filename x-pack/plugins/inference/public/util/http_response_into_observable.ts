@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import { map, OperatorFunction, pipe, switchMap, tap } from 'rxjs';
-import { InferenceTaskEvent, InferenceTaskEventType } from '../../common/tasks';
-import {
-  createObservableFromHttpResponse,
-  StreamedHttpResponse,
-} from './create_observable_from_http_response';
+import { catchError, map, OperatorFunction, pipe, switchMap, tap, throwError } from 'rxjs';
 import {
   createInferenceInternalError,
   InferenceTaskError,
   InferenceTaskErrorEvent,
 } from '../../common/errors';
+import { InferenceTaskEvent, InferenceTaskEventType } from '../../common/inference_task';
+import {
+  createObservableFromHttpResponse,
+  StreamedHttpResponse,
+} from './create_observable_from_http_response';
 
 export function httpResponseIntoObservable<
   T extends InferenceTaskEvent = never
 >(): OperatorFunction<StreamedHttpResponse, T> {
   return pipe(
     switchMap((response) => createObservableFromHttpResponse(response)),
+    catchError((error) => {
+      return throwError(() => createInferenceInternalError(error.message));
+    }),
     map((line): T => {
       try {
         return JSON.parse(line);

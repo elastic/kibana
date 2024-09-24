@@ -14,7 +14,6 @@ import * as i18n from './translations';
 import { PageHeader } from './components/page_header';
 import { CreateMaintenanceWindowForm } from './components/create_maintenance_windows_form';
 import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
-import { IS_SCOPED_QUERY_ENABLED } from './constants';
 
 export const MaintenanceWindowsCreatePage = React.memo(() => {
   useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate);
@@ -31,7 +30,6 @@ export const MaintenanceWindowsCreatePage = React.memo(() => {
       <CreateMaintenanceWindowForm
         onCancel={navigateToMaintenanceWindows}
         onSuccess={navigateToMaintenanceWindows}
-        scopedQueryFeatureFlag={IS_SCOPED_QUERY_ENABLED}
       />
     </EuiPageSection>
   );

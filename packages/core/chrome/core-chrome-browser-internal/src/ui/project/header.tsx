@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -32,7 +33,7 @@ import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
-import React, { useCallback } from 'react';
+import React, { useCallback, type ComponentProps } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime, Observable } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
@@ -110,7 +111,7 @@ const headerStrings = {
   },
 };
 
-export interface Props {
+export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isServerless'> {
   headerBanner$: Observable<ChromeUserBanner | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   actionMenu$: Observable<MountPoint | undefined>;
@@ -129,6 +130,7 @@ export interface Props {
   navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
+  isSideNavCollapsed$: Observable<boolean>;
   toggleSideNav: (isCollapsed: boolean) => void;
 }
 
@@ -225,6 +227,7 @@ export const ProjectHeader = ({
   docLinks,
   toggleSideNav,
   customBranding$,
+  isServerless,
   ...observables
 }: Props) => {
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
@@ -247,7 +250,12 @@ export const ProjectHeader = ({
           <EuiHeader position="fixed" className="header__firstBar">
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               <Router history={application.history}>
-                <ProjectNavigation toggleSideNav={toggleSideNav}>{children}</ProjectNavigation>
+                <ProjectNavigation
+                  isSideNavCollapsed$={observables.isSideNavCollapsed$}
+                  toggleSideNav={toggleSideNav}
+                >
+                  {children}
+                </ProjectNavigation>
               </Router>
 
               <EuiHeaderSectionItem>
@@ -286,6 +294,7 @@ export const ProjectHeader = ({
 
               <EuiHeaderSectionItem>
                 <HeaderHelpMenu
+                  isServerless={isServerless}
                   globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
                   helpExtension$={observables.helpExtension$}
                   helpSupportUrl$={observables.helpSupportUrl$}

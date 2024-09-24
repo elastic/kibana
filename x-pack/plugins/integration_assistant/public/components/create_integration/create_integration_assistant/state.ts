@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createContext, useContext } from 'react';
-import type { Pipeline, Docs } from '../../../../common';
+import type { Pipeline, Docs, SamplesFormat } from '../../../../common';
 import type { AIConnector, IntegrationSettings } from './types';
 
 export interface State {
@@ -16,6 +16,7 @@ export interface State {
   result?: {
     pipeline: Pipeline;
     docs: Docs;
+    samplesFormat?: SamplesFormat;
   };
 }
 

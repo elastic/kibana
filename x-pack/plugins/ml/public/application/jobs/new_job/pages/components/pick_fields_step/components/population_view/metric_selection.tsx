@@ -9,17 +9,19 @@ import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState, useReducer, useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
+
+import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { PopulationJobCreator } from '../../../../../common/job_creator';
 import type { LineChartData } from '../../../../../common/chart_loader';
 import type { DropDownLabel, DropDownProps } from '../agg_select';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
-import { MetricSelector } from './metric_selector';
+import { MetricSelector } from '../metric_selector';
 import { PopulationFieldSelector } from '../population_field';
 import { ChartGrid } from './chart_grid';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -28,6 +30,7 @@ interface Props {
 type DetectorFieldValues = Record<number, string[]>;
 
 export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
+  const uiSettings = useUiSettings();
   const {
     jobCreator: jc,
     jobCreatorUpdate,
@@ -36,6 +39,8 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
     chartInterval,
   } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
+  const toastNotificationService = useToastNotificationService();
+  const newJobCapsService = useNewJobCapsService();
 
   const fields = useMemo(
     () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
@@ -157,7 +162,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings(jobCreator, chartInterval);
+        const cs = getChartSettings(uiSettings, jobCreator, chartInterval);
         setChartSettings(cs);
         const resp: LineChartData = await chartLoader.loadPopulationCharts(
           jobCreator.start,
@@ -171,7 +176,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
 
         setLineChartsData(resp);
       } catch (error) {
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationService.displayErrorToast(error);
         setLineChartsData([]);
       }
       setLoadingData(false);

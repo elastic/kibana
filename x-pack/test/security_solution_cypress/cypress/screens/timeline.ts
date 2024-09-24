@@ -320,3 +320,5 @@ export const SAVE_TIMELINE_TOOLTIP = getDataTestSubjectSelector(
 );
 
 export const TOGGLE_DATA_PROVIDER_BTN = getDataTestSubjectSelector('toggle-data-provider');
+
+export const EXPAND_ALERT_BTN = getDataTestSubjectSelector('docTableExpandToggleColumn');

@@ -17,7 +17,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
-  const PageObjects = getPageObjects([
+  const {
+    dashboard,
+    dashboardControls,
+    common,
+    header,
+    timePicker,
+    settings,
+    copySavedObjectsToSpace,
+  } = getPageObjects([
     'dashboard',
     'dashboardControls',
     'common',
@@ -38,9 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
 
   const createDrilldown = async () => {
-    await PageObjects.dashboard.gotoDashboardEditMode(
-      dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
-    );
+    await dashboard.gotoDashboardEditMode(dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME);
     await toasts.dismissAll(); // toasts get in the way of bottom "Create drilldown" button in flyout
 
     // create drilldown
@@ -55,18 +61,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardDrilldownsManage.closeFlyout();
 
     // check that drilldown notification badge is shown
-    expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(1);
+    expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(1);
 
     // save dashboard, navigate to view mode
     await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
-    await PageObjects.dashboard.saveDashboard(
-      dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME,
-      {
-        saveAsNew: false,
-        waitDialogIsClosed: true,
-        exitFromEditMode: true,
-      }
-    );
+    await dashboard.saveDashboard(dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME, {
+      saveAsNew: false,
+      waitDialogIsClosed: true,
+      exitFromEditMode: true,
+    });
     await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
   };
 
@@ -74,17 +77,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     dashboardName: string,
     controls: Array<{ field: string; type: string }>
   ) => {
-    await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+    await dashboard.gotoDashboardEditMode(dashboardName);
     await toasts.dismissAll(); // toasts get in the way of bottom "Save and close" button in create control flyout
 
     for (const control of controls) {
-      await PageObjects.dashboardControls.createControl({
+      await dashboardControls.createControl({
         controlType: control.type,
         dataViewTitle: 'logstash-*',
         fieldName: control.field,
       });
     }
-    await PageObjects.dashboard.clickQuickSave();
+    await dashboard.clickQuickSave();
   };
 
   const brushAreaChart = async () => {
@@ -110,16 +113,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const navigateAndEnsureIDChange = async (navigationTrigger: () => Promise<void>) => {
     // before executing action which would trigger navigation: remember current dashboard id in url
-    const oldDashboardId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+    const oldDashboardId = await dashboard.getDashboardIdFromCurrentUrl();
     // execute navigation action
     await navigationTrigger();
     // wait until dashboard navigates to a new dashboard with area chart
     await retry.waitFor('navigate to different dashboard', async () => {
-      const newDashboardId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+      const newDashboardId = await dashboard.getDashboardIdFromCurrentUrl();
       return typeof newDashboardId === 'string' && oldDashboardId !== newDashboardId;
     });
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.dashboard.waitForRenderComplete();
+    await header.waitUntilLoadingHasFinished();
+    await dashboard.waitForRenderComplete();
   };
 
   describe('Dashboard to dashboard drilldown', function () {
@@ -127,8 +130,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         log.debug('Dashboard Drilldowns:initTests');
         await security.testUser.setRoles(['test_logstash_reader', 'global_dashboard_all']);
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.preserveCrossAppState();
+        await dashboard.navigateToApp();
+        await dashboard.preserveCrossAppState();
         await elasticChart.setNewChartUiDebugFlag();
 
         await createDrilldown();
@@ -145,9 +148,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       };
 
-      describe('test dashboard to dashboard drilldown', async () => {
+      describe('test dashboard to dashboard drilldown', () => {
         beforeEach(async () => {
-          await PageObjects.dashboard.gotoDashboardEditMode(
+          await dashboard.gotoDashboardEditMode(
             dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
           );
         });
@@ -166,7 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           // ensure that we ended up on the correct destination dashboard.
-          await PageObjects.dashboard.expectOnDashboard(
+          await dashboard.expectOnDashboard(
             dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
           );
 
@@ -181,19 +184,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             DRILLDOWN_TO_AREA_CHART_NAME
           );
           expect(typeof href).to.be('string'); // checking that action has a href
-          const dashboardIdFromHref = PageObjects.dashboard.getDashboardIdFromUrl(href);
+          const dashboardIdFromHref = dashboard.getDashboardIdFromUrl(href);
 
           await navigateAndEnsureIDChange(async () => {
             await dashboardDrilldownPanelActions.openHrefByText(DRILLDOWN_TO_AREA_CHART_NAME);
           });
 
           // checking that href points to the dashboard id that we have navigated to.
-          expect(dashboardIdFromHref).to.be(
-            await PageObjects.dashboard.getDashboardIdFromCurrentUrl()
-          );
+          expect(dashboardIdFromHref).to.be(await dashboard.getDashboardIdFromCurrentUrl());
 
           // ensure that we ended up on the correct destination dashboard.
-          await PageObjects.dashboard.expectOnDashboard(
+          await dashboard.expectOnDashboard(
             dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
           );
 
@@ -213,7 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           // ensure that we ended up on the correct destination dashboard.
-          await PageObjects.dashboard.expectOnDashboard(
+          await dashboard.expectOnDashboard(
             dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
           );
 
@@ -224,7 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('carries over time range from source dashboard', async () => {
           const startTime = 'Sep 22, 2015 @ 06:31:44.000';
           const endTime = 'Sep 23, 2015 @ 06:31:44.000';
-          await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
+          await timePicker.setAbsoluteRange(startTime, endTime);
 
           // Navigate via drilldown, ensuring that the ID changes.
           await openContextMenuFromPieSlice();
@@ -233,15 +234,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           // ensure that we ended up on the correct destination dashboard.
-          await PageObjects.dashboard.expectOnDashboard(
+          await dashboard.expectOnDashboard(
             dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
           );
 
           // ensure that the time range has been carried over.
-          expect(await PageObjects.timePicker.getTimeDurationInHours()).to.be(24);
+          expect(await timePicker.getTimeDurationInHours()).to.be(24);
 
           // reset time range
-          await PageObjects.timePicker.setDefaultAbsoluteRange();
+          await timePicker.setDefaultAbsoluteRange();
         });
 
         it('browser back navigation works after drilldown navigation', async () => {
@@ -253,7 +254,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           // ensure that we ended up on the correct destination dashboard.
-          await PageObjects.dashboard.expectOnDashboard(
+          await dashboard.expectOnDashboard(
             dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
           );
 
@@ -262,18 +263,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           // ensure that we have returned to the origin dashboard.
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
-          await PageObjects.dashboard.waitForRenderComplete();
+          await dashboard.clickCancelOutOfEditMode();
+          await dashboard.waitForRenderComplete();
 
-          await PageObjects.dashboard.expectOnDashboard(
+          await dashboard.expectOnDashboard(
             dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
           );
         });
 
         it('delete dashboard to dashboard drilldown', async () => {
           // delete drilldown
-          await PageObjects.dashboard.switchToEditMode();
-          await dashboardDrilldownPanelActions.expectExistsManageDrilldownsAction();
+          await dashboard.switchToEditMode();
           await dashboardDrilldownPanelActions.clickManageDrilldowns();
           await dashboardDrilldownsManage.expectsManageDrilldownsFlyoutOpen();
 
@@ -281,18 +281,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardDrilldownsManage.closeFlyout();
 
           // check that drilldown notification badge is not shown
-          expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(0);
+          expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(0);
 
           // this drilldown will be available again in the next test because the session storage is cleared.
         });
       });
 
-      describe('test dashboard to dashboard drilldown with controls', async () => {
+      describe('test dashboard to dashboard drilldown with controls', () => {
         const cleanFiltersAndControls = async (dashboardName: string) => {
-          await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+          await dashboard.gotoDashboardEditMode(dashboardName);
           await filterBar.removeAllFilters();
-          await PageObjects.dashboardControls.deleteAllControls();
-          await PageObjects.dashboard.clickQuickSave();
+          await dashboardControls.deleteAllControls();
+          await dashboard.clickQuickSave();
         };
 
         before('add controls and make selections', async () => {
@@ -301,17 +301,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             { field: 'geo.src', type: OPTIONS_LIST_CONTROL },
             { field: 'bytes', type: RANGE_SLIDER_CONTROL },
           ]);
-          const controlIds = await PageObjects.dashboardControls.getAllControlIds();
+          const controlIds = await dashboardControls.getAllControlIds();
           const [optionsListControl, rangeSliderControl] = controlIds;
-          await PageObjects.dashboardControls.optionsListOpenPopover(optionsListControl);
-          await PageObjects.dashboardControls.optionsListPopoverSelectOption('CN');
-          await PageObjects.dashboardControls.optionsListPopoverSelectOption('US');
-          await PageObjects.dashboardControls.rangeSliderWaitForLoading(rangeSliderControl); // wait for range slider to respond to options list selections before proceeding
-          await PageObjects.dashboardControls.rangeSliderSetLowerBound(rangeSliderControl, '1000');
-          await PageObjects.dashboardControls.rangeSliderSetUpperBound(rangeSliderControl, '15000');
-          await PageObjects.dashboard.waitForRenderComplete();
-          await PageObjects.dashboard.clickQuickSave();
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await dashboardControls.optionsListOpenPopover(optionsListControl);
+          await dashboardControls.optionsListPopoverSelectOption('CN');
+          await dashboardControls.optionsListPopoverSelectOption('US');
+          await dashboardControls.rangeSliderWaitForLoading(rangeSliderControl); // wait for range slider to respond to options list selections before proceeding
+          await dashboardControls.rangeSliderSetLowerBound(rangeSliderControl, '1000');
+          await dashboardControls.rangeSliderSetUpperBound(rangeSliderControl, '15000');
+          await dashboard.waitForRenderComplete();
+          await dashboard.clickQuickSave();
+          await header.waitUntilLoadingHasFinished();
 
           /** Destination Dashboard */
           await createControls(dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME, [
@@ -325,7 +325,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('creates filter pills representing controls selections', async () => {
-          await PageObjects.dashboard.gotoDashboardEditMode(
+          await dashboard.gotoDashboardEditMode(
             dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
           );
 
@@ -343,13 +343,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await filterBar.hasFilter('bytes', '1,000 to 15,000')).to.be(true);
 
           // control filter pills impact destination dashboard controls
-          const controlIds = await PageObjects.dashboardControls.getAllControlIds();
+          const controlIds = await dashboardControls.getAllControlIds();
           const optionsListControl = controlIds[0];
-          await PageObjects.dashboardControls.optionsListOpenPopover(optionsListControl);
-          expect(
-            await PageObjects.dashboardControls.optionsListPopoverGetAvailableOptionsCount()
-          ).to.equal(2);
-          await PageObjects.dashboardControls.optionsListEnsurePopoverIsClosed(optionsListControl);
+          await dashboardControls.optionsListOpenPopover(optionsListControl);
+          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.equal(2);
+          await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListControl);
         });
       });
     });
@@ -363,8 +361,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           name: 'custom_space',
           disabledFeatures: [],
         });
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSavedObjects();
+        await settings.navigateTo();
+        await settings.clickKibanaSavedObjects();
       });
 
       after(async () => {
@@ -372,19 +370,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Dashboards linked by a drilldown are both copied to a space', async () => {
-        await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject(
+        await copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject(
           dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
         );
-        await PageObjects.copySavedObjectsToSpace.setupForm({
+        await copySavedObjectsToSpace.setupForm({
           destinationSpaceId,
         });
-        await PageObjects.copySavedObjectsToSpace.startCopy();
+        await copySavedObjectsToSpace.startCopy();
 
         // Wait for successful copy
         await testSubjects.waitForDeleted(`cts-summary-indicator-loading-${destinationSpaceId}`);
         await testSubjects.existOrFail(`cts-summary-indicator-success-${destinationSpaceId}`);
 
-        const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
+        const summaryCounts = await copySavedObjectsToSpace.getSummaryCounts();
 
         expect(summaryCounts).to.eql({
           success: 5, // 2 dashboards (linked by a drilldown) + 2 visualizations + 1 index pattern
@@ -393,19 +391,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           errors: 0,
         });
 
-        await PageObjects.copySavedObjectsToSpace.finishCopy();
+        await copySavedObjectsToSpace.finishCopy();
 
         // Actually use copied dashboards in a new space:
 
-        await PageObjects.common.navigateToApp('dashboards', {
+        await common.navigateToApp('dashboards', {
           basePath: `/s/${destinationSpaceId}`,
         });
-        await PageObjects.dashboard.preserveCrossAppState();
-        await PageObjects.dashboard.loadSavedDashboard(
+        await dashboard.preserveCrossAppState();
+        await dashboard.loadSavedDashboard(
           dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
         );
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
 
         // brush area chart and drilldown back to pie chat dashboard
         await brushAreaChart();

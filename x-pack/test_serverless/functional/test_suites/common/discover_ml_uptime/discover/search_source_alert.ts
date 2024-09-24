@@ -66,8 +66,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const dateNow = new Date();
     const dateToSet = new Date(dateNow);
     dateToSet.setMinutes(dateNow.getMinutes() - 10);
-    for await (const message of mockMessages) {
-      es.transport.request({
+    for (const message of mockMessages) {
+      await es.transport.request({
         path: `/${SOURCE_DATA_VIEW}/_doc`,
         method: 'POST',
         body: {
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return ruleName === alertName;
     });
     await testSubjects.click('thresholdPopover');
-    await testSubjects.setValue('alertThresholdInput', '1');
+    await testSubjects.setValue('alertThresholdInput0', '1');
 
     await testSubjects.click('forLastExpression');
     await testSubjects.setValue('timeWindowSizeNumber', '30');
@@ -499,7 +499,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
 
       await testSubjects.click('thresholdPopover');
-      await testSubjects.setValue('alertThresholdInput', '1');
+      await testSubjects.setValue('alertThresholdInput0', '1');
       await testSubjects.click('saveEditedRuleButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

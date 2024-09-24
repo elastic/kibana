@@ -9,8 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@el
 import { css, SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { statusColors } from '@kbn/cloud-security-posture';
 import { calculatePostureScore } from '../../common/utils/helpers';
-import { statusColors } from '../common/constants';
 import { CSP_FINDINGS_COMPLIANCE_SCORE } from './test_subjects';
 
 /**

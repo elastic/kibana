@@ -158,7 +158,12 @@ export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
                   values={{ minimumTimeRangeOption, categoryCount }}
                 />
               </>
-            ) : null}
+            ) : (
+              <FormattedMessage
+                id="xpack.aiops.logCategorization.embeddableMenu.totalPatternsMessage2"
+                defaultMessage="No additional time will be added to the range you specified with the time selector."
+              />
+            )}
           </>
         }
       >

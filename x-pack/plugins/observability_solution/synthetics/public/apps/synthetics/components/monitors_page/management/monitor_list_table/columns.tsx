@@ -183,7 +183,16 @@ export function useMonitorListColumns({
               canEditSynthetics={canEditSynthetics}
               canUsePublicLocations={isPublicLocationsAllowed(fields)}
             >
-              {labels.EDIT_LABEL}
+              <span
+                aria-label={i18n.translate('xpack.synthetics.management.monitorList.editLabel', {
+                  defaultMessage: 'Edit monitor {monitorName}',
+                  values: {
+                    monitorName: fields[ConfigKey.NAME],
+                  },
+                })}
+              >
+                {labels.EDIT_LABEL}
+              </span>
             </NoPermissionsTooltip>
           ),
           description: labels.EDIT_LABEL,
@@ -206,7 +215,16 @@ export function useMonitorListColumns({
               canEditSynthetics={canEditSynthetics}
               canUsePublicLocations={isPublicLocationsAllowed(fields)}
             >
-              {labels.CLONE_LABEL}
+              <span
+                aria-label={i18n.translate('xpack.synthetics.management.monitorList.cloneLabel', {
+                  defaultMessage: 'Clone monitor {monitorName}',
+                  values: {
+                    monitorName: fields[ConfigKey.NAME],
+                  },
+                })}
+              >
+                {labels.CLONE_LABEL}
+              </span>
             </NoPermissionsTooltip>
           ),
           description: labels.CLONE_LABEL,
@@ -229,7 +247,16 @@ export function useMonitorListColumns({
               canEditSynthetics={canEditSynthetics}
               canUsePublicLocations={isPublicLocationsAllowed(fields)}
             >
-              {labels.DELETE_LABEL}
+              <span
+                aria-label={i18n.translate('xpack.synthetics.management.monitorList.deleteLabel', {
+                  defaultMessage: 'Delete monitor {monitorName}',
+                  values: {
+                    monitorName: fields[ConfigKey.NAME],
+                  },
+                })}
+              >
+                {labels.DELETE_LABEL}
+              </span>
             </NoPermissionsTooltip>
           ),
           description: labels.DELETE_LABEL,
@@ -244,10 +271,25 @@ export function useMonitorListColumns({
         },
         {
           description: labels.DISABLE_STATUS_ALERT,
-          name: (fields) =>
-            isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
-              ? labels.DISABLE_STATUS_ALERT
-              : labels.ENABLE_STATUS_ALERT,
+          name: (fields) => (
+            <span
+              aria-label={
+                isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
+                  ? i18n.translate('xpack.synthetics.management.monitorList.disableAlert', {
+                      defaultMessage: 'Disable alert for {monitorName}',
+                      values: { monitorName: fields[ConfigKey.NAME] },
+                    })
+                  : i18n.translate('xpack.synthetics.management.monitorList.enableAlert', {
+                      defaultMessage: 'Enable alert for {monitorName}',
+                      values: { monitorName: fields[ConfigKey.NAME] },
+                    })
+              }
+            >
+              {isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
+                ? labels.DISABLE_STATUS_ALERT
+                : labels.ENABLE_STATUS_ALERT}
+            </span>
+          ),
           icon: (fields) =>
             isStatusEnabled(fields[ConfigKey.ALERT_CONFIG]) ? 'bellSlash' : 'bell',
           type: 'icon' as const,
@@ -267,14 +309,6 @@ export function useMonitorListColumns({
             });
           },
         },
-        /*
-      TODO: Implement duplication functionality
-      const duplicateMenuItem = (
-        <EuiContextMenuItem key="xpack.synthetics.duplicateMonitor" icon="copy" onClick={closePopover}>
-          {labels.DUPLICATE_LABEL}
-        </EuiContextMenuItem>
-      );
-      */
       ],
     },
   ];

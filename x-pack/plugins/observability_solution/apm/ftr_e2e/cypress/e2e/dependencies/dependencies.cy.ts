@@ -38,6 +38,7 @@ describe('Dependencies', () => {
   describe('top-level dependencies page', () => {
     it('has a list of dependencies and you can navigate to the page for one', () => {
       cy.visitKibana(`/app/apm/services?${new URLSearchParams(timeRange)}`);
+      cy.getByTestSubj('superDatePickerstartDatePopoverButton');
       cy.contains('nav a', 'Dependencies').click();
 
       // `force: true` because Cypress says the element is 0x0

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { DataViewAttributes } from '@kbn/data-views-plugin/common';
-import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
 import { KbnClientSavedObjects } from '@kbn/test/src/kbn_client/kbn_client_saved_objects';
 import { FtrProviderContext } from '../ftr_provider_context';
 

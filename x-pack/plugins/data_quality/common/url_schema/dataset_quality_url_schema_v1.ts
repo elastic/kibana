@@ -6,43 +6,14 @@
  */
 
 import * as rt from 'io-ts';
-import { degradedFieldRT, tableRT, timeRangeRT } from './common';
-
-const integrationRT = rt.strict({
-  name: rt.string,
-  title: rt.string,
-  version: rt.string,
-});
-
-const datasetRT = rt.intersection([
-  rt.strict({
-    rawName: rt.string,
-    type: rt.string,
-    name: rt.string,
-    namespace: rt.string,
-  }),
-  rt.exact(
-    rt.partial({
-      integration: integrationRT,
-      title: rt.string,
-    })
-  ),
-]);
-
-export const flyoutRT = rt.exact(
-  rt.partial({
-    dataset: datasetRT,
-    insightsTimeRange: timeRangeRT,
-    breakdownField: rt.string,
-    degradedFields: degradedFieldRT,
-  })
-);
+import { tableRT, timeRangeRT } from './common';
 
 export const filtersRT = rt.exact(
   rt.partial({
     inactive: rt.boolean,
     fullNames: rt.boolean,
     timeRange: timeRangeRT,
+    types: rt.array(rt.string),
     integrations: rt.array(rt.string),
     namespaces: rt.array(rt.string),
     qualities: rt.array(rt.union([rt.literal('poor'), rt.literal('degraded'), rt.literal('good')])),
@@ -54,7 +25,6 @@ export const urlSchemaRT = rt.exact(
   rt.partial({
     v: rt.literal(1),
     table: tableRT,
-    flyout: flyoutRT,
     filters: filtersRT,
   })
 );
