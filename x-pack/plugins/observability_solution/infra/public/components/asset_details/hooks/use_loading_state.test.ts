@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { useLoadingState } from './use_loading_state';
 import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date_picker';
 import { BehaviorSubject, EMPTY, of, Subject, Subscription, skip } from 'rxjs';
@@ -102,7 +103,7 @@ describe('useLoadingState', () => {
   });
 
   it('should set isAutoRefreshRequestPending to true when there are requests pending', async () => {
-    const { result, unmount, waitFor } = renderHook(() => useLoadingState());
+    const { result, unmount } = renderHook(() => useLoadingState());
 
     let receivedValue = false;
     subscription.add(
@@ -128,7 +129,7 @@ describe('useLoadingState', () => {
   });
 
   it('should set isAutoRefreshRequestPending to false when all requests complete', async () => {
-    const { result, unmount, waitFor } = renderHook(() => useLoadingState());
+    const { result, unmount } = renderHook(() => useLoadingState());
 
     let receivedValue = true;
     subscription.add(
@@ -153,7 +154,7 @@ describe('useLoadingState', () => {
   });
 
   it('should not call updateSearchSessionId if waitUntilNextSessionCompletesMock$ returns empty', async () => {
-    const { unmount, waitFor } = renderHook(() => useLoadingState());
+    const { unmount } = renderHook(() => useLoadingState());
 
     // waitUntilNextSessionCompletes$ returns EMPTY when the status is loading or none
     sessionState$.next(SearchSessionState.Loading);
@@ -171,7 +172,7 @@ describe('useLoadingState', () => {
   });
 
   it('should call updateSearchSessionId when waitUntilNextSessionCompletesMock$ returns', async () => {
-    const { unmount, waitFor } = renderHook(() => useLoadingState());
+    const { unmount } = renderHook(() => useLoadingState());
 
     // waitUntilNextSessionCompletes$ returns something when the status is Completed or BackgroundCompleted
     sessionState$.next(SearchSessionState.Loading);

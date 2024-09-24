@@ -46,98 +46,96 @@ describe('usePersistExceptionItem', () => {
   });
 
   test('"isLoading" is "true" when exception item is being saved', async () => {
-    await act(async () => {
-      const { result, rerender } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
-        usePersistExceptionItem({ http: mockKibanaHttpService, onError })
-      );
+    const { result, rerender } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+      usePersistExceptionItem({ http: mockKibanaHttpService, onError })
+    );
 
-      await waitFor(() => null);
+    await act(async () => {
       result.current[1](getCreateExceptionListItemSchemaMock());
       rerender();
-
-      expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
     });
+
+    expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
   });
 
   test('"isSaved" is "true" when exception item saved successfully', async () => {
+    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+      usePersistExceptionItem({ http: mockKibanaHttpService, onError })
+    );
+
     await act(async () => {
-      const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
-        usePersistExceptionItem({ http: mockKibanaHttpService, onError })
-      );
-
-      await waitFor(() => null);
       result.current[1](getCreateExceptionListItemSchemaMock());
-      await waitFor(() => null);
-
-      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
     });
+
+    expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
   });
 
   test('it invokes "updateExceptionListItem" when payload has "id"', async () => {
     const addExceptionListItem = jest.spyOn(api, 'addExceptionListItem');
     const updateExceptionListItem = jest.spyOn(api, 'updateExceptionListItem');
-    await act(async () => {
-      const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
-        usePersistExceptionItem({ http: mockKibanaHttpService, onError })
-      );
+    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+      usePersistExceptionItem({ http: mockKibanaHttpService, onError })
+    );
 
-      await waitFor(() => null);
+    await waitFor(() => null);
+
+    await act(async () => {
       // NOTE: Take note here passing in an exception item where it's
       // entries have been enriched with ids to ensure that they get stripped
       // before the call goes through
       result.current[1]({ ...getUpdateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS });
-      await waitFor(() => null);
+    });
 
-      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
-      expect(addExceptionListItem).not.toHaveBeenCalled();
-      expect(updateExceptionListItem).toHaveBeenCalledWith({
-        http: mockKibanaHttpService,
-        listItem: getUpdateExceptionListItemSchemaMock(),
-        signal: new AbortController().signal,
-      });
+    await waitFor(() => null);
+
+    expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
+    expect(addExceptionListItem).not.toHaveBeenCalled();
+    expect(updateExceptionListItem).toHaveBeenCalledWith({
+      http: mockKibanaHttpService,
+      listItem: getUpdateExceptionListItemSchemaMock(),
+      signal: new AbortController().signal,
     });
   });
 
   test('it invokes "addExceptionListItem" when payload does not have "id"', async () => {
     const updateExceptionListItem = jest.spyOn(api, 'updateExceptionListItem');
     const addExceptionListItem = jest.spyOn(api, 'addExceptionListItem');
-    await act(async () => {
-      const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
-        usePersistExceptionItem({ http: mockKibanaHttpService, onError })
-      );
+    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+      usePersistExceptionItem({ http: mockKibanaHttpService, onError })
+    );
 
-      await waitFor(() => null);
+    await waitFor(() => null);
+    await act(async () => {
       // NOTE: Take note here passing in an exception item where it's
       // entries have been enriched with ids to ensure that they get stripped
       // before the call goes through
       result.current[1]({ ...getCreateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS });
-      await waitFor(() => null);
+    });
+    await waitFor(() => null);
 
-      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
-      expect(updateExceptionListItem).not.toHaveBeenCalled();
-      expect(addExceptionListItem).toHaveBeenCalledWith({
-        http: mockKibanaHttpService,
-        listItem: getCreateExceptionListItemSchemaMock(),
-        signal: new AbortController().signal,
-      });
+    expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
+    expect(updateExceptionListItem).not.toHaveBeenCalled();
+    expect(addExceptionListItem).toHaveBeenCalledWith({
+      http: mockKibanaHttpService,
+      listItem: getCreateExceptionListItemSchemaMock(),
+      signal: new AbortController().signal,
     });
   });
 
   test('"onError" callback is invoked and "isSaved" is "false" when api call fails', async () => {
     const error = new Error('persist rule failed');
     jest.spyOn(api, 'addExceptionListItem').mockRejectedValue(error);
+    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+      usePersistExceptionItem({ http: mockKibanaHttpService, onError })
+    );
 
+    await waitFor(() => null);
     await act(async () => {
-      const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
-        usePersistExceptionItem({ http: mockKibanaHttpService, onError })
-      );
-
-      await waitFor(() => null);
       result.current[1](getCreateExceptionListItemSchemaMock());
-      await waitFor(() => null);
-
-      expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]]);
-      expect(onError).toHaveBeenCalledWith(error);
     });
+    await waitFor(() => null);
+
+    expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]]);
+    expect(onError).toHaveBeenCalledWith(error);
   });
 });

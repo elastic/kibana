@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { useRequestObservable } from './use_request_observable';
 import { type RequestState, useLoadingStateContext } from './use_loading_state';
 import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date_picker';
@@ -69,7 +70,7 @@ describe('useRequestObservable', () => {
   });
 
   it('should process a valid request function', async () => {
-    const { result, waitFor, unmount } = renderHook(() => useRequestObservable());
+    const { result, unmount } = renderHook(() => useRequestObservable());
 
     act(() => {
       result.current.request$.next(() => Promise.resolve());
@@ -85,7 +86,7 @@ describe('useRequestObservable', () => {
   });
 
   it('should be able to make new requests if isAutoRefreshRequestPending is false', async () => {
-    const { result, waitFor, unmount } = renderHook(() => useRequestObservable());
+    const { result, unmount } = renderHook(() => useRequestObservable());
 
     act(() => {
       isAutoRefreshRequestPendingMock$.next(false);
@@ -102,7 +103,7 @@ describe('useRequestObservable', () => {
   });
 
   it('should block new requests when isAutoRefreshRequestPending is true', async () => {
-    const { result, waitFor, unmount } = renderHook(() => useRequestObservable());
+    const { result, unmount } = renderHook(() => useRequestObservable());
 
     act(() => {
       isAutoRefreshRequestPendingMock$.next(false);
@@ -123,7 +124,7 @@ describe('useRequestObservable', () => {
   });
 
   it('should not block new requests when auto-refresh is paused', async () => {
-    const { result, waitFor, unmount } = renderHook(() => useRequestObservable());
+    const { result, unmount } = renderHook(() => useRequestObservable());
 
     act(() => {
       autoRefreshConfig$.next({ isPaused: true, interval: 5000 });
@@ -144,7 +145,7 @@ describe('useRequestObservable', () => {
   });
 
   it('should complete the request when an error is thrown', async () => {
-    const { result, waitFor, unmount } = renderHook(() => useRequestObservable());
+    const { result, unmount } = renderHook(() => useRequestObservable());
 
     act(() => {
       autoRefreshConfig$.next({ isPaused: true, interval: 5000 });

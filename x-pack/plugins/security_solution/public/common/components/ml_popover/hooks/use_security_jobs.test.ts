@@ -75,9 +75,7 @@ describe('useSecurityJobs', () => {
       const { result } = renderHook(() => useSecurityJobs(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
-
-      expect(result.current.jobs).toHaveLength(6);
+      await waitFor(() => expect(result.current.jobs).toHaveLength(6));
       expect(result.current.jobs).toEqual(expect.arrayContaining([expectedSecurityJob]));
     });
 

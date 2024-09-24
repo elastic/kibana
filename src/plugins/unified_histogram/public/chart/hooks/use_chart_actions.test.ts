@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { act } from 'react-test-renderer';
+import { act } from '@testing-library/react';
 import { UnifiedHistogramChartContext } from '../../types';
 import { useChartActions } from './use_chart_actions';
 
