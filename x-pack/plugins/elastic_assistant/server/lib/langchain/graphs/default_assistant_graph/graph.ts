@@ -94,6 +94,10 @@ export const getDefaultAssistantGraph = ({
         value: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
       },
+      isOssModel: {
+        value: (x: boolean, y?: boolean) => y ?? x,
+        default: () => false,
+      },
       conversation: {
         value: (x: ConversationResponse | undefined, y?: ConversationResponse | undefined) =>
           y ?? x,

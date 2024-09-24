@@ -189,6 +189,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     conversationId,
     llmType,
     isStream,
+    isOssModel,
     input: latestMessage[0]?.content as string,
   };
 

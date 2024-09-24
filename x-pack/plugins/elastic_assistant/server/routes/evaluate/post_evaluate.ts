@@ -197,6 +197,7 @@ export const postEvaluateRoute = (
             name: string;
             graph: DefaultAssistantGraph;
             llmType: string | undefined;
+            isOssModel: boolean | undefined;
           }> = await Promise.all(
             connectors.map(async (connector) => {
               const llmType = getLlmType(connector.actionTypeId);
@@ -316,6 +317,7 @@ export const postEvaluateRoute = (
               return {
                 name: `${runName} - ${connector.name}`,
                 llmType,
+                isOssModel,
                 graph: getDefaultAssistantGraph({
                   agentRunnable,
                   dataClients,
@@ -329,7 +331,7 @@ export const postEvaluateRoute = (
           );
 
           // Run an evaluation for each graph so they show up separately (resulting in each dataset run grouped by connector)
-          await asyncForEach(graphs, async ({ name, graph, llmType }) => {
+          await asyncForEach(graphs, async ({ name, graph, llmType, isOssModel }) => {
             // Wrapper function for invoking the graph (to parse different input/output formats)
             const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
@@ -342,6 +344,7 @@ export const postEvaluateRoute = (
                   llmType,
                   bedrockChatEnabled: true,
                   isStreaming: false,
+                  isOssModel,
                 }, // TODO: Update to use the correct input format per dataset type
                 {
                   runName,

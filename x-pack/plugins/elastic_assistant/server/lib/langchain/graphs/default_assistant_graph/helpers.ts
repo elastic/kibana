@@ -84,8 +84,8 @@ export const streamGraph = async ({
   };
 
   if (
-    (inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') &&
-    inputs?.bedrockChatEnabled
+    inputs.isOssModel ||
+    ((inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') && inputs?.bedrockChatEnabled)
   ) {
     const stream = await assistantGraph.streamEvents(
       inputs,
@@ -96,7 +96,9 @@ export const streamGraph = async ({
         version: 'v2',
         streamMode: 'values',
       },
-      inputs?.llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
+      inputs.isOssModel || inputs?.llmType === 'bedrock'
+        ? { includeNames: ['Summarizer'] }
+        : undefined
     );
 
     for await (const { event, data, tags } of stream) {
