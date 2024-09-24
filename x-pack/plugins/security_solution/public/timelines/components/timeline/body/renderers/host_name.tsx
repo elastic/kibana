@@ -9,6 +9,7 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { LinkAnchor } from '../../../../../common/components/links/helpers';
 import { HostPanelKey } from '../../../../../flyout/entity_details/host_right';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
@@ -50,6 +51,9 @@ const HostNameComponent: React.FC<Props> = ({
   const hostName = `${value}`;
   const isInTimelineContext =
     hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
+  const {
+    services: { appName },
+  } = useKibana();
 
   const openHostDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent<Element, Event>) => {
@@ -81,7 +85,7 @@ const HostNameComponent: React.FC<Props> = ({
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
   // When this component is used outside of timeline/alerts table (i.e. in the flyout) we would still like it to link to the Host Details page
   const content = useMemo(() => {
-    return isInTimelineContext ? (
+    return isInTimelineContext || appName !== 'security' ? (
       <LinkAnchor onClick={openHostDetailsSidePanel} data-test-subj="host-details-button">
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
       </LinkAnchor>
@@ -90,7 +94,15 @@ const HostNameComponent: React.FC<Props> = ({
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
       </HostDetailsLink>
     );
-  }, [Component, hostName, isButton, isInTimelineContext, openHostDetailsSidePanel, title]);
+  }, [
+    Component,
+    hostName,
+    isButton,
+    isInTimelineContext,
+    openHostDetailsSidePanel,
+    title,
+    appName,
+  ]);
 
   return isString(value) && hostName.length > 0 ? (
     isDraggable ? (

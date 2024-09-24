@@ -8,13 +8,18 @@
  */
 
 import React, { useEffect } from 'react';
-import { ExpandableFlyoutProvider, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DiscoverGridFlyoutProps } from '../../../../components/discover_grid_flyout';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { SecurityProfileProviderFactory } from '../types';
 
 export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
-  RootProfileProvider
+  RootProfileProvider<{
+    solutionType: SolutionType.Security;
+    store: unknown;
+    appWrapper: React.FC;
+  }>
 > = async (services: ProfileProviderServices) => {
   const { discoverFeaturesRegistry } = services;
   const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-render');
@@ -22,17 +27,13 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   const reduxStoreInitFeature = discoverFeaturesRegistry.getById(
     'security-solution-redux-store-init'
   );
-  const store = await reduxStoreInitFeature?.init();
-
-  const appWrapperGetter = await appWrapperFeature?.getWrapper();
 
   return {
     profileId: 'security-root-profile',
     isExperimental: true,
     profile: {
       getRenderDocViewerFlyout: (PrevFlyout, params) => {
-        const AppWrapper = appWrapperGetter?.({ store });
-        const SecurityFlyout = (props) => {
+        const SecurityFlyout = (props: DiscoverGridFlyoutProps) => {
           const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
           useEffect(() => {
             if (!props.hit.raw._id) return;
@@ -50,22 +51,10 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
 
           return null;
         };
-        if (!AppWrapper) return null;
-
-        return (props) => (
-          <ExpandableFlyoutProvider>
-            <SecurityFlyout {...props} />
-          </ExpandableFlyoutProvider>
-        );
+        return (props) => <SecurityFlyout {...props} />;
       },
-      getRenderAppWrapper: async (PrevWrapper, params) => {
-        return (
-          appWrapperGetter?.({
-            store,
-          }) ?? PrevWrapper
-        );
-      },
-      getCellRenderers: (prev) => () => ({
+      getRenderAppWrapper: (PrevWrapper, params) => params.context.appWrapper,
+      getCellRenderers: (prev, params) => () => ({
         ...prev(),
         'host.name': (props) => {
           if (!cellRendererFeature) return undefined;
@@ -81,7 +70,17 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
     },
     resolve: async (params) => {
       if (params.solutionNavId === SolutionType.Security) {
-        return { isMatch: true, context: { solutionType: SolutionType.Security } };
+        const store = await reduxStoreInitFeature?.init();
+        const appWrapperGetter = await appWrapperFeature?.getWrapper();
+
+        return {
+          isMatch: true,
+          context: {
+            solutionType: SolutionType.Security,
+            store,
+            appWrapper: appWrapperGetter?.({ store }),
+          },
+        };
       }
 
       return {
