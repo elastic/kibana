@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { composeValidators, patternValidator } from '@kbn/ml-plugin/common';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/parse_interval'],
+};

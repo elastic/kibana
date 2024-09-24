@@ -6,18 +6,19 @@
  */
 
 import { useMemo } from 'react';
+import moment from 'moment';
+import type { Observable } from 'rxjs';
+import { forkJoin, of, catchError, map } from 'rxjs';
+import { each, get } from 'lodash';
+
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import { isMultiBucketAnomaly, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import moment from 'moment';
-import type { Observable } from 'rxjs';
-import { forkJoin, of } from 'rxjs';
-import { each, get } from 'lodash';
-import { catchError, map } from 'rxjs';
 import { type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds, TimeBucketsInterval } from '@kbn/ml-time-buckets';
-import { parseInterval } from '../../../common/util/parse_interval';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import type { GetAnnotationsResponse } from '../../../common/types/annotations';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';

@@ -7,7 +7,9 @@
 
 import type { PropsWithChildren, FC } from 'react';
 import React, { useCallback, useState } from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { FieldStatsProps } from '@kbn/unified-field-list/src/components/field_stats';
@@ -16,33 +18,73 @@ import { getProcessedFields } from '@kbn/ml-data-grid';
 import { stringHash } from '@kbn/ml-string-hash';
 import { lastValueFrom } from 'rxjs';
 import { useRef } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getMergedSampleDocsForPopulatedFieldsQuery } from './populated_fields/get_merged_populated_fields_query';
-import { useMlKibana } from '../../contexts/kibana';
 import { FieldStatsFlyout } from './field_stats_flyout';
-import { MLFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
+import { MLFieldStatsFlyoutContext } from './use_field_stats_flyout_context';
 import { PopulatedFieldsCacheManager } from './populated_fields/populated_fields_cache_manager';
 
-export const FieldStatsFlyoutProvider: FC<
-  PropsWithChildren<{
-    dataView: DataView;
-    fieldStatsServices: FieldStatsServices;
-    timeRangeMs?: TimeRangeMs;
-    dslQuery?: FieldStatsProps['dslQuery'];
-    disablePopulatedFields?: boolean;
-  }>
-> = ({
-  dataView,
-  fieldStatsServices,
-  timeRangeMs,
-  dslQuery,
-  disablePopulatedFields = false,
-  children,
-}) => {
+type Services = CoreStart & {
+  data: DataPublicPluginStart;
+};
+
+function useDataSearch() {
+  const { data } = useKibana<Services>().services;
+
+  if (!data) {
+    throw new Error('Kibana data service not available.');
+  }
+
+  return data.search;
+}
+
+/**
+ * Props for the FieldStatsFlyoutProvider component.
+ *
+ * @typedef {Object} FieldStatsFlyoutProviderProps
+ * @property dataView - The data view object.
+ * @property fieldStatsServices - Services required for field statistics.
+ * @property [timeRangeMs] - Optional time range in milliseconds.
+ * @property [dslQuery] - Optional DSL query for filtering field statistics.
+ * @property [disablePopulatedFields] - Optional flag to disable populated fields.
+ */
+export type FieldStatsFlyoutProviderProps = PropsWithChildren<{
+  dataView: DataView;
+  fieldStatsServices: FieldStatsServices;
+  timeRangeMs?: TimeRangeMs;
+  dslQuery?: FieldStatsProps['dslQuery'];
+  disablePopulatedFields?: boolean;
+}>;
+
+/**
+ * Provides field statistics in a flyout component.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <FieldStatsFlyoutProvider
+ *   dataView={dataView}
+ *   fieldStatsServices={fieldStatsServices}
+ *   timeRangeMs={timeRangeMs}
+ *   dslQuery={dslQuery}
+ *   disablePopulatedFields={disablePopulatedFields}
+ * >
+ *   {children}
+ * </FieldStatsFlyoutProvider>
+ * ```
+ *
+ * @param {FieldStatsFlyoutProviderProps} props - The component props.
+ */
+export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (props) => {
   const {
-    services: {
-      data: { search },
-    },
-  } = useMlKibana();
+    dataView,
+    fieldStatsServices,
+    timeRangeMs,
+    dslQuery,
+    disablePopulatedFields = false,
+    children,
+  } = props;
+  const search = useDataSearch();
   const [isFieldStatsFlyoutVisible, setFieldStatsIsFlyoutVisible] = useState(false);
   const [fieldName, setFieldName] = useState<string | undefined>();
   const [fieldValue, setFieldValue] = useState<string | number | undefined>();

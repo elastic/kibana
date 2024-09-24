@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ALLOWED_DATA_UNITS } from '../constants/validation';
-import { parseInterval } from './parse_interval';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
+import { ALLOWED_DATA_UNITS } from './constants';
 
 /**
  * Provides a validator function for maximum allowed input length.
@@ -27,8 +28,9 @@ export function maxLengthValidator(
 }
 
 /**
- * Provides a validator function for checking against pattern.
- * @param pattern
+ * Factory that provides a validator function for checking against pattern.
+ * @param pattern Pattern to check against.
+ * @returns A validator function that checks if the value matches the pattern.
  */
 export function patternValidator(
   pattern: RegExp
@@ -44,8 +46,10 @@ export function patternValidator(
 }
 
 /**
- * Composes multiple validators into a single function
- * @param validators
+ * Factory that composes multiple validators into a single function.
+ *
+ * @param validators List of validators to compose.
+ * @returns A validator function that runs all the validators.
  */
 export function composeValidators(
   ...validators: Array<(value: any) => { [key: string]: any } | null>
@@ -58,16 +62,32 @@ export function composeValidators(
   };
 }
 
+/**
+ * Factory to create a required validator function.
+ * @returns A validator function that checks if the value is empty.
+ */
 export function requiredValidator() {
   return <T extends string>(value: T) => {
     return value === '' || value === undefined || value === null ? { required: true } : null;
   };
 }
 
+/**
+ * Type for the result of a validation.
+ */
 export type ValidationResult = Record<string, any> | null;
 
+/**
+ * Type for the result of a memory input validation.
+ */
 export type MemoryInputValidatorResult = { invalidUnits: { allowedUnits: string } } | null;
 
+/**
+ * Factory for creating a memory input validator function.
+ *
+ * @param allowedUnits Allowed units for the memory input.
+ * @returns A validator function that checks if the value is a valid memory input.
+ */
 export function memoryInputValidator(allowedUnits = ALLOWED_DATA_UNITS) {
   return <T>(value: T) => {
     if (typeof value !== 'string' || value === '') {
@@ -80,6 +100,11 @@ export function memoryInputValidator(allowedUnits = ALLOWED_DATA_UNITS) {
   };
 }
 
+/**
+ * Factory for creating a time interval input validator function.
+ *
+ * @returns A validator function that checks if the value is a valid time interval.
+ */
 export function timeIntervalInputValidator() {
   return (value: string) => {
     if (value === '') {
@@ -97,6 +122,12 @@ export function timeIntervalInputValidator() {
   };
 }
 
+/**
+ * Factory to create a dictionary validator function.
+ * @param dict Dictionary to check against.
+ * @param shouldInclude Whether the value should be included in the dictionary.
+ * @returns A validator function that checks if the value is in the dictionary.
+ */
 export function dictionaryValidator(dict: string[], shouldInclude: boolean = false) {
   const dictSet = new Set(dict);
   return (value: string) => {

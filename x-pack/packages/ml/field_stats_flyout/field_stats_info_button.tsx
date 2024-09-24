@@ -7,30 +7,81 @@
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { type FC } from 'react';
 import { FieldIcon } from '@kbn/react-field';
 import { type Field } from '@kbn/ml-anomaly-utils';
-import { useCurrentThemeVars } from '../../contexts/kibana';
-import { getKbnFieldIconType } from '../../../../common/util/get_field_icon_types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
 
+import { getKbnFieldIconType } from './get_kbn_field_icon_types';
+
+function useThemeVars() {
+  const { theme } = useKibana().services;
+
+  if (!theme) {
+    throw new TypeError('theme service not available in kibana-react context.');
+  }
+
+  return useCurrentEuiThemeVars(theme);
+}
+
+/**
+ * Represents a field used for statistics.
+ */
 export type FieldForStats = Pick<Field, 'id' | 'type'>;
-export const FieldStatsInfoButton = ({
-  field,
-  label,
-  onButtonClick,
-  disabled,
-  isEmpty = false,
-  hideTrigger = false,
-}: {
+
+/**
+ * Represents the props for the FieldStatsInfoButton component.
+ */
+export interface FieldStatsInfoButtonProps {
+  /**
+   * The field for which to display statistics.
+   */
   field: FieldForStats;
+  /**
+   * The label for the field.
+   */
   label: string;
-  searchValue?: string;
-  disabled?: boolean;
-  isEmpty?: boolean;
+  /**
+   * Button click callback function.
+   * @param field - The field for which to display statistics.
+   * @returns void
+   */
   onButtonClick?: (field: FieldForStats) => void;
+  /**
+   * If true, the button is disabled.
+   */
+  disabled?: boolean;
+  /**
+   * If true, the field is empty.
+   */
+  isEmpty?: boolean;
+  /**
+   * If true, the trigger is hidden.
+   */
   hideTrigger?: boolean;
-}) => {
-  const themeVars = useCurrentThemeVars();
+}
+
+/**
+ * Renders a button component for field statistics information.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <FieldStatsInfoButton
+ *   field={field}
+ *   label={label}
+ *   onButtonClick={handleButtonClick}
+ *   disabled={false}
+ *   isEmpty={true}
+ *   hideTrigger={false}
+ * />
+ * ```
+ * @param {FieldStatsInfoButtonProps} props - The props for the FieldStatsInfoButton component.
+ */
+export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
+  const { field, label, onButtonClick, disabled, isEmpty, hideTrigger } = props;
+  const themeVars = useThemeVars();
   const emptyFieldMessage = isEmpty
     ? ' ' +
       i18n.translate('xpack.ml.newJob.wizard.fieldContextPopover.emptyFieldInSampleDocsMsg', {
