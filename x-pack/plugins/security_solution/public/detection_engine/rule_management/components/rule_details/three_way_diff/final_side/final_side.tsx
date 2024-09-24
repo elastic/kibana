@@ -12,9 +12,8 @@ import { SideHeader } from '../components/side_header';
 import { FinalSideHelpInfo } from './final_side_help_info';
 import * as i18n from './translations';
 import { FinalReadOnly } from '../final_readonly/final_readonly';
-import { FinalEdit } from '../final_edit/final_edit';
-// import { FinalEdit } from '../final_edit/final_edit_2';
 import type { SetFieldResolvedValueFn } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+import { FinalEdit } from '../final_edit/final_edit';
 
 interface FinalSideProps {
   fieldName: string;
