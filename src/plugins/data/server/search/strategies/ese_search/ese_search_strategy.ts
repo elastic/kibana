@@ -23,7 +23,6 @@ import {
   getDefaultAsyncGetParams,
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
-  toKibanaResponse,
 } from './request_utils';
 import {
   toAsyncKibanaSearchResponse,
@@ -148,7 +147,7 @@ export const enhancedEsSearchStrategyProvider = (
     }).pipe(
       mergeMap(async (response) => {
         if (!options.stream) {
-          return await toKibanaResponse(response);
+          return await toKibsanaResponse(response);
         }
         return response;
       }),

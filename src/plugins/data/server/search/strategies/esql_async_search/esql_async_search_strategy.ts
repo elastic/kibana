@@ -8,12 +8,14 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs';
+import { catchError, mergeMap, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
+import { Readable } from 'stream';
+import { parseJsonFromStream } from '../ese_search/request_utils';
 import {
   getCommonDefaultAsyncSubmitParams,
   getCommonDefaultAsyncGetParams,
@@ -121,9 +123,18 @@ export const esqlAsyncSearchStrategyProvider = (
       pollInterval: searchConfig.asyncSearch.pollInterval,
       ...options,
     }).pipe(
+      mergeMap(async (response) => {
+        if (!options.stream) {
+          const data = {
+            ...response,
+            rawResponse: await parseJsonFromStream(response.rawResponse as unknown as Readable),
+          };
+          return data;
+        }
+        return response;
+      }),
       tap((response) => (id = response.id)),
       catchError((e) => {
-        console.log(e);
         throw getKbnSearchError(e);
       })
     );

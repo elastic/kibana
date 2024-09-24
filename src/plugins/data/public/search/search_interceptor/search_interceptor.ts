@@ -464,7 +464,7 @@ export class SearchInterceptor {
         .then((response) => {
           switch (strategy) {
             case ENHANCED_ES_SEARCH_STRATEGY:
-              if (response.rawResponse) return response;
+              if ((response as IKibanaSearchResponse).rawResponse) return response;
               const typedResponse = response as unknown as AsyncSearchGetResponse;
               const shimmedResponse = shimHitsTotal(typedResponse.response);
               return {

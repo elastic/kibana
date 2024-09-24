@@ -10,7 +10,7 @@
 import { IUiSettingsClient } from '@kbn/core/server';
 import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
-import { IEsSearchResponse, ISearchOptions } from '@kbn/search-types';
+import { ISearchOptions } from '@kbn/search-types';
 import { Readable, promises } from 'stream';
 import {
   AsyncSearchResponse,
@@ -79,7 +79,10 @@ export function getDefaultAsyncGetParams(
   };
 }
 
-export const toKibanaResponse = async (resp: IEsSearchResponse) => {
+export const toKibanaResponse = async (
+  resp: Record<string, unknown>,
+  shimTotals: boolean = true
+) => {
   let result = { ...resp };
   if ((resp.rawResponse as unknown as Readable).pipe) {
     result = await parseJsonFromStream(resp.rawResponse as unknown as Readable);
@@ -91,8 +94,8 @@ export const toKibanaResponse = async (resp: IEsSearchResponse) => {
       id: typedResult.id,
       isRunning: typedResult.is_running,
       isPartial: typedResult.is_partial,
-      rawResponse: { ...shimHitsTotal(typedResult.response) },
-      ...getTotalLoaded(typedResult.response),
+      rawResponse: { ...(shimTotals ? shimHitsTotal(typedResult.response) : typedResult.response) },
+      ...(shimTotals ? getTotalLoaded(typedResult.response) : {}),
     };
   }
 
