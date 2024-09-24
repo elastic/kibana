@@ -43,6 +43,7 @@ import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
 import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
+import type { RequestLike } from './util';
 
 type Options = AddVersionOpts<unknown, unknown, unknown>;
 
@@ -133,7 +134,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     return this.handlers.size ? '[' + [...this.handlers.keys()].join(', ') + ']' : '<none>';
   }
 
-  private getVersion(req: Pick<KibanaRequest, 'headers' | 'query'>): ApiVersion | undefined {
+  private getVersion(req: RequestLike): ApiVersion | undefined {
     let version;
     const maybeVersion = readVersion(req, this.enableQueryVersion);
     if (!maybeVersion && (this.isPublic || this.useDefaultStrategyForPath)) {
@@ -276,7 +277,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     return [...this.handlers.values()];
   }
 
-  public getSecurity: RouteSecurityGetter = (req: Pick<KibanaRequest, 'headers' | 'query'>) => {
+  public getSecurity: RouteSecurityGetter = (req: RequestLike) => {
     const version = this.getVersion(req)!;
 
     return this.handlers.get(version)?.options.security ?? this.defaultSecurityConfig;
