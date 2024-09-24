@@ -72,6 +72,7 @@ export const DataProviderQueryMatch = z.object({
   kqlQuery: z.string().nullable().optional(),
   name: z.string().nullable().optional(),
   queryMatch: QueryMatchResult.nullable().optional(),
+  type: DataProviderType.nullable().optional(),
 });
 
 export type DataProviderResult = z.infer<typeof DataProviderResult>;
