@@ -15,6 +15,7 @@ import {
   getKibanaMigratorTestKit,
   nextMinor,
   defaultKibanaIndex,
+  defaultKibanaTaskIndex,
 } from '../kibana_migrator_test_kit';
 import '../jest_matchers';
 import { delay, parseLogFile } from '../test_utils';
@@ -51,12 +52,19 @@ describe('when rolling back to an older version', () => {
     const { runMigrations: rollback } = await getKibanaMigratorTestKit({ types, logFilePath });
 
     await clearLog(logFilePath);
-    await expect(rollback()).rejects.toThrowError(
-      `Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: The ${defaultKibanaIndex}_${nextMinor} alias refers to a newer version of Kibana: v${nextMinor}`
-    );
+
+    try {
+      await rollback();
+      throw new Error('Rollback should have thrown but it did not');
+    } catch (error) {
+      expect([
+        `Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: The ${defaultKibanaIndex}_${nextMinor} alias refers to a newer version of Kibana: v${nextMinor}`,
+        `Unable to complete saved object migrations for the [${defaultKibanaTaskIndex}] index: The ${defaultKibanaTaskIndex}_${nextMinor} alias refers to a newer version of Kibana: v${nextMinor}`,
+      ]).toContain(error.message);
+    }
 
     const logs = await parseLogFile(logFilePath);
-    expect(logs).toContainLogEntry('[.kibana_migrator_tests] INIT -> FATAL.');
+    expect(logs).toContainLogEntry(`[${defaultKibanaIndex}] INIT -> FATAL.`);
   });
 
   afterAll(async () => {
