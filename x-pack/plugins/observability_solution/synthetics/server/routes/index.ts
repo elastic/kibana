@@ -33,10 +33,7 @@ import {
   disableSyntheticsRoute,
   getSyntheticsEnablementRoute,
 } from './synthetics_service/enablement';
-import {
-  getSyntheticsMonitorOverviewRoute,
-  getSyntheticsMonitorRoute,
-} from './monitor_cruds/get_monitor';
+import { getSyntheticsMonitorRoute } from './monitor_cruds/get_monitor';
 import { deleteSyntheticsMonitorProjectRoute } from './monitor_cruds/delete_monitor_project';
 import { getSyntheticsProjectMonitorsRoute } from './monitor_cruds/get_monitor_project';
 import { runOnceSyntheticsMonitorRoute } from './synthetics_service/run_once_monitor';
@@ -70,7 +67,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getServiceLocationsRoute,
   getSyntheticsProjectMonitorsRoute,
   getAllSyntheticsMonitorRoute,
-  getSyntheticsMonitorOverviewRoute,
   installIndexTemplatesRoute,
   runOnceSyntheticsMonitorRoute,
   testNowMonitorRoute,
