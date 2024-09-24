@@ -37,3 +37,13 @@ jest.mock('./public/services/dashboard_backup_service', () => {
     dashboardBackupService: mockDashboardBackupService,
   };
 });
+
+jest.mock('./public/services/dashboard_recently_accessed_service', () => {
+  return {
+    dashboardRecentlyAccessed: {
+      add: jest.fn(),
+      get: jest.fn(),
+      get$: jest.fn(),
+    },
+  };
+});
