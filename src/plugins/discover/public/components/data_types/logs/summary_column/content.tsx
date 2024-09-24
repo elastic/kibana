@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable react/no-danger */
+
 import React, { useMemo } from 'react';
 import {
   EuiDescriptionList,
@@ -49,6 +51,7 @@ const LogMessage = ({
           {field}
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
+          data-test-subj="discoverDataTableMessageValue"
           className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={{ __html: value }}
         />
@@ -56,8 +59,12 @@ const LogMessage = ({
     );
   }
 
-  // eslint-disable-next-line react/no-danger
-  return <span dangerouslySetInnerHTML={{ __html: value }} />;
+  return (
+    <span
+      data-test-subj="discoverDataTableMessageValue"
+      dangerouslySetInnerHTML={{ __html: value }}
+    />
+  );
 };
 
 export const Content = ({
