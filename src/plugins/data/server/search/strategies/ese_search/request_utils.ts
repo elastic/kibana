@@ -12,7 +12,12 @@ import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithB
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import { IEsSearchResponse, ISearchOptions } from '@kbn/search-types';
 import { Readable, promises } from 'stream';
-import { UI_SETTINGS } from '../../../../common';
+import {
+  AsyncSearchResponse,
+  getTotalLoaded,
+  shimHitsTotal,
+  UI_SETTINGS,
+} from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import { SearchConfigSchema } from '../../../config';
 import {
@@ -80,11 +85,14 @@ export const toKibanaResponse = async (resp: IEsSearchResponse) => {
     result = await parseJsonFromStream(resp.rawResponse as unknown as Readable);
   }
   if (!result.rawResponse) {
+    const typedResult = result as unknown as AsyncSearchResponse;
+
     result = {
-      id: result.id,
-      isRunning: result.is_running,
-      isPartial: result.is_partial,
-      rawResponse: { ...result.response },
+      id: typedResult.id,
+      isRunning: typedResult.is_running,
+      isPartial: typedResult.is_partial,
+      rawResponse: { ...shimHitsTotal(typedResult.response) },
+      ...getTotalLoaded(typedResult.response),
     };
   }
 
