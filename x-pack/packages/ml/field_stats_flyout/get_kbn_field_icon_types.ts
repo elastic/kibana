@@ -8,6 +8,12 @@
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { FieldIconProps } from '@kbn/react-field';
 
+/**
+ * Returns the Kibana field icon type based on the provided field type.
+ *
+ * @param fieldType - The type of the field for which the icon type is needed.
+ * @returns The icon type corresponding to the provided field type.
+ */
 export function getKbnFieldIconType(type: string): FieldIconProps['type'] {
   switch (type) {
     case ES_FIELD_TYPES.FLOAT:

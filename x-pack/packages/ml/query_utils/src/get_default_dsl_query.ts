@@ -6,9 +6,10 @@
  */
 
 import { cloneDeep } from 'lodash';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-const DEFAULT_QUERY = {
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+const DEFAULT_DSL_QUERY: estypes.QueryDslQueryContainer = {
   bool: {
     must: [
       {
@@ -21,6 +22,6 @@ const DEFAULT_QUERY = {
 /**
  * Default DSL query which matches all the results
  */
-export function getDefaultDSLQuery(): QueryDslQueryContainer {
-  return cloneDeep(DEFAULT_QUERY);
+export function getDefaultDSLQuery(): estypes.QueryDslQueryContainer {
+  return cloneDeep(DEFAULT_DSL_QUERY);
 }
