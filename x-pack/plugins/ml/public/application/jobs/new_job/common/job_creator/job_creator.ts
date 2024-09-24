@@ -45,9 +45,7 @@ import type { CREATED_BY_LABEL } from '../../../../../../common/constants/new_jo
 import { JOB_TYPE, SHARED_RESULTS_INDEX_NAME } from '../../../../../../common/constants/new_job';
 import { collectAggs } from './util/general';
 import { filterRuntimeMappings } from './util/filter_runtime_mappings';
-import { parseInterval } from '../../../../../../common/util/parse_interval';
 import type { MlCalendar } from '../../../../../../common/types/calendars';
-import type { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
 import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
