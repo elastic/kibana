@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { navigateToCasesApp } from '../../../../../../shared/lib/cases';
 
 export default function ({ getPageObject, getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['header']);
   const retry = getService('retry');
   const svlCases = getService('svlCases');
   const svlCommonScreenshots = getService('svlCommonScreenshots');
