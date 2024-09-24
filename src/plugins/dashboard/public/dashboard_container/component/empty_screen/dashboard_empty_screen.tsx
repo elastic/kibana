@@ -63,7 +63,7 @@ export function DashboardEmptyScreen() {
     if (trackUiMetric) {
       trackUiMetric(METRIC_TYPE.CLICK, `${lensAlias.name}:create`);
     }
-    const appContext = dashboardApi.getAppContext(); 
+    const appContext = dashboardApi.getAppContext();
     getStateTransfer().navigateToEditor(lensAlias.alias.app, {
       path: lensAlias.alias.path,
       state: {
@@ -72,13 +72,7 @@ export function DashboardEmptyScreen() {
         searchSessionId: search.session.getSessionId(),
       },
     });
-  }, [
-    getStateTransfer,
-    lensAlias,
-    dashboardApi,
-    search.session,
-    usageCollection,
-  ]);
+  }, [getStateTransfer, lensAlias, dashboardApi, search.session, usageCollection]);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = basePath.prepend(
