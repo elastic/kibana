@@ -243,13 +243,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     (bucketedColumns.length &&
       props.data.rows.every((row) => bucketedColumns.every((col) => row[col] == null)));
 
-  const visibleColumns = useMemo(
-    () =>
-      columnConfig.columns
-        .filter((col) => !!col.columnId && !col.hidden)
-        .map((col) => col.columnId),
-    [columnConfig]
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
+    columnConfig.columns.filter((col) => !!col.columnId && !col.hidden).map((col) => col.columnId)
   );
+
+  useEffect(() => {
+    setVisibleColumns(() =>
+      columnConfig.columns.filter((col) => !!col.columnId && !col.hidden).map((col) => col.columnId)
+    );
+  }, [columnConfig]);
 
   const isReadOnlySorted = renderMode !== 'edit';
 
@@ -458,7 +460,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const columnVisibility = useMemo(
     () => ({
       visibleColumns,
-      setVisibleColumns: () => {},
+      setVisibleColumns: (newColumns: string[]) => {
+        setVisibleColumns(newColumns);
+      },
     }),
     [visibleColumns]
   );
