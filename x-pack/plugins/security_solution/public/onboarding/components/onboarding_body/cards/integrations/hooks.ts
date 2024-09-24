@@ -41,6 +41,7 @@ export const useTabMetaData = (toggleIdSelected: string) => {
   const selectedSubCategory = selectedTab?.subCategory;
   const showSearchTools = selectedTab?.showSearchTools ?? true;
   const customCardNames = useMemo(() => selectedTab?.customCardNames, [selectedTab]);
+  const overflow = selectedTab?.overflow ?? 'scroll';
 
   return useMemo(() => {
     return {
@@ -48,6 +49,7 @@ export const useTabMetaData = (toggleIdSelected: string) => {
       customCardNames,
       selectedCategory,
       selectedSubCategory,
+      overflow,
     };
-  }, [showSearchTools, customCardNames, selectedCategory, selectedSubCategory]);
+  }, [showSearchTools, customCardNames, selectedCategory, selectedSubCategory, overflow]);
 };

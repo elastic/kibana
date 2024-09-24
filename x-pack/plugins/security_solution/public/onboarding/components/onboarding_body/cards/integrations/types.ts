@@ -12,4 +12,5 @@ export interface Tab {
   label: string;
   showSearchTools?: boolean;
   subCategory?: string;
+  overflow?: 'hidden' | 'scroll';
 }

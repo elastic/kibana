@@ -38,7 +38,7 @@ export const IntegrationsCard: OnboardingCardComponent = ({
               <FormattedMessage
                 id="xpack.securitySolution.onboarding.integrationsCard.callout.completeLabel"
                 defaultMessage={`
-      {desc1} {desc2}
+      {desc1} {desc2} {icon}
     `}
                 values={{
                   desc1: checkCompleteMetadata?.agentStillRequired ? (
@@ -59,7 +59,6 @@ export const IntegrationsCard: OnboardingCardComponent = ({
                         id="xpack.securitySolution.onboarding.integrationsCard.agent.link"
                         defaultMessage="here"
                       />
-                      <EuiIcon type="arrowRight" size="s" />
                     </LinkAnchor>
                   ) : (
                     <LinkAnchor onClick={onClick} href={href}>
@@ -67,9 +66,9 @@ export const IntegrationsCard: OnboardingCardComponent = ({
                         id="xpack.securitySolution.onboarding.integrationsCard.button.completeLink"
                         defaultMessage="Manage integrations"
                       />
-                      <EuiIcon type="arrowRight" size="s" />
                     </LinkAnchor>
                   ),
+                  icon: <EuiIcon type="arrowRight" size="s" />,
                 }}
               />
             }

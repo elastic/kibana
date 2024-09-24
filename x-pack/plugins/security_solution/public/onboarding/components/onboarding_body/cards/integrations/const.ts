@@ -22,6 +22,7 @@ export const INTEGRATION_TABS: Tab[] = [
     category: 'security',
     iconType: 'starFilled',
     showSearchTools: false,
+    overflow: 'hidden',
   },
   {
     id: 'network',

@@ -34,7 +34,7 @@ interface WrapperProps {
 }
 export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProps) => {
   const { spaceId } = useOnboardingContext();
-  const scrollElement = useRef(null);
+  const scrollElement = useRef<HTMLDivElement>(null);
   const [selectedTabId, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
     spaceId,
     DEFAULT_TAB.id
@@ -43,6 +43,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
   const [toggleIdSelected, setToggleIdSelected] = useState<string>(selectedTabId);
   const onTabChange = useCallback(
     (id: string) => {
+      scrollElement.current?.scrollTo(0, 0);
       setToggleIdSelected(id);
       setSelectedTabIdToStorage(id);
     },
@@ -60,7 +61,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
     prereleaseIntegrationsEnabled: false,
   });
 
-  const { showSearchTools, customCardNames, selectedCategory, selectedSubCategory } =
+  const { showSearchTools, customCardNames, selectedCategory, selectedSubCategory, overflow } =
     useTabMetaData(toggleIdSelected);
 
   const onSearchTermChanged = useCallback(
@@ -122,7 +123,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
       </EuiFlexItem>
       <EuiFlexItem
         css={css`
-          overflow-y: scroll;
+          overflow-y: ${overflow};
         `}
         grow={1}
         id={SCROLL_ELEMENT_ID}
