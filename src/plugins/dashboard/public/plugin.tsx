@@ -335,28 +335,26 @@ export class DashboardPlugin
       import('./services/dashboard_backup_service'),
       import('./services/dashboard_content_management_service'),
       import('./services/dashboard_recently_accessed_service'),
+      import('./dashboard_actions'),
       untilPluginStartServicesReady(),
     ]).then(
       ([
         { setDashboardBackupService },
         { setDashboardContentManagementService },
         { setDashboardRecentlyAccessedService },
+        { buildAllDashboardActions },
       ]) => {
         setDashboardBackupService();
         setDashboardContentManagementService();
         setDashboardRecentlyAccessedService();
+
+        buildAllDashboardActions({
+          core,
+          plugins,
+          allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
+        });
       }
     );
-
-    untilPluginStartServicesReady().then(async () => {
-      const { buildAllDashboardActions } = await import('./dashboard_actions');
-
-      buildAllDashboardActions({
-        core,
-        plugins,
-        allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
-      });
-    });
 
     return {
       locator: this.locator,
