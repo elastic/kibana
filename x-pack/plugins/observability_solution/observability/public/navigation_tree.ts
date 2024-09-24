@@ -350,7 +350,8 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
           },
           {
             id: 'machine_learning-landing',
-            link: 'securitySolutionUI:machine_learning-landing',
+            // link: 'securitySolutionUI:machine_learning-landing',
+            link: 'machine_learning-landing',
             renderAs: 'panelOpener',
             spaceBefore: null,
             children: [
