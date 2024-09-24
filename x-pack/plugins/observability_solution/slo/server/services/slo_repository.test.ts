@@ -82,6 +82,21 @@ describe('KibanaSavedObjectsSLORepository', () => {
   });
 
   describe('saving an SLO', () => {
+    it('finding existing id for slo', async () => {
+      const slo = createSLO({ id: 'my-id' });
+      soClientMock.find.mockResolvedValueOnce(soFindResponse([]));
+      soClientMock.create.mockResolvedValueOnce(aStoredSLO(slo));
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock, loggerMock);
+
+      await repository.getExistingSavedObjectId(slo);
+
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_SLO_TYPE,
+        perPage: 0,
+        filter: `slo.attributes.id:(${slo.id})`,
+      });
+    });
+
     it('saves the new SLO', async () => {
       const slo = createSLO({ id: 'my-id' });
       soClientMock.find.mockResolvedValueOnce(soFindResponse([]));
@@ -91,12 +106,6 @@ describe('KibanaSavedObjectsSLORepository', () => {
       const savedSLO = await repository.save(slo);
 
       expect(savedSLO).toEqual(slo);
-      expect(soClientMock.find).toHaveBeenCalledWith({
-        type: SO_SLO_TYPE,
-        page: 1,
-        perPage: 1,
-        filter: `slo.attributes.id:(${slo.id})`,
-      });
       expect(soClientMock.create).toHaveBeenCalledWith(
         SO_SLO_TYPE,
         sloDefinitionSchema.encode(slo),
@@ -112,13 +121,12 @@ describe('KibanaSavedObjectsSLORepository', () => {
       soClientMock.find.mockResolvedValueOnce(soFindResponse([slo]));
       const repository = new KibanaSavedObjectsSLORepository(soClientMock, loggerMock);
 
-      await expect(repository.save(slo, { throwOnConflict: true })).rejects.toThrowError(
-        new SLOIdConflict(`SLO [my-id] already exists`)
-      );
+      await expect(
+        repository.getExistingSavedObjectId(slo, { throwOnConflict: true })
+      ).rejects.toThrowError(new SLOIdConflict(`SLO [my-id] already exists`));
       expect(soClientMock.find).toHaveBeenCalledWith({
         type: SO_SLO_TYPE,
-        page: 1,
-        perPage: 1,
+        perPage: 0,
         filter: `slo.attributes.id:(${slo.id})`,
       });
     });
@@ -129,15 +137,10 @@ describe('KibanaSavedObjectsSLORepository', () => {
       soClientMock.create.mockResolvedValueOnce(aStoredSLO(slo));
       const repository = new KibanaSavedObjectsSLORepository(soClientMock, loggerMock);
 
-      const savedSLO = await repository.save(slo);
+      const savedSLO = await repository.save(slo, { existingSavedObjectId: 'my-id' });
 
       expect(savedSLO).toEqual(slo);
-      expect(soClientMock.find).toHaveBeenCalledWith({
-        type: SO_SLO_TYPE,
-        page: 1,
-        perPage: 1,
-        filter: `slo.attributes.id:(${slo.id})`,
-      });
+
       expect(soClientMock.create).toHaveBeenCalledWith(
         SO_SLO_TYPE,
         sloDefinitionSchema.encode(slo),

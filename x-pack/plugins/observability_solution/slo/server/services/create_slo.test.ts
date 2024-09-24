@@ -81,7 +81,7 @@ describe('CreateSLO', () => {
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
         }),
-        { throwOnConflict: true }
+        { existingSavedObjectId: undefined }
       );
 
       expect(mockTransformManager.install).toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe('CreateSLO', () => {
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
         }),
-        { throwOnConflict: true }
+        { existingSavedObjectId: undefined }
       );
     });
 
@@ -154,7 +154,7 @@ describe('CreateSLO', () => {
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
         }),
-        { throwOnConflict: true }
+        { existingSavedObjectId: undefined }
       );
     });
   });

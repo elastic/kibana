@@ -91,6 +91,8 @@ export class CreateSLO {
         tempDocPromise,
       ]);
 
+      // transforms can only be started after the pipeline is created
+
       await Promise.all([
         this.transformManager.start(rollupTransformId),
         this.summaryTransformManager.start(summaryTransformId),
