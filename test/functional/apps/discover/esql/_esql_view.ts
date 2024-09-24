@@ -701,6 +701,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
       });
 
+      it('should add filter using histogram legend values', async () => {
+        await discover.clickLegendFilter('png', '+');
+        await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(`from logstash-*\nAND \`extension\`=="png"`);
+      });
+
       it('should save breakdown field in saved search', async () => {
         await discover.saveSearch('esql view with breakdown');
 
