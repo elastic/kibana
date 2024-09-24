@@ -10,7 +10,8 @@
 import { IUiSettingsClient } from '@kbn/core/server';
 import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ISearchOptions } from '@kbn/search-types';
+import { IEsSearchResponse, ISearchOptions } from '@kbn/search-types';
+import { Readable, promises } from 'stream';
 import { UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import { SearchConfigSchema } from '../../../config';
@@ -72,3 +73,36 @@ export function getDefaultAsyncGetParams(
     ...getCommonDefaultAsyncGetParams(searchConfig, options),
   };
 }
+
+export const toKibanaResponse = async (resp: IEsSearchResponse) => {
+  let result = { ...resp };
+  if ((resp.rawResponse as unknown as Readable).pipe) {
+    result = await parseJsonFromStream(resp.rawResponse as unknown as Readable);
+  }
+  if (!result.rawResponse) {
+    result = {
+      id: result.id,
+      isRunning: result.is_running,
+      isPartial: result.is_partial,
+      rawResponse: { ...result.response },
+    };
+  }
+
+  return result;
+};
+
+export const parseJsonFromStream = async (stream: Readable) => {
+  try {
+    return JSON.parse(
+      await promises.pipeline(stream, async (source) => {
+        let data = '';
+        for await (const chunk of source) {
+          data += chunk;
+        }
+        return data;
+      })
+    );
+  } catch (e) {
+    return {};
+  }
+};
