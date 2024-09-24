@@ -7,6 +7,7 @@
 
 import type { EuiSuperSelectOption, EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -118,19 +119,33 @@ export const SolutionView: FunctionComponent<Props> = ({
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.spaces.management.manageSpacePage.setSolutionViewMessage"
-                defaultMessage="Set solution view"
-              />
-            </h3>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.spaces.management.manageSpacePage.setSolutionViewMessage"
+                    defaultMessage="Select solution view"
+                  />
+                </h3>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiBetaBadge
+                  label={i18n.translate(
+                    'xpack.spaces.management.manageSpacePage.setSolutionViewNewBadge',
+                    { defaultMessage: 'New' }
+                  )}
+                  color="accent"
+                  size="s"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 id="xpack.spaces.management.manageSpacePage.setSolutionViewDescription"
-                defaultMessage="Determines the navigation all users will see for this space. Each solution view contains features from Analytics tools and Management."
+                defaultMessage="Focus the navigation and menus of this space on a specific solution. Features that are not relevant to the selected solution are no longer visible to users of this space."
               />
             </p>
           </EuiText>
