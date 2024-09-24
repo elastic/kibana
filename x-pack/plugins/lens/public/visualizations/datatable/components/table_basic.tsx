@@ -60,6 +60,7 @@ import { getFinalSummaryConfiguration } from '../../../../common/expressions/dat
 import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
 import { getFieldTypeFromDatatable } from '../../../../common/expressions/datatable/utils';
 import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import { getColumnAlignment } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -271,7 +272,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       firstLocalTable.columns.reduce<Record<string, boolean>>(
         (map, column) => ({
           ...map,
-          [column.id]: column.meta.type === 'number',
+          [column.id]: column.meta.type === 'number' && column.meta.params?.id !== 'range',
         }),
         {}
       ),
@@ -281,14 +282,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const alignments: Record<string, 'left' | 'right' | 'center'> = useMemo(() => {
     const alignmentMap: Record<string, 'left' | 'right' | 'center'> = {};
     columnConfig.columns.forEach((column) => {
-      if (column.alignment) {
-        alignmentMap[column.columnId] = column.alignment;
-      } else {
-        alignmentMap[column.columnId] = isNumericMap[column.columnId] ? 'right' : 'left';
-      }
+      alignmentMap[column.columnId] = getColumnAlignment(
+        column.alignment,
+        isNumericMap[column.columnId]
+      );
     });
     return alignmentMap;
-  }, [columnConfig, isNumericMap]);
+  }, [columnConfig.columns, isNumericMap]);
 
   const minMaxByColumnId: Record<string, { min: number; max: number }> = useMemo(() => {
     return findMinMaxByColumnId(

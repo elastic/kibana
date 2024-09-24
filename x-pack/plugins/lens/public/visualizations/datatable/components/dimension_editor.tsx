@@ -26,6 +26,7 @@ import './dimension_editor.scss';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
+import { getColumnAlignment } from '../utils';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -76,7 +77,7 @@ export function TableDimensionEditor(
   const datasource = frame.datasourceLayers?.[localState.layerId];
   const { dataType, isBucketed } = datasource?.getOperationForColumnId(accessor) ?? {};
   const showColorByTerms = shouldColorByTerms(dataType, isBucketed);
-  const currentAlignment = column?.alignment || (dataType === 'number' ? 'right' : 'left');
+  const currentAlignment = getColumnAlignment(column?.alignment, dataType === 'number');
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
   const showDynamicColoringFeature = dataType !== 'date';
