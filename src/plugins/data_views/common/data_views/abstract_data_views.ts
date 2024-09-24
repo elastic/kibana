@@ -191,8 +191,6 @@ export abstract class AbstractDataView {
     this.sourceFilters = [...(spec.sourceFilters || [])];
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify({ ...extractedFieldAttrs, ...spec.fieldAttrs }));
     this.fieldAttrs = new Map(Object.entries({ ...extractedFieldAttrs, ...spec.fieldAttrs }));
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
@@ -303,8 +301,6 @@ export abstract class AbstractDataView {
     value: FieldAttrSet[K]
   ) {
     const fieldAttrs = this.fieldAttrs.get(fieldName) || {};
-    // eslint-disable-next-line no-console
-    console.log('### fieldAttrs', fieldAttrs, fieldName, attrName, value);
     this.fieldAttrs.set(fieldName, { ...fieldAttrs, [attrName]: value });
   }
 

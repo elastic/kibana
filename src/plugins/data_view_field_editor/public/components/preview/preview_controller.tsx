@@ -306,10 +306,6 @@ export class PreviewController {
 
       this.setIsSaving(false);
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('##################### HERE');
-      // eslint-disable-next-line no-console
-      console.log(e);
       const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
         defaultMessage: 'Failed to save field changes',
       });
