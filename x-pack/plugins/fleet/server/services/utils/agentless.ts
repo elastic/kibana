@@ -29,13 +29,13 @@ const AGENTLESS_SERVERLESS_API_BASE_PATH = '/api/v1/serverless';
 type AgentlessApiEndpoints = '/deployments' | `/deployments/${string}`;
 
 export interface AgentlessConfig {
-  enabled: boolean;
-  api: {
-    url: string;
-    tls: {
-      certificate: string;
-      key: string;
-      ca: string;
+  enabled?: boolean;
+  api?: {
+    url?: string;
+    tls?: {
+      certificate?: string;
+      key?: string;
+      ca?: string;
     };
   };
 }

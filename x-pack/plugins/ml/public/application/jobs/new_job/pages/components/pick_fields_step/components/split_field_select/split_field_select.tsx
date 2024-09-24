@@ -11,7 +11,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
-import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
+import { useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 
 interface DropDownLabel {
   label: string;

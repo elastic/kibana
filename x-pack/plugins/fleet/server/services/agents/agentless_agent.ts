@@ -7,11 +7,13 @@
 
 import https from 'https';
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, LogMeta, SavedObjectsClientContract } from '@kbn/core/server';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
+
+import apm from 'elastic-apm-node';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy } from '../../types';
@@ -35,6 +37,15 @@ class AgentlessAgentService {
     soClient: SavedObjectsClientContract,
     agentlessAgentPolicy: AgentPolicy
   ) {
+    const traceId = apm.currentTransaction?.traceparent;
+    const withRequestIdMessage = (message: string) => `${message} [Request Id: ${traceId}]`;
+
+    const errorMetadata: LogMeta = {
+      trace: {
+        id: traceId,
+      },
+    };
+
     const logger = appContextService.getLogger();
     logger.debug(`[Agentless API] Creating agentless agent ${agentlessAgentPolicy.id}`);
 
@@ -51,7 +62,7 @@ class AgentlessAgentService {
 
     const agentlessConfig = appContextService.getConfig()?.agentless;
     if (!agentlessConfig) {
-      logger.error('[Agentless API] Missing agentless configuration');
+      logger.error('[Agentless API] Missing agentless configuration', errorMetadata);
       throw new AgentlessAgentCreateError('missing agentless configuration');
     }
 
@@ -63,12 +74,15 @@ class AgentlessAgentService {
     );
 
     logger.debug(
-      `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleetToken ${fleetToken}`
+      `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleet_token: [REDACTED]`
     );
 
-    logger.debug(`[Agentless API] Creating agentless agent with TLS config with certificate: ${agentlessConfig.api.tls.certificate},
-       and key: ${agentlessConfig.api.tls.key}`);
-
+    logger.debug(
+      `[Agentless API] Creating agentless agent with TLS cert: ${
+        agentlessConfig?.api?.tls?.certificate ? '[REDACTED]' : 'undefined'
+      } and TLS key: ${agentlessConfig?.api?.tls?.key ? '[REDACTED]' : 'undefined'}
+      and TLS ca: ${agentlessConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
+    );
     const tlsConfig = this.createTlsConfig(agentlessConfig);
 
     const requestConfig: AxiosRequestConfig = {
@@ -81,6 +95,7 @@ class AgentlessAgentService {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
+        'X-Request-ID': traceId,
       },
       httpsAgent: new https.Agent({
         rejectUnauthorized: tlsConfig.rejectUnauthorized,
@@ -90,26 +105,34 @@ class AgentlessAgentService {
       }),
     };
 
-    const requestConfigDebug = this.createRequestConfigDebug(requestConfig);
-
     const cloudSetup = appContextService.getCloud();
     if (!cloudSetup?.isServerlessEnabled) {
       requestConfig.data.stack_version = appContextService.getKibanaVersion();
     }
 
+    const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
+
     logger.debug(
-      `[Agentless API] Creating agentless agent with request config ${requestConfigDebug}`
+      `[Agentless API] Creating agentless agent with request config ${requestConfigDebugStatus}`
     );
+    const errorMetadataWithRequestConfig: LogMeta = {
+      ...errorMetadata,
+      http: {
+        request: {
+          id: traceId,
+          body: requestConfig.data,
+        },
+      },
+    };
 
     const response = await axios<AgentlessApiResponse>(requestConfig).catch(
       (error: Error | AxiosError) => {
         if (!axios.isAxiosError(error)) {
           logger.error(
-            `[Agentless API] Creating agentless failed with an error ${error} ${JSON.stringify(
-              requestConfigDebug
-            )}`
+            `[Agentless API] Creating agentless failed with an error ${error} ${requestConfigDebugStatus}`,
+            errorMetadataWithRequestConfig
           );
-          throw new AgentlessAgentCreateError(error.message);
+          throw new AgentlessAgentCreateError(withRequestIdMessage(error.message));
         }
 
         const errorLogCodeCause = `${error.code}  ${this.convertCauseErrorsToString(error)}`;
@@ -119,28 +142,38 @@ class AgentlessAgentService {
           logger.error(
             `[Agentless API] Creating agentless failed because the Agentless API responding with a status code that falls out of the range of 2xx: ${JSON.stringify(
               error.response.status
-            )}} ${JSON.stringify(error.response.data)}} ${JSON.stringify(requestConfigDebug)}`
+            )}} ${JSON.stringify(error.response.data)}} ${requestConfigDebugStatus}`,
+            {
+              ...errorMetadataWithRequestConfig,
+              http: {
+                ...errorMetadataWithRequestConfig.http,
+                response: {
+                  status_code: error.response.status,
+                  body: error.response.data,
+                },
+              },
+            }
           );
           throw new AgentlessAgentCreateError(
-            `the Agentless API could not create the agentless agent`
+            withRequestIdMessage(`the Agentless API could not create the agentless agent`)
           );
         } else if (error.request) {
           // The request was made but no response was received
           logger.error(
-            `[Agentless API] Creating agentless agent failed while sending the request to the Agentless API: ${errorLogCodeCause} ${JSON.stringify(
-              requestConfigDebug
-            )}`
+            `[Agentless API] Creating agentless agent failed while sending the request to the Agentless API: ${errorLogCodeCause} ${requestConfigDebugStatus}`,
+            errorMetadataWithRequestConfig
           );
-          throw new AgentlessAgentCreateError(`no response received from the Agentless API`);
+          throw new AgentlessAgentCreateError(
+            withRequestIdMessage(`no response received from the Agentless API`)
+          );
         } else {
           // Something happened in setting up the request that triggered an Error
           logger.error(
-            `[Agentless API] Creating agentless agent failed to be created ${errorLogCodeCause} ${JSON.stringify(
-              requestConfigDebug
-            )}`
+            `[Agentless API] Creating agentless agent failed to be created ${errorLogCodeCause} ${requestConfigDebugStatus}`,
+            errorMetadataWithRequestConfig
           );
           throw new AgentlessAgentCreateError(
-            'the Agentless API could not create the agentless agent'
+            withRequestIdMessage('the Agentless API could not create the agentless agent')
           );
         }
       }
@@ -168,10 +201,10 @@ class AgentlessAgentService {
       }),
     };
 
-    const requestConfigDebug = this.createRequestConfigDebug(requestConfig);
+    const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
 
     logger.debug(
-      `[Agentless API] Start deleting agentless agent for agent policy ${requestConfigDebug}`
+      `[Agentless API] Start deleting agentless agent for agent policy ${requestConfigDebugStatus}`
     );
 
     if (!isAgentlessApiEnabled) {
@@ -187,34 +220,32 @@ class AgentlessAgentService {
     logger.debug(`[Agentless API] Deleting agentless agent with TLS config with certificate`);
 
     logger.debug(
-      `[Agentless API] Deleting agentless deployment with request config ${requestConfigDebug}`
+      `[Agentless API] Deleting agentless deployment with request config ${requestConfigDebugStatus}`
     );
 
     const response = await axios(requestConfig).catch((error: AxiosError) => {
-      const errorLogCodeCause = `${error.code}  ${this.convertCauseErrorsToString(error)}`;
+      const errorLogCodeCause = `${error.code} ${this.convertCauseErrorsToString(error)}`;
 
       if (!axios.isAxiosError(error)) {
         logger.error(
           `[Agentless API] Deleting agentless deployment failed with an error ${JSON.stringify(
             error
-          )} ${JSON.stringify(requestConfigDebug)}`
+          )} ${requestConfigDebugStatus}`
         );
       }
       if (error.response) {
         logger.error(
           `[Agentless API] Deleting Agentless deployment Failed Response Error: ${JSON.stringify(
             error.response.status
-          )}} ${JSON.stringify(error.response.data)}} ${requestConfigDebug} `
+          )}} ${JSON.stringify(error.response.data)}} ${requestConfigDebugStatus} `
         );
       } else if (error.request) {
         logger.error(
-          `[Agentless API] Deleting agentless deployment failed to receive a response from the Agentless API ${errorLogCodeCause} ${JSON.stringify(
-            requestConfigDebug
-          )}`
+          `[Agentless API] Deleting agentless deployment failed to receive a response from the Agentless API ${errorLogCodeCause} ${requestConfigDebugStatus}`
         );
       } else {
         logger.error(
-          `[Agentless API] Deleting agentless deployment failed to delete the request ${errorLogCodeCause} ${requestConfigDebug}`
+          `[Agentless API] Deleting agentless deployment failed to delete the request ${errorLogCodeCause} ${requestConfigDebugStatus}`
         );
       }
     });
@@ -236,6 +267,10 @@ class AgentlessAgentService {
   private createRequestConfigDebug(requestConfig: AxiosRequestConfig<any>) {
     return JSON.stringify({
       ...requestConfig,
+      data: {
+        ...requestConfig.data,
+        fleet_token: '[REDACTED]',
+      },
       httpsAgent: {
         ...requestConfig.httpsAgent,
         options: {
