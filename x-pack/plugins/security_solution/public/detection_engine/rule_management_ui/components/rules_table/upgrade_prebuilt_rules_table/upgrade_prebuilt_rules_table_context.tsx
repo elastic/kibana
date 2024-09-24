@@ -254,6 +254,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             content: (
               <TabContentPadding>
                 <ThreeWayDiffTab
+                  ruleId={rule.rule_id}
                   ruleUpgradeState={ruleUpgradeState}
                   setFieldResolvedValue={setFieldResolvedValue}
                 />

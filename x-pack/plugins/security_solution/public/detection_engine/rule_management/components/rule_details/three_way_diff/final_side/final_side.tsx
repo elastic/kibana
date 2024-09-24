@@ -5,23 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiTitle } from '@elastic/eui';
-import type {
-  DiffableAllFields,
-  DiffableRule,
-} from '../../../../../../../common/api/detection_engine';
-import { FieldReadOnly } from '../final_readonly/field_readonly';
+import type { DiffableRule } from '../../../../../../../common/api/detection_engine';
 import { SideHeader } from '../components/side_header';
 import { FinalSideHelpInfo } from './final_side_help_info';
 import * as i18n from './translations';
+import { FinalReadOnly } from '../final_readonly/final_readonly';
+import { FinalEdit } from '../final_edit/final_edit';
+// import { FinalEdit } from '../final_edit/final_edit_2';
+import type { SetFieldResolvedValueFn } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 
 interface FinalSideProps {
   fieldName: string;
   finalDiffableRule: DiffableRule;
+  setFieldResolvedValue: SetFieldResolvedValueFn;
 }
 
-export function FinalSide({ fieldName, finalDiffableRule }: FinalSideProps): JSX.Element {
+export function FinalSide({
+  fieldName,
+  finalDiffableRule,
+  setFieldResolvedValue,
+}: FinalSideProps): JSX.Element {
+  const [mode, setMode] = React.useState<'readonly' | 'edit'>('readonly'); // This is temporary, will be replaced with state from the context
+  const setReadOnlyMode = useCallback(() => setMode('readonly'), []);
+  const setEditMode = useCallback(() => setMode('edit'), []);
+
   return (
     <>
       <SideHeader>
@@ -32,10 +41,20 @@ export function FinalSide({ fieldName, finalDiffableRule }: FinalSideProps): JSX
           </h3>
         </EuiTitle>
       </SideHeader>
-      <FieldReadOnly
-        fieldName={fieldName as keyof DiffableAllFields}
-        finalDiffableRule={finalDiffableRule as DiffableAllFields}
-      />
+      {mode === 'edit' ? (
+        <FinalEdit
+          fieldName={fieldName}
+          finalDiffableRule={finalDiffableRule}
+          setReadOnlyMode={setReadOnlyMode}
+          setFieldResolvedValue={setFieldResolvedValue}
+        />
+      ) : (
+        <FinalReadOnly
+          fieldName={fieldName}
+          finalDiffableRule={finalDiffableRule}
+          setEditMode={setEditMode}
+        />
+      )}
     </>
   );
 }
