@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { SeverityFilterGroup } from './severity_filter_group';
+import { SeverityFilter } from './severity_filter';
 import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
 import { TestProviders } from '../../../common/mock';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
@@ -22,7 +22,7 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-describe('SeverityFilterGroup', () => {
+describe('SeverityFilter', () => {
   beforeEach(() => {
     mockedTelemetry.reportEntityRiskFiltered.mockClear();
   });
@@ -30,11 +30,7 @@ describe('SeverityFilterGroup', () => {
   it('sends telemetry when selecting a classification', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <SeverityFilterGroup
-          selectedItems={[]}
-          onSelect={jest.fn()}
-          riskEntity={RiskScoreEntity.user}
-        />
+        <SeverityFilter selectedItems={[]} onSelect={jest.fn()} riskEntity={RiskScoreEntity.user} />
       </TestProviders>
     );
 
@@ -48,7 +44,7 @@ describe('SeverityFilterGroup', () => {
   it('does not send telemetry when deselecting a classification', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <SeverityFilterGroup
+        <SeverityFilter
           selectedItems={[
             RiskSeverity.Critical,
             RiskSeverity.High,

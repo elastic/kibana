@@ -84,7 +84,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
   );
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
 
-  const onSelectSeverityFilterGroup = useCallback((newSelection: RiskSeverity[]) => {
+  const onSelectSeverityFilter = useCallback((newSelection: RiskSeverity[]) => {
     setSelectedSeverity(newSelection);
   }, []);
 
@@ -209,7 +209,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
         >
           <RiskScoreHeaderContent
             entityLinkProps={entity.linkProps}
-            onSelectSeverityFilterGroup={onSelectSeverityFilterGroup}
+            onSelectSeverityFilter={onSelectSeverityFilter}
             riskEntity={riskEntity}
             selectedSeverity={selectedSeverity}
             toggleStatus={toggleStatus}

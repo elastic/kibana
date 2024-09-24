@@ -36,7 +36,7 @@ describe('RiskScoreHeaderContent', () => {
           onClick: jest.fn(),
           path: '/userRisk',
         }}
-        onSelectSeverityFilterGroup={jest.fn()}
+        onSelectSeverityFilter={jest.fn()}
         riskEntity={RiskScoreEntity.user}
         selectedSeverity={[]}
         toggleStatus={true}
@@ -67,7 +67,7 @@ describe('RiskScoreHeaderContent', () => {
           onClick: jest.fn(),
           path: '/userRisk',
         }}
-        onSelectSeverityFilterGroup={jest.fn()}
+        onSelectSeverityFilter={jest.fn()}
         riskEntity={RiskScoreEntity.user}
         selectedSeverity={[]}
         toggleStatus={false}

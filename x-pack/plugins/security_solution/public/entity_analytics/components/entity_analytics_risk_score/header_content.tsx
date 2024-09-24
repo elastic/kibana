@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RiskSeverity, RiskScoreEntity } from '../../../../common/search_strategy';
-import { SeverityFilterGroup } from '../severity/severity_filter_group';
+import { SeverityFilter } from '../severity/severity_filter';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import type { SecurityPageName } from '../../../../common/constants';
 import * as i18n from './translations';
@@ -15,7 +15,7 @@ import { RiskInformationButtonEmpty } from '../risk_information';
 
 const RiskScoreHeaderContentComponent = ({
   entityLinkProps,
-  onSelectSeverityFilterGroup,
+  onSelectSeverityFilter,
   riskEntity,
   selectedSeverity,
   toggleStatus,
@@ -25,7 +25,7 @@ const RiskScoreHeaderContentComponent = ({
     path: string;
     onClick: () => void;
   };
-  onSelectSeverityFilterGroup: (newSelection: RiskSeverity[]) => void;
+  onSelectSeverityFilter: (newSelection: RiskSeverity[]) => void;
   riskEntity: RiskScoreEntity;
   selectedSeverity: RiskSeverity[];
   toggleStatus: boolean;
@@ -46,11 +46,13 @@ const RiskScoreHeaderContentComponent = ({
         <RiskInformationButtonEmpty riskEntity={riskEntity} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SeverityFilterGroup
-          selectedItems={selectedSeverity}
-          riskEntity={riskEntity}
-          onSelect={onSelectSeverityFilterGroup}
-        />
+        <EuiFilterGroup>
+          <SeverityFilter
+            selectedItems={selectedSeverity}
+            riskEntity={riskEntity}
+            onSelect={onSelectSeverityFilter}
+          />
+        </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <LinkButton
