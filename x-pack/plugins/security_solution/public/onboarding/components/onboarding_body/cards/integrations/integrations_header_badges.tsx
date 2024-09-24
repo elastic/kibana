@@ -6,8 +6,32 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { NavigateToAppOptions } from '@kbn/core/public';
 
-export const getDummyAdditionalBadge = () => {
-  return <EuiBadge color="warning">{'Dummy badge'}</EuiBadge>;
+export const getCompleteBadgeWithTooltip = ({
+  agentStillRequired,
+  navigateToApp,
+  completeBadgeText,
+}: {
+  agentStillRequired: boolean;
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
+  completeBadgeText: string;
+}) => {
+  return agentStillRequired ? (
+    <EuiToolTip
+      position="top"
+      content={
+        <FormattedMessage
+          id="xpack.securitySolution.onboarding.integrations.completeBadgeTooltip"
+          defaultMessage="Elastic Agent is required for one or more of your integrations."
+        />
+      }
+    >
+      <>{completeBadgeText}</>
+    </EuiToolTip>
+  ) : (
+    completeBadgeText
+  );
 };

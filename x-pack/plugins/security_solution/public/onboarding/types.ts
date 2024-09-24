@@ -8,8 +8,9 @@
 import type React from 'react';
 import type { IconType } from '@elastic/eui';
 import type { LicenseType } from '@kbn/licensing-plugin/public';
-import type { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, NavigateToAppOptions } from '@kbn/core/public';
 
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { OnboardingCardId } from './constants';
 import type { RequiredCapabilities } from '../common/lib/capabilities';
 
@@ -17,7 +18,7 @@ export interface CheckCompleteResult {
   /**
    * Optional custom badge text replacement for the card complete badge in the card header.
    */
-  completeBadgeText?: string;
+  completeBadgeText?: string | React.ReactNode;
   /**
    * Optional badges to prepend to the card complete badge in the card header, regardless of completion status.
    */
@@ -64,7 +65,15 @@ export type OnboardingCardComponent = React.ComponentType<{
   checkCompleteMetadata?: Record<string, unknown>;
 }>;
 
-export type OnboardingCardCheckComplete = ({ http }: { http: HttpSetup }) => Promise<boolean>;
+export type OnboardingCardCheckComplete = ({
+  http,
+  data,
+  navigateToApp,
+}: {
+  http: HttpSetup;
+  data: DataPublicPluginStart;
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
+}) => Promise<CheckCompleteResponse>;
 
 export interface OnboardingCardConfig {
   id: OnboardingCardId;

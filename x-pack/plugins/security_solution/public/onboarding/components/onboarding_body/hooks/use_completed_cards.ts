@@ -34,7 +34,11 @@ export type CardCheckCompleteResult = Partial<Record<OnboardingCardId, CheckComp
  */
 export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => {
   const { spaceId, reportCardComplete } = useOnboardingContext();
-  const { http } = useKibana().services;
+  const {
+    http,
+    data,
+    application: { navigateToApp },
+  } = useKibana().services;
 
   // Use stored state to keep localStorage in sync, and a local state to avoid unnecessary re-renders.
   const [storedCompleteCardIds, setStoredCompleteCardIds] = useStoredCompletedCardIds(spaceId);
@@ -113,22 +117,22 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
       const cardConfig = cardsWithAutoCheck.find(({ id }) => id === cardId);
 
       if (cardConfig) {
-        cardConfig.checkComplete?.({ http }).then((checkCompleteResult) => {
+        cardConfig.checkComplete?.({ http, data, navigateToApp }).then((checkCompleteResult) => {
           processCardCheckCompleteResult(cardId, checkCompleteResult);
         });
       }
     },
-    [cardsWithAutoCheck, http, processCardCheckCompleteResult]
+    [cardsWithAutoCheck, http, data, navigateToApp, processCardCheckCompleteResult]
   );
 
   // Initial auto-check for all cards, it should run only once, after cardsGroupConfig is properly populated
   useEffect(() => {
     cardsWithAutoCheck.map((card) =>
-      card.checkComplete?.({ http }).then((checkCompleteResult) => {
+      card.checkComplete?.({ http, data, navigateToApp }).then((checkCompleteResult) => {
         processCardCheckCompleteResult(card.id, checkCompleteResult);
       })
     );
-  }, [cardsWithAutoCheck, http, processCardCheckCompleteResult]);
+  }, [cardsWithAutoCheck, http, data, navigateToApp, processCardCheckCompleteResult]);
 
   return {
     isCardComplete,

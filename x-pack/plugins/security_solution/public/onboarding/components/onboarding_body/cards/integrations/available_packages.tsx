@@ -61,7 +61,7 @@ export const AvailablePackages = React.memo(
     if (asyncLoading || ref.current === null)
       return <EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_HEIGHT} />;
 
-    return <PackageListGrid useAvailablePackages={ref.current} setComplete={setComplete} />;
+    return <PackageListGrid useAvailablePackages={ref.current} />;
   }
 );
 
