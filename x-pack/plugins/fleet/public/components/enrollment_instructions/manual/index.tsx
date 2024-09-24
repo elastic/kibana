@@ -14,7 +14,7 @@ function getfleetServerHostsEnrollArgs(
 ) {
   const proxyHeadersArgs = fleetProxy?.proxy_headers
     ? Object.entries(fleetProxy.proxy_headers).reduce((acc, [proxyKey, proyVal]) => {
-        acc += ` --proxy-header ${proxyKey}=${proyVal}`;
+        acc += ` --proxy-header "${proxyKey}=${proyVal}"`;
 
         return acc;
       }, '')
