@@ -35,7 +35,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `The OpenAI API authentication key. For more details about generating OpenAI API keys, refer to the https://platform.openai.com/account/api-keys.`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -114,7 +114,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `API Key for the provider you're connecting to`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -128,7 +128,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `ID of the LLM you're using`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -163,7 +163,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `A valid AWS access key that has permissions to use Amazon Bedrock.`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -177,7 +177,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `A valid AWS secret key that is paired with the access_key.`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -217,7 +217,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: 'The model provider for your deployment.',
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -231,7 +231,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `The base model ID or an ARN to a custom model based on a foundational model.`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -245,7 +245,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `The region that your model or ARN is deployed in.`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -281,7 +281,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `API Key for the provider you're connecting to`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -309,7 +309,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `Please provide the GCP region where the Vertex AI API(s) is enabled. For more information, refer to the {geminiVertexAIDocs}.`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -324,7 +324,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
             'The GCP Project ID which has Vertex AI API(s) enabled. For more information on the URL, refer to the {geminiVertexAIDocs}.',
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -422,7 +422,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `API Key for the provider you're connecting to`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -577,7 +577,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `API Key for the provider you're connecting to`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -612,7 +612,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `API Key for the provider you're connecting to`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -690,7 +690,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `API Key for the provider you're connecting to`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -704,7 +704,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `The target URL of your Azure AI Studio model deployment.`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -728,7 +728,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
             },
           ],
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -768,7 +768,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: 'The model provider for your deployment.',
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -803,7 +803,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `API Key for the provider you're connecting to`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -817,7 +817,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `The name of the model to use for the inference task.`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -840,16 +840,21 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
       },
     },
   ] as InferenceProvider[];
-  return Promise.resolve(providers);
+  return Promise.resolve(
+    providers.sort((a, b) => (a.provider > b.provider ? 1 : b.provider > a.provider ? -1 : 0))
+  );
 };
 
 export const useProviders = (http: HttpSetup, toasts: ToastsStart) => {
   const onErrorFn = (error: Error) => {
     if (error) {
       toasts.addDanger(
-        i18n.translate('alertsUIShared.hooks.useFindAlertsQuery.unableToFindAlertsQueryMessage', {
-          defaultMessage: 'Unable to find alerts',
-        })
+        i18n.translate(
+          'xpack.stackConnectors.components.inference.unableToFindProvidersQueryMessage',
+          {
+            defaultMessage: 'Unable to find providers',
+          }
+        )
       );
     }
   };

@@ -8,38 +8,28 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
-import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
-import { DEFAULT_BODY, DEFAULT_BODY_AZURE, DEFAULT_URL } from './constants';
+import { SUB_ACTION } from '../../../common/inference/constants';
 
-const messageVariables = [
-  {
-    name: 'myVar',
-    description: 'My variable description',
-    useWithTripleBracesInTemplates: true,
-  },
-];
-
-describe('Gen AI Params Fields renders', () => {
+describe('Inference Params Fields renders', () => {
   test('all params fields are rendered', () => {
     const { getByTestId } = render(
       <ParamsFields
         actionParams={{
-          subAction: SUB_ACTION.RUN,
-          subActionParams: { body: '{"message": "test"}' },
+          subAction: SUB_ACTION.COMPLETION,
+          subActionParams: { input: 'What is Elastic?' },
         }}
         errors={{ body: [] }}
         editAction={() => {}}
         index={0}
-        messageVariables={messageVariables}
       />
     );
-    expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
-    expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '{"message": "test"}');
-    expect(getByTestId('bodyAddVariableButton')).toBeInTheDocument();
+    expect(getByTestId('inferenceInput')).toBeInTheDocument();
+    expect(getByTestId('inferenceInput')).toHaveProperty('value', 'What is Elastic?');
   });
-  test.each([OpenAiProviderType.OpenAi, OpenAiProviderType.AzureAi])(
-    'useEffect handles the case when subAction and subActionParams are undefined and apiProvider is %p',
-    (apiProvider) => {
+
+  test.each(['openai', 'googleaistudio'])(
+    'useEffect handles the case when subAction and subActionParams are undefined and provider is %p',
+    (provider) => {
       const actionParams = {
         subAction: undefined,
         subActionParams: undefined,
@@ -48,17 +38,19 @@ describe('Gen AI Params Fields renders', () => {
       const errors = {};
       const actionConnector = {
         secrets: {
-          apiKey: 'apiKey',
+          providerSecrets: { apiKey: 'apiKey' },
         },
         id: 'test',
-        actionTypeId: '.gen-ai',
+        actionTypeId: '.inference',
         isPreconfigured: false,
         isSystemAction: false as const,
         isDeprecated: false,
         name: 'My OpenAI Connector',
         config: {
-          apiProvider,
-          apiUrl: DEFAULT_URL,
+          provider,
+          providerConfig: {
+            url: 'https://api.openai.com/v1/embeddings',
+          },
         },
       };
       render(
@@ -67,17 +59,24 @@ describe('Gen AI Params Fields renders', () => {
           actionConnector={actionConnector}
           editAction={editAction}
           index={0}
-          messageVariables={messageVariables}
           errors={errors}
         />
       );
       expect(editAction).toHaveBeenCalledTimes(2);
-      expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
-      if (apiProvider === OpenAiProviderType.OpenAi) {
-        expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY }, 0);
+      expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.COMPLETION, 0);
+      if (provider === 'openai') {
+        expect(editAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { input: 'What is Elastic?' },
+          0
+        );
       }
-      if (apiProvider === OpenAiProviderType.AzureAi) {
-        expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY_AZURE }, 0);
+      if (provider === 'googleaistudio') {
+        expect(editAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { input: 'What is Elastic?' },
+          0
+        );
       }
     }
   );
@@ -86,22 +85,16 @@ describe('Gen AI Params Fields renders', () => {
     const actionParams = {
       subAction: undefined,
       subActionParams: {
-        body: '{"key": "value"}',
+        input: '{"key": "value"}',
       },
     };
     const editAction = jest.fn();
     const errors = {};
     render(
-      <ParamsFields
-        actionParams={actionParams}
-        editAction={editAction}
-        index={0}
-        messageVariables={messageVariables}
-        errors={errors}
-      />
+      <ParamsFields actionParams={actionParams} editAction={editAction} index={0} errors={errors} />
     );
     expect(editAction).toHaveBeenCalledTimes(1);
-    expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
+    expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.COMPLETION, 0);
   });
 
   it('calls editAction function with the correct arguments ', () => {
@@ -110,14 +103,13 @@ describe('Gen AI Params Fields renders', () => {
     const { getByTestId } = render(
       <ParamsFields
         actionParams={{
-          subAction: SUB_ACTION.RUN,
+          subAction: SUB_ACTION.RERANK,
           subActionParams: {
-            body: '{"key": "value"}',
+            input: '{"key": "value"}',
           },
         }}
         editAction={editAction}
         index={0}
-        messageVariables={messageVariables}
         errors={errors}
       />
     );

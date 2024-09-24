@@ -6,11 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_PROVIDER, DEFAULT_TASK_TYPE } from './constants';
 
 export const ConfigSchema = schema.object({
-  provider: schema.string({ defaultValue: DEFAULT_PROVIDER }),
-  taskType: schema.string({ defaultValue: DEFAULT_TASK_TYPE }),
+  provider: schema.string(),
+  taskType: schema.string(),
   inferenceId: schema.string(),
   providerSchema: schema.arrayOf(
     schema.object(

@@ -15,10 +15,9 @@ import { SelectableProvider } from '.';
 const mockGetProviders = jest.fn();
 describe('SelectableProvider', () => {
   const props = {
-    taskType: 'completion',
-    getSelectableOptions: jest.fn().mockReturnValue([]),
     onClosePopover: jest.fn(),
     onProviderChange: jest.fn(),
+    getSelectableOptions: jest.fn().mockReturnValue([]),
   };
 
   describe('should render', () => {
@@ -43,7 +42,7 @@ describe('SelectableProvider', () => {
 
     describe('template', () => {
       beforeAll(() => {
-        wrapper = shallow(<SelectableProvider {...templateProps} />);
+        wrapper = shallow(<SelectableProvider {...props} />);
       });
 
       afterAll(() => {
@@ -54,7 +53,7 @@ describe('SelectableProvider', () => {
         const searchProps: EuiSelectableProps['searchProps'] = wrapper
           .find('[data-test-subj="selectable-provider-input"]')
           .prop('searchProps');
-        expect(searchProps?.placeholder).toEqual('e.g. template name or description');
+        expect(searchProps?.placeholder).toEqual('Search');
       });
     });
   });

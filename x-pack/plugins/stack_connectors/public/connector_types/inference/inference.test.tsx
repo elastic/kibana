@@ -8,16 +8,14 @@
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
-import { SUB_ACTION } from '../../../common/openai/constants';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { registrationServicesMock } from '../../mocks';
+import { SUB_ACTION } from '../../../common/inference/constants';
 
-const ACTION_TYPE_ID = '.gen-ai';
+const ACTION_TYPE_ID = '.inference';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
   const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
@@ -38,18 +36,18 @@ describe('actionTypeRegistry.get() works', () => {
 describe('OpenAI action params validation', () => {
   test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
-      subAction: SUB_ACTION.RUN,
-      subActionParams: { body: '{"message": "test"}' },
+      subAction: SUB_ACTION.COMPLETION,
+      subActionParams: { input: 'message test' },
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { body: [], subAction: [] },
+      errors: { input: [], subAction: [] },
     });
   });
 
-  test('params validation fails when body is not an object', async () => {
+  test('params validation fails when params is a wrong object', async () => {
     const actionParams = {
-      subAction: SUB_ACTION.RUN,
+      subAction: SUB_ACTION.COMPLETION,
       subActionParams: { body: 'message {test}' },
     };
 
@@ -60,7 +58,7 @@ describe('OpenAI action params validation', () => {
 
   test('params validation fails when subAction is missing', async () => {
     const actionParams = {
-      subActionParams: { body: '{"message": "test"}' },
+      subActionParams: { input: 'message test' },
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
@@ -73,13 +71,13 @@ describe('OpenAI action params validation', () => {
 
   test('params validation fails when subActionParams is missing', async () => {
     const actionParams = {
-      subAction: SUB_ACTION.RUN,
+      subAction: SUB_ACTION.RERANK,
       subActionParams: {},
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        body: ['Body is required.'],
+        input: ['Input is required.'],
         subAction: [],
       },
     });

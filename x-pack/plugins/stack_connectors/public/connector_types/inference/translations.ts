@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const getRequiredMessage = (field: string) => {
+  return i18n.translate('xpack.stackConnectors.components.inference.requiredInputTextField', {
+    defaultMessage: '{field} is required.',
+    values: { field },
+  });
+};
+
 export const INPUT_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.inference.requiredInputTextField',
   {
@@ -22,9 +29,16 @@ export const QUERY_REQUIRED = i18n.translate(
 );
 
 export const INPUT_TYPE_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.inference.requiredInpuTypeTextField',
+  'xpack.stackConnectors.components.inference.requiredInputTypeTextField',
   {
     defaultMessage: 'Input type is required.',
+  }
+);
+
+export const TASK_TYPE_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.inference.requiredTaskTypeTextField',
+  {
+    defaultMessage: 'Task type is required.',
   }
 );
 

@@ -10,7 +10,6 @@ import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
@@ -27,27 +26,36 @@ jest.mock('../lib/gen_ai/use_get_dashboard');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const mockDashboard = useGetDashboard as jest.Mock;
 const openAiConnector = {
-  actionTypeId: '.gen-ai',
-  name: 'OpenAI',
+  actionTypeId: '.inference',
+  name: 'AI Connector',
   id: '123',
   config: {
-    apiUrl: 'https://openaiurl.com',
-    apiProvider: OpenAiProviderType.OpenAi,
-    defaultModel: DEFAULT_OPENAI_MODEL,
+    provider: 'openai',
+    taskType: 'completion',
+    providerConfig: {
+      url: 'https://openaiurl.com',
+      model_id: 'gpt-4o',
+    },
+    taskTypeConfig: {},
+    providerSchema: [],
+    taskTypeSchema: [],
   },
   secrets: {
-    apiKey: 'thats-a-nice-looking-key',
+    secretsConfig: {
+      apiKey: 'thats-a-nice-looking-key',
+    },
   },
   isDeprecated: false,
 };
-const azureConnector = {
+
+const googleaistudioConnector = {
   ...openAiConnector,
   config: {
-    apiUrl: 'https://azureaiurl.com',
-    apiProvider: OpenAiProviderType.AzureAi,
-  },
-  secrets: {
-    apiKey: 'thats-a-nice-looking-key',
+    ...openAiConnector.config,
+    provider: 'googleaistudio',
+    providerConfig: {
+      modelId: 'somemodel',
+    },
   },
 };
 
@@ -61,33 +69,37 @@ describe('ConnectorFields renders', () => {
       dashboardUrl: `https://dashboardurl.com/${connectorId}`,
     }));
   });
-  test('open ai connector fields are rendered', async () => {
+  test('open ai provider fields are rendered', async () => {
     const { getAllByTestId } = render(
       <ConnectorFormTestProvider connector={openAiConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
     expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(openAiConnector.config.apiUrl);
+    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(
+      openAiConnector.config?.providerConfig?.url
+    );
     expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
-      openAiConnector.config.apiProvider
+      openAiConnector.config.provider
     );
     expect(getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
   });
 
-  test('azure ai connector fields are rendered', async () => {
+  test('azure ai provider fields are rendered', async () => {
     const { getAllByTestId } = render(
-      <ConnectorFormTestProvider connector={azureConnector}>
+      <ConnectorFormTestProvider connector={googleaistudioConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
     expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(azureConnector.config.apiUrl);
+    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(
+      googleaistudioConnector.config?.providerConfig?.modelId
+    );
     expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
-      azureConnector.config.apiProvider
+      googleaistudioConnector.config.provider
     );
     expect(getAllByTestId('azure-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('azure-ai-api-keys-doc')[0]).toBeInTheDocument();
@@ -159,12 +171,15 @@ describe('ConnectorFields renders', () => {
       });
     });
 
-    it('validates correctly if the apiUrl is empty', async () => {
+    it('validates correctly if the provider config url is empty', async () => {
       const connector = {
         ...openAiConnector,
         config: {
           ...openAiConnector.config,
-          apiUrl: '',
+          providerConfig: {
+            url: '',
+            modelId: 'gpt-4o',
+          },
         },
       };
 

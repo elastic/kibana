@@ -47,13 +47,15 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
 }) => {
-  const { isValid, required, placeholder, value } = configEntry;
-  const [innerValue, setInnerValue] = useState(value);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { isValid, placeholder, value, default_value } = configEntry;
+  const [innerValue, setInnerValue] = useState(
+    !value || value.toString().length === 0 ? default_value : value
+  );
   return (
     <EuiFieldText
       disabled={isLoading}
       fullWidth
-      required={required}
       value={ensureStringType(innerValue)}
       isInvalid={!isValid}
       onChange={(event) => {
@@ -70,8 +72,9 @@ export const ConfigSwitchField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
 }) => {
-  const { label, value } = configEntry;
-  const [innerValue, setInnerValue] = useState(value);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { label, value, default_value } = configEntry;
+  const [innerValue, setInnerValue] = useState(value ?? default_value);
   return (
     <EuiSwitch
       checked={ensureBooleanType(innerValue)}
@@ -90,13 +93,12 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   validateAndSetConfigValue,
 }) => {
-  const { isValid, required, placeholder, value } = configEntry;
+  const { isValid, placeholder, value } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
     <EuiTextArea
       disabled={isLoading}
       fullWidth
-      required={required}
       // ensures placeholder shows up when value is empty string
       value={ensureStringType(innerValue) || undefined}
       isInvalid={!isValid}
@@ -114,13 +116,12 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
 }) => {
-  const { isValid, required, placeholder, value } = configEntry;
+  const { isValid, placeholder, value } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
     <EuiFieldNumber
       fullWidth
       disabled={isLoading}
-      required={required}
       value={innerValue as number}
       isInvalid={!isValid}
       onChange={(event) => {
@@ -134,7 +135,6 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
 
 export const ConfigCheckableField: React.FC<ConfigInputFieldProps> = ({
   configEntry,
-  isLoading,
   validateAndSetConfigValue,
 }) => {
   const radioCardId = useGeneratedHtmlId({ prefix: 'radioCard' });
@@ -183,14 +183,13 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   validateAndSetConfigValue,
 }) => {
-  const { required, value } = configEntry;
+  const { value } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
     <>
       <EuiFieldPassword
         fullWidth
         disabled={isLoading}
-        required={required}
         type="dual"
         value={ensureStringType(innerValue)}
         onChange={(event) => {
@@ -207,7 +206,7 @@ export const ConfigSelectField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
 }) => {
-  const { isValid, required, options, value } = configEntry;
+  const { isValid, options, value } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   const optionsRes = options?.map((o) => ({
     value: o.value,
@@ -227,6 +226,7 @@ export const ConfigSelectField: React.FC<ConfigInputFieldProps> = ({
   return (
     <EuiSuperSelect
       fullWidth
+      isInvalid={!isValid}
       disabled={isLoading}
       options={optionsRes as any}
       valueOfSelected={innerValue as any}
@@ -247,7 +247,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     setConfigValue(ensureCorrectTyping(configEntry.type, value));
   };
 
-  const { key, display, options, required, sensitive, value } = configEntry;
+  const { key, display, sensitive } = configEntry;
 
   switch (display) {
     case DisplayType.DROPDOWN:

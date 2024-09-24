@@ -153,6 +153,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       return;
     }
 
+    console.log(preSubmitValidator)
     if (isValid) {
       if (preSubmitValidator) {
         const validatorRes = await preSubmitValidator();
