@@ -59,9 +59,9 @@ export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
         css={`
           position: absolute;
           border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
-          bottom: 1px;
-          left: 1px;
-          width: calc(100% - 2px);
+          bottom: 0;
+          left: 0;
+          width: 100%;
           overflow: hidden;
         `}
       >
