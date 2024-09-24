@@ -5178,6 +5178,9 @@ describe('Package policy service', () => {
           policy_ids: ['agent-policy-1'],
           output_id: null,
           inputs: [],
+        },
+        {
+          force: undefined,
         }
       );
     });

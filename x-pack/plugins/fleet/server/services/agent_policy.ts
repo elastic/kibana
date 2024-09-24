@@ -910,7 +910,7 @@ class AgentPolicyService {
           );
           return this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
             skipValidation: true,
-            force: options.force,
+            force: options?.force,
           });
         },
         {
