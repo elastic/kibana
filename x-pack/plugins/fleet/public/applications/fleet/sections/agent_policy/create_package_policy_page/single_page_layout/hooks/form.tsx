@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 import { isEqual } from 'lodash';
 
@@ -205,7 +205,7 @@ export function useOnSubmit({
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          safeLoad,
+          load,
           spaceSettings
         );
         setValidationResults(newValidationResult);
