@@ -10,6 +10,7 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
+import { dashboardContentManagementCache } from '..';
 import {
   DashboardAttributes,
   DashboardCrudTypes,
@@ -17,7 +18,6 @@ import {
 } from '../../../../common/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { contentManagementService } from '../../kibana_services';
-import { dashboardContentManagementCache } from '../../dashboard_content_management_service';
 
 export interface SearchDashboardsArgs {
   options?: DashboardCrudTypes['SearchIn']['options'];

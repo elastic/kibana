@@ -16,6 +16,7 @@
  */
 import {
   mockDashboardBackupService,
+  mockDashboardContentManagementCache,
   mockDashboardContentManagementService,
   setStubKibanaServices,
 } from './public/services/mocks';
@@ -26,6 +27,7 @@ setStubKibanaServices();
 // Mock the dashboad services
 jest.mock('./public/services/dashboard_content_management_service', () => {
   return {
+    dashboardContentManagementCache: mockDashboardContentManagementCache,
     dashboardContentManagementService: mockDashboardContentManagementService,
   };
 });

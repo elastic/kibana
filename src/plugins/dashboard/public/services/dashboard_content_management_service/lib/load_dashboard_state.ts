@@ -16,6 +16,7 @@ import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 
+import { dashboardContentManagementCache } from '..';
 import {
   convertSavedPanelsToPanelMap,
   injectReferences,
@@ -32,7 +33,6 @@ import {
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 import { convertNumberToDashboardVersion } from './dashboard_versioning';
 import { migrateDashboardInput } from './migrate_dashboard_input';
-import { dashboardContentManagementCache } from '../../dashboard_content_management_service';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
