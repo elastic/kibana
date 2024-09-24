@@ -224,6 +224,53 @@
           },
           {
             "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.updateIndexTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "updateIndexTemplate",
+            "description": [],
+            "signature": [
+              "(name: string, template: Record<string, unknown>) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.updateIndexTemplate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.updateIndexTemplate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "template",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
             "id": "def-server.ClusterClientAdapter.getExistingLegacyIndexTemplates",
             "type": "Function",
             "tags": [],
@@ -495,7 +542,7 @@
             "label": "createDataStream",
             "description": [],
             "signature": [
-              "(name: string, body?: Record<string, unknown>) => Promise<void>"
+              "(name: string) => Promise<void>"
             ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
@@ -515,16 +562,33 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.updateConcreteIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "updateConcreteIndices",
+            "description": [],
+            "signature": [
+              "(name: string) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
               {
                 "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.createDataStream.$2",
-                "type": "Object",
+                "id": "def-server.ClusterClientAdapter.updateConcreteIndices.$1",
+                "type": "string",
                 "tags": [],
-                "label": "body",
+                "label": "name",
                 "description": [],
                 "signature": [
-                  "Record<string, unknown>"
+                  "string"
                 ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,

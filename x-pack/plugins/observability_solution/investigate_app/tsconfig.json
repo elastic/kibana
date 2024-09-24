@@ -58,5 +58,8 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/i18n-react",
     "@kbn/zod",
+    "@kbn/observability-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/rule-data-utils",
   ],
 }

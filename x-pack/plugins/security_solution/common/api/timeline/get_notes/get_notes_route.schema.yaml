@@ -15,25 +15,24 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: GetNotes
-      description: Gets notes
-      summary: Get all notes for a given document.
+      description: Get all notes for a given document.
+      summary: Get notes
       tags:
         - access:securitySolution
       parameters:
         - name: documentIds
           in: query
-          required: true
           schema:
             $ref: '#/components/schemas/DocumentIds'
         - name: page
           in: query
           schema:
-            type: number
+            type: string
             nullable: true
         - name: perPage
           in: query
           schema:
-            type: number
+            type: string
             nullable: true
         - name: search
           in: query
@@ -58,6 +57,12 @@ paths:
       responses:
         '200':
           description: Indicates the requested notes were returned.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/GetNotesResult'
+                  - type: object
 
 components:
   schemas:
@@ -67,3 +72,13 @@ components:
           items:
             type: string
         - type: string
+    GetNotesResult:
+      type: object
+      required: [totalCount, notes]
+      properties:
+        totalCount:
+          type: number
+        notes:
+          type: array
+          items:
+            $ref: '../model/components.schema.yaml#/components/schemas/Note'

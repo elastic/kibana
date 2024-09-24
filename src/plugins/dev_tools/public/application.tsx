@@ -36,7 +36,7 @@ export interface AppServices {
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
-  updateRoute: (newRoute: string) => void;
+  history: RouteComponentProps['history'];
   appServices: AppServices;
   location: RouteComponentProps['location'];
   startServices: DevToolsStartServices;
@@ -51,7 +51,7 @@ interface MountedDevToolDescriptor {
 function DevToolsWrapper({
   devTools,
   activeDevTool,
-  updateRoute,
+  history,
   appServices,
   location,
   startServices,
@@ -83,7 +83,7 @@ function DevToolsWrapper({
             isSelected={currentDevTool === activeDevTool}
             onClick={() => {
               if (!currentDevTool.isDisabled()) {
-                updateRoute(`/${currentDevTool.id}`);
+                history.push(`/${currentDevTool.id}`);
               }
             }}
           >
@@ -122,6 +122,7 @@ function DevToolsWrapper({
             const params = {
               element,
               location,
+              history,
               ...startServices,
             };
 
@@ -192,7 +193,7 @@ export function renderApp(
                 exact={!devTool.enableRouting}
                 render={(props) => (
                   <DevToolsWrapper
-                    updateRoute={props.history.push}
+                    history={props.history}
                     location={props.location}
                     activeDevTool={devTool}
                     devTools={devTools}

@@ -81,7 +81,7 @@ export function registerAnalyzeLogsRoutes(
           const graph = await getLogFormatDetectionGraph({ model, client });
           const graphResults = await graph.invoke(logFormatParameters, options);
           const graphLogFormat = graphResults.results.samplesFormat.name;
-          if (graphLogFormat === 'unsupported') {
+          if (graphLogFormat === 'unsupported' || graphLogFormat === 'csv') {
             return res.customError({
               statusCode: 501,
               body: { message: `Unsupported log samples format` },
