@@ -63,12 +63,10 @@ const USER_FIELD_RETENTION_DEFINITION: FieldRetentionDefinition = {
   ],
 };
 
-const FIELD_RETENTION_DEFINITIONS: Record<EntityType, FieldRetentionDefinition> = {
-  host: HOST_FIELD_RETENTION_DEFINITION,
-  user: USER_FIELD_RETENTION_DEFINITION,
-};
-
 export const getFieldRetentionDefinition = (entityType: EntityType) =>
-  FIELD_RETENTION_DEFINITIONS[entityType];
+  entityType === 'host' ? HOST_FIELD_RETENTION_DEFINITION : USER_FIELD_RETENTION_DEFINITION;
 
-export const getFieldRetentionDefinitions = () => Object.values(FIELD_RETENTION_DEFINITIONS);
+export const getFieldRetentionDefinitions = () => [
+  HOST_FIELD_RETENTION_DEFINITION,
+  USER_FIELD_RETENTION_DEFINITION,
+];
