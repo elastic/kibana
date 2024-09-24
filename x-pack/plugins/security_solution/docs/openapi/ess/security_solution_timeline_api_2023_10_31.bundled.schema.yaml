@@ -29,7 +29,8 @@ paths:
                       type: string
                   required:
                     - noteId
-                - type: object
+                - nullable: true
+                  type: object
                   properties:
                     noteIds:
                       items:
@@ -60,19 +61,18 @@ paths:
       parameters:
         - in: query
           name: documentIds
-          required: true
           schema:
             $ref: '#/components/schemas/DocumentIds'
         - in: query
           name: page
           schema:
             nullable: true
-            type: number
+            type: string
         - in: query
           name: perPage
           schema:
             nullable: true
-            type: number
+            type: string
         - in: query
           name: search
           schema:
@@ -95,6 +95,12 @@ paths:
             type: string
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/GetNotesResult'
+                  - type: object
           description: Indicates the requested notes were returned.
       summary: Get notes
       tags:
@@ -144,18 +150,7 @@ paths:
                     type: object
                     properties:
                       persistNote:
-                        type: object
-                        properties:
-                          code:
-                            type: number
-                          message:
-                            type: string
-                          note:
-                            $ref: '#/components/schemas/Note'
-                        required:
-                          - code
-                          - message
-                          - note
+                        $ref: '#/components/schemas/ResponseNote'
                     required:
                       - persistNote
                 required:
@@ -198,14 +193,7 @@ paths:
                     type: object
                     properties:
                       persistPinnedEventOnTimeline:
-                        allOf:
-                          - $ref: '#/components/schemas/PinnedEvent'
-                          - type: object
-                            properties:
-                              code:
-                                type: number
-                              message:
-                                type: string
+                        $ref: '#/components/schemas/PersistPinnedEventResponse'
                     required:
                       - persistPinnedEventOnTimeline
                 required:
@@ -1002,7 +990,6 @@ components:
           nullable: true
           type: string
         timelineId:
-          nullable: true
           type: string
         updated:
           nullable: true
@@ -1011,6 +998,28 @@ components:
           nullable: true
           type: string
       required:
+        - timelineId
+    BarePinnedEvent:
+      type: object
+      properties:
+        created:
+          nullable: true
+          type: number
+        createdBy:
+          nullable: true
+          type: string
+        eventId:
+          type: string
+        timelineId:
+          type: string
+        updated:
+          nullable: true
+          type: number
+        updatedBy:
+          nullable: true
+          type: string
+      required:
+        - eventId
         - timelineId
     ColumnHeaderResult:
       type: object
@@ -1184,6 +1193,18 @@ components:
           type: string
         script:
           type: string
+    GetNotesResult:
+      type: object
+      properties:
+        notes:
+          items:
+            $ref: '#/components/schemas/Note'
+          type: array
+        totalCount:
+          type: number
+      required:
+        - totalCount
+        - notes
     ImportTimelineResult:
       type: object
       properties:
@@ -1244,34 +1265,37 @@ components:
               type: string
             version:
               type: string
+          required:
+            - noteId
+            - version
+    PersistPinnedEventResponse:
+      oneOf:
+        - allOf:
+            - $ref: '#/components/schemas/PinnedEvent'
+            - $ref: '#/components/schemas/PinnedEventBaseResponseBody'
+        - nullable: true
+          type: object
     PinnedEvent:
+      allOf:
+        - $ref: '#/components/schemas/BarePinnedEvent'
+        - type: object
+          properties:
+            pinnedEventId:
+              type: string
+            version:
+              type: string
+          required:
+            - pinnedEventId
+            - version
+    PinnedEventBaseResponseBody:
       type: object
       properties:
-        created:
-          nullable: true
+        code:
           type: number
-        createdBy:
-          nullable: true
-          type: string
-        eventId:
-          type: string
-        pinnedEventId:
-          type: string
-        timelineId:
-          type: string
-        updated:
-          nullable: true
-          type: number
-        updatedBy:
-          nullable: true
-          type: string
-        version:
+        message:
           type: string
       required:
-        - eventId
-        - pinnedEventId
-        - timelineId
-        - version
+        - code
     QueryMatchResult:
       type: object
       properties:
@@ -1316,6 +1340,19 @@ components:
           type: object
         readable:
           type: boolean
+    ResponseNote:
+      type: object
+      properties:
+        code:
+          type: number
+        message:
+          type: string
+        note:
+          $ref: '#/components/schemas/Note'
+      required:
+        - code
+        - message
+        - note
     RowRendererId:
       enum:
         - alert
