@@ -204,7 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
             fieldName: 'timestamp',
             type: ML_JOB_FIELD_TYPES.KEYWORD,
             docCountFormatted: '20 (100%)',
-            exampleCount: 4,
+            exampleCount: 11,
           },
         ],
         visibleMetricFieldsCount: 0,
