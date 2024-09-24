@@ -26542,10 +26542,10 @@ re-resizable@^6.9.9:
   resolved "https://registry.yarnpkg.com/re-resizable/-/re-resizable-6.9.9.tgz#99e8b31c67a62115dc9c5394b7e55892265be216"
   integrity sha512-l+MBlKZffv/SicxDySKEEh42hR6m5bAHfNu3Tvxks2c4Ah+ldnWjfnVRwxo/nxF27SsUsxDS0raAzFuJNKABXA==
 
-re2js@0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/re2js/-/re2js-0.4.1.tgz#74a87a90b79ab5dc1effed818151354c8faccb3d"
-  integrity sha512-Kxb+OKXrEPowP4bXAF07NDXtgYX07S8HeVGgadx5/D/R41LzWg1kgTD2szIv2iHJM3vrAPnDKaBzfUE/7QWX9w==
+re2js@0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/re2js/-/re2js-0.4.2.tgz#e344697e64d128ea65c121d6581e67ee5bfa5feb"
+  integrity sha512-wuv0p0BGbrVIkobV8zh82WjDurXko0QNCgaif6DdRAljgVm2iio4PVYCwjAxGaWen1/QZXWDM67dIslmz7AIbA==
 
 react-ace@^7.0.5:
   version "7.0.5"
