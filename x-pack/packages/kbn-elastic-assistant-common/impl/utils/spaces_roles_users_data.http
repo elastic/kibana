@@ -30,8 +30,8 @@ Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
   "imageUrl": ""
 }
 
-### Create assistant_admin Role - All Spaces, All Features
-PUT http://{{host}}:{{port}}{{basePath}}/api/security/role/assistant_admin
+### Create Assistant All Role - All Spaces, All Features
+PUT http://{{host}}:{{port}}{{basePath}}/api/security/role/assistant_all
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
@@ -100,20 +100,20 @@ Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
   ]
 }
 
-### Create assistant_system User - All Spaces, All Features
-POST http://{{host}}:{{port}}{{basePath}}/internal/security/users/assistant_system
+### Create Assistant All User - All Spaces, All Features
+POST http://{{host}}:{{port}}{{basePath}}/internal/security/users/assistant_all
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
 Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
 
 {
-  "password": "{{auth.assistant_system.password}}",
-  "username": "{{auth.assistant_system.username}}",
-  "full_name": "Assistant System",
+  "password": "{{auth.assistant_all.password}}",
+  "username": "{{auth.assistant_all.username}}",
+  "full_name": "Assistant All",
   "email": "",
   "roles": [
-    "assistant_admin"
+    "assistant_all"
   ]
 }
 

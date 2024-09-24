@@ -56,10 +56,12 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
         const core = ctx.core;
         const soClient = core.savedObjects.getClient();
         const kbResource = request.params.resource;
-        const modelIdOverride = request.query.modelId;
 
         // FF Check for V2 KB
         const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
+        // Only allow modelId override if FF is enabled as this will re-write the ingest pipeline and break any previous KB entries
+        // This is only really needed for API integration tests
+        const modelIdOverride = v2KnowledgeBaseEnabled ? request.query.modelId : undefined;
 
         try {
           const knowledgeBaseDataClient =

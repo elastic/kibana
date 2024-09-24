@@ -15,6 +15,27 @@ X-Kbn-Context: {{appContext.security}}
   "text": "My favorite food is Dan Bing"
 }
 
+### Create Index Entry (Admin Global)
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf: "true"
+Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
+X-Kbn-Context: {{appContext.security}}
+
+{
+  "type": "index",
+  "name": "SlackConnector (Admin Global)",
+  "namespace": "default",
+  "index": "slackbot-test",
+  "field": "semantic_text",
+  "description": "Use this index to search for the user's Slack messages.",
+  "queryDescription":
+  "The free text search that the user wants to perform over this dataset. So if asking \"what are my slack messages from last week about failed tests\", the query would be \"A test has failed! failing test failed test\"",
+  "outputFields": ["author", "text", "timestamp"],
+  "users": []
+}
+
 ### Create Index Entry (Admin)
 POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
 kbn-xsrf: "true"
@@ -35,24 +56,27 @@ X-Kbn-Context: {{appContext.security}}
   "outputFields": ["author", "text", "timestamp"]
 }
 
-### Create Index Entry (Assistant System)
+### Create Index Entry (Assistant All)
 POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
-Authorization: Basic {{auth.assistant_system.username}} {{auth.assistant_system.password}}
+Authorization: Basic {{auth.assistant_all.username}} {{auth.assistant_all.password}}
 X-Kbn-Context: {{appContext.security}}
 
 {
   "type": "index",
-  "name": "SlackConnector (Assistant System)",
+  "name": "SlackConnector (Assistant All)",
   "namespace": "default",
   "index": "slackbot-test",
   "field": "semantic_text",
   "description": "Use this index to search for the user's Slack messages.",
-  "queryDescription":
-  "The free text search that the user wants to perform over this dataset. So if asking \"what are my slack messages from last week about failed tests\", the query would be \"A test has failed! failing test failed test\"",
-  "outputFields": ["author", "text", "timestamp"]
+  "queryDescription": "The free text search that the user wants to perform over this dataset. So if asking \"what are my slack messages from last week about failed tests\", the query would be \"A test has failed! failing test failed test\"",
+  "outputFields": [
+    "author",
+    "text",
+    "timestamp"
+  ]
 }
 
 

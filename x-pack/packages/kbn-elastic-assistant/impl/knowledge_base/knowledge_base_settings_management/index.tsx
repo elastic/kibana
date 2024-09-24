@@ -27,6 +27,7 @@ import { AlertsSettingsManagement } from '../../alerts/settings/alerts_settings_
 import { useKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_knowledge_base_entries';
 import { useAssistantContext } from '../../assistant_context';
 import { useKnowledgeBaseTable } from './use_knowledge_base_table';
+import { AssistantSettingsBottomBar } from '../../assistant/settings/assistant_settings_bottom_bar';
 import {
   useSettingsUpdater,
   DEFAULT_CONVERSATIONS,
@@ -48,6 +49,7 @@ import {
 } from './helpers';
 import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
 import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries';
+import { SETTINGS_UPDATED_TOAST_TITLE } from '../../assistant/settings/translations';
 
 export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
   const {
@@ -55,14 +57,46 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     http,
     toasts,
   } = useAssistantContext();
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   // Only needed for legacy settings management
-  const { knowledgeBase, setUpdatedKnowledgeBaseSettings } = useSettingsUpdater(
-    DEFAULT_CONVERSATIONS, // Knowledge Base settings do not require conversations
-    DEFAULT_PROMPTS, // Knowledge Base settings do not require prompts
-    false, // Knowledge Base settings do not require conversations
-    false // Knowledge Base settings do not require prompts
+  const { knowledgeBase, setUpdatedKnowledgeBaseSettings, resetSettings, saveSettings } =
+    useSettingsUpdater(
+      DEFAULT_CONVERSATIONS, // Knowledge Base settings do not require conversations
+      DEFAULT_PROMPTS, // Knowledge Base settings do not require prompts
+      false, // Knowledge Base settings do not require conversations
+      false // Knowledge Base settings do not require prompts
+    );
+
+  const handleUpdateKnowledgeBaseSettings = useCallback(
+    (updatedKnowledgeBase) => {
+      setHasPendingChanges(true);
+      setUpdatedKnowledgeBaseSettings(updatedKnowledgeBase);
+    },
+    [setUpdatedKnowledgeBaseSettings]
   );
+
+  const handleSave = useCallback(
+    async (param?: { callback?: () => void }) => {
+      await saveSettings();
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: SETTINGS_UPDATED_TOAST_TITLE,
+      });
+      setHasPendingChanges(false);
+      param?.callback?.();
+    },
+    [saveSettings, toasts]
+  );
+
+  const onCancelClick = useCallback(() => {
+    resetSettings();
+    setHasPendingChanges(false);
+  }, [resetSettings]);
+
+  const onSaveButtonClicked = useCallback(() => {
+    handleSave();
+  }, [handleSave]);
 
   const { isFlyoutOpen: isFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
 
@@ -100,7 +134,11 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     closeFlyout();
   }, [closeFlyout]);
 
-  const { data: entries } = useKnowledgeBaseEntries({ http, toasts });
+  const { data: entries } = useKnowledgeBaseEntries({
+    http,
+    toasts,
+    enabled: enableKnowledgeBaseByDefault,
+  });
   const { getColumns } = useKnowledgeBaseTable();
   const columns = useMemo(
     () =>
@@ -169,10 +207,17 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
 
   if (!enableKnowledgeBaseByDefault) {
     return (
-      <KnowledgeBaseSettings
-        knowledgeBase={knowledgeBase}
-        setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-      />
+      <>
+        <KnowledgeBaseSettings
+          knowledgeBase={knowledgeBase}
+          setUpdatedKnowledgeBaseSettings={handleUpdateKnowledgeBaseSettings}
+        />
+        <AssistantSettingsBottomBar
+          hasPendingChanges={hasPendingChanges}
+          onCancelClick={onCancelClick}
+          onSaveButtonClicked={onSaveButtonClicked}
+        />
+      </>
     );
   }
 
@@ -208,7 +253,12 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
       <EuiSpacer size="m" />
       <AlertsSettingsManagement
         knowledgeBase={knowledgeBase}
-        setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+        setUpdatedKnowledgeBaseSettings={handleUpdateKnowledgeBaseSettings}
+      />
+      <AssistantSettingsBottomBar
+        hasPendingChanges={hasPendingChanges}
+        onCancelClick={onCancelClick}
+        onSaveButtonClicked={onSaveButtonClicked}
       />
       <Flyout
         flyoutVisible={isFlyoutVisible}
