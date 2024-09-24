@@ -87,8 +87,7 @@ describe('useHostIsolationAction', () => {
         });
       }
 
-      const { result, waitForValueToChange } = render();
-      await waitForValueToChange(() => result.current);
+      const { result } = render();
 
       expect(result.current).toEqual([
         buildExpectedMenuItemResult({
@@ -99,8 +98,8 @@ describe('useHostIsolationAction', () => {
   );
 
   it('should call `closePopover` callback when menu item `onClick` is called', async () => {
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
+    const { result } = render();
+    await appContextMock.waitFor(() => result.current);
     result.current[0].onClick!({} as unknown as React.MouseEvent);
 
     expect(hookProps.closePopover).toHaveBeenCalled();
@@ -156,8 +155,8 @@ describe('useHostIsolationAction', () => {
       if (type === 'non-endpoint') {
         hookProps.detailsData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
       }
-      const { result, waitForValueToChange } = render();
-      await waitForValueToChange(() => result.current);
+      const { result } = render();
+      await appContextMock.waitFor(() => result.current);
 
       expect(result.current).toEqual([
         buildExpectedMenuItemResult({
@@ -170,8 +169,8 @@ describe('useHostIsolationAction', () => {
   );
 
   it('should call isolate API when agent is currently NOT isolated', async () => {
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
+    const { result } = render();
+    await appContextMock.waitFor(() => result.current);
     result.current[0].onClick!({} as unknown as React.MouseEvent);
 
     expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('isolateHost');
@@ -183,8 +182,8 @@ describe('useHostIsolationAction', () => {
         data: { 'abfe4a35-d5b4-42a0-a539-bd054c791769': { isolated: true } },
       })
     );
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
+    const { result } = render();
+    await appContextMock.waitFor(() => result.current);
     result.current[0].onClick!({} as unknown as React.MouseEvent);
 
     expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('unisolateHost');
