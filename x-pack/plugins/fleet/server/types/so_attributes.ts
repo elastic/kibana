@@ -139,6 +139,25 @@ export interface PackagePolicySOAttributes {
   overrides?: any | null;
 }
 
+export interface OtelPolicySOAttributes {
+  name: string;
+  description?: string;
+  namespace?: string;
+  policy_ids: string[];
+  output_id?: string | null;
+  integration?: {
+    name: string;
+    version?: string;
+  };
+  vars?: PackagePolicyConfigRecord;
+  pipelines?: string[];
+  revision: number;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+}
+
 interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;

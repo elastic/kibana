@@ -12,6 +12,7 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  OTEL_POLICY_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -784,6 +785,37 @@ export const getSavedObjectTypes = (
           },
           secret_references: { properties: { id: { type: 'keyword' } } },
           overrides: { type: 'flattened', index: false },
+          revision: { type: 'integer' },
+          updated_at: { type: 'date' },
+          updated_by: { type: 'keyword' },
+          created_at: { type: 'date' },
+          created_by: { type: 'keyword' },
+        },
+      },
+    },
+    [OTEL_POLICY_SAVED_OBJECT_TYPE]: {
+      name: OTEL_POLICY_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'multiple',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        properties: {
+          name: { type: 'keyword' },
+          description: { type: 'text' },
+          namespace: { type: 'keyword' },
+          policy_ids: { type: 'keyword' },
+          output_id: { type: 'keyword' },
+          integration: {
+            properties: {
+              name: { type: 'keyword' },
+              version: { type: 'keyword' },
+            },
+          },
+          vars: { type: 'flattened' },
+          pipelines: { type: 'flattened' },
           revision: { type: 'integer' },
           updated_at: { type: 'date' },
           updated_by: { type: 'keyword' },

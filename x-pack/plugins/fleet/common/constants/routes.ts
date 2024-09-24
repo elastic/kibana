@@ -16,6 +16,7 @@ export const PACKAGE_POLICY_API_ROOT = `${API_ROOT}/package_policies`;
 export const AGENT_POLICY_API_ROOT = `${API_ROOT}/agent_policies`;
 export const K8S_API_ROOT = `${API_ROOT}/kubernetes`;
 export const DOWNLOAD_SOURCE_API_ROOT = `${API_ROOT}/agent_download_sources`;
+export const OTEL_API_ROOT = `${API_ROOT}/otel`;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 
@@ -215,6 +216,13 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
 };
 
+// OTEL policies and templates routes
+export const OTEL_INTEGRATIONS_ROUTES = {
+  CREATE_PATTERN: `${OTEL_API_ROOT}/templates/{pkgName}`,
+};
+export const OTEL_POLICIES_ROUTES = {
+  CREATE_PATTERN: `${OTEL_API_ROOT}/policies`,
+};
 export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;
 
 // Fleet debug routes
