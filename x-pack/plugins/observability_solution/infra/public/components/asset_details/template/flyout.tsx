@@ -17,7 +17,6 @@ import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import type { ContentTemplateProps } from '../types';
-import { useMetadataStateContext } from '../hooks/use_metadata_state';
 
 export const Flyout = ({
   tabs = [],
@@ -31,7 +30,6 @@ export const Flyout = ({
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
-  const { metadata, loading: metadataLoading } = useMetadataStateContext();
 
   useEffectOnce(() => {
     telemetry.reportAssetDetailsFlyoutViewed({
@@ -59,9 +57,7 @@ export const Flyout = ({
             title={asset.name}
             tabs={tabEntries}
             rightSideItems={rightSideItems}
-            hasSystemIntegration={!!metadata?.hasSystemIntegration}
             assetType={asset.type}
-            metadataLoading={metadataLoading}
             loading={loading}
           />
         </EuiFlyoutHeader>

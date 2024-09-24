@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -14,7 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'unifiedFieldList']);
+  const { common, discover, unifiedFieldList } = getPageObjects([
+    'common',
+    'discover',
+    'unifiedFieldList',
+  ]);
 
   describe('index pattern with unmapped fields', () => {
     before(async () => {
@@ -31,8 +36,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}"}`,
       });
 
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('test-index-unmapped-fields');
+      await common.navigateToApp('discover');
+      await discover.selectIndexPattern('test-index-unmapped-fields');
     });
 
     after(async () => {
@@ -46,42 +51,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('unmapped fields exist on a new saved search', async () => {
       const expectedHitCount = '4';
       await retry.try(async function () {
-        expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
+        expect(await discover.getHitCount()).to.be(expectedHitCount);
       });
-      let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
+      let allFields = await unifiedFieldList.getAllFieldNames();
       // message is a mapped field
       expect(allFields.includes('message')).to.be(true);
       // sender is not a mapped field
       expect(allFields.includes('sender')).to.be(false);
 
-      await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
+      await unifiedFieldList.toggleSidebarSection('unmapped');
 
-      allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
+      allFields = await unifiedFieldList.getAllFieldNames();
       expect(allFields.includes('sender')).to.be(true); // now visible under Unmapped section
 
-      await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
+      await unifiedFieldList.toggleSidebarSection('unmapped');
     });
 
     it('unmapped fields exist on an existing saved search', async () => {
-      await PageObjects.discover.loadSavedSearch('Existing Saved Search');
+      await discover.loadSavedSearch('Existing Saved Search');
       const expectedHitCount = '4';
       await retry.try(async function () {
-        expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
+        expect(await discover.getHitCount()).to.be(expectedHitCount);
       });
-      let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
+      let allFields = await unifiedFieldList.getAllFieldNames();
       expect(allFields.includes('message')).to.be(true);
       expect(allFields.includes('sender')).to.be(false);
       expect(allFields.includes('receiver')).to.be(false);
 
-      await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
+      await unifiedFieldList.toggleSidebarSection('unmapped');
 
-      allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
+      allFields = await unifiedFieldList.getAllFieldNames();
 
       // now visible under Unmapped section
       expect(allFields.includes('sender')).to.be(true);
       expect(allFields.includes('receiver')).to.be(true);
 
-      await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
+      await unifiedFieldList.toggleSidebarSection('unmapped');
     });
   });
 }

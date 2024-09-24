@@ -34,7 +34,7 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('updates all assets when updating a package to a different version', async () => {
+  describe('updates all assets when updating a package to a different version', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
@@ -418,6 +418,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'component_template',
           },
           {
+            id: 'logs@custom',
+            type: 'component_template',
+          },
+          {
             id: 'logs-all_assets.test_logs@custom',
             type: 'component_template',
           },
@@ -439,6 +443,11 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             id: 'metrics-all_assets.test_metrics@package',
+            type: 'component_template',
+          },
+
+          {
+            id: 'metrics@custom',
             type: 'component_template',
           },
           {

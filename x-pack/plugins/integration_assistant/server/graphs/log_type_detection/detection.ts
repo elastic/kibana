@@ -4,20 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { LogFormatDetectionState } from '../../types';
 import { LOG_FORMAT_DETECTION_PROMPT } from './prompts';
+import type { LogDetectionNodeParams } from './types';
 
 const MaxLogSamplesInPrompt = 5;
 
-export async function handleLogFormatDetection(
-  state: LogFormatDetectionState,
-  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
-) {
+export async function handleLogFormatDetection({
+  state,
+  model,
+}: LogDetectionNodeParams): Promise<Partial<LogFormatDetectionState>> {
   const outputParser = new JsonOutputParser();
   const logFormatDetectionNode = LOG_FORMAT_DETECTION_PROMPT.pipe(model).pipe(outputParser);
 
@@ -30,7 +27,9 @@ export async function handleLogFormatDetection(
     ex_answer: state.exAnswer,
     log_samples: samples,
   });
-  const logFormat = detectedLogFormatAnswer.log_type;
 
-  return { logFormat, lastExecutedChain: 'logFormatDetection' };
+  const logFormat = detectedLogFormatAnswer.log_type;
+  const header = detectedLogFormatAnswer.header;
+
+  return { samplesFormat: { name: logFormat }, header, lastExecutedChain: 'logFormatDetection' };
 }

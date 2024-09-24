@@ -16,7 +16,14 @@ export type {
   BaseCspSetupBothPolicy,
   BaseCspSetupStatus,
   CspSetupStatus,
-  CspFinding,
-} from './types';
+} from './types/status';
+export type { CspFinding, CspFindingResult } from './types/findings';
+export type { BenchmarksCisId } from './types/benchmark';
+export type { VulnSeverity } from './types/vulnerabilities';
 export * from './constants';
-export type { CspBenchmarkRuleMetadata, CspBenchmarkRulesStates } from './schema/rules';
+export {
+  extractErrorMessage,
+  buildMutedRulesFilter,
+  buildEntityFlyoutPreviewQuery,
+} from './utils/helpers';
+export { getAbbreviatedNumber } from './utils/get_abbreviated_number';

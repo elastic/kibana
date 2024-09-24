@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
+import { isEmpty } from 'lodash';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
@@ -20,7 +21,7 @@ export const replaceStringWithParams = (
   params: Record<string, string>,
   logger?: Logger
 ) => {
-  if (!value || typeof value === 'boolean') {
+  if (!value || typeof value === 'boolean' || isEmpty(params)) {
     return value as string | null;
   }
 
@@ -42,12 +43,29 @@ export const replaceStringWithParams = (
 
     const parsedVars: ParsedVars = variableParser.parse(value);
 
+    if (allParamsAreMissing(parsedVars, params)) {
+      return value as string | null;
+    }
+
     return replaceVarsWithParams(parsedVars, params);
   } catch (e) {
     logger?.error(`error parsing vars for value ${JSON.stringify(value)}, ${e}`);
   }
 
   return value as string | null;
+};
+
+const allParamsAreMissing = (parsedVars: ParsedVars, params: Record<string, string>) => {
+  const hasDefault = parsedVars.some(
+    (parsedVar) => parsedVar.type === 'var' && parsedVar.content.default
+  );
+  if (hasDefault) {
+    return false;
+  }
+  const varKeys = parsedVars
+    .filter((parsedVar) => parsedVar.type === 'var')
+    .map((v) => (typeof v.content === 'string' ? v.content : v.content.name));
+  return varKeys.every((v) => !params[v]);
 };
 
 const SHELL_PARAMS_REGEX = /\$\{[a-zA-Z_][a-zA-Z0-9\._\-?:]*\}/g;

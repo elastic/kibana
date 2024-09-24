@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 import { isEqual } from 'lodash';
 
@@ -26,6 +26,7 @@ import {
   sendCreatePackagePolicy,
   sendBulkInstallPackages,
   sendGetPackagePolicies,
+  useMultipleAgentPolicies,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import {
@@ -154,6 +155,8 @@ export function useOnSubmit({
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
   // Form state
@@ -184,14 +187,10 @@ export function useOnSubmit({
       if (isEqual(updatedAgentPolicies, agentPolicies)) {
         return;
       }
-      if (updatedAgentPolicies.length > 0) {
-        setAgentPolicies(updatedAgentPolicies);
-        if (packageInfo) {
-          setHasAgentPolicyError(false);
-        }
-      } else {
-        setHasAgentPolicyError(true);
-        setAgentPolicies([]);
+
+      setAgentPolicies(updatedAgentPolicies);
+      if (packageInfo) {
+        setHasAgentPolicyError(false);
       }
 
       // eslint-disable-next-line no-console
@@ -206,7 +205,7 @@ export function useOnSubmit({
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          safeLoad,
+          load,
           spaceSettings
         );
         setValidationResults(newValidationResult);
@@ -235,18 +234,17 @@ export function useOnSubmit({
         ? validationHasErrors(newValidationResults)
         : false;
       const hasAgentPolicy =
-        newPackagePolicy.policy_ids.length > 0 && newPackagePolicy.policy_ids[0] !== '';
-      if (
-        hasPackage &&
-        (hasAgentPolicy || selectedPolicyTab === SelectedPolicyTab.NEW) &&
-        !hasValidationErrors
-      ) {
+        (newPackagePolicy.policy_ids.length > 0 && newPackagePolicy.policy_ids[0] !== '') ||
+        selectedPolicyTab === SelectedPolicyTab.NEW;
+      const isOrphaningPolicy =
+        canUseMultipleAgentPolicies && newPackagePolicy.policy_ids.length === 0;
+      if (hasPackage && (hasAgentPolicy || isOrphaningPolicy) && !hasValidationErrors) {
         setFormState('VALID');
       } else {
         setFormState('INVALID');
       }
     },
-    [packagePolicy, setFormState, updatePackagePolicyValidation, selectedPolicyTab]
+    [packagePolicy, updatePackagePolicyValidation, selectedPolicyTab, canUseMultipleAgentPolicies]
   );
 
   // Initial loading of package info
@@ -315,7 +313,8 @@ export function useOnSubmit({
         return;
       }
       if (
-        agentCount !== 0 &&
+        (agentCount !== 0 ||
+          (agentPolicies.length === 0 && selectedPolicyTab !== SelectedPolicyTab.NEW)) &&
         !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
         formState !== 'CONFIRM'
       ) {
@@ -401,7 +400,7 @@ export function useOnSubmit({
         setSavedPackagePolicy(data!.item);
 
         const promptForAgentEnrollment =
-          !(agentCount && agentPolicies.length > 0) &&
+          (createdPolicy || (agentPolicies.length > 0 && !agentCount)) &&
           !isAgentlessConfigured &&
           hasFleetAddAgentsPrivileges;
 

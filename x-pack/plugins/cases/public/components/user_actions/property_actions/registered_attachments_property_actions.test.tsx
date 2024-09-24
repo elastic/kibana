@@ -18,8 +18,7 @@ import {
 import { RegisteredAttachmentsPropertyActions } from './registered_attachments_property_actions';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
-// Failing: See https://github.com/elastic/kibana/issues/174384
-describe.skip('RegisteredAttachmentsPropertyActions', () => {
+describe('RegisteredAttachmentsPropertyActions', () => {
   let appMock: AppMockRenderer;
 
   const props = {
@@ -34,12 +33,16 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
     appMock = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMock.clearQueryCache();
+  });
+
   it('renders the correct number of actions', async () => {
     appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
 
     expect(await screen.findByTestId('property-actions-user-action-group')).toBeInTheDocument();
   });
@@ -49,12 +52,12 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-trash'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-trash'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
@@ -70,16 +73,16 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-trash'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-trash'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByText('Delete'));
+    await userEvent.click(await screen.findByText('Delete'));
 
     await waitFor(() => {
       expect(props.onDelete).toHaveBeenCalled();
@@ -123,7 +126,7 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(

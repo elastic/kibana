@@ -13,7 +13,10 @@ interface BeatsTemplateProps extends PageTemplateProps {
   instance?: any;
 }
 
-export const BeatsTemplate: React.FC<BeatsTemplateProps> = ({ instance, ...props }) => {
+export const BeatsTemplate: React.FC<React.PropsWithChildren<BeatsTemplateProps>> = ({
+  instance,
+  ...props
+}) => {
   const tabs: TabMenuItem[] = [];
 
   if (!instance) {

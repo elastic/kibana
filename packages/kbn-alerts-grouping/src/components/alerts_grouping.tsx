@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, {
@@ -17,7 +18,7 @@ import React, {
   useState,
 } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { isNoneGroup, useGrouping } from '@kbn/grouping';
+import { GroupOption, isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEqual } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
@@ -89,7 +90,7 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
   ) as [number[], Dispatch<SetStateAction<number[]>>, () => void];
 
   const onOptionsChange = useCallback(
-    (options) => {
+    (options: GroupOption[]) => {
       // useGrouping > useAlertsGroupingState options sync
       // the available grouping options change when the user selects
       // a new field not in the default ones

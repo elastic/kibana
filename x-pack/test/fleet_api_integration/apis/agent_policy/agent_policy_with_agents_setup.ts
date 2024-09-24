@@ -93,9 +93,8 @@ export default function (providerContext: FtrProviderContext) {
     });
     after(async () => {
       // Wait before agent status is updated
-      return new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
-    });
-    after(async () => {
+      await new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
+
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 

@@ -63,6 +63,7 @@ export interface AppDependencies {
     enableIndexActions: boolean;
     enableLegacyTemplates: boolean;
     enableIndexStats: boolean;
+    enableSizeAndDocCount: boolean;
     enableDataStreamStats: boolean;
     editableIndexSettings: 'all' | 'limited';
     enableMappingsSourceFieldSection: boolean;

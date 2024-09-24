@@ -173,7 +173,7 @@ describe('CaseView', () => {
   it('should refresh data on refresh', async () => {
     const queryClientSpy = jest.spyOn(appMockRenderer.queryClient, 'invalidateQueries');
     const result = appMockRenderer.render(<CaseView {...caseViewProps} />);
-    userEvent.click(result.getByTestId('case-refresh'));
+    await userEvent.click(result.getByTestId('case-refresh'));
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
   });

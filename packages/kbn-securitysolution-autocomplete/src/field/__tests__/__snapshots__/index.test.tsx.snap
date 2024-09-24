@@ -1,659 +1,224 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FieldComponent should allow user to clear values if isClearable is true 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiComboBox emotion-euiComboBox-fullWidth"
-        data-test-subj="fieldAutocompleteComboBox"
-      >
-        <div
-          class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
-        >
-          <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
-          >
-            <div
-              class="euiFormControlLayout__childrenWrapper"
-              style="--euiFormControlRightIconsCount: 2;"
-            >
-              <div
-                class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText"
-                data-test-subj="comboBoxInput"
-                tabindex="-1"
-              >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  aria-invalid="false"
-                  autocomplete="off"
-                  class="euiComboBox__input emotion-euiComboBoxInput"
-                  data-test-subj="comboBoxSearchInput"
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="inline-size: 100%;"
-                  value="machine.os.raw"
-                />
-              </div>
-              <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
-              >
-                <button
-                  aria-label="Clear input"
-                  class="euiFormControlLayoutClearButton"
-                  data-test-subj="comboBoxClearButton"
-                  type="button"
-                >
-                  <span
-                    class="euiFormControlLayoutClearButton__icon"
-                    data-euiicon-type="cross"
-                  />
-                </button>
-                <button
-                  aria-label="Open list of options"
-                  class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                  data-test-subj="comboBoxToggleListButton"
-                  tabindex="-1"
-                  type="button"
-                >
-                  <span
-                    aria-hidden="true"
-                    class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
+<div>
+  <div
+    class="euiComboBox emotion-euiComboBox-fullWidth"
+    data-test-subj="fieldAutocompleteComboBox"
+  >
     <div
-      class="euiComboBox emotion-euiComboBox-fullWidth"
-      data-test-subj="fieldAutocompleteComboBox"
+      class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
     >
       <div
-        class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+        class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 2;"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
-            style="--euiFormControlRightIconsCount: 2;"
+            class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText"
+            data-test-subj="comboBoxInput"
+            tabindex="-1"
           >
-            <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText"
-              data-test-subj="comboBoxInput"
-              tabindex="-1"
+            <input
+              aria-autocomplete="list"
+              aria-controls=""
+              aria-expanded="false"
+              aria-invalid="false"
+              autocomplete="off"
+              class="euiComboBox__input emotion-euiComboBoxInput"
+              data-test-subj="comboBoxSearchInput"
+              id="generated-id__eui-combobox-id"
+              role="combobox"
+              style="inline-size: 100%;"
+              value="machine.os.raw"
+            />
+          </div>
+          <div
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+          >
+            <button
+              aria-label="Clear input"
+              class="euiFormControlLayoutClearButton emotion-euiFormControlLayoutClearButton"
+              data-test-subj="comboBoxClearButton"
+              type="button"
             >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                aria-invalid="false"
-                autocomplete="off"
-                class="euiComboBox__input emotion-euiComboBoxInput"
-                data-test-subj="comboBoxSearchInput"
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="inline-size: 100%;"
-                value="machine.os.raw"
+              <span
+                class="euiFormControlLayoutClearButton__icon emotion-euiFormControlLayoutClearButton__icon-m"
+                data-euiicon-type="cross"
               />
-            </div>
-            <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+            </button>
+            <button
+              aria-label="Open list of options"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
+              data-test-subj="comboBoxToggleListButton"
+              tabindex="-1"
+              type="button"
             >
-              <button
-                aria-label="Clear input"
-                class="euiFormControlLayoutClearButton"
-                data-test-subj="comboBoxClearButton"
-                type="button"
-              >
-                <span
-                  class="euiFormControlLayoutClearButton__icon"
-                  data-euiicon-type="cross"
-                />
-              </button>
-              <button
-                aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                data-test-subj="comboBoxToggleListButton"
-                tabindex="-1"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </button>
-            </div>
+              <span
+                aria-hidden="true"
+                class="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="arrowDown"
+              />
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
+  </div>
+</div>
 `;
 
 exports[`FieldComponent should render the component disabled if isDisabled is true 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"
-        data-test-subj="fieldAutocompleteComboBox"
-      >
-        <div
-          class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
-        >
-          <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
-          >
-            <div
-              class="euiFormControlLayout__childrenWrapper"
-            >
-              <div
-                class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
-                data-test-subj="comboBoxInput"
-                tabindex="-1"
-              >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  aria-invalid="false"
-                  autocomplete="off"
-                  class="euiComboBox__input emotion-euiComboBoxInput"
-                  data-test-subj="comboBoxSearchInput"
-                  disabled=""
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="inline-size: 100%;"
-                  value="machine.os.raw"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
+<div>
+  <div
+    class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"
+    data-test-subj="fieldAutocompleteComboBox"
+  >
     <div
-      class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"
-      data-test-subj="fieldAutocompleteComboBox"
+      class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
     >
       <div
-        class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+        class="euiFormControlLayout euiFormControlLayout-isDisabled emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
+            data-test-subj="comboBoxInput"
+            tabindex="-1"
           >
-            <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
-              data-test-subj="comboBoxInput"
-              tabindex="-1"
-            >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                aria-invalid="false"
-                autocomplete="off"
-                class="euiComboBox__input emotion-euiComboBoxInput"
-                data-test-subj="comboBoxSearchInput"
-                disabled=""
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="inline-size: 100%;"
-                value="machine.os.raw"
-              />
-            </div>
+            <input
+              aria-autocomplete="list"
+              aria-controls=""
+              aria-expanded="false"
+              aria-invalid="false"
+              autocomplete="off"
+              class="euiComboBox__input emotion-euiComboBoxInput"
+              data-test-subj="comboBoxSearchInput"
+              disabled=""
+              id="generated-id__eui-combobox-id"
+              role="combobox"
+              style="inline-size: 100%;"
+              value="machine.os.raw"
+            />
           </div>
         </div>
       </div>
     </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
+  </div>
+</div>
 `;
 
 exports[`FieldComponent should render the component enabled and displays the selected field correctly 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiComboBox emotion-euiComboBox-fullWidth"
-        data-test-subj="fieldAutocompleteComboBox"
-      >
-        <div
-          class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
-        >
-          <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
-          >
-            <div
-              class="euiFormControlLayout__childrenWrapper"
-              style="--euiFormControlRightIconsCount: 1;"
-            >
-              <div
-                class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText"
-                data-test-subj="comboBoxInput"
-                tabindex="-1"
-              >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  aria-invalid="false"
-                  autocomplete="off"
-                  class="euiComboBox__input emotion-euiComboBoxInput"
-                  data-test-subj="comboBoxSearchInput"
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="inline-size: 100%;"
-                  value="machine.os.raw"
-                />
-              </div>
-              <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
-              >
-                <button
-                  aria-label="Open list of options"
-                  class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                  data-test-subj="comboBoxToggleListButton"
-                  tabindex="-1"
-                  type="button"
-                >
-                  <span
-                    aria-hidden="true"
-                    class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
+<div>
+  <div
+    class="euiComboBox emotion-euiComboBox-fullWidth"
+    data-test-subj="fieldAutocompleteComboBox"
+  >
     <div
-      class="euiComboBox emotion-euiComboBox-fullWidth"
-      data-test-subj="fieldAutocompleteComboBox"
+      class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
     >
       <div
-        class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+        class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
-            style="--euiFormControlRightIconsCount: 1;"
+            class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText"
+            data-test-subj="comboBoxInput"
+            tabindex="-1"
           >
-            <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText"
-              data-test-subj="comboBoxInput"
+            <input
+              aria-autocomplete="list"
+              aria-controls=""
+              aria-expanded="false"
+              aria-invalid="false"
+              autocomplete="off"
+              class="euiComboBox__input emotion-euiComboBoxInput"
+              data-test-subj="comboBoxSearchInput"
+              id="generated-id__eui-combobox-id"
+              role="combobox"
+              style="inline-size: 100%;"
+              value="machine.os.raw"
+            />
+          </div>
+          <div
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+          >
+            <button
+              aria-label="Open list of options"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
+              data-test-subj="comboBoxToggleListButton"
               tabindex="-1"
+              type="button"
             >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                aria-invalid="false"
-                autocomplete="off"
-                class="euiComboBox__input emotion-euiComboBoxInput"
-                data-test-subj="comboBoxSearchInput"
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="inline-size: 100%;"
-                value="machine.os.raw"
+              <span
+                aria-hidden="true"
+                class="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="arrowDown"
               />
-            </div>
-            <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
-            >
-              <button
-                aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                data-test-subj="comboBoxToggleListButton"
-                tabindex="-1"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </button>
-            </div>
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
+  </div>
+</div>
 `;
 
 exports[`FieldComponent should render the loading spinner if isLoading is true when clicked 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"
-        data-test-subj="fieldAutocompleteComboBox"
-      >
-        <div
-          class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
-        >
-          <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
-          >
-            <div
-              class="euiFormControlLayout__childrenWrapper"
-              style="--euiFormControlRightIconsCount: 1;"
-            >
-              <div
-                class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
-                data-test-subj="comboBoxInput"
-                tabindex="-1"
-              >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  aria-invalid="false"
-                  autocomplete="off"
-                  class="euiComboBox__input emotion-euiComboBoxInput"
-                  data-test-subj="comboBoxSearchInput"
-                  disabled=""
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="inline-size: 100%;"
-                  value="machine.os.raw"
-                />
-              </div>
-              <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
-              >
-                <span
-                  aria-label="Loading"
-                  class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
-                  role="progressbar"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
+<div>
+  <div
+    class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"
+    data-test-subj="fieldAutocompleteComboBox"
+  >
     <div
-      class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"
-      data-test-subj="fieldAutocompleteComboBox"
+      class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
     >
       <div
-        class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+        class="euiFormControlLayout euiFormControlLayout-isDisabled emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
-            style="--euiFormControlRightIconsCount: 1;"
+            class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
+            data-test-subj="comboBoxInput"
+            tabindex="-1"
           >
-            <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
-              data-test-subj="comboBoxInput"
-              tabindex="-1"
-            >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                aria-invalid="false"
-                autocomplete="off"
-                class="euiComboBox__input emotion-euiComboBoxInput"
-                data-test-subj="comboBoxSearchInput"
-                disabled=""
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="inline-size: 100%;"
-                value="machine.os.raw"
-              />
-            </div>
-            <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
-            >
-              <span
-                aria-label="Loading"
-                class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
-                role="progressbar"
-              />
-            </div>
+            <input
+              aria-autocomplete="list"
+              aria-controls=""
+              aria-expanded="false"
+              aria-invalid="false"
+              autocomplete="off"
+              class="euiComboBox__input emotion-euiComboBoxInput"
+              data-test-subj="comboBoxSearchInput"
+              disabled=""
+              id="generated-id__eui-combobox-id"
+              role="combobox"
+              style="inline-size: 100%;"
+              value="machine.os.raw"
+            />
+          </div>
+          <div
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right-disabled"
+          >
+            <span
+              aria-label="Loading"
+              class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+              role="progressbar"
+            />
           </div>
         </div>
       </div>
     </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
+  </div>
+</div>
 `;

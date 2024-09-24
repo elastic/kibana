@@ -21,20 +21,9 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import {
-  AlertsLocatorParams,
-  alertsLocatorID,
-  convertToBuiltInComparators,
-  getAlertUrl,
-} from '@kbn/observability-plugin/common';
+import { convertToBuiltInComparators, getAlertUrl } from '@kbn/observability-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
-import {
-  ASSET_DETAILS_LOCATOR_ID,
-  INVENTORY_LOCATOR_ID,
-  type AssetDetailsLocatorParams,
-  type InventoryLocatorParams,
-} from '@kbn/observability-shared-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import {
   AlertStates,
@@ -45,7 +34,7 @@ import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import { LogQueryFields } from '../../metrics/types';
 import {
   buildErrorAlertReason,
@@ -86,7 +75,10 @@ export type InventoryMetricThresholdAlert = Omit<
 };
 
 export const createInventoryMetricThresholdExecutor =
-  (libs: InfraBackendLibs) =>
+  (
+    libs: InfraBackendLibs,
+    { alertsLocator, assetDetailsLocator, inventoryLocator }: InfraLocators
+  ) =>
   async (
     options: RuleExecutorOptions<
       InventoryMetricThresholdParams & Record<string, unknown>,
@@ -106,13 +98,6 @@ export const createInventoryMetricThresholdExecutor =
       rule: { id: ruleId, tags: ruleTags },
       getTimeRange,
     } = options;
-
-    const { share } = libs.plugins;
-    const alertsLocator = share.setup.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
-    const assetDetailsLocator =
-      share.setup.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
-    const inventoryLocator =
-      share.setup.url.locators.get<InventoryLocatorParams>(INVENTORY_LOCATOR_ID);
 
     const startTime = Date.now();
 
@@ -169,11 +154,9 @@ export const createInventoryMetricThresholdExecutor =
             timestamp: startedAt.toISOString(),
             value: null,
             viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-              basePath: libs.basePath,
               criteria,
               nodeType,
               timestamp: indexedStartedAt,
-              spaceId,
               assetDetailsLocator,
               inventoryLocator,
             }),
@@ -326,11 +309,9 @@ export const createInventoryMetricThresholdExecutor =
             formatMetric(result[group].metric, result[group].currentValue)
           ),
           viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
             criteria,
             nodeType,
             timestamp: indexedStartedAt,
-            spaceId,
             hostName: additionalContext?.host?.name,
             assetDetailsLocator,
             inventoryLocator,
@@ -378,11 +359,9 @@ export const createInventoryMetricThresholdExecutor =
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-          basePath: libs.basePath,
           criteria,
           nodeType,
           timestamp: indexedStartedAt,
-          spaceId,
           hostName: additionalContext?.host?.name,
           assetDetailsLocator,
           inventoryLocator,

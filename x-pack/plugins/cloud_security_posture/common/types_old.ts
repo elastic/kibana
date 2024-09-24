@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { type TypeOf } from '@kbn/config-schema';
-import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
@@ -150,8 +150,6 @@ export interface CnvmDashboardData {
   topPatchableVulnerabilities: PatchableVulnerabilityStat[];
   topVulnerabilities: VulnerabilityStat[];
 }
-
-export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
 
 export interface VulnerableResourceStat {
   vulnerabilityCount: number | undefined;

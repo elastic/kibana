@@ -1,29 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
-import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchGeneric,
+} from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getStartEndParams } from '@kbn/esql-utils';
-
 import { zipObject } from 'lodash';
-import { Observable, defer, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs';
-import { buildEsQuery } from '@kbn/es-query';
-import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
+import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
+import { buildEsQuery, type Filter } from '@kbn/es-query';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
-import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext, ESQL_TABLE_TYPE } from '..';
+import {
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  ESQL_TABLE_TYPE,
+  isRunningResponse,
+  type KibanaContext,
+} from '..';
 import { UiSettingsCommon } from '../..';
+
+declare global {
+  interface Window {
+    /**
+     * Debug setting to make requests complete slower than normal. Only available on snapshots where `error_query` is enabled in ES.
+     */
+    ELASTIC_ESQL_DELAY_SECONDS?: number;
+  }
+}
 
 type Input = KibanaContext | null;
 type Output = Observable<Datatable>;
@@ -166,12 +182,31 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 fieldName: timeField,
               });
 
-            params.filter = buildEsQuery(
-              undefined,
-              input.query || [],
-              [...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
-              esQueryConfigs
-            );
+            // Used for debugging & inside automated tests to simulate a slow query
+            const delayFilter: Filter | undefined = window.ELASTIC_ESQL_DELAY_SECONDS
+              ? {
+                  meta: {},
+                  query: {
+                    error_query: {
+                      indices: [
+                        {
+                          name: '*',
+                          error_type: 'warning',
+                          stall_time_seconds: window.ELASTIC_ESQL_DELAY_SECONDS,
+                        },
+                      ],
+                    },
+                  },
+                }
+              : undefined;
+
+            const filters = [
+              ...(input.filters ?? []),
+              ...(timeFilter ? [timeFilter] : []),
+              ...(delayFilter ? [delayFilter] : []),
+            ];
+
+            params.filter = buildEsQuery(undefined, input.query || [], filters, esQueryConfigs);
           }
 
           let startTime = Date.now();
@@ -222,7 +257,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next({ rawResponse, requestParams }) {
+              next(response) {
+                if (isRunningResponse(response)) return;
+                const { rawResponse, requestParams } = response;
                 logInspectorRequest()
                   .stats({
                     hits: {

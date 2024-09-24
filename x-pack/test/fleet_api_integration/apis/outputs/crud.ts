@@ -196,7 +196,7 @@ export default function (providerContext: FtrProviderContext) {
 
   const TEST_SPACE_ID = 'testspaceoutputs';
 
-  describe('fleet_outputs_crud', async function () {
+  describe('fleet_outputs_crud', function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -209,6 +209,7 @@ export default function (providerContext: FtrProviderContext) {
     let fleetServerPolicyId: string;
     let fleetServerPolicyWithCustomOutputId: string;
 
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async function () {
       await enableSecrets(providerContext);
       await enableOutputSecrets();
@@ -1352,6 +1353,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      // eslint-disable-next-line mocha/no-identical-title
       it('should discard the shipper values when shipper is disabled', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
@@ -1701,6 +1703,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(400);
         });
 
+        // eslint-disable-next-line mocha/no-identical-title
         it('should return a 400 when deleting a default output ', async function () {
           await supertest
             .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)
@@ -1888,6 +1891,64 @@ export default function (providerContext: FtrProviderContext) {
           } catch (e) {
             // not found
           }
+        });
+
+        it('should update kafka output to logstash output', async function () {
+          // Output secrets require at least one Fleet server on 8.12.0 or higher (and none under 8.12.0).
+          await clearAgents();
+          await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Kafka Output With Secret',
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'ssl',
+              topics: [{ topic: 'topic1' }],
+              config_yaml: '',
+              compression: 'none',
+              client_id: 'Elastic',
+              partition: 'random',
+              version: '1.0.0',
+              required_acks: 1,
+              ssl: {
+                certificate: 'CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+              },
+              secrets: {
+                ssl: {
+                  key: 'KEY',
+                },
+              },
+            })
+            .expect(200);
+
+          const outputWithSecretsId = res.body.item.id;
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${outputWithSecretsId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'kafka_to_logstash',
+              type: 'logstash',
+              hosts: ['logstash'],
+              is_default: false,
+              is_default_monitoring: false,
+              config_yaml: '',
+              ssl: { certificate: 'cert', certificate_authorities: ['ca'] },
+              secrets: { ssl: { key: 'key' } },
+              proxy_id: null,
+            })
+            .expect(200);
+
+          expect(updateRes.body.item.type).to.eql('logstash');
+          expect(updateRes.body.item.topics).to.eql(null);
+
+          await supertest
+            .delete(`/api/fleet/outputs/${outputWithSecretsId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
         });
       });
     });

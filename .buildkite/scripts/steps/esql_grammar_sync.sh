@@ -11,15 +11,14 @@ synchronize_lexer_grammar () {
 
   # Insert the license header
   temp_file=$(mktemp)
-  printf "%s\n\n// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.\n\n%s" "$license_header" "$(cat $destination_file)" > "$temp_file"
+  printf "// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.\n\n%s" "$(cat $destination_file)" > "$temp_file"
   mv "$temp_file" "$destination_file"
 
   # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
   sed -i -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file"
 
-  # Insert "options { caseInsensitive = true; }" one line below
-  sed -i -e '/lexer grammar esql_lexer;/a\
-  options { caseInsensitive = true; }' "$destination_file"
+  # Replace the line containing "superClass" with "superClass=lexer_config;"
+  sed -i -e 's/superClass.*$/superClass=lexer_config;/' "$destination_file"
 
   echo "File copied and modified successfully."
 }
@@ -34,14 +33,17 @@ synchronize_parser_grammar () {
 
   # Insert the license header
   temp_file=$(mktemp)
-  printf "%s\n\n// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.\n\n%s" "$license_header" "$(cat ${destination_file})" > "$temp_file"
+  printf "// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.\n\n%s" "$(cat ${destination_file})" > "$temp_file"
   mv "$temp_file" "$destination_file"
 
   # Replace the line containing "parser grammar" with "parser grammar esql_parser;"
   sed -i -e 's/parser grammar.*$/parser grammar esql_parser;/' "$destination_file"
 
-  # Replace options {tokenVocab=EsqlBaseLexer;} with options {tokenVocab=esql_lexer;}
-  sed -i -e 's/options {tokenVocab=EsqlBaseLexer;}/options {tokenVocab=esql_lexer;}/' "$destination_file"
+  # Replace tokenVocab=EsqlBaseLexer; with tokenVocab=esql_lexer;
+  sed -i -e 's/tokenVocab=EsqlBaseLexer;/tokenVocab=esql_lexer;/' "$destination_file"
+
+  # Replace the line containing "superClass" with "superClass=parser_config;"
+  sed -i -e 's/superClass.*$/superClass=parser_config;/' "$destination_file"
 
   echo "File copied and modified successfully."
 }

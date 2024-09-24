@@ -48,7 +48,7 @@ const NewSavedQueryPageComponent = () => {
   );
 
   const handleSubmit = useCallback(
-    async (payload) => {
+    async (payload: any) => {
       await mutateAsync(payload);
     },
     [mutateAsync]

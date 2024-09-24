@@ -386,24 +386,6 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
-    label: 'Threat Intelligence Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    parallelism: 1
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
     agents:

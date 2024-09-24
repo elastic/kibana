@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -101,6 +102,7 @@ function buildEuiGridColumn({
   onFilter,
   editField,
   columnCellActions,
+  cellActionsHandling,
   visibleCellActions,
   columnsMeta,
   showColumnTokens,
@@ -123,6 +125,7 @@ function buildEuiGridColumn({
   onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   columnCellActions?: EuiDataGridColumnCellAction[];
+  cellActionsHandling: 'replace' | 'append';
   visibleCellActions?: number;
   columnsMeta?: DataTableColumnsMeta;
   showColumnTokens?: boolean;
@@ -175,12 +178,16 @@ function buildEuiGridColumn({
 
   let cellActions: EuiDataGridColumnCellAction[];
 
-  if (columnCellActions?.length) {
+  if (columnCellActions?.length && cellActionsHandling === 'replace') {
     cellActions = columnCellActions;
   } else {
     cellActions = dataViewField
       ? buildCellActions(dataViewField, toastNotifications, valueToStringConverter, onFilter)
       : [];
+
+    if (columnCellActions?.length && cellActionsHandling === 'append') {
+      cellActions.push(...columnCellActions);
+    }
   }
 
   const columnType = columnsMeta?.[columnName]?.type ?? dataViewField?.type;
@@ -277,6 +284,7 @@ export const deserializeHeaderRowHeight = (headerRowHeightLines: number) => {
 export function getEuiGridColumns({
   columns,
   columnsCellActions,
+  cellActionsHandling,
   rowsCount,
   settings,
   dataView,
@@ -297,6 +305,7 @@ export function getEuiGridColumns({
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
+  cellActionsHandling: 'replace' | 'append';
   rowsCount: number;
   settings: UnifiedDataTableSettings | undefined;
   dataView: DataView;
@@ -327,6 +336,7 @@ export function getEuiGridColumns({
       numberOfColumns,
       columnName: column,
       columnCellActions: columnsCellActions?.[columnIndex],
+      cellActionsHandling,
       columnWidth: getColWidth(column),
       dataView,
       defaultColumns,
@@ -347,40 +357,4 @@ export function getEuiGridColumns({
       onResize,
     })
   );
-}
-
-export function canPrependTimeFieldColumn(
-  columns: string[],
-  timeFieldName: string | undefined,
-  columnsMeta: DataTableColumnsMeta | undefined,
-  showTimeCol: boolean,
-  isPlainRecord: boolean
-) {
-  if (!showTimeCol || !timeFieldName) {
-    return false;
-  }
-
-  if (isPlainRecord) {
-    return !!columnsMeta && timeFieldName in columnsMeta && columns.includes('_source');
-  }
-
-  return true;
-}
-
-export function getVisibleColumns(
-  columns: string[],
-  dataView: DataView,
-  shouldPrependTimeFieldColumn: boolean
-) {
-  const timeFieldName = dataView.timeFieldName;
-
-  if (
-    shouldPrependTimeFieldColumn &&
-    timeFieldName &&
-    !columns.find((col) => col === timeFieldName)
-  ) {
-    return [timeFieldName, ...columns];
-  }
-
-  return columns;
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -34,17 +35,17 @@ const tooltipContent: CaseTooltipContentProps = {
 };
 
 const tooltipProps: CaseTooltipProps = {
-  children: TestSpan,
+  children: <TestSpan />,
   loading: false,
   content: tooltipContent,
 };
 
-const longTitle = `Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
+const longTitle = `Lorem Ipsum is simply dummy text of the printing and typesetting industry.
   Lorem Ipsum has been the industry standard dummy text ever since the 1500s!! Lorem!!!`;
 
-const longDescription = `Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
-  Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer 
-  took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, 
+const longDescription = `Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+  Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer
+  took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
   but also the leap into electronic typesetting, remaining essentially unchanged.`;
 
 const Template = (args: CaseTooltipProps) => (

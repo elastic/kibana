@@ -19,6 +19,7 @@ env:
   SKIP_NODE_SETUP: true
   TEAM_CHANNEL: "#kibana-mission-control"
   ENVIRONMENT: ${ENVIRONMENT?}
+  DEPLOYMENT_SLICES: ${DEPLOYMENT_SLICES:-""}
 
 steps:
   - label: ":pipeline::grey_question::seedling: Trigger Kibana Tests for ${ENVIRONMENT}"

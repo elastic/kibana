@@ -12,7 +12,10 @@ import type { RiskEngineStatusResponse } from '../../../../../common/api/entity_
 import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-export const riskEngineStatusRoute = (router: EntityAnalyticsRoutesDeps['router']) => {
+export const riskEngineStatusRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+) => {
   router.versioned
     .get({
       access: 'internal',
@@ -29,20 +32,27 @@ export const riskEngineStatusRoute = (router: EntityAnalyticsRoutesDeps['router'
         const securitySolution = await context.securitySolution;
         const riskEngineClient = securitySolution.getRiskEngineDataClient();
         const spaceId = securitySolution.getSpaceId();
+        const [_, { taskManager }] = await getStartServices();
 
         try {
-          const { riskEngineStatus, legacyRiskEngineStatus, isMaxAmountOfRiskEnginesReached } =
-            await riskEngineClient.getStatus({
-              namespace: spaceId,
-            });
-
-          return response.ok({
-            body: {
-              risk_engine_status: riskEngineStatus,
-              legacy_risk_engine_status: legacyRiskEngineStatus,
-              is_max_amount_of_risk_engines_reached: isMaxAmountOfRiskEnginesReached,
-            },
+          const {
+            riskEngineStatus,
+            legacyRiskEngineStatus,
+            isMaxAmountOfRiskEnginesReached,
+            taskStatus,
+          } = await riskEngineClient.getStatus({
+            namespace: spaceId,
+            taskManager,
           });
+
+          const body: RiskEngineStatusResponse = {
+            risk_engine_status: riskEngineStatus,
+            legacy_risk_engine_status: legacyRiskEngineStatus,
+            is_max_amount_of_risk_engines_reached: isMaxAmountOfRiskEnginesReached,
+            risk_engine_task_status: taskStatus,
+          };
+
+          return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
 

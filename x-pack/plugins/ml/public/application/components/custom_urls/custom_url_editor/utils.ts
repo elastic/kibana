@@ -42,12 +42,12 @@ import {
   replaceTokensInDFAUrlValue,
   isValidLabel,
 } from '../../../util/custom_url_utils';
-import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
 import type { CombinedJob, Job } from '../../../../../common/types/anomaly_detection_jobs';
 import { isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
 import type { TimeRangeType } from './constants';
+import type { MlApi } from '../../../services/ml_api_service';
 
 export interface TimeRange {
   type: TimeRangeType;
@@ -426,7 +426,11 @@ function buildAppStateQueryParam(queryFieldNames: string[]) {
 // Builds the full URL for testing out a custom URL configuration, which
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
-async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): Promise<string> {
+async function getAnomalyDetectionJobTestUrl(
+  mlApi: MlApi,
+  job: Job,
+  customUrl: MlUrlConfig
+): Promise<string> {
   const interval = parseInterval(job.analysis_config.bucket_span!);
   const bucketSpanSecs = interval !== null ? interval.asSeconds() : 0;
 
@@ -451,7 +455,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
 
   let resp;
   try {
-    resp = await ml.results.anomalySearch(
+    resp = await mlApi.results.anomalySearch(
       {
         body,
       },
@@ -475,8 +479,8 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
     try {
       // attempt load the non-combined job and datafeed so they can be used in the datafeed preview
       const [{ jobs }, { datafeeds }] = await Promise.all([
-        ml.getJobs({ jobId: job.job_id }),
-        ml.getDatafeeds({ datafeedId: job.datafeed_config?.datafeed_id ?? '' }),
+        mlApi.getJobs({ jobId: job.job_id }),
+        mlApi.getDatafeeds({ datafeedId: job.datafeed_config?.datafeed_id ?? '' }),
       ]);
       datafeedConfig = datafeeds[0];
       jobConfig = jobs[0];
@@ -496,7 +500,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
       delete jobConfig.datafeed_config;
     }
 
-    const preview = (await ml.jobs.datafeedPreview(
+    const preview = (await mlApi.jobs.datafeedPreview(
       undefined,
       jobConfig,
       datafeedConfig
@@ -516,6 +520,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
 }
 
 async function getDataFrameAnalyticsTestUrl(
+  mlApi: MlApi,
   job: DataFrameAnalyticsConfig,
   customUrl: MlKibanaUrlConfig,
   timeFieldName: string | null,
@@ -538,13 +543,13 @@ async function getDataFrameAnalyticsTestUrl(
       },
     };
 
-    resp = await ml.esSearch(body);
+    resp = await mlApi.esSearch(body);
 
     if (resp && resp.hits.total.value > 0) {
       record = resp.hits.hits[0]._source;
     } else {
       // No results for this job yet so use source index for example doc.
-      resp = await ml.esSearch({
+      resp = await mlApi.esSearch({
         index: Array.isArray(job.source.index) ? job.source.index.join(',') : job.source.index,
         body: {
           size: 1,
@@ -589,6 +594,7 @@ async function getDataFrameAnalyticsTestUrl(
 }
 
 export function getTestUrl(
+  mlApi: MlApi,
   job: Job | DataFrameAnalyticsConfig,
   customUrl: MlUrlConfig,
   timeFieldName: string | null,
@@ -597,6 +603,7 @@ export function getTestUrl(
 ) {
   if (isDataFrameAnalyticsConfigs(job) || isPartialDFAJob) {
     return getDataFrameAnalyticsTestUrl(
+      mlApi,
       job as DataFrameAnalyticsConfig,
       customUrl,
       timeFieldName,
@@ -605,5 +612,5 @@ export function getTestUrl(
     );
   }
 
-  return getAnomalyDetectionJobTestUrl(job, customUrl);
+  return getAnomalyDetectionJobTestUrl(mlApi, job, customUrl);
 }

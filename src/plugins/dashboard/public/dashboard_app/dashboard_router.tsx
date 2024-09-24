@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './_dashboard_app.scss';
@@ -100,7 +101,9 @@ export async function mountApp({
     };
   };
 
-  const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
+  const renderDashboard = (
+    routeProps: RouteComponentProps<{ id?: string; expandedPanelId?: string }>
+  ) => {
     const routeParams = parse(routeProps.history.location.search);
     if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
@@ -111,6 +114,7 @@ export async function mountApp({
         embedSettings={globalEmbedSettings}
         savedDashboardId={routeProps.match.params.id}
         redirectTo={redirect}
+        expandedPanelId={routeProps.match.params.expandedPanelId}
       />
     );
   };
@@ -153,7 +157,11 @@ export async function mountApp({
         <HashRouter>
           <Routes>
             <Route
-              path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
+              path={[
+                CREATE_NEW_DASHBOARD_URL,
+                `${VIEW_DASHBOARD_URL}/:id/:expandedPanelId`,
+                `${VIEW_DASHBOARD_URL}/:id`,
+              ]}
               render={renderDashboard}
             />
             <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />

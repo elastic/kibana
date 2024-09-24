@@ -80,7 +80,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
     services: {
       share,
       application,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
 
@@ -185,7 +185,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
           })
         );
       } else {
-        mlApiServices.jobs
+        mlApi.jobs
           .jobsExist([jobId])
           .then((resp) => {
             if (resp[jobId].exists) {

@@ -3,10 +3,6 @@
 exports[`renders control with warning 1`] = `
 <EuiFormRow
   data-test-subj="inputControl0"
-  describedByIds={Array []}
-  display="row"
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   id="controlId"
   label={
     <React.Fragment>
@@ -23,7 +19,6 @@ exports[`renders control with warning 1`] = `
       test control
     </React.Fragment>
   }
-  labelType="label"
 >
   <div>
     My Control
@@ -34,13 +29,8 @@ exports[`renders control with warning 1`] = `
 exports[`renders disabled control with tooltip 1`] = `
 <EuiFormRow
   data-test-subj="inputControl0"
-  describedByIds={Array []}
-  display="row"
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   id="controlId"
   label="test control"
-  labelType="label"
 >
   <EuiToolTip
     anchorClassName="eui-displayBlock"
@@ -59,13 +49,8 @@ exports[`renders disabled control with tooltip 1`] = `
 exports[`renders enabled control 1`] = `
 <EuiFormRow
   data-test-subj="inputControl0"
-  describedByIds={Array []}
-  display="row"
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   id="controlId"
   label="test control"
-  labelType="label"
 >
   <div>
     My Control

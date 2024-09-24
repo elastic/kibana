@@ -85,11 +85,12 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   }
 
   public async getNonAggregatableDatasets(params: GetNonAggregatableDataStreamsParams) {
+    const types = params.types.length === 0 ? KNOWN_TYPES : params.types;
     const response = await this.http
       .get<NonAggregatableDatasets>('/internal/dataset_quality/data_streams/non_aggregatable', {
         query: {
           ...params,
-          types: rison.encodeArray(params.types),
+          types: rison.encodeArray(types),
         },
       })
       .catch((error) => {

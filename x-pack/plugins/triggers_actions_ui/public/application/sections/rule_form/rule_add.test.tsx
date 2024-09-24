@@ -233,7 +233,7 @@ describe('rule_add', () => {
     expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
     expect(await screen.findByTestId('showRequestButton')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('cancelSaveRuleButton'));
+    await userEvent.click(await screen.findByTestId('cancelSaveRuleButton'));
     expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.CANCELED, {
       fields: ['test'],
       test: 'some value',
@@ -286,13 +286,13 @@ describe('rule_add', () => {
 
     expect(await screen.findByTestId('ruleNameInput')).toBeInTheDocument();
 
-    userEvent.type(await screen.findByTestId('ruleNameInput'), 'my{space}rule{space}type');
+    await userEvent.type(await screen.findByTestId('ruleNameInput'), 'my[Space]rule[Space]type');
 
     expect(await screen.findByTestId('ruleNameInput')).toHaveValue('my rule type');
     expect(await screen.findByTestId('comboBoxSearchInput')).toHaveValue('');
     expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('m');
 
-    userEvent.click(await screen.findByTestId('cancelSaveRuleButton'));
+    await userEvent.click(await screen.findByTestId('cancelSaveRuleButton'));
 
     expect(onClose).not.toHaveBeenCalled();
     expect(await screen.findByTestId('confirmRuleCloseModal')).toBeInTheDocument();
@@ -403,7 +403,7 @@ describe('rule_add', () => {
 
     expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('saveRuleButton'));
+    await userEvent.click(await screen.findByTestId('saveRuleButton'));
 
     await waitFor(() => {
       return expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.SAVED, {
@@ -479,7 +479,7 @@ describe('rule_add', () => {
     expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
 
     await waitFor(async () => {
-      userEvent.click(await screen.findByTestId('saveRuleButton'));
+      await userEvent.click(await screen.findByTestId('saveRuleButton'));
       return expect(createRule).toHaveBeenLastCalledWith(
         expect.objectContaining({
           rule: expect.objectContaining({

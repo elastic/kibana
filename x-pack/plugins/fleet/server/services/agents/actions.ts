@@ -313,7 +313,7 @@ export async function cancelAgentAction(
   soClient: SavedObjectsClientContract,
   actionId: string
 ) {
-  const currentNameSpace = getCurrentNamespace(soClient);
+  const currentSpaceId = getCurrentNamespace(soClient);
 
   const getUpgradeActions = async () => {
     const query = {
@@ -329,7 +329,7 @@ export async function cancelAgentAction(
     };
     const res = await esClient.search<FleetServerAgentAction>({
       index: AGENT_ACTIONS_INDEX,
-      query: await addNamespaceFilteringToQuery(query, currentNameSpace),
+      query: await addNamespaceFilteringToQuery(query, currentSpaceId),
       size: SO_SEARCH_LIMIT,
     });
 
@@ -358,12 +358,10 @@ export async function cancelAgentAction(
   const cancelledActions: Array<{ agents: string[] }> = [];
 
   const createAction = async (action: FleetServerAgentAction) => {
-    const namespaces = currentNameSpace ? { namespaces: [currentNameSpace] } : {};
-
     await createAgentAction(esClient, {
       id: cancelActionId,
       type: 'CANCEL',
-      ...namespaces,
+      namespaces: [currentSpaceId],
       agents: action.agents!,
       data: {
         target_id: action.action_id,

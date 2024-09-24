@@ -30,6 +30,7 @@ import type {
 } from '../../../common/types/timeline';
 import type { DataProviderType, RowRendererId } from '../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
+import type { PrimitiveOrArrayOfPrimitives } from '../../common/lib/kuery';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -115,7 +116,7 @@ export const dataProviderEdited = actionCreator<{
   id: string;
   operator: QueryOperator;
   providerId: string;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }>('DATA_PROVIDER_EDITED');
 
 export const updateDataProviderType = actionCreator<{

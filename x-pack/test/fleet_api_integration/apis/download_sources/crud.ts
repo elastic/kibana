@@ -20,16 +20,13 @@ export default function (providerContext: FtrProviderContext) {
   const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_download_sources_crud', function () {
+    let defaultDownloadSourceId: string;
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
-    });
 
-    let defaultDownloadSourceId: string;
-
-    before(async function () {
       const { body: response } = await supertest
         .get(`/api/fleet/agent_download_sources`)
         .expect(200);
@@ -133,7 +130,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(downloadSource.host).to.eql('https://test.co:403');
       });
 
-      it('should allow to update an existing download source', async function () {
+      it('should allow to update is_default for existing download source', async function () {
         await supertest
           .put(`/api/fleet/agent_download_sources/${defaultDownloadSourceId}`)
           .set('kbn-xsrf', 'xxxx')

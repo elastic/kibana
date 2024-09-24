@@ -238,7 +238,7 @@ function sumFirstNValues(n: number, bars: Array<{ y: number }> | undefined): num
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'lens', 'dashboard']);
+  const { common, lens, dashboard } = getPageObjects(['common', 'lens', 'dashboard']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
@@ -368,47 +368,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('for regular metric', () => {
         it('defaults to median for non-rolled up metric', async () => {
-          await PageObjects.common.navigateToApp('lens');
-          await PageObjects.lens.waitForField('bytes_gauge');
-          await PageObjects.lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
-          expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+          await common.navigateToApp('lens');
+          await lens.waitForField('bytes_gauge');
+          await lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
+          expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
             'Median of bytes_gauge'
           );
         });
 
         it('does not show a warning', async () => {
-          await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
+          await lens.openDimensionEditor('lnsXY_yDimensionPanel');
           await testSubjects.missingOrFail('median-partial-warning');
-          await PageObjects.lens.assertNoEditorWarning();
-          await PageObjects.lens.closeDimensionEditor();
+          await lens.assertNoEditorWarning();
+          await lens.closeDimensionEditor();
         });
       });
 
       describe('for rolled up metric (downsampled)', () => {
         it('defaults to average for rolled up metric', async () => {
-          await PageObjects.lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
-          await PageObjects.lens.removeLayer();
-          await PageObjects.lens.waitForField('bytes_gauge');
-          await PageObjects.lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
-          expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+          await lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
+          await lens.removeLayer();
+          await lens.waitForField('bytes_gauge');
+          await lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
+          expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
             'Average of bytes_gauge'
           );
         });
         it('shows warnings in editor when using median', async () => {
-          await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
+          await lens.openDimensionEditor('lnsXY_yDimensionPanel');
           await testSubjects.existOrFail('median-partial-warning');
           await testSubjects.click('lns-indexPatternDimension-median');
-          await PageObjects.lens.waitForVisualization('xyVisChart');
-          await PageObjects.lens.assertMessageListContains(
+          await lens.waitForVisualization('xyVisChart');
+          await lens.assertMessageListContains(
             'Median of bytes_gauge uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
             'warning'
           );
         });
         it('shows warnings in dashboards as well', async () => {
-          await PageObjects.lens.save('New', false, false, false, 'new');
+          await lens.save('New', false, false, false, 'new');
 
-          await PageObjects.dashboard.waitForRenderComplete();
-          await PageObjects.lens.assertMessageListContains(
+          await dashboard.waitForRenderComplete();
+          await lens.assertMessageListContains(
             'Median of bytes_gauge uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
             'warning'
           );
@@ -418,13 +418,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('time series special field types support', () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('lens');
-        await PageObjects.lens.switchDataPanelIndexPattern(tsdbDataView);
-        await PageObjects.lens.goToTimeRange();
+        await common.navigateToApp('lens');
+        await lens.switchDataPanelIndexPattern(tsdbDataView);
+        await lens.goToTimeRange();
       });
 
       afterEach(async () => {
-        await PageObjects.lens.removeLayer();
+        await lens.removeLayer();
       });
 
       // skip count for now as it's a special function and will
@@ -459,14 +459,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         if (supportedOperations.length) {
           it(`should allow operations when supported by ${fieldType} field type`, async () => {
             // Counter rate requires a date histogram dimension configured to work
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
 
             // minimum supports all tsdb field types
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'min',
               field: `bytes_${fieldType}`,
@@ -484,7 +484,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             for (const supportedOp of supportedOperations) {
               // try to change to the provided function and check all is ok
-              await PageObjects.lens.selectOperation(supportedOp.name);
+              await lens.selectOperation(supportedOp.name);
 
               expect(
                 await find.existsByCssSelector(
@@ -493,22 +493,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               ).to.be(false);
 
               // return in a clean state before checking the next operation
-              await PageObjects.lens.selectOperation('min');
+              await lens.selectOperation('min');
             }
-            await PageObjects.lens.closeDimensionEditor();
+            await lens.closeDimensionEditor();
           });
         }
         if (unsupportedOperatons.length) {
           it(`should notify the incompatibility of unsupported operations for the ${fieldType} field type`, async () => {
             // Counter rate requires a date histogram dimension configured to work
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
 
             // minimum supports all tsdb field types
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'min',
               field: `bytes_${fieldType}`,
@@ -529,7 +529,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             for (const unsupportedOp of unsupportedOperatons) {
               // try to change to the provided function and check if it's in an incompatibility state
-              await PageObjects.lens.selectOperation(unsupportedOp.name, true);
+              await lens.selectOperation(unsupportedOp.name, true);
 
               const fieldSelectErrorEl = await find.byCssSelector(
                 '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText'
@@ -540,28 +540,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               );
 
               // return in a clean state before checking the next operation
-              await PageObjects.lens.selectOperation('min');
+              await lens.selectOperation('min');
             }
-            await PageObjects.lens.closeDimensionEditor();
+            await lens.closeDimensionEditor();
           });
         }
       }
 
       describe('show time series dimension groups within breakdown', () => {
         it('should show the time series dimension group on field picker when configuring a breakdown', async () => {
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
             operation: 'date_histogram',
             field: '@timestamp',
           });
 
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
             operation: 'min',
             field: 'bytes_counter',
           });
 
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
             operation: 'terms',
             keepOpen: true,
@@ -569,24 +569,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const list = await comboBox.getOptionsList('indexPattern-dimension-field');
           expect(list).to.contain('Time series dimensions');
-          await PageObjects.lens.closeDimensionEditor();
+          await lens.closeDimensionEditor();
         });
 
         it("should not show the time series dimension group on field picker if it's not a breakdown", async () => {
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
             operation: 'min',
             field: 'bytes_counter',
           });
 
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
             operation: 'date_histogram',
             keepOpen: true,
           });
           const list = await comboBox.getOptionsList('indexPattern-dimension-field');
           expect(list).to.not.contain('Time series dimensions');
-          await PageObjects.lens.closeDimensionEditor();
+          await lens.closeDimensionEditor();
         });
       });
     });
@@ -701,10 +701,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
                 { override: true }
               );
-              await PageObjects.common.navigateToApp('lens');
+              await common.navigateToApp('lens');
               await elasticChart.setNewChartUiDebugFlag(true);
               // go to the
-              await PageObjects.lens.goToTimeRange(
+              await lens.goToTimeRange(
                 fromTimeForScenarios,
                 moment
                   .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
@@ -731,8 +731,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             beforeEach(async () => {
-              await PageObjects.lens.switchDataPanelIndexPattern(dataViewName);
-              await PageObjects.lens.removeLayer();
+              await lens.switchDataPanelIndexPattern(dataViewName);
+              await lens.removeLayer();
             });
 
             testingFn(indexes);
@@ -774,13 +774,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         runTestsForEachScenario(streamConvertedToTsdbIndex, (indexes) => {
           it('should detect the data stream has now been upgraded to TSDB', async () => {
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
 
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'min',
               field: `bytes_counter`,
@@ -792,30 +792,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 timeout: 500,
               })
             ).to.eql(false);
-            await PageObjects.lens.closeDimensionEditor();
+            await lens.closeDimensionEditor();
           });
 
           it(`should visualize a date histogram chart for counter field`, async () => {
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
 
             // check the counter field works
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'min',
               field: `bytes_counter`,
             });
             // and also that the count of documents should be "indexes.length" times overall
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'count',
             });
 
-            await PageObjects.lens.waitForVisualization('xyVisChart');
-            const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+            await lens.waitForVisualization('xyVisChart');
+            const data = await lens.getCurrentChartDebugState('xyVisChart');
             const counterBars = data?.bars![0].bars;
             const countBars = data?.bars![1].bars;
 
@@ -876,13 +876,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         runTestsForEachScenario(tsdbConvertedToStream, (indexes) => {
           it('should keep TSDB restrictions only if a tsdb stream is in the dataView mix', async () => {
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
 
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'min',
               field: `bytes_counter`,
@@ -894,23 +894,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 timeout: 500,
               })
             ).to.eql(indexes.some(({ tsdb }) => tsdb));
-            await PageObjects.lens.closeDimensionEditor();
+            await lens.closeDimensionEditor();
           });
 
           it(`should visualize a date histogram chart for counter field`, async () => {
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
             // just check the data is shown
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'count',
             });
 
-            await PageObjects.lens.waitForVisualization('xyVisChart');
-            const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+            await lens.waitForVisualization('xyVisChart');
+            const data = await lens.getCurrentChartDebugState('xyVisChart');
             const bars = data?.bars![0].bars;
             const columnsToCheck = bars ? bars.length / 2 : 0;
             // due to the flaky nature of exact check here, we're going to relax it
@@ -929,7 +929,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           it('should visualize data when moving the time window around the downgrade moment', async () => {
             // check after the downgrade
-            await PageObjects.lens.goToTimeRange(
+            await lens.goToTimeRange(
               moment
                 .utc(fromTimeForScenarios, TIME_PICKER_FORMAT)
                 .subtract(1, 'hour')
@@ -940,23 +940,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 .format(TIME_PICKER_FORMAT) // consider only new documents
             );
 
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'count',
             });
 
-            await PageObjects.lens.waitForVisualization('xyVisChart');
-            const dataBefore = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+            await lens.waitForVisualization('xyVisChart');
+            const dataBefore = await lens.getCurrentChartDebugState('xyVisChart');
             const barsBefore = dataBefore?.bars![0].bars;
             expect(barsBefore?.some(({ y }) => y)).to.eql(true);
 
             // check after the downgrade
-            await PageObjects.lens.goToTimeRange(
+            await lens.goToTimeRange(
               moment
                 .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
                 .add(1, 'second')
@@ -967,8 +967,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 .format(TIME_PICKER_FORMAT) // consider also new documents
             );
 
-            await PageObjects.lens.waitForVisualization('xyVisChart');
-            const dataAfter = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+            await lens.waitForVisualization('xyVisChart');
+            const dataAfter = await lens.getCurrentChartDebugState('xyVisChart');
             const barsAfter = dataAfter?.bars![0].bars;
             expect(barsAfter?.some(({ y }) => y)).to.eql(true);
           });

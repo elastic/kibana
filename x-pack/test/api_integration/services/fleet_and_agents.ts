@@ -9,12 +9,12 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export async function FleetAndAgents({ getService }: FtrProviderContext) {
-  // Use elastic/fleet-server service account to execute setup to verify privilege configuration
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
     async setup() {
+      // Use elastic/fleet-server service account to execute setup to verify privilege configuration
       const { token } = await es.security.createServiceToken({
         namespace: 'elastic',
         service: 'fleet-server',

@@ -102,10 +102,15 @@ export const useListDetailsView = (exceptionListId: string) => {
     [toasts]
   );
 
-  const initializeListRules = useCallback(async (result) => {
-    const listRules = await getListRules(result.list_id);
-    setLinkedRules(listRules);
-  }, []);
+  const initializeListRules = useCallback(
+    async (result: Awaited<ReturnType<typeof getListById>>) => {
+      if (result) {
+        const listRules = await getListRules(result.list_id);
+        setLinkedRules(listRules);
+      }
+    },
+    []
+  );
 
   const initializeList = useCallback(async () => {
     try {
@@ -329,7 +334,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     return linkedRules.filter((rule) => !newLinkedRules.includes(rule));
   }, [linkedRules, newLinkedRules]);
 
-  const onRuleSelectionChange = useCallback((value) => {
+  const onRuleSelectionChange = useCallback((value: UIRule[]) => {
     setNewLinkedRules(value);
     setDisableManageButton(false);
   }, []);

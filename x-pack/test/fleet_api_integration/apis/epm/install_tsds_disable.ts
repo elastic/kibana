@@ -19,7 +19,7 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('installing with tsds disabled', async () => {
+  describe('installing with tsds disabled', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {

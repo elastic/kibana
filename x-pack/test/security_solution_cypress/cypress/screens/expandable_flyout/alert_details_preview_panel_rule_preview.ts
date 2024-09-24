@@ -8,30 +8,30 @@
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE = getDataTestSubjectSelector(
-  'securitySolutionFlyoutRuleOverviewRuleOverviewTitle'
+  'securitySolutionFlyoutRulePanelTitle'
 );
 export const DOCUMENT_DETAILS_FLYOUT_CREATED_BY = getDataTestSubjectSelector(
-  'securitySolutionFlyoutRuleOverviewCreatedByText'
+  'securitySolutionFlyoutRulePanelCreatedByText'
 );
 export const DOCUMENT_DETAILS_FLYOUT_UPDATED_BY = getDataTestSubjectSelector(
-  'securitySolutionFlyoutRuleOverviewUpdatedByText'
+  'securitySolutionFlyoutRulePanelUpdatedByText'
 );
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER = getDataTestSubjectSelector(
-  'securitySolutionFlyoutRuleOverviewAboutSectionHeader'
+  'securitySolutionFlyoutRulePanelAboutSectionHeader'
 );
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_CONTENT =
-  getDataTestSubjectSelector('securitySolutionFlyoutRuleOverviewAboutSectionContent');
+  getDataTestSubjectSelector('securitySolutionFlyoutRulePanelAboutSectionContent');
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_HEADER =
-  getDataTestSubjectSelector('securitySolutionFlyoutRuleOverviewDefinitionSectionHeader');
+  getDataTestSubjectSelector('securitySolutionFlyoutRulePanelDefinitionSectionHeader');
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_CONTENT =
-  getDataTestSubjectSelector('securitySolutionFlyoutRuleOverviewDefinitionSectionContent');
+  getDataTestSubjectSelector('securitySolutionFlyoutRulePanelDefinitionSectionContent');
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER =
-  getDataTestSubjectSelector('securitySolutionFlyoutRuleOverviewScheduleSectionHeader');
+  getDataTestSubjectSelector('securitySolutionFlyoutRulePanelScheduleSectionHeader');
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_CONTENT =
-  getDataTestSubjectSelector('securitySolutionFlyoutRuleOverviewScheduleSectionContent');
+  getDataTestSubjectSelector('securitySolutionFlyoutRulePanelScheduleSectionContent');
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER = getDataTestSubjectSelector(
-  'securitySolutionFlyoutRuleOverviewFooter'
+  'securitySolutionFlyoutRulePreviewPanelFooter'
 );
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER_LINK = getDataTestSubjectSelector(
-  'securitySolutionFlyoutRuleOverviewFooterLinkToRuleDetails'
+  'securitySolutionFlyoutRulePreviewPanelFooterOpenRuleFlyout'
 );

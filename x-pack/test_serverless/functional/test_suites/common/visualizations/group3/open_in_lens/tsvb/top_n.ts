@@ -66,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       const type = await chartSwitcher.getVisibleText();
-      expect(type).to.be('Bar horizontal');
+      expect(type).to.be('Bar');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
         expect(layerCount).to.be(1);

@@ -10,8 +10,8 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/core/server';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { CspBenchmarkRule } from '../../../../common/types/latest';
 import { getCspBenchmarkRulesStatesHandler } from '../../../routes/benchmark_rules/get_states/v1';
 import { MutedRulesStats } from './types';
 

@@ -19,7 +19,7 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('metric_type with dynamic_templates', async () => {
+  describe('metric_type with dynamic_templates', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {

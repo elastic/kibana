@@ -10,6 +10,7 @@ import { flattenObject } from './utils';
 describe('FlattenObject', () => {
   it('flattens multi level item', () => {
     const data = {
+      key0: 'value',
       key1: {
         item1: 'value 1',
         item2: { itemA: 'value 2' },
@@ -22,6 +23,7 @@ describe('FlattenObject', () => {
 
     const flatten = flattenObject(data);
     expect(flatten).toEqual({
+      key0: 'value',
       'key2.item3.itemA.itemAB': 'value AB',
       'key2.item4': 'value 4',
       'key1.item1': 'value 1',

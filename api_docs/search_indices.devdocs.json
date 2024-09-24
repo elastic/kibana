@@ -17,7 +17,19 @@
       "path": "x-pack/plugins/search_indices/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "searchIndices",
+          "id": "def-public.SearchIndicesPluginSetup.enabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "enabled",
+          "description": [],
+          "path": "x-pack/plugins/search_indices/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },

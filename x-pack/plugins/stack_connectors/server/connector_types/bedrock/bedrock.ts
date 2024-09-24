@@ -22,7 +22,7 @@ import {
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
 } from '../../../common/bedrock/schema';
-import {
+import type {
   Config,
   Secrets,
   RunActionParams,
@@ -32,6 +32,8 @@ import {
   InvokeAIRawActionParams,
   InvokeAIRawActionResponse,
   RunApiLatestResponse,
+  BedrockMessage,
+  BedrockToolChoice,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
@@ -309,13 +311,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       signal,
       timeout,
       tools,
+      toolChoice,
     }: InvokeAIActionParams | InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
     const res = (await this.streamApi(
       {
         body: JSON.stringify(
-          formatBedrockBody({ messages, stopSequences, system, temperature, tools })
+          formatBedrockBody({ messages, stopSequences, system, temperature, tools, toolChoice })
         ),
         model,
         signal,
@@ -344,13 +347,23 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       maxTokens,
       signal,
       timeout,
+      tools,
+      toolChoice,
     }: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
     const res = (await this.runApi(
       {
         body: JSON.stringify(
-          formatBedrockBody({ messages, stopSequences, system, temperature, maxTokens })
+          formatBedrockBody({
+            messages,
+            stopSequences,
+            system,
+            temperature,
+            maxTokens,
+            tools,
+            toolChoice,
+          })
         ),
         model,
         signal,
@@ -372,6 +385,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       signal,
       timeout,
       tools,
+      toolChoice,
       anthropicVersion,
     }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
@@ -385,6 +399,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
           temperature,
           max_tokens: maxTokens,
           tools,
+          tool_choice: toolChoice,
           anthropic_version: anthropicVersion,
         }),
         model,
@@ -405,14 +420,16 @@ const formatBedrockBody = ({
   system,
   maxTokens = DEFAULT_TOKEN_LIMIT,
   tools,
+  toolChoice,
 }: {
-  messages: Array<{ role: string; content?: string }>;
+  messages: BedrockMessage[];
   stopSequences?: string[];
   temperature?: number;
   maxTokens?: number;
   // optional system message to be sent to the API
   system?: string;
   tools?: Array<{ name: string; description: string }>;
+  toolChoice?: BedrockToolChoice;
 }) => ({
   anthropic_version: 'bedrock-2023-05-31',
   ...ensureMessageFormat(messages, system),
@@ -420,7 +437,13 @@ const formatBedrockBody = ({
   stop_sequences: stopSequences,
   temperature,
   tools,
+  tool_choice: toolChoice,
 });
+
+interface FormattedBedrockMessage {
+  role: string;
+  content: string | BedrockMessage['rawContent'];
+}
 
 /**
  * Ensures that the messages are in the correct format for the Bedrock API
@@ -429,19 +452,32 @@ const formatBedrockBody = ({
  * @param messages
  */
 const ensureMessageFormat = (
-  messages: Array<{ role: string; content?: string }>,
+  messages: BedrockMessage[],
   systemPrompt?: string
-): { messages: Array<{ role: string; content?: string }>; system?: string } => {
+): {
+  messages: FormattedBedrockMessage[];
+  system?: string;
+} => {
   let system = systemPrompt ? systemPrompt : '';
 
-  const newMessages = messages.reduce((acc: Array<{ role: string; content?: string }>, m) => {
-    const lastMessage = acc[acc.length - 1];
+  const newMessages = messages.reduce<FormattedBedrockMessage[]>((acc, m) => {
     if (m.role === 'system') {
       system = `${system.length ? `${system}\n` : ''}${m.content}`;
       return acc;
     }
 
-    if (lastMessage && lastMessage.role === m.role) {
+    const messageRole = () => (['assistant', 'ai'].includes(m.role) ? 'assistant' : 'user');
+
+    if (m.rawContent) {
+      acc.push({
+        role: messageRole(),
+        content: m.rawContent,
+      });
+      return acc;
+    }
+
+    const lastMessage = acc[acc.length - 1];
+    if (lastMessage && lastMessage.role === m.role && typeof lastMessage.content === 'string') {
       // Bedrock only accepts assistant and user roles.
       // If 2 user or 2 assistant messages are sent in a row, combine the messages into a single message
       return [
@@ -451,11 +487,9 @@ const ensureMessageFormat = (
     }
 
     // force role outside of system to ensure it is either assistant or user
-    return [
-      ...acc,
-      { content: m.content, role: ['assistant', 'ai'].includes(m.role) ? 'assistant' : 'user' },
-    ];
+    return [...acc, { content: m.content, role: messageRole() }];
   }, []);
+
   return system.length ? { system, messages: newMessages } : { messages: newMessages };
 };
 
