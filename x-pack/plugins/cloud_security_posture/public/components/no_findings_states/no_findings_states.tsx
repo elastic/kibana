@@ -225,7 +225,7 @@ const EmptySecurityFindingsPrompt = () => {
             </p>
           }
           actions={
-            <EuiFlexGroup justifyContent="center">
+            <EuiFlexGroup justifyContent="center" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="primary"
