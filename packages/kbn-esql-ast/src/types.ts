@@ -26,6 +26,7 @@ export type ESQLSingleAstItem =
   | ESQLLiteral // "literal expression"
   | ESQLCommandMode
   | ESQLInlineCast // "inline cast expression"
+  | ESQLOrderExpression
   | ESQLUnknownItem;
 
 export type ESQLAstField = ESQLFunction | ESQLColumn;
@@ -135,9 +136,24 @@ export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
   args: [ESQLAstItem];
 }
 
-export interface ESQLPostfixUnaryExpression extends ESQLFunction<'postfix-unary-expression'> {
+export interface ESQLPostfixUnaryExpression<Name extends string = string>
+  extends ESQLFunction<'postfix-unary-expression', Name> {
   subtype: 'postfix-unary-expression';
   args: [ESQLAstItem];
+}
+
+/**
+ * Represents an order expression used in SORT commands.
+ *
+ * ```
+ * ... | SORT field ASC NULLS FIRST
+ * ```
+ */
+export interface ESQLOrderExpression extends ESQLAstBaseItem {
+  type: 'order';
+  order: '' | 'ASC' | 'DESC';
+  nulls: '' | 'NULLS FIRST' | 'NULLS LAST';
+  args: [field: ESQLAstItem];
 }
 
 export interface ESQLBinaryExpression
