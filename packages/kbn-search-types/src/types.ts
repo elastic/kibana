@@ -135,4 +135,5 @@ export type ISearchOptionsSerializable = Pick<
   | 'isRestore'
   | 'retrieveResults'
   | 'executionContext'
+  | 'stream'
 >;

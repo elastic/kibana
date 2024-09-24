@@ -289,6 +289,7 @@ export class SearchInterceptor {
     if (combined.executionContext !== undefined) {
       serializableOptions.executionContext = combined.executionContext;
     }
+    if (combined.stream) serializableOptions.stream = true;
 
     return serializableOptions;
   }

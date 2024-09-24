@@ -147,7 +147,7 @@ export const enhancedEsSearchStrategyProvider = (
       ...options,
     }).pipe(
       mergeMap(async (response) => {
-        if (!options.asstream) {
+        if (!options.stream) {
           return await toKibanaResponse(response);
         }
         return response;
