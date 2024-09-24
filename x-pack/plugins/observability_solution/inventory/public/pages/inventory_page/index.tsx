@@ -4,36 +4,64 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
 import { EuiDataGridSorting } from '@elastic/eui';
+import React from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EntitiesGrid } from '../../components/entities_grid';
-import { useKibana } from '../../hooks/use_kibana';
+import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
+import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function InventoryPage() {
+  const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
   const { query } = useInventoryParams('/');
-  const { sortDirection, sortField, pageIndex } = query;
+  const { sortDirection, sortField, pageIndex, kuery, entityTypes } = query;
+
   const inventoryRoute = useInventoryRouter();
 
-  const { value = { entities: [] }, loading } = useAbortableAsync(
+  const {
+    value = { entities: [] },
+    loading,
+    refresh,
+  } = useInventoryAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
         params: {
           query: {
             sortDirection,
             sortField,
+            entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
+            kuery,
           },
         },
         signal,
       });
     },
-    [inventoryAPIClient, sortDirection, sortField]
+    [entityTypes, inventoryAPIClient, kuery, sortDirection, sortField]
   );
+
+  useEffectOnce(() => {
+    const searchBarContentSubscription = searchBarContentSubject$.subscribe(
+      ({ refresh: isRefresh, ...queryParams }) => {
+        if (isRefresh) {
+          refresh();
+        } else {
+          inventoryRoute.push('/', {
+            path: {},
+            query: { ...query, ...queryParams },
+          });
+        }
+      }
+    );
+    return () => {
+      searchBarContentSubscription.unsubscribe();
+    };
+  });
 
   function handlePageChange(nextPage: number) {
     inventoryRoute.push('/', {

@@ -62,6 +62,7 @@ import {
 
 import { CustomFields } from './custom_fields';
 import { SpaceSelector } from './space_selector';
+import { AgentPolicyAdvancedMonitoringOptions } from './advanced_monitoring';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -143,6 +144,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         }
       >
+        <EuiSpacer size="l" />
         <EuiSwitch
           label={
             <>
@@ -409,6 +411,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         }
       >
+        <EuiSpacer size="l" />
         <EuiCheckboxGroup
           disabled={disabled || isManagedorAgentlessPolicy}
           options={[
@@ -484,6 +487,17 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }}
         />
       </EuiDescribedFormGroup>
+
+      <AgentPolicyAdvancedMonitoringOptions
+        agentPolicy={agentPolicy}
+        disabled={disabled || agentPolicy.is_managed === true}
+        validation={validation}
+        touchedFields={touchedFields}
+        updateTouchedFields={(fields) => setTouchedFields({ ...touchedFields, ...fields })}
+        updateAgentPolicy={updateAgentPolicy}
+      />
+      <EuiSpacer size="l" />
+
       {AgentTamperProtectionSection}
 
       <EuiDescribedFormGroup
