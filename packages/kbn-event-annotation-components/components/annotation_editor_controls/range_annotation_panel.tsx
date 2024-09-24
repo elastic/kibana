@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiText, EuiFormLabel, EuiDatePicker } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiText, EuiDatePicker } from '@elastic/eui';
 import moment from 'moment';
 import type {
   PointInTimeEventAnnotationConfig,
@@ -100,8 +100,14 @@ export const ConfigPanelRangeDatePicker = ({
   dataTestSubj?: string;
 }) => {
   return (
-    <EuiFormRow display="rowCompressed" fullWidth label={label} className="lnsRowCompressedMargin">
+    <EuiFormRow
+      display="rowCompressed"
+      fullWidth
+      label={label}
+      className="lnsConfigPanelAnnotations__date lnsRowCompressedMargin"
+    >
       <EuiDatePicker
+        compressed
         calendarClassName={calendarClassName}
         fullWidth
         showTimeSelect
@@ -109,11 +115,7 @@ export const ConfigPanelRangeDatePicker = ({
         onChange={onChange}
         dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
         data-test-subj={dataTestSubj}
-        prepend={
-          prependLabel ? (
-            <EuiFormLabel className="lnsConfigPanelDate__label">{prependLabel}</EuiFormLabel>
-          ) : undefined
-        }
+        prepend={prependLabel}
       />
     </EuiFormRow>
   );
