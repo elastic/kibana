@@ -23,6 +23,7 @@ import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
+import { openSettingsFlyout } from '../../dashboard_container/embeddable/api';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -84,7 +85,7 @@ export const useDashboardMenuItems = ({
         anchorElement,
         savedObjectId: lastSavedId,
         isDirty: Boolean(hasUnsavedChanges),
-        getPanelsState: dashboardApi.getPanelsState,
+        getPanelsState: () => dashboardApi.panels$.value,
       });
     },
     [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboardApi]
@@ -227,7 +228,7 @@ export const useDashboardMenuItems = ({
         id: 'settings',
         testId: 'dashboardSettingsButton',
         disableButton: disableTopNav,
-        run: () => dashboardApi.openSettingsFlyout(),
+        run: () => openSettingsFlyout(dashboardApi),
       },
     };
   }, [
