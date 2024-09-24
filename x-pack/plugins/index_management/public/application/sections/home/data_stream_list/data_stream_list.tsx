@@ -88,7 +88,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const [projectLevelRetentionCallout, setprojectLevelRetentionCallout] =
     useStateWithLocalStorage<boolean>(SHOW_PROJECT_LEVEL_RETENTION, true);
-  const shouldShowProjectLevelRetention = enableProjectLevelRetentionChecks && cloud?.deploymentUrl;
+  const shouldShowProjectLevelRetention = enableProjectLevelRetentionChecks;
 
   const [filters, setFilters] = useState<Filters<DataStreamFilterName>>({
     managed: {
@@ -157,7 +157,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
         {shouldShowProjectLevelRetention && (
           <EuiFlexItem grow={false}>
-            <EuiLink href={cloud.deploymentUrl} target="_blank">
+            <EuiLink href={cloud?.deploymentUrl} target="_blank">
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.projectlevelRetention.linkText"
                 defaultMessage="Project data retention"
@@ -313,7 +313,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
                 />
               </p>
 
-              <EuiButton href={cloud.deploymentUrl} fill>
+              <EuiButton href={cloud?.deploymentUrl} fill data-test-subj="cloudLinkButton">
                 <FormattedMessage
                   id="xpack.idxMgmt.dataStreamList.projectLevelRetentionCallout.buttonText"
                   defaultMessage="Get started"
