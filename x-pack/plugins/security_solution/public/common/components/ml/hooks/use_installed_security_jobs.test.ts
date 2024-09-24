@@ -43,9 +43,8 @@ describe('useInstalledSecurityJobs', () => {
         wrapper: TestProviders,
       });
 
-      await waitFor(() => null);
+      await waitFor(() => expect(result.current.jobs).toHaveLength(3));
 
-      expect(result.current.jobs).toHaveLength(3);
       expect(result.current.jobs).toEqual(
         expect.arrayContaining([
           {
@@ -76,9 +75,8 @@ describe('useInstalledSecurityJobs', () => {
       const { result } = renderHook(() => useInstalledSecurityJobs(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => expect(result.current.jobs.length).toBeGreaterThan(0));
 
-      expect(result.current.jobs.length).toBeGreaterThan(0);
       expect(result.current.jobs.every(isSecurityJob)).toEqual(true);
     });
 

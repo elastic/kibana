@@ -503,6 +503,9 @@ describe('useStateProps', () => {
         columns: undefined,
       })
     );
+
+    await waitFor(() => null);
+
     const {
       onTopPanelHeightChange,
       onTimeIntervalChange,
