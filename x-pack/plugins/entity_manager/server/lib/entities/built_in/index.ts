@@ -18,4 +18,12 @@ export const builtInDefinitions: EntityDefinition[] = [
   builtInHostsFromEcsEntityDefinition,
   builtInContainersFromEcsEntityDefinition,
   builtInDataStreamsFromEcsDefinition,
-];
+].map((definition) => {
+  return {
+    ...definition,
+    indexPatterns: definition.indexPatterns.flatMap((indexPattern) => [
+      `*:${indexPattern}`,
+      indexPattern,
+    ]),
+  };
+});

@@ -45,7 +45,7 @@ export const builtInContainersFromEcsEntityDefinition: EntityDefinition =
       'container.image.tag',
       'container.runtime',
       'host.name',
-      'host.ip',
+      // 'host.ip',
       'host.mac',
       'host.architecture',
       'host.os.family',
@@ -65,94 +65,5 @@ export const builtInContainersFromEcsEntityDefinition: EntityDefinition =
       'agent.type',
       'agent.ephemeral_id',
     ],
-    metrics: [
-      {
-        name: 'log_rate',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'doc_count',
-            filter: 'log.level: * OR error.log.level: *',
-          },
-        ],
-      },
-      {
-        name: 'error_log_rate',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'doc_count',
-            filter: '(log.level: "error" OR "ERROR") OR (error.log.level: "error" OR "ERROR")',
-          },
-        ],
-      },
-      {
-        name: 'cpu_usage_avg',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'avg',
-            field: 'docker.cpu.total.pct',
-          },
-        ],
-      },
-      {
-        name: 'memory_usage_avg',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'avg',
-            field: 'docker.memory.usage.pct',
-          },
-        ],
-      },
-      {
-        name: 'network_in_avg',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'avg',
-            field: 'docker.network.in.bytes',
-          },
-        ],
-      },
-      {
-        name: 'network_out_avg',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'avg',
-            field: 'docker.network.out.bytes',
-          },
-        ],
-      },
-      {
-        name: 'disk_read_avg',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'avg',
-            field: 'docker.diskio.read.ops',
-          },
-        ],
-      },
-      {
-        name: 'disk_write_avg',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'avg',
-            field: 'docker.diskio.write.ops',
-          },
-        ],
-      },
-    ],
+    metrics: [],
   });

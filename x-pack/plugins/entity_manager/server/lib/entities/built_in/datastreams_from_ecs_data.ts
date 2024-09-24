@@ -29,27 +29,5 @@ export const builtInDataStreamsFromEcsDefinition: EntityDefinition = entityDefin
   metadata: [{ source: '_index', destination: 'sourceIndex', limit: 10 }],
   displayNameTemplate:
     '{{remote}}{{data_stream.type}}-{{data_stream.dataset}}-{{data_stream.namespace}}',
-  metrics: [
-    {
-      name: 'logRate',
-      equation: 'A',
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'doc_count',
-        },
-      ],
-    },
-    {
-      name: 'logErrorRate',
-      equation: 'A',
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'doc_count',
-          filter: 'log.level: "ERROR" or log.level: "error"',
-        },
-      ],
-    },
-  ],
+  metrics: [],
 });
