@@ -11,6 +11,7 @@ import { Ast, Query } from '@elastic/eui';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { FieldDefinition } from '@kbn/management-settings-types';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { Clause } from '@elastic/eui/src/components/search_bar/query/ast';
 import { useServices } from '../services';
 import { useSettings } from './use_settings';
 
@@ -28,22 +29,20 @@ export const useFields = (scope: UiSettingsScope, query?: Query): FieldDefinitio
     isCustom: (key) => isCustomSetting(key, scope),
     isOverridden: (key) => isOverriddenSetting(key, scope),
   });
-  if (query && fields.length) {
-    let ast = Ast.create([]);
+  if (query) {
+    const clauses: Clause[] = query.ast.clauses.map((clause) =>
+      // If the clause value contains `:` and is not a category filter, add it as a term clause
+      // This allows searching for settings that include `:` in their names
+      clause.type === 'field' && clause.field !== 'categories'
+        ? {
+            type: 'term',
+            match: 'must',
+            value: `${clause.field}:${clause.value}`,
+          }
+        : clause
+    );
 
-    query.ast.clauses.forEach((clause) => {
-      if (clause.type !== 'field' || Object.keys(fields[0]).includes(clause.field)) {
-        ast = ast.addClause(clause);
-      } else {
-        ast = ast.addClause({
-          type: 'term',
-          match: 'must',
-          value: `${clause.field}:${clause.value}`,
-        });
-      }
-    });
-
-    return Query.execute(new Query(ast, undefined, query.text), fields);
+    return Query.execute(new Query(Ast.create(clauses), undefined, query.text), fields);
   }
   return fields;
 };
