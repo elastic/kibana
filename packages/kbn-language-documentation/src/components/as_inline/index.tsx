@@ -15,12 +15,11 @@ import type { LanguageDocumentationSections } from '../../types';
 import { getESQLDocsSections } from '../../sections';
 
 interface DocumentationInlineProps {
+  height: number;
   searchInDescription?: boolean;
 }
 
-const MAX_HEIGHT = 250;
-
-function DocumentationInline({ searchInDescription }: DocumentationInlineProps) {
+function DocumentationInline({ searchInDescription, height }: DocumentationInlineProps) {
   const theme = useEuiTheme();
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
@@ -56,7 +55,7 @@ function DocumentationInline({ searchInDescription }: DocumentationInlineProps) 
     <div
       css={css`
         padding: ${theme.euiTheme.size.base};
-        max-height: ${MAX_HEIGHT}px;
+        max-height: ${height}px;
         overflow-y: auto;
         ${scrollBarStyles}
       `}
