@@ -18,7 +18,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { Filter, DataViewFieldBase } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import { getFilter } from '../utils/get_filter';
 import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';

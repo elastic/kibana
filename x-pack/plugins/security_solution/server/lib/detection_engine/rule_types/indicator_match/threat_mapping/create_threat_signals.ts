@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { uniq, chunk } from 'lodash/fp';
+import { queryToFields } from '@kbn/data-plugin/common';
 
 import { TelemetryChannel } from '../../../../telemetry/types';
 import { getThreatList, getThreatListCount } from './get_threat_list';
@@ -36,7 +37,6 @@ import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
-import { getFieldsForWildcard } from '../../utils/get_fields_for_wildcard';
 import { getDataTierFilter } from '../../utils/get_data_tier_filter';
 
 export const createThreatSignals = async ({
@@ -72,7 +72,6 @@ export const createThreatSignals = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
-  inputIndexFields,
   licensing,
   experimentalFeatures,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
@@ -115,6 +114,17 @@ export const createThreatSignals = async ({
   const allEventFilters = [...filters, eventMappingFilter, ...dataTiersFilters];
   const allThreatFilters = [...threatFilters, indicatorMappingFilter, ...dataTiersFilters];
 
+  const dataViews = await services.getDataViews();
+  const inputIndexDataViewLazy = await dataViews.createDataViewLazy({
+    title: inputIndex.join(),
+  });
+  const inputIndexFields = Object.values(
+    await queryToFields({
+      dataView: inputIndexDataViewLazy,
+      request: { query: [{ query, language: language || 'kuery' }] },
+    })
+  );
+
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     index: inputIndex,
@@ -140,14 +150,15 @@ export const createThreatSignals = async ({
     if (newPitId) threatPitId = newPitId;
   };
 
-  const dataViews = await services.getDataViews();
-  // const threatIndexFields = await getFieldsForWildcard({
-  //   index: threatIndex,
-  //   language: threatLanguage ?? 'kuery',
-  //   dataViews,
-  //   ruleExecutionLogger,
-  // });
-  const threatIndexFields = [];
+  const threatIndexDataViewLazy = await dataViews.createDataViewLazy({
+    title: threatIndex.join(),
+  });
+  const threatIndexFields = Object.values(
+    await queryToFields({
+      dataView: threatIndexDataViewLazy,
+      request: { query: [{ query: threatQuery, language: threatLanguage || 'kuery' }] },
+    })
+  );
 
   const threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
