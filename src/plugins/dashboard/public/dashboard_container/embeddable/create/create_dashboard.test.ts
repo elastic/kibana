@@ -23,10 +23,11 @@ import { getSampleDashboardPanel, mockControlGroupApi } from '../../../mocks';
 import { dataService, embeddableService } from '../../../services/kibana_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { createDashboard } from './create_dashboard';
-import { dashboardContentManagementService } from '../../../services/dashboard_content_management_service';
+import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 
 const dashboardBackupService = getDashboardBackupService();
+const dashboardContentManagementService = getDashboardContentManagementService();
 
 test("doesn't throw error when no data views are available", async () => {
   dataService.dataViews.defaultDataViewExists = jest.fn().mockReturnValue(false);

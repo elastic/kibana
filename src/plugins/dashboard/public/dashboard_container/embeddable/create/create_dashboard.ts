@@ -33,7 +33,7 @@ import {
   PANELS_CONTROL_GROUP_KEY,
   getDashboardBackupService,
 } from '../../../services/dashboard_backup_service';
-import { dashboardContentManagementService } from '../../../services/dashboard_content_management_service';
+import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import {
   LoadDashboardReturn,
   SavedDashboardInput,
@@ -75,6 +75,7 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
   const defaultDataViewExistsPromise = dataService.dataViews.defaultDataViewExists();
+  const dashboardContentManagementService = getDashboardContentManagementService();
   const dashboardSavedObjectPromise = dashboardContentManagementService.loadDashboardState({
     id: savedObjectId,
   });

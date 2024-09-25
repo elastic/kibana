@@ -90,7 +90,7 @@ import {
   PanelPlacementStrategy,
 } from '../../dashboard_constants';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup_service';
-import { dashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import {
   coreServices,
   dataService,
@@ -778,7 +778,7 @@ export class DashboardContainer
     if (newCreationOptions) {
       this.creationOptions = { ...this.creationOptions, ...newCreationOptions };
     }
-    const loadDashboardReturn = await dashboardContentManagementService.loadDashboardState({
+    const loadDashboardReturn = await getDashboardContentManagementService().loadDashboardState({
       id: newSavedObjectId,
     });
 
