@@ -329,21 +329,19 @@ export const kibanaSplitIndex = `${defaultKibanaIndex}_split`;
 export const getRelocatingMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
   filterDeprecated = false,
-  types = getReindexingBaselineTypes(filterDeprecated).map((type) => {
-    if (type.name !== 'task' && type.name !== 'basic') {
-      return type;
-    }
-
-    // relocate 'basic' and 'task' objects to a new index (forces reindex)
-    return {
-      ...type,
-      indexPattern: kibanaSplitIndex,
-    };
-  }),
+  // relocate 'task' and 'basic' objects to a new SO index
+  relocateTypes = {
+    task: kibanaSplitIndex,
+    basic: kibanaSplitIndex,
+  },
+  types = getReindexingBaselineTypes(filterDeprecated).map((type) => ({
+    ...type,
+    ...(relocateTypes[type.name] && { indexPattern: relocateTypes[type.name] }),
+  })),
   kibanaVersion = nextMinor,
   clientWrapperFactory,
   settings = {},
-}: GetMutatedMigratorParams = {}) => {
+}: GetMutatedMigratorParams & { relocateTypes?: Record<string, string> } = {}) => {
   return await getKibanaMigratorTestKit({
     logFilePath,
     types,
