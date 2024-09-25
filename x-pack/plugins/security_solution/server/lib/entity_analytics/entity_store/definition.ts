@@ -32,12 +32,14 @@ export const buildHostEntityDefinition = (space: string): EntityDefinition =>
       interval: '1m',
     },
     version: '1.0.0',
+    managed: true,
   });
 
 export const buildUserEntityDefinition = (space: string): EntityDefinition =>
   entityDefinitionSchema.parse({
     id: buildEntityDefinitionId('user', space),
     name: 'EA User Store',
+    type: 'user',
     indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
     identityFields: ['user.name'],
     displayNameTemplate: '{{user.name}}',
@@ -47,4 +49,5 @@ export const buildUserEntityDefinition = (space: string): EntityDefinition =>
       interval: '1m',
     },
     version: '1.0.0',
+    managed: true,
   });
