@@ -85,14 +85,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               type: 'application',
               name: 'discover',
               url: '/app/discover',
-              child: {
-                name: 'discover',
-                url: '/app/discover',
-                type: 'application',
-                page: 'app',
-                id: 'new',
-                description: 'fetch documents',
-              },
+              page: 'app',
+              id: 'new',
+              description: 'fetch documents',
             }),
           });
         });
