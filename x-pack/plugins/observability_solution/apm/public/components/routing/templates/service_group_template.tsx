@@ -18,7 +18,7 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { ApmMainTemplate } from './apm_main_template/apm_main_template';
+import { ApmMainTemplate } from './apm_main_template';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';

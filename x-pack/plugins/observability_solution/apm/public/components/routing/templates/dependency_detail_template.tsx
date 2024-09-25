@@ -17,7 +17,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { BetaBadge } from '../../shared/beta_badge';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { SpanIcon } from '../../shared/span_icon';
-import { ApmMainTemplate } from './apm_main_template/apm_main_template';
+import { ApmMainTemplate } from './apm_main_template';
 
 interface Props {
   children: React.ReactNode;

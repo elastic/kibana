@@ -12,7 +12,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
-import { ApmMainTemplate } from '../../routing/templates/apm_main_template/apm_main_template';
+import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { Breadcrumb } from '../breadcrumb';
 import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';

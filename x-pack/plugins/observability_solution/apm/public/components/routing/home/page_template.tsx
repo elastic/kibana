@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import React from 'react';
 import { Route } from '@kbn/typed-react-router-config';
 import { Breadcrumb } from '../../app/breadcrumb';
-import { ApmMainTemplate } from '../templates/apm_main_template/apm_main_template';
+import { ApmMainTemplate } from '../templates/apm_main_template';
 
 export function page<
   TPath extends string,

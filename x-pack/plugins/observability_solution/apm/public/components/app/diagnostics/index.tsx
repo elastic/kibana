@@ -14,7 +14,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { DiagnosticsSummary, getIsCrossCluster } from './summary_tab';
-import { ApmMainTemplate } from '../../routing/templates/apm_main_template/apm_main_template';
+import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { DiagnosticsIndexTemplates } from './index_templates_tab';
 import { DiagnosticsIndices } from './indices_tab';
 import { DiagnosticsDataStreams } from './data_stream_tab';

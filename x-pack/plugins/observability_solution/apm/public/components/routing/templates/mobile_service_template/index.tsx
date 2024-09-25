@@ -20,7 +20,7 @@ import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_ca
 import { MobileSearchBar } from '../../../app/mobile/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
-import { ApmMainTemplate } from '../apm_main_template/apm_main_template';
+import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from '../apm_service_template/analyze_data_button';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
