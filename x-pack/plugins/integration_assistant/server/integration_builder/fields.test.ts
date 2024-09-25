@@ -46,7 +46,7 @@ describe('createFieldMapping', () => {
   type: keyword
 `;
 
-    expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/base-fields.yml`, mockedTemplate);
+    expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/fields/base-fields.yml`, mockedTemplate);
     expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/fields/fields.yml`, expectedFields);
   });
 
@@ -56,7 +56,7 @@ describe('createFieldMapping', () => {
     const expectedFields = `[]
 `;
 
-    expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/base-fields.yml`, mockedTemplate);
+    expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/fields/base-fields.yml`, mockedTemplate);
     expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/fields/fields.yml`, expectedFields);
   });
 });
