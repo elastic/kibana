@@ -47,7 +47,6 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
       fleet_server_host_id: undefined,
       download_source_id: undefined,
     };
-
     // Check if there is any active fleet server enrolled into the fleet server policies policies
     if (fleetServerPolicies) {
       settingsResponse.fleet_server.policies = fleetServerPolicies;

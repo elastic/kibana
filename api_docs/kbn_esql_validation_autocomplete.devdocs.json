@@ -694,6 +694,8 @@
             "text": "ESQLAstItem"
           },
           "> | ",
+          "ESQLOrderExpression",
+          " | ",
           "ESQLUnknownItem",
           "; option: ",
           {
@@ -814,6 +816,8 @@
             "text": "ESQLAstItem"
           },
           "> | ",
+          "ESQLOrderExpression",
+          " | ",
           "ESQLUnknownItem",
           " | undefined; option: ",
           {
@@ -918,6 +922,8 @@
             "text": "ESQLAstItem"
           },
           "> | ",
+          "ESQLOrderExpression",
+          " | ",
           "ESQLUnknownItem",
           " | undefined; option: ",
           {
@@ -1030,6 +1036,8 @@
             "text": "ESQLAstItem"
           },
           "> | ",
+          "ESQLOrderExpression",
+          " | ",
           "ESQLUnknownItem",
           " | undefined; setting: ",
           {

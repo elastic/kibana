@@ -383,11 +383,7 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: true,
-      params: [
-        { name: 'expression', type: 'any' },
-        { name: 'direction', type: 'string', optional: true, values: ['ASC', 'DESC'] },
-        { name: 'nulls', type: 'string', optional: true, values: ['NULLS FIRST', 'NULLS LAST'] },
-      ],
+      params: [{ name: 'expression', type: 'any' }],
     },
   },
   {
