@@ -10,7 +10,7 @@ import { ErrorThatHandlesItsOwnResponse } from './types';
 import { ErrorCode } from '../../../common/constants';
 
 export class UnsupportedLogFormatError extends Error implements ErrorThatHandlesItsOwnResponse {
-  private readonly errorCode: string = ErrorCode.UNSUPPORTED_LOG_FORMAT;
+  private readonly errorCode: string = ErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT;
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(message: string) {
