@@ -40,8 +40,7 @@ paths:
                     required: [data]
                     properties:
                       data:
-                        $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                  - type: object
+                        $ref: '../model/components.schema.yaml#/components/schemas/ResolvedTimeline'
 
         '400':
           description: The request is missing parameters

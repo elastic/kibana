@@ -29,7 +29,7 @@ import type {
   TimelineResult,
   TimelineType,
   TimelineStatus,
-  ResolvedTimelineWithOutcomeSavedObject,
+  ResolvedTimeline,
   TimelineSavedObject,
   SavedTimeline,
   TimelineWithoutExternalRefs,
@@ -89,7 +89,7 @@ export const getTimelineOrNull = async (
 export const resolveTimelineOrNull = async (
   frameworkRequest: FrameworkRequest,
   savedObjectId: string
-): Promise<ResolvedTimelineWithOutcomeSavedObject | null> => {
+): Promise<ResolvedTimeline | null> => {
   let resolvedTimeline = null;
   try {
     resolvedTimeline = await resolveSavedTimeline(frameworkRequest, savedObjectId);

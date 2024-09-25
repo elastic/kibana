@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
+import type { ZodError, ZodType } from '@kbn/zod';
+import { type Either, fold, left, right } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isEmpty } from 'lodash';
@@ -29,10 +30,10 @@ import {
   importTimelineResultSchema,
   allTimelinesResponse,
   PersistFavoriteRouteResponse,
-  SingleTimelineResponseType,
   type TimelineType,
   TimelineTypeEnum,
   ResolvedSingleTimelineResponseType,
+  GetTimelineResponse,
 } from '../../../common/api/timeline';
 import {
   TIMELINE_URL,
@@ -68,6 +69,21 @@ interface RequestPatchTimeline<T = string> extends RequestPostTimeline {
 
 type RequestPersistTimeline = RequestPostTimeline & Partial<RequestPatchTimeline<null | string>>;
 const createToasterPlainError = (message: string) => new ToasterError([message]);
+
+type ErrorFactory = (message: string) => Error;
+
+const parseRuntimeType =
+  <T>(zodType: ZodType<T>) =>
+  (v: unknown): Either<ZodError<T>, T> => {
+    const result = zodType.safeParse(v);
+    return result.success ? right(result.data) : left(result.error);
+  };
+
+const decodeOrThrow =
+  (runtimeType: ZodType, createError: ErrorFactory = createToasterPlainError) =>
+  (inputValue: unknown) =>
+    pipe(parseRuntimeType(runtimeType)(inputValue), fold(throwErrors(createError), identity));
+
 const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorResponse) =>
   pipe(
     TimelineResponseType.decode(respTimeline),
@@ -75,10 +91,7 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorR
   );
 
 const decodeSingleTimelineResponse = (respTimeline?: SingleTimelineResponse) =>
-  pipe(
-    SingleTimelineResponseType.decode(respTimeline),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+  decodeOrThrow(GetTimelineResponse)(respTimeline);
 
 const decodeResolvedSingleTimelineResponse = (respTimeline?: SingleTimelineResolveResponse) =>
   pipe(

@@ -15,7 +15,7 @@ import { useDiscoverInTimelineContext } from '../../../common/components/discove
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type {
   TimelineResult,
-  SingleTimelineResolveResponse,
+  ResolvedTimeline,
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
@@ -376,7 +376,7 @@ export const useQueryTimelineById = () => {
     } else {
       return Promise.resolve(resolveTimeline(timelineId))
         .then((result) => {
-          const data: SingleTimelineResolveResponse['data'] | null = getOr(null, 'data', result);
+          const data: ResolvedTimeline['data'] | null = getOr(null, 'data', result);
           if (!data) return;
 
           const timelineToOpen = omitTypenameInTimeline(data.timeline);

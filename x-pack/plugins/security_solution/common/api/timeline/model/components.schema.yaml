@@ -188,6 +188,29 @@ components:
               type: string
             version:
               type: string
+    ResolvedTimeline:
+      type: object
+      required: [timeline, outcome]
+      properties:
+        timeline:
+          $ref: '#/components/schemas/TimelineSavedToReturnObject'
+        outcome:
+          $ref: '#/components/schemas/SavedObjectResolveOutcome'
+        alias_target_id:
+          type: string
+        alias_purpose:
+          $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+    SavedObjectResolveOutcome:
+      type: string
+      enum:
+        - exactMatch
+        - aliasMatch
+        - conflict
+    SavedObjectResolveAliasPurpose:
+      type: string
+      enum:
+        - savedObjectConversion
+        - savedObjectImport
     FavoriteTimelineResponse:
       type: object
       required: [savedObjectId, version]

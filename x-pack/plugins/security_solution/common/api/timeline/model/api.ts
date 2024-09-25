@@ -23,6 +23,7 @@ import {
   ImportTimelines,
   type Note,
   PinnedEvent,
+  ResolvedTimeline,
   RowRendererId,
   RowRendererIdEnum,
   SavedTimeline,
@@ -47,6 +48,7 @@ export {
   ImportTimelines,
   Note,
   PinnedEvent,
+  ResolvedTimeline,
   RowRendererId,
   RowRendererIdEnum,
   SavedTimeline,
@@ -372,14 +374,6 @@ export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes
 
 export type ResolvedTimelineWithOutcomeSavedObject = runtimeTypes.TypeOf<
   typeof ResolvedTimelineSavedObjectToReturnObjectRuntimeType
->;
-
-export const ResolvedSingleTimelineResponseType = runtimeTypes.type({
-  data: ResolvedTimelineSavedObjectToReturnObjectRuntimeType,
-});
-
-export type SingleTimelineResolveResponse = runtimeTypes.TypeOf<
-  typeof ResolvedSingleTimelineResponseType
 >;
 
 const responseTimelines = runtimeTypes.type({

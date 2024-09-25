@@ -265,6 +265,40 @@ export const TimelineResponse = SavedTimeline.merge(
   })
 );
 
+export type TimelineSavedToReturnObject = z.infer<typeof TimelineSavedToReturnObject>;
+export const TimelineSavedToReturnObject = SavedTimeline.merge(
+  z.object({
+    savedObjectId: z.string(),
+    version: z.string(),
+    eventIdToNoteIds: z.array(Note).optional(),
+    notes: z.array(Note).optional(),
+    noteIds: z.array(z.string()).optional(),
+    pinnedEventIds: z.array(z.string()).optional(),
+    pinnedEventsSaveObject: z.array(PinnedEvent).optional(),
+  })
+);
+
+export type SavedObjectResolveOutcome = z.infer<typeof SavedObjectResolveOutcome>;
+export const SavedObjectResolveOutcome = z.enum(['exactMatch', 'aliasMatch', 'conflict']);
+export type SavedObjectResolveOutcomeEnum = typeof SavedObjectResolveOutcome.enum;
+export const SavedObjectResolveOutcomeEnum = SavedObjectResolveOutcome.enum;
+
+export type SavedObjectResolveAliasPurpose = z.infer<typeof SavedObjectResolveAliasPurpose>;
+export const SavedObjectResolveAliasPurpose = z.enum([
+  'savedObjectConversion',
+  'savedObjectImport',
+]);
+export type SavedObjectResolveAliasPurposeEnum = typeof SavedObjectResolveAliasPurpose.enum;
+export const SavedObjectResolveAliasPurposeEnum = SavedObjectResolveAliasPurpose.enum;
+
+export type ResolvedTimeline = z.infer<typeof ResolvedTimeline>;
+export const ResolvedTimeline = z.object({
+  timeline: TimelineSavedToReturnObject,
+  outcome: SavedObjectResolveOutcome,
+  alias_target_id: z.string().optional(),
+  alias_purpose: SavedObjectResolveAliasPurpose.optional(),
+});
+
 export type FavoriteTimelineResponse = z.infer<typeof FavoriteTimelineResponse>;
 export const FavoriteTimelineResponse = z.object({
   savedObjectId: z.string(),
@@ -329,19 +363,6 @@ export const ImportTimelines = SavedTimeline.merge(
     pinnedEventIds: z.array(z.string()).nullable(),
     eventNotes: z.array(BareNote).nullable(),
     globalNotes: z.array(BareNote).nullable(),
-  })
-);
-
-export type TimelineSavedToReturnObject = z.infer<typeof TimelineSavedToReturnObject>;
-export const TimelineSavedToReturnObject = SavedTimeline.merge(
-  z.object({
-    savedObjectId: z.string(),
-    version: z.string(),
-    eventIdToNoteIds: z.array(Note).optional(),
-    notes: z.array(Note).optional(),
-    noteIds: z.array(z.string()).optional(),
-    pinnedEventIds: z.array(z.string()).optional(),
-    pinnedEventsSaveObject: z.array(PinnedEvent).optional(),
   })
 );
 

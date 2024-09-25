@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { TimelineResponse } from '../model/components.gen';
+import { ResolvedTimeline } from '../model/components.gen';
 
 export type ResolveTimelineRequestQuery = z.infer<typeof ResolveTimelineRequestQuery>;
 export const ResolveTimelineRequestQuery = z.object({
@@ -34,7 +34,6 @@ export type ResolveTimelineRequestQueryInput = z.input<typeof ResolveTimelineReq
 export type ResolveTimelineResponse = z.infer<typeof ResolveTimelineResponse>;
 export const ResolveTimelineResponse = z.union([
   z.object({
-    data: TimelineResponse,
+    data: ResolvedTimeline,
   }),
-  z.object({}),
 ]);

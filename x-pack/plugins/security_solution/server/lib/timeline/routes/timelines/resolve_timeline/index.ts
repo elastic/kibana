@@ -21,10 +21,7 @@ import {
   type ResolveTimelineResponse,
 } from '../../../../../../common/api/timeline';
 import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
-import type {
-  SavedTimeline,
-  ResolvedTimelineWithOutcomeSavedObject,
-} from '../../../../../../common/api/timeline';
+import type { SavedTimeline, ResolvedTimeline } from '../../../../../../common/api/timeline';
 
 export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -48,7 +45,7 @@ export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter) => {
           const query = request.query ?? {};
           const { template_timeline_id: templateTimelineId, id } = query;
 
-          let res: SavedTimeline | ResolvedTimelineWithOutcomeSavedObject | null = null;
+          let res: SavedTimeline | ResolvedTimeline | null = null;
 
           if (templateTimelineId != null && id == null) {
             // Template timelineId is not a SO id, so it does not need to be updated to use resolve
