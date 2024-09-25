@@ -31,7 +31,10 @@ import { EntityType } from '../../../common/entities';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 
-type EntityColumnIds = typeof ENTITY_DISPLAY_NAME | typeof ENTITY_LAST_SEEN | typeof ENTITY_TYPE;
+export type EntityColumnIds =
+  | typeof ENTITY_DISPLAY_NAME
+  | typeof ENTITY_LAST_SEEN
+  | typeof ENTITY_TYPE;
 
 const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipContent: string }) => (
   <>
