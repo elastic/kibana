@@ -11,6 +11,7 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
 import { intersection, isEmpty, uniq } from 'lodash';
+import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
   AlertOverviewStatus,
   AlertStatusConfigs,
@@ -19,12 +20,7 @@ import {
 } from '../../../common/runtime_types/alert_rules/common';
 import { queryFilterMonitors } from './queries/filter_monitors';
 import { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
-import {
-  getAlertDetailsUrl,
-  getFullViewInAppMessage,
-  getRelativeViewInAppUrl,
-  getViewInAppUrl,
-} from '../common';
+import { getFullViewInAppMessage, getRelativeViewInAppUrl, getViewInAppUrl } from '../common';
 import {
   DOWN_LABEL,
   getMonitorAlertDocument,

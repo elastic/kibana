@@ -7,15 +7,11 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import {
-  GetViewInAppRelativeUrlFnOpts,
-  AlertInstanceContext as AlertContext,
-  RuleExecutorOptions,
-  AlertsClientError,
-} from '@kbn/alerting-plugin/server';
-import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
-import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import { GetViewInAppRelativeUrlFnOpts, AlertsClientError } from '@kbn/alerting-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
+import apm from 'elastic-apm-node';
+import { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
+import { StatusRuleExecutorOptions } from './types';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { StatusRuleExecutor } from './status_rule_executor';
@@ -27,9 +23,6 @@ import {
 import {
   setRecoveredAlertsContext,
   updateState,
-  getViewInAppUrl,
-  getRelativeViewInAppUrl,
-  getFullViewInAppMessage,
   SyntheticsRuleTypeAlertDefinition,
 } from '../common';
 import { getActionVariables } from '../action_variables';
