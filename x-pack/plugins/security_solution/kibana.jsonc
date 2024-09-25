@@ -57,7 +57,6 @@
       "entityManager"
     ],
     "optionalPlugins": [
-      "cloudExperiments",
       "encryptedSavedObjects",
       "fleet",
       "ml",

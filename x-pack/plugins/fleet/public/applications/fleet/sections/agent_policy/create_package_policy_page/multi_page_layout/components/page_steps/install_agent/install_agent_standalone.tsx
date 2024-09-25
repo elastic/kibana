@@ -35,7 +35,8 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
   const [commandCopied, setCommandCopied] = useState(false);
   const [policyCopied, setPolicyCopied] = useState(false);
 
-  const { yaml, onCreateApiKey, apiKey, downloadYaml } = useFetchFullPolicy(agentPolicy);
+  const { yaml, onCreateApiKey, isCreatingApiKey, apiKey, downloadYaml } =
+    useFetchFullPolicy(agentPolicy);
 
   if (!agentPolicy) {
     return (
@@ -60,6 +61,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       downloadYaml,
       apiKey,
       onCreateApiKey,
+      isCreatingApiKey,
       isComplete: policyCopied,
       onCopy: () => setPolicyCopied(true),
     }),
