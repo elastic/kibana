@@ -16,7 +16,15 @@ export const registerGetRoute = (router: InternalDeprecationRouter) => {
       path: '/',
       validate: false,
       options: {
-        deprecated: true,
+        deprecated: {
+          guideLink: 'https://google.com',
+          severity: 'warning',
+          reason: {
+            type: 'migrated-api',
+            apiMethod: 'GET',
+            apiPath: '/api/core/deprecations',
+          },
+        },
       },
     },
     async (context, req, res) => {

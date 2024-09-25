@@ -278,10 +278,6 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const deprecationsSetup = await this.deprecations.setup({
-      http: httpSetup,
-    });
-
     // setup i18n prior to any other service, to have translations ready
     const i18nServiceSetup = await this.i18n.setup({ http: httpSetup, pluginPaths });
 
@@ -303,6 +299,11 @@ export class Server {
       metrics: metricsSetup,
       savedObjectsStartPromise: this.savedObjectsStartPromise,
       changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
+    });
+
+    const deprecationsSetup = await this.deprecations.setup({
+      http: httpSetup,
+      coreUsageData: coreUsageDataSetup,
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
@@ -381,6 +382,7 @@ export class Server {
 
     this.registerCoreContext(coreSetup);
     this.registerApiRouteDeprecationsLogger(coreSetup);
+
     await this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction.end();
@@ -534,44 +536,6 @@ export class Server {
     );
   }
   private registerApiRouteDeprecationsLogger(coreSetup: InternalCoreSetup) {
-    const deprecationsRegistery = coreSetup.deprecations.getRegistry('core.http');
-    deprecationsRegistery.registerDeprecations({
-      getDeprecations: async () => {
-        const usageClient = coreSetup.coreUsageData.getClient();
-        const deprecatedRoutes = coreSetup.http.getDeprecatedRoutes();
-        const deprecatedStats = await usageClient.getDeprecatedApisStats();
-
-        return [
-          {
-            routePath: '/api/chocolate_love',
-            routeMethod: 'GET',
-            title: `The Route "[GET] /api/chocolate_love" has deprected params`,
-            level: 'warning',
-            message: `Deprecated route [GET] /api/chocolate_love was called 34 times with deprecated params.\n
-            The last time the deprecation was triggered was on Fri Sep 20 2024 14:28:22.\n
-            This deprecation was previously marked as resolved but was called 3 times since it was marked on Fri Sep 13 2024 10:28:22.`,
-            documentationUrl: 'https://google.com',
-            correctiveActions: {
-              manualSteps: [
-                'The following query params are deprecated: dont_use,my_old_query_param',
-                'Make sure you are not using any of these parameters when calling the API',
-              ],
-              api: {
-                path: 'some-path',
-                method: 'POST',
-                body: {
-                  extra_param: 123,
-                },
-              },
-            },
-            deprecationType: 'api',
-            requireRestart: false,
-            domainId: 'core.router',
-          },
-        ];
-      },
-    });
-
     coreSetup.http.registerOnPostValidation(
       createRouteDeprecationsHandler({
         coreUsageData: coreSetup.coreUsageData,

@@ -39,7 +39,7 @@ import type {
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
-import { identity, isFunction } from 'lodash';
+import { identity, isObject } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
@@ -209,9 +209,10 @@ export class HttpServer {
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
-        if (route.options.deprecated === true || isFunction(route.options.deprecated)) {
+        if (isObject(route.options.deprecated)) {
           deprecatedRoutes.push({
             basePath: router.routerPath,
+            routeVerion: 'v1', // TODO(Bamieh): ADD this to route
             routePath: route.path,
             routeOptions: route.options,
             routeMethod: route.method,

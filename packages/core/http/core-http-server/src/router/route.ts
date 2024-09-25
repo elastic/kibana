@@ -143,14 +143,23 @@ export type RouteInputDeprecationFactory = (factories: {
   rename(oldPath: string, newPath: string): RouteInputDeprecationRenamedDescription;
 }) => RouteInputDeprecationDescription[];
 
-/**
- * Declare route input deprecations.
- * @public
- */
-export interface RouteInputDeprecation {
-  query?: RouteInputDeprecationFactory;
-  body?: RouteInputDeprecationFactory;
+interface NewRouteDeprecationType {
+  type: 'new-version';
+  apiVersion: string;
 }
+interface RemovedApiDeprecationType {
+  type: 'removed';
+}
+interface MigratedApiDeprecationType {
+  type: 'migrated-api';
+  apiPath: string;
+  apiMethod: string;
+}
+
+export type RouteInputDeprecationReason =
+  | NewRouteDeprecationType
+  | RemovedApiDeprecationType
+  | MigratedApiDeprecationType;
 
 /**
  * Description of deprecations for this HTTP API.
@@ -177,7 +186,12 @@ export interface RouteInputDeprecation {
  * @default false
  * @public
  */
-export type RouteDeprecation = boolean | RouteInputDeprecation;
+export interface RouteDeprecation {
+  severity: 'warning' | 'critical';
+  /** new version is only for versioned router, removed is a special case */
+  reason: RouteInputDeprecationReason;
+  guideLink: string;
+}
 
 /**
  * Additional route options.

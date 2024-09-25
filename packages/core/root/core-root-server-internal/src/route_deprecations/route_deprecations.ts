@@ -10,7 +10,8 @@
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-server-internal';
 import type { Logger } from '@kbn/logging';
 
-import { CoreKibanaRequest, buildDeprecations } from '@kbn/core-http-router-server-internal';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { isObject } from 'lodash';
 
 interface Dependencies {
   logRouteApiDeprecations: boolean; // TODO(jloleysens) use this
@@ -25,20 +26,17 @@ export function createRouteDeprecationsHandler({ coreUsageData }: Dependencies) 
         options: { deprecated: deprecatedInput },
       },
     } = req;
-    const messages: string[] = [];
-    if (typeof deprecatedInput === 'boolean' && deprecatedInput === true) {
-      // Log route level deprecation
-      messages.push(`${req.route.method} ${req.route.path} is deprecated.`);
-    } else if (typeof deprecatedInput === 'object') {
-      // Log route input level deprecation + message
-      const deprecations = buildDeprecations(deprecatedInput);
-      for (const { check, message, location } of deprecations) {
-        if (check(req[location])) messages.push(`${req.route.method} ${req.route.path} ${message}`);
-      }
+
+    if (typeof deprecatedInput === 'boolean') {
+      console.log('INVALID DEPRECATION INPUT!!! GOT BOOLEAN');
     }
 
-    for (const message of messages) {
-      coreUsageData.incrementUsageCounter({ counterName: message }); // TODO(jloleysens) figure this part out
+    if (isObject(deprecatedInput)) {
+      const routeVersion = 'v1';
+      const counterName = `[${routeVersion}][${req.route.method}] ${req.route.path}`;
+
+      console.log(`Incrementing deprecated route: ${req.route.path}`);
+      coreUsageData.incrementDeprecatedApiUsageCounter({ counterName });
     }
   };
 }

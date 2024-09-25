@@ -14,6 +14,7 @@ export {
 } from './src';
 export type {
   InternalCoreUsageDataSetup,
+  IDeprecationsStatsClient,
   ICoreUsageStatsClient,
   BaseIncrementOptions,
   IncrementSavedObjectsImportOptions,
