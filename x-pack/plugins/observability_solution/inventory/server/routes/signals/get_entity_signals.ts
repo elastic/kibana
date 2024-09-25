@@ -13,6 +13,7 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { SloClient } from '@kbn/slo-plugin/server';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Entity, EntityDefinition } from '../../../common/entities';
 import { entitySourceQuery } from '../../../common/utils/queries/entity_source_query';
 import { withInventorySpan } from '../../lib/with_inventory_span';
@@ -72,14 +73,14 @@ export async function getEntitySignals({
       });
       const slosWithoutIdsQuery = await sloClient.getDataScopeForSummarySlos({ start, end });
 
-      const sloQuery = {
+      const sloQuery: QueryDslQueryContainer = {
         bool: {
           should: [
-            slosWithIdsQuery,
+            slosWithIdsQuery.query,
             {
               bool: {
                 filter: [
-                  slosWithoutIdsQuery,
+                  slosWithoutIdsQuery.query,
                   ...entitySourceQuery({ entity, identityFields: definition.identityFields }),
                 ],
               },
