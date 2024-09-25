@@ -10,3 +10,4 @@
 require('../setup_node_env');
 require('./apm')(process.env.ELASTIC_APM_SERVICE_NAME || 'kibana-proxy');
 require('./cli');
+// no-op
