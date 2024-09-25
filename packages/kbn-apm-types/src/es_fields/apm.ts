@@ -259,6 +259,49 @@ export const PROCESS_PARENT_PID = 'process.parent.pid';
 export const PROCESS_PID = 'process.pid';
 export const PROCESS_TITLE = 'process.title';
 
-export const SOURCE_IP = 'source.ip';
+export const SCOPE_NAME = 'scope.name';
+export const SCOPE_ATTRIBUTES_SERVICE_FRAMEWORK_NAME = 'scope.attributes.service.framework.name';
+export const SCOPE_ATTRIBUTES_SERVICE_FRAMEWORK_VERSION =
+  'scope.attributes.service.framework.version';
+export const SCOPE_DROPPED_ATTRIBUTES_COUNT = 'scope.dropped_attributes_count';
 
+export const RESOURCE_ATTRIBUTES_AGENT_NAME = 'resource.attributes.agent.name';
+export const RESOURCE_ATTRIBUTES_AGENT_VERSION = 'resource.attributes.agent.version';
+export const RESOURCE_ATTRIBUTES_SERVICE_INSTANCE_ID = 'resource.attributes.service.instance.id';
+export const RESOURCE_ATTRIBUTES_SERVICE_NAME = 'resource.attributes.service.name';
+export const RESOURCE_ATTRIBUTES_SOME_RESOURCE_ATTRIBUTE =
+  'resource.attributes.some.resource.attribute';
+export const RESOURCE_DROPPED_ATTRIBUTES_COUNT = 'resource.dropped_attributes_count';
+export const RESOURCE_SCHEMA_URL = 'resource.schema_url';
+
+export const ATTRIBUTES_EVENT_OUTCOME = 'attributes.event.outcome';
+export const ATTRIBUTES_EVENT_SUCCESS_COUNT = 'attributes.event.success_count';
+export const ATTRIBUTES_HTTP_STATUS_CODE = 'attributes.http.status_code';
+export const ATTRIBUTES_PEER_SERVICE = 'attributes.peer.service';
+export const ATTRIBUTES_PROCESSOR_EVENT = 'attributes.processor.event';
+export const ATTRIBUTES_SERVICE_TARGET_NAME = 'attributes.service.target.name';
+export const ATTRIBUTES_SERVICE_TARGET_TYPE = 'attributes.service.target.type';
+export const ATTRIBUTES_SOME_SPAN_ATTRIBUTE = 'attributes.some.span.attribute';
+export const ATTRIBUTES_SPAN_DESTINATION_SERVICE_RESOURCE =
+  'attributes.span.destination.service.resource';
+export const ATTRIBUTES_SPAN_DURATION_US = 'attributes.span.duration.us';
+export const ATTRIBUTES_SPAN_NAME = 'attributes.span.name';
+export const ATTRIBUTES_SPAN_RESPSENTATIVE_COUNT = 'attributes.span.representative_count';
+export const ATTRIBUTES_SPAN_SUBTYPE = 'attributes.span.subtype';
+export const ATTRIBUTES_SPAN_TYPE = 'attributes.span.type';
+export const ATTRIBUTES_TIMESTAMP_US = 'attributes.timestamp.us';
+
+export const DROPPED_ATTRIBUTES_COUNT = 'dropped_attributes_count';
+export const DROPPED_EVENTS_COUNT = 'dropped_events_count';
+export const DROPPED_LINKS_COUNT = 'dropped_links_count';
+
+// other otel collector fields
+export const SOURCE_IP = 'source.ip';
 export const DOC_COUNT = '_doc_count';
+export const DURATION = 'duration';
+export const KIND = 'kind';
+export const NAME = 'name';
+export const PARENT_SPAN_ID = 'parent_span_id';
+export const OTEL_SPAN_ID = 'span_id';
+export const OTEL_TRACE_ID = 'trace_id';
+export const STATUS_CODE = 'status.code';
