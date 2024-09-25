@@ -40,9 +40,9 @@ import {
 import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { dictionaryValidator } from '@kbn/ml-validators';
 import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
-import { dictionaryValidator } from '@kbn/ml-validators';
 import type { ModelItem } from './models_list';
 import type { MlStartTrainedModelDeploymentRequestNew } from './deployment_params_mapper';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
@@ -238,7 +238,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               {
                 defaultMessage:
                   'Your model may scale up to the maximum number of vCPUs available for this deployment from the Cloud console if needed. If the maximum is {minVCPUs} vCPUs or fewer, this level is equivalent to the medium level.',
-                values: { minVCPUs: vcpuRange.min },
+                // use an upper bound of medium level
+                values: { minVCPUs: vcpuRange.min - 1 },
               }
             );
         }
@@ -250,7 +251,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.lowCpuStaticHelp',
               {
                 defaultMessage:
-                  'This level limits resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
+                  'This level sets resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
@@ -258,8 +259,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.mediumCpuStaticHelp',
               {
                 defaultMessage:
-                  'Your model will consume {maxVCPUs} vCPUs consistently, if provided by the Cloud console.',
-                values: { maxVCPUs: vcpuRange.static },
+                  'Your model will consume {staticVCPUs} vCPUs consistently, if provided by the Cloud console.',
+                values: { staticVCPUs: vcpuRange.static },
               }
             );
           case 'high':
@@ -267,8 +268,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.highCpuStaticHelp',
               {
                 defaultMessage:
-                  'Your model will consume {maxVCPUs} vCPUs - the maximum available number of ML processors.',
-                values: { minVCPUs: vcpuRange.static },
+                  'Your model will consume {staticVCPUs} vCPUs consistently, if provided by the Cloud console.',
+                values: { staticVCPUs: vcpuRange.static },
               }
             );
         }
@@ -286,7 +287,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.lowCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'This level limits resources to one vCPU, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                  'This level limits resources to {maxVCPUs, plural, one {vCPU} other {vCPUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                values: { maxVCPUs: vcpuRange.max },
               }
             );
           case 'medium':
@@ -294,7 +296,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.mediumCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'This level limits resources to two vCPUs, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                  'This level limits resources to {maxVCPUs, plural, one {vCPU} other {vCPUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                values: { maxVCPUs: vcpuRange.max },
               }
             );
           case 'high':
@@ -302,7 +305,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.highCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'This level may use the maximum number of vCPUs available for this deployment from the Cloud console. If the maximum is 2 vCPUs or fewer, this level is equivalent to the medium or low level.',
+                  'This level may use {maxVCPUs, plural, one {vCPU} other {vCPUs}} - the maximum number of vCPUs available for this deployment. If the maximum is 2 vCPUs or fewer, this level is equivalent to the medium or low level.',
+                values: { maxVCPUs: vcpuRange.max },
               }
             );
         }
@@ -311,28 +315,27 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         switch (config.vCPUUsage) {
           case 'low':
             return i18n.translate(
-              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.lowCpuStaticeHelp',
+              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.lowCpuStaticHelp',
               {
                 defaultMessage:
-                  'This level limits resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
+                  'This level limits resources to the minimum required for ELSER to run. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
             return i18n.translate(
-              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.mediumCpuStaticeHelp',
+              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.mediumCpuStaticHelp',
               {
-                defaultMessage:
-                  'Your model will consume {maxVCPUs} vCPUs consistently, if provided by the Cloud console.',
-                values: { maxVCPUs: vcpuRange.static },
+                defaultMessage: 'Your model will consume {staticVCPUs} vCPUs consistently.',
+                values: { staticVCPUs: vcpuRange.static },
               }
             );
           case 'high':
             return i18n.translate(
-              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.highCpuStaticeHelp',
+              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.highCpuStaticHelp',
               {
                 defaultMessage:
-                  'Your model will consume {maxVCPUs} vCPUs - the maximum available number of ML processors.',
-                values: { minVCPUs: vcpuRange.static },
+                  'Your model will consume {staticVCPUs} vCPUs - the maximum available number.',
+                values: { staticVCPUs: vcpuRange.static },
               }
             );
         }
@@ -367,37 +370,6 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                 defaultMessage:
                   'Your model will scale up to a maximum of {vcus} VCUs per hour if required by your search or ingest load. Note that it will scale down automatically as needed and that you only pay for what you use.',
                 values: { vcus: vcpuRange.max },
-              }
-            );
-        }
-      } else {
-        // Without adaptive resources
-        switch (config.vCPUUsage) {
-          case 'low':
-            return i18n.translate(
-              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.lowCpuStaticeHelp',
-              {
-                defaultMessage:
-                  'This level consumes {vcus} VCUs consistently, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
-                values: { vcus: vcpuRange.static },
-              }
-            );
-          case 'medium':
-            return i18n.translate(
-              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.mediumCpuStaticeHelp',
-              {
-                defaultMessage:
-                  'Your model will consume {vcus} VCUs per hour,  required by your search or ingest load. It will never scale down and affect your costs.',
-                values: { vcus: vcpuRange.static },
-              }
-            );
-          case 'high':
-            return i18n.translate(
-              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.highCpuStaticeHelp',
-              {
-                defaultMessage:
-                  'Your model will consume {vcus} VCUs per hour,  required by your search or ingest load. It will never scale down and affect your costs.',
-                values: { vcus: vcpuRange.static },
               }
             );
         }
