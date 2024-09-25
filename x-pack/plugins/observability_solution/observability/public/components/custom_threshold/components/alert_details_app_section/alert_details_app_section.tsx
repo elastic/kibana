@@ -168,9 +168,9 @@ export default function AlertDetailsAppSection({
                     <EuiIcon type="sortRight" />
                     &nbsp;
                     {i18n.translate(
-                      'xpack.observability.alertDetailsAppSection.a.viewRelatedLogsLabel',
+                      'xpack.observability.customThreshold.rule.alertDetailsAppSection.viewLogsLabel',
                       {
-                        defaultMessage: 'View logs',
+                        defaultMessage: 'View in Discover',
                       }
                     )}
                   </EuiLink>
