@@ -35,5 +35,5 @@ const pickedServices = _.pick(apiIntegrationServices, [
 export const services = {
   // deployment agnostic FTR services
   ...pickedServices,
-  ...apiIntegrationDeploymentAgnosticServices,
+  alertingApi: apiIntegrationDeploymentAgnosticServices.alertingApi,
 };
