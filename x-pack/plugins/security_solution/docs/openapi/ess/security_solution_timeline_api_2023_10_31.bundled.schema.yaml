@@ -797,13 +797,12 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/ResolvedTimeline'
-                    required:
-                      - data
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ResolvedTimeline'
+                required:
+                  - data
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
@@ -870,34 +869,32 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      customTemplateTimelineCount:
-                        type: number
-                      defaultTimelineCount:
-                        type: number
-                      elasticTemplateTimelineCount:
-                        type: number
-                      favoriteCount:
-                        type: number
-                      templateTimelineCount:
-                        type: number
-                      timeline:
-                        items:
-                          $ref: '#/components/schemas/TimelineResponse'
-                        type: array
-                      totalCount:
-                        type: number
-                    required:
-                      - timeline
-                      - totalCount
-                      - defaultTimelineCount
-                      - templateTimelineCount
-                      - favoriteCount
-                      - elasticTemplateTimelineCount
-                      - customTemplateTimelineCount
-                  - type: object
+                type: object
+                properties:
+                  customTemplateTimelineCount:
+                    type: number
+                  defaultTimelineCount:
+                    type: number
+                  elasticTemplateTimelineCount:
+                    type: number
+                  favoriteCount:
+                    type: number
+                  templateTimelineCount:
+                    type: number
+                  timeline:
+                    items:
+                      $ref: '#/components/schemas/TimelineResponse'
+                    type: array
+                  totalCount:
+                    type: number
+                required:
+                  - timeline
+                  - totalCount
+                  - defaultTimelineCount
+                  - templateTimelineCount
+                  - favoriteCount
+                  - elasticTemplateTimelineCount
+                  - customTemplateTimelineCount
           description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:

@@ -74,36 +74,33 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    required:
-                      [
-                        timeline,
-                        totalCount,
-                        defaultTimelineCount,
-                        templateTimelineCount,
-                        favoriteCount,
-                        elasticTemplateTimelineCount,
-                        customTemplateTimelineCount,
-                      ]
-                    properties:
-                      timeline:
-                        type: array
-                        items:
-                          $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                      totalCount:
-                        type: number
-                      defaultTimelineCount:
-                        type: number
-                      templateTimelineCount:
-                        type: number
-                      favoriteCount:
-                        type: number
-                      elasticTemplateTimelineCount:
-                        type: number
-                      customTemplateTimelineCount:
-                        type: number
-                  - type: object
+                type: object
+                required: [
+                  timeline,
+                  totalCount,
+                  defaultTimelineCount,
+                  templateTimelineCount,
+                  favoriteCount,
+                  elasticTemplateTimelineCount,
+                  customTemplateTimelineCount,
+                ]
+                properties:
+                  timeline:
+                    type: array
+                    items:
+                      $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                  totalCount:
+                    type: number
+                  defaultTimelineCount:
+                    type: number
+                  templateTimelineCount:
+                    type: number
+                  favoriteCount:
+                    type: number
+                  elasticTemplateTimelineCount:
+                    type: number
+                  customTemplateTimelineCount:
+                    type: number
         '400':
           description: Bad request. The user supplied invalid data.
           content:
