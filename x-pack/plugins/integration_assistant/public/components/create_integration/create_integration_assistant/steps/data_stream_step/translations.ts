@@ -198,7 +198,7 @@ export const RETRY = i18n.translate('xpack.integrationAssistant.step.dataStream.
   defaultMessage: 'Retry',
 });
 
-export const ERROR_TRANSLATION = {
+export const ERROR_TRANSLATION: Record<ErrorCode, string> = {
   [ErrorCode.RECURSION_LIMIT_ANALYZE_LOGS]: i18n.translate(
     'xpack.integrationAssistant.errors.recursionLimitAnalyzeLogsErrorMessage',
     {

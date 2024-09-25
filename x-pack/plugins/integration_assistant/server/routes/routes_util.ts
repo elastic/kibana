@@ -6,6 +6,7 @@
  */
 
 import { GraphRecursionError } from '@langchain/langgraph';
+import { ErrorCode } from '../../common/constants';
 import { RecursionLimitError } from '../lib/errors';
 
 /**
@@ -18,9 +19,12 @@ import { RecursionLimitError } from '../lib/errors';
  * @throws {RecursionLimitError} If the error is an instance of GraphRecursionError.
  * @throws {Error} The original error.
  */
-export function handleCustomErrors(err: Error, errorCode: string) {
+export function handleCustomErrors(
+  err: Error,
+  recursionErrorCode: ErrorCode.RECURSION_LIMIT | ErrorCode.RECURSION_LIMIT_ANALYZE_LOGS
+) {
   if (err instanceof GraphRecursionError) {
-    throw new RecursionLimitError(err.message, errorCode);
+    throw new RecursionLimitError(err.message, recursionErrorCode);
   }
   throw err;
 }
