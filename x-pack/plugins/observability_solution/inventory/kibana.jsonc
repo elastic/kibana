@@ -13,7 +13,10 @@
       "inference",
       "dataViews",
       "share",
-      "features"
+      "features",
+      "unifiedSearch",
+      "data",
+      "share"
     ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": [],

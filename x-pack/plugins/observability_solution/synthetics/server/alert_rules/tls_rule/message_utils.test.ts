@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { IBasePath } from '@kbn/core/server';
-import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { setTLSRecoveredAlertsContext } from './message_utils';
 import { TLSLatestPing } from './tls_rule_executor';
 
@@ -17,11 +16,6 @@ describe('setTLSRecoveredAlertsContext', () => {
   const basePath = {
     publicBaseUrl: 'https://localhost:5601',
   } as IBasePath;
-  const alertsLocatorMock = {
-    getLocation: jest.fn().mockImplementation(() => ({
-      path: 'https://localhost:5601/app/observability/alerts/alert-id',
-    })),
-  } as any as LocatorPublic<AlertsLocatorParams>;
   const alertState = {
     summary: 'test-summary',
     status: 'has expired',
@@ -57,9 +51,7 @@ describe('setTLSRecoveredAlertsContext', () => {
     await setTLSRecoveredAlertsContext({
       alertsClient: alertsClientMock,
       basePath,
-      defaultStartedAt: timestamp,
       spaceId: 'default',
-      alertsLocator: alertsLocatorMock,
       latestPings: [
         {
           config_id: configId,
@@ -122,9 +114,7 @@ describe('setTLSRecoveredAlertsContext', () => {
     await setTLSRecoveredAlertsContext({
       alertsClient: alertsClientMock,
       basePath,
-      defaultStartedAt: timestamp,
       spaceId: 'default',
-      alertsLocator: alertsLocatorMock,
       latestPings: [
         {
           config_id: configId,
