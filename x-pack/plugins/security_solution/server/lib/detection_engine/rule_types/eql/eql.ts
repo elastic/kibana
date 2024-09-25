@@ -162,54 +162,25 @@ export const eqlExecutor = async ({
           newSignals = wrapHits(events, buildReasonMessageForEqlAlert);
         }
       } else if (sequences) {
-        console.error('isAlertSuppressionActive??? ', isAlertSuppressionActive);
         if (
           isAlertSuppressionActive &&
           experimentalFeatures.alertSuppressionForSequenceEqlRuleEnabled
         ) {
-          // result.warningMessages.push(
-          //   'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
-          // );
-
-          console.error('how many sequences?', sequences.length);
-
-          /*
-          We are missing the 'fields' property from the sequences.events because
-          we are wrapping the sequences before passing them to the bulk create
-          suppressed function. My hypothesis is to pass the raw sequence data to
-          bulk create suppressed alerts, then do the sequence wrapping
-          within the create suppressed alerts function.
-
-          */
-
-          // commenting out all this code because it needs to happen further down the stack,
-          // where we are no longer relying on fields.
-          // const candidateSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
-          // // partition sequence alert from building block alerts
-          // const [sequenceAlerts, buildingBlockAlerts] = partition(
-          //   candidateSignals,
-          //   (signal) => signal._source[ALERT_BUILDING_BLOCK_TYPE] == null
-          // );
-          // console.error('how many potential sequence alerts?', sequenceAlerts.length);
-          try {
-            await bulkCreateSuppressedSequencesInMemory({
-              sequences,
-              toReturn: result,
-              wrapSequences, // TODO: fix type mismatch
-              bulkCreate,
-              services,
-              buildReasonMessage: buildReasonMessageForEqlAlert,
-              ruleExecutionLogger,
-              tuple,
-              alertSuppression: completeRule.ruleParams.alertSuppression,
-              wrapSuppressedSequences,
-              alertTimestampOverride,
-              alertWithSuppression,
-              experimentalFeatures,
-            });
-          } catch (exc) {
-            console.error('WHAT IS THE EXC', exc);
-          }
+          await bulkCreateSuppressedSequencesInMemory({
+            sequences,
+            toReturn: result,
+            wrapSequences, // TODO: fix type mismatch
+            bulkCreate,
+            services,
+            buildReasonMessage: buildReasonMessageForEqlAlert,
+            ruleExecutionLogger,
+            tuple,
+            alertSuppression: completeRule.ruleParams.alertSuppression,
+            wrapSuppressedSequences,
+            alertTimestampOverride,
+            alertWithSuppression,
+            experimentalFeatures,
+          });
         } else {
           newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
         }

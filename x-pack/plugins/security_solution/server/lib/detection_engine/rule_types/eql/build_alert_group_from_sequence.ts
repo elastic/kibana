@@ -60,7 +60,6 @@ export const buildAlertGroupFromSequence = (
   // since that's when the group ID is determined.
   let baseAlerts: BaseFieldsLatest[] = [];
   try {
-    console.error('CALLING WITHIN BUILD ALERT GROUP FROM SEQUENCE');
     baseAlerts = sequence.events.map((event) =>
       buildBulkBody(
         spaceId,
@@ -78,7 +77,6 @@ export const buildAlertGroupFromSequence = (
       )
     );
   } catch (error) {
-    console.error(`\n************\nBIG ERROR ${error}\n************\n`);
     ruleExecutionLogger.error(error);
     return [];
   }
@@ -157,7 +155,6 @@ export const buildAlertRoot = (
     severity: completeRule.ruleParams.severity,
     mergedDoc: mergedAlerts as SignalSourceHit,
   });
-  console.error('CALLING INSIDE BUILD ALERT ROOT');
   const doc = buildAlert(
     wrappedBuildingBlocks,
     completeRule,

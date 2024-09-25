@@ -492,11 +492,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     isEqlSequenceQuery(queryBar?.query?.query as string)
   );
 
-  useEffect(
-    () => console.error('IS SUPPRESSION ENABLED', isAlertSuppressionEnabled),
-    [isAlertSuppressionEnabled]
-  );
-
   /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
   const areSuppressionFieldsDisabledByMlFields =
     isMlRule(ruleType) && (mlRuleConfigLoading || !mlSuppressionFields.length);
@@ -1198,7 +1193,6 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
   const transformFields = useExperimentalFeatureFieldsTransform();
   const fieldsToDisplay = transformFields(dataForDescription);
-  console.error('WHAT FIELDS TO DISPLAY', fieldsToDisplay.queryBar?.query.query);
 
   return (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>

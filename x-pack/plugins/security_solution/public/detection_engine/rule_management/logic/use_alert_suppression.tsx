@@ -27,7 +27,6 @@ export const useAlertSuppression = (
     }
 
     if (isEqlRule(ruleType) && isEqlSequenceQuery) {
-      console.error('IS SEQUENCE SUPPRESSION ENABLED', isAlertSuppressionForSequenceEQLRuleEnabled);
       return isAlertSuppressionForSequenceEQLRuleEnabled;
     }
 

@@ -21,7 +21,6 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
   );
   const transformer = useCallback(
     (fields: T) => {
-      console.error('fields query bar', fields.queryBar?.query?.query);
       const isSuppressionDisabled =
         isEqlRule(fields.ruleType) &&
         isEqlSequenceQuery(fields.queryBar?.query?.query as string) &&

@@ -41,10 +41,6 @@ export const getSuppressionAlertFields = ({
   fallbackTimestamp: string;
   instanceId: string;
 }) => {
-  console.error(
-    `primary timestamp: ${primaryTimestamp}, secondaryTimestamp: ${secondaryTimestamp}, fallbackTimestamp: ${fallbackTimestamp}`
-  );
-  console.error('WHAT ARE FIELDS', JSON.stringify(fields));
   const primeTimestamp = get(fields, primaryTimestamp) as string;
   const secondTimestamp =
     secondaryTimestamp != null ? (get(fields, secondaryTimestamp) as string) : fallbackTimestamp;
@@ -60,8 +56,6 @@ export const getSuppressionAlertFields = ({
     [ALERT_SUPPRESSION_END]: suppressionTime,
     [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
   };
-
-  console.error('WHAT ARE THE SUPPRESSION FIELDS', JSON.stringify(suppressionFields));
 
   return suppressionFields;
 };

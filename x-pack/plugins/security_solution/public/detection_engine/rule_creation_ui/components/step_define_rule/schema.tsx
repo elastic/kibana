@@ -655,7 +655,6 @@ export const schema: FormSchema<DefineStepRule> = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
           const needsValidation = isSuppressionRuleConfiguredWithGroupBy(formData.ruleType);
-          console.error('DO WE NEED VALIDATION', needsValidation);
           if (!needsValidation) {
             return;
           }

@@ -13,8 +13,12 @@ import type {
   AlertWithCommonFieldsLatest,
   SuppressionFieldsLatest,
 } from '@kbn/rule-registry-plugin/common/schemas';
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 
+import { ALERT_GROUP_ID } from '../../../../../common/field_maps/field_names';
+import {
+  isEqlBuildingBlockAlert,
+  isEqlShellAlert,
+} from '../../../../../common/api/detection_engine/model/alerts/8.0.0';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { makeFloatString } from './utils';
@@ -26,11 +30,6 @@ import type { RuleServices } from '../types';
 import { createEnrichEventsFunction } from './enrichments';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
-import {
-  isEqlBuildingBlockAlert,
-  isEqlShellAlert,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/model/alerts/8.0.0';
-import { ALERT_GROUP_ID } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
@@ -104,18 +103,6 @@ export const bulkCreateWithSuppression = async <
       enrichmentsTimeFinish = performance.now();
     }
   };
-
-  console.error(
-    'DO WRAPPED DOCS HAVE INSTANCE IDS',
-    wrappedDocs.reduce(
-      (acc, doc) => ({
-        ...acc,
-        [doc._source[ALERT_INSTANCE_ID]]:
-          acc[doc._source[ALERT_INSTANCE_ID]] != null ? acc[doc._source[ALERT_INSTANCE_ID]] + 1 : 0,
-      }),
-      {}
-    )
-  );
 
   let myfunc;
 

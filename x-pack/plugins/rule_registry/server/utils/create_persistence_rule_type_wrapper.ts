@@ -25,8 +25,6 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_SUPPRESSION_VALUE,
-  ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 // import {
@@ -184,11 +182,11 @@ export const suppressAlertsInMemory = <
     (alert) => {
       const instanceId = alert._source[ALERT_INSTANCE_ID];
       const suppressionDocsCount = alert._source[ALERT_SUPPRESSION_DOCS_COUNT];
-      console.error('INSIDE SUPPRESSION DOCS COUNT', suppressionDocsCount);
-      console.error(
-        'NOT A BUILDING BLOCK',
-        alert._source['kibana.alert.building_block_type'] == null
-      );
+      // console.error('INSIDE SUPPRESSION DOCS COUNT', suppressionDocsCount);
+      // console.error(
+      //   'NOT A BUILDING BLOCK',
+      //   alert._source['kibana.alert.building_block_type'] == null
+      // );
       const suppressionEnd = alert._source[ALERT_SUPPRESSION_END];
 
       if (instanceId && idsMap[instanceId] != null) {
@@ -207,7 +205,7 @@ export const suppressAlertsInMemory = <
     []
   );
 
-  console.error('WHAT IS IDS MAP', JSON.stringify(idsMap));
+  // console.error('WHAT IS IDS MAP', JSON.stringify(idsMap));
 
   const alertCandidates = filteredAlerts.map((alert) => {
     const instanceId = alert._source[ALERT_INSTANCE_ID];
@@ -217,11 +215,6 @@ export const suppressAlertsInMemory = <
     }
     return alert;
   });
-
-  console.error(
-    'INSIDE SUPPRESSION DOCS COUNT',
-    alertCandidates.map((alrt) => alrt._source[ALERT_SUPPRESSION_DOCS_COUNT])
-  );
 
   return {
     alertCandidates,
@@ -240,8 +233,6 @@ export const isExistingDateGtEqThanAlert = <
   property: typeof ALERT_SUPPRESSION_END | typeof ALERT_SUPPRESSION_START
 ) => {
   const existingDate = existingAlert?._source?.[property];
-  console.error('WHAT IS THE EXISTING DATE', existingDate);
-  console.error('WHAT IS THE SOURCE PROPERTY', alert._source[property]);
   return existingDate ? existingDate >= alert._source[property].toISOString() : false;
 };
 
@@ -509,8 +500,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   return acc;
                 }, {});
 
-                console.error('ARE THERE EXISTING ALERTS', existingAlertsByInstanceId.length);
-
                 // filter out alerts that were already suppressed
                 // alert was suppressed if its suppression ends is older
                 // than suppression end of existing alert
@@ -558,8 +547,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   }
                 });
 
-                console.error('ARE THERE DUPLICATE ALERTS', duplicateAlerts?.length);
-
                 const duplicateAlertUpdates = duplicateAlerts.flatMap((alert) => {
                   const existingAlert =
                     existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
@@ -593,7 +580,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 let enrichedAlerts = newAlerts;
-                console.error('WHAT ARE ENRICHED ALERTS LENGTH BEFORE', enrichedAlerts?.length);
 
                 if (enrichAlerts) {
                   try {
@@ -604,8 +590,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     logger.debug('Enrichments failed');
                   }
                 }
-
-                console.error('WHAT ARE ENRICHED ALERTS LENGTH AFTER', enrichedAlerts?.length);
 
                 if (maxAlerts && enrichedAlerts.length > maxAlerts) {
                   enrichedAlerts.length = maxAlerts;
@@ -619,11 +603,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   currentTimeOverride,
                 });
 
-                console.error(
-                  'WHAT IS AUGMENTED ALERT LENGTH',
-                  augmentedAlerts.map((alrt) => alrt?._source?.[ALERT_SUPPRESSION_TERMS])
-                );
-
                 /**
                  * buildingBlockAlerts?.filter((someAlert) => {
                   // console.error('SOME ALERT GROUP ID', someAlert?._source[ALERT_GROUP_ID]);
@@ -636,8 +615,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   );
                 });
                  */
-
-                console.error('is it defined', getMatchingBuildingBlockAlerts);
 
                 // TODO: move all this stuff into a utility function
                 // only create building block alerts for the new eql shell alert
@@ -661,12 +638,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                       })
                     : [];
 
-                // console.error('DO WE HAVE NEW ALERTS?', newAlerts?.length);
-                // console.error('DO WE HAVE BUILDING BLOCK ALERTS?? ', buildingBlockAlerts?.length);
-                // console.error(
-                //   'DO THE MAP ALERTS TO BULK CREATE CONTAIN THE INSTANCE IDS',
-                //   JSON.stringify(mapAlertsToBulkCreate(augmentedAlerts))
-                // );
                 const bulkResponse = await ruleDataClientWriter.bulk({
                   body: [
                     ...duplicateAlertUpdates,
@@ -701,23 +672,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   )
                   // Security solution's EQL rule consists of building block alerts which should be filtered out.
                   .filter((alert) => alert['kibana.alert.building_block_type'] == null);
-
-                console.error('HOW MANY CREATED ALERTS', createdAlerts.length);
-                console.error('HOW MANY DUPLICATE ALERTS', duplicateAlerts.length);
-                console.error(
-                  'HOW MANY SUPPRESSED IN MEMORY ALERTS',
-                  suppressedInMemoryAlerts.length
-                );
-
-                console.error(
-                  'created alerts suppression count',
-                  JSON.stringify(
-                    createdAlerts.map((alrt) => ({
-                      'suppressed values': alrt[ALERT_SUPPRESSION_TERMS],
-                      'suppressed count': alrt['kibana.alert.suppression.docs_count'],
-                    }))
-                  )
-                );
 
                 createdAlerts.forEach((alert) =>
                   options.services.alertFactory

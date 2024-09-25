@@ -8,11 +8,7 @@ import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ALERT_BUILDING_BLOCK_TYPE,
-  ALERT_INSTANCE_ID,
-  ALERT_SUPPRESSION_TERMS,
-} from '@kbn/rule-data-utils';
+import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
 import partition from 'lodash/partition';
 
 import type {
@@ -38,7 +34,6 @@ import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
@@ -137,17 +132,11 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     );
 
     unsuppressibleWrappedDocs = wrapHits(partitionedEvents[1], buildReasonMessage);
-    console.error('unsuppressible docs', unsuppressibleWrappedDocs.length);
     suppressibleEvents = partitionedEvents[0];
   }
 
   // refactor the below into a separate function
   const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleEvents, buildReasonMessage);
-
-  console.error(
-    'SUPPRESSIBLE WRAPPED instance ids',
-    suppressibleWrappedDocs.map((doc) => doc._source[ALERT_INSTANCE_ID])
-  );
 
   // I think we create a separate bulkCreateSuppressedInMemory function
   // specifically for eql sequences
@@ -214,9 +203,7 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
       if (eventsWithFields.length === 0) {
         // unsuppressible sequence alert
         const wrappedSequence = wrapSequences([sequence], buildReasonMessage);
-        // console.error('UNSUPPRESSED WRAP SEQUENCE', wrappedSequence);
         unsuppressibleWrappedDocs.push(...wrappedSequence);
-        console.error('unsuppressible docs', unsuppressibleWrappedDocs.length);
       } else {
         suppressibleSequences.push(sequence);
       }
@@ -326,7 +313,6 @@ export const executeBulkCreateAlerts = async <
     : tuple.from.toISOString();
 
   if (unsuppressibleWrappedDocs.length) {
-    console.error('UNSUPPRESSIBLE DOCS WRAPPED');
     const unsuppressedResult = await bulkCreate(
       unsuppressibleWrappedDocs,
       tuple.maxSignals - toReturn.createdSignalsCount,

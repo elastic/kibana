@@ -106,7 +106,6 @@ export const buildBulkBody = (
 
   const thresholdResult = mergedDoc._source?.threshold_result;
   if (isSourceDoc(mergedDoc)) {
-    console.error('CALLING INSIDE BUILD BULK BODY');
     return {
       ...validatedSource,
       ...validatedEventFields,

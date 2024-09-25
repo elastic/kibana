@@ -55,10 +55,8 @@ import {
   MaxWidthEuiFlexItem,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
-import {
-  DefineStepRule,
-  RuleStep,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { ruleStepsOrder } from '../../../../detections/pages/detection_engine/rules/utils';

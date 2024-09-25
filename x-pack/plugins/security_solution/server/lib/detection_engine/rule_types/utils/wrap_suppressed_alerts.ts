@@ -31,12 +31,9 @@ import { generateBuildingBlockIds } from '../factories/utils/generate_building_b
 
 import type { BuildReasonMessage } from './reason_formatters';
 import { buildAlertRoot } from '../eql/build_alert_group_from_sequence';
-import { getAlertDetailsUrl } from '@kbn/security-solution-plugin/common/utils/alert_detail_path';
-import { DEFAULT_ALERTS_INDEX } from '@kbn/security-solution-plugin/common/constants';
-import {
-  ALERT_GROUP_ID,
-  ALERT_GROUP_INDEX,
-} from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
+import { ALERT_GROUP_ID, ALERT_GROUP_INDEX } from '../../../../../common/field_maps/field_names';
 import { buildAncestors } from '../factories/utils/build_alert';
 
 type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams | MachineLearningRuleParams;
@@ -168,7 +165,6 @@ export const wrapSuppressedSequenceAlerts = ({
         return [];
       }
 
-      console.error('CALLING WITHIN WRAP SUPPRESSED SEQUENCE ALERTS');
       // The "building block" alerts start out as regular BaseFields.
       // We'll add the group ID and index fields
       // after creating the shell alert later on
@@ -191,7 +187,6 @@ export const wrapSuppressedSequenceAlerts = ({
       );
 
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
-      console.error('sequence alert INSTANCE ID', instanceId);
 
       // The ID of each building block alert depends on all of the other building blocks as well,
       // so we generate the IDs after making all the BaseFields
