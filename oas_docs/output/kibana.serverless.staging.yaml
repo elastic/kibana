@@ -16945,10 +16945,9 @@ paths:
                     properties:
                       data:
                         $ref: >-
-                          #/components/schemas/Security_Timeline_API_TimelineResponse
+                          #/components/schemas/Security_Timeline_API_ResolvedTimeline
                     required:
                       - data
-                  - type: object
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
@@ -31470,6 +31469,22 @@ components:
                 type: string
               nullable: true
               type: array
+    Security_Timeline_API_ResolvedTimeline:
+      type: object
+      properties:
+        alias_purpose:
+          $ref: >-
+            #/components/schemas/Security_Timeline_API_SavedObjectResolveAliasPurpose
+        alias_target_id:
+          type: string
+        outcome:
+          $ref: '#/components/schemas/Security_Timeline_API_SavedObjectResolveOutcome'
+        timeline:
+          $ref: >-
+            #/components/schemas/Security_Timeline_API_TimelineSavedToReturnObject
+      required:
+        - timeline
+        - outcome
     Security_Timeline_API_ResponseNote:
       type: object
       properties:
@@ -31503,6 +31518,17 @@ components:
         - system_socket
         - threat_match
         - zeek
+      type: string
+    Security_Timeline_API_SavedObjectResolveAliasPurpose:
+      enum:
+        - savedObjectConversion
+        - savedObjectImport
+      type: string
+    Security_Timeline_API_SavedObjectResolveOutcome:
+      enum:
+        - exactMatch
+        - aliasMatch
+        - conflict
       type: string
     Security_Timeline_API_SavedTimeline:
       type: object
