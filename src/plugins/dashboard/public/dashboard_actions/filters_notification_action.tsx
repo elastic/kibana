@@ -58,8 +58,6 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   public readonly type = BADGE_FILTERS_NOTIFICATION;
   public readonly order = 2;
 
-  constructor() {}
-
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     const { embeddable } = context;
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();

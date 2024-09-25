@@ -38,8 +38,6 @@ export class LegacyUnlinkFromLibraryAction implements Action<EmbeddableApiContex
   public readonly id = ACTION_LEGACY_UNLINK_FROM_LIBRARY;
   public order = 15;
 
-  constructor() {}
-
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!legacyUnlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
     return dashboardUnlinkFromLibraryActionStrings.getDisplayName();

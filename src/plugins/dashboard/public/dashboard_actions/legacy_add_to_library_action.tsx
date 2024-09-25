@@ -36,8 +36,6 @@ export class LegacyAddToLibraryAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_LEGACY_ADD_TO_LIBRARY;
   public order = 15;
 
-  constructor() {}
-
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return dashboardAddToLibraryActionStrings.getDisplayName();

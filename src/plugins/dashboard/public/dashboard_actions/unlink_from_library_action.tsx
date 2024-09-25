@@ -55,8 +55,6 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
 
-  constructor() {}
-
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return dashboardUnlinkFromLibraryActionStrings.getDisplayName();

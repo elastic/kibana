@@ -349,7 +349,6 @@ export class DashboardPlugin
         setDashboardRecentlyAccessedService();
 
         buildAllDashboardActions({
-          core,
           plugins,
           allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
         });

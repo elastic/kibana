@@ -64,8 +64,6 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 8;
 
-  constructor() {}
-
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return dashboardAddToLibraryActionStrings.getDisplayName();

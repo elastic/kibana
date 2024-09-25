@@ -43,8 +43,6 @@ export class ExportCSVAction implements Action<ExportContext> {
   public readonly type = ACTION_EXPORT_CSV;
   public readonly order = 18; // right after Export in discover which is 19
 
-  constructor() {}
-
   public getIconType() {
     return 'exportAction';
   }

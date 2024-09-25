@@ -9,7 +9,6 @@
 
 import React from 'react';
 
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   EmbeddableApiContext,
   HasParentApi,
@@ -27,9 +26,9 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { DashboardApi } from '../dashboard_api/types';
 import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 import { coreServices } from '../services/kibana_services';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
-import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
 
@@ -61,8 +60,6 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_COPY_TO_DASHBOARD;
   public order = 1;
 
-  constructor(private core: CoreStart) {}
-
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!apiIsCompatible(embeddable)) throw new IncompatibleActionError();
 
@@ -84,7 +81,7 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!apiIsCompatible(embeddable)) throw new IncompatibleActionError();
 
-    const { theme, i18n } = this.core;
+    const { theme, i18n } = coreServices;
     const session = coreServices.overlays.openModal(
       toMountPoint(<CopyToDashboardModal closeModal={() => session.close()} api={embeddable} />, {
         theme,
