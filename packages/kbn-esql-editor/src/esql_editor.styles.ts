@@ -13,6 +13,10 @@ export const EDITOR_INITIAL_HEIGHT = 80;
 export const EDITOR_INITIAL_HEIGHT_INLINE_EDITING = 140;
 export const EDITOR_MIN_HEIGHT = 40;
 export const EDITOR_MAX_HEIGHT = 400;
+// resizeable container initial height
+// the resizable container is the container that holds the history component or the inline docs
+// they are never open simultaneously
+export const RESIZABLE_CONTAINER_INITIAL_HEIGHT = 190;
 
 export const esqlEditorStyles = (
   euiTheme: EuiThemeComputed,
@@ -23,7 +27,9 @@ export const esqlEditorStyles = (
   editorIsInline: boolean,
   hasOutline: boolean
 ) => {
-  const bottomContainerBorderColor = hasErrors ? euiTheme.colors.danger : euiTheme.colors.primary;
+  const bottomContainerBorderColor = hasErrors
+    ? euiTheme.colors.danger
+    : euiTheme.colors.lightestShade;
 
   return {
     editorContainer: {

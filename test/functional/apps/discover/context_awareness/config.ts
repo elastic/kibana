@@ -8,6 +8,11 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import path from 'path';
+import {
+  KibanaEBTUIProvider,
+  KibanaEBTServerProvider,
+} from '../../../../analytics/services/kibana_ebt';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
@@ -21,7 +26,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...baseConfig.kbnTestServer.serverArgs,
         '--discover.experimental.enabledProfiles=["example-root-profile","example-data-source-profile","example-document-profile"]',
+        `--plugin-path=${path.resolve(
+          __dirname,
+          '../../../../analytics/plugins/analytics_ftr_helpers'
+        )}`,
       ],
+    },
+    services: {
+      ...baseConfig.services,
+      kibana_ebt_server: KibanaEBTServerProvider,
+      kibana_ebt_ui: KibanaEBTUIProvider,
     },
   };
 }

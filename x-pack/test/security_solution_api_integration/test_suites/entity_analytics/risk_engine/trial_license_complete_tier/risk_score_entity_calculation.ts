@@ -206,6 +206,49 @@ export default ({ getService }: FtrProviderContext): void => {
             persistedScoreByApi.calculated_score_norm! + 0.000000000000001
           );
         });
+
+        it('ignores deleted asset criticality when calculating and persisting risk scores with additional criticality metadata and modifiers', async () => {
+          const documentId = uuidv4();
+          await assetCriticalityRoutes.delete('host.name', 'host-1');
+          await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, documentId)]);
+          await waitForAssetCriticalityToBePresent({ es, log });
+          await createRuleAndWaitExecution(documentId);
+          await riskEngineRoutes.init();
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
+
+          const results = await calculateEntityRiskScore('host-1');
+
+          const expectedScore = {
+            calculated_level: 'Unknown',
+            calculated_score: 21,
+            calculated_score_norm: 8.10060175898781,
+            category_1_score: 8.10060175898781,
+            category_1_count: 1,
+            id_field: 'host.name',
+            id_value: 'host-1',
+          };
+
+          const [score] = sanitizeScores([results.score]);
+          expect(results.success).to.be(true);
+          expect(score).to.eql(expectedScore);
+
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 });
+          const persistedScores = await readRiskScores(es);
+
+          expect(persistedScores.length).to.greaterThan(1); // the risk score is calculated once by the risk engine and a second time by the API
+          const [persistedScoreByApi, persistedScoreByEngine] = normalizeScores(persistedScores);
+          expect(persistedScoreByApi).to.eql(expectedScore);
+          expect(persistedScoreByApi).to.eql(persistedScoreByEngine);
+
+          const [rawScore] = persistedScores;
+
+          expect(
+            rawScore.host?.risk.category_1_score! + rawScore.host?.risk.category_2_score!
+          ).to.be.within(
+            persistedScoreByApi.calculated_score_norm! - 0.000000000000001,
+            persistedScoreByApi.calculated_score_norm! + 0.000000000000001
+          );
+        });
       });
     });
   });
