@@ -44,5 +44,6 @@
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/repo-info",
     "@kbn/elastic-assistant-common",
+    "@kbn/cloud-security-posture-common",
   ]
 }
