@@ -35,6 +35,7 @@ export const GetInstalledPackagesRequestSchema = {
         schema.literal('profiling'),
       ])
     ),
+    showOnlyActiveDataStreams: schema.maybe(schema.boolean()),
     nameQuery: schema.maybe(schema.string()),
     searchAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
     perPage: schema.number({ defaultValue: 15 }),

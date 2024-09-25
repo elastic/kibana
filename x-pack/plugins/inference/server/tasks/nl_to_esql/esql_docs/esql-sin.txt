@@ -1,8 +1,18 @@
-## SIN
+# SIN
 
-The `SIN` function returns the sine trigonometric function of an angle, expressed in radians. If the input angle is null, the function returns null.
+The SIN function calculates the sine of a given angle.
 
-### Examples
+## Syntax
+
+`SIN(angle)`
+
+### Parameters
+
+#### angle
+
+The angle for which the sine value is to be calculated. The angle should be in radians.
+
+## Examples
 
 ```esql
 ROW a=1.8

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-describe('[Logs onboarding] System logs', () => {
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
+describe.skip('[Logs onboarding] System logs', () => {
   describe('System integration', () => {
     beforeEach(() => {
       cy.deleteIntegration('system');
