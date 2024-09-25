@@ -191,10 +191,6 @@ export const dashboardContainerReducers = {
     state.explicitInput.timeslice = action.payload;
   },
 
-  setExpandedPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
-    state.componentState.expandedPanelId = action.payload;
-  },
-
   // ------------------------------------------------------------------------------
   // Component state reducers
   // ------------------------------------------------------------------------------

@@ -107,6 +107,7 @@ import {
   initializeComponentStateManager,
 } from '../../dashboard_api/component_state_manager';
 import { initializeTracksOverlays } from '../../dashboard_api/tracks_overlays';
+import { initializeExpandAndScrollPanels } from '../../dashboard_api/expand_and_scroll_panels';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -155,6 +156,7 @@ export class DashboardContainer
   public clearOverlays: () => void;
   public setScrollToPanelId: (id: string | undefined) => void;
   public setFullScreenMode: (fullScreenMode: boolean) => void;
+  public setExpandedPanelId: (newId?: string) => void;
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
@@ -181,7 +183,6 @@ export class DashboardContainer
   public creationEndTime?: number;
   public firstLoad: boolean = true;
   private hadContentfulRender = false;
-  private scrollPosition?: number;
 
   // setup
   public untilContainerInitialized: () => Promise<void>;
@@ -322,16 +323,19 @@ export class DashboardContainer
     this.setHasUnsavedChanges = componentStateManager.setHasUnsavedChanges;
     this.setManaged = componentStateManager.setManaged;
 
-    const tracksOverlay = initializeTracksOverlays();
+    const expandAndScroll = initializeExpandAndScrollPanels(this.untilEmbeddableLoaded);
+    this.expandedPanelId = expandAndScroll.expandedPanelId;
+    this.setExpandedPanelId = expandAndScroll.setExpandedPanelId;
+    this.scrollToPanelId$ = expandAndScroll.scrollToPanelId$;
+    this.setScrollToPanelId = expandAndScroll.setScrollToPanelId;
+
+    const tracksOverlay = initializeTracksOverlays(expandAndScroll.setScrollToPanelId);
     this.clearOverlays = tracksOverlay.clearOverlays;
     this.focusedPanelId$ = tracksOverlay.focusedPanelId$;
     this.hasOverlays$ = tracksOverlay.hasOverlayers$;
     this.openOverlay = tracksOverlay.openOverlay;
-    this.scrollToPanelId$ = tracksOverlay.scrollToPanelId$;
-    this.setScrollToPanelId = tracksOverlay.setScrollToPanelId;
 
     this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
-    this.expandedPanelId = new BehaviorSubject(this.getExpandedPanelId());
     this.hasRunMigrations$ = new BehaviorSubject(
       this.getState().componentState.hasRunClientsideMigrations
     );
@@ -343,9 +347,6 @@ export class DashboardContainer
         const state = this.getState();
         if (this.savedObjectId.value !== this.getDashboardSavedObjectId()) {
           this.savedObjectId.next(this.getDashboardSavedObjectId());
-        }
-        if (this.expandedPanelId.value !== this.getExpandedPanelId()) {
-          this.expandedPanelId.next(this.getExpandedPanelId());
         }
         if (this.useMargins$.value !== state.explicitInput.useMargins) {
           this.useMargins$.next(state.explicitInput.useMargins);
@@ -563,7 +564,7 @@ export class DashboardContainer
     duplicateDashboardPanel.bind(this)(id);
   }
 
-  public canRemovePanels = () => !this.getExpandedPanelId();
+  public canRemovePanels = () => this.expandedPanelId.value !== undefined;
 
   public getTypeDisplayName = () => dashboardTypeDisplayName;
   public getTypeDisplayNameLowerCase = () => dashboardTypeDisplayLowercase;
@@ -591,7 +592,7 @@ export class DashboardContainer
       panelType,
       true
     );
-    if (this.getExpandedPanelId() !== undefined) {
+    if (this.expandedPanelId.value !== undefined) {
       this.setExpandedPanelId(newId);
     }
     this.setHighlightPanelId(newId);
@@ -721,21 +722,6 @@ export class DashboardContainer
     return panel;
   };
 
-  public expandPanel = (panelId: string) => {
-    const isPanelExpanded = Boolean(this.getExpandedPanelId());
-
-    if (isPanelExpanded) {
-      this.setExpandedPanelId(undefined);
-      this.setScrollToPanelId(panelId);
-      return;
-    }
-
-    this.setExpandedPanelId(panelId);
-    if (window.scrollY > 0) {
-      this.scrollPosition = window.scrollY;
-    }
-  };
-
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
   public forceRefresh(refreshControlGroup: boolean = true) {
@@ -812,12 +798,12 @@ export class DashboardContainer
 
     this.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
     this.setManaged(loadDashboardReturn?.managed ?? false);
+    this.setExpandedPanelId(undefined);
     batch(() => {
       this.dispatch.setLastSavedInput(
         omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
       );
       this.dispatch.setLastSavedId(newSavedObjectId);
-      this.setExpandedPanelId(undefined);
     });
     this.firstLoad = true;
     this.updateInput(newInput);
@@ -830,10 +816,6 @@ export class DashboardContainer
    */
   public setAllDataViews = (newDataViews: DataView[]) => {
     (this.dataViews as BehaviorSubject<DataView[] | undefined>).next(newDataViews);
-  };
-
-  public getExpandedPanelId = () => {
-    return this.getState().componentState.expandedPanelId;
   };
 
   public getPanelsState = () => {
@@ -858,10 +840,6 @@ export class DashboardContainer
 
   public setSettings = (settings: DashboardStateFromSettingsFlyout) => {
     this.dispatch.setStateFromSettingsFlyout(settings);
-  };
-
-  public setExpandedPanelId = (newId?: string) => {
-    this.dispatch.setExpandedPanelId(newId);
   };
 
   public setViewMode = (viewMode: ViewMode) => {
@@ -904,31 +882,6 @@ export class DashboardContainer
     }
     return titles;
   }
-
-  public scrollToPanel = async (panelRef: HTMLDivElement) => {
-    const id = this.scrollToPanelId$.value;
-    if (!id) return;
-
-    this.untilEmbeddableLoaded(id).then(() => {
-      this.setScrollToPanelId(undefined);
-      if (this.scrollPosition) {
-        panelRef.ontransitionend = () => {
-          // Scroll to the last scroll position after the transition ends to ensure the panel is back in the right position before scrolling
-          // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
-          window.scrollTo({ top: this.scrollPosition });
-          this.scrollPosition = undefined;
-          panelRef.ontransitionend = null;
-        };
-        return;
-      }
-
-      panelRef.scrollIntoView({ block: 'center' });
-    });
-  };
-
-  public scrollToTop = () => {
-    window.scroll(0, 0);
-  };
 
   public setHighlightPanelId = (id: string | undefined) => {
     this.dispatch.setHighlightPanelId(id);

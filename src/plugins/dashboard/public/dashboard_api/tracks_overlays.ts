@@ -10,16 +10,15 @@
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { BehaviorSubject } from 'rxjs';
 
-export function initializeTracksOverlays() {
+export function initializeTracksOverlays(setScrollToPanels: (id: string | undefined) => void) {
   let overlayRef: OverlayRef;
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const hasOverlayers$ = new BehaviorSubject(false);
-  const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
 
   function clearOverlays() {
     hasOverlayers$.next(false);
     focusedPanelId$.next(undefined);
-    scrollToPanelId$.next(undefined);
+    setScrollToPanels(undefined);
     overlayRef?.close();
   }
 
@@ -33,10 +32,8 @@ export function initializeTracksOverlays() {
       overlayRef = ref;
       if (options?.focusedPanelId) {
         focusedPanelId$.next(options.focusedPanelId);
-        scrollToPanelId$.next(options.focusedPanelId);
+        setScrollToPanels(options.focusedPanelId);
       }
     },
-    setScrollToPanelId: (id: string | undefined) => scrollToPanelId$.next(id),
-    scrollToPanelId$,
-  }
+  };
 }
