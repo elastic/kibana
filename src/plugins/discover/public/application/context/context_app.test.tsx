@@ -22,7 +22,6 @@ import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { HistoryLocationState } from '../../build_services';
 import { createSearchSessionMock } from '../../__mocks__/search_session';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
@@ -36,14 +35,7 @@ const discoverServices = createDiscoverServicesMock();
 describe('ContextApp test', () => {
   const { history } = createSearchSessionMock();
   const services = {
-    data: {
-      ...dataPluginMock.createStartContract(),
-      search: {
-        searchSource: {
-          createEmpty: jest.fn(),
-        },
-      },
-    },
+    data: discoverServices.data,
     capabilities: {
       discover: {
         save: true,
@@ -80,6 +72,8 @@ describe('ContextApp test', () => {
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
     profilesManager: discoverServices.profilesManager,
+    timefilter: discoverServices.timefilter,
+    uiActions: discoverServices.uiActions,
   } as unknown as DiscoverServices;
 
   const defaultProps = {

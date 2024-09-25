@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'header']);
+  const { common, dashboard, header } = getPageObjects(['common', 'dashboard', 'header']);
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
@@ -30,9 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
 
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
+      await dashboard.switchToEditMode();
     });
 
     it('should create an image embeddable', async () => {
@@ -40,13 +40,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Image');
       await testSubjects.exists(`createImageEmbeddableFlyout`);
-      await PageObjects.common.setFileInputPath(require.resolve('./elastic_logo.png'));
+      await common.setFileInputPath(require.resolve('./elastic_logo.png'));
       await testSubjects.clickWhenNotDisabled(`imageEmbeddableEditorSave`);
 
       // check that it is added on the dashboard
-      expect(await PageObjects.dashboard.getSharedItemsCount()).to.be('1');
-      await PageObjects.dashboard.waitForRenderComplete();
-      const panel = (await PageObjects.dashboard.getDashboardPanels())[0];
+      expect(await dashboard.getSharedItemsCount()).to.be('1');
+      await dashboard.waitForRenderComplete();
+      const panel = (await dashboard.getDashboardPanels())[0];
       const img = await panel.findByCssSelector('img.euiImage');
       const imgSrc = await img.getAttribute('src');
       expect(imgSrc).to.contain(`files/defaultImage`);
@@ -66,21 +66,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownsManage.saveChanges();
       await dashboardDrilldownsManage.closeFlyout();
 
-      expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(1);
+      expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(1);
 
-      const panel = (await PageObjects.dashboard.getDashboardPanels())[0];
+      const panel = (await dashboard.getDashboardPanels())[0];
       const img = await panel.findByCssSelector('img.euiImage');
 
-      const oldDashboardId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+      const oldDashboardId = await dashboard.getDashboardIdFromCurrentUrl();
 
       await img.click();
 
       await retry.waitFor('navigate to different dashboard', async () => {
-        const newDashboardId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+        const newDashboardId = await dashboard.getDashboardIdFromCurrentUrl();
         return typeof newDashboardId === 'string' && oldDashboardId !== newDashboardId;
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
     });
   });
 }

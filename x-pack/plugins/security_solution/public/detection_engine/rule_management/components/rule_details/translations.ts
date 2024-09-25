@@ -28,6 +28,13 @@ export const UPDATES_TAB_LABEL = i18n.translate(
   }
 );
 
+export const DIFF_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.diffTabLabel',
+  {
+    defaultMessage: 'Diff',
+  }
+);
+
 export const JSON_VIEW_UPDATES_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.jsonViewUpdatesTabLabel',
   {

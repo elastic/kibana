@@ -15,11 +15,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects([
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
     'common',
-    'header',
     'discover',
-    'visualize',
     'timePicker',
     'unifiedFieldList',
   ]);
@@ -34,9 +32,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {
@@ -44,18 +42,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async function () {
           await queryBar.setQuery('php');
           await queryBar.submitQuery();
-          const hitCount = await PageObjects.discover.getHitCount();
+          const hitCount = await discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);
         });
       });
 
       it('the search term should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-        const marks = await PageObjects.discover.getMarks();
+        await unifiedFieldList.clickFieldListItemAdd('extension');
+        const marks = await discover.getMarks();
         expect(marks.length).to.be.greaterThan(0);
         expect(marks.indexOf('php')).to.be(0);
-        await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
+        await unifiedFieldList.clickFieldListItemRemove('extension');
       });
 
       it('search type:apache should show the correct hit count', async function () {
@@ -63,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('type:apache');
         await queryBar.submitQuery();
         await retry.try(async function tryingForTime() {
-          const hitCount = await PageObjects.discover.getHitCount();
+          const hitCount = await discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);
         });
       });
@@ -77,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('doc view should sort ascending', async function () {
         const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
         await dataGrid.clickDocSortAsc();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
         await retry.waitFor('first cell contains expected timestamp', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -92,8 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'whitespace but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
-        await PageObjects.discover.showsErrorCallout();
-        const message = await PageObjects.discover.getDiscoverErrorMessage();
+        await discover.showsErrorCallout();
+        const message = await discover.getDiscoverErrorMessage();
         expect(message).to.contain(expectedError);
       });
     });

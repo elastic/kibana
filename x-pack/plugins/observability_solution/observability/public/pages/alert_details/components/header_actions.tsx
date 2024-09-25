@@ -178,10 +178,12 @@ export function HeaderActions({
               to: new Date(paddedAlertTimeRange.to).getTime(),
             },
           },
+          tags: [],
           origin: {
             type: 'alert',
             id: alert.fields[ALERT_UUID],
           },
+          externalIncidentUrl: null,
         },
       });
 

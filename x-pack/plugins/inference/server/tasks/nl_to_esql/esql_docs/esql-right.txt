@@ -1,8 +1,24 @@
-## RIGHT
+# RIGHT
 
-The `RIGHT` function returns a substring that extracts a specified number of characters from a string, starting from the right.
+The RIGHT function extracts a specified number of characters from the end of a string.
 
-### Examples
+## Syntax
+
+`RIGHT(string, length)`
+
+### Parameters
+
+#### string
+
+The string from which a substring is to be returned.
+
+#### length
+
+The number of characters to return from the end of the string.
+
+## Examples
+
+The following example extracts the last three characters from the `last_name` field:
 
 ```esql
 FROM employees

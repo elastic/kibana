@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects([
+  const { common, discover, timePicker, header, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'timePicker',
@@ -42,26 +42,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view fields', function () {
       before(async () => {
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await common.navigateToApp('discover');
+        await discover.waitUntilSearchingHasFinished();
 
-        await PageObjects.discover.addRuntimeField(
-          '_is_large',
-          'emit(doc["bytes"].value > 1024)',
-          'boolean'
-        );
+        await discover.addRuntimeField('_is_large', 'emit(doc["bytes"].value > 1024)', 'boolean');
 
         await retry.waitFor('form to close', async () => {
           return !(await testSubjects.exists('fieldEditor'));
         });
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await header.waitUntilLoadingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
       it('should show a top values popover for a boolean runtime field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('_is_large');
+        await unifiedFieldList.clickFieldListItem('_is_large');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Top values');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -71,11 +67,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '14,004 records'
         );
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show a histogram and top values popover for numeric field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await unifiedFieldList.clickFieldListItem('bytes');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.contain('Top values');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.contain('Distribution');
@@ -88,11 +84,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '14,004 records'
         );
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show a top values popover for a keyword field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('extension');
+        await unifiedFieldList.clickFieldListItem('extension');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Top values');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -102,11 +98,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '14,004 records'
         );
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show a top values popover for an ip field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('clientip');
+        await unifiedFieldList.clickFieldListItem('clientip');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Top values');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -116,21 +112,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '14,004 records'
         );
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show a date histogram popover for a date field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('@timestamp');
+        await unifiedFieldList.clickFieldListItem('@timestamp');
         await testSubjects.existOrFail('unifiedFieldStats-timeDistribution');
         await testSubjects.missingOrFail('dscFieldStats-buttonGroup-topValuesButton');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '14,004 records'
         );
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show examples for geo points field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('geo.coordinates');
+        await unifiedFieldList.clickFieldListItem('geo.coordinates');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Examples');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -140,27 +136,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '100 sample records'
         );
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
     });
 
     describe('ES|QL columns', function () {
       beforeEach(async () => {
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await common.navigateToApp('discover');
+        await discover.waitUntilSearchingHasFinished();
 
-        await PageObjects.discover.selectTextBaseLang();
+        await discover.selectTextBaseLang();
 
         const testQuery = `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await header.waitUntilLoadingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
       it('should show top values popover for numeric field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await unifiedFieldList.clickFieldListItem('bytes');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Top values');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -169,16 +165,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '42 sample values'
         );
 
-        await PageObjects.unifiedFieldList.clickFieldListPlusFilter('bytes', '0');
+        await unifiedFieldList.clickFieldListPlusFilter('bytes', '0');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
           `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`bytes\`==0`
         );
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show a top values popover for a keyword field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('extension.raw');
+        await unifiedFieldList.clickFieldListItem('extension.raw');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Top values');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -189,17 +185,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '500 sample values'
         );
 
-        await PageObjects.unifiedFieldList.clickFieldListPlusFilter('extension.raw', 'css');
+        await unifiedFieldList.clickFieldListPlusFilter('extension.raw', 'css');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
           `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`extension.raw\`=="css"`
         );
 
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show a top values popover for an ip field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('clientip');
+        await unifiedFieldList.clickFieldListItem('clientip');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Top values');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -210,17 +206,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '32 sample values'
         );
 
-        await PageObjects.unifiedFieldList.clickFieldListPlusFilter('clientip', '216.126.255.31');
+        await unifiedFieldList.clickFieldListPlusFilter('clientip', '216.126.255.31');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
           `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`clientip\`::string=="216.126.255.31"`
         );
 
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show a top values popover for _index field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('_index');
+        await unifiedFieldList.clickFieldListItem('_index');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Top values');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -230,22 +226,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '500 sample values'
         );
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should not have stats for a date field yet but create an is not null filter', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('@timestamp');
-        await PageObjects.unifiedFieldList.clickFieldListExistsFilter('@timestamp');
+        await unifiedFieldList.clickFieldListItem('@timestamp');
+        await unifiedFieldList.clickFieldListExistsFilter('@timestamp');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
           `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`@timestamp\` is not null`
         );
         await testSubjects.missingOrFail('dscFieldStats-statsFooter');
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show examples for geo points field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('geo.coordinates');
+        await unifiedFieldList.clickFieldListItem('geo.coordinates');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Examples');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -255,11 +251,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '100 sample records'
         );
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show examples for text field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('extension');
+        await unifiedFieldList.clickFieldListItem('extension');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Examples');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -270,17 +266,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '100 sample records'
         );
 
-        await PageObjects.unifiedFieldList.clickFieldListPlusFilter('extension', 'css');
+        await unifiedFieldList.clickFieldListPlusFilter('extension', 'css');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
           `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`extension\`=="css"`
         );
 
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show examples for _id field', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('_id');
+        await unifiedFieldList.clickFieldListItem('_id');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Examples');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -290,17 +286,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '100 sample records'
         );
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show a top values popover for a more complex query', async () => {
         const testQuery = `from logstash-* | sort @timestamp desc | limit 50 | stats avg(bytes) by geo.dest | limit 3`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await header.waitUntilLoadingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await PageObjects.unifiedFieldList.clickFieldListItem('avg(bytes)');
+        await unifiedFieldList.clickFieldListItem('avg(bytes)');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Top values');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
@@ -309,38 +305,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '3 sample values'
         );
 
-        await PageObjects.unifiedFieldList.clickFieldListPlusFilter('avg(bytes)', '5453');
+        await unifiedFieldList.clickFieldListPlusFilter('avg(bytes)', '5453');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
           `from logstash-* | sort @timestamp desc | limit 50 | stats avg(bytes) by geo.dest | limit 3\n| WHERE \`avg(bytes)\`==5453`
         );
 
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
 
       it('should show a top values popover for a boolean field', async () => {
         const testQuery = `row enabled = true`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await header.waitUntilLoadingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await PageObjects.unifiedFieldList.clickFieldListItem('enabled');
+        await unifiedFieldList.clickFieldListItem('enabled');
         await testSubjects.existOrFail('dscFieldStats-topValues');
         expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Top values');
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
         expect(topValuesRows.length).to.eql(1);
-        expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
+        expect(await unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
           'true\n100%'
         );
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '1 sample value'
         );
 
-        await PageObjects.unifiedFieldList.clickFieldListMinusFilter('enabled', 'true');
+        await unifiedFieldList.clickFieldListMinusFilter('enabled', 'true');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(`row enabled = true\n| WHERE \`enabled\`!=true`);
-        await PageObjects.unifiedFieldList.closeFieldPopover();
+        await unifiedFieldList.closeFieldPopover();
       });
     });
   });

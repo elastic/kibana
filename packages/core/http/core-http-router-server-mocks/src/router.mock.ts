@@ -118,6 +118,19 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   );
 }
 
+function createFakeKibanaRequestMock({
+  headers = { accept: 'something/html' },
+}: {
+  headers?: Record<string, string>;
+}): KibanaRequest {
+  const fakeRequest = {
+    headers,
+    path: '/',
+  };
+
+  return CoreKibanaRequest.from(fakeRequest);
+}
+
 const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   ok: jest.fn(),
   created: jest.fn(),
@@ -140,5 +153,6 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
 export const mockRouter = {
   create: createRouterMock,
   createKibanaRequest: createKibanaRequestMock,
+  createFakeKibanaRequest: createFakeKibanaRequestMock,
   createResponseFactory: createResponseFactoryMock,
 };

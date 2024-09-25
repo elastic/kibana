@@ -16,7 +16,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DiscoverServices } from '../../../build_services';
-import { createDataViewDataSource } from '../../../../common/data_sources';
+import { createDataSource } from '../../../../common/data_sources';
 
 export async function fetchAnchor(
   anchorId: string,
@@ -34,7 +34,7 @@ export async function fetchAnchor(
   const solutionNavId = await firstValueFrom(core.chrome.getActiveSolutionNavId$());
   await profilesManager.resolveRootProfile({ solutionNavId });
   await profilesManager.resolveDataSourceProfile({
-    dataSource: dataView?.id ? createDataViewDataSource({ dataViewId: dataView.id }) : undefined,
+    dataSource: createDataSource({ dataView, query: undefined }),
     dataView,
     query: { query: '', language: 'kuery' },
   });

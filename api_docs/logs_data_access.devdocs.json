@@ -53,6 +53,39 @@
       },
       {
         "parentPluginId": "logsDataAccess",
+        "id": "def-public.LogSourcesSettingSynchronisationInfo",
+        "type": "Function",
+        "tags": [],
+        "label": "LogSourcesSettingSynchronisationInfo",
+        "description": [],
+        "signature": [
+          "({ isLoading, logSourcesValue, getUrlForApp, title }: React.PropsWithChildren<{ isLoading: boolean; logSourcesValue: string; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; title?: string | undefined; }>) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_data_access/public/components/logs_sources_setting.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsDataAccess",
+            "id": "def-public.LogSourcesSettingSynchronisationInfo.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ isLoading, logSourcesValue, getUrlForApp, title }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ isLoading: boolean; logSourcesValue: string; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; title?: string | undefined; }>"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_data_access/public/components/logs_sources_setting.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsDataAccess",
         "id": "def-public.useLogSourcesContext",
         "type": "Function",
         "tags": [],

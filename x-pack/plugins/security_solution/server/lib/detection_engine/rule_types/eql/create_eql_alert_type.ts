@@ -12,7 +12,13 @@ import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
-import type { CreateRuleOptions, SecurityAlertType, SignalSource, SignalSourceHit } from '../types';
+import type {
+  CreateRuleOptions,
+  SecurityAlertType,
+  SignalSource,
+  SignalSourceHit,
+  CreateRuleAdditionalOptions,
+} from '../types';
 import { validateIndexPatterns } from '../utils';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import {
@@ -22,9 +28,10 @@ import {
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 
 export const createEqlAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateRuleOptions & CreateRuleAdditionalOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, version, licensing } = createOptions;
+  const { experimentalFeatures, version, licensing, scheduleNotificationResponseActionsService } =
+    createOptions;
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
@@ -126,7 +133,7 @@ export const createEqlAlertType = (
         alertSuppression: completeRule.ruleParams.alertSuppression,
         licensing,
       });
-      const result = await eqlExecutor({
+      const { result, loggedRequests } = await eqlExecutor({
         completeRule,
         tuple,
         inputIndex,
@@ -147,8 +154,10 @@ export const createEqlAlertType = (
         alertWithSuppression,
         isAlertSuppressionActive,
         experimentalFeatures,
+        state,
+        scheduleNotificationResponseActionsService,
       });
-      return { ...result, state };
+      return { ...result, state, ...(loggedRequests ? { loggedRequests } : {}) };
     },
   };
 };

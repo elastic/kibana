@@ -234,7 +234,7 @@ describe('ActionsConnectorsHome', () => {
     );
 
     const createConnectorButton = await screen.findByRole('button', { name: 'Create connector' });
-    userEvent.click(createConnectorButton);
+    await userEvent.click(createConnectorButton);
     const selectConnectorFlyout = await screen.findByRole('heading', {
       name: 'Select a connector',
     });

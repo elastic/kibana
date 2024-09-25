@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
@@ -33,9 +33,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     it('should open the doc view of the selected document', async function () {
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should create an exists filter from doc view of the selected document', async function () {
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       await dataGrid.clickFieldActionInFlyout('@timestamp', 'addExistsFilterButton');

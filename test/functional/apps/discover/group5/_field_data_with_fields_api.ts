@@ -17,11 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const browser = getService('browser');
-  const PageObjects = getPageObjects([
+  const { common, header, discover, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'header',
     'discover',
-    'visualize',
     'timePicker',
     'unifiedFieldList',
   ]);
@@ -36,8 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
         'discover:searchFieldsFromSource': false,
       });
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
     });
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {
@@ -45,18 +44,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async function () {
           await queryBar.setQuery('php');
           await queryBar.submitQuery();
-          const hitCount = await PageObjects.discover.getHitCount();
+          const hitCount = await discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);
         });
       });
 
       it('the search term should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-        const marks = await PageObjects.discover.getMarks();
+        await unifiedFieldList.clickFieldListItemAdd('extension');
+        const marks = await discover.getMarks();
         expect(marks.length).to.be.greaterThan(0);
         expect(marks.indexOf('php')).to.be(0);
-        await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
+        await unifiedFieldList.clickFieldListItemRemove('extension');
       });
 
       it('search type:apache should show the correct hit count', async function () {
@@ -64,13 +63,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('type:apache');
         await queryBar.submitQuery();
         await retry.try(async function tryingForTime() {
-          const hitCount = await PageObjects.discover.getHitCount();
+          const hitCount = await discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);
         });
       });
 
       it('doc view should show @timestamp and Document columns', async function () {
-        const Docheader = await PageObjects.discover.getDocHeader();
+        const Docheader = await discover.getDocHeader();
         expect(Docheader).to.contain('@timestamp');
         expect(Docheader).to.contain('Document');
       });
@@ -81,8 +80,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'whitespace but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
-        await PageObjects.discover.showsErrorCallout();
-        const message = await PageObjects.discover.getDiscoverErrorMessage();
+        await discover.showsErrorCallout();
+        const message = await discover.getDiscoverErrorMessage();
         expect(message).to.contain(expectedError);
       });
 
@@ -91,21 +90,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
         const currentUrl = await browser.getCurrentUrl();
         const [, hash] = currentUrl.split('#/');
-        await PageObjects.common.navigateToUrl(
+        await common.navigateToUrl(
           'discover',
           hash.replace('columns:!()', 'columns:!(relatedContent)'),
           { useActualUrl: true }
         );
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await retry.try(async function tryingForTime() {
-          expect(await PageObjects.discover.getDocHeader()).to.contain('relatedContent');
+          expect(await discover.getDocHeader()).to.contain('relatedContent');
 
-          const field = await PageObjects.discover.getDocTableIndex(1);
+          const field = await discover.getDocTableIndex(1);
           expect(field).to.contain('relatedContent.url');
         });
 
-        const marks = await PageObjects.discover.getMarks();
+        const marks = await discover.getMarks();
         expect(marks.length).to.be.above(0);
         expect(marks).to.contain('election');
       });

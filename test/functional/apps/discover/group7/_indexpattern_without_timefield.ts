@@ -17,7 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'header']);
+  const { common, timePicker, discover, header } = getPageObjects([
+    'common',
+    'timePicker',
+    'discover',
+    'header',
+  ]);
 
   describe('indexpattern without timefield', () => {
     before(async () => {
@@ -33,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'without-timefield',
         'timepicker:timeDefaults': '{  "from": "2019-01-18T19:37:13.000Z",  "to": "now"}',
       });
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async () => {
@@ -47,43 +52,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not display a timepicker', async () => {
-      if (await PageObjects.timePicker.timePickerExists()) {
+      if (await timePicker.timePickerExists()) {
         throw new Error('Expected timepicker not to exist');
       }
     });
 
     it('should adapt sidebar fields when switching', async () => {
-      await PageObjects.discover.selectIndexPattern('with-timefield');
+      await discover.selectIndexPattern('with-timefield');
       const timefieldExistsWithTimefield = await testSubjects.exists('field-@timestamp');
       expect(timefieldExistsWithTimefield).to.be(true);
-      await PageObjects.discover.selectIndexPattern('without-timefield');
-      await PageObjects.discover.waitForDocTableLoadingComplete();
+      await discover.selectIndexPattern('without-timefield');
+      await discover.waitForDocTableLoadingComplete();
       const timefieldExistsWithoutTimefield = await testSubjects.exists('field-@timestamp');
       expect(timefieldExistsWithoutTimefield).to.be(false);
     });
 
     it('should display a timepicker after switching to an index pattern with timefield', async () => {
-      await PageObjects.discover.selectIndexPattern('with-timefield');
-      await PageObjects.discover.waitForDocTableLoadingComplete();
-      if (!(await PageObjects.timePicker.timePickerExists())) {
+      await discover.selectIndexPattern('with-timefield');
+      await discover.waitForDocTableLoadingComplete();
+      if (!(await timePicker.timePickerExists())) {
         throw new Error('Expected timepicker to exist');
       }
     });
     it('should switch between with and without timefield using the browser back button', async () => {
-      await PageObjects.discover.selectIndexPattern('without-timefield');
-      await PageObjects.discover.waitForDocTableLoadingComplete();
+      await discover.selectIndexPattern('without-timefield');
+      await discover.waitForDocTableLoadingComplete();
       await retry.waitForWithTimeout(
         'The timepicker not to exist',
         5000,
-        async () => !(await PageObjects.timePicker.timePickerExists())
+        async () => !(await timePicker.timePickerExists())
       );
 
-      await PageObjects.discover.selectIndexPattern('with-timefield');
-      await PageObjects.discover.waitForDocTableLoadingComplete();
+      await discover.selectIndexPattern('with-timefield');
+      await discover.waitForDocTableLoadingComplete();
       await retry.waitForWithTimeout(
         'The timepicker to exist',
         5000,
-        async () => await PageObjects.timePicker.timePickerExists()
+        async () => await timePicker.timePickerExists()
       );
       await retry.waitForWithTimeout(
         'index pattern to have been switched back to "without-timefield"',
@@ -91,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         async () => {
           // Navigating back
           await browser.goBack();
-          await PageObjects.discover.waitForDocTableLoadingComplete();
+          await discover.waitForDocTableLoadingComplete();
           return (
             (await testSubjects.getVisibleText('discover-dataView-switch-link')) ===
             'without-timefield'
@@ -102,49 +107,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitForWithTimeout(
         'The timepicker not to exist',
         5000,
-        async () => !(await PageObjects.timePicker.timePickerExists())
+        async () => !(await timePicker.timePickerExists())
       );
     });
 
     it('should disable the auto refresh interval when switching to a data view without a time field', async () => {
       const autoRefreshInterval = 5;
-      await PageObjects.discover.selectIndexPattern('with-timefield');
-      await PageObjects.timePicker.startAutoRefresh(autoRefreshInterval);
+      await discover.selectIndexPattern('with-timefield');
+      await timePicker.startAutoRefresh(autoRefreshInterval);
       let url = await browser.getCurrentUrl();
       expect(url).to.contain(`refreshInterval:(pause:!f,value:${autoRefreshInterval * 1000})`);
-      await PageObjects.discover.selectIndexPattern('without-timefield');
+      await discover.selectIndexPattern('without-timefield');
       url = await browser.getCurrentUrl();
       expect(url).to.contain(`refreshInterval:(pause:!t,value:${autoRefreshInterval * 1000})`);
     });
 
     it('should allow switching from a saved search with a time field to a saved search without a time field', async () => {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('with-timefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.saveSearch('with-timefield');
-      await PageObjects.discover.selectIndexPattern('without-timefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.saveSearch('without-timefield', true);
-      await PageObjects.discover.loadSavedSearch('with-timefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.loadSavedSearch('without-timefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.assertHitCount('1');
+      await common.navigateToApp('discover');
+      await discover.selectIndexPattern('with-timefield');
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch('with-timefield');
+      await discover.selectIndexPattern('without-timefield');
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch('without-timefield', true);
+      await discover.loadSavedSearch('with-timefield');
+      await header.waitUntilLoadingHasFinished();
+      await discover.loadSavedSearch('without-timefield');
+      await header.waitUntilLoadingHasFinished();
+      await discover.assertHitCount('1');
     });
 
     it('should allow switching from data views with different timefields and sort correctly', async () => {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('with-timefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.selectIndexPattern('with-timefield');
+      await header.waitUntilLoadingHasFinished();
       let url = await browser.getCurrentUrl();
       expect(url).to.contain(`@timestamp`);
 
-      await PageObjects.discover.selectIndexPattern('with-different-timefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await discover.selectIndexPattern('with-different-timefield');
+      await header.waitUntilLoadingHasFinished();
       url = await browser.getCurrentUrl();
       expect(url).to.contain(`with-different-timefield`);
       await browser.goBack();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       url = await browser.getCurrentUrl();
       expect(url).to.contain(`@timestamp`);
     });

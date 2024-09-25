@@ -10,12 +10,6 @@
 import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 
-import {
-  controlGroupInputToRawControlGroupAttributes,
-  generateNewControlIds,
-  getDefaultControlGroupInput,
-  persistableControlGroupInputIsEqual,
-} from '@kbn/controls-plugin/common';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 
@@ -30,23 +24,9 @@ import {
   DashboardContentManagementRequiredServices,
   SaveDashboardProps,
   SaveDashboardReturn,
-  SavedDashboardInput,
 } from '../types';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
 import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
-
-export const serializeControlGroupInput = (
-  controlGroupInput: SavedDashboardInput['controlGroupInput']
-) => {
-  // only save to saved object if control group is not default
-  if (
-    !controlGroupInput ||
-    persistableControlGroupInputIsEqual(controlGroupInput, getDefaultControlGroupInput())
-  ) {
-    return undefined;
-  }
-  return controlGroupInputToRawControlGroupAttributes(controlGroupInput);
-};
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -69,6 +49,7 @@ type SaveDashboardStateProps = SaveDashboardProps & {
 };
 
 export const saveDashboardState = async ({
+  controlGroupReferences,
   data,
   embeddable,
   lastSavedId,
@@ -101,9 +82,10 @@ export const saveDashboardState = async ({
     syncCursor,
     syncTooltips,
     hidePanelTitles,
+    controlGroupInput,
   } = currentState;
 
-  let { panels, controlGroupInput } = currentState;
+  let { panels } = currentState;
   let prefixedPanelReferences = panelReferences;
   if (saveOptions.saveAsCopy) {
     const { panels: newPanels, references: newPanelReferences } = generateNewPanelIds(
@@ -112,7 +94,10 @@ export const saveDashboardState = async ({
     );
     panels = newPanels;
     prefixedPanelReferences = newPanelReferences;
-    controlGroupInput = generateNewControlIds(controlGroupInput);
+    //
+    // do not need to generate new ids for controls.
+    // ControlGroup Component is keyed on dashboard id so changing dashboard id mounts new ControlGroup Component.
+    //
   }
 
   /**
@@ -160,7 +145,7 @@ export const saveDashboardState = async ({
 
   const rawDashboardAttributes: DashboardAttributes = {
     version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
-    controlGroupInput: serializeControlGroupInput(controlGroupInput),
+    controlGroupInput,
     kibanaSavedObjectMeta: { searchSourceJSON },
     description: description ?? '',
     refreshInterval,
@@ -187,7 +172,11 @@ export const saveDashboardState = async ({
     ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
     : dashboardReferences;
 
-  const allReferences = [...references, ...(prefixedPanelReferences ?? [])];
+  const allReferences = [
+    ...references,
+    ...(prefixedPanelReferences ?? []),
+    ...(controlGroupReferences ?? []),
+  ];
 
   /**
    * Save the saved object using the content management

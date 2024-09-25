@@ -21,7 +21,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { apiHasType } from '@kbn/presentation-publishing';
 import { Toast } from '@kbn/core/public';
-import { PresentationContainer } from '@kbn/presentation-containers';
+import { CanAddNewPanel } from '@kbn/presentation-containers';
 import {
   core,
   embeddableStart,
@@ -85,7 +85,7 @@ export const AddPanelFlyout = ({
   onAddPanel,
   modalTitleId,
 }: {
-  container: PresentationContainer;
+  container: CanAddNewPanel;
   onAddPanel?: (id: string) => void;
   modalTitleId?: string;
 }) => {

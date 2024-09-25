@@ -90,7 +90,7 @@ describe('FilterActivity ', () => {
 
     const commentsFilter = screen.getByTestId('user-actions-filter-activity-button-comments');
 
-    userEvent.click(commentsFilter);
+    await userEvent.click(commentsFilter);
 
     await waitFor(() => expect(onFilterActivityChange).toHaveBeenCalledWith('user'));
   });
@@ -100,7 +100,7 @@ describe('FilterActivity ', () => {
 
     const actionsFilter = screen.getByTestId('user-actions-filter-activity-button-history');
 
-    userEvent.click(actionsFilter);
+    await userEvent.click(actionsFilter);
 
     await waitFor(() => expect(onFilterActivityChange).toHaveBeenCalledWith('action'));
     await waitFor(() => {
@@ -117,7 +117,7 @@ describe('FilterActivity ', () => {
 
     const actionsFilter = screen.getByTestId('user-actions-filter-activity-button-all');
 
-    userEvent.click(actionsFilter);
+    await userEvent.click(actionsFilter);
 
     await waitFor(() => expect(onFilterActivityChange).toHaveBeenCalledWith('all'));
     await waitFor(() => {

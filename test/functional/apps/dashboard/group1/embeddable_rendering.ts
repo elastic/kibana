@@ -29,13 +29,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects([
+  const { common, dashboard, header, timePicker } = getPageObjects([
     'common',
     'dashboard',
     'header',
-    'visualize',
-    'visChart',
-    'discover',
     'timePicker',
   ]);
   let visNames: string[] = [];
@@ -114,10 +111,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.setTime({ from, to });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.clickNewDashboard();
+      await common.setTime({ from, to });
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.clickNewDashboard();
       await elasticChart.setNewChartUiDebugFlag(true);
     });
 
@@ -127,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newUrl = currentUrl.replace(/\?.*$/, '');
       await browser.get(newUrl, false);
       await security.testUser.restoreDefaults();
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
@@ -138,10 +135,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // This one is rendered via svg which lets us do better testing of what is being rendered.
       visNames.push(await dashboardAddPanel.addVisualization('Filter Bytes Test: vega'));
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visNames);
       expect(visNames.length).to.be.equal(25);
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
     });
 
     it('adding saved searches', async () => {
@@ -149,20 +146,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.addEverySavedSearch('"Rendering Test"')
       );
       await dashboardAddPanel.closeAddPanel();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visAndSearchNames);
       expect(visAndSearchNames.length).to.be.equal(26);
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
-      await PageObjects.dashboard.saveDashboard('embeddable rendering test', {
+      await dashboard.saveDashboard('embeddable rendering test', {
         saveAsNew: true,
         storeTimeWithDashboard: true,
       });
     });
 
     it('initial render test', async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
@@ -170,9 +167,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Change the time to make sure that it's updated when re-opened from the listing page.
       const fromTime = 'May 10, 2018 @ 00:00:00.000';
       const toTime = 'May 11, 2018 @ 00:00:00.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.dashboard.loadSavedDashboard('embeddable rendering test');
-      await PageObjects.dashboard.waitForRenderComplete();
+      await timePicker.setAbsoluteRange(fromTime, toTime);
+      await dashboard.loadSavedDashboard('embeddable rendering test');
+      await dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
@@ -184,28 +181,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // setNewChartUiDebugFlag required because window._echDebugStateFlag flag is reset after refresh
       await elasticChart.setNewChartUiDebugFlag(true);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
 
       // call query refresh to guarantee all panels are rendered after window._echDebugStateFlag is set
       await queryBar.clickQuerySubmitButton();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
     it('panels are updated when time changes outside of data', async () => {
       const fromTime = 'May 11, 2018 @ 00:00:00.000';
       const toTime = 'May 12, 2018 @ 00:00:00.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.dashboard.waitForRenderComplete();
+      await timePicker.setAbsoluteRange(fromTime, toTime);
+      await dashboard.waitForRenderComplete();
       await expectNoDataRenders();
     });
 
     it('panels are updated when time changes inside of data', async () => {
       const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
       const toTime = 'Apr 13, 2018 @ 00:00:00.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.dashboard.waitForRenderComplete();
+      await timePicker.setAbsoluteRange(fromTime, toTime);
+      await dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
   });

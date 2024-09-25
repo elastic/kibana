@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
 import { DataTableRowControl, Size } from '../../data_table_row_control';
-import type { RowControlColumn, RowControlProps } from '../../../types';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
@@ -34,7 +34,7 @@ export const RowMenuControlCell = ({
 }: EuiDataGridCellValueElementProps & {
   rowControlColumns: RowControlColumn[];
 }) => {
-  const rowProps = useControlColumn(props);
+  const { record, rowIndex } = useControlColumn(props);
   const [isMoreActionsPopoverOpen, setIsMoreActionsPopoverOpen] = useState<boolean>(false);
 
   const buttonLabel = i18n.translate('unifiedDataTable.grid.additionalRowActions', {
@@ -51,7 +51,9 @@ export const RowMenuControlCell = ({
             icon={iconType}
             color={color}
             onClick={() => {
-              onClick?.(rowProps);
+              if (record) {
+                onClick?.({ record, rowIndex });
+              }
               setIsMoreActionsPopoverOpen(false);
             }}
           >
@@ -59,7 +61,7 @@ export const RowMenuControlCell = ({
           </EuiContextMenuItem>
         );
       },
-    [rowProps, setIsMoreActionsPopoverOpen]
+    [record, rowIndex]
   );
 
   const popoverMenuItems = useMemo(
@@ -68,11 +70,11 @@ export const RowMenuControlCell = ({
         const Control = getControlComponent(rowControlColumn.id);
         return (
           <Fragment key={rowControlColumn.id}>
-            {rowControlColumn.renderControl(Control, rowProps)}
+            {record ? rowControlColumn.renderControl(Control, { record, rowIndex }) : null}
           </Fragment>
         );
       }),
-    [rowControlColumns, rowProps, getControlComponent]
+    [rowControlColumns, getControlComponent, record, rowIndex]
   );
 
   return (

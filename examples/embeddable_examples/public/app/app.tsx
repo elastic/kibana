@@ -7,107 +7,98 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
+import { Redirect } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageSection,
-  EuiPageTemplate,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
+import { BrowserRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
+import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import { Overview } from './overview';
 import { RegisterEmbeddable } from './register_embeddable';
 import { RenderExamples } from './render_examples';
 import { PresentationContainerExample } from './presentation_container_example/components/presentation_container_example';
 import { StartDeps } from '../plugin';
+import { Sidebar } from './sidebar';
+import { StateManagementExample } from './state_management_example/state_management_example';
 
-const OVERVIEW_TAB_ID = 'overview';
-const REGISTER_EMBEDDABLE_TAB_ID = 'register';
-const RENDER_TAB_ID = 'render';
-const PRESENTATION_CONTAINER_EXAMPLE_ID = 'presentationContainerExample';
+const App = ({
+  core,
+  deps,
+  mountParams,
+}: {
+  core: CoreStart;
+  deps: StartDeps;
+  mountParams: AppMountParameters;
+}) => {
+  const pages = useMemo(() => {
+    return [
+      {
+        id: 'overview',
+        title: 'Embeddables overview',
+        component: <Overview />,
+      },
+      {
+        id: 'registerEmbeddable',
+        title: 'Register a new embeddable type',
+        component: <RegisterEmbeddable />,
+      },
+      {
+        id: 'renderEmbeddable',
+        title: 'Render embeddables in your application',
+        component: <RenderExamples />,
+      },
+      {
+        id: 'stateManagement',
+        title: 'Embeddable state management',
+        component: <StateManagementExample uiActions={deps.uiActions} />,
+      },
+      {
+        id: 'presentationContainer',
+        title: 'Create a dashboard like experience with embeddables',
+        component: <PresentationContainerExample uiActions={deps.uiActions} />,
+      },
+    ];
+  }, [deps.uiActions]);
 
-const App = ({ core, deps }: { core: CoreStart; deps: StartDeps }) => {
-  const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
-
-  function onSelectedTabChanged(tabId: string) {
-    setSelectedTabId(tabId);
-  }
-
-  function renderTabContent() {
-    if (selectedTabId === RENDER_TAB_ID) {
-      return <RenderExamples />;
-    }
-
-    if (selectedTabId === REGISTER_EMBEDDABLE_TAB_ID) {
-      return <RegisterEmbeddable />;
-    }
-
-    if (selectedTabId === PRESENTATION_CONTAINER_EXAMPLE_ID) {
-      return <PresentationContainerExample uiActions={deps.uiActions} />;
-    }
-
-    return <Overview />;
-  }
+  const routes = useMemo(() => {
+    return pages.map((page) => (
+      <Route
+        key={page.id}
+        path={`/${page.id}`}
+        render={(props) => (
+          <>
+            <EuiPageTemplate.Header>
+              <EuiTitle size="l">
+                <h1 data-test-subj="responseStreamPageTitle">{page.title}</h1>
+              </EuiTitle>
+            </EuiPageTemplate.Header>
+            <EuiPageTemplate.Section>{page.component}</EuiPageTemplate.Section>
+          </>
+        )}
+      />
+    ));
+  }, [pages]);
 
   return (
     <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageSection>
-            <EuiPageHeader pageTitle="Embeddables" />
-          </EuiPageSection>
-          <EuiPageTemplate.Section>
-            <EuiPageSection>
-              <EuiTabs>
-                <EuiTab
-                  onClick={() => onSelectedTabChanged(OVERVIEW_TAB_ID)}
-                  isSelected={OVERVIEW_TAB_ID === selectedTabId}
-                >
-                  Embeddables overview
-                </EuiTab>
-                <EuiTab
-                  onClick={() => onSelectedTabChanged(REGISTER_EMBEDDABLE_TAB_ID)}
-                  isSelected={REGISTER_EMBEDDABLE_TAB_ID === selectedTabId}
-                >
-                  Register new embeddable type
-                </EuiTab>
-                <EuiTab
-                  onClick={() => onSelectedTabChanged(RENDER_TAB_ID)}
-                  isSelected={RENDER_TAB_ID === selectedTabId}
-                >
-                  Rendering embeddables in your application
-                </EuiTab>
-                <EuiTab
-                  onClick={() => onSelectedTabChanged(PRESENTATION_CONTAINER_EXAMPLE_ID)}
-                  isSelected={PRESENTATION_CONTAINER_EXAMPLE_ID === selectedTabId}
-                >
-                  PresentationContainer example
-                </EuiTab>
-              </EuiTabs>
-
-              <EuiSpacer />
-
-              {renderTabContent()}
-            </EuiPageSection>
-          </EuiPageTemplate.Section>
-        </EuiPageBody>
-      </EuiPage>
+      <Router basename={mountParams.appBasePath}>
+        <EuiPageTemplate restrictWidth={true} offset={0}>
+          <EuiPageTemplate.Sidebar sticky={true}>
+            <Sidebar pages={pages} />
+          </EuiPageTemplate.Sidebar>
+          <Routes>
+            {routes}
+            <Redirect to="/overview" />
+          </Routes>
+        </EuiPageTemplate>
+      </Router>
     </KibanaRenderContextProvider>
   );
 };
 
-export const renderApp = (
-  core: CoreStart,
-  deps: StartDeps,
-  element: AppMountParameters['element']
-) => {
-  ReactDOM.render(<App core={core} deps={deps} />, element);
+export const renderApp = (core: CoreStart, deps: StartDeps, mountParams: AppMountParameters) => {
+  ReactDOM.render(<App core={core} deps={deps} mountParams={mountParams} />, mountParams.element);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => ReactDOM.unmountComponentAtNode(mountParams.element);
 };

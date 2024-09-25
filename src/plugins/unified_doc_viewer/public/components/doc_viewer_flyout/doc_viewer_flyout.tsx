@@ -29,8 +29,7 @@ import {
   useIsWithinMinBreakpoint,
   EuiFlyoutProps,
 } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';

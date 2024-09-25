@@ -13,26 +13,25 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 const CREATE_DRILLDOWN_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN';
 const MANAGE_DRILLDOWNS_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN';
 
-export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProviderContext) {
+export function DashboardDrilldownPanelActionsProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
+  const { dashboard } = getPageObjects(['dashboard']);
+
   return new (class DashboardDrilldownPanelActions {
     async expectExistsCreateDrilldownAction() {
       log.debug('expectExistsCreateDrilldownAction');
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
-      await await testSubjects.existOrFail(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
+      await dashboardPanelActions.expectExistsPanelAction(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
     async expectMissingCreateDrilldownAction() {
       log.debug('expectMissingCreateDrilldownAction');
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
-      await testSubjects.existOrFail(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+      await dashboardPanelActions.expectMissingPanelAction(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
     async clickCreateDrilldown() {
@@ -43,24 +42,17 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
 
     async expectExistsManageDrilldownsAction() {
       log.debug('expectExistsCreateDrilldownAction');
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
-      await testSubjects.existOrFail(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
+      await dashboardPanelActions.expectExistsPanelAction(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 
     async expectMissingManageDrilldownsAction() {
       log.debug('expectExistsRemovePanelAction');
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
-      await testSubjects.existOrFail(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+      await dashboardPanelActions.expectMissingPanelAction(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 
     async clickManageDrilldowns() {
       log.debug('clickManageDrilldowns');
-      await this.expectExistsManageDrilldownsAction();
-      await testSubjects.clickWhenNotDisabledWithoutRetry(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickContextMenuItem(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 
     async expectMultipleActionsMenuOpened() {
@@ -96,6 +88,38 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
       }
 
       throw new Error(`No action matching text "${text}"`);
+    }
+
+    async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
+      log.debug('getPanelDrilldownCount');
+      const panel = (await dashboard.getDashboardPanels())[panelIndex];
+      await dashboardPanelActions.openContextMenu(panel);
+
+      try {
+        const exists = await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ, {
+          timeout: 500,
+        });
+        if (!exists) {
+          await dashboardPanelActions.clickContextMenuMoreItem();
+          if (!(await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ, { timeout: 500 }))) {
+            return 0;
+          }
+        }
+        const manageDrilldownAction = await testSubjects.find(
+          MANAGE_DRILLDOWNS_DATA_TEST_SUBJ,
+          500
+        );
+
+        const count = await (
+          await manageDrilldownAction.findByCssSelector('.euiNotificationBadge')
+        ).getVisibleText();
+        return Number.parseInt(count, 10);
+      } catch (e) {
+        log.debug('manage drilldowns action not found');
+        return 0;
+      } finally {
+        await dashboardPanelActions.toggleContextMenu(panel);
+      }
     }
   })();
 }

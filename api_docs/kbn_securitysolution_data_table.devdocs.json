@@ -1256,7 +1256,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; readonly dataViewId: string | null; readonly initialized?: boolean | undefined; readonly defaultColumns: (Pick<",
+          "[] | undefined; readonly initialized?: boolean | undefined; readonly dataViewId: string | null; readonly defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",

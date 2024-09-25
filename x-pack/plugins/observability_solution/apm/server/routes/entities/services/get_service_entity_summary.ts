@@ -16,22 +16,12 @@ interface Params {
   entitiesESClient: EntitiesESClient;
   serviceName: string;
   environment: string;
-  start: number;
-  end: number;
 }
 
-export function getServiceEntitySummary({
-  end,
-  entitiesESClient,
-  environment,
-  serviceName,
-  start,
-}: Params) {
+export function getServiceEntitySummary({ entitiesESClient, environment, serviceName }: Params) {
   return withApmSpan('get_service_entity_summary', async () => {
     const entityLatestServices = await getEntityLatestServices({
       entitiesESClient,
-      start,
-      end,
       environment,
       size: MAX_NUMBER_OF_SERVICES,
       serviceName,

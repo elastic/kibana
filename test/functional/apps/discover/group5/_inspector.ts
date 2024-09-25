@@ -12,7 +12,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const { common, timePicker } = getPageObjects(['common', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
@@ -40,8 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
     });
 
     afterEach(async () => {
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display request stats with results', async () => {
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await timePicker.setDefaultAbsoluteRange();
       await inspector.open();
       await testSubjects.click('inspectorRequestChooser');
       await testSubjects.click(`inspectorRequestChooserDocuments`);

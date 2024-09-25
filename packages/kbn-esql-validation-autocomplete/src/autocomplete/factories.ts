@@ -10,8 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import {
@@ -26,11 +26,11 @@ import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 
-const allFunctions = statsAggregationFunctionDefinitions
-  .concat(evalFunctionDefinitions)
+const allFunctions = aggregationFunctionDefinitions
+  .concat(scalarFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
-export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
+export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 
 export const getAddDateHistogramSnippet = (histogramBarTarget = 50) => {
   return `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`;
@@ -140,8 +140,6 @@ export const buildFieldsDefinitionsWithMetadata = (
   options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
 ): SuggestionRawDefinition[] => {
   return fields.map((field) => {
-    const description = field.metadata?.description;
-
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
     return {
       label: field.name,
@@ -151,16 +149,8 @@ export const buildFieldsDefinitionsWithMetadata = (
         (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
-      documentation: description
-        ? {
-            value: `
----
-
-${description}`,
-          }
-        : undefined,
-      // If there is a description, it is a field from ECS, so it should be sorted to the top
-      sortText: description ? '1D' : 'D',
+      // If detected to be an ECS field, push it up to the top of the list
+      sortText: field.isEcs ? '1D' : 'D',
       command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   });
@@ -175,6 +165,7 @@ export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinitio
       defaultMessage: `Field specified by the input table`,
     }),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 };
 export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDefinition[] =>
@@ -196,7 +187,7 @@ export const buildSourcesDefinitions = (
 ): SuggestionRawDefinition[] =>
   sources.map(({ name, isIntegration, title, type }) => ({
     label: title ?? name,
-    text: getSafeInsertSourceText(name) + (!isIntegration ? ' ' : ''),
+    text: getSafeInsertSourceText(name),
     isSnippet: isIntegration,
     kind: isIntegration ? 'Class' : 'Issue',
     detail: isIntegration
@@ -272,7 +263,7 @@ export const buildPoliciesDefinitions = (
 ): SuggestionRawDefinition[] =>
   policies.map(({ name: label, sourceIndices }) => ({
     label,
-    text: getSafeInsertText(label, { dashSupported: true }),
+    text: getSafeInsertText(label, { dashSupported: true }) + ' ',
     kind: 'Class',
     detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
@@ -282,6 +273,7 @@ export const buildPoliciesDefinitions = (
       },
     }),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildMatchingFieldsDefinition = (
@@ -290,7 +282,7 @@ export const buildMatchingFieldsDefinition = (
 ): SuggestionRawDefinition[] =>
   fields.map((label) => ({
     label,
-    text: getSafeInsertText(label),
+    text: getSafeInsertText(label) + ' ',
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
@@ -302,6 +294,7 @@ export const buildMatchingFieldsDefinition = (
       }
     ),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildOptionDefinition = (
@@ -438,6 +431,20 @@ export function getCompatibleLiterals(
   return suggestions;
 }
 
+export const TIME_SYSTEM_DESCRIPTIONS = {
+  '?_tstart': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
+    {
+      defaultMessage: 'The start time from the date picker',
+    }
+  ),
+  '?_tend': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
+    {
+      defaultMessage: 'The end time from the date picker',
+    }
+  ),
+};
 export function getDateLiterals(options?: {
   advanceCursorAndOpenSuggestions?: boolean;
   addComma?: boolean;

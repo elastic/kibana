@@ -19,6 +19,7 @@ import {
   AI_ASSISTANT_APP_ID,
   OBLT_UX_APP_ID,
   OBLT_PROFILING_APP_ID,
+  INVENTORY_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
@@ -32,6 +33,7 @@ type SloApp = typeof SLO_APP_ID;
 type AiAssistantApp = typeof AI_ASSISTANT_APP_ID;
 type ObltUxApp = typeof OBLT_UX_APP_ID;
 type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
+type InventoryApp = typeof INVENTORY_APP_ID;
 
 export type AppId =
   | LogsApp
@@ -44,9 +46,12 @@ export type AppId =
   | SloApp
   | AiAssistantApp
   | ObltUxApp
-  | ObltProfilingApp;
+  | ObltProfilingApp
+  | InventoryApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
+
+export type InventoryLinkId = 'datastreams';
 
 export type ObservabilityOverviewLinkId =
   | 'alerts'
@@ -90,4 +95,5 @@ export type DeepLinkId =
   | `${MetricsApp}:${MetricsLinkId}`
   | `${ApmApp}:${ApmLinkId}`
   | `${SyntheticsApp}:${SyntheticsLinkId}`
-  | `${ObltProfilingApp}:${ProfilingLinkId}`;
+  | `${ObltProfilingApp}:${ProfilingLinkId}`
+  | `${InventoryApp}:${InventoryLinkId}`;

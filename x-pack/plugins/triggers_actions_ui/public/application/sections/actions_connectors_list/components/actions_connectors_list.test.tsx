@@ -111,7 +111,7 @@ describe('actions_connectors_list', () => {
         </IntlProvider>
       );
       const createFirstActionButton = await screen.findByTestId('createFirstActionButton');
-      userEvent.click(createFirstActionButton);
+      await userEvent.click(createFirstActionButton);
       await waitFor(() => {
         expect(setAddFlyoutVisibility).toBeCalled();
       });

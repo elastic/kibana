@@ -7,6 +7,7 @@
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useMutation } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
@@ -34,10 +35,26 @@ export function useDeleteInvestigationItem() {
     },
     {
       onSuccess: (response, {}) => {
-        toasts.addSuccess('Item deleted');
+        toasts.addSuccess(
+          i18n.translate('xpack.investigateApp.useDeleteInvestigationItem.successMessage', {
+            defaultMessage: 'Item deleted',
+          })
+        );
       },
       onError: (error, {}, context) => {
-        toasts.addError(new Error(error.body?.message ?? 'An error occurred'), { title: 'Error' });
+        toasts.addError(
+          new Error(
+            error.body?.message ??
+              i18n.translate('xpack.investigateApp.useDeleteInvestigationItem.errorMessage', {
+                defaultMessage: 'an error occurred',
+              })
+          ),
+          {
+            title: i18n.translate('xpack.investigateApp.useDeleteInvestigationItem.errorTitle', {
+              defaultMessage: 'Error',
+            }),
+          }
+        );
       },
     }
   );

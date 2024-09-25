@@ -10,34 +10,34 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'timePicker']);
+  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
 
   describe('lens gauge', () => {
     before(async () => {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.waitForVisualization('xyVisChart');
     });
 
     it('should switch to gauge and render a gauge with default values', async () => {
-      await PageObjects.lens.switchToVisualization('lnsGauge', 'gauge');
-      await PageObjects.lens.waitForVisualization('gaugeChart');
+      await lens.switchToVisualization('lnsGauge', 'gauge');
+      await lens.waitForVisualization('gaugeChart');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.horizontal);
@@ -47,9 +47,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reflect edits for gauge', async () => {
-      await PageObjects.lens.switchToVisualization('lnsGauge', 'gauge');
-      await PageObjects.lens.waitForVisualization('gaugeChart');
-      await PageObjects.lens.configureDimension({
+      await lens.switchToVisualization('lnsGauge', 'gauge');
+      await lens.waitForVisualization('gaugeChart');
+      await lens.configureDimension({
         dimension: 'lnsGauge_metricDimensionPanel > lns-dimensionTrigger',
         operation: 'count',
         field: 'Records',
@@ -58,33 +58,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.setEuiSwitch('lnsDynamicColoringGaugeSwitch', 'check');
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
-      await PageObjects.lens.openTextOptions();
-      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title');
-      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor-select', 'custom', {});
-      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
+      await lens.openTextOptions();
+      await lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title');
+      await lens.retrySetValue('lnsToolbarGaugeLabelMinor-select', 'custom', {});
+      await lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
 
-      await PageObjects.lens.waitForVisualization('gaugeChart');
-      await PageObjects.lens.openDimensionEditor(
-        'lnsGauge_goalDimensionPanel > lns-empty-dimension'
-      );
+      await lens.waitForVisualization('gaugeChart');
+      await lens.openDimensionEditor('lnsGauge_goalDimensionPanel > lns-empty-dimension');
 
-      await PageObjects.lens.waitForVisualization('gaugeChart');
-      await PageObjects.lens.closeDimensionEditor();
-      await PageObjects.lens.openDimensionEditor(
+      await lens.waitForVisualization('gaugeChart');
+      await lens.closeDimensionEditor();
+      await lens.openDimensionEditor(
         'lnsGauge_minDimensionPanel > lns-empty-dimension-suggested-value'
       );
-      await PageObjects.lens.retrySetValue('lns-indexPattern-static_value-input', '1000');
-      await PageObjects.lens.waitForVisualization('gaugeChart');
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.retrySetValue('lns-indexPattern-static_value-input', '1000');
+      await lens.waitForVisualization('gaugeChart');
+      await lens.closeDimensionEditor();
 
-      await PageObjects.lens.openDimensionEditor(
+      await lens.openDimensionEditor(
         'lnsGauge_maxDimensionPanel > lns-empty-dimension-suggested-value'
       );
-      await PageObjects.lens.retrySetValue('lns-indexPattern-static_value-input', '25000');
-      await PageObjects.lens.waitForVisualization('gaugeChart');
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.retrySetValue('lns-indexPattern-static_value-input', '25000');
+      await lens.waitForVisualization('gaugeChart');
+      await lens.closeDimensionEditor();
 
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
@@ -96,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should seamlessly switch to vertical bullet chart without losing configuration', async () => {
-      await PageObjects.lens.openVisualOptions();
+      await lens.openVisualOptions();
       await testSubjects.click('lns_gaugeOrientation_verticalBullet');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
@@ -108,8 +106,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should seamlessly switch to minor arc gauge chart without losing configuration', async () => {
-      await PageObjects.lens.openVisualOptions();
-      await PageObjects.lens.setGaugeShape('Minor arc');
+      await lens.openVisualOptions();
+      await lens.setGaugeShape('Minor arc');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.halfCircle);
@@ -120,8 +118,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should seamlessly switch to arc gauge chart without losing configuration', async () => {
-      await PageObjects.lens.openVisualOptions();
-      await PageObjects.lens.setGaugeShape('Major arc');
+      await lens.openVisualOptions();
+      await lens.setGaugeShape('Major arc');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.twoThirdsCircle);
@@ -132,8 +130,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should seamlessly switch to circular gauge chart without losing configuration', async () => {
-      await PageObjects.lens.openVisualOptions();
-      await PageObjects.lens.setGaugeShape('Circle');
+      await lens.openVisualOptions();
+      await lens.setGaugeShape('Circle');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.circle);
@@ -144,10 +142,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should switch to table chart and filter not supported static values', async () => {
-      await PageObjects.lens.switchToVisualization('lnsDatatable');
-      const columnsCount = await PageObjects.lens.getCountOfDatatableColumns();
+      await lens.switchToVisualization('lnsDatatable');
+      const columnsCount = await lens.getCountOfDatatableColumns();
       expect(columnsCount).to.eql(1);
-      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('Count of records');
+      expect(await lens.getDatatableHeaderText(0)).to.equal('Count of records');
     });
   });
 }

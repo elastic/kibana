@@ -34,12 +34,7 @@ export function cloudwatchLogsSpecProvider(context: TutorialContext): TutorialSc
     longDescription: i18n.translate('home.tutorials.cloudwatchLogs.longDescription', {
       defaultMessage:
         'Collect Cloudwatch logs by deploying Functionbeat to run as \
-        an AWS Lambda function. \
-        [Learn more]({learnMoreLink}).',
-      values: {
-        learnMoreLink:
-          '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
-      },
+        an AWS Lambda function.',
     }),
     euiIconType: 'logoAWS',
     artifacts: {
