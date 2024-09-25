@@ -12,6 +12,7 @@ import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererValues } from '../../../../common/api/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
@@ -73,7 +74,13 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const { globalFullScreen } = useGlobalFullScreen();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const isEnterprisePlus = useLicense().isEnterprise();
-  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
+  let ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+  if (!securitySolutionNotesEnabled) {
+    ACTION_BUTTON_COUNT--;
+  }
   const leadingControlColumns = useMemo(
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
     [ACTION_BUTTON_COUNT]
