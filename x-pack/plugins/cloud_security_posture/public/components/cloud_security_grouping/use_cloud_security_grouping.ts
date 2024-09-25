@@ -9,16 +9,16 @@ import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import * as uuid from 'uuid';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { GroupOption, GroupPanelRenderer, GetGroupStats } from '@kbn/grouping/src';
-
-import { useUrlQuery } from '../../common/hooks/use_url_query';
-
-import { FindingsBaseURLQuery } from '../../common/types';
-import { useBaseEsQuery, usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 import {
   GROUP_BY_CLICK,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+
+import { useUrlQuery } from '../../common/hooks/use_url_query';
+
+import { FindingsBaseURLQuery } from '../../common/types';
+import { useBaseEsQuery, usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_MAX_GROUPING_LEVELS = 3;

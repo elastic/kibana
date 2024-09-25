@@ -10,12 +10,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { CspLoadingState } from './components/csp_loading_state';
 import type { CspRouterProps } from './application/csp_router';
 import type { CspClientPluginSetup, CspClientPluginStart, CspClientPluginSetupDeps } from './types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import { SetupContext } from './application/setup_context';
-import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 
 const LazyCspPolicyTemplateForm = lazy(
   () => import('./components/fleet_extensions/policy_template_form')

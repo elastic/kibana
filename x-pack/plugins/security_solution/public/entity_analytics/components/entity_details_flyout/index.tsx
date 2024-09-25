@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { PREFIX } from '../../../flyout/shared/test_ids';
-import type { RiskInputsTabProps } from './tabs/risk_inputs/risk_inputs_tab';
-import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
-import { InsightsTabCsp } from '../../../cloud_security_posture/components/csp_details/insights_tab_csp';
 import {
   NAV_TO_FINDINGS_FROM_ENTITY_FLUTOUT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { PREFIX } from '../../../flyout/shared/test_ids';
+import type { RiskInputsTabProps } from './tabs/risk_inputs/risk_inputs_tab';
+import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
+import { InsightsTabCsp } from '../../../cloud_security_posture/components/csp_details/insights_tab_csp';
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightInputsTab` as const;

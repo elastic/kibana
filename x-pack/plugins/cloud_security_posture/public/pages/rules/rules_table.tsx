@@ -19,16 +19,16 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { uniqBy } from 'lodash';
-import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
-import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
-import * as TEST_SUBJECTS from './test_subjects';
-import { useChangeCspRuleState } from './use_change_csp_rule_state';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   CHANGE_RULE_STATE,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { uniqBy } from 'lodash';
+import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
+import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
+import * as TEST_SUBJECTS from './test_subjects';
+import { useChangeCspRuleState } from './use_change_csp_rule_state';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
