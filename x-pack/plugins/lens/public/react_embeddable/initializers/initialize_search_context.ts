@@ -35,11 +35,11 @@ export function initializeSearchContext(
   >(undefined);
 
   const [filters$, filtersComparator] = buildObservableVariable<Filter[] | undefined>(
-    initialState.filters
+    initialState.attributes.state.filters
   );
 
   const [query$, queryComparator] = buildObservableVariable<Query | AggregateQuery | undefined>(
-    initialState.query
+    initialState.attributes.state.query
   );
 
   const [timeslice$, timesliceComparator] = buildObservableVariable<[number, number] | undefined>(
