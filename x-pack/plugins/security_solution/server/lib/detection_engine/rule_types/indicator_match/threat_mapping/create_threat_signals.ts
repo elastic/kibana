@@ -10,7 +10,6 @@ import { firstValueFrom } from 'rxjs';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { uniq, chunk } from 'lodash/fp';
-import { queryToFields } from '@kbn/data-plugin/common';
 
 import { TelemetryChannel } from '../../../../telemetry/types';
 import { getThreatList, getThreatListCount } from './get_threat_list';
@@ -38,6 +37,7 @@ import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
 import { getDataTierFilter } from '../../utils/get_data_tier_filter';
+import { getQueryFields } from '../../utils/get_query_fields';
 
 export const createThreatSignals = async ({
   alertId,
@@ -115,15 +115,12 @@ export const createThreatSignals = async ({
   const allThreatFilters = [...threatFilters, indicatorMappingFilter, ...dataTiersFilters];
 
   const dataViews = await services.getDataViews();
-  const inputIndexDataViewLazy = await dataViews.createDataViewLazy({
-    title: inputIndex.join(),
+  const inputIndexFields = await getQueryFields({
+    dataViews,
+    index: inputIndex,
+    query,
+    language,
   });
-  const inputIndexFields = Object.values(
-    await queryToFields({
-      dataView: inputIndexDataViewLazy,
-      request: { query: [{ query, language: language || 'kuery' }] },
-    })
-  );
 
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
@@ -150,15 +147,12 @@ export const createThreatSignals = async ({
     if (newPitId) threatPitId = newPitId;
   };
 
-  const threatIndexDataViewLazy = await dataViews.createDataViewLazy({
-    title: threatIndex.join(),
+  const threatIndexFields = await getQueryFields({
+    dataViews,
+    index: threatIndex,
+    query: threatQuery,
+    language: threatLanguage,
   });
-  const threatIndexFields = Object.values(
-    await queryToFields({
-      dataView: threatIndexDataViewLazy,
-      request: { query: [{ query: threatQuery, language: threatLanguage || 'kuery' }] },
-    })
-  );
 
   const threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
