@@ -114,8 +114,7 @@ function DiscoverDocumentsComponent({
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
-  const { dataViews, capabilities, uiSettings, uiActions, ebtContextManager, fieldsMetadata } =
-    services;
+  const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
   const [
     dataSource,
     query,
@@ -201,17 +200,17 @@ function DiscoverDocumentsComponent({
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtContextManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtContextManager, fieldsMetadata]
+    [onAddColumn, ebtManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtContextManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtContextManager, fieldsMetadata]
+    [onRemoveColumn, ebtManager, fieldsMetadata]
   );
 
   const setExpandedDoc = useCallback(

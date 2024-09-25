@@ -78,7 +78,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
-    ebtContextManager,
+    ebtManager,
     fieldsMetadata,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
@@ -159,17 +159,17 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtContextManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtContextManager, fieldsMetadata]
+    [onAddColumn, ebtManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtContextManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtContextManager, fieldsMetadata]
+    [onRemoveColumn, ebtManager, fieldsMetadata]
   );
 
   // The assistant is getting the state from the url correctly
@@ -193,22 +193,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
-      void ebtContextManager.trackFilterAddition({
+      void ebtManager.trackFilterAddition({
         fieldName: fieldName === '_exists_' ? String(values) : fieldName,
         filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
         fieldsMetadata,
       });
       return filterManager.addFilters(newFilters);
     },
-    [
-      filterManager,
-      dataView,
-      dataViews,
-      trackUiMetric,
-      capabilities,
-      ebtContextManager,
-      fieldsMetadata,
-    ]
+    [filterManager, dataView, dataViews, trackUiMetric, capabilities, ebtManager, fieldsMetadata]
   );
 
   const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
@@ -253,13 +245,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
       }
-      void ebtContextManager.trackFilterAddition({
+      void ebtManager.trackFilterAddition({
         fieldName: fieldName === '_exists_' ? String(values) : fieldName,
         filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
         fieldsMetadata,
       });
     },
-    [data.query.queryString, query, trackUiMetric, ebtContextManager, fieldsMetadata]
+    [data.query.queryString, query, trackUiMetric, ebtManager, fieldsMetadata]
   );
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;

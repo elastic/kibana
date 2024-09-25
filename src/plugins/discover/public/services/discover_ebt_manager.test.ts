@@ -9,11 +9,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
-import { DiscoverEBTContextManager } from './discover_ebt_context_manager';
+import { DiscoverEBTManager } from './discover_ebt_manager';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
-describe('DiscoverEBTContextManager', () => {
-  let discoverEBTContextManager: DiscoverEBTContextManager;
+describe('DiscoverEBTManager', () => {
+  let discoverEBTContextManager: DiscoverEBTManager;
 
   const coreSetupMock = coreMock.createSetup();
 
@@ -30,7 +30,7 @@ describe('DiscoverEBTContextManager', () => {
   } as unknown as FieldsMetadataPublicStart;
 
   beforeEach(() => {
-    discoverEBTContextManager = new DiscoverEBTContextManager();
+    discoverEBTContextManager = new DiscoverEBTManager();
   });
 
   describe('register', () => {
