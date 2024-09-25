@@ -74,10 +74,7 @@ export interface ChartProps {
   isChartLoading?: boolean;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
-  onBreakdownFieldChange?: (
-    breakdownField: DataViewField | undefined,
-    columns?: DatatableColumn[]
-  ) => void;
+  onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
