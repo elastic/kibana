@@ -494,9 +494,6 @@ An API key secret that varies by connector:
 
 `xpack.actions.preconfigured.<connector-id>.secrets.credentialsJSON`::
 For an <<gemini-action-type,{gemini} connector>>, specifies the GCP service account credentials JSON file for authentication.
-
-`xpack.actions.preconfigured.<connector-id>.secrets.credentialsJSON`::
-For an <<inference-action-type,{inference} connector>>, specifies the specific per provider credentials configuration for the provider authentication.
 +
 --
 * For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI or Azure OpenAI API key for authentication.
