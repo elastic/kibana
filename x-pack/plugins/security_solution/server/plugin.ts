@@ -124,6 +124,7 @@ import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
+import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -212,6 +213,17 @@ export class Plugin implements ISecuritySolutionPlugin {
         entityAnalyticsConfig: config.entityAnalytics,
       });
     }
+
+    // const esClient = (await context.core).elasticsearch.client;
+    // const esClient = (await context.core).elasticsearch.client;
+    scheduleEntityAnalyticsMigration({
+      // coreStartPromise,
+      // pluginStartPromise,
+      getStartServices: core.getStartServices,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+    });
 
     const requestContextFactory = new RequestContextFactory({
       config,

@@ -49,19 +49,12 @@ const createId = ({ idField, idValue }: AssetCriticalityIdParts) => `${idField}:
 
 export class AssetCriticalityDataClient {
   constructor(private readonly options: AssetCriticalityClientOpts) {}
+
   /**
-   * It will create idex for asset criticality,
-   * or update mappings if index exists
+   * Initialize asset criticality resources.
    */
   public async init() {
-    await createOrUpdateIndex({
-      esClient: this.options.esClient,
-      logger: this.options.logger,
-      options: {
-        index: this.getIndex(),
-        mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
-      },
-    });
+    await this.createOrUpdateIndex();
 
     this.options.auditLogger?.log({
       message: 'User installed asset criticality Elasticsearch resources',
@@ -70,6 +63,20 @@ export class AssetCriticalityDataClient {
         category: AUDIT_CATEGORY.DATABASE,
         type: AUDIT_TYPE.CREATION,
         outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
+  }
+
+  /**
+   * It will create idex for asset criticality or update mappings if index exists
+   */
+  public async createOrUpdateIndex() {
+    await createOrUpdateIndex({
+      esClient: this.options.esClient,
+      logger: this.options.logger,
+      options: {
+        index: this.getIndex(),
+        mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
       },
     });
   }
@@ -131,7 +138,7 @@ export class AssetCriticalityDataClient {
     });
   }
 
-  private getIndex() {
+  public getIndex() {
     return getAssetCriticalityIndex(this.options.namespace);
   }
 
@@ -165,6 +172,12 @@ export class AssetCriticalityDataClient {
     };
   }
 
+  public getIndexMappings() {
+    return this.options.esClient.indices.getMapping({
+      index: this.getIndex(),
+    });
+  }
+
   public async get(idParts: AssetCriticalityIdParts): Promise<AssetCriticalityRecord | undefined> {
     const id = createId(idParts);
 
@@ -192,12 +205,36 @@ export class AssetCriticalityDataClient {
     record: AssetCriticalityUpsert,
     refresh = 'wait_for' as const
   ): Promise<AssetCriticalityRecord> {
+    const isHost = record.idField === 'host.name';
+
+    const entityProperty = isHost
+      ? {
+          host: {
+            name: record.idField,
+            asset: {
+              criticality: record.criticalityLevel,
+            },
+          },
+        }
+      : {
+          user: {
+            name: record.idField,
+            asset: {
+              criticality: record.criticalityLevel,
+            },
+          },
+        };
+
     const id = createId(record);
-    const doc = {
+    const doc: AssetCriticalityRecord = {
       id_field: record.idField,
       id_value: record.idValue,
       criticality_level: record.criticalityLevel,
       '@timestamp': new Date().toISOString(),
+      asset: {
+        criticality: record.criticalityLevel,
+      },
+      ...entityProperty,
     };
 
     await this.options.esClient.update({
