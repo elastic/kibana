@@ -7,6 +7,8 @@
 
 import React, { ReactNode } from 'react';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { isEmpty } from 'lodash';
 import { allOptionText } from './fields';
 import { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
 
@@ -36,12 +38,17 @@ export function FieldPopoverExpression({
 
   const suggestions = allSuggestions?.[fieldName];
 
-  const label = value
-    ? suggestions
-        ?.filter((suggestion) => value.includes(suggestion.value))
-        ?.map((suggestion) => suggestion.label)
-        .join(', ')
-    : allOptionText;
+  let label =
+    !isEmpty(value) && value
+      ? suggestions
+          ?.filter((suggestion) => value.includes(suggestion.value))
+          ?.map((suggestion) => suggestion.label)
+          .join(', ')
+      : allOptionText;
+
+  if (value?.includes(ALL_VALUE)) {
+    label = allOptionText;
+  }
 
   const closePopover = () => setSelectedField(selectedField === fieldName ? undefined : fieldName);
   return (
