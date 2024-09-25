@@ -33,7 +33,6 @@ import {
 export default function ({ getService }: FtrProviderContext) {
   const resolver = getService('resolverGenerator');
   const utils = getService('securitySolutionUtils');
-  const browser = getService('browser');
 
   const relatedEventsToGen = [
     { category: RelatedEventCategory.Driver, count: 2 },
