@@ -36,9 +36,10 @@ export async function inlineToProjectZip(
       });
       archive.finalize();
     });
+
+    return mWriter.buffer.toString('base64');
   } catch (e) {
     logger.error(`Failed to create zip for inline monitor ${monitorId}`);
     throw e;
   }
-  return mWriter.buffer.toString('base64');
 }

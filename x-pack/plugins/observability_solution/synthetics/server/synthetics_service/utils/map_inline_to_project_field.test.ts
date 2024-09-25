@@ -8,6 +8,7 @@
 import { ConfigKey } from '../../../common/runtime_types';
 import { unzipFile } from '../../common/unzip_project_code';
 import { mapInlineToProjectFields } from './map_inline_to_project_field';
+import * as inlineToZip from '../../common/inline_to_zip';
 
 describe('mapInlineToProjectFields', () => {
   let logger: Logger;
@@ -29,16 +30,13 @@ describe('mapInlineToProjectFields', () => {
     }
   );
 
-  it('should return the project content if the source inline is empty', async () => {
+  it('should return an empty object if the inline script is empty', async () => {
     const result = await mapInlineToProjectFields(
       'browser',
       { [ConfigKey.SOURCE_PROJECT_CONTENT]: 'foo' },
       logger as any
     );
-    expect(result).toEqual({
-      [ConfigKey.SOURCE_INLINE]: '',
-      [ConfigKey.SOURCE_PROJECT_CONTENT]: 'foo',
-    });
+    expect(result).toEqual({});
   });
 
   it('should zip the source inline and return it as project content', async () => {
@@ -57,5 +55,20 @@ describe('mapInlineToProjectFields', () => {
       foo
       });"
     `);
+  });
+
+  it('should return the inline script if the zipping fails', async () => {
+    jest.spyOn(inlineToZip, 'inlineToProjectZip').mockImplementationOnce(async () => {
+      throw new Error('Failed to zip');
+    });
+
+    const result = await mapInlineToProjectFields(
+      'browser',
+      {
+        [ConfigKey.SOURCE_INLINE]: 'foo',
+      },
+      logger as any
+    );
+    expect(result[ConfigKey.SOURCE_INLINE]).toEqual('foo');
   });
 });

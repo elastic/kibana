@@ -16,14 +16,23 @@ export async function mapInlineToProjectFields(
 ): Promise<Record<string, string> | {}> {
   if (monitorType !== 'browser') return {};
   const asBrowserMonitor = monitor as BrowserSimpleFields;
+  const inlineScript = asBrowserMonitor?.[ConfigKey.SOURCE_INLINE];
+  if (!inlineScript) return {};
+  try {
+    const projectZip = await inlineToProjectZip(
+      inlineScript,
+      asBrowserMonitor?.[ConfigKey.CONFIG_ID],
+      logger
+    );
+    return {
+      [ConfigKey.SOURCE_INLINE]: '',
+      [ConfigKey.SOURCE_PROJECT_CONTENT]: projectZip,
+    };
+  } catch (e) {
+    logger.error(e);
+  }
+
   return {
-    [ConfigKey.SOURCE_INLINE]: '',
-    [ConfigKey.SOURCE_PROJECT_CONTENT]: !!asBrowserMonitor?.[ConfigKey.SOURCE_INLINE]
-      ? await inlineToProjectZip(
-          asBrowserMonitor?.[ConfigKey.SOURCE_INLINE]!,
-          asBrowserMonitor?.[ConfigKey.CONFIG_ID],
-          logger
-        )
-      : asBrowserMonitor?.[ConfigKey.SOURCE_PROJECT_CONTENT] ?? '',
+    [ConfigKey.SOURCE_INLINE]: inlineScript,
   };
 }
