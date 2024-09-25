@@ -20,7 +20,6 @@ import type {
   ImportTimelineResultSchema,
   AllTimelinesResponse,
   SingleTimelineResponse,
-  SingleTimelineResolveResponse,
   GetAllTimelineVariables,
 } from '../../../common/api/timeline';
 import {
@@ -32,8 +31,8 @@ import {
   PersistFavoriteRouteResponse,
   type TimelineType,
   TimelineTypeEnum,
-  ResolvedSingleTimelineResponseType,
   GetTimelineResponse,
+  ResolveTimelineResponse,
 } from '../../../common/api/timeline';
 import {
   TIMELINE_URL,
@@ -93,11 +92,8 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorR
 const decodeSingleTimelineResponse = (respTimeline?: SingleTimelineResponse) =>
   decodeOrThrow(GetTimelineResponse)(respTimeline);
 
-const decodeResolvedSingleTimelineResponse = (respTimeline?: SingleTimelineResolveResponse) =>
-  pipe(
-    ResolvedSingleTimelineResponseType.decode(respTimeline),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+const decodeResolvedSingleTimelineResponse = (respTimeline?: ResolveTimelineResponse) =>
+  decodeOrThrow(ResolveTimelineResponse)(respTimeline);
 
 const decodeAllTimelinesResponse = (respTimeline: AllTimelinesResponse) =>
   pipe(
@@ -410,7 +406,7 @@ export const getTimeline = async (id: string) => {
 };
 
 export const resolveTimeline = async (id: string) => {
-  const response = await KibanaServices.get().http.get<SingleTimelineResolveResponse>(
+  const response = await KibanaServices.get().http.get<ResolveTimelineResponse>(
     TIMELINE_RESOLVE_URL,
     {
       query: {
