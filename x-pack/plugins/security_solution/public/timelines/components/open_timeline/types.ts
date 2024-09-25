@@ -210,9 +210,9 @@ export interface OpenTimelineProps {
 }
 
 export interface ResolveTimelineConfig {
-  alias_target_id: ResolvedTimeline['data']['alias_target_id'];
-  outcome: ResolvedTimeline['data']['outcome'];
-  alias_purpose: ResolvedTimeline['data']['alias_purpose'];
+  alias_target_id: ResolvedTimeline['alias_target_id'];
+  outcome: ResolvedTimeline['outcome'];
+  alias_purpose: ResolvedTimeline['alias_purpose'];
 }
 export interface UpdateTimeline {
   duplicate: boolean;

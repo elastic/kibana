@@ -376,7 +376,7 @@ export const useQueryTimelineById = () => {
     } else {
       return Promise.resolve(resolveTimeline(timelineId))
         .then((result) => {
-          const data: ResolvedTimeline['data'] | null = getOr(null, 'data', result);
+          const data: ResolvedTimeline | null = getOr(null, 'data', result);
           if (!data) return;
 
           const timelineToOpen = omitTypenameInTimeline(data.timeline);
