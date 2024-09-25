@@ -7,16 +7,27 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { EntityStoreUtils } from '../../utils';
-export default ({ getService }: FtrProviderContext) => {
+export default ({ getService }: FtrProviderContextWithSpaces) => {
   const api = getService('securitySolutionApi');
+  const spaces = getService('spaces');
+  const namespace = 'test-space';
 
   const utils = EntityStoreUtils(getService);
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs in non-default space', () => {
     before(async () => {
       await utils.cleanEngines();
+      await spaces.create({
+        id: namespace,
+        name: namespace,
+        disabledFeatures: [],
+      });
+    });
+
+    after(async () => {
+      await spaces.delete(namespace);
     });
 
     describe('init', () => {
@@ -28,8 +39,8 @@ export default ({ getService }: FtrProviderContext) => {
         await utils.initEntityEngineForEntityType('user');
 
         const expectedTransforms = [
-          'entities-v1-history-ea_default_user_entity_store',
-          'entities-v1-latest-ea_default_user_entity_store',
+          `entities-v1-history-ea_${namespace}_user_entity_store`,
+          `entities-v1-latest-ea_${namespace}_user_entity_store`,
         ];
 
         await utils.expectTransformsExist(expectedTransforms);
@@ -39,8 +50,8 @@ export default ({ getService }: FtrProviderContext) => {
         await utils.initEntityEngineForEntityType('host');
 
         const expectedTransforms = [
-          'entities-v1-history-ea_default_host_entity_store',
-          'entities-v1-latest-ea_default_host_entity_store',
+          `entities-v1-history-ea_${namespace}_host_entity_store`,
+          `entities-v1-latest-ea_${namespace}_host_entity_store`,
         ];
 
         await utils.expectTransformsExist(expectedTransforms);
@@ -173,8 +184,10 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await utils.expectTransformNotFound('entities-v1-history-ea_host_entity_store');
-        await utils.expectTransformNotFound('entities-v1-latest-ea_host_entity_store');
+        await utils.expectTransformNotFound(
+          `entities-v1-history-ea_${namespace}_host_entity_store`
+        );
+        await utils.expectTransformNotFound(`entities-v1-latest-ea_${namespace}_host_entity_store`);
       });
 
       it('should delete the user entity engine', async () => {
@@ -187,8 +200,10 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await utils.expectTransformNotFound('entities-v1-history-ea_user_entity_store');
-        await utils.expectTransformNotFound('entities-v1-latest-ea_user_entity_store');
+        await utils.expectTransformNotFound(
+          `entities-v1-history-ea_${namespace}_user_entity_store`
+        );
+        await utils.expectTransformNotFound(`entities-v1-latest-ea_${namespace}_user_entity_store`);
       });
     });
   });
