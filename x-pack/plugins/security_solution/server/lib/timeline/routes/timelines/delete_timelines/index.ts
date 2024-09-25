@@ -6,9 +6,12 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { ConfigType } from '../../../../..';
-import { deleteTimelinesSchema } from '../../../../../../common/api/timeline';
+import {
+  DeleteTimelinesRequestBody,
+  type DeleteTimelinesResponse,
+} from '../../../../../../common/api/timeline';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINE_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
@@ -29,7 +32,7 @@ export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
       {
         version: '2023-10-31',
         validate: {
-          request: { body: buildRouteValidationWithExcess(deleteTimelinesSchema) },
+          request: { body: buildRouteValidationWithZod(DeleteTimelinesRequestBody) },
         },
       },
       async (context, request, response) => {
@@ -40,7 +43,8 @@ export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
           const { savedObjectIds, searchIds } = request.body;
 
           await deleteTimeline(frameworkRequest, savedObjectIds, searchIds);
-          return response.ok({ body: { data: { deleteTimeline: true } } });
+          const body: DeleteTimelinesResponse = { data: { deleteTimeline: true } };
+          return response.ok({ body });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({
