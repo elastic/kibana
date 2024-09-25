@@ -662,6 +662,5 @@ export default function createFindTests({ getService }: FtrProviderContext) {
     });
 
     findTestUtils('public', objectRemover, supertest, supertestWithoutAuth);
-    findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);
   });
 }

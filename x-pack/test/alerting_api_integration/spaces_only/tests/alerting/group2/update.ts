@@ -85,7 +85,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
         }
 
-        response = await supertest.get(
+        response = await supertest.post(
           `${getUrlPrefix(
             Spaces.space1.id
           )}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
