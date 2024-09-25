@@ -53,7 +53,7 @@ export function DiscoverButton({ dataView }: { dataView: DataView }) {
   const entityTypeField = dataView.getFieldByName(ENTITY_TYPE);
 
   if (entityTypes && entityTypeField) {
-    const entityTypeFilter = buildPhrasesFilter(entityTypeField!, entityTypes, dataView);
+    const entityTypeFilter = buildPhrasesFilter(entityTypeField, entityTypes, dataView);
     filters.push(entityTypeFilter);
   }
 
