@@ -49,7 +49,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async scrollPanelIntoView(wrapper?: WebElementWrapper) {
     this.log.debug(`scrollPanelIntoView`);
-    if (!wrapper) wrapper = await this.getPanelWrapper();
+    wrapper = wrapper || (await this.getPanelWrapper());
     const yOffset = (await wrapper.getPosition()).y;
     if (yOffset > DASHBOARD_TOP_OFFSET) {
       await this.browser.execute(`
@@ -93,9 +93,9 @@ export class DashboardPanelActionsService extends FtrService {
 
   async clickPanelAction(testSubject: string, wrapper?: WebElementWrapper) {
     this.log.debug(`clickPanelAction(${testSubject})`);
-
+    wrapper = wrapper || (await this.getPanelWrapper());
     await this.scrollPanelIntoView(wrapper);
-    const exists = await this.testSubjects.exists(testSubject);
+    const exists = await this.testSubjects.descendantExists(testSubject, wrapper);
     if (!exists) await this.openContextMenu(wrapper);
     await this.testSubjects.existOrFail(testSubject);
     await this.testSubjects.click(testSubject);
@@ -133,8 +133,9 @@ export class DashboardPanelActionsService extends FtrService {
    */
   async clickEdit(wrapper?: WebElementWrapper) {
     this.log.debug(`clickEdit`);
+    wrapper = wrapper || (await this.getPanelWrapper());
     await this.scrollPanelIntoView(wrapper);
-    if (await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ)) {
+    if (await this.testSubjects.descendantExists(EDIT_PANEL_DATA_TEST_SUBJ, wrapper)) {
       // navigate to the editor
       await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
     } else {

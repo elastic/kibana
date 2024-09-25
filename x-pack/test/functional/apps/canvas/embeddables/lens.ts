@@ -12,6 +12,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const archives = {
@@ -19,7 +20,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
     kbn: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/lens',
   };
 
-  describe('lens in canvas', function () {
+  describe.only('lens in canvas', function () {
     before(async () => {
       await esArchiver.load(archives.es);
       await kibanaServer.savedObjects.cleanStandardList();
@@ -34,32 +35,8 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('by-reference', () => {
-      it('adds existing lens embeddable from the visualize library', async () => {
-        await canvas.clickAddFromLibrary();
-        await dashboardAddPanel.addEmbeddable('Artistpreviouslyknownaslens', 'lens');
-        await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslens');
-      });
-
-      it('edits lens by-reference embeddable', async () => {
-        await dashboardPanelActions.editPanelByTitle('Artistpreviouslyknownaslens');
-        await lens.save('Artistpreviouslyknownaslens v2', false, true);
-        await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslensv2');
-      });
-
-      it('renders lens visualization using savedLens expression', async () => {
-        // load test workpad
-        await canvas.goToListingPage();
-        await canvas.loadFirstWorkpad('Test Workpad');
-        await header.waitUntilLoadingHasFinished();
-
-        await lens.assertLegacyMetric('Maximum of bytes', '16,788');
-      });
-    });
-
     describe('by-value', () => {
       it('creates new lens embeddable', async () => {
-        await canvas.addNewPage();
         await canvas.createNewVis('lens');
         await lens.goToTimeRange();
         await lens.configureDimension({
@@ -86,8 +63,34 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       });
     });
 
+    describe('by-reference', () => {
+      it('adds existing lens embeddable from the visualize library', async () => {
+        await canvas.goToListingPageViaBreadcrumbs();
+        await canvas.createNewWorkpad();
+        await canvas.clickAddFromLibrary();
+        await dashboardAddPanel.addEmbeddable('Artistpreviouslyknownaslens', 'lens');
+        await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslens');
+      });
+
+      it('edits lens by-reference embeddable', async () => {
+        await dashboardPanelActions.editPanelByTitle('Artistpreviouslyknownaslens');
+        await lens.save('Artistpreviouslyknownaslens v2', false, true);
+        await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslensv2');
+      });
+
+      it('renders lens visualization using savedLens expression', async () => {
+        // load test workpad
+        await canvas.goToListingPage();
+        await canvas.loadFirstWorkpad('Test Workpad');
+        await header.waitUntilLoadingHasFinished();
+
+        await lens.assertLegacyMetric('Maximum of bytes', '16,788');
+      });
+    });
+
     describe('switch page smoke test', () => {
       it('loads embeddables on page change', async () => {
+        await canvas.addNewPage();
         await canvas.goToPreviousPage();
         await header.waitUntilLoadingHasFinished();
         await lens.assertLegacyMetric('Maximum of bytes', '16,788');
