@@ -10,10 +10,9 @@
 import React from 'react';
 import { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { createKibanaReactContext, DataPublicPluginStart } from './shared_imports';
+import { createKibanaReactContext, DataPublicPluginStart, DataView } from './shared_imports';
 
 import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';

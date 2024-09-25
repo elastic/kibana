@@ -10,21 +10,22 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE, DataView } from '@kbn/data-views-plugin/public';
 import { DataViewSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
-import { DataViewEditorContext, DataViewEditorProps } from '../types';
+import { DataViewEditorContext, DataViewEditorPropsInternal } from '../types';
 import { DataViewEditorService } from '../data_view_editor_service';
 
 const DataViewFlyoutContentContainer = ({
   onSave,
+  onSaveLazy,
   onCancel = () => {},
   defaultTypeIsRollup,
   requireTimestampField = false,
   editData,
   allowAdHocDataView,
   showManagementLink,
-}: DataViewEditorProps) => {
+}: DataViewEditorPropsInternal) => {
   const {
     services: { dataViews, notifications, http },
   } = useKibana<DataViewEditorContext>();
@@ -49,7 +50,7 @@ const DataViewFlyoutContentContainer = ({
 
   const onSaveClick = async (dataViewSpec: DataViewSpec, persist: boolean = true) => {
     try {
-      let saveResponse;
+      let saveResponse: DataView;
       if (editData) {
         const { name = '', timeFieldName, title = '', allowHidden = false } = dataViewSpec;
         editData.setIndexPattern(title);
@@ -67,7 +68,8 @@ const DataViewFlyoutContentContainer = ({
       }
 
       if (saveResponse && !(saveResponse instanceof Error)) {
-        await dataViews.refreshFields(saveResponse);
+        // clears legacy data view cache, clients will need to fetch the data view again
+        dataViews.clearInstanceCache(saveResponse.id);
 
         if (persist) {
           const title = i18n.translate('indexPatternEditor.saved', {
@@ -79,7 +81,13 @@ const DataViewFlyoutContentContainer = ({
             text,
           });
         }
-        await onSave(saveResponse);
+        if (onSave) {
+          await onSave(saveResponse);
+        }
+        if (onSaveLazy) {
+          const saveResponseLazy = await dataViews.toDataViewLazy(saveResponse);
+          await onSaveLazy(saveResponseLazy);
+        }
       }
     } catch (e) {
       const title = i18n.translate('indexPatternEditor.dataView.unableSaveLabel', {

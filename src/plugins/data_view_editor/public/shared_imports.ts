@@ -12,7 +12,12 @@ export type {
   GetFieldsOptions,
   IndexPatternAggRestrictions,
 } from '@kbn/data-plugin/public';
-export type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/public';
+export type {
+  DataViewLazy,
+  DataViewField,
+  DataViewSpec,
+  DataView,
+} from '@kbn/data-views-plugin/public';
 
 export { createKibanaReactContext, useKibana } from '@kbn/kibana-react-plugin/public';
 
