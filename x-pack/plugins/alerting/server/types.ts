@@ -36,7 +36,7 @@ import {
   RulesSettingsClient,
   RulesSettingsFlappingClient,
   RulesSettingsQueryDelayClient,
-} from './rules_settings_client';
+} from './rules_settings';
 import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {

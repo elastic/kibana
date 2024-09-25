@@ -98,6 +98,12 @@ export class Client {
     this.kbnClient = options.kbnClient;
     this.log = options.log;
   }
+  /**
+    * An exception list groups exception items and can be associated with detection rules. You can assign detection rules with multiple exception lists.
+> info
+> All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
+
+    */
   async createExceptionList(props: CreateExceptionListProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateExceptionList`);
     return this.kbnClient
@@ -111,6 +117,12 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Create an exception item and associate it with the specified exception list.
+> info
+> Before creating exception items, you must create an exception list.
+
+    */
   async createExceptionListItem(props: CreateExceptionListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateExceptionListItem`);
     return this.kbnClient
@@ -124,6 +136,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Create exception items that apply to a single detection rule.
+   */
   async createRuleExceptionListItems(props: CreateRuleExceptionListItemsProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleExceptionListItems`);
     return this.kbnClient
@@ -137,6 +152,12 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * An exception list groups exception items and can be associated with detection rules. A shared exception list can apply to multiple detection rules.
+> info
+> All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
+
+    */
   async createSharedExceptionList(props: CreateSharedExceptionListProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateSharedExceptionList`);
     return this.kbnClient
@@ -150,6 +171,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Delete an exception list using the `id` or `list_id` field.
+   */
   async deleteExceptionList(props: DeleteExceptionListProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteExceptionList`);
     return this.kbnClient
@@ -164,6 +188,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Delete an exception list item using the `id` or `item_id` field.
+   */
   async deleteExceptionListItem(props: DeleteExceptionListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteExceptionListItem`);
     return this.kbnClient
@@ -178,6 +205,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Duplicate an existing exception list.
+   */
   async duplicateExceptionList(props: DuplicateExceptionListProps) {
     this.log.info(`${new Date().toISOString()} Calling API DuplicateExceptionList`);
     return this.kbnClient
@@ -193,7 +223,7 @@ export class Client {
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Exports an exception list and its associated items to an .ndjson file
+   * Export an exception list and its associated items to an NDJSON file.
    */
   async exportExceptionList(props: ExportExceptionListProps) {
     this.log.info(`${new Date().toISOString()} Calling API ExportExceptionList`);
@@ -209,6 +239,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a list of all exception list items in the specified list.
+   */
   async findExceptionListItems(props: FindExceptionListItemsProps) {
     this.log.info(`${new Date().toISOString()} Calling API FindExceptionListItems`);
     return this.kbnClient
@@ -223,6 +256,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a list of all exception lists.
+   */
   async findExceptionLists(props: FindExceptionListsProps) {
     this.log.info(`${new Date().toISOString()} Calling API FindExceptionLists`);
     return this.kbnClient
@@ -238,7 +274,7 @@ export class Client {
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Imports an exception list and associated items
+   * Import an exception list and its associated items from an NDJSON file.
    */
   async importExceptionList(props: ImportExceptionListProps) {
     this.log.info(`${new Date().toISOString()} Calling API ImportExceptionList`);
@@ -254,6 +290,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the details of an exception list using the `id` or `list_id` field.
+   */
   async readExceptionList(props: ReadExceptionListProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadExceptionList`);
     return this.kbnClient
@@ -268,6 +307,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the details of an exception list item using the `id` or `item_id` field.
+   */
   async readExceptionListItem(props: ReadExceptionListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadExceptionListItem`);
     return this.kbnClient
@@ -282,6 +324,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a summary of the specified exception list.
+   */
   async readExceptionListSummary(props: ReadExceptionListSummaryProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadExceptionListSummary`);
     return this.kbnClient
@@ -296,6 +341,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Update an exception list using the `id` or `list_id` field.
+   */
   async updateExceptionList(props: UpdateExceptionListProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateExceptionList`);
     return this.kbnClient
@@ -309,6 +357,9 @@ export class Client {
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Update an exception list item using the `id` or `item_id` field.
+   */
   async updateExceptionListItem(props: UpdateExceptionListItemProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateExceptionListItem`);
     return this.kbnClient

@@ -10,3 +10,4 @@
 export * from './data_view';
 export * from './es_hits';
 export * from './additional_field_groups';
+export * from './logs_context_service';

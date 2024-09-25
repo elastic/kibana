@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
-import { set } from '@kbn/safer-lodash-set/fp';
+import { robustGet, robustSet } from '../utils/robust_field_access';
 import type { SignalSource } from '../../../types';
-import { filterFieldEntries } from '../utils/filter_field_entries';
+import { filterFieldEntry } from '../utils/filter_field_entry';
 import type { FieldsType, MergeStrategyFunction } from '../types';
 import { isObjectLikeOrArrayOfObjectLikes } from '../utils/is_objectlike_or_array_of_objectlikes';
 import { isNestedObject } from '../utils/is_nested_object';
@@ -16,8 +15,7 @@ import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';
 import { isPrimitive } from '../utils/is_primitive';
 import { isArrayOfPrimitives } from '../utils/is_array_of_primitives';
 import { isTypeObject } from '../utils/is_type_object';
-import { isPathValid } from '../utils/is_path_valid';
-import { buildFieldsKeyAsArrayMap } from '../utils/build_fields_key_as_array_map';
+import { robustIsPathValid } from '../utils/is_path_valid';
 
 /**
  * Merges all of "doc._source" with its "doc.fields" on a "best effort" basis. See ../README.md for more information
@@ -29,63 +27,56 @@ import { buildFieldsKeyAsArrayMap } from '../utils/build_fields_key_as_array_map
  * it will not be added from fields.
  * @returns The two merged together in one object where we can
  */
-export const mergeAllFieldsWithSource: MergeStrategyFunction = ({ doc, ignoreFields }) => {
+export const mergeAllFieldsWithSource: MergeStrategyFunction = ({
+  doc,
+  ignoreFields,
+  ignoreFieldsRegexes,
+}) => {
   const source = doc._source ?? {};
   const fields = doc.fields ?? {};
-  const fieldEntries = Object.entries(fields);
-  const filteredEntries = filterFieldEntries(fieldEntries, ignoreFields);
-  const fieldsKeyMap = buildFieldsKeyAsArrayMap(source);
+  const fieldsKeys = Object.keys(fields);
 
-  const transformedSource = filteredEntries.reduce(
-    (merged, [fieldsKeyAsString, fieldsValue]: [string, FieldsType]) => {
-      const fieldsKey = fieldsKeyMap[fieldsKeyAsString] ?? fieldsKeyAsString;
-
-      if (
-        hasEarlyReturnConditions({
-          fieldsValue,
-          fieldsKey,
-          merged,
-        })
-      ) {
-        return merged;
-      }
-
-      const valueInMergedDocument = get(fieldsKey, merged);
+  fieldsKeys.forEach((fieldsKey) => {
+    const valueInMergedDocument = robustGet({ key: fieldsKey, document: source });
+    const fieldsValue = fields[fieldsKey];
+    if (
+      !hasEarlyReturnConditions({
+        fieldsValue,
+        fieldsKey,
+        merged: source,
+      }) &&
+      filterFieldEntry([fieldsKey, fieldsValue], fieldsKeys, ignoreFields, ignoreFieldsRegexes)
+    ) {
       if (valueInMergedDocument === undefined) {
         const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
-        return set(fieldsKey, valueToMerge, merged);
+        robustSet({ key: fieldsKey, valueToSet: valueToMerge, document: source });
       } else if (isPrimitive(valueInMergedDocument)) {
         const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
-        return set(fieldsKey, valueToMerge, merged);
+        robustSet({ key: fieldsKey, valueToSet: valueToMerge, document: source });
       } else if (isArrayOfPrimitives(valueInMergedDocument)) {
         const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
-        return set(fieldsKey, valueToMerge, merged);
+        robustSet({ key: fieldsKey, valueToSet: valueToMerge, document: source });
       } else if (
         isObjectLikeOrArrayOfObjectLikes(valueInMergedDocument) &&
         isNestedObject(fieldsValue) &&
         !Array.isArray(valueInMergedDocument)
       ) {
         const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
-        return set(fieldsKey, valueToMerge, merged);
+        robustSet({ key: fieldsKey, valueToSet: valueToMerge, document: source });
       } else if (
         isObjectLikeOrArrayOfObjectLikes(valueInMergedDocument) &&
         isNestedObject(fieldsValue) &&
         Array.isArray(valueInMergedDocument)
       ) {
         const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
-        return set(fieldsKey, valueToMerge, merged);
-      } else {
-        // fail safe catch all condition for production, but we shouldn't try to reach here and
-        // instead write tests if we encounter this situation.
-        return merged;
+        robustSet({ key: fieldsKey, valueToSet: valueToMerge, document: source });
       }
-    },
-    { ...source }
-  );
+    }
+  });
 
   return {
     ...doc,
-    _source: transformedSource,
+    _source: source,
   };
 };
 
@@ -105,13 +96,13 @@ const hasEarlyReturnConditions = ({
   merged,
 }: {
   fieldsValue: FieldsType;
-  fieldsKey: string[] | string;
+  fieldsKey: string;
   merged: SignalSource;
 }) => {
-  const valueInMergedDocument = get(fieldsKey, merged);
+  const valueInMergedDocument = robustGet({ key: fieldsKey, document: merged });
   return (
     fieldsValue.length === 0 ||
-    (valueInMergedDocument === undefined && !isPathValid(fieldsKey, merged)) ||
+    (valueInMergedDocument === undefined && !robustIsPathValid(fieldsKey, merged)) ||
     (isObjectLikeOrArrayOfObjectLikes(valueInMergedDocument) &&
       !isNestedObject(fieldsValue) &&
       !isTypeObject(fieldsValue))
