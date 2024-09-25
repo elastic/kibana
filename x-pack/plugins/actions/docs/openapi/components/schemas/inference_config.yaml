@@ -1,0 +1,25 @@
+title: Connector request properties for an Inference API connector
+description: Defines properties for connectors when type is `.gemini`.
+type: object
+required:
+  - provider
+  - taskType
+properties:
+  provider:
+    type: string
+    description: The Inference API service provider.
+  taskType:
+    type: string
+    description: The Inference task type supported by provider.
+  providerSchema:
+    type: string
+    description: The fields definition for provider settings.
+  providerConfig:
+    type: string
+    description: The provider settings.
+  taskTypeSchema:
+    type: string
+    description: The fields definition for task type settings.
+  taskTypeConfig:
+    type: string
+    description: The task type settings.
