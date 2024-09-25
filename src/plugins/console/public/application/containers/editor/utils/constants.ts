@@ -17,11 +17,7 @@ export const SELECTED_REQUESTS_CLASSNAME = 'console__monaco_editor__selectedRequ
 /*
  * CSS class names used for the styling of multiple-response status codes
  */
-export const PRIMARY_STATUS_BADGE_CLASSNAME = 'monaco__status_badge--primary';
-export const SUCCESS_STATUS_BADGE_CLASSNAME = 'monaco__status_badge--success';
-export const DEFAULT_STATUS_BADGE_CLASSNAME = 'monaco__status_badge--default';
-export const WARNING_STATUS_BADGE_CLASSNAME = 'monaco__status_badge--warning';
-export const DANGER_STATUS_BADGE_CLASSNAME = 'monaco__status_badge--danger';
+export const STATUS_CODE_LINE_CLASSNAME = 'monaco__status_code_line';
 
 export const whitespacesRegex = /\s+/;
 export const newLineRegex = /\n/;

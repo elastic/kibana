@@ -183,6 +183,7 @@ export function HeaderActions({
             type: 'alert',
             id: alert.fields[ALERT_UUID],
           },
+          externalIncidentUrl: null,
         },
       });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SamplesFormatName } from '../../common/api/model/common_attributes';
+import { SamplesFormatName } from '../../common';
 
 export const kvState = {
   lastExecutedChain: 'testchain',

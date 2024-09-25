@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await sendMultipleRequests(['\n GET /_search?pretty', '\n GET /_search?pretty']);
 
       const response = await PageObjects.console.getOutputText();
-      expect(response).to.contain('# 2: GET /_search?pretty');
+      expect(response).to.contain('# 2: GET /_search?pretty [200 OK]');
     });
 
     it('should clear the console output', async () => {

@@ -25,7 +25,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import moment from 'moment';
-import { orderBy } from 'lodash';
+import { get, orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -2830,7 +2830,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.destination).toEqual(
           expect.objectContaining({ domain: 'aaa.stage.11111111.hello' })
         );
-        expect(previewAlerts[0]?._source?.['event.dataset']).toEqual('network_traffic.tls');
+        expect(get(previewAlerts[0]?._source, 'event.dataset')).toEqual('network_traffic.tls');
       });
     });
   });
