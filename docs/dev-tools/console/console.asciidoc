@@ -193,7 +193,7 @@ Navigate items in autocomplete menu::
 ==== View API docs
 
 To view the documentation for an API endpoint, select the request, then open the contextual menu and select
-*Open documentation*.
+*Open API reference*.
 
 [float]
 [[console-request]]
