@@ -23,7 +23,7 @@ import { getNotesByTimelineId, persistNote } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId, persistPinnedEventOnTimeline } from '../pinned_events';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import type {
-  AllTimelinesResponse,
+  GetTimelinesResponse,
   ResolvedTimeline,
   SavedTimeline,
 } from '../../../../../common/api/timeline';
@@ -141,7 +141,7 @@ describe('saved_object', () => {
       pageSize: 10,
       pageIndex: 1,
     };
-    let result = null as unknown as AllTimelinesResponse;
+    let result = null as unknown as GetTimelinesResponse;
     beforeEach(async () => {
       (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockGetTimelineValue);
       mockFindSavedObject = jest

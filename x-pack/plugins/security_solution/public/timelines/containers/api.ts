@@ -18,21 +18,20 @@ import type {
   TimelineResponse,
   TimelineErrorResponse,
   ImportTimelineResultSchema,
-  AllTimelinesResponse,
   SingleTimelineResponse,
   GetAllTimelineVariables,
+  TimelineType,
 } from '../../../common/api/timeline';
 import {
   TimelineResponseType,
   TimelineStatusEnum,
   TimelineErrorResponseType,
   importTimelineResultSchema,
-  allTimelinesResponse,
   PersistFavoriteRouteResponse,
-  type TimelineType,
   TimelineTypeEnum,
   GetTimelineResponse,
   ResolveTimelineResponse,
+  GetTimelinesResponse,
 } from '../../../common/api/timeline';
 import {
   TIMELINE_URL,
@@ -95,11 +94,8 @@ const decodeSingleTimelineResponse = (respTimeline?: SingleTimelineResponse) =>
 const decodeResolvedSingleTimelineResponse = (respTimeline?: ResolveTimelineResponse) =>
   decodeOrThrow(ResolveTimelineResponse)(respTimeline);
 
-const decodeAllTimelinesResponse = (respTimeline: AllTimelinesResponse) =>
-  pipe(
-    allTimelinesResponse.decode(respTimeline),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+const decodeGetTimelinesResponse = (respTimeline: GetTimelinesResponse) =>
+  decodeOrThrow(GetTimelinesResponse)(respTimeline);
 
 const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse) =>
   pipe(
@@ -431,7 +427,7 @@ export const getTimelineTemplate = async (templateTimelineId: string) => {
 };
 
 export const getAllTimelines = async (args: GetAllTimelineVariables, abortSignal: AbortSignal) => {
-  const response = await KibanaServices.get().http.fetch<AllTimelinesResponse>(TIMELINES_URL, {
+  const response = await KibanaServices.get().http.fetch<GetTimelinesResponse>(TIMELINES_URL, {
     method: 'GET',
     query: {
       ...(args.onlyUserFavorite ? { only_user_favorite: args.onlyUserFavorite } : {}),
@@ -447,7 +443,7 @@ export const getAllTimelines = async (args: GetAllTimelineVariables, abortSignal
     version: '2023-10-31',
   });
 
-  return decodeAllTimelinesResponse(response);
+  return decodeGetTimelinesResponse(response);
 };
 
 export const persistFavorite = async ({

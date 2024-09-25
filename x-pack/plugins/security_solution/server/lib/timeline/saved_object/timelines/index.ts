@@ -19,7 +19,7 @@ import type {
   Note,
   BareNote,
   PinnedEvent,
-  AllTimelinesResponse,
+  GetTimelinesResponse,
   ExportTimelineNotFoundError,
   PageInfoTimeline,
   ResponseTimelines,
@@ -218,7 +218,7 @@ export const getAllTimeline = async (
   sort: SortTimeline | null,
   status: TimelineStatus | null,
   timelineType: TimelineType | null
-): Promise<AllTimelinesResponse> => {
+): Promise<GetTimelinesResponse> => {
   const searchTerm = search != null ? search : undefined;
   const searchFields = ['title', 'description'];
   const filter = combineFilters([
