@@ -10,11 +10,14 @@
 import { RecentlyAccessed, RecentlyAccessedService } from '@kbn/recently-accessed';
 import { coreServices } from './kibana_services';
 
-export let dashboardRecentlyAccessed: RecentlyAccessed;
+let dashboardRecentlyAccessed: RecentlyAccessed;
 
-export const setDashboardRecentlyAccessedService = () => {
-  dashboardRecentlyAccessed = new RecentlyAccessedService().start({
-    http: coreServices.http,
-    key: 'dashboardRecentlyAccessed',
-  });
+export const getDashboardRecentlyAccessedService = () => {
+  if (!dashboardRecentlyAccessed) {
+    dashboardRecentlyAccessed = new RecentlyAccessedService().start({
+      http: coreServices.http,
+      key: 'dashboardRecentlyAccessed',
+    });
+  }
+  return dashboardRecentlyAccessed;
 };

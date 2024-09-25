@@ -333,24 +333,16 @@ export class DashboardPlugin
 
     Promise.all([
       import('./services/dashboard_content_management_service'),
-      import('./services/dashboard_recently_accessed_service'),
       import('./dashboard_actions'),
       untilPluginStartServicesReady(),
-    ]).then(
-      ([
-        { setDashboardContentManagementService },
-        { setDashboardRecentlyAccessedService },
-        { buildAllDashboardActions },
-      ]) => {
-        setDashboardContentManagementService();
-        setDashboardRecentlyAccessedService();
+    ]).then(([{ setDashboardContentManagementService }, { buildAllDashboardActions }]) => {
+      setDashboardContentManagementService();
 
-        buildAllDashboardActions({
-          plugins,
-          allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
-        });
-      }
-    );
+      buildAllDashboardActions({
+        plugins,
+        allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
+      });
+    });
 
     return {
       locator: this.locator,

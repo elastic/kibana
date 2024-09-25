@@ -25,7 +25,7 @@ import {
 } from '../../dashboard_constants';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { dashboardContentManagementService } from '../../services/dashboard_content_management_service';
-import { dashboardRecentlyAccessed } from '../../services/dashboard_recently_accessed_service';
+import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import { coreServices } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import {
@@ -300,7 +300,7 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
-      recentlyAccessed: dashboardRecentlyAccessed,
+      recentlyAccessed: getDashboardRecentlyAccessedService(),
     };
   }, [
     contentEditorValidators,
