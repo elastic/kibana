@@ -44,7 +44,7 @@ export async function getDataStreamMapping({
 }): Promise<DataStreamMappingResponse> {
   const mappings = await datasetQualityESClient.mappings({ index: dataStream });
   const properties = mappings[lastBackingIndex]?.mappings?.properties;
-  logger.info(`tug-aj Mapping for data stream ${dataStream}: ${JSON.stringify(properties)}`);
+  logger.error(`tug-aj mapping for data stream ${dataStream}: ${JSON.stringify(properties)}`);
   const { count: fieldCount, capturedMapping: mapping } = countFields(properties ?? {}, field);
   const fieldPresent = mapping !== undefined;
   const fieldMapping = fieldPresent
