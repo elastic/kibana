@@ -17,6 +17,14 @@ const BASE_ES_MAPPING: MappingTypeMapping['properties'] = {
   'asset.criticality': {
     type: 'keyword',
   },
+  'entity.name': {
+    type: 'text',
+    fields: {
+      text: {
+        type: 'keyword',
+      },
+    },
+  },
 };
 
 const HOST_ES_MAPPING: MappingTypeMapping['properties'] = {

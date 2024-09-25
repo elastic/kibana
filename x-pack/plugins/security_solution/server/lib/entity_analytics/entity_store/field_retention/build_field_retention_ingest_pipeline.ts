@@ -13,6 +13,7 @@ import type {
   PreferNewestValue,
   PreferOldestValue,
 } from './types';
+import { getIdentityFieldForEntityType } from '../utils/utils';
 
 const ENRICH_FIELD = 'historical';
 
@@ -35,6 +36,24 @@ export const buildFieldRetentionIngestPipeline = ({
       target_field: ENRICH_FIELD,
     },
   },
+  {
+    set: {
+      field: '@timestamp',
+      value: '{{entity.lastSeenTimestamp}}',
+    },
+  },
+  {
+    remove: {
+      ignore_failure: true,
+      field: 'entity',
+    },
+  },
+  {
+    set: {
+      field: 'entity.name',
+      value: `{{${getIdentityFieldForEntityType(fieldRetentionDefinition.entityType)}}}`,
+    },
+  },
   ...getDotExpanderProcessors(allEntityFields),
   ...getFieldProcessors(fieldRetentionDefinition),
   ...getRemoveEmptyFieldProcessors(allEntityFields),
@@ -44,12 +63,6 @@ export const buildFieldRetentionIngestPipeline = ({
   arrayToSingleValueProcessor({
     field: 'asset.criticality',
   }),
-  {
-    remove: {
-      ignore_failure: true,
-      field: 'entity',
-    },
-  },
   {
     remove: {
       ignore_failure: true,
