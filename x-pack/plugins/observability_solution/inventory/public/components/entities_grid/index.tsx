@@ -30,7 +30,6 @@ import React, { useCallback, useState } from 'react';
 import { EntityType } from '../../../common/entities';
 import {
   ENTITY_DISPLAY_NAME,
-  ENTITY_ID,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '../../../common/es_fields/entities';
@@ -164,13 +163,13 @@ export function EntitiesGrid({
         case 'host':
         case 'container':
           return assetDetailsLocator?.getRedirectUrl({
-            assetId: entity[ENTITY_ID],
+            assetId: entity[ENTITY_DISPLAY_NAME],
             assetType: type,
           });
 
         case 'service':
           return serviceOverviewLocator?.getRedirectUrl({
-            serviceName: entity[ENTITY_ID],
+            serviceName: entity[ENTITY_DISPLAY_NAME],
           });
       }
     },
