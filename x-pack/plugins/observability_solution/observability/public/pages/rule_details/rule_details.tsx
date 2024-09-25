@@ -201,6 +201,9 @@ export function RuleDetailsPage() {
       data-test-subj="ruleDetails"
       pageHeader={{
         pageTitle: rule.name,
+        pageTitleProps: {
+          'data-test-subj': 'ruleName',
+        },
         children: <PageTitleContent rule={rule} />,
         bottomBorder: false,
         rightSideItems: [
