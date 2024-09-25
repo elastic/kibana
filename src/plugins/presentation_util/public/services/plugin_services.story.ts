@@ -8,25 +8,19 @@
  */
 
 import {
-  PluginServices,
-  PluginServiceProviders,
   PluginServiceProvider,
+  PluginServiceProviders,
   PluginServiceRegistry,
+  PluginServices,
 } from './create';
 import { PresentationUtilServices } from './types';
 
 import { capabilitiesServiceFactory } from './capabilities/capabilities.story';
-import { dataViewsServiceFactory } from './data_views/data_views.story';
-import { contentManagementServiceFactory } from './content_management/content_management.stub';
 import { labsServiceFactory } from './labs/labs.story';
-import { uiActionsServiceFactory } from './ui_actions/ui_actions.stub';
 
 export const providers: PluginServiceProviders<PresentationUtilServices> = {
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
-  dataViews: new PluginServiceProvider(dataViewsServiceFactory),
-  contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
-  uiActions: new PluginServiceProvider(uiActionsServiceFactory),
 };
 
 export const pluginServices = new PluginServices<PresentationUtilServices>();

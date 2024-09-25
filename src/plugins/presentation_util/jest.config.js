@@ -15,5 +15,6 @@ module.exports = {
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/src/plugins/presentation_util/{common,public,server}/**/*.{ts,tsx}',
+    '!<rootDir>/**/*.stories.*',
   ],
 };
