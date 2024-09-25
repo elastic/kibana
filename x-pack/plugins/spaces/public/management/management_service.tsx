@@ -6,6 +6,7 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
 import type {
   PrivilegesAPIClientPublicContract,
@@ -26,6 +27,7 @@ interface SetupDeps {
   getRolesAPIClient: () => Promise<RolesAPIClient>;
   eventTracker: EventTracker;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
+  logger: Logger;
 }
 
 export class ManagementService {
@@ -36,6 +38,7 @@ export class ManagementService {
     management,
     spacesManager,
     config,
+    logger,
     getRolesAPIClient,
     eventTracker,
     getPrivilegesAPIClient,
@@ -45,6 +48,7 @@ export class ManagementService {
         getStartServices,
         spacesManager,
         config,
+        logger,
         getRolesAPIClient,
         eventTracker,
         getPrivilegesAPIClient,

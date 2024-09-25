@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { from, map } from 'rxjs';
 import {
   AppMountParameters,
   CoreSetup,
@@ -15,8 +13,13 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import type { Logger } from '@kbn/logging';
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
+import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/logging';
+import { from, map } from 'rxjs';
+import { createCallInventoryAPI } from './api';
+import { TelemetryService } from './services/telemetry/telemetry_service';
+import { InventoryServices } from './services/types';
 import type {
   ConfigSchema,
   InventoryPublicSetup,
@@ -24,9 +27,6 @@ import type {
   InventorySetupDependencies,
   InventoryStartDependencies,
 } from './types';
-import { InventoryServices } from './services/types';
-import { createCallInventoryAPI } from './api';
-import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export class InventoryPlugin
   implements
