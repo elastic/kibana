@@ -1158,9 +1158,7 @@
             "label": "pinnedEventsSaveObject",
             "description": [],
             "signature": [
-              "{ [x: string]: ",
-              "PinnedEvent",
-              "; }"
+              "{ [x: string]: { version: string; eventId: string; timelineId: string; pinnedEventId: string; createdBy?: string | null | undefined; updatedBy?: string | null | undefined; created?: number | null | undefined; updated?: number | null | undefined; }; }"
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,

@@ -6,10 +6,12 @@
  */
 
 import { pick } from 'lodash';
+
 import { isDefined } from '@kbn/ml-is-defined';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import type { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
 import { resolveMaxTimeInterval } from './job_utils';
-import { parseInterval } from './parse_interval';
 import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '../types/alerts';
 
 const narrowBucketLength = 60;
