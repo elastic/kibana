@@ -95,7 +95,6 @@ function createRoot({ logFileName, hosts }: RootConfig) {
   });
 }
 
-// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
 describe('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
