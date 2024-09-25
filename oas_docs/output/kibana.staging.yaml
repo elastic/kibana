@@ -20620,7 +20620,7 @@ paths:
           description: Indicates that the timeline has been successfully copied.
       summary: Copies timeline or timeline template.
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
   /api/timeline/_draft:
     get:
