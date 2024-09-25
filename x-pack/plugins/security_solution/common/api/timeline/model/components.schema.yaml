@@ -305,9 +305,8 @@ components:
           nullable: true
         queryMatch:
           $ref: '#/components/schemas/QueryMatchResult'
-    BareNote:
+    BareNoteWithoutExternalRefs:
       type: object
-      required: [timelineId]
       properties:
         eventId:
           type: string
@@ -330,10 +329,35 @@ components:
         updatedBy:
           type: string
           nullable: true
+    BareNote:
+      type: object
+      required: [timelineId]
+      properties:
+        eventId:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        timelineId:
+          type: string
+        created:
+          type: number
+          nullable: true
+        createdBy:
+          type: string
+          nullable: true
+        updated:
+          type: number
+          nullable: true
+        updatedBy:
+          type: string
+          nullable: true
     Note:
       allOf:
         - $ref: '#/components/schemas/BareNote'
         - type: object
+          required: [noteId, version]
           properties:
             noteId:
               type: string
@@ -451,12 +475,10 @@ components:
             serializedQuery:
               type: string
               nullable: true
-    PinnedEvent:
+    BarePinnedEvent:
       type: object
-      required: [eventId, pinnedEventId, timelineId, version]
+      required: [eventId, timelineId]
       properties:
-        pinnedEventId:
-          type: string
         eventId:
           type: string
         timelineId:
@@ -473,8 +495,16 @@ components:
         updatedBy:
           type: string
           nullable: true
-        version:
-          type: string
+    PinnedEvent:
+      allOf:
+        - $ref: '#/components/schemas/BarePinnedEvent'
+        - type: object
+          required: [pinnedEventId, version]
+          properties:
+            pinnedEventId:
+              type: string
+            version:
+              type: string
     Sort:
       oneOf:
         - $ref: '#/components/schemas/SortObject'
