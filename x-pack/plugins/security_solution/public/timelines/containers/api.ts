@@ -13,17 +13,19 @@ import { isEmpty } from 'lodash';
 import { throwErrors } from '@kbn/cases-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 
+import type { CleanDraftTimelinesResponse } from '../../../common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
 import type {
-  TimelineResponse,
   TimelineErrorResponse,
   ImportTimelineResultSchema,
   SingleTimelineResponse,
   GetAllTimelineVariables,
   TimelineType,
   PatchTimelineResponse,
+  CreateTimelinesResponse,
+  CopyTimelineResponse,
+  GetDraftTimelinesResponse,
 } from '../../../common/api/timeline';
 import {
-  TimelineResponseType,
   TimelineStatusEnum,
   TimelineErrorResponseType,
   importTimelineResultSchema,
@@ -32,6 +34,7 @@ import {
   GetTimelineResponse,
   ResolveTimelineResponse,
   GetTimelinesResponse,
+  PersistTimelineResponse,
 } from '../../../common/api/timeline';
 import {
   TIMELINE_URL,
@@ -71,13 +74,10 @@ const createToasterPlainError = (message: string) => new ToasterError([message])
 
 const parseOrThrow = parseOrThrowErrorFactory(createToasterPlainError);
 
-const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorResponse) =>
-  pipe(
-    TimelineResponseType.decode(respTimeline),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+const decodeTimelineResponse = (respTimeline?: PersistTimelineResponse | TimelineErrorResponse) =>
+  parseOrThrow(PersistTimelineResponse)(respTimeline);
 
-const decodeSingleTimelineResponse = (respTimeline?: SingleTimelineResponse) =>
+const decodeSingleTimelineResponse = (respTimeline?: GetTimelineResponse) =>
   parseOrThrow(GetTimelineResponse)(respTimeline);
 
 const decodeResolvedSingleTimelineResponse = (respTimeline?: ResolveTimelineResponse) =>
@@ -103,7 +103,7 @@ const decodeResponseFavoriteTimeline = (respTimeline?: PersistFavoriteRouteRespo
 
 const postTimeline = async ({
   timeline,
-}: RequestPostTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
+}: RequestPostTimeline): Promise<CreateTimelinesResponse | TimelineErrorResponse> => {
   let requestBody;
   try {
     requestBody = JSON.stringify({ timeline });
@@ -111,7 +111,7 @@ const postTimeline = async ({
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
 
-  const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_URL, {
+  const response = await KibanaServices.get().http.post<CreateTimelinesResponse>(TIMELINE_URL, {
     method: 'POST',
     body: requestBody,
     version: '2023-10-31',
@@ -169,7 +169,7 @@ export const copyTimeline = async ({
   timelineId,
   timeline,
   savedSearch,
-}: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
+}: RequestPersistTimeline): Promise<CopyTimelineResponse | TimelineErrorResponse> => {
   let response = null;
   let requestBody = null;
   let newSavedSearchId = null;
@@ -199,7 +199,7 @@ export const copyTimeline = async ({
   }
 
   try {
-    response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_COPY_URL, {
+    response = await KibanaServices.get().http.post<CopyTimelineResponse>(TIMELINE_COPY_URL, {
       method: 'POST',
       body: requestBody,
       version: '1',
@@ -218,10 +218,10 @@ export const persistTimeline = async ({
   timeline,
   version,
   savedSearch,
-}: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
+}: RequestPersistTimeline): Promise<PersistTimelineResponse | TimelineErrorResponse> => {
   try {
     if (isEmpty(timelineId) && timeline.status === TimelineStatusEnum.draft && timeline) {
-      const temp: TimelineResponse | TimelineErrorResponse = await cleanDraftTimeline({
+      const temp: CleanDraftTimelinesResponse | TimelineErrorResponse = await cleanDraftTimeline({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineType: timeline.timelineType!,
         templateTimelineId: timeline.templateTimelineId ?? undefined,
@@ -324,13 +324,16 @@ export const getDraftTimeline = async ({
   timelineType,
 }: {
   timelineType: TimelineType;
-}): Promise<TimelineResponse> => {
-  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_DRAFT_URL, {
-    query: {
-      timelineType,
-    },
-    version: '2023-10-31',
-  });
+}): Promise<GetDraftTimelinesResponse> => {
+  const response = await KibanaServices.get().http.get<GetDraftTimelinesResponse>(
+    TIMELINE_DRAFT_URL,
+    {
+      query: {
+        timelineType,
+      },
+      version: '2023-10-31',
+    }
+  );
 
   return decodeTimelineResponse(response);
 };
@@ -343,7 +346,7 @@ export const cleanDraftTimeline = async ({
   timelineType: TimelineType;
   templateTimelineId?: string;
   templateTimelineVersion?: number;
-}): Promise<TimelineResponse | TimelineErrorResponse> => {
+}): Promise<CleanDraftTimelinesResponse | TimelineErrorResponse> => {
   let requestBody;
   const templateTimelineInfo =
     timelineType === TimelineTypeEnum.template
@@ -360,10 +363,13 @@ export const cleanDraftTimeline = async ({
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
-  const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_URL, {
-    body: requestBody,
-    version: '2023-10-31',
-  });
+  const response = await KibanaServices.get().http.post<CleanDraftTimelinesResponse>(
+    TIMELINE_DRAFT_URL,
+    {
+      body: requestBody,
+      version: '2023-10-31',
+    }
+  );
 
   return decodeTimelineResponse(response);
 };
