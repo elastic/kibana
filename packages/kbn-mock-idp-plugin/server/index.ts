@@ -17,6 +17,7 @@ export const config = {
     // The plugin should only be enabled in Serverless.
     enabled: offeringBasedSchema({
       serverless: schema.boolean({ defaultValue: true }),
+      traditional: schema.boolean({ defaultValue: false }),
       options: { defaultValue: false },
     }),
   }),

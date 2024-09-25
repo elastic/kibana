@@ -146,6 +146,48 @@ paths:
                 - actionTypeId
       responses:
         '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  config:
+                    additionalProperties: {}
+                    type: object
+                  connector_type_id:
+                    description: The connector type identifier.
+                    type: string
+                  id:
+                    description: The identifier for the connector.
+                    type: string
+                  is_deprecated:
+                    description: Indicates whether the connector is deprecated.
+                    type: boolean
+                  is_missing_secrets:
+                    description: Indicates whether the connector is missing secrets.
+                    type: boolean
+                  is_preconfigured:
+                    description: >-
+                      Indicates whether the connector is preconfigured. If true,
+                      the `config` and `is_missing_secrets` properties are
+                      omitted from the response. 
+                    type: boolean
+                  is_system_action:
+                    description: >-
+                      Indicates whether the connector is used for system
+                      actions.
+                    type: boolean
+                  name:
+                    description: ' The name of the rule.'
+                    type: string
+                required:
+                  - id
+                  - name
+                  - connector_type_id
+                  - is_preconfigured
+                  - is_deprecated
+                  - is_system_action
           description: Indicates a successful call.
       summary: Create a connector
       tags:
@@ -203,6 +245,48 @@ paths:
             type: string
       responses:
         '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  config:
+                    additionalProperties: {}
+                    type: object
+                  connector_type_id:
+                    description: The connector type identifier.
+                    type: string
+                  id:
+                    description: The identifier for the connector.
+                    type: string
+                  is_deprecated:
+                    description: Indicates whether the connector is deprecated.
+                    type: boolean
+                  is_missing_secrets:
+                    description: Indicates whether the connector is missing secrets.
+                    type: boolean
+                  is_preconfigured:
+                    description: >-
+                      Indicates whether the connector is preconfigured. If true,
+                      the `config` and `is_missing_secrets` properties are
+                      omitted from the response. 
+                    type: boolean
+                  is_system_action:
+                    description: >-
+                      Indicates whether the connector is used for system
+                      actions.
+                    type: boolean
+                  name:
+                    description: ' The name of the rule.'
+                    type: string
+                required:
+                  - id
+                  - name
+                  - connector_type_id
+                  - is_preconfigured
+                  - is_deprecated
+                  - is_system_action
           description: Indicates a successful call.
       summary: Get connector information
       tags:
@@ -253,6 +337,48 @@ paths:
                 - name
       responses:
         '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  config:
+                    additionalProperties: {}
+                    type: object
+                  connector_type_id:
+                    description: The connector type identifier.
+                    type: string
+                  id:
+                    description: The identifier for the connector.
+                    type: string
+                  is_deprecated:
+                    description: Indicates whether the connector is deprecated.
+                    type: boolean
+                  is_missing_secrets:
+                    description: Indicates whether the connector is missing secrets.
+                    type: boolean
+                  is_preconfigured:
+                    description: >-
+                      Indicates whether the connector is preconfigured. If true,
+                      the `config` and `is_missing_secrets` properties are
+                      omitted from the response. 
+                    type: boolean
+                  is_system_action:
+                    description: >-
+                      Indicates whether the connector is used for system
+                      actions.
+                    type: boolean
+                  name:
+                    description: ' The name of the rule.'
+                    type: string
+                required:
+                  - id
+                  - name
+                  - connector_type_id
+                  - is_preconfigured
+                  - is_deprecated
+                  - is_system_action
           description: Indicates a successful call.
       summary: Update a connector
       tags:
@@ -297,6 +423,48 @@ paths:
                 - params
       responses:
         '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  config:
+                    additionalProperties: {}
+                    type: object
+                  connector_type_id:
+                    description: The connector type identifier.
+                    type: string
+                  id:
+                    description: The identifier for the connector.
+                    type: string
+                  is_deprecated:
+                    description: Indicates whether the connector is deprecated.
+                    type: boolean
+                  is_missing_secrets:
+                    description: Indicates whether the connector is missing secrets.
+                    type: boolean
+                  is_preconfigured:
+                    description: >-
+                      Indicates whether the connector is preconfigured. If true,
+                      the `config` and `is_missing_secrets` properties are
+                      omitted from the response. 
+                    type: boolean
+                  is_system_action:
+                    description: >-
+                      Indicates whether the connector is used for system
+                      actions.
+                    type: boolean
+                  name:
+                    description: ' The name of the rule.'
+                    type: string
+                required:
+                  - id
+                  - name
+                  - connector_type_id
+                  - is_preconfigured
+                  - is_deprecated
+                  - is_system_action
           description: Indicates a successful call.
       summary: Run a connector
       tags:
@@ -377,6 +545,48 @@ paths:
             type: string
       responses:
         '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  config:
+                    additionalProperties: {}
+                    type: object
+                  connector_type_id:
+                    description: The connector type identifier.
+                    type: string
+                  id:
+                    description: The identifier for the connector.
+                    type: string
+                  is_deprecated:
+                    description: Indicates whether the connector is deprecated.
+                    type: boolean
+                  is_missing_secrets:
+                    description: Indicates whether the connector is missing secrets.
+                    type: boolean
+                  is_preconfigured:
+                    description: >-
+                      Indicates whether the connector is preconfigured. If true,
+                      the `config` and `is_missing_secrets` properties are
+                      omitted from the response. 
+                    type: boolean
+                  is_system_action:
+                    description: >-
+                      Indicates whether the connector is used for system
+                      actions.
+                    type: boolean
+                  name:
+                    description: ' The name of the rule.'
+                    type: string
+                required:
+                  - id
+                  - name
+                  - connector_type_id
+                  - is_preconfigured
+                  - is_deprecated
+                  - is_system_action
           description: Indicates a successful call.
       summary: Get connector information
       tags:
@@ -399,7 +609,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: An identifier for the connector.
+          in: path
           name: id
           required: false
           schema:
@@ -430,6 +641,48 @@ paths:
                 - connector_type_id
       responses:
         '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  config:
+                    additionalProperties: {}
+                    type: object
+                  connector_type_id:
+                    description: The connector type identifier.
+                    type: string
+                  id:
+                    description: The identifier for the connector.
+                    type: string
+                  is_deprecated:
+                    description: Indicates whether the connector is deprecated.
+                    type: boolean
+                  is_missing_secrets:
+                    description: Indicates whether the connector is missing secrets.
+                    type: boolean
+                  is_preconfigured:
+                    description: >-
+                      Indicates whether the connector is preconfigured. If true,
+                      the `config` and `is_missing_secrets` properties are
+                      omitted from the response. 
+                    type: boolean
+                  is_system_action:
+                    description: >-
+                      Indicates whether the connector is used for system
+                      actions.
+                    type: boolean
+                  name:
+                    description: ' The name of the rule.'
+                    type: string
+                required:
+                  - id
+                  - name
+                  - connector_type_id
+                  - is_preconfigured
+                  - is_deprecated
+                  - is_system_action
           description: Indicates a successful call.
       summary: Create a connector
       tags:
@@ -480,6 +733,48 @@ paths:
                 - name
       responses:
         '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  config:
+                    additionalProperties: {}
+                    type: object
+                  connector_type_id:
+                    description: The connector type identifier.
+                    type: string
+                  id:
+                    description: The identifier for the connector.
+                    type: string
+                  is_deprecated:
+                    description: Indicates whether the connector is deprecated.
+                    type: boolean
+                  is_missing_secrets:
+                    description: Indicates whether the connector is missing secrets.
+                    type: boolean
+                  is_preconfigured:
+                    description: >-
+                      Indicates whether the connector is preconfigured. If true,
+                      the `config` and `is_missing_secrets` properties are
+                      omitted from the response. 
+                    type: boolean
+                  is_system_action:
+                    description: >-
+                      Indicates whether the connector is used for system
+                      actions.
+                    type: boolean
+                  name:
+                    description: ' The name of the rule.'
+                    type: string
+                required:
+                  - id
+                  - name
+                  - connector_type_id
+                  - is_preconfigured
+                  - is_deprecated
+                  - is_system_action
           description: Indicates a successful call.
       summary: Update a connector
       tags:
@@ -526,6 +821,48 @@ paths:
                 - params
       responses:
         '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  config:
+                    additionalProperties: {}
+                    type: object
+                  connector_type_id:
+                    description: The connector type identifier.
+                    type: string
+                  id:
+                    description: The identifier for the connector.
+                    type: string
+                  is_deprecated:
+                    description: Indicates whether the connector is deprecated.
+                    type: boolean
+                  is_missing_secrets:
+                    description: Indicates whether the connector is missing secrets.
+                    type: boolean
+                  is_preconfigured:
+                    description: >-
+                      Indicates whether the connector is preconfigured. If true,
+                      the `config` and `is_missing_secrets` properties are
+                      omitted from the response. 
+                    type: boolean
+                  is_system_action:
+                    description: >-
+                      Indicates whether the connector is used for system
+                      actions.
+                    type: boolean
+                  name:
+                    description: ' The name of the rule.'
+                    type: string
+                required:
+                  - id
+                  - name
+                  - connector_type_id
+                  - is_preconfigured
+                  - is_deprecated
+                  - is_system_action
           description: Indicates a successful call.
       summary: Run a connector
       tags:
@@ -591,6 +928,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
       summary: Delete a rule
       tags:
         - alerting
@@ -1417,6 +1760,12 @@ paths:
                   - execution_status
                   - revision
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
       summary: Get rule details
       tags:
         - alerting
@@ -2552,6 +2901,12 @@ paths:
                   - execution_status
                   - revision
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '409':
+          description: Indicates that the rule id is already in use.
       summary: Create a rule
       tags:
         - alerting
@@ -3658,6 +4013,14 @@ paths:
                   - execution_status
                   - revision
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
+        '409':
+          description: Indicates that the rule has already been updated by another user.
       summary: Update a rule
       tags:
         - alerting
@@ -3701,6 +4064,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
       summary: Disable a rule
       tags:
         - alerting
@@ -3732,6 +4101,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
       summary: Enable a rule
       tags:
         - alerting
@@ -3825,6 +4200,14 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
+        '409':
+          description: Indicates that the rule has already been updated by another user.
       summary: Update the API key for a rule
       tags:
         - alerting
@@ -3863,6 +4246,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule or alert with the given ID does not exist.
       summary: Mute an alert
       tags:
         - alerting
@@ -3901,6 +4290,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule or alert with the given ID does not exist.
       summary: Unmute an alert
       tags:
         - alerting
@@ -4828,6 +5223,10 @@ paths:
                   - execution_status
                   - revision
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
       summary: Get information about rules
       tags:
         - alerting
@@ -12235,6 +12634,25 @@ components:
             collection will be disabled
           nullable: true
           type: boolean
+        monitoring_diagnostics:
+          type: object
+          properties:
+            limit:
+              type: object
+              properties:
+                burst:
+                  type: number
+                interval:
+                  type: string
+            uploader:
+              type: object
+              properties:
+                init_dur:
+                  type: string
+                max_dur:
+                  type: string
+                max_retries:
+                  type: number
         monitoring_enabled:
           items:
             enum:
@@ -12242,9 +12660,22 @@ components:
               - logs
             type: string
           type: array
+        monitoring_http:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            host:
+              type: string
+            port:
+              type: number
+          required:
+            - enabled
         monitoring_output_id:
           nullable: true
           type: string
+        monitoring_pprof_enabled:
+          type: boolean
         name:
           type: string
         namespace:
@@ -12716,6 +13147,63 @@ components:
           type: string
         inputs:
           type: string
+        monitoring:
+          type: object
+          properties:
+            diagnostics:
+              type: object
+              properties:
+                limit:
+                  type: object
+                  properties:
+                    burst:
+                      type: number
+                    interval:
+                      type: string
+                uploader:
+                  type: object
+                  properties:
+                    init_dur:
+                      type: string
+                    max_dur:
+                      type: string
+                    max_retries:
+                      type: number
+            enabled:
+              type: boolean
+            http:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                host:
+                  type: string
+                port:
+                  type: number
+              required:
+                - enabled
+            logs:
+              type: boolean
+            metrics:
+              type: boolean
+            namespace:
+              type: string
+            pprof:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+              required:
+                - enabled
+            traces:
+              type: boolean
+            use_output:
+              type: string
+          required:
+            - enabled
+            - metrics
+            - logs
+            - traces
         output_permissions:
           additionalProperties:
             type: object

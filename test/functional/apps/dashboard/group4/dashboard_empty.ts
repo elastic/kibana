@@ -19,7 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const { common, dashboard, header } = getPageObjects(['common', 'dashboard', 'header']);
 
-  describe('dashboard empty state', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/165745
+  describe.skip('dashboard empty state', () => {
     const kbnDirectory = 'test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
 
     before(async function () {

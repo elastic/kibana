@@ -14,9 +14,6 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
   const retry = getService('retry');
 
   return {
-    async expectToBeIndexDetailPage() {
-      expect(await browser.getCurrentUrl()).contain('/index_details');
-    },
     async expectIndexDetailPageHeader() {
       await testSubjects.existOrFail('searchIndexDetailsHeader', { timeout: 2000 });
     },
@@ -66,6 +63,16 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.missingOrFail('setupAISearchButton', { timeout: 2000 });
     },
 
+    async expectAddDocumentCodeExamples() {
+      await testSubjects.existOrFail('SearchIndicesAddDocumentsCode', { timeout: 2000 });
+    },
+
+    async expectHasIndexDocuments() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail('search-index-documents-result', { timeout: 2000 });
+      });
+    },
+
     async expectMoreOptionsActionButtonExists() {
       await testSubjects.existOrFail('moreOptionsActionButton');
     },
@@ -100,6 +107,49 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.click('reloadButton', 2000);
       });
+    },
+    async expectWithDataTabsExists() {
+      await testSubjects.existOrFail('mappingsTab', { timeout: 2000 });
+      await testSubjects.existOrFail('dataTab', { timeout: 2000 });
+    },
+    async expectShouldDefaultToDataTab() {
+      expect(await browser.getCurrentUrl()).contain('/data');
+    },
+    async withDataChangeTabs(tab: 'dataTab' | 'mappingsTab' | 'settingsTab') {
+      await testSubjects.click(tab);
+    },
+    async expectUrlShouldChangeTo(tab: 'data' | 'mappings' | 'settings') {
+      expect(await browser.getCurrentUrl()).contain(`/${tab}`);
+    },
+    async expectMappingsComponentIsVisible() {
+      await testSubjects.existOrFail('indexDetailsMappingsToggleViewButton', { timeout: 2000 });
+    },
+    async expectSettingsComponentIsVisible() {
+      await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
+    },
+    async expectSelectedLanguage(language: string) {
+      await testSubjects.existOrFail('codeExampleLanguageSelect');
+      expect(
+        (await testSubjects.getVisibleText('codeExampleLanguageSelect')).toLowerCase()
+      ).contain(language);
+    },
+    async selectCodingLanguage(language: string) {
+      await testSubjects.existOrFail('codeExampleLanguageSelect');
+      await testSubjects.click('codeExampleLanguageSelect');
+      await testSubjects.existOrFail(`lang-option-${language}`);
+      await testSubjects.click(`lang-option-${language}`);
+      expect(
+        (await testSubjects.getVisibleText('codeExampleLanguageSelect')).toLowerCase()
+      ).contain(language);
+    },
+    async codeSampleContainsValue(subject: string, value: string) {
+      const tstSubjId = `${subject}-code-block`;
+      await testSubjects.existOrFail(tstSubjId);
+      expect(await testSubjects.getVisibleText(tstSubjId)).contain(value);
+    },
+    async openConsoleCodeExample() {
+      await testSubjects.existOrFail('tryInConsoleButton');
+      await testSubjects.click('tryInConsoleButton');
     },
   };
 }

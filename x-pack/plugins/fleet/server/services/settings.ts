@@ -36,15 +36,7 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
   return {
     id: settingsSo.id,
     version: settingsSo.version,
-    secret_storage_requirements_met: settingsSo.attributes.secret_storage_requirements_met,
-    output_secret_storage_requirements_met:
-      settingsSo.attributes.output_secret_storage_requirements_met,
-    has_seen_add_data_notice: settingsSo.attributes.has_seen_add_data_notice,
-    prerelease_integrations_enabled: settingsSo.attributes.prerelease_integrations_enabled,
-    use_space_awareness_migration_status:
-      settingsSo.attributes.use_space_awareness_migration_status,
-    use_space_awareness_migration_started_at:
-      settingsSo.attributes.use_space_awareness_migration_started_at,
+    ...settingsSo.attributes,
     fleet_server_hosts: fleetServerHosts.items.flatMap((item) => item.host_urls),
     preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
   };

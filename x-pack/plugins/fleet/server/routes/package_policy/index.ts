@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
 
 import { getRouteRequiredAuthz } from '../../services/security';
 
@@ -23,20 +22,8 @@ import {
   DryRunPackagePoliciesRequestSchema,
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
-  PackagePolicyResponseSchema,
-  BulkGetPackagePoliciesResponseBodySchema,
-  DeletePackagePoliciesResponseBodySchema,
-  DeleteOnePackagePolicyResponseSchema,
-  UpgradePackagePoliciesResponseBodySchema,
-  DryRunPackagePoliciesResponseBodySchema,
-  OrphanedPackagePoliciesResponseSchema,
-  CreatePackagePolicyResponseSchema,
 } from '../../types';
 import { calculateRouteAuthz } from '../../services/security/security';
-
-import { genericErrorResponse, notFoundResponse } from '../schema/errors';
-
-import { ListResponseSchema } from '../schema/utils';
 
 import {
   getPackagePoliciesHandler,
@@ -61,25 +48,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('get', PACKAGE_POLICY_API_ROUTES.LIST_PATTERN)
         ).granted,
-      description: 'List package policies',
-      options: {
-        tags: ['oas-tag:Fleet package policies'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: GetPackagePoliciesRequestSchema,
-          response: {
-            200: {
-              body: () => ListResponseSchema(PackagePolicyResponseSchema),
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-          },
-        },
+        validate: { request: GetPackagePoliciesRequestSchema },
       },
       getPackagePoliciesHandler
     );
@@ -93,28 +66,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('post', PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN)
         ).granted,
-      description: 'Bulk get package policies',
-      options: {
-        tags: ['oas-tag:Fleet package policies'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: BulkGetPackagePoliciesRequestSchema,
-          response: {
-            200: {
-              body: () => BulkGetPackagePoliciesResponseBodySchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-            404: {
-              body: notFoundResponse,
-            },
-          },
-        },
+        validate: { request: BulkGetPackagePoliciesRequestSchema },
       },
       bulkGetPackagePoliciesHandler
     );
@@ -128,31 +84,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('get', PACKAGE_POLICY_API_ROUTES.INFO_PATTERN)
         ).granted,
-      description: 'Get package policy by ID',
-      options: {
-        tags: ['oas-tag:Fleet package policies'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: GetOnePackagePolicyRequestSchema,
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  item: PackagePolicyResponseSchema,
-                }),
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-            404: {
-              body: notFoundResponse,
-            },
-          },
-        },
+        validate: { request: GetOnePackagePolicyRequestSchema },
       },
       getOnePackagePolicyHandler
     );
@@ -167,48 +103,20 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: {},
-          response: {
-            200: {
-              body: () => OrphanedPackagePoliciesResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-          },
-        },
+        validate: {},
       },
       getOrphanedPackagePolicies
     );
 
   // Create
-  // Authz check moved to service here: https://github.com/elastic/kibana/pull/140458
   router.versioned
     .post({
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
-      description: 'Create package policy',
-      options: {
-        tags: ['oas-tag:Fleet package policies'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: CreatePackagePolicyRequestSchema,
-          response: {
-            200: {
-              body: () => CreatePackagePolicyResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-            409: {
-              body: genericErrorResponse,
-            },
-          },
-        },
+        validate: { request: CreatePackagePolicyRequestSchema },
       },
       createPackagePolicyHandler
     );
@@ -222,31 +130,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('put', PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN)
         ).granted,
-      description: 'Update package policy by ID',
-      options: {
-        tags: ['oas-tag:Fleet package policies'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: UpdatePackagePolicyRequestSchema,
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  item: PackagePolicyResponseSchema,
-                }),
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-            403: {
-              body: genericErrorResponse,
-            },
-          },
-        },
+        validate: { request: UpdatePackagePolicyRequestSchema },
       },
 
       updatePackagePolicyHandler
@@ -259,25 +147,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
-      description: 'Bulk delete package policies',
-      options: {
-        tags: ['oas-tag:Fleet package policies'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: DeletePackagePoliciesRequestSchema,
-          response: {
-            200: {
-              body: () => DeletePackagePoliciesResponseBodySchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-          },
-        },
+        validate: { request: DeletePackagePoliciesRequestSchema },
       },
       deletePackagePolicyHandler
     );
@@ -288,25 +162,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
-      description: 'Delete package policy by ID',
-      options: {
-        tags: ['oas-tag:Fleet package policies'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: DeleteOnePackagePolicyRequestSchema,
-          response: {
-            200: {
-              body: () => DeleteOnePackagePolicyResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-          },
-        },
+        validate: { request: DeleteOnePackagePolicyRequestSchema },
       },
       deleteOnePackagePolicyHandler
     );
@@ -318,25 +178,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
-      description: 'Upgrade package policy to a newer package version',
-      options: {
-        tags: ['oas-tag:Fleet package policies'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: UpgradePackagePoliciesRequestSchema,
-          response: {
-            200: {
-              body: () => UpgradePackagePoliciesResponseBodySchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-          },
-        },
+        validate: { request: UpgradePackagePoliciesRequestSchema },
       },
       upgradePackagePolicyHandler
     );
@@ -348,25 +194,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { readIntegrationPolicies: true },
       },
-      description: 'Dry run package policy upgrade',
-      options: {
-        tags: ['oas-tag:Fleet package policies'],
-      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: DryRunPackagePoliciesRequestSchema,
-          response: {
-            200: {
-              body: () => DryRunPackagePoliciesResponseBodySchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-          },
-        },
+        validate: { request: DryRunPackagePoliciesRequestSchema },
       },
       dryRunUpgradePackagePolicyHandler
     );

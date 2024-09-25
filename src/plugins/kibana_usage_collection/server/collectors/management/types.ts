@@ -55,7 +55,6 @@ export interface UsageStats {
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logsExplorer:allowedDataViews': string[];
   'observability:logSources': string[];
-  'observability:aiAssistantLogsIndexPattern': string;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'visualization:heatmap:maxBuckets': number;
@@ -181,4 +180,5 @@ export interface UsageStats {
   'aiAssistant:preferredAIAssistantType': string;
   'observability:profilingFetchTopNFunctionsFromStacktraces': boolean;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
+  'observability:searchExcludedDataTiers': string[];
 }

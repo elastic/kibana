@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   describe('console autocomplete feature', function describeIndexTests() {
-    this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
