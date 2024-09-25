@@ -287,7 +287,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.lowCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'This level limits resources to {maxVCPUs, plural, one {vCPU} other {vCPUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                  'This level limits resources to {maxVCPUs, plural, one {vCPU} other {# vCPUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
                 values: { maxVCPUs: vcpuRange.max },
               }
             );
@@ -296,7 +296,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.mediumCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'This level limits resources to {maxVCPUs, plural, one {vCPU} other {vCPUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                  'This level limits resources to {maxVCPUs, plural, one {vCPU} other {# vCPUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
                 values: { maxVCPUs: vcpuRange.max },
               }
             );
@@ -305,7 +305,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.highCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'This level may use {maxVCPUs, plural, one {vCPU} other {vCPUs}} - the maximum number of vCPUs available for this deployment. If the maximum is 2 vCPUs or fewer, this level is equivalent to the medium or low level.',
+                  'This level may use {maxVCPUs, plural, one {vCPU} other {# vCPUs}} - the maximum number of vCPUs available for this deployment. If the maximum is 2 vCPUs or fewer, this level is equivalent to the medium or low level.',
                 values: { maxVCPUs: vcpuRange.max },
               }
             );
@@ -351,7 +351,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.serverless.lowCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'This level limits resources to {vcus, plural, one {VCU} other {VCUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                  'This level limits resources to {vcus, plural, one {VCU} other {# VCUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
                 values: { vcus: vcpuRange.max },
               }
             );
@@ -360,7 +360,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.serverless.mediumCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
+                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {# VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
                 values: { vcus: vcpuRange.max },
               }
             );
@@ -369,7 +369,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.serverless.highCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
+                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {# VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
                 values: { vcus: vcpuRange.max },
               }
             );
