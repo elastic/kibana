@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           withTimeoutMs: 500,
         });
 
-        expect(events[events.length - 1].context.dscProfiles).to.eql([
+        expect(events[events.length - 1].context.discoverProfiles).to.eql([
           'example-root-profile',
           'default-data-source-profile',
         ]);
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           withTimeoutMs: 500,
         });
 
-        expect(events[events.length - 1].context.dscProfiles).to.eql([
+        expect(events[events.length - 1].context.discoverProfiles).to.eql([
           'example-root-profile',
           'example-data-source-profile',
         ]);
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             withTimeoutMs: 500,
           });
 
-          expect(eventsAfter[eventsAfter.length - 1].context.dscProfiles).to.eql([]);
+          expect(eventsAfter[eventsAfter.length - 1].context.discoverProfiles).to.eql([]);
         });
       });
 
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(
           events.length > 0 &&
-            events.every((event) => !(event.context.dscProfiles as string[])?.length)
+            events.every((event) => !(event.context.discoverProfiles as string[])?.length)
         ).to.be(true);
       });
     });
