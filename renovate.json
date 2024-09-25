@@ -136,10 +136,10 @@
     },
     {
       "groupName": "HAPI ecosystem",
-      "matchDepNames": ["@hapi/*", "brok"],
-      "reviewers": ["team:kibana-core", "team:kibana-security"],
+      "matchDepNames": ["@hapi/**", "!@hapi/cookie", "brok"],
+      "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Core", "Team:Security", "backport:prev-minor"],
+      "labels": ["release_note:skip", "Team:Core", "backport:prev-minor"],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
