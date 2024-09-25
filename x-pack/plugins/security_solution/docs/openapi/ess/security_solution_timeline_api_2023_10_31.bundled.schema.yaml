@@ -3,7 +3,7 @@ info:
   description: >-
     You can create Timelines and Timeline templates via the API, as well as
     import new Timelines from an ndjson file.
-  title: Security Solution Timeline API (Elastic Cloud and self-hosted)
+  title: Security Timeline API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
@@ -53,7 +53,7 @@ paths:
           description: Indicates the note was successfully deleted.
       summary: Delete a note
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
     get:
       description: Get all notes for a given document.
@@ -104,7 +104,7 @@ paths:
           description: Indicates the requested notes were returned.
       summary: Get notes
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
     patch:
       description: Add a note to a Timeline or update an existing note.
@@ -158,7 +158,7 @@ paths:
           description: Indicates the note was successfully created.
       summary: Add or update a note
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
   /api/pinned_event:
     patch:
@@ -201,7 +201,7 @@ paths:
           description: Indicates the event was successfully pinned to the Timeline.
       summary: Pin an event
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
   /api/timeline:
     delete:
@@ -247,7 +247,7 @@ paths:
           description: Indicates the Timeline was successfully deleted.
       summary: Delete Timelines or Timeline templates
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
     get:
       description: Get the details of an existing saved Timeline or Timeline template.
@@ -283,7 +283,7 @@ paths:
           description: Indicates that the (template) Timeline was found and returned.
       summary: Get Timeline or Timeline template details
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
     patch:
       description: >-
@@ -351,7 +351,7 @@ paths:
             a draft Timeline.
       summary: Update a Timeline
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
     post:
       description: Create a new Timeline or Timeline template.
@@ -421,7 +421,7 @@ paths:
           description: Indicates that there was an error in the Timeline creation.
       summary: Create a Timeline or Timeline template
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
   /api/timeline/_draft:
     get:
@@ -488,7 +488,7 @@ paths:
             draft Timeline with the given `timelineId`.
       summary: Get draft Timeline or Timeline template details
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
     post:
       description: >
@@ -566,7 +566,7 @@ paths:
             `timelineId`.
       summary: Create a clean draft Timeline or Timeline template
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
   /api/timeline/_export:
     post:
@@ -613,7 +613,7 @@ paths:
           description: Indicates that the export size limit was exceeded.
       summary: Export Timelines
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
   /api/timeline/_favorite:
     patch:
@@ -676,7 +676,7 @@ paths:
             the favorite status.
       summary: Favorite a Timeline or Timeline template
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
   /api/timeline/_import:
     post:
@@ -767,7 +767,7 @@ paths:
           description: Indicates the import of Timelines was unsuccessful.
       summary: Import Timelines
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
   /api/timeline/_prepackaged:
     post:
@@ -826,7 +826,7 @@ paths:
             unsuccessful.
       summary: Install prepackaged Timelines
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
   /api/timeline/resolve:
     get:
@@ -866,7 +866,7 @@ paths:
           description: The (template) Timeline was not found
       summary: Get an existing saved Timeline or Timeline template
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
   /api/timelines:
     get:
@@ -970,7 +970,7 @@ paths:
           description: Bad request. The user supplied invalid data.
       summary: Get Timelines or Timeline templates
       tags:
-        - Security Solution Timeline API
+        - Security Timeline API
         - access:securitySolution
 components:
   schemas:
@@ -1601,4 +1601,4 @@ tags:
   - description: >-
       You can create Timelines and Timeline templates via the API, as well as
       import new Timelines from an ndjson file.
-    name: Security Solution Timeline API
+    name: Security Timeline API
