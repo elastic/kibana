@@ -16,6 +16,7 @@ import { createTelemetryDiagnosticTimelineTaskConfig } from './timelines_diagnos
 import { createTelemetryConfigurationTaskConfig } from './configuration';
 import { telemetryConfiguration } from '../configuration';
 import { createTelemetryFilterListArtifactTaskConfig } from './filterlists';
+import { createTelemetryIndicesMetadataTaskConfig } from './indices.metadata';
 
 export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
   return [
@@ -30,5 +31,6 @@ export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
     createTelemetryDiagnosticTimelineTaskConfig(),
     createTelemetryConfigurationTaskConfig(),
     createTelemetryFilterListArtifactTaskConfig(),
+    createTelemetryIndicesMetadataTaskConfig(),
   ];
 }
