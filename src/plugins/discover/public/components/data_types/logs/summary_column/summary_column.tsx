@@ -13,7 +13,14 @@ import {
   DataGridDensity,
 } from '@kbn/unified-data-table';
 import React from 'react';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import {
   ShouldShowFieldInTableHandler,
   getLogDocumentOverview,
@@ -23,7 +30,12 @@ import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { Resource } from './resource';
 import { Content } from './content';
-import { contentLabel, jsonLabel, resourceLabel } from '../translations';
+import {
+  closeCellActionPopoverText,
+  contentLabel,
+  jsonLabel,
+  resourceLabel,
+} from '../translations';
 import { createResourceFields, formatJsonDocumentForContent } from './utils';
 
 export interface SummaryColumnFactoryDeps {
@@ -94,7 +106,7 @@ const SummaryCell = ({
 };
 
 const SummaryCellPopover = (props: SummaryColumnProps & SummaryColumnFactoryDeps) => {
-  const { row, dataView, fieldFormats, onFilter } = props;
+  const { row, dataView, fieldFormats, onFilter, closePopover } = props;
 
   const resourceFields = createResourceFields(row);
   const shouldRenderResource = resourceFields.length > 0;
@@ -106,7 +118,16 @@ const SummaryCellPopover = (props: SummaryColumnProps & SummaryColumnFactoryDeps
   const shouldRenderSource = !shouldRenderContent;
 
   return (
-    <EuiFlexGroup direction="column" css={{ width: 580 }}>
+    <EuiFlexGroup direction="column" css={{ position: 'relative', width: 580 }}>
+      <EuiButtonIcon
+        aria-label={closeCellActionPopoverText}
+        data-test-subj="docTableClosePopover"
+        iconSize="s"
+        iconType="cross"
+        size="xs"
+        onClick={closePopover}
+        css={{ position: 'absolute', right: 0 }}
+      />
       {shouldRenderResource && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiTitle size="xxs">
