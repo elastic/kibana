@@ -142,7 +142,7 @@ export const useStateProps = ({
       // We need to store the Lens request adapter in order to inspect its requests
       stateService?.setLensRequestAdapter(event.adapters.requests);
       stateService?.setLensAdapters(event.adapters);
-      stateService?.setLensEmbeddableOutput$(event.embeddableOutput$);
+      stateService?.setLensDataLoading$(event.dataLoading$);
     },
     [stateService]
   );
