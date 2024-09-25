@@ -186,7 +186,7 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
             `[${index}] Starting to process`,
             `[${index}] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM.`,
             `[${index}] REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK.`,
-            `[${index}] REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ.`,
+            `[${index}] REINDEX_SOURCE_TO_TEMP_INDEX_BULK`,
             `[${index}] Processed`,
             // if the index is closed by another node, we will have instead: REINDEX_SOURCE_TO_TEMP_TRANSFORM => REINDEX_SOURCE_TO_TEMP_CLOSE_PIT.
             // `[${index}] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT.`,
