@@ -19,26 +19,35 @@ describe('<NoDataViewsPromptComponent />', () => {
       <NoDataViewsPrompt
         onClickCreate={jest.fn()}
         canCreateNewDataView={true}
-        dataViewsDocLink={'dummy'}
+        dataViewsDocLink="doc-link-data-views"
+        esqlDocLink="doc-link-esql"
+        onTryESQL={jest.fn()}
       />
     );
-    expect(component.find(EuiEmptyPrompt).length).toBe(1);
-    expect(component.find(EuiButton).length).toBe(1);
-    expect(component.find(DocumentationLink).length).toBe(1);
+    expect(component.find(EuiEmptyPrompt).length).toBe(2);
+    expect(component.find(EuiButton).length).toBe(2);
+    expect(component.find(DocumentationLink).length).toBe(2);
+
+    expect(component.find('EuiButton[data-test-subj="createDataViewButton"]').length).toBe(1);
+    expect(component.find('DocumentationLink[data-test-subj="docLinkDataViews"]').length).toBe(1);
+
+    expect(component.find('EuiButton[data-test-subj="tryESQLLink"]').length).toBe(1);
+    expect(component.find('DocumentationLink[data-test-subj="docLinkEsql"]').length).toBe(1);
   });
 
-  test('does not render button if canCreateNewDataViews is false', () => {
+  test('does not render "Create data view" button if canCreateNewDataViews is false', () => {
     const component = mountWithIntl(<NoDataViewsPrompt canCreateNewDataView={false} />);
 
-    expect(component.find(EuiButton).length).toBe(0);
+    expect(component.find('EuiButton[data-test-subj="createDataViewButton"]').length).toBe(0);
   });
 
-  test('does not documentation link if linkToDocumentation is not provided', () => {
+  test('does not render documentation links if links to documentation are not provided', () => {
     const component = mountWithIntl(
       <NoDataViewsPrompt onClickCreate={jest.fn()} canCreateNewDataView={true} />
     );
 
-    expect(component.find(DocumentationLink).length).toBe(0);
+    expect(component.find('DocumentationLink[data-test-subj="docLinkDataViews"]').length).toBe(0);
+    expect(component.find('DocumentationLink[data-test-subj="docLinkEsql"]').length).toBe(0);
   });
 
   test('onClickCreate', () => {
@@ -50,5 +59,16 @@ describe('<NoDataViewsPromptComponent />', () => {
     component.find('button').simulate('click');
 
     expect(onClickCreate).toHaveBeenCalledTimes(1);
+  });
+
+  test('onClickTryEsql', () => {
+    const onClickTryEsql = jest.fn();
+    const component = mountWithIntl(
+      <NoDataViewsPrompt canCreateNewDataView={false} onTryESQL={onClickTryEsql} />
+    );
+
+    component.find('button[data-test-subj="tryESQLLink"]').simulate('click');
+
+    expect(onClickTryEsql).toHaveBeenCalledTimes(1);
   });
 });
