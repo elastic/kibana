@@ -67,7 +67,7 @@ const CheckeableCardLabel = ({ historyItem }: { historyItem: HistoryProps }) => 
       <EuiFlexItem>
         <EuiText size="s">
           <b>
-            {historyItem.method} - {historyItem.endpoint}
+            {historyItem.method} {historyItem.endpoint}
           </b>
         </EuiText>
       </EuiFlexItem>
