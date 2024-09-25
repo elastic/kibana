@@ -29,7 +29,7 @@ export function InventoryCallout({ onDissmiss }: InventoryCalloutProps) {
       <EuiFlexItem grow={false}>
         <EuiLink data-test-subj="inventoryCalloutLink" href={inventoryLocator?.useUrl({})}>
           <FormattedMessage
-            id="app_not_found_in_i18nrc.inventoryCallout.linklabel"
+            id="xpack.apm.inventoryCallout.linklabel"
             defaultMessage="Try our new Inventory!"
           />
         </EuiLink>
@@ -38,7 +38,7 @@ export function InventoryCallout({ onDissmiss }: InventoryCalloutProps) {
         <EuiToolTip
           content={
             <FormattedMessage
-              id="app_not_found_in_i18nrc.inventoryCallout.linkTooltip"
+              id="xpack.apm.inventoryCallout.linkTooltip"
               defaultMessage="Hide this"
             />
           }
