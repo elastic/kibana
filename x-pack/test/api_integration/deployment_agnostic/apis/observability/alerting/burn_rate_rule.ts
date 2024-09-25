@@ -23,7 +23,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const isServerless = config.get('serverless');
   const expectedConsumer = isServerless ? 'observability' : 'slo';
 
-  describe('Burn rate rule', () => {
+  // Skipped because it manipulates component template at cluster level
+  describe.skip('Burn rate rule', () => {
     const RULE_TYPE_ID = 'slo.rules.burnRate';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const RULE_ALERT_INDEX = '.alerts-observability.slo.alerts-default';

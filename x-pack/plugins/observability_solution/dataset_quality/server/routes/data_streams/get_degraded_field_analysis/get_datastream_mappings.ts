@@ -10,7 +10,6 @@ import {
   MappingProperty,
   PropertyName,
 } from '@elastic/elasticsearch/lib/api/types';
-import { Logger } from '@kbn/core/server';
 import { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
 
 export interface DataStreamMappingResponse {
@@ -34,17 +33,14 @@ export async function getDataStreamMapping({
   datasetQualityESClient,
   dataStream,
   lastBackingIndex,
-  logger,
 }: {
   field: string;
   datasetQualityESClient: DatasetQualityESClient;
   dataStream: string;
   lastBackingIndex: string;
-  logger: Logger;
 }): Promise<DataStreamMappingResponse> {
   const mappings = await datasetQualityESClient.mappings({ index: dataStream });
   const properties = mappings[lastBackingIndex]?.mappings?.properties;
-  logger.error(`tug-aj mapping for data stream ${dataStream}: ${JSON.stringify(properties)}`);
   const { count: fieldCount, capturedMapping: mapping } = countFields(properties ?? {}, field);
   const fieldPresent = mapping !== undefined;
   const fieldMapping = fieldPresent
