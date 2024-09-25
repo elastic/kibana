@@ -59,9 +59,7 @@ export class MonacoEditorOutputActionsProvider {
       await debouncedHighlightRequests();
     });
 
-    editor.onDidBlurEditorText(() =>
-      this.clearEditorDecorations()
-    );
+    editor.onDidBlurEditorText(() => this.clearEditorDecorations());
   }
 
   private clearEditorDecorations() {
