@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '../table_context';
@@ -18,13 +18,13 @@ import { DataTableRowControl } from './data_table_row_control';
 export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
   const toolTipRef = useRef<EuiToolTip>(null);
   const [pressed, setPressed] = useState<boolean>(false);
-  const { expanded, setExpanded, rows, isDarkMode, componentsTourSteps } =
+  const { expanded, setExpanded, getRowByIndex, isDarkMode, componentsTourSteps } =
     useContext(UnifiedDataTableContext);
-  const current = rows[rowIndex];
+  const current = useMemo(() => getRowByIndex(rowIndex), [getRowByIndex, rowIndex]);
 
   const tourStep = componentsTourSteps ? componentsTourSteps.expandButton : undefined;
   useEffect(() => {
-    if (current.isAnchor) {
+    if (current?.isAnchor) {
       setCellProps({
         className: 'unifiedDataTable__cell--highlight',
       });
@@ -42,7 +42,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
     defaultMessage: 'Toggle dialog with details',
   });
 
-  const testSubj = current.isAnchor
+  const testSubj = current?.isAnchor
     ? 'docTableExpandToggleColumnAnchor'
     : 'docTableExpandToggleColumn';
 
@@ -55,7 +55,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
     }
   }, [isCurrentRowExpanded, setPressed, pressed]);
 
-  if (!setExpanded) {
+  if (!setExpanded || !current) {
     return null;
   }
 
