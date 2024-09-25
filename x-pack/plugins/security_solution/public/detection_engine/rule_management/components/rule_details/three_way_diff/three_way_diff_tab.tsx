@@ -11,8 +11,8 @@ import type {
   RuleUpgradeState,
   SetFieldResolvedValueFn,
 } from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
-import { UpgradeInfoBar } from './upgrade_info_bar';
-import { RuleDiffSection } from './rule_diff_section';
+import { UpgradeInfoBar } from './components/upgrade_info_bar';
+import { RuleDiffSection } from './components/rule_diff_section';
 
 interface ThreeWayDiffTabProps {
   ruleUpgradeState: RuleUpgradeState;

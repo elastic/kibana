@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 
 export const NUM_OF_FIELDS_WITH_UPDATES = (count: number) =>
   i18n.translate(

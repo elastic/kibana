@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import type { RuleUpgradeState } from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+import type { RuleUpgradeState } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import {
   UtilityBar,
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../../../common/components/utility_bar';
+} from '../../../../../../common/components/utility_bar';
 import * as i18n from './translations';
 
 interface UpgradeInfoBarProps {
