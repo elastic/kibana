@@ -19,7 +19,6 @@ import type {
   ScopedHistory,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import type { SavedObjectsStart as SavedObjectsPluginStart } from '@kbn/saved-objects-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -38,7 +37,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { GetMlSharedImportsReturnType } from '../shared_imports';
 
 export interface AppDependencies {
   analytics: AnalyticsServiceStart;
@@ -60,9 +58,7 @@ export interface AppDependencies {
   overlays: OverlayStart;
   theme: ThemeServiceStart;
   history: ScopedHistory;
-  savedObjectsPlugin: SavedObjectsPluginStart;
   share: SharePluginStart;
-  ml: GetMlSharedImportsReturnType;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

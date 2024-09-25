@@ -35,7 +35,11 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { addSpaceIdToPath, type Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
-import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import {
+  DEFAULT_SPACE_ID,
+  ENTER_SPACE_PATH,
+  SOLUTION_VIEW_CLASSIC,
+} from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
@@ -251,6 +255,9 @@ export class SpacesGridPage extends Component<Props, State> {
   };
 
   public getColumnConfig() {
+    const { activeSpace, features } = this.state;
+    const { solution: activeSolution } = activeSpace ?? {};
+
     const config: Array<EuiBasicTableColumn<Space>> = [
       {
         field: 'initials',
@@ -306,17 +313,21 @@ export class SpacesGridPage extends Component<Props, State> {
         truncateText: true,
         width: '30%',
       },
-      {
+    ];
+
+    const shouldShowFeaturesColumn = !activeSolution || activeSolution === SOLUTION_VIEW_CLASSIC;
+    if (shouldShowFeaturesColumn) {
+      config.push({
         field: 'disabledFeatures',
         name: i18n.translate('xpack.spaces.management.spacesGridPage.featuresColumnName', {
           defaultMessage: 'Features visible',
         }),
         sortable: (space: Space) => {
-          return getEnabledFeatures(this.state.features, space).length;
+          return getEnabledFeatures(features, space).length;
         },
         render: (_disabledFeatures: string[], rowRecord: Space) => {
-          const enabledFeatureCount = getEnabledFeatures(this.state.features, rowRecord).length;
-          if (enabledFeatureCount === this.state.features.length) {
+          const enabledFeatureCount = getEnabledFeatures(features, rowRecord).length;
+          if (enabledFeatureCount === features.length) {
             return (
               <FormattedMessage
                 id="xpack.spaces.management.spacesGridPage.allFeaturesEnabled"
@@ -326,7 +337,7 @@ export class SpacesGridPage extends Component<Props, State> {
           }
           if (enabledFeatureCount === 0) {
             return (
-              <EuiText color={'danger'}>
+              <EuiText color={'danger'} size="s">
                 <FormattedMessage
                   id="xpack.spaces.management.spacesGridPage.noFeaturesEnabled"
                   defaultMessage="No features visible"
@@ -340,26 +351,27 @@ export class SpacesGridPage extends Component<Props, State> {
               defaultMessage="{enabledFeatureCount} / {totalFeatureCount}"
               values={{
                 enabledFeatureCount,
-                totalFeatureCount: this.state.features.length,
+                totalFeatureCount: features.length,
               }}
             />
           );
         },
+      });
+    }
+
+    config.push({
+      field: 'id',
+      name: i18n.translate('xpack.spaces.management.spacesGridPage.identifierColumnName', {
+        defaultMessage: 'Identifier',
+      }),
+      sortable: true,
+      render(id: string) {
+        if (id === DEFAULT_SPACE_ID) {
+          return '';
+        }
+        return id;
       },
-      {
-        field: 'id',
-        name: i18n.translate('xpack.spaces.management.spacesGridPage.identifierColumnName', {
-          defaultMessage: 'Identifier',
-        }),
-        sortable: true,
-        render(id: string) {
-          if (id === DEFAULT_SPACE_ID) {
-            return '';
-          }
-          return id;
-        },
-      },
-    ];
+    });
 
     if (this.props.allowSolutionVisibility) {
       config.push({
@@ -404,7 +416,7 @@ export class SpacesGridPage extends Component<Props, State> {
             defaultMessage: 'Switch',
           }),
           description: (rowRecord) =>
-            this.state.activeSpace?.name !== rowRecord.name
+            activeSpace?.name !== rowRecord.name
               ? i18n.translate(
                   'xpack.spaces.management.spacesGridPage.switchSpaceActionDescription',
                   {
@@ -428,7 +440,7 @@ export class SpacesGridPage extends Component<Props, State> {
               rowRecord.id,
               `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/`
             ),
-          enabled: (rowRecord) => this.state.activeSpace?.name !== rowRecord.name,
+          enabled: (rowRecord) => activeSpace?.name !== rowRecord.name,
           'data-test-subj': (rowRecord) => `${rowRecord.name}-switchSpace`,
         },
         {
@@ -440,7 +452,7 @@ export class SpacesGridPage extends Component<Props, State> {
               ? i18n.translate(
                   'xpack.spaces.management.spacesGridPage.deleteActionDisabledDescription',
                   {
-                    defaultMessage: `{spaceName} is reserved`,
+                    defaultMessage: `You can't delete the {spaceName} space`,
                     values: { spaceName: rowRecord.name },
                   }
                 )

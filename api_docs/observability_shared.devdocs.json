@@ -6191,6 +6191,18 @@
     "enums": [
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.IndexLifecyclePhaseSelectOption",
+        "type": "Enum",
+        "tags": [],
+        "label": "IndexLifecyclePhaseSelectOption",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/ilm_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.ObservabilityTriggerId",
         "type": "Enum",
         "tags": [],
@@ -6541,6 +6553,21 @@
           "\"container.id\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.DataTier",
+        "type": "Type",
+        "tags": [],
+        "label": "DataTier",
+        "description": [],
+        "signature": [
+          "\"data_hot\" | \"data_warm\" | \"data_cold\" | \"data_frozen\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/ilm_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8613,6 +8640,22 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.indexLifeCyclePhaseToDataTier",
+        "type": "Object",
+        "tags": [],
+        "label": "indexLifeCyclePhaseToDataTier",
+        "description": [],
+        "signature": [
+          "{ readonly hot: \"data_hot\"; readonly warm: \"data_warm\"; readonly cold: \"data_cold\"; readonly frozen: \"data_frozen\"; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/ilm_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }
