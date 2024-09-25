@@ -219,8 +219,7 @@ describe('PackagePolicyActionsMenu', () => {
     });
   });
 
-  // Todo: Fix test case when orphan policy fails
-  it.skip('Should show Edit integration with correct href when there is no agent policy', async () => {
+  it('Should show Edit integration with correct href when there is no agent policy', async () => {
     const packagePolicy = createMockPackagePolicy({
       policy_ids: [],
     });

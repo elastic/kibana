@@ -185,7 +185,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
   const renderModal = () => {
     const isAgentlessPolicy = agentPolicies?.find((policy) => policy?.supports_agentless === true);
-    const packagePolicy = agentPolicies?.[0].package_policies?.find(
+    const packagePolicy = agentPolicies?.[0]?.package_policies?.find(
       (policy) => policy.id === packagePolicies[0]
     );
     if (!isModalOpen) {
