@@ -119,7 +119,7 @@ export const ConnectorDetail: React.FC = () => {
       label: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorDetail.indexMappingsTabLabel',
         {
-          defaultMessage: 'Index mappings',
+          defaultMessage: 'Mappings',
         }
       ),
       onClick: () =>
