@@ -24,7 +24,7 @@ import {
   totalHitsResultSelector,
   totalHitsStatusSelector,
   lensAdaptersSelector,
-  lensEmbeddableOutputSelector$,
+  lensDataLoadingSelector$,
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 
@@ -47,10 +47,7 @@ export const useStateProps = ({
   const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
   const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
   const lensAdapters = useStateSelector(stateService?.state$, lensAdaptersSelector);
-  const lensEmbeddableOutput$ = useStateSelector(
-    stateService?.state$,
-    lensEmbeddableOutputSelector$
-  );
+  const lensDataLoading$ = useStateSelector(stateService?.state$, lensDataLoadingSelector$);
   /**
    * Contexts
    */
@@ -179,7 +176,7 @@ export const useStateProps = ({
     request,
     isPlainRecord,
     lensAdapters,
-    lensEmbeddableOutput$,
+    lensDataLoading$,
     onTopPanelHeightChange,
     onTimeIntervalChange,
     onTotalHitsChange,
