@@ -13,6 +13,7 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   OTEL_POLICY_SAVED_OBJECT_TYPE,
+  OTEL_INTEGRATION_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -817,6 +818,26 @@ export const getSavedObjectTypes = (
           vars: { type: 'flattened' },
           pipelines: { type: 'keyword' },
           revision: { type: 'integer' },
+          updated_at: { type: 'date' },
+          updated_by: { type: 'keyword' },
+          created_at: { type: 'date' },
+          created_by: { type: 'keyword' },
+        },
+      },
+    },
+    [OTEL_INTEGRATION_SAVED_OBJECT_TYPE]: {
+      name: OTEL_INTEGRATION_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'multiple',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        properties: {
+          name: { type: 'keyword' },
+          version: { type: 'keyword' },
+          config: { type: 'flattened' },
           updated_at: { type: 'date' },
           updated_by: { type: 'keyword' },
           created_at: { type: 'date' },

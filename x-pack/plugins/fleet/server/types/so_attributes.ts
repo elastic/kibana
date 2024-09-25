@@ -157,6 +157,15 @@ export interface OtelPolicySOAttributes {
   updated_at: string;
   updated_by: string;
 }
+export interface OtelIntegrationSOAttributes {
+  name: string;
+  version?: string;
+  config?: any;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+}
 
 interface OutputSoBaseAttributes {
   is_default: boolean;

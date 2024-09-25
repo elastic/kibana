@@ -5,13 +5,22 @@
  * 2.0.
  */
 import type { FleetAuthzRouter } from '../../services/security';
-import { API_VERSIONS, OTEL_POLICIES_ROUTES } from '../../../common/constants';
-import { CreateOtelPolicyRequestSchema } from '../../types/rest_spec/otel';
+import {
+  API_VERSIONS,
+  OTEL_POLICIES_ROUTES,
+  OTEL_INTEGRATIONS_ROUTES,
+} from '../../../common/constants';
+import {
+  CreateOtelPolicyRequestSchema,
+  InstallOtelIntegrationRequestSchema,
+} from '../../types/rest_spec/otel';
 
-import { createOtelPolicyHandler } from './handlers';
+const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
+
+import { createOtelPolicyHandler, createOtelIntegrationPolicyHandler } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  // Create
+  // Create policy
   router.versioned
     .post({
       path: OTEL_POLICIES_ROUTES.CREATE_PATTERN,
@@ -31,5 +40,32 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       createOtelPolicyHandler
+    );
+
+  // create integration
+  router.versioned
+    .post({
+      path: OTEL_INTEGRATIONS_ROUTES.CREATE_PATTERN,
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
+      description: 'Create new otel integration',
+      options: {
+        tags: ['oas-tag:Fleet Otel integrations'],
+        body: {
+          accepts: ['application/x-yaml', 'text/x-yaml'],
+          parse: false,
+          maxBytes: MAX_FILE_SIZE_BYTES,
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: InstallOtelIntegrationRequestSchema,
+        },
+      },
+      createOtelIntegrationPolicyHandler
     );
 };

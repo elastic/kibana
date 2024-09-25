@@ -218,7 +218,7 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
 
 // OTEL policies and templates routes
 export const OTEL_INTEGRATIONS_ROUTES = {
-  CREATE_PATTERN: `${OTEL_API_ROOT}/templates/{pkgName}`,
+  CREATE_PATTERN: `${OTEL_API_ROOT}/integrations/{name}`,
 };
 export const OTEL_POLICIES_ROUTES = {
   CREATE_PATTERN: `${OTEL_API_ROOT}/policies`,

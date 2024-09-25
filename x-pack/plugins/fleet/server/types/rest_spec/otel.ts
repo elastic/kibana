@@ -67,3 +67,10 @@ const createOtelPolicyRequestBodySchema = schema.object({
 export const CreateOtelPolicyRequestSchema = {
   body: createOtelPolicyRequestBodySchema,
 };
+
+export const InstallOtelIntegrationRequestSchema = {
+  params: schema.object({
+    name: schema.string(),
+  }),
+  body: schema.any(),
+};

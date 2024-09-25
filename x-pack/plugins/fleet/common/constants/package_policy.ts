@@ -19,3 +19,4 @@ export const inputsFormat = {
 export const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
 
 export const OTEL_POLICY_SAVED_OBJECT_TYPE = 'fleet-otel-policies';
+export const OTEL_INTEGRATION_SAVED_OBJECT_TYPE = 'fleet-otel-integrations';
