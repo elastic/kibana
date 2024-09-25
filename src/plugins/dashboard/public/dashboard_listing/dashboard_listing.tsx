@@ -61,7 +61,7 @@ export const DashboardListing = ({
       <TableListViewKibanaProvider
         {...{
           core: coreServices,
-          savedObjectsTagging: savedObjectsTaggingService,
+          savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
           FormattedRelative,
           favorites: dashboardFavoritesClient,
           contentInsightsClient,

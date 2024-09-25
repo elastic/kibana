@@ -29,9 +29,10 @@ export const updateDashboardMeta = async ({
     return;
   }
 
+  const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
   const references =
-    savedObjectsTaggingService?.ui.updateTagsReferences && tags.length
-      ? savedObjectsTaggingService.ui.updateTagsReferences(dashboard.references, tags)
+    savedObjectsTaggingApi?.ui.updateTagsReferences && tags.length
+      ? savedObjectsTaggingApi.ui.updateTagsReferences(dashboard.references, tags)
       : dashboard.references;
 
   await contentManagementService.client.update<

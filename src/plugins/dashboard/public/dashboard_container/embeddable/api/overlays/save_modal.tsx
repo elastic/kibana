@@ -80,8 +80,9 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   );
 
   const renderDashboardSaveOptions = useCallback(() => {
-    const tagSelector = savedObjectsTaggingService ? (
-      <savedObjectsTaggingService.ui.components.SavedObjectSaveModalTagSelector
+    const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
+    const tagSelector = savedObjectsTaggingApi ? (
+      <savedObjectsTaggingApi.ui.components.SavedObjectSaveModalTagSelector
         initialSelection={selectedTags}
         onTagsSelected={(selectedTagIds) => {
           setSelectedTags(selectedTagIds);

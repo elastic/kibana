@@ -119,7 +119,8 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   };
 
   const renderTagSelector = () => {
-    if (!savedObjectsTaggingService) return;
+    const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
+    if (!savedObjectsTaggingApi) return;
 
     return (
       <EuiFormRow
@@ -130,7 +131,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           />
         }
       >
-        <savedObjectsTaggingService.ui.components.TagSelector
+        <savedObjectsTaggingApi.ui.components.TagSelector
           selected={localSettings.tags}
           onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
         />
