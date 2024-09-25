@@ -22,7 +22,7 @@ import {
   SolutionType,
 } from '../profiles';
 import { ProfilesManager } from '../profiles_manager';
-import { DiscoverEBTManager } from '../../services/discover_ebt_manager';
+import { DiscoverEBTContextManager } from '../../services/discover_ebt_context_manager';
 import { createLogsContextServiceMock } from '@kbn/discover-utils/src/__mocks__';
 
 export const createContextAwarenessMocks = ({
@@ -151,12 +151,12 @@ export const createContextAwarenessMocks = ({
     documentProfileServiceMock.registerProvider(documentProfileProviderMock);
   }
 
-  const ebtManagerMock = new DiscoverEBTManager();
+  const ebtContextManagerMock = new DiscoverEBTContextManager();
   const profilesManagerMock = new ProfilesManager(
     rootProfileServiceMock,
     dataSourceProfileServiceMock,
     documentProfileServiceMock,
-    ebtManagerMock
+    ebtContextManagerMock
   );
 
   const profileProviderServices = createProfileProviderServicesMock();
@@ -172,7 +172,7 @@ export const createContextAwarenessMocks = ({
     contextRecordMock2,
     profilesManagerMock,
     profileProviderServices,
-    ebtManagerMock,
+    ebtContextManagerMock,
   };
 };
 

@@ -35,7 +35,7 @@ export interface DiscoverEBTContextProps {
 }
 export type DiscoverEBTContext = BehaviorSubject<DiscoverEBTContextProps>;
 
-export class DiscoverEBTManager {
+export class DiscoverEBTContextManager {
   private isCustomContextEnabled: boolean = false;
   private customContext$: DiscoverEBTContext | undefined;
   private reportEvent: CoreSetup['analytics']['reportEvent'] | undefined;

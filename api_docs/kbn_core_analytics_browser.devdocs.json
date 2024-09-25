@@ -1782,7 +1782,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/plugins/discover/public/services/discover_ebt_context_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core-application-browser-internal",

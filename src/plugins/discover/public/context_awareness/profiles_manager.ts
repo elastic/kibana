@@ -25,7 +25,7 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
-import { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import { DiscoverEBTContextManager } from '../services/discover_ebt_context_manager';
 
 interface SerializedRootProfileParams {
   solutionNavId: RootProfileProviderParams['solutionNavId'];
@@ -53,7 +53,7 @@ export interface GetProfilesOptions {
 export class ProfilesManager {
   private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
-  private readonly ebtManager: DiscoverEBTManager;
+  private readonly ebtContextManager: DiscoverEBTContextManager;
 
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
@@ -64,11 +64,11 @@ export class ProfilesManager {
     private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService,
-    ebtManager: DiscoverEBTManager
+    ebtContextManager: DiscoverEBTContextManager
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
-    this.ebtManager = ebtManager;
+    this.ebtContextManager = ebtContextManager;
   }
 
   /**
@@ -206,7 +206,7 @@ export class ProfilesManager {
   private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
     const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
 
-    this.ebtManager.updateProfilesContextWith(dscProfiles);
+    this.ebtContextManager.updateProfilesContextWith(dscProfiles);
   }
 }
 
