@@ -13,6 +13,7 @@
     "@kbn/test-subj-selector",
     "@kbn/ftr-common-functional-services",
     "@kbn/std",
-    "@kbn/expect"
+    "@kbn/expect",
+    "@kbn/core-http-common"
   ]
 }
