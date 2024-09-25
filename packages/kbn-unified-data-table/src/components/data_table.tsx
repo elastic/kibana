@@ -69,7 +69,7 @@ import {
   SELECT_ROW,
   OPEN_DETAILS,
 } from './data_table_columns';
-import { UnifiedDataTableContext } from '../table_context';
+import { DataTableContext, UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
 import { DataTableDocumentToolbarBtn } from './data_table_document_selection';
 import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
@@ -629,11 +629,11 @@ export const UnifiedDataTable = ({
     );
   }, [currentPageSize, setPagination]);
 
-  const unifiedDataTableContextValue = useMemo(
+  const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({
       expanded: expandedDoc,
       setExpanded: setExpandedDoc,
-      rows: displayedRows,
+      getRowByIndex: (index: number) => displayedRows[index],
       onFilter,
       dataView,
       isDarkMode: darkMode,
@@ -876,7 +876,7 @@ export const UnifiedDataTable = ({
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const defaultControlColumns = getLeadControlColumns(canSetExpandedDoc);
+    const defaultControlColumns = getLeadControlColumns({ rows: displayedRows, canSetExpandedDoc });
     const internalControlColumns = controlColumnIds
       ? // reorder the default controls as per controlColumnIds
         controlColumnIds.reduce((acc, id) => {
@@ -907,6 +907,7 @@ export const UnifiedDataTable = ({
   }, [
     canSetExpandedDoc,
     controlColumnIds,
+    displayedRows,
     externalControlColumns,
     getRowIndicator,
     rowAdditionalLeadingControls,

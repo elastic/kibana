@@ -14,6 +14,7 @@ import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/server';
+import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
@@ -117,12 +118,6 @@ export const getViewInAppUrl = (
   spaceId: string,
   relativeViewInAppUrl: string
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
-
-export const getAlertDetailsUrl = (
-  basePath: IBasePath,
-  spaceId: string,
-  alertUuid: string | null
-) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
 export const getRelativeViewInAppUrl = ({
   configId,
