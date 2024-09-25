@@ -188,7 +188,11 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
-          profilesManager: await this.createProfilesManager(coreStart, discoverStartPlugins, ebtContextManager
+          profilesManager: await this.createProfilesManager(
+            coreStart,
+            discoverStartPlugins,
+            ebtContextManager
+          ),
           ebtContextManager,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
@@ -322,7 +326,11 @@ export class DiscoverPlugin
     return { rootProfileService, dataSourceProfileService, documentProfileService };
   }
 
-  private createProfilesManager = async (core: CoreStart, plugins: DiscoverStartPlugins, ebtContextManager: DiscoverEBTContextManager) => {
+  private createProfilesManager = async (
+    core: CoreStart,
+    plugins: DiscoverStartPlugins,
+    ebtContextManager: DiscoverEBTContextManager
+  ) => {
     const { registerProfileProviders } = await import('./context_awareness/profile_providers');
     const { rootProfileService, dataSourceProfileService, documentProfileService } =
       this.createProfileServices();
@@ -341,7 +349,7 @@ export class DiscoverPlugin
       dataSourceProfileService,
       documentProfileService,
       enabledExperimentalProfileIds,
-      services: this.getDiscoverServices(core, plugins, profilesManager),
+      services: this.getDiscoverServices(core, plugins, profilesManager, ebtContextManager),
     });
 
     return profilesManager;
