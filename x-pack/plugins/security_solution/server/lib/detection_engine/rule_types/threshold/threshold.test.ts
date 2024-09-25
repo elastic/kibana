@@ -22,6 +22,8 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { RunOpts } from '../types';
 import type { ExperimentalFeatures } from '../../../../../common';
 
+jest.mock('../utils/get_filter', () => ({ getFilter: jest.fn() }));
+
 describe('threshold_executor', () => {
   let alertServices: RuleExecutorServicesMock;
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
