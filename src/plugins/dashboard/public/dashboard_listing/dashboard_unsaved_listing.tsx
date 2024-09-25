@@ -16,14 +16,14 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardAttributes } from '../../common/content_management';
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
-  dashboardBackupService,
+  getDashboardBackupService,
 } from '../services/dashboard_backup_service';
 import { dashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
@@ -120,6 +120,7 @@ export const DashboardUnsavedListing = ({
   refreshUnsavedDashboards,
 }: DashboardUnsavedListingProps) => {
   const [items, setItems] = useState<UnsavedItemMap>({});
+  const dashboardBackupService = useMemo(() => getDashboardBackupService(), []);
 
   const onOpen = useCallback(
     (id?: string) => {
@@ -135,7 +136,7 @@ export const DashboardUnsavedListing = ({
         refreshUnsavedDashboards();
       });
     },
-    [refreshUnsavedDashboards]
+    [dashboardBackupService, refreshUnsavedDashboards]
   );
 
   useEffect(() => {
@@ -178,7 +179,7 @@ export const DashboardUnsavedListing = ({
     return () => {
       canceled = true;
     };
-  }, [refreshUnsavedDashboards, unsavedDashboardIds]);
+  }, [dashboardBackupService, refreshUnsavedDashboards, unsavedDashboardIds]);
 
   return unsavedDashboardIds.length === 0 ? null : (
     <>

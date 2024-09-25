@@ -31,13 +31,13 @@ import {
 } from '../../../dashboard_constants';
 import {
   PANELS_CONTROL_GROUP_KEY,
-  dashboardBackupService,
+  getDashboardBackupService,
 } from '../../../services/dashboard_backup_service';
+import { dashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import {
   LoadDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management_service/types';
-import { dashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import { coreServices, dataService, embeddableService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
@@ -150,6 +150,7 @@ export const initializeDashboard = async ({
     filterManager,
     timefilter: { timefilter: timefilterService },
   } = dataService.query;
+  const dashboardBackupService = getDashboardBackupService();
 
   const {
     getInitialInput,

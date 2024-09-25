@@ -193,8 +193,11 @@ class DashboardBackupService implements DashboardBackupServiceType {
   }
 }
 
-export let dashboardBackupService: DashboardBackupService;
+let dashboardBackupService: DashboardBackupService;
 
-export const setDashboardBackupService = () => {
-  dashboardBackupService = new DashboardBackupService();
+export const getDashboardBackupService = () => {
+  if (!dashboardBackupService) {
+    dashboardBackupService = new DashboardBackupService();
+  }
+  return dashboardBackupService;
 };

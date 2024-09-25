@@ -20,7 +20,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
-  dashboardBackupService,
+  getDashboardBackupService,
 } from '../services/dashboard_backup_service';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
@@ -76,6 +76,7 @@ export const DashboardListingEmptyPrompt = ({
             color="danger"
             onClick={() =>
               confirmDiscardUnsavedChanges(() => {
+                const dashboardBackupService = getDashboardBackupService();
                 dashboardBackupService.clearState(DASHBOARD_PANELS_UNSAVED_ID);
                 setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
               })

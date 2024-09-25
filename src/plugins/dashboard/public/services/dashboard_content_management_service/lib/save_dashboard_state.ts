@@ -20,7 +20,7 @@ import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_conv
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
-import { dashboardBackupService } from '../../dashboard_backup_service';
+import { getDashboardBackupService } from '../../dashboard_backup_service';
 import {
   contentManagementService,
   coreServices,
@@ -209,7 +209,7 @@ export const saveDashboardState = async ({
        * If the dashboard id has been changed, redirect to the new ID to keep the url param in sync.
        */
       if (newId !== lastSavedId) {
-        dashboardBackupService.clearState(lastSavedId);
+        getDashboardBackupService().clearState(lastSavedId);
         return { redirectRequired: true, id: newId, references: allReferences };
       } else {
         dashboardContentManagementCache.deleteDashboard(newId); // something changed in an existing dashboard, so delete it from the cache so that it can be re-fetched

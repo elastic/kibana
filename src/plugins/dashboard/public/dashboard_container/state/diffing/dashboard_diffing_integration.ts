@@ -15,7 +15,7 @@ import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
 import {
   PANELS_CONTROL_GROUP_KEY,
-  dashboardBackupService,
+  getDashboardBackupService,
 } from '../../../services/dashboard_backup_service';
 import { UnsavedPanelState } from '../../types';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
@@ -192,7 +192,7 @@ function backupUnsavedChanges(
 ) {
   const dashboardStateToBackup = omit(dashboardChanges, keysToOmitFromSessionStorage);
 
-  dashboardBackupService.setState(
+  getDashboardBackupService().setState(
     this.getDashboardSavedObjectId(),
     {
       ...dashboardStateToBackup,

@@ -17,7 +17,7 @@ import { waitFor } from '@testing-library/react';
 
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
-  dashboardBackupService,
+  getDashboardBackupService,
 } from '../services/dashboard_backup_service';
 import { dashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { coreServices } from '../services/kibana_services';
@@ -43,6 +43,8 @@ function mountWith({ props: incomingProps }: { props?: Partial<DashboardUnsavedL
 }
 
 describe('Unsaved listing', () => {
+  const dashboardBackupService = getDashboardBackupService();
+
   it('Gets information for each unsaved dashboard', async () => {
     mountWith({});
     await waitFor(() => {

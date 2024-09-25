@@ -22,7 +22,7 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import { convertPanelMapToSavedPanels, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 import {
-  dashboardBackupService,
+  getDashboardBackupService,
   PANELS_CONTROL_GROUP_KEY,
 } from '../../../services/dashboard_backup_service';
 import { coreServices, dataService, shareService } from '../../../services/kibana_services';
@@ -117,7 +117,7 @@ export function ShowShareModal({
   let unsavedStateForLocator: DashboardLocatorParams = {};
 
   const { dashboardState: unsavedDashboardState, panels: panelModifications } =
-    dashboardBackupService.getState(savedObjectId) ?? {};
+    getDashboardBackupService().getState(savedObjectId) ?? {};
 
   const allUnsavedPanels = (() => {
     if (

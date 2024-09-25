@@ -20,7 +20,7 @@ import {
   noDataPageService,
   shareService,
 } from '../../services/kibana_services';
-import { dashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { dashboardContentManagementService } from '../../services/dashboard_content_management_service';
 
 export const DashboardAppNoDataPage = ({
@@ -71,7 +71,7 @@ export const isDashboardAppInNoDataState = async () => {
   if (hasIncomingEmbeddable) return false;
 
   // consider has data if there is unsaved dashboard with edits
-  if (dashboardBackupService.dashboardHasUnsavedEdits()) return false;
+  if (getDashboardBackupService().dashboardHasUnsavedEdits()) return false;
 
   // consider has data if there is at least one dashboard
   const { total } = await dashboardContentManagementService.findDashboards

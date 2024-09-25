@@ -20,7 +20,7 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { openSettingsFlyout } from '../../dashboard_container/embeddable/api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
-import { dashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
 import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
@@ -111,7 +111,7 @@ export const useDashboardMenuItems = ({
       const switchModes = switchToViewMode
         ? () => {
             dashboardApi.setViewMode(ViewMode.VIEW);
-            dashboardBackupService.storeViewMode(ViewMode.VIEW);
+            getDashboardBackupService().storeViewMode(ViewMode.VIEW);
           }
         : undefined;
       if (!hasUnsavedChanges) {
@@ -161,7 +161,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
         run: () => {
-          dashboardBackupService.storeViewMode(ViewMode.EDIT);
+          getDashboardBackupService().storeViewMode(ViewMode.EDIT);
           dashboardApi.setViewMode(ViewMode.EDIT);
           dashboardApi.clearOverlays();
         },

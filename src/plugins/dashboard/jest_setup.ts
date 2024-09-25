@@ -34,7 +34,7 @@ jest.mock('./public/services/dashboard_content_management_service', () => {
 
 jest.mock('./public/services/dashboard_backup_service', () => {
   return {
-    dashboardBackupService: mockDashboardBackupService,
+    getDashboardBackupService: () => mockDashboardBackupService,
   };
 });
 

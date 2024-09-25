@@ -9,7 +9,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { dashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { dashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { coreServices } from '../../services/kibana_services';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
@@ -47,6 +47,8 @@ jest.mock('../_dashboard_listing_strings', () => ({
 }));
 
 describe('useDashboardListingTable', () => {
+  const dashboardBackupService = getDashboardBackupService();
+
   beforeEach(() => {
     jest.clearAllMocks();
 

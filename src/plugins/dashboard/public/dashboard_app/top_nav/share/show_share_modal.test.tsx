@@ -13,7 +13,7 @@ import { DashboardLocatorParams } from '../../../dashboard_container';
 
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
-import { dashboardBackupService } from '../../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard" app is not available', () => {
@@ -57,6 +57,7 @@ describe('showPublicUrlSwitch', () => {
 });
 
 describe('ShowShareModal', () => {
+  const dashboardBackupService = getDashboardBackupService();
   const unsavedStateKeys = ['query', 'filters', 'options', 'savedQuery', 'panels'] as Array<
     keyof DashboardLocatorParams
   >;

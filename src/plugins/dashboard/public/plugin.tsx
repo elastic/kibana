@@ -332,19 +332,16 @@ export class DashboardPlugin
     setKibanaServices(core, plugins);
 
     Promise.all([
-      import('./services/dashboard_backup_service'),
       import('./services/dashboard_content_management_service'),
       import('./services/dashboard_recently_accessed_service'),
       import('./dashboard_actions'),
       untilPluginStartServicesReady(),
     ]).then(
       ([
-        { setDashboardBackupService },
         { setDashboardContentManagementService },
         { setDashboardRecentlyAccessedService },
         { buildAllDashboardActions },
       ]) => {
-        setDashboardBackupService();
         setDashboardContentManagementService();
         setDashboardRecentlyAccessedService();
 
