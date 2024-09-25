@@ -7,11 +7,10 @@
 }
 
 .secAccessAgreementPage__text {
+  max-height: 400px;
+  padding: $euiSize $euiSizeL 0;
+
   @include euiYScrollWithShadows;
-  & {
-    max-height: 400px;
-    padding: $euiSize $euiSizeL 0;
-  }
 }
 
 .secAccessAgreementPage__footer {
