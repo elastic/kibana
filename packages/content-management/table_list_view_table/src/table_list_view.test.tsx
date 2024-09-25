@@ -1301,11 +1301,20 @@ describe('TableListView', () => {
       expect(getSearchBoxValue()).toBe('hello');
       expect(router?.history.location?.search).toBe('?s=hello');
 
+      // Change the URL
+      await act(async () => {
+        if (router?.history.push) {
+          router.history.push({
+            search: `?${queryString.stringify({ s: '' }, { encode: false })}`,
+          });
+        }
+      });
+
       component.update();
 
-      // Search box is updated
+      // Search box is not updated
       expect(getSearchBoxValue()).toBe('hello');
-      expect(router?.history.location?.search).toBe('?s=hello');
+      expect(router?.history.location?.search).toBe('?s=');
     });
 
     test('should update the URL when changing the search term', async () => {
@@ -1427,11 +1436,28 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
         ['Item 2tag-2', twoDaysAgoToString],
         ['Item 1tag-1', yesterdayToString],
+      ]);
+
+      // Change the URL
+      await act(async () => {
+        if (router?.history.push) {
+          router.history.push({
+            search: `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'desc' })}`,
+          });
+        }
+      });
+      component.update();
+
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      expect(tableCellsValues).toEqual([
+        ['Item 2tag-2', twoDaysAgoToString],
+        ['Item 1tag-1', yesterdayToString], // Sort stayed the same
       ]);
     });
 
