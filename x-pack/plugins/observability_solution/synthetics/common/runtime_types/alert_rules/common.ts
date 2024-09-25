@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { OverviewPingCodec } from '../monitor_management/synthetics_overview_status';
 
 export const SyntheticsCommonStateCodec = t.intersection([
   t.partial({
@@ -36,3 +37,49 @@ export const SyntheticsMonitorStatusAlertStateCodec = t.type({
 export type SyntheticsMonitorStatusAlertState = t.TypeOf<
   typeof SyntheticsMonitorStatusAlertStateCodec
 >;
+
+export const AlertStatusMetaDataCodec = t.interface({
+  monitorQueryId: t.string,
+  configId: t.string,
+  status: t.string,
+  locationId: t.string,
+  timestamp: t.string,
+  ping: OverviewPingCodec,
+});
+
+export const StaleAlertStatusMetaDataCodec = t.intersection([
+  AlertStatusMetaDataCodec,
+  t.partial({
+    isDeleted: t.boolean,
+    isLocationRemoved: t.boolean,
+  }),
+]);
+
+export const AlertPendingStatusMetaDataCodec = t.intersection([
+  t.interface({
+    monitorQueryId: t.string,
+    configId: t.string,
+    status: t.string,
+    locationId: t.string,
+  }),
+  t.partial({
+    timestamp: t.string,
+    ping: OverviewPingCodec,
+  }),
+]);
+
+export const AlertStatusCodec = t.interface({
+  up: t.number,
+  down: t.number,
+  pending: t.number,
+  upConfigs: t.record(t.string, AlertStatusMetaDataCodec),
+  downConfigs: t.record(t.string, AlertStatusMetaDataCodec),
+  pendingConfigs: t.record(t.string, AlertPendingStatusMetaDataCodec),
+  enabledMonitorQueryIds: t.array(t.string),
+  staleDownConfigs: t.record(t.string, StaleAlertStatusMetaDataCodec),
+});
+
+export type AlertPendingStatusMetaData = t.TypeOf<typeof AlertPendingStatusMetaDataCodec>;
+export type StaleDownConfig = t.TypeOf<typeof StaleAlertStatusMetaDataCodec>;
+export type AlertStatusMetaData = t.TypeOf<typeof AlertStatusMetaDataCodec>;
+export type AlertOverviewStatus = t.TypeOf<typeof AlertStatusCodec>;
