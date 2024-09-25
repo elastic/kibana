@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Group } from '../../../../common/typings';
+import type { Group } from '../../typings';
 
 export interface Query {
   query: string;
