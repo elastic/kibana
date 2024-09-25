@@ -21,13 +21,13 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 
 interface Props {
-  property: string;
+  field: string;
   value: string;
   label?: string;
   onFilter: () => void;
 }
 
-export function BadgeFilterWithPopover({ property, value, onFilter, label }: Props) {
+export function BadgeFilterWithPopover({ field, value, onFilter, label }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const theme = useEuiTheme();
 
@@ -35,7 +35,7 @@ export function BadgeFilterWithPopover({ property, value, onFilter, label }: Pro
     <EuiPopover
       button={
         <EuiBadge
-          data-test-subj="popoverButton"
+          data-test-subj="inventoryBadgeFilterWithPopoverButton"
           color="hollow"
           onClick={() => setIsOpen((state) => !state)}
           onClickAriaLabel={i18n.translate(
@@ -49,9 +49,9 @@ export function BadgeFilterWithPopover({ property, value, onFilter, label }: Pro
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
     >
-      <span data-test-subj="popoverContentTitle">
+      <span data-test-subj="inventoryBadgeFilterWithPopoverTitle">
         <EuiFlexGroup
-          data-test-subj="popoverContent"
+          data-test-subj="inventoryBadgeFilterWithPopoverContent"
           responsive={false}
           gutterSize="xs"
           css={css`
@@ -64,7 +64,7 @@ export function BadgeFilterWithPopover({ property, value, onFilter, label }: Pro
                 font-weight: bold;
               `}
             >
-              {property}:
+              {field}:
             </span>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

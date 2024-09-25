@@ -146,7 +146,7 @@ export function EntitiesGrid({
           const entityType = entity[columnEntityTableId] as EntityType;
           return (
             <BadgeFilterWithPopover
-              property={ENTITY_TYPE}
+              field={ENTITY_TYPE}
               value={entityType}
               label={getEntityTypeLabel(entityType)}
               onFilter={() => onFilterByType(entityType)}

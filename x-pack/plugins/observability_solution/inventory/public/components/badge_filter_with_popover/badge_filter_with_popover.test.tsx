@@ -18,11 +18,11 @@ jest.mock('@elastic/eui', () => ({
 
 describe('BadgeFilterWithPopover', () => {
   const mockOnFilter = jest.fn();
-  const property = ENTITY_TYPE;
+  const field = ENTITY_TYPE;
   const value = 'host';
   const label = 'Host';
-  const popoverContentDataTestId = 'popoverContent';
-  const popoverContentTitleTestId = 'popoverContentTitle';
+  const popoverContentDataTestId = 'inventoryBadgeFilterWithPopoverContent';
+  const popoverContentTitleTestId = 'inventoryBadgeFilterWithPopoverTitle';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,12 +30,7 @@ describe('BadgeFilterWithPopover', () => {
 
   it('renders the badge with the correct label', () => {
     render(
-      <BadgeFilterWithPopover
-        property={property}
-        value={value}
-        onFilter={mockOnFilter}
-        label={label}
-      />,
+      <BadgeFilterWithPopover field={field} value={value} onFilter={mockOnFilter} label={label} />,
       { wrapper: EuiThemeProvider }
     );
     expect(screen.queryByText(label)).toBeInTheDocument();
@@ -43,24 +38,22 @@ describe('BadgeFilterWithPopover', () => {
   });
 
   it('opens the popover when the badge is clicked', () => {
-    render(<BadgeFilterWithPopover property={property} value={value} onFilter={mockOnFilter} />);
+    render(<BadgeFilterWithPopover field={field} value={value} onFilter={mockOnFilter} />);
     expect(screen.queryByTestId(popoverContentDataTestId)).not.toBeInTheDocument();
     fireEvent.click(screen.getByText(value));
     expect(screen.queryByTestId(popoverContentDataTestId)).toBeInTheDocument();
-    expect(screen.queryByTestId(popoverContentTitleTestId)?.textContent).toBe(
-      `${property}:${value}`
-    );
+    expect(screen.queryByTestId(popoverContentTitleTestId)?.textContent).toBe(`${field}:${value}`);
   });
 
   it('calls onFilter when the "Filter for" button is clicked', () => {
-    render(<BadgeFilterWithPopover property={property} value={value} onFilter={mockOnFilter} />);
+    render(<BadgeFilterWithPopover field={field} value={value} onFilter={mockOnFilter} />);
     fireEvent.click(screen.getByText(value));
     fireEvent.click(screen.getByTestId('inventoryBadgeFilterWithPopoverFilterForButton'));
     expect(mockOnFilter).toHaveBeenCalled();
   });
 
   it('copies value to clipboard when the "Copy value" button is clicked', () => {
-    render(<BadgeFilterWithPopover property={property} value={value} onFilter={mockOnFilter} />);
+    render(<BadgeFilterWithPopover field={field} value={value} onFilter={mockOnFilter} />);
     fireEvent.click(screen.getByText(value));
     fireEvent.click(screen.getByTestId('inventoryBadgeFilterWithPopoverCopyValueButton'));
     expect(copyToClipboard).toHaveBeenCalledWith(value);
