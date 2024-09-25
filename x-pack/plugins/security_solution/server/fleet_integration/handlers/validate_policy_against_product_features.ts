@@ -44,7 +44,7 @@ export const validatePolicyAgainstProductFeatures = (
     ) {
       const productFeatureError: Error & { statusCode?: number; apiPassThrough?: boolean } =
         new Error(
-          'To modify custom notifications, you must add Endpoint Complete to your project.'
+          'To customize the user notification, you must add Endpoint Protection Complete to your project.'
         );
       productFeatureError.statusCode = 403;
       productFeatureError.apiPassThrough = true;

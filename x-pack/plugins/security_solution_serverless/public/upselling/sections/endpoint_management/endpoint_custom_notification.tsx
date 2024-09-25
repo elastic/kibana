@@ -19,7 +19,8 @@ const CARD_TITLE = i18n.translate(
 const CARD_MESSAGE = i18n.translate(
   'xpack.securitySolutionServerless.endpointCustomNotification.cardMessage',
   {
-    defaultMessage: 'To add custom notification, you must add Endpoint Complete to your project.',
+    defaultMessage:
+      'To customize the user notification, you must add Endpoint Protection Complete to your project.',
   }
 );
 const BADGE_TEXT = i18n.translate(

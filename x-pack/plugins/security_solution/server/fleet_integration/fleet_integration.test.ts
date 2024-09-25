@@ -629,7 +629,7 @@ describe('ingest_integration tests ', () => {
         await expect(() =>
           callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
         ).rejects.toThrow(
-          'To modify custom notifications, you must add Endpoint Complete to your project.'
+          'To customize the user notification, you must add Endpoint Protection Complete to your project.'
         );
       });
 
