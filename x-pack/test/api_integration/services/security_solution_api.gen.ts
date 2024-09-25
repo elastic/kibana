@@ -256,6 +256,16 @@ If asset criticality records already exist for the specified entities, those rec
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+     */
+    cleanUpRiskEngine() {
+      return supertest
+        .delete('/api/risk_score/engine/dangerously_delete_data')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     createAlertsIndex() {
       return supertest
         .post('/api/detection_engine/index')
