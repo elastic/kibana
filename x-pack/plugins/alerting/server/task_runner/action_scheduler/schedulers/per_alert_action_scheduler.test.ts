@@ -846,7 +846,7 @@ describe('Per-Alert Action Scheduler', () => {
       ]);
     });
 
-    test('should skip generating executable when alert has has no scheduled actions and has no end time', async () => {
+    test('should skip generating an executable when an alert has neither scheduled actions nor end time', async () => {
       const scheduler = new PerAlertActionScheduler(getSchedulerContext());
       const alertWithNoScheduledActions = generateAlert({
         id: 5,
