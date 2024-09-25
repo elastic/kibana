@@ -47,13 +47,10 @@ describe('createFieldMapping', () => {
 `;
 
     expect(Utils.createSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/base-fields.yml`,
+      `${dataStreamPath}/fields/base-fields.yml`,
       mockedTemplate
     );
-    expect(Utils.createSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/fields/fields.yml`,
-      expectedFields
-    );
+    expect(Utils.createSync).toHaveBeenCalledWith(`${dataStreamPath}/fields/fields.yml`, expectedFields);
   });
 
   it('Should create fields files even if docs value is empty', async () => {
@@ -63,12 +60,9 @@ describe('createFieldMapping', () => {
 `;
 
     expect(Utils.createSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/base-fields.yml`,
+      `${dataStreamPath}/fields/base-fields.yml`,
       mockedTemplate
     );
-    expect(Utils.createSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/fields/fields.yml`,
-      expectedFields
-    );
+    expect(Utils.createSync).toHaveBeenCalledWith(`${dataStreamPath}/fields/fields.yml`, expectedFields);
   });
 });
