@@ -62,7 +62,7 @@ export interface IntegrationCardItem {
   installStatus: EpmPackageInstallStatus | null | undefined;
   titleLineClamp?: number;
   descriptionLineClamp?: number;
-  fixedCardHeight?: number;
+  maxCardHeight?: number;
 }
 
 export const mapToCard = ({

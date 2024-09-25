@@ -9,6 +9,7 @@ import React from 'react';
 
 import { EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 import { installationStatuses } from '../../../../../../common/constants';
 import type { EpmPackageInstallStatus } from '../../../../../../common/types';
@@ -56,7 +57,7 @@ export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
     const { euiTheme } = useEuiTheme();
     return shouldShowInstallationStatus({ installStatus, showInstallationStatus }) ? (
       <div
-        css={`
+        css={css`
           position: absolute;
           border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
           bottom: 0;
@@ -66,13 +67,15 @@ export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
         `}
       >
         <EuiSpacer
+          data-test-subj="installation-status-spacer"
           size="m"
-          css={`
+          css={css`
             background: ${euiTheme.colors.emptyShade};
           `}
         />
         <EuiCallOut
-          css={`
+          data-test-subj="installation-status-callout"
+          css={css`
             padding: ${euiTheme.size.s} ${euiTheme.size.m};
             text-align: center;
           `}
