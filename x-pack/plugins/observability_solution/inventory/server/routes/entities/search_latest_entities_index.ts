@@ -22,8 +22,8 @@ import { toEntity } from '../../../common/utils/to_entity';
 
 const MAX_NUMBER_OF_ENTITIES = 500;
 
-const keyword = { keyword: [] as Array<string | null> };
-const long = { long: [] as Array<number | null> };
+const keyword = () => ({ keyword: [] as Array<string | null> });
+const long = () => ({ long: [] as Array<number | null> });
 
 export async function searchLatestEntitiesIndex({
   esClient,
@@ -61,14 +61,14 @@ export async function searchLatestEntitiesIndex({
         return prev;
       },
       {
-        'entity.type': keyword,
-        'entity.displayName': keyword,
-        'slos.violated': long,
-        'slos.healthy': long,
-        'slos.degraded': long,
-        'slos.no_data': long,
-        'alerts.active': long,
-        'alerts.total': long,
+        'entity.type': keyword(),
+        'entity.displayName': keyword(),
+        'slos.violated': long(),
+        'slos.healthy': long(),
+        'slos.degraded': long(),
+        'slos.no_data': long(),
+        'alerts.active': long(),
+        'alerts.total': long(),
       }
     );
   }
