@@ -223,6 +223,7 @@
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture-common",
     "@kbn/presentation-publishing",
+    "@kbn/inference-plugin",
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
   ]
