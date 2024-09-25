@@ -12,7 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { AppMenuDiscoverParams, AppMenuItem } from '@kbn/discover-utils';
+import { AppMenuDiscoverParams, AppMenuItem, AppMenuActionType } from '@kbn/discover-utils';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
@@ -218,6 +218,7 @@ function convertMenuItem({
       id: appMenuItem.id,
       label: appMenuItem.label,
       description: appMenuItem.description ?? appMenuItem.label,
+      testId: appMenuItem.testId,
       run: (anchorElement: HTMLElement) => {
         runAppMenuPopoverAction({
           appMenuItem,
@@ -225,7 +226,6 @@ function convertMenuItem({
           getDiscoverParams,
         });
       },
-      testId: appMenuItem.testId,
     };
   }
 
@@ -233,6 +233,7 @@ function convertMenuItem({
     id: appMenuItem.id,
     label: appMenuItem.controlProps.label,
     description: appMenuItem.controlProps.description ?? appMenuItem.controlProps.label,
+    testId: appMenuItem.controlProps.testId,
     run: async (anchorElement: HTMLElement) => {
       await runAppMenuAction({
         appMenuItem,
@@ -240,6 +241,8 @@ function convertMenuItem({
         getDiscoverParams,
       });
     },
-    testId: appMenuItem.controlProps.testId,
+    ...(appMenuItem.type === AppMenuActionType.primary
+      ? { iconType: appMenuItem.controlProps.iconType, iconOnly: true }
+      : {}),
   };
 }

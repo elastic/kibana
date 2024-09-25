@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMenuAction, AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import { AppMenuIconAction, AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -22,10 +22,10 @@ export const getShareAppMenuItem = ({
 }: {
   stateContainer: DiscoverStateContainer;
   services: DiscoverServices;
-}): AppMenuAction => {
+}): AppMenuIconAction => {
   return {
     id: AppMenuActionId.share,
-    type: AppMenuActionType.secondary,
+    type: AppMenuActionType.primary,
     controlProps: {
       label: i18n.translate('discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
@@ -33,6 +33,7 @@ export const getShareAppMenuItem = ({
       description: i18n.translate('discover.localMenu.shareSearchDescription', {
         defaultMessage: 'Share Search',
       }),
+      iconType: 'link',
       testId: 'shareTopNavButton',
       onClick: async ({ getDiscoverParams, anchorElement }) => {
         const { dataView, isEsqlMode } = getDiscoverParams();
