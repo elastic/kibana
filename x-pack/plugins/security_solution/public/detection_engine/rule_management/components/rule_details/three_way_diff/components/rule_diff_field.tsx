@@ -6,16 +6,10 @@
  */
 
 import React from 'react';
-import {
-  EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { camelCase, startCase } from 'lodash';
+import { SplitAccordion } from '../../../../../../common/components/split_accordion';
 import type {
   DiffableAllFields,
   DiffableRule,
@@ -24,6 +18,7 @@ import type {
 import { ThreeWayDiffConflict } from '../../../../../../../common/api/detection_engine';
 import { ComparisonSide } from '../comparison_side/comparison_side';
 import { FinalSide } from '../final_side/final_side';
+import { fieldToDisplayNameMap } from '../../diff_components/translations';
 
 interface RuleDiffFieldProps<FieldName extends keyof DiffableAllFields> {
   fieldName: FieldName;
@@ -39,39 +34,39 @@ export function RuleDiffField<FieldName extends keyof DiffableAllFields>({
   resolvedValue,
 }: RuleDiffFieldProps<FieldName>): JSX.Element {
   const { euiTheme } = useEuiTheme();
-  const accordionId = useGeneratedHtmlId({ prefix: 'rule-diff-accordion' });
   const hasConflict = fieldThreeWayDiff.conflict !== ThreeWayDiffConflict.NONE;
 
   return (
     <>
-      <EuiPanel>
-        <EuiAccordion
-          id={accordionId}
-          buttonContent={fieldName}
-          initialIsOpen={hasConflict}
-          paddingSize="s"
-        >
-          <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-            <EuiFlexItem grow={1}>
-              <ComparisonSide
-                fieldName={fieldName}
-                fieldThreeWayDiff={fieldThreeWayDiff}
-                resolvedValue={resolvedValue}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={0}
-              css={css`
-                align-self: stretch;
-                border-right: ${euiTheme.border.thin};
-              `}
+      <SplitAccordion
+        header={
+          <EuiTitle data-test-subj="ruleUpgradeFieldDiffLabel" size="xs">
+            <h5>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h5>
+          </EuiTitle>
+        }
+        initialIsOpen={hasConflict}
+        data-test-subj="ruleUpgradePerFieldDiff"
+      >
+        <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+          <EuiFlexItem grow={1}>
+            <ComparisonSide
+              fieldName={fieldName}
+              fieldThreeWayDiff={fieldThreeWayDiff}
+              resolvedValue={resolvedValue}
             />
-            <EuiFlexItem grow={1}>
-              <FinalSide fieldName={fieldName} finalDiffableRule={finalDiffableRule} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiAccordion>
-      </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={0}
+            css={css`
+              align-self: stretch;
+              border-right: ${euiTheme.border.thin};
+            `}
+          />
+          <EuiFlexItem grow={1}>
+            <FinalSide fieldName={fieldName} finalDiffableRule={finalDiffableRule} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </SplitAccordion>
       <EuiSpacer size="s" />
     </>
   );
