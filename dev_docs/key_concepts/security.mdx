@@ -18,7 +18,7 @@ This guide covers the following topics:
 Kibana API routes do not have any authorization checks applied by default. This means that your APIs are accessible to anyone with valid credentials, regardless of their permissions. This includes users with no roles assigned.
 This on its own is insufficient, and care must be taken to ensure that only authorized users can invoke your endpoints.
 
-### [Deprecated] Adding API authorization before 9.0
+### [Deprecated] Adding API authorization before `9.0`
 Kibana leverages <DocLink id="kibDevDocsSavedObjectsIntro" text="Saved Objects" /> for a majority of its persistence. The Saved Objects Service performs its own authorization checks, so if your API route is primarily a CRUD interface to Saved Objects, then your authorization needs are already met.
 This is also true for derivatives of the Saved Objects Service, such as the Alerting and Cases services.
 
@@ -35,8 +35,8 @@ Each authorization check that we perform involves a round-trip to Elasticsearch,
 Adding an `access` tag to routes that leverage the Saved Objects Service would be redundant in most cases, since the Saved Objects Service will be performing authorization anyway.
 
 
-### Adding API authorization after 9.0
-In Kibana 9.0, we extended `KibanaRouteOptions` to include security configuration at the route definition level.
+### Adding API authorization after `9.0`
+In Kibana `9.0`, we extended `KibanaRouteOptions` to include security configuration at the route definition level.
 Kibana now supports flexible security configurations for both **Classic** and **Versioned** routes.
 
 ```ts
@@ -104,14 +104,11 @@ router.get({
 #### Versioned Router Examples
 Versioned routes allow different security configurations per version, giving flexibility when evolving API security over time.
 
-1. **Default Configuration (applies to versions without specific authorization)**:
-   - Requires `<privilege_1>`.
+1. **Default Configuration (applies to versions without specific authorization)**: Requires `<privilege_1>`.
 
-2. **Version 1**:
-   - Requires **both** `<privilege_1>` and `<privilege_2>` privileges.
+2. **Version 1**: Requires **both** `<privilege_1>` and `<privilege_2>` privileges.
 
-3. **Version 2**:
-   - Inherits the default authorization configuration, requiring `<privilege_1>`.
+3. **Version 2**: Inherits the default authorization configuration, requiring `<privilege_1>`.
 
 ```ts
 router.versioned
