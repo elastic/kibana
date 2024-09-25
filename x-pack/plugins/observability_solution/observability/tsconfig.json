@@ -9,7 +9,7 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../../typings/**/*",
+    "../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/rule-data-utils",
@@ -94,7 +94,6 @@
     "@kbn/home-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/guided-onboarding-plugin",
-    "@kbn/inventory-plugin",
     "@kbn/investigate-plugin",
     "@kbn/license-management-plugin",
     "@kbn/presentation-util-plugin",
@@ -114,9 +113,7 @@
     "@kbn/io-ts-utils",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/es-types",
-    "@kbn/logging-mocks",
+    "@kbn/logging-mocks"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

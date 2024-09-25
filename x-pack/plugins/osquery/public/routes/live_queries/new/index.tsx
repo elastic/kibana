@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
 
+import { isArray } from 'lodash';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { LiveQuery } from '../../../live_queries';
@@ -30,7 +31,11 @@ const NewLiveQueryPageComponent = () => {
   const agentPolicyIds = useMemo(() => {
     const queryParams = qs.parse(location.search);
 
-    return queryParams?.agentPolicyId ? ([queryParams?.agentPolicyId] as string[]) : undefined;
+    return queryParams?.agentPolicyId
+      ? isArray(queryParams?.agentPolicyId)
+        ? queryParams?.agentPolicyId
+        : [queryParams?.agentPolicyId]
+      : undefined;
   }, [location.search]);
 
   useEffect(() => {
@@ -68,7 +73,7 @@ const NewLiveQueryPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      <LiveQuery agentPolicyIds={agentPolicyIds} {...initialFormData} />
+      <LiveQuery {...initialFormData} agentPolicyIds={agentPolicyIds} />
     </WithHeaderLayout>
   );
 };

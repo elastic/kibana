@@ -16,6 +16,7 @@ import type {
   ESQLInlineCast,
   ESQLList,
   ESQLLiteral,
+  ESQLOrderExpression,
   ESQLSource,
   ESQLTimeInterval,
 } from '../types';
@@ -400,6 +401,10 @@ export class GlobalVisitorContext<
         if (!this.methods.visitInlineCastExpression) break;
         return this.visitInlineCastExpression(parent, expressionNode, input as any);
       }
+      case 'order': {
+        if (!this.methods.visitOrderExpression) break;
+        return this.visitOrderExpression(parent, expressionNode, input as any);
+      }
       case 'option': {
         switch (expressionNode.name) {
           case 'as': {
@@ -486,5 +491,14 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitRenameExpression'> {
     const context = new contexts.RenameExpressionVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitRenameExpression', context, input);
+  }
+
+  public visitOrderExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLOrderExpression,
+    input: types.VisitorInput<Methods, 'visitOrderExpression'>
+  ): types.VisitorOutput<Methods, 'visitOrderExpression'> {
+    const context = new contexts.OrderExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitOrderExpression', context, input);
   }
 }
