@@ -10,22 +10,24 @@ import { ComponentStory } from '@storybook/react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils';
 
-import { PageTitle as Component, PageTitleProps } from './page_title';
+import { PageTitleContent as Component, PageTitleContentProps } from './page_title_content';
 import { alert } from '../mock/alert';
 
 export default {
   component: Component,
-  title: 'app/AlertDetails/PageTitle',
+  title: 'app/AlertDetails/PageTitleContent',
   alert,
 };
 
-const Template: ComponentStory<typeof Component> = (props: PageTitleProps) => (
+const Template: ComponentStory<typeof Component> = (props: PageTitleContentProps) => (
   <Component {...props} />
 );
 
-const TemplateWithPageTemplate: ComponentStory<typeof Component> = (props: PageTitleProps) => (
+const TemplateWithPageTemplate: ComponentStory<typeof Component> = (
+  props: PageTitleContentProps
+) => (
   <EuiPageTemplate>
-    <EuiPageTemplate.Header pageTitle={<Component {...props} />} bottomBorder={false} />
+    <EuiPageTemplate.Header children={<Component {...props} />} bottomBorder={false} />
   </EuiPageTemplate>
 );
 
@@ -33,11 +35,11 @@ const defaultProps = {
   alert,
 };
 
-export const PageTitle = Template.bind({});
-PageTitle.args = defaultProps;
+export const PageTitleContent = Template.bind({});
+PageTitleContent.args = defaultProps;
 
-export const PageTitleForAnomaly = Template.bind({});
-PageTitleForAnomaly.args = {
+export const PageTitleContentForAnomaly = Template.bind({});
+PageTitleContentForAnomaly.args = {
   ...{
     alert: {
       ...defaultProps.alert,
