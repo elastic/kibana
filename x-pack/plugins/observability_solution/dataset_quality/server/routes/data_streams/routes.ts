@@ -305,7 +305,7 @@ const analyzeDegradedFieldRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<DegradedFieldAnalysis> {
-    const { context, params } = resources;
+    const { context, params, logger } = resources;
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
@@ -314,6 +314,7 @@ const analyzeDegradedFieldRoute = createDatasetQualityServerRoute({
       dataStream: params.path.dataStream,
       degradedField: params.path.degradedField,
       lastBackingIndex: params.query.lastBackingIndex,
+      logger,
     });
 
     return degradedFieldAnalysis;

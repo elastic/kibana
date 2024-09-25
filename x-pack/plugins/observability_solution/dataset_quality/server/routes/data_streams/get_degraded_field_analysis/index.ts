@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Logger } from '@kbn/core/server';
 import { DegradedFieldAnalysis } from '../../../../common/api_types';
 import { createDatasetQualityESClient } from '../../../utils';
 import { getDataStreamMapping } from './get_datastream_mappings';
@@ -18,11 +19,13 @@ export async function analyzeDegradedField({
   dataStream,
   degradedField,
   lastBackingIndex,
+  logger,
 }: {
   esClient: ElasticsearchClient;
   dataStream: string;
   degradedField: string;
   lastBackingIndex: string;
+  logger: Logger;
 }): Promise<DegradedFieldAnalysis> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
@@ -35,8 +38,9 @@ export async function analyzeDegradedField({
       dataStream,
       field: degradedField,
       lastBackingIndex,
+      logger,
     }),
-    getDataStreamSettings({ datasetQualityESClient, dataStream, lastBackingIndex }),
+    getDataStreamSettings({ datasetQualityESClient, dataStream, lastBackingIndex, logger }),
   ]);
 
   return {
