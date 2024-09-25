@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPageHeaderProps,
-  EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -22,7 +21,6 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React, { useContext } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,7 +39,6 @@ import { ServiceGroupsButtonGroup } from '../../app/service_groups/service_group
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { EntityEnablement } from '../../shared/entity_enablement';
 import { ServiceInventoryView } from '../../../context/entity_manager_context/entity_manager_context';
 
 // Paths that must skip the no data screen
@@ -241,20 +238,6 @@ export function ApmMainTemplate({
           pageTitle: pageHeaderTitle,
           children: (
             <EuiFlexGroup direction="column">
-              {isEntityCentricExperienceSettingEnabled &&
-              showEnablementCallout &&
-              selectedNavButton === 'allServices' ? (
-                <EntityEnablement
-                  label={i18n.translate('xpack.apm.eemEnablement.tryItButton.', {
-                    defaultMessage: 'Try our new experience!',
-                  })}
-                  tooltip={i18n.translate('xpack.apm.entityEnablement.content', {
-                    defaultMessage:
-                      'Our new experience combines both APM-instrumented services with services detected from logs in a single service inventory.',
-                  })}
-                />
-              ) : null}
-
               {showInventoryCallout ? inventoryCallout : null}
               {showServiceGroupsNav && selectedNavButton && (
                 <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
