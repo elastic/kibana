@@ -472,7 +472,7 @@ describe('CoreKibanaRequest', () => {
         expect(kibanaRequest.route.options.security).toEqual(security);
       });
 
-      it('handles required authz config for versioned route', () => {
+      it('handles required authz config for the route with RouteSecurityGetter', () => {
         const security: RouteSecurity = {
           authz: {
             requiredPrivileges: [
@@ -487,6 +487,7 @@ describe('CoreKibanaRequest', () => {
           route: {
             settings: {
               app: {
+                // security is a getter function only for the versioned routes
                 security: () => security,
               },
             },
