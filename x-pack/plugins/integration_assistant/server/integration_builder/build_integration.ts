@@ -38,12 +38,11 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   const packageDir = createDirectories(workingDir, integration, packageDirectoryName);
 
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
-  const dataStreamFields: object[] = [];
-  for (const dataStream of integration.dataStreams) {
+  const dataStreamFields = integration.dataStreams.map(dataStream => {
     const dataStreamName = dataStream.name;
     const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
 
-    createDataStream(integration.name, specificDataStreamDir, dataStream);
+    const dataStreamFields = createDataStream(integration.name, specificDataStreamDir, dataStream);
     createAgentInput(specificDataStreamDir, dataStream.inputTypes);
     createPipeline(specificDataStreamDir, dataStream.pipeline);
     const fields = createFieldMapping(
@@ -52,11 +51,12 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
       specificDataStreamDir,
       dataStream.docs
     );
-    dataStreamFields.push({
+
+    return {
       datastream: dataStreamName,
-      fields,
-    });
-  }
+      fields: [...fields, ...dataStreamFields],
+    };
+  });
 
   createReadme(packageDir, integration.name, dataStreamFields);
   const zipBuffer = await createZipArchive(workingDir, packageDirectoryName);
