@@ -46,7 +46,7 @@ export const getTopNavLinks = ({
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
 }): TopNavMenuData[] => {
-  const alerts = {
+  const alerts: TopNavMenuData = {
     id: 'alerts',
     label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
       defaultMessage: 'Alerts',
@@ -69,7 +69,7 @@ export const getTopNavLinks = ({
   /**
    * Switches from ES|QL to classic mode and vice versa
    */
-  const esqLDataViewTransitionToggle = {
+  const esqLDataViewTransitionToggle: TopNavMenuData = {
     id: 'esql',
     label: isEsqlMode
       ? i18n.translate('discover.localMenu.switchToClassicTitle', {
@@ -114,7 +114,7 @@ export const getTopNavLinks = ({
     testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
   };
 
-  const newSearch = {
+  const newSearch: TopNavMenuData = {
     id: 'new',
     label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
       defaultMessage: 'New',
@@ -122,11 +122,13 @@ export const getTopNavLinks = ({
     description: i18n.translate('discover.localMenu.newSearchDescription', {
       defaultMessage: 'New Search',
     }),
+    iconType: 'plus',
+    iconOnly: true,
     run: () => services.locator.navigate({}),
     testId: 'discoverNewButton',
   };
 
-  const saveSearch = {
+  const saveSearch: TopNavMenuData = {
     id: 'save',
     label: i18n.translate('discover.localMenu.saveTitle', {
       defaultMessage: 'Save',
@@ -149,7 +151,7 @@ export const getTopNavLinks = ({
     },
   };
 
-  const openSearch = {
+  const openSearch: TopNavMenuData = {
     id: 'open',
     label: i18n.translate('discover.localMenu.openTitle', {
       defaultMessage: 'Open',
@@ -157,6 +159,8 @@ export const getTopNavLinks = ({
     description: i18n.translate('discover.localMenu.openSavedSearchDescription', {
       defaultMessage: 'Open Saved Search',
     }),
+    iconType: 'folderOpen',
+    iconOnly: true,
     testId: 'discoverOpenButton',
     run: () =>
       showOpenSearchPanel({
@@ -165,7 +169,7 @@ export const getTopNavLinks = ({
       }),
   };
 
-  const shareSearch = {
+  const shareSearch: TopNavMenuData = {
     id: 'share',
     label: i18n.translate('discover.localMenu.shareTitle', {
       defaultMessage: 'Share',
@@ -173,6 +177,8 @@ export const getTopNavLinks = ({
     description: i18n.translate('discover.localMenu.shareSearchDescription', {
       defaultMessage: 'Share Search',
     }),
+    iconType: 'link',
+    iconOnly: true,
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
       if (!services.share) return;
@@ -263,7 +269,7 @@ export const getTopNavLinks = ({
     },
   };
 
-  const inspectSearch = {
+  const inspectSearch: TopNavMenuData = {
     id: 'inspect',
     label: i18n.translate('discover.localMenu.inspectTitle', {
       defaultMessage: 'Inspect',
@@ -285,15 +291,15 @@ export const getTopNavLinks = ({
   }
 
   if (!defaultMenu?.newItem?.disabled) {
-    entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 100 });
+    entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 510 });
   }
 
   if (!defaultMenu?.openItem?.disabled) {
-    entries.push({ data: openSearch, order: defaultMenu?.openItem?.order ?? 200 });
+    entries.push({ data: openSearch, order: defaultMenu?.openItem?.order ?? 520 });
   }
 
   if (!defaultMenu?.shareItem?.disabled) {
-    entries.push({ data: shareSearch, order: defaultMenu?.shareItem?.order ?? 300 });
+    entries.push({ data: shareSearch, order: defaultMenu?.shareItem?.order ?? 530 });
   }
 
   if (
