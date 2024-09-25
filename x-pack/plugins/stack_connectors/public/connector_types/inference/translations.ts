@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const getRequiredMessage = (field: string) => {
-  return i18n.translate('xpack.stackConnectors.components.inference.requiredInputTextField', {
+  return i18n.translate('xpack.stackConnectors.components.inference.requiredGenericTextField', {
     defaultMessage: '{field} is required.',
     values: { field },
   });

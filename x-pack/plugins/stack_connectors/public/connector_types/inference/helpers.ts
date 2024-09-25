@@ -70,10 +70,7 @@ export const missingConfigFieldValidator = (
       }
     });
 
-    console.log(formData['config.providerSchema']);
-
     if (hasErrors) {
-      console.log(hasErrors);
       return {
         code: 'ERR_FIELD_MISSING',
         path,
@@ -110,11 +107,7 @@ export const missingSecretsFieldValidator = (
       }
     });
 
-    console.log(formData['config.providerSchema']);
-
     if (hasErrors) {
-      console.log(hasErrors);
-
       return {
         code: 'ERR_FIELD_MISSING',
         path,
@@ -146,8 +139,6 @@ export const missingTaskTypeFieldValidator = (
     });
 
     if (hasErrors) {
-      console.log(hasErrors);
-
       return {
         code: 'ERR_FIELD_MISSING',
         path,
