@@ -106,7 +106,7 @@ import {
   InitialComponentState,
   initializeComponentStateManager,
 } from '../../dashboard_api/component_state_manager';
-import { initializeTracksOverlaysApi } from '../../dashboard_api/tracks_overlays_api';
+import { initializeTracksOverlays } from '../../dashboard_api/tracks_overlays';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -319,7 +319,7 @@ export class DashboardContainer
     this.setHasUnsavedChanges = componentStateManager.setHasUnsavedChanges;
     this.setManaged = componentStateManager.setManaged;
 
-    const tracksOverlayApi = initializeTracksOverlaysApi();
+    const tracksOverlayApi = initializeTracksOverlays();
     this.clearOverlays = tracksOverlayApi.clearOverlays;
     this.focusedPanelId$ = tracksOverlayApi.focusedPanelId$;
     this.hasOverlays$ = tracksOverlayApi.hasOverlayers$;
