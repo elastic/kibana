@@ -10,33 +10,19 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
-import {
-  generateHistoryIndexTemplateId,
-  generateLatestIndexTemplateId,
-} from './helpers/generate_component_id';
-import {
-  createAndInstallHistoryIngestPipeline,
-  createAndInstallLatestIngestPipeline,
-} from './create_and_install_ingest_pipeline';
-import {
-  createAndInstallHistoryBackfillTransform,
-  createAndInstallHistoryTransform,
-  createAndInstallLatestTransform,
-} from './create_and_install_transform';
+import { generateHistoryIndexTemplateId } from './helpers/generate_component_id';
+import { createAndInstallHistoryIngestPipeline } from './create_and_install_ingest_pipeline';
+import { createAndInstallHistoryTransform } from './create_and_install_transform';
 import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
-import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
+import { deleteIngestPipelines } from './delete_ingest_pipeline';
 import { findEntityDefinitionById } from './find_entity_definition';
 import {
   entityDefinitionExists,
   saveEntityDefinition,
   updateEntityDefinition,
 } from './save_entity_definition';
-
-import { isBackfillEnabled } from './helpers/is_backfill_enabled';
-import { deleteTemplate, upsertTemplate } from '../manage_index_templates';
-import { generateEntitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
-import { generateEntitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
+import { createAndInstallTemplates, deleteTemplate } from '../manage_index_templates';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
@@ -50,16 +36,6 @@ export interface InstallDefinitionParams {
   definition: EntityDefinition;
   logger: Logger;
 }
-
-const throwIfRejected = (values: Array<PromiseFulfilledResult<any> | PromiseRejectedResult>) => {
-  const rejectedPromise = values.find(
-    (value) => value.status === 'rejected'
-  ) as PromiseRejectedResult;
-  if (rejectedPromise) {
-    throw new Error(rejectedPromise.reason);
-  }
-  return values;
-};
 
 // install an entity definition from scratch with all its required components
 // after verifying that the definition id is valid and available.
@@ -91,23 +67,13 @@ export async function installEntityDefinition({
     logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
     await stopAndDeleteTransforms(esClient, definition, logger);
 
-    await Promise.all([
-      deleteHistoryIngestPipeline(esClient, definition, logger),
-      deleteLatestIngestPipeline(esClient, definition, logger),
-    ]);
+    await deleteIngestPipelines(esClient, definition, logger);
 
-    await Promise.all([
-      deleteTemplate({
-        esClient,
-        logger,
-        name: generateHistoryIndexTemplateId(definition),
-      }),
-      deleteTemplate({
-        esClient,
-        logger,
-        name: generateLatestIndexTemplateId(definition),
-      }),
-    ]);
+    await deleteTemplate({
+      esClient,
+      logger,
+      name: generateHistoryIndexTemplateId(definition),
+    });
 
     await deleteEntityDefinition(soClient, definition).catch((err) => {
       if (err instanceof EntityDefinitionNotFound) {
@@ -191,35 +157,18 @@ async function install({
   );
 
   logger.debug(`Installing index templates for definition ${definition.id}`);
-  await Promise.allSettled([
-    upsertTemplate({
-      esClient,
-      logger,
-      template: generateEntitiesHistoryIndexTemplateConfig(definition),
-    }),
-    upsertTemplate({
-      esClient,
-      logger,
-      template: generateEntitiesLatestIndexTemplateConfig(definition),
-    }),
-  ]).then(throwIfRejected);
+  const templates = await createAndInstallTemplates(esClient, definition, logger);
 
   logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
-  await Promise.allSettled([
-    createAndInstallHistoryIngestPipeline(esClient, definition, logger),
-    createAndInstallLatestIngestPipeline(esClient, definition, logger),
-  ]).then(throwIfRejected);
+  const pipelines = await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
 
   logger.debug(`Installing transforms for definition ${definition.id}`);
-  await Promise.allSettled([
-    createAndInstallHistoryTransform(esClient, definition, logger),
-    isBackfillEnabled(definition)
-      ? createAndInstallHistoryBackfillTransform(esClient, definition, logger)
-      : Promise.resolve(),
-    createAndInstallLatestTransform(esClient, definition, logger),
-  ]).then(throwIfRejected);
+  const transforms = await createAndInstallHistoryTransform(esClient, definition, logger);
 
-  await updateEntityDefinition(soClient, definition.id, { installStatus: 'installed' });
+  await updateEntityDefinition(soClient, definition.id, {
+    installStatus: 'installed',
+    installedComponents: [...templates, ...pipelines, ...transforms],
+  });
   return { ...definition, installStatus: 'installed' };
 }
 

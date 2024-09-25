@@ -21,9 +21,7 @@ import {
   generateHistoryTransformId,
   generateHistoryIngestPipelineId,
   generateHistoryIndexName,
-  generateHistoryBackfillTransformId,
 } from '../helpers/generate_component_id';
-import { isBackfillEnabled } from '../helpers/is_backfill_enabled';
 
 export function generateHistoryTransform(
   definition: EntityDefinition
@@ -56,48 +54,6 @@ export function generateHistoryTransform(
     transformId: generateHistoryTransformId(definition),
     frequency: definition.history.settings.frequency,
     syncDelay: definition.history.settings.syncDelay,
-  });
-}
-
-export function generateBackfillHistoryTransform(
-  definition: EntityDefinition
-): TransformPutTransformRequest {
-  if (!isBackfillEnabled(definition)) {
-    throw new Error(
-      'generateBackfillHistoryTransform called without history.settings.backfillSyncDelay set'
-    );
-  }
-
-  const filter: QueryDslQueryContainer[] = [];
-
-  if (definition.filter) {
-    filter.push(getElasticsearchQueryOrThrow(definition.filter));
-  }
-
-  if (definition.history.settings.backfillLookbackPeriod) {
-    filter.push({
-      range: {
-        [definition.history.timestampField]: {
-          gte: `now-${definition.history.settings.backfillLookbackPeriod}`,
-        },
-      },
-    });
-  }
-
-  if (definition.identityFields.some(({ optional }) => !optional)) {
-    definition.identityFields
-      .filter(({ optional }) => !optional)
-      .forEach(({ field }) => {
-        filter.push({ exists: { field } });
-      });
-  }
-
-  return generateTransformPutRequest({
-    definition,
-    filter,
-    transformId: generateHistoryBackfillTransformId(definition),
-    frequency: definition.history.settings.backfillFrequency,
-    syncDelay: definition.history.settings.backfillSyncDelay,
   });
 }
 
@@ -157,12 +113,6 @@ const generateTransformPutRequest = ({
           }),
           {}
         ),
-        ['@timestamp']: {
-          date_histogram: {
-            field: definition.history.timestampField,
-            fixed_interval: definition.history.interval,
-          },
-        },
       },
       aggs: {
         ...generateHistoryMetricAggregations(definition),

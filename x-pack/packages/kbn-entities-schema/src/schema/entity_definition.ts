@@ -57,6 +57,18 @@ export const entityDefinitionSchema = z.object({
     ])
   ),
   installStartedAt: z.optional(z.string()),
+  installedComponents: z.optional(
+    z.array(
+      z.object({
+        type: z.union([
+          z.literal('transform'),
+          z.literal('ingest_pipeline'),
+          z.literal('template'),
+        ]),
+        id: z.string(),
+      })
+    )
+  ),
 });
 
 export const entityDefinitionUpdateSchema = entityDefinitionSchema

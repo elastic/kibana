@@ -19,7 +19,7 @@ export async function createAndInstallHistoryIngestPipeline(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
-) {
+): Promise<Array<{ type: 'ingest_pipeline'; id: string }>> {
   try {
     const historyProcessors = generateHistoryProcessors(definition);
     const historyId = generateHistoryIngestPipelineId(definition);
@@ -35,6 +35,7 @@ export async function createAndInstallHistoryIngestPipeline(
         }),
       { logger }
     );
+    return [{ type: 'ingest_pipeline', id: historyId }];
   } catch (e) {
     logger.error(
       `Cannot create entity history ingest pipelines for [${definition.id}] entity defintion`
