@@ -182,6 +182,13 @@ export class CreateSpacePage extends Component<Props, State> {
   public getForm = () => {
     const { showAlteringActiveSpaceDialog } = this.state;
 
+    // The "Set feature visibility" section should show if the solution view has
+    // been set to "classic", or if the solution view selector isn't shown.
+    const showEnabledFeatures =
+      (this.state.showVisibleFeaturesPicker &&
+        this.state.space.solution === SOLUTION_VIEW_CLASSIC) ||
+      !this.props.allowSolutionVisibility;
+
     return (
       <div data-test-subj="spaces-create-page">
         <CustomizeSpace
@@ -203,17 +210,16 @@ export class CreateSpacePage extends Component<Props, State> {
           </>
         )}
 
-        {this.state.showVisibleFeaturesPicker &&
-          this.state.space.solution === SOLUTION_VIEW_CLASSIC && (
-            <>
-              <EuiSpacer />
-              <EnabledFeatures
-                space={this.state.space}
-                features={this.state.features}
-                onChange={this.onSpaceChange}
-              />
-            </>
-          )}
+        {showEnabledFeatures && (
+          <>
+            <EuiSpacer />
+            <EnabledFeatures
+              space={this.state.space}
+              features={this.state.features}
+              onChange={this.onSpaceChange}
+            />
+          </>
+        )}
 
         <EuiSpacer />
 
