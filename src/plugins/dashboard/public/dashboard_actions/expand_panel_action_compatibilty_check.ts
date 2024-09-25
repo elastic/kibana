@@ -14,6 +14,7 @@ import {
   type HasParentApi,
   type HasUniqueId,
 } from '@kbn/presentation-publishing';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export type ExpandPanelActionApi = HasUniqueId & HasParentApi<CanExpandPanels>;
 
@@ -24,6 +25,6 @@ export const compatibilityCheck = (api: unknown): api is ExpandPanelActionApi =>
 export function isCompatible(api: unknown) {
   if (!compatibilityCheck(api)) return false;
   const { createNew: canCreateNew, showWriteControls: canEditExisting } =
-    dashboardCapabilitiesService.dashboardCapabilities;
+    getDashboardCapabilities();
   return Boolean(canCreateNew || canEditExisting);
 }
