@@ -12,7 +12,6 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const archives = {
@@ -20,7 +19,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
     kbn: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/lens',
   };
 
-  describe.only('lens in canvas', function () {
+  describe('lens in canvas', function () {
     before(async () => {
       await esArchiver.load(archives.es);
       await kibanaServer.savedObjects.cleanStandardList();
