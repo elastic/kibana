@@ -19,17 +19,25 @@ import { mockVisualizationMap } from './visualization_mock';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';
 
-export const mockStoreDeps = (deps?: {
-  lensServices?: LensAppServices;
-  datasourceMap?: DatasourceMap;
-  visualizationMap?: VisualizationMap;
-}) => {
-  return {
-    datasourceMap: deps?.datasourceMap || mockDatasourceMap(),
-    visualizationMap: deps?.visualizationMap || mockVisualizationMap(),
-    lensServices: deps?.lensServices || makeDefaultServices(),
-  };
-};
+export const mockStoreDeps = (
+  {
+    lensServices = makeDefaultServices(),
+    datasourceMap = mockDatasourceMap(),
+    visualizationMap = mockVisualizationMap(),
+  }: {
+    lensServices?: LensAppServices;
+    datasourceMap?: DatasourceMap;
+    visualizationMap?: VisualizationMap;
+  } = {
+    lensServices: makeDefaultServices(),
+    datasourceMap: mockDatasourceMap(),
+    visualizationMap: mockVisualizationMap(),
+  }
+) => ({
+  datasourceMap,
+  visualizationMap,
+  lensServices,
+});
 
 export function mockDatasourceStates() {
   return {

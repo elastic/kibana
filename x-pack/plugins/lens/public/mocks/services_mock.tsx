@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import { Subject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
@@ -104,12 +103,7 @@ export function makeDefaultServices(
   dataViewsMock.getIdsWithTitle.mockImplementation(jest.fn(async () => []));
 
   const navigationStartMock = navigationPluginMock.createStartContract();
-
-  jest
-    .spyOn(navigationStartMock.ui.AggregateQueryTopNavMenu.prototype, 'constructor')
-    .mockImplementation(() => {
-      return <div className="topNavMenu" />;
-    });
+  const presentationUtilMock = presentationUtilPluginMock.createStartContract(core);
 
   return {
     ...startMock,
@@ -122,7 +116,7 @@ export function makeDefaultServices(
       inspect: jest.fn(),
       closeInspector: jest.fn(),
     },
-    presentationUtil: presentationUtilPluginMock.createStartContract(core),
+    presentationUtil: presentationUtilMock,
     savedObjectStore: {
       load: jest.fn(),
       search: jest.fn(),
@@ -135,6 +129,9 @@ export function makeDefaultServices(
       capabilities: {
         ...core.application.capabilities,
         visualize: { save: true, saveQuery: true, show: true, createShortUrl: true },
+        dashboard: {
+          showWriteControls: true,
+        },
       },
       getUrlForApp: jest.fn((appId: string) => `/testbasepath/app/${appId}#/`),
     },
