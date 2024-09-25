@@ -23,7 +23,6 @@ import {
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_UNTRACKED,
-  ALERT_GROUP,
 } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -31,7 +30,6 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
-import type { Group } from '../../../common/typings';
 import { observabilityFeatureId } from '../../../common';
 import { RelatedAlerts } from './components/related_alerts';
 import { useKibana } from '../../utils/kibana_react';
@@ -269,14 +267,7 @@ export function AlertDetails() {
         defaultMessage: 'Related Alerts',
       }),
       'data-test-subj': 'relatedAlertsTab',
-      content: (
-        <RelatedAlerts
-          alert={alertDetail?.formatted}
-          tags={alertDetail?.formatted.fields.tags}
-          groups={alertDetail?.formatted.fields[ALERT_GROUP] as Group[]}
-          kuery={relatedAlertsKuery}
-        />
-      ),
+      content: <RelatedAlerts alert={alertDetail?.formatted} kuery={relatedAlertsKuery} />,
     });
   }
 
