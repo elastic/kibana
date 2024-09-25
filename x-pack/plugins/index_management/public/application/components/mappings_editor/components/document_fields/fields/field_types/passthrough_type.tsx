@@ -15,7 +15,11 @@ export const PassthroughType = () => {
   return (
     <BasicParametersSection>
       <UseField path="priority" config={getFieldConfig('priority')} component={Field} />
-      <UseField path="dynamic" config={getFieldConfig('dynamic_passthrough')} component={CheckBoxField} />
+      <UseField
+        path="dynamic"
+        config={getFieldConfig('dynamic_passthrough')}
+        component={CheckBoxField}
+      />
     </BasicParametersSection>
   );
 };
