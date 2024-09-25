@@ -19,7 +19,7 @@ import {
   DASHBOARD_PANELS_UNSAVED_ID,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
-import { dashboardContentManagementService } from '../services/dashboard_content_management_service';
+import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { coreServices } from '../services/kibana_services';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 
@@ -44,6 +44,7 @@ function mountWith({ props: incomingProps }: { props?: Partial<DashboardUnsavedL
 
 describe('Unsaved listing', () => {
   const dashboardBackupService = getDashboardBackupService();
+  const dashboardContentManagementService = getDashboardContentManagementService();
 
   it('Gets information for each unsaved dashboard', async () => {
     mountWith({});

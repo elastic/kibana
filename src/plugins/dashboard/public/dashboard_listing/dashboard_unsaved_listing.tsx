@@ -25,7 +25,7 @@ import {
   DASHBOARD_PANELS_UNSAVED_ID,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
-import { dashboardContentManagementService } from '../services/dashboard_content_management_service';
+import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 
@@ -147,8 +147,8 @@ export const DashboardUnsavedListing = ({
     const existingDashboardsWithUnsavedChanges = unsavedDashboardIds.filter(
       (id) => id !== DASHBOARD_PANELS_UNSAVED_ID
     );
-    dashboardContentManagementService.findDashboards
-      .findByIds(existingDashboardsWithUnsavedChanges)
+    getDashboardContentManagementService()
+      .findDashboards.findByIds(existingDashboardsWithUnsavedChanges)
       .then((results) => {
         const dashboardMap = {};
         if (canceled) {

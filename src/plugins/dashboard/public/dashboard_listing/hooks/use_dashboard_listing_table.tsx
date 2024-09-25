@@ -24,7 +24,7 @@ import {
   SAVED_OBJECT_LOADED_TIME,
 } from '../../dashboard_constants';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { dashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import { coreServices } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
@@ -102,7 +102,12 @@ export const useDashboardListingTable = ({
   const entityNamePlural = getEntityNamePlural();
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
+
   const dashboardBackupService = useMemo(() => getDashboardBackupService(), []);
+  const dashboardContentManagementService = useMemo(
+    () => getDashboardContentManagementService(),
+    []
+  );
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardBackupService.getDashboardIdsWithUnsavedChanges()
@@ -128,7 +133,7 @@ export const useDashboardListingTable = ({
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackupService]
+    [dashboardBackupService, dashboardContentManagementService]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -164,7 +169,7 @@ export const useDashboardListingTable = ({
         },
       ],
     }),
-    []
+    [dashboardContentManagementService]
   );
 
   const emptyPrompt = useMemo(
@@ -223,7 +228,7 @@ export const useDashboardListingTable = ({
           };
         });
     },
-    [listingLimit]
+    [listingLimit, dashboardContentManagementService]
   );
 
   const deleteItems = useCallback(
@@ -255,7 +260,7 @@ export const useDashboardListingTable = ({
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackupService]
+    [dashboardBackupService, dashboardContentManagementService]
   );
 
   const editItem = useCallback(

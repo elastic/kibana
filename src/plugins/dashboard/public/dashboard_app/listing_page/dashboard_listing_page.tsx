@@ -22,7 +22,7 @@ import {
   isDashboardAppInNoDataState,
 } from '../no_data/dashboard_app_no_data';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
-import { dashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -70,14 +70,16 @@ export const DashboardListingPage = ({
       kbnUrlStateStorage
     );
     if (title) {
-      dashboardContentManagementService.findDashboards.findByTitle(title).then((result) => {
-        if (!result) return;
-        redirectTo({
-          destination: 'dashboard',
-          id: result.id,
-          useReplace: true,
+      getDashboardContentManagementService()
+        .findDashboards.findByTitle(title)
+        .then((result) => {
+          if (!result) return;
+          redirectTo({
+            destination: 'dashboard',
+            id: result.id,
+            useReplace: true,
+          });
         });
-      });
     }
 
     return () => {

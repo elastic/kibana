@@ -26,8 +26,11 @@ jest.mock('../../dashboard_listing/dashboard_listing', () => {
 
 import { DashboardAppNoDataPage } from '../no_data/dashboard_app_no_data';
 import { dataService } from '../../services/kibana_services';
-import { dashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
+
+const dashboardContentManagementService = getDashboardContentManagementService();
 const mockIsDashboardAppInNoDataState = jest.fn().mockResolvedValue(false);
+
 jest.mock('../no_data/dashboard_app_no_data', () => {
   const originalModule = jest.requireActual('../no_data/dashboard_app_no_data');
   return {
