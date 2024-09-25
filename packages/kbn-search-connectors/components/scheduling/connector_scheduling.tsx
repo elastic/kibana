@@ -42,8 +42,8 @@ export const SchedulePanel: FC<PropsWithChildren<SchedulePanelProps>> = ({
     <>
       <EuiSplitPanel.Outer>
         <EuiSplitPanel.Inner color="subdued">
-          <EuiTitle>
-            <h2>{title}</h2>
+          <EuiTitle size="s">
+            <h4>{title}</h4>
           </EuiTitle>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
@@ -115,7 +115,6 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
   }
   return (
     <>
-      <EuiSpacer size="l" />
       {hasIngestionError ? <ConnectorError /> : <></>}
       {children}
       <EuiFlexGroup>
