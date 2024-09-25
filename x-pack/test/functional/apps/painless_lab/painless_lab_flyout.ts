@@ -12,7 +12,7 @@ const TEST_SCRIPT = `return 1;`;
 const TEST_SCRIPT_REQUEST = `POST _scripts/painless/_execute
 {
   "script": {
-    "source": """return 1;""",
+    "source": """${TEST_SCRIPT}""",
     "params": {
       "string_parameter": "string value",
       "number_parameter": 1.5,
@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const monacoEditor = getService('monacoEditor');
 
   describe('Painless lab', function describeIndexTests() {
@@ -49,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('validate response body is the expected', async () => {
-      await testSubjects.findService.clickByCssSelector('#response');
+      await find.clickByCssSelector('#response');
       await retry.waitFor('Wait for response to change', async () => {
         return (
           (await testSubjects.getVisibleText('painlessLabFlyoutResponse')) === TEST_SCRIPT_RESPONSE
