@@ -167,7 +167,7 @@ describe('Timeline save middleware', () => {
   });
 
   it('should show an error message when the call is unauthorized', async () => {
-    (persistTimeline as jest.Mock).mockResolvedValue({ data: { persistTimeline: { code: 403 } } });
+    (persistTimeline as jest.Mock).mockResolvedValue({ status_code: 403 });
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
 
     expect(refreshTimelines as unknown as jest.Mock).not.toHaveBeenCalled();

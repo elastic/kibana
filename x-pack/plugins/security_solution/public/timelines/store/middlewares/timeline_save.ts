@@ -34,7 +34,10 @@ import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
 import type { inputsModel } from '../../../common/store/inputs';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
-import type { TimelineErrorResponse, TimelineResponse } from '../../../../common/api/timeline';
+import type {
+  TimelineErrorResponse,
+  PersistTimelineResponse,
+} from '../../../../common/api/timeline';
 import type { TimelineInput } from '../../../../common/search_strategy';
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
@@ -83,6 +86,9 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
         if (isTimelineErrorResponse(result)) {
           const error = getErrorFromResponse(result);
           switch (error?.errorCode) {
+            case 403:
+              store.dispatch(showCallOutUnauthorizedMsg());
+              break;
             // conflict
             case 409:
               kibana.notifications.toasts.addDanger({
@@ -105,11 +111,6 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
             title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
             text: i18n.UPDATE_TIMELINE_ERROR_TEXT,
           });
-          return;
-        }
-
-        if (response && response.code === 403) {
-          store.dispatch(showCallOutUnauthorizedMsg());
           return;
         }
 
@@ -270,7 +271,7 @@ const convertToString = (obj: unknown) => {
   }
 };
 
-type PossibleResponse = TimelineResponse | TimelineErrorResponse;
+type PossibleResponse = PersistTimelineResponse | TimelineErrorResponse;
 
 function isTimelineErrorResponse(response: PossibleResponse): response is TimelineErrorResponse {
   return response && ('status_code' in response || 'statusCode' in response);

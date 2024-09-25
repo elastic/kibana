@@ -35,11 +35,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    $ref: '../model/components.schema.yaml#/components/schemas/ResolvedTimeline'
+                oneOf:
+                  - type: object
+                    required: [data]
+                    properties:
+                      data:
+                        $ref: '../model/components.schema.yaml#/components/schemas/ResolvedTimeline'
+                  - type: object
 
         '400':
           description: The request is missing parameters

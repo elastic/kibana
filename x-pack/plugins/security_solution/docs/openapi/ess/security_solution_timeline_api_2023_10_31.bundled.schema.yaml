@@ -797,12 +797,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/ResolvedTimeline'
-                required:
-                  - data
+                oneOf:
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ResolvedTimeline'
+                    required:
+                      - data
+                  - type: object
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters

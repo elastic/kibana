@@ -6,13 +6,11 @@
  */
 
 import * as runtimeTypes from 'io-ts';
-import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 
 import { stringEnum, unionWithNullType } from '../../../utility_types';
 
 import type { Maybe } from '../../../search_strategy';
 import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
-import { ErrorSchema } from './error_schema';
 import type { DataProviderType } from './components.gen';
 import {
   BareNote,
@@ -20,6 +18,7 @@ import {
   DataProviderTypeEnum,
   FavoriteTimelineResponse,
   type FavoriteTimelineResult,
+  ImportTimelineResult,
   ImportTimelines,
   type Note,
   PinnedEvent,
@@ -46,6 +45,7 @@ export {
   DataProviderType,
   DataProviderTypeEnum,
   FavoriteTimelineResponse,
+  ImportTimelineResult,
   ImportTimelines,
   Note,
   PinnedEvent,
@@ -354,50 +354,12 @@ export type TimelineSavedObject = runtimeTypes.TypeOf<
   typeof TimelineSavedToReturnObjectRuntimeType
 >;
 
-export const SingleTimelineResponseType = runtimeTypes.type({
-  data: runtimeTypes.type({
-    getOneTimeline: TimelineSavedToReturnObjectRuntimeType,
-  }),
-});
-
-export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineResponseType>;
-
 const responseTimelines = runtimeTypes.type({
   timeline: runtimeTypes.array(TimelineSavedToReturnObjectRuntimeType),
   totalCount: runtimeTypes.number,
 });
 
 export type ResponseTimelines = runtimeTypes.TypeOf<typeof responseTimelines>;
-
-export const allTimelinesResponse = runtimeTypes.intersection([
-  responseTimelines,
-  runtimeTypes.type({
-    defaultTimelineCount: runtimeTypes.number,
-    templateTimelineCount: runtimeTypes.number,
-    elasticTemplateTimelineCount: runtimeTypes.number,
-    customTemplateTimelineCount: runtimeTypes.number,
-    favoriteCount: runtimeTypes.number,
-  }),
-]);
-
-export type AllTimelinesResponse = runtimeTypes.TypeOf<typeof allTimelinesResponse>;
-
-/**
- * All Timeline Saved object type with metadata
- */
-export const TimelineResponseType = runtimeTypes.type({
-  data: runtimeTypes.type({
-    persistTimeline: runtimeTypes.intersection([
-      runtimeTypes.partial({
-        code: unionWithNullType(runtimeTypes.number),
-        message: unionWithNullType(runtimeTypes.string),
-      }),
-      runtimeTypes.type({
-        timeline: TimelineSavedToReturnObjectRuntimeType,
-      }),
-    ]),
-  }),
-});
 
 export const TimelineErrorResponseType = runtimeTypes.union([
   runtimeTypes.type({
@@ -411,7 +373,6 @@ export const TimelineErrorResponseType = runtimeTypes.union([
 ]);
 
 export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
-export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
 
 /**
  * Import/export timelines
@@ -434,23 +395,6 @@ export interface ExportTimelineNotFoundError {
   statusCode: number;
   message: string;
 }
-
-export const importTimelineResultSchema = runtimeTypes.exact(
-  runtimeTypes.type({
-    success: runtimeTypes.boolean,
-    success_count: PositiveInteger,
-    timelines_installed: PositiveInteger,
-    timelines_updated: PositiveInteger,
-    errors: runtimeTypes.array(ErrorSchema),
-  })
-);
-
-export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;
-
-export const pageInfoTimeline = runtimeTypes.type({
-  pageIndex: runtimeTypes.number,
-  pageSize: runtimeTypes.number,
-});
 
 export interface PageInfoTimeline {
   pageIndex: number;

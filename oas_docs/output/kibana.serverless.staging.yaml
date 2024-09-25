@@ -16865,13 +16865,15 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: >-
-                      #/components/schemas/Security_Timeline_API_ResolvedTimeline
-                required:
-                  - data
+                oneOf:
+                  - type: object
+                    properties:
+                      data:
+                        $ref: >-
+                          #/components/schemas/Security_Timeline_API_ResolvedTimeline
+                    required:
+                      - data
+                  - type: object
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters

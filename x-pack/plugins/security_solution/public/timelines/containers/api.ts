@@ -13,11 +13,9 @@ import { isEmpty } from 'lodash';
 import { throwErrors } from '@kbn/cases-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 
-import type { CleanDraftTimelinesResponse } from '../../../common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
 import type {
-  TimelineErrorResponse,
-  ImportTimelineResultSchema,
-  SingleTimelineResponse,
+  CleanDraftTimelinesResponse,
+  TimelineErrorResponse, // todo
   GetAllTimelineVariables,
   TimelineType,
   PatchTimelineResponse,
@@ -26,9 +24,9 @@ import type {
   GetDraftTimelinesResponse,
 } from '../../../common/api/timeline';
 import {
+  ImportTimelineResult,
   TimelineStatusEnum,
-  TimelineErrorResponseType,
-  importTimelineResultSchema,
+  TimelineErrorResponseType, // todo
   PersistFavoriteRouteResponse,
   TimelineTypeEnum,
   GetTimelineResponse,
@@ -76,6 +74,10 @@ const parseOrThrow = parseOrThrowErrorFactory(createToasterPlainError);
 
 const decodeTimelineResponse = (respTimeline?: PersistTimelineResponse | TimelineErrorResponse) =>
   parseOrThrow(PersistTimelineResponse)(respTimeline);
+// - migrate over all decode functions
+// - make that where theyre used, the correct new types are used and none of the legacy types
+// - Check what can be done about TimelineErrorResponse
+// - check in timeline/api.ts if more types can be removed
 
 const decodeSingleTimelineResponse = (respTimeline?: GetTimelineResponse) =>
   parseOrThrow(GetTimelineResponse)(respTimeline);
@@ -92,11 +94,8 @@ const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse) =>
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResultSchema) =>
-  pipe(
-    importTimelineResultSchema.decode(respTimeline),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResult) =>
+  parseOrThrow(ImportTimelineResult)(respTimeline);
 
 const decodeResponseFavoriteTimeline = (respTimeline?: PersistFavoriteRouteResponse) =>
   parseOrThrow(PersistFavoriteRouteResponse)(respTimeline);
@@ -374,8 +373,8 @@ export const cleanDraftTimeline = async ({
   return decodeTimelineResponse(response);
 };
 
-export const installPrepackedTimelines = async (): Promise<ImportTimelineResultSchema> => {
-  const response = await KibanaServices.get().http.post<ImportTimelineResultSchema>(
+export const installPrepackedTimelines = async (): Promise<ImportTimelineResult> => {
+  const response = await KibanaServices.get().http.post<ImportTimelineResult>(
     TIMELINE_PREPACKAGED_URL,
     {
       version: '2023-10-31',
@@ -386,7 +385,7 @@ export const installPrepackedTimelines = async (): Promise<ImportTimelineResultS
 };
 
 export const getTimeline = async (id: string) => {
-  const response = await KibanaServices.get().http.get<SingleTimelineResponse>(TIMELINE_URL, {
+  const response = await KibanaServices.get().http.get<GetTimelineResponse>(TIMELINE_URL, {
     query: {
       id,
     },
@@ -411,7 +410,7 @@ export const resolveTimeline = async (id: string) => {
 };
 
 export const getTimelineTemplate = async (templateTimelineId: string) => {
-  const response = await KibanaServices.get().http.get<SingleTimelineResponse>(TIMELINE_URL, {
+  const response = await KibanaServices.get().http.get<GetTimelineResponse>(TIMELINE_URL, {
     query: {
       template_timeline_id: templateTimelineId,
     },
