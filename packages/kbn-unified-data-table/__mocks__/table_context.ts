@@ -14,17 +14,13 @@ import { servicesMock } from './services';
 import { DataTableContext } from '../src/table_context';
 import { convertValueToString } from '../src/utils/convert_value_to_string';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
-const buildTableContext = (dataView: DataView, rows: EsHitRecord[]): DataTableContext => {
-  const usedRows = rows.map((row) => {
-    return buildDataTableRecord(row, dataView);
-  });
-
+const buildTableContext = (dataView: DataView, rows: DataTableRecord[]): DataTableContext => {
   return {
     expanded: undefined,
     setExpanded: jest.fn(),
-    rows: usedRows,
+    getRowByIndex: jest.fn((index) => rows[index]),
     onFilter: jest.fn(),
     dataView,
     isDarkMode: false,
@@ -35,13 +31,24 @@ const buildTableContext = (dataView: DataView, rows: EsHitRecord[]): DataTableCo
         rowIndex,
         columnId,
         fieldFormats: servicesMock.fieldFormats,
-        rows: usedRows,
+        rows,
         dataView,
         options,
       }),
   };
 };
 
-export const dataTableContextMock = buildTableContext(dataViewMock, esHitsMock);
+export const dataTableContextRowsMock = esHitsMock.map((row) =>
+  buildDataTableRecord(row, dataViewMock)
+);
 
-export const dataTableContextComplexMock = buildTableContext(dataViewComplexMock, esHitsComplex);
+export const dataTableContextMock = buildTableContext(dataViewMock, dataTableContextRowsMock);
+
+export const dataTableContextComplexRowsMock = esHitsComplex.map((row) =>
+  buildDataTableRecord(row, dataViewComplexMock)
+);
+
+export const dataTableContextComplexMock = buildTableContext(
+  dataViewComplexMock,
+  dataTableContextComplexRowsMock
+);
