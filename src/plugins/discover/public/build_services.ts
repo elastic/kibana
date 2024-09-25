@@ -63,7 +63,7 @@ import type { DiscoverContextAppLocator } from './application/context/services/l
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
-import type { DiscoverEBTContextManager } from './services/discover_ebt_context_manager';
+import type { DiscoverEBTManager } from './services/discover_ebt_manager';
 
 /**
  * Location state of internal Discover history instance
@@ -131,7 +131,7 @@ export interface DiscoverServices {
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   profilesManager: ProfilesManager;
-  ebtContextManager: DiscoverEBTContextManager;
+  ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
@@ -147,7 +147,7 @@ export const buildServices = memoize(
     scopedHistory,
     urlTracker,
     profilesManager,
-    ebtContextManager,
+    ebtManager,
     setHeaderActionMenu = noop,
   }: {
     core: CoreStart;
@@ -160,7 +160,7 @@ export const buildServices = memoize(
     scopedHistory?: ScopedHistory;
     urlTracker: UrlTracker;
     profilesManager: ProfilesManager;
-    ebtContextManager: DiscoverEBTContextManager;
+    ebtManager: DiscoverEBTManager;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }): DiscoverServices => {
     const { usageCollection } = plugins;
@@ -221,7 +221,7 @@ export const buildServices = memoize(
       noDataPage: plugins.noDataPage,
       observabilityAIAssistant: plugins.observabilityAIAssistant,
       profilesManager,
-      ebtContextManager,
+      ebtManager,
       fieldsMetadata: plugins.fieldsMetadata,
     };
   }
