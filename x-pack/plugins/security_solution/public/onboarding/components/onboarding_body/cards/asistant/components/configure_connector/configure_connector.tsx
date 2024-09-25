@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
 import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
 import type { SetComplete } from '../../../../../../types';
 import { useKibana } from '../../../../../../../common/lib/kibana';
-import { ConnectorSetup } from '../connector_setup/connector_setup';
+import { ConnectorCards } from '../connector_cards/connector_cards';
 
 const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
 
@@ -20,28 +20,25 @@ interface ConfigureConnectorProps {
 
 export const ConfigureConnector = React.memo<ConfigureConnectorProps>(({ setComplete }) => {
   const { http } = useKibana().services;
-  const [connectors, setConnectors] = useState<AIConnector[]>();
   const { isLoading, data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({ http });
-  const hasConnectors = !isLoading && connectors?.length;
+  const [connectors, setConnectors] = useState<AIConnector[]>([]);
 
   useEffect(() => {
-    if (aiConnectors != null) {
-      const filteredAiConnectors = aiConnectors.filter(({ actionTypeId }) =>
+    if (aiConnectors) {
+      const filteredConnectors = aiConnectors.filter(({ actionTypeId }) =>
         AllowedActionTypeIds.includes(actionTypeId)
       );
-      setConnectors(filteredAiConnectors);
+      setConnectors(filteredConnectors);
+      setComplete(filteredConnectors.length > 0);
     }
-    if (hasConnectors) {
-      setComplete(true);
-    }
-  }, [aiConnectors, setComplete, hasConnectors]);
+  }, [aiConnectors, setComplete]);
 
-  const onConnectorSaved = useCallback(() => refetchConnectors(), [refetchConnectors]);
+  const onConnectorSaved = () => refetchConnectors();
 
-  if (isLoading) return <p>{'loading'}</p>;
+  if (isLoading) return null;
 
   return (
-    <ConnectorSetup
+    <ConnectorCards
       connectors={connectors}
       actionTypeIds={AllowedActionTypeIds}
       onConnectorSaved={onConnectorSaved}

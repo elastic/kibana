@@ -9,13 +9,11 @@ import React from 'react';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
-import { ASISTANT_CARD_TITLE } from './translations';
-// import { checkAssistantCardComplete } from './assistant_check_complete';
+import { ASSISTANT_CARD_TITLE } from './translations';
 
 export const asistantCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.asistant,
-  title: ASISTANT_CARD_TITLE,
+  title: ASSISTANT_CARD_TITLE,
   icon: AssistantAvatar,
-  // checkComplete: checkAssistantCardComplete,
   Component: React.lazy(() => import('./asistant_card')),
 };
