@@ -34,8 +34,12 @@ describe('DiscoverEBTContextManager', () => {
   });
 
   describe('register', () => {
-    it('should register the context provider', () => {
-      discoverEBTContextManager.initialize({ core: coreSetupMock });
+    it('should register the context provider and custom events', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        shouldInitializeCustomContext: true,
+        shouldInitializeCustomEvents: true,
+      });
 
       expect(coreSetupMock.analytics.registerContextProvider).toHaveBeenCalledWith({
         name: 'discover_context',
@@ -52,6 +56,33 @@ describe('DiscoverEBTContextManager', () => {
           },
         },
       });
+
+      expect(coreSetupMock.analytics.registerEventType).toHaveBeenCalledWith({
+        eventType: 'discover_field_usage',
+        schema: {
+          eventName: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval',
+            },
+          },
+          fieldName: {
+            type: 'keyword',
+            _meta: {
+              description: "Field name if it's a part of ECS schema",
+              optional: true,
+            },
+          },
+          filterOperation: {
+            type: 'keyword',
+            _meta: {
+              description: "Operation type when a filter is added i.e. '+', '-', '_exists_'",
+              optional: true,
+            },
+          },
+        },
+      });
     });
   });
 
@@ -59,8 +90,12 @@ describe('DiscoverEBTContextManager', () => {
     it('should update the profiles with the provided props', () => {
       const dscProfiles = ['profile1', 'profile2'];
       const dscProfiles2 = ['profile21', 'profile22'];
-      discoverEBTContextManager.initialize({ core: coreSetupMock });
-      discoverEBTContextManager.enable();
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        shouldInitializeCustomContext: true,
+        shouldInitializeCustomEvents: false,
+      });
+      discoverEBTContextManager.enableContext();
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
@@ -72,8 +107,12 @@ describe('DiscoverEBTContextManager', () => {
     it('should not update the profiles if profile list did not change', () => {
       const dscProfiles = ['profile1', 'profile2'];
       const dscProfiles2 = ['profile1', 'profile2'];
-      discoverEBTContextManager.initialize({ core: coreSetupMock });
-      discoverEBTContextManager.enable();
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        shouldInitializeCustomContext: true,
+        shouldInitializeCustomEvents: false,
+      });
+      discoverEBTContextManager.enableContext();
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
@@ -84,7 +123,11 @@ describe('DiscoverEBTContextManager', () => {
 
     it('should not update the profiles if not enabled yet', () => {
       const dscProfiles = ['profile1', 'profile2'];
-      discoverEBTContextManager.initialize({ core: coreSetupMock });
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        shouldInitializeCustomContext: true,
+        shouldInitializeCustomEvents: false,
+      });
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
@@ -92,15 +135,19 @@ describe('DiscoverEBTContextManager', () => {
 
     it('should not update the profiles after resetting unless enabled again', () => {
       const dscProfiles = ['profile1', 'profile2'];
-      discoverEBTContextManager.initialize({ core: coreSetupMock });
-      discoverEBTContextManager.enable();
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        shouldInitializeCustomContext: true,
+        shouldInitializeCustomEvents: false,
+      });
+      discoverEBTContextManager.enableContext();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
-      discoverEBTContextManager.disableAndReset();
+      discoverEBTContextManager.disableAndResetContext();
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
-      discoverEBTContextManager.enable();
+      discoverEBTContextManager.enableContext();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
     });
@@ -108,8 +155,11 @@ describe('DiscoverEBTContextManager', () => {
 
   describe('trackFieldUsageEvent', () => {
     it('should track the field usage when a field is added to the table', async () => {
-      discoverEBTContextManager.initialize({ core: coreSetupMock });
-      discoverEBTContextManager.enable();
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        shouldInitializeCustomContext: false,
+        shouldInitializeCustomEvents: true,
+      });
 
       await discoverEBTContextManager.trackDataTableSelection({
         fieldName: 'test',
@@ -132,8 +182,11 @@ describe('DiscoverEBTContextManager', () => {
     });
 
     it('should track the field usage when a field is removed from the table', async () => {
-      discoverEBTContextManager.initialize({ core: coreSetupMock });
-      discoverEBTContextManager.enable();
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        shouldInitializeCustomContext: false,
+        shouldInitializeCustomEvents: true,
+      });
 
       await discoverEBTContextManager.trackDataTableRemoval({
         fieldName: 'test',
@@ -156,8 +209,11 @@ describe('DiscoverEBTContextManager', () => {
     });
 
     it('should track the field usage when a filter is created', async () => {
-      discoverEBTContextManager.initialize({ core: coreSetupMock });
-      discoverEBTContextManager.enable();
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        shouldInitializeCustomContext: false,
+        shouldInitializeCustomEvents: true,
+      });
 
       await discoverEBTContextManager.trackFilterAddition({
         fieldName: 'test',

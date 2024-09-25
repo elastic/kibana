@@ -36,84 +36,101 @@ export interface DiscoverEBTContextProps {
 export type DiscoverEBTContext = BehaviorSubject<DiscoverEBTContextProps>;
 
 export class DiscoverEBTContextManager {
-  private isEnabled: boolean = false;
-  private ebtContext$: DiscoverEBTContext | undefined;
+  private isCustomContextEnabled: boolean = false;
+  private customContext$: DiscoverEBTContext | undefined;
   private reportEvent: CoreSetup['analytics']['reportEvent'] | undefined;
 
   constructor() {}
 
   // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
-  public initialize({ core }: { core: CoreSetup }) {
-    // Register Discover specific context to be used in EBT
-    const context$ = new BehaviorSubject<DiscoverEBTContextProps>({
-      discoverProfiles: [],
-    });
-    core.analytics.registerContextProvider({
-      name: 'discover_context',
-      context$,
-      schema: {
-        discoverProfiles: {
-          type: 'array',
-          items: {
+  public initialize({
+    core,
+    shouldInitializeCustomContext,
+    shouldInitializeCustomEvents,
+  }: {
+    core: CoreSetup;
+    shouldInitializeCustomContext: boolean;
+    shouldInitializeCustomEvents: boolean;
+  }) {
+    if (shouldInitializeCustomContext) {
+      // Register Discover specific context to be used in EBT
+      const context$ = new BehaviorSubject<DiscoverEBTContextProps>({
+        discoverProfiles: [],
+      });
+      core.analytics.registerContextProvider({
+        name: 'discover_context',
+        context$,
+        schema: {
+          discoverProfiles: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'List of active Discover context awareness profiles',
+              },
+            },
+          },
+          // If we decide to extend EBT context with more properties, we can do it here
+        },
+      });
+      this.customContext$ = context$;
+    }
+
+    if (shouldInitializeCustomEvents) {
+      // Register Discover events to be used with EBT
+      core.analytics.registerEventType({
+        eventType: FIELD_USAGE_EVENT_TYPE,
+        schema: {
+          [FIELD_USAGE_EVENT_NAME]: {
             type: 'keyword',
             _meta: {
-              description: 'List of active Discover context awareness profiles',
+              description:
+                'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval',
+            },
+          },
+          [FIELD_USAGE_FIELD_NAME]: {
+            type: 'keyword',
+            _meta: {
+              description: "Field name if it's a part of ECS schema",
+              optional: true,
+            },
+          },
+          [FIELD_USAGE_FILTER_OPERATION]: {
+            type: 'keyword',
+            _meta: {
+              description: "Operation type when a filter is added i.e. '+', '-', '_exists_'",
+              optional: true,
             },
           },
         },
-        // If we decide to extend EBT context with more properties, we can do it here
-      },
-    });
-    this.ebtContext$ = context$;
-
-    // Register Discover events to be used with EBT
-    core.analytics.registerEventType({
-      eventType: FIELD_USAGE_EVENT_TYPE,
-      schema: {
-        [FIELD_USAGE_EVENT_NAME]: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval',
-          },
-        },
-        [FIELD_USAGE_FIELD_NAME]: {
-          type: 'keyword',
-          _meta: {
-            description: "Field name if it's a part of ECS schema",
-            optional: true,
-          },
-        },
-        [FIELD_USAGE_FILTER_OPERATION]: {
-          type: 'keyword',
-          _meta: {
-            description: "Operation type when a filter is added i.e. '+', '-', '_exists_'",
-            optional: true,
-          },
-        },
-      },
-    });
-    this.reportEvent = core.analytics.reportEvent;
+      });
+      this.reportEvent = core.analytics.reportEvent;
+    }
   }
 
-  public enable() {
-    this.isEnabled = true;
+  public enableContext() {
+    this.isCustomContextEnabled = true;
+  }
+
+  public disableAndResetContext() {
+    this.updateProfilesContextWith([]);
+    this.isCustomContextEnabled = false;
   }
 
   public updateProfilesContextWith(discoverProfiles: DiscoverEBTContextProps['discoverProfiles']) {
     if (
-      this.isEnabled &&
-      this.ebtContext$ &&
-      !isEqual(this.ebtContext$.getValue().discoverProfiles, discoverProfiles)
+      this.isCustomContextEnabled &&
+      this.customContext$ &&
+      !isEqual(this.customContext$.getValue().discoverProfiles, discoverProfiles)
     ) {
-      this.ebtContext$.next({
+      this.customContext$.next({
         discoverProfiles,
       });
     }
   }
 
   public getProfilesContext() {
-    return this.ebtContext$?.getValue()?.discoverProfiles;
+    return this.customContext$?.getValue()?.discoverProfiles;
   }
 
   private async trackFieldUsageEvent({
@@ -198,10 +215,5 @@ export class DiscoverEBTContextManager {
       fieldsMetadata,
       filterOperation,
     });
-  }
-
-  public disableAndReset() {
-    this.updateProfilesContextWith([]);
-    this.isEnabled = false;
   }
 }
