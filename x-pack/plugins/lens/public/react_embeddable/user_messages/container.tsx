@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import type { UserMessage } from '../../types';
 import { VisualizationErrorPanel } from './error_panel';
-import { FeatureBadge } from './info_badges';
+import { EmbeddableFeatureBadge } from './info_badges';
 import { MessagesPopover } from './message_popover';
 
 export function UserMessages({
@@ -35,7 +35,7 @@ export function UserMessages({
         })}
       >
         <MessagesPopover messages={warningOrErrors} />
-        <FeatureBadge messages={infoMessages} />
+        <EmbeddableFeatureBadge messages={infoMessages} />
       </div>
     </>
   );

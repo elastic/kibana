@@ -21,7 +21,7 @@ import { useState } from 'react';
 import type { UserMessage } from '../../types';
 import './info_badges.scss';
 
-export const FeatureBadge = ({ messages }: { messages: UserMessage[] }) => {
+export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

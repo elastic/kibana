@@ -7,10 +7,12 @@
 
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { canTrackContentfulRender } from '@kbn/presentation-containers';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 import { getExecutionContextEvents, trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { GetStateType, LensApi, LensEmbeddableStartServices } from '../types';
+import { getSuccessfulRequestTimings } from '../../report_performance_metric_util';
 
 function trackContentfulRender(activeData: TableInspectorAdapter, parentApi: unknown) {
   if (!activeData || !canTrackContentfulRender(parentApi)) {
@@ -31,11 +33,28 @@ function trackContentfulRender(activeData: TableInspectorAdapter, parentApi: unk
   }
 }
 
+function trackPerformanceMetrics(
+  api: LensApi,
+  coreStart: LensEmbeddableStartServices['coreStart']
+) {
+  const inspectorAdapters = api.getInspectorAdapters();
+  const timings = getSuccessfulRequestTimings(inspectorAdapters);
+  if (timings) {
+    const esRequestMetrics = {
+      eventName: 'lens_chart_es_request_totals',
+      duration: timings.requestTimeTotal,
+      key1: 'es_took_total',
+      value1: timings.esTookTotal,
+    };
+    reportPerformanceMetricEvent(coreStart.analytics, esRequestMetrics);
+  }
+}
+
 export function prepareOnRender(
   api: LensApi,
   parentApi: unknown,
   getState: GetStateType,
-  { datasourceMap, visualizationMap }: LensEmbeddableStartServices,
+  { datasourceMap, visualizationMap, coreStart }: LensEmbeddableStartServices,
   executionContext: KibanaExecutionContext | undefined,
   dispatchRenderComplete: () => void
 ) {
@@ -79,5 +98,7 @@ export function prepareOnRender(
     trackContentfulRender(api.getInspectorAdapters().tables?.tables, parentApi);
 
     dispatchRenderComplete();
+
+    trackPerformanceMetrics(api, coreStart);
   };
 }
