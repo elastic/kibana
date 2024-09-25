@@ -35,11 +35,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('Wait for editor to be visible', async () => {
         return testSubjects.isDisplayed('painless_lab');
       });
+      // replace the default script with a simpler one
+      await monacoEditor.setCodeEditorValue(TEST_SCRIPT);
     });
 
     it('click show API request button and flyout should appear in page', async () => {
-      // replace the default script with a simpler one
-      await monacoEditor.setCodeEditorValue(TEST_SCRIPT);
       await testSubjects.click('btnViewRequest');
       await testSubjects.existOrFail('painlessLabRequestFlyoutHeader', { timeout: 10 * 1000 });
     });
