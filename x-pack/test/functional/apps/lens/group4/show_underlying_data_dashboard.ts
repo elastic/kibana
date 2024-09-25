@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 const OPEN_IN_DISCOVER_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
+  const { visualize, lens, dashboard, header, discover, common } = getPageObjects([
     'visualize',
     'lens',
     'dashboard',
@@ -31,13 +31,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens show underlying data from dashboard', () => {
     it('should show the open button for a compatible saved visualization', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.save('Embedded Visualization', true, false, false, 'new');
+      await lens.clickVisualizeListItemTitle('lnsXYvis');
+      await lens.goToTimeRange();
+      await lens.save('Embedded Visualization', true, false, false, 'new');
 
-      await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {
+      await dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {
         saveAsNew: true,
         exitFromEditMode: true,
       });
@@ -47,10 +47,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the table columns
-      const columns = await PageObjects.discover.getColumnHeaders();
+      const columns = await discover.getColumnHeaders();
       expect(columns).to.eql(['@timestamp', 'ip', 'bytes']);
 
       await browser.closeCurrentWindow();
@@ -58,17 +58,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the open button for a compatible saved visualization with annotations and reference line', async () => {
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.switchToEditMode();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.lens.createLayer('annotations');
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await header.waitUntilLoadingHasFinished();
+      await lens.createLayer('annotations');
+      await lens.waitForVisualization('xyVisChart');
 
-      await PageObjects.lens.createLayer('referenceLine');
-      await PageObjects.lens.save('Embedded Visualization', false);
+      await lens.createLayer('referenceLine');
+      await lens.save('Embedded Visualization', false);
 
-      await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {
+      await dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {
         saveAsNew: false,
         exitFromEditMode: true,
       });
@@ -78,10 +78,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the table columns
-      const columns = await PageObjects.discover.getColumnHeaders();
+      const columns = await discover.getColumnHeaders();
       expect(columns).to.eql(['@timestamp', 'ip', 'bytes']);
 
       await browser.closeCurrentWindow();
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should bring both dashboard context and visualization context to discover', async () => {
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.switchToEditMode();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
@@ -99,9 +99,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.submitQuery();
       await filterBarService.addFilter({ field: 'geo.src', operation: 'is', value: 'AF' });
       // the filter bar seems to need a moment to settle before saving and returning
-      await PageObjects.common.sleep(1000);
+      await common.sleep(1000);
 
-      await PageObjects.lens.saveAndReturn();
+      await lens.saveAndReturn();
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
       await queryBar.switchQueryLanguage('kql');
       await savedQueryManagementComponent.closeSavedQueryManagementComponent();
@@ -113,19 +113,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         value: 'cdn.theacademyofperformingartsandscience.org',
       });
 
-      await PageObjects.dashboard.clickQuickSave();
+      await dashboard.clickQuickSave();
 
       // make sure Open in Discover is also available in edit mode
       await dashboardPanelActions.expectExistsPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
-      await PageObjects.dashboard.clickCancelOutOfEditMode();
+      await dashboard.clickCancelOutOfEditMode();
 
       await dashboardPanelActions.clickContextMenuItem(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
 
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await retry.waitFor('filter count to be correct', async () => {
         const filterCount = await filterBarService.getFilterCount();

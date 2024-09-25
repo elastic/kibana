@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
 import {
   asHttpRequestExecutionSource,
@@ -21,6 +21,7 @@ const mockTaskManager = taskManagerMock.createStart();
 const savedObjectsClient = savedObjectsClientMock.create();
 const request = {} as KibanaRequest;
 const mockActionsConfig = actionsConfigMock.create();
+const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -43,6 +44,7 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -133,6 +135,7 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -226,6 +229,7 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -323,6 +327,7 @@ describe('bulkExecute()', () => {
         },
       ],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     const source = { type: 'alert', id: uuidv4() };
 
@@ -422,6 +427,7 @@ describe('bulkExecute()', () => {
         },
       ],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     const source = { type: 'alert', id: uuidv4() };
 
@@ -521,6 +527,7 @@ describe('bulkExecute()', () => {
         },
       ],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     const source = { type: 'alert', id: uuidv4() };
 
@@ -641,6 +648,7 @@ describe('bulkExecute()', () => {
         },
       ],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     const source = { type: 'alert', id: uuidv4() };
 
@@ -750,6 +758,7 @@ describe('bulkExecute()', () => {
       actionTypeRegistry: actionTypeRegistryMock.create(),
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     await expect(
       executeFn(savedObjectsClient, [
@@ -768,13 +777,14 @@ describe('bulkExecute()', () => {
     );
   });
 
-  test('throws when isMissingSecrets is true for connector', async () => {
+  test('filter outs the connectors when isMissingSecrets is true', async () => {
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -788,26 +798,69 @@ describe('bulkExecute()', () => {
           },
           references: [],
         },
+        {
+          id: '234',
+          type: 'action',
+          attributes: {
+            name: 'mock-action-2',
+            isMissingSecrets: false,
+            actionTypeId: 'mock-action-2',
+          },
+          references: [],
+        },
       ],
     });
-    await expect(
-      executeFn(savedObjectsClient, [
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
         {
-          id: '123',
-          params: { baz: false },
-          spaceId: 'default',
-          executionId: '123abc',
-          apiKey: null,
-          source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'mock-action',
+          id: '234',
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+          },
+          references: [],
         },
-      ])
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to execute action because no secrets are defined for the \\"mock-action\\" connector."`
+      ],
+    });
+
+    const result = await executeFn(savedObjectsClient, [
+      {
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: '123abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
+      },
+      {
+        id: '234',
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: '123abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action-2',
+      },
+    ]);
+
+    expect(result).toEqual({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'mock-action-2',
+          id: '234',
+          response: 'success',
+        },
+      ],
+    });
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Skipped the actions for the connector: mock-action (123). Error: Unable to execute action because no secrets are defined for the "mock-action" connector.'
     );
   });
 
-  test('should ensure action type is enabled', async () => {
+  test('skips the disabled action types', async () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
@@ -815,6 +868,7 @@ describe('bulkExecute()', () => {
       actionTypeRegistry: mockedActionTypeRegistry,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
       throw new Error('Fail');
@@ -826,25 +880,45 @@ describe('bulkExecute()', () => {
           type: 'action',
           attributes: {
             actionTypeId: 'mock-action',
+            name: 'test-connector',
+          },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '234',
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
           },
           references: [],
         },
       ],
     });
 
-    await expect(
-      executeFn(savedObjectsClient, [
-        {
-          id: '123',
-          params: { baz: false },
-          spaceId: 'default',
-          executionId: '123abc',
-          apiKey: null,
-          source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'mock-action',
-        },
-      ])
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    const result = await executeFn(savedObjectsClient, [
+      {
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: '123abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
+      },
+    ]);
+
+    expect(result).toEqual({
+      errors: false,
+      items: [],
+    });
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Skipped the actions for the connector: test-connector (123). Error: Fail'
+    );
   });
 
   test('should skip ensure action type if action type is preconfigured and license is valid', async () => {
@@ -866,6 +940,7 @@ describe('bulkExecute()', () => {
         },
       ],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -927,6 +1002,7 @@ describe('bulkExecute()', () => {
         },
       ],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -984,6 +1060,7 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [],

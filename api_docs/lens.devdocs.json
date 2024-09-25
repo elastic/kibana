@@ -11975,7 +11975,7 @@
         "signature": [
           "Omit<",
           "LensByValueInput",
-          ", \"overrides\" | \"attributes\"> & { attributes: LensAttributes<\"lnsXY\", ",
+          ", \"attributes\" | \"overrides\"> & { attributes: LensAttributes<\"lnsXY\", ",
           {
             "pluginId": "lens",
             "scope": "public",

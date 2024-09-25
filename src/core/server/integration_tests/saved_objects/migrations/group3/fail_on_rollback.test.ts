@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -14,6 +15,7 @@ import {
   getKibanaMigratorTestKit,
   nextMinor,
   defaultKibanaIndex,
+  defaultKibanaTaskIndex,
 } from '../kibana_migrator_test_kit';
 import '../jest_matchers';
 import { delay, parseLogFile } from '../test_utils';
@@ -50,12 +52,19 @@ describe('when rolling back to an older version', () => {
     const { runMigrations: rollback } = await getKibanaMigratorTestKit({ types, logFilePath });
 
     await clearLog(logFilePath);
-    await expect(rollback()).rejects.toThrowError(
-      `Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: The ${defaultKibanaIndex}_${nextMinor} alias refers to a newer version of Kibana: v${nextMinor}`
-    );
+
+    try {
+      await rollback();
+      throw new Error('Rollback should have thrown but it did not');
+    } catch (error) {
+      expect([
+        `Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: The ${defaultKibanaIndex}_${nextMinor} alias refers to a newer version of Kibana: v${nextMinor}`,
+        `Unable to complete saved object migrations for the [${defaultKibanaTaskIndex}] index: The ${defaultKibanaTaskIndex}_${nextMinor} alias refers to a newer version of Kibana: v${nextMinor}`,
+      ]).toContain(error.message);
+    }
 
     const logs = await parseLogFile(logFilePath);
-    expect(logs).toContainLogEntry('[.kibana_migrator_tests] INIT -> FATAL.');
+    expect(logs).toContainLogEntry(`[${defaultKibanaIndex}] INIT -> FATAL.`);
   });
 
   afterAll(async () => {

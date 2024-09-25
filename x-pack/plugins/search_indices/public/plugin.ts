@@ -13,6 +13,7 @@ import type {
   SearchIndicesPluginStart,
   SearchIndicesServicesContextDeps,
 } from './types';
+import { initQueryClient } from './services/query_client';
 
 export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
@@ -20,6 +21,8 @@ export class SearchIndicesPlugin
   public setup(
     core: CoreSetup<SearchIndicesAppPluginStartDependencies, SearchIndicesPluginStart>
   ): SearchIndicesPluginSetup {
+    const queryClient = initQueryClient(core.notifications.toasts);
+
     core.application.register({
       id: 'elasticsearchStart',
       appRoute: '/app/elasticsearch/start',
@@ -34,7 +37,7 @@ export class SearchIndicesPlugin
           ...depsStart,
           history,
         };
-        return renderApp(ElasticsearchStartPage, coreStart, startDeps, element);
+        return renderApp(ElasticsearchStartPage, coreStart, startDeps, element, queryClient);
       },
     });
     core.application.register({
@@ -51,7 +54,7 @@ export class SearchIndicesPlugin
           ...depsStart,
           history,
         };
-        return renderApp(SearchIndicesRouter, coreStart, startDeps, element);
+        return renderApp(SearchIndicesRouter, coreStart, startDeps, element, queryClient);
       },
     });
 

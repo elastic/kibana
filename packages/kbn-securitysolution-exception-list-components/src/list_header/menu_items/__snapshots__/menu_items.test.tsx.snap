@@ -1,1156 +1,357 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MenuItems should not render Manage rules 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-        data-test-subj="Container"
-      >
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-        >
-          <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-          >
-            <div
-              class="euiPopover emotion-euiPopover-inline-block"
-              data-test-subj="LinkedRulesMenuItems"
-            >
-              <button
-                aria-label="Header menu Button Empty"
-                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-                data-test-subj="LinkedRulesMenuEmptyButton"
-                type="button"
-              >
-                <span
-                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-                >
-                  <span
-                    class="eui-textTruncate euiButtonEmpty__text"
-                  >
-                    Linked to 1 rules
-                  </span>
-                  <span
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-        >
-          <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-          >
-            <div
-              class="euiPopover emotion-euiPopover-inline-block"
-              data-test-subj="MenuActionsItems"
-            >
-              <button
-                aria-label="Header menu Button Icon"
-                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                data-test-subj="MenuActionsButtonIcon"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="boxesHorizontal"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
+<div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
+    data-test-subj="Container"
+  >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-      data-test-subj="Container"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+          class="euiPopover emotion-euiPopover-inline-block"
+          data-test-subj="LinkedRulesMenuItems"
         >
-          <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            data-test-subj="LinkedRulesMenuItems"
+          <button
+            aria-label="Header menu Button Empty"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+            data-test-subj="LinkedRulesMenuEmptyButton"
+            type="button"
           >
-            <button
-              aria-label="Header menu Button Empty"
-              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-              data-test-subj="LinkedRulesMenuEmptyButton"
-              type="button"
+            <span
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                class="eui-textTruncate euiButtonEmpty__text"
               >
-                <span
-                  class="eui-textTruncate euiButtonEmpty__text"
-                >
-                  Linked to 1 rules
-                </span>
-                <span
-                  color="inherit"
-                  data-euiicon-type="arrowDown"
-                />
+                Linked to 1 rules
               </span>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-        >
-          <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            data-test-subj="MenuActionsItems"
-          >
-            <button
-              aria-label="Header menu Button Icon"
-              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-              data-test-subj="MenuActionsButtonIcon"
-              type="button"
-            >
               <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
                 color="inherit"
-                data-euiicon-type="boxesHorizontal"
+                data-euiicon-type="arrowDown"
               />
-            </button>
-          </div>
+            </span>
+          </button>
         </div>
       </div>
     </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      >
+        <div
+          class="euiPopover emotion-euiPopover-inline-block"
+          data-test-subj="MenuActionsItems"
+        >
+          <button
+            aria-label="Header menu Button Icon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+            data-test-subj="MenuActionsButtonIcon"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="boxesHorizontal"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`MenuItems should not render linkedRules HeaderMenu component, instead should render a text 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-        data-test-subj="Container"
+<div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
+    data-test-subj="Container"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <span
+        class="emotion-EuiTextColor"
+        data-test-subj="noLinkedRules"
       >
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        Linked to 0 rules
+      </span>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+        data-test-subj="LinkRulesButton"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
         >
           <span
-            class="emotion-EuiTextColor"
-            data-test-subj="noLinkedRules"
+            class="eui-textTruncate"
           >
-            Linked to 0 rules
+            Link rules
           </span>
-        </div>
+        </span>
+      </button>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      >
         <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          class="euiPopover emotion-euiPopover-inline-block"
+          data-test-subj="MenuActionsItems"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-            data-test-subj="LinkRulesButton"
+            aria-label="Header menu Button Icon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+            data-test-subj="MenuActionsButtonIcon"
             type="button"
           >
             <span
-              class="emotion-euiButtonDisplayContent"
-            >
-              <span
-                class="eui-textTruncate"
-              >
-                Link rules
-              </span>
-            </span>
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="boxesHorizontal"
+            />
           </button>
         </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-        >
-          <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-          >
-            <div
-              class="euiPopover emotion-euiPopover-inline-block"
-              data-test-subj="MenuActionsItems"
-            >
-              <button
-                aria-label="Header menu Button Icon"
-                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                data-test-subj="MenuActionsButtonIcon"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="boxesHorizontal"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
-  </body>,
-  "container": <div>
-    <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-      data-test-subj="Container"
-    >
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
-        <span
-          class="emotion-EuiTextColor"
-          data-test-subj="noLinkedRules"
-        >
-          Linked to 0 rules
-        </span>
-      </div>
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
-        <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-          data-test-subj="LinkRulesButton"
-          type="button"
-        >
-          <span
-            class="emotion-euiButtonDisplayContent"
-          >
-            <span
-              class="eui-textTruncate"
-            >
-              Link rules
-            </span>
-          </span>
-        </button>
-      </div>
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-        >
-          <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            data-test-subj="MenuActionsItems"
-          >
-            <button
-              aria-label="Header menu Button Icon"
-              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-              data-test-subj="MenuActionsButtonIcon"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="boxesHorizontal"
-              />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
+  </div>
+</div>
 `;
 
 exports[`MenuItems should render all menu actions enabled 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-        data-test-subj="Container"
+<div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
+    data-test-subj="Container"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <span
+        class="emotion-EuiTextColor"
+        data-test-subj="noLinkedRules"
       >
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        Linked to 0 rules
+      </span>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+        data-test-subj="LinkRulesButton"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
         >
           <span
-            class="emotion-EuiTextColor"
-            data-test-subj="noLinkedRules"
+            class="eui-textTruncate"
           >
-            Linked to 0 rules
+            Link rules
           </span>
-        </div>
+        </span>
+      </button>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      >
         <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          class="euiPopover emotion-euiPopover-inline-block"
+          data-test-subj="MenuActionsItems"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-            data-test-subj="LinkRulesButton"
+            aria-label="Header menu Button Icon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+            data-test-subj="MenuActionsButtonIcon"
             type="button"
           >
             <span
-              class="emotion-euiButtonDisplayContent"
-            >
-              <span
-                class="eui-textTruncate"
-              >
-                Link rules
-              </span>
-            </span>
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="boxesHorizontal"
+            />
           </button>
         </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-        >
-          <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-          >
-            <div
-              class="euiPopover emotion-euiPopover-inline-block"
-              data-test-subj="MenuActionsItems"
-            >
-              <button
-                aria-label="Header menu Button Icon"
-                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                data-test-subj="MenuActionsButtonIcon"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="boxesHorizontal"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
-    <div
-      data-euiportal="true"
-    >
-      <div
-        data-eui="EuiFocusTrap"
-      >
-        <div
-          aria-describedby="generated-id"
-          aria-live="off"
-          aria-modal="true"
-          class="euiPanel euiPanel--plain euiPanel--paddingSmall euiPopover__panel emotion-euiPanel-grow-m-s-plain-euiPopover__panel-light-hasTransform"
-          data-popover-panel="true"
-          role="dialog"
-          style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
-          tabindex="0"
-        >
-          <div
-            class="euiPopover__arrow emotion-euiPopoverArrow-bottom"
-            data-popover-arrow="bottom"
-            style="left: 10px; top: 0px;"
-          />
-          <p
-            class="emotion-euiScreenReaderOnly"
-            id="generated-id"
-          >
-            You are in a dialog. Press Escape, or tap/click outside the dialog to close.
-          </p>
-          <div>
-            <div
-              class="euiContextMenuPanel eui-scrollBar emotion-euiContextMenuPanel-Render"
-              data-test-subj="MenuActionsMenuPanel"
-              tabindex="-1"
-            >
-              <div>
-                <button
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
-                  data-test-subj="MenuActionsActionItem1"
-                  type="button"
-                >
-                  <span
-                    class="euiContextMenu__icon emotion-euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="exportAction"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
-                  >
-                    Export exception list
-                  </span>
-                </button>
-                <button
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
-                  data-test-subj="MenuActionsActionItem2"
-                  type="button"
-                >
-                  <span
-                    class="euiContextMenu__icon emotion-euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="copy"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
-                  >
-                    Duplicate exception list
-                  </span>
-                </button>
-                <button
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
-                  data-test-subj="MenuActionsActionItem3"
-                  type="button"
-                >
-                  <span
-                    class="euiContextMenu__icon emotion-euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="trash"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
-                  >
-                    Delete exception list
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-      data-test-subj="Container"
-    >
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
-        <span
-          class="emotion-EuiTextColor"
-          data-test-subj="noLinkedRules"
-        >
-          Linked to 0 rules
-        </span>
-      </div>
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
-        <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-          data-test-subj="LinkRulesButton"
-          type="button"
-        >
-          <span
-            class="emotion-euiButtonDisplayContent"
-          >
-            <span
-              class="eui-textTruncate"
-            >
-              Link rules
-            </span>
-          </span>
-        </button>
-      </div>
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-        >
-          <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            data-test-subj="MenuActionsItems"
-          >
-            <button
-              aria-label="Header menu Button Icon"
-              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-              data-test-subj="MenuActionsButtonIcon"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="boxesHorizontal"
-              />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
+  </div>
+</div>
 `;
 
 exports[`MenuItems should render delete action disabled when "canUserEditList" is "false" 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-        data-test-subj="Container"
-      >
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-        >
-          <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-          >
-            <div
-              class="euiPopover emotion-euiPopover-inline-block"
-              data-test-subj="LinkedRulesMenuItems"
-            >
-              <button
-                aria-label="Header menu Button Empty"
-                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-                data-test-subj="LinkedRulesMenuEmptyButton"
-                type="button"
-              >
-                <span
-                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-                >
-                  <span
-                    class="eui-textTruncate euiButtonEmpty__text"
-                  >
-                    Linked to 1 rules
-                  </span>
-                  <span
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-        >
-          <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-          >
-            <div
-              class="euiPopover emotion-euiPopover-inline-block"
-              data-test-subj="MenuActionsItems"
-            >
-              <button
-                aria-label="Header menu Button Icon"
-                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                data-test-subj="MenuActionsButtonIcon"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="boxesHorizontal"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
+    data-test-subj="Container"
+  >
     <div
-      data-euiportal="true"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
-        data-eui="EuiFocusTrap"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
-          aria-describedby="generated-id"
-          aria-live="off"
-          aria-modal="true"
-          class="euiPanel euiPanel--plain euiPanel--paddingSmall euiPopover__panel emotion-euiPanel-grow-m-s-plain-euiPopover__panel-light-hasTransform"
-          data-popover-panel="true"
-          role="dialog"
-          style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
-          tabindex="0"
-        >
-          <div
-            class="euiPopover__arrow emotion-euiPopoverArrow-bottom"
-            data-popover-arrow="bottom"
-            style="left: 10px; top: 0px;"
-          />
-          <p
-            class="emotion-euiScreenReaderOnly"
-            id="generated-id"
-          >
-            You are in a dialog. Press Escape, or tap/click outside the dialog to close.
-          </p>
-          <div>
-            <div
-              class="euiContextMenuPanel eui-scrollBar emotion-euiContextMenuPanel-Render"
-              data-test-subj="MenuActionsMenuPanel"
-              tabindex="-1"
-            >
-              <div>
-                <button
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
-                  data-test-subj="MenuActionsActionItem1"
-                  type="button"
-                >
-                  <span
-                    class="euiContextMenu__icon emotion-euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="exportAction"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
-                  >
-                    Export exception list
-                  </span>
-                </button>
-                <button
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center-disabled"
-                  data-test-subj="MenuActionsActionItem2"
-                  disabled=""
-                  type="button"
-                >
-                  <span
-                    class="euiContextMenu__icon emotion-euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="copy"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
-                  >
-                    Duplicate exception list
-                  </span>
-                </button>
-                <button
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center-disabled"
-                  data-test-subj="MenuActionsActionItem3"
-                  disabled=""
-                  type="button"
-                >
-                  <span
-                    class="euiContextMenu__icon emotion-euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="trash"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
-                  >
-                    Delete exception list
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-      data-test-subj="Container"
-    >
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-        >
-          <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            data-test-subj="LinkedRulesMenuItems"
-          >
-            <button
-              aria-label="Header menu Button Empty"
-              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-              data-test-subj="LinkedRulesMenuEmptyButton"
-              type="button"
-            >
-              <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-              >
-                <span
-                  class="eui-textTruncate euiButtonEmpty__text"
-                >
-                  Linked to 1 rules
-                </span>
-                <span
-                  color="inherit"
-                  data-euiicon-type="arrowDown"
-                />
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-        >
-          <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            data-test-subj="MenuActionsItems"
-          >
-            <button
-              aria-label="Header menu Button Icon"
-              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-              data-test-subj="MenuActionsButtonIcon"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="boxesHorizontal"
-              />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
-`;
-
-exports[`MenuItems should render linkedRules, manageRules and menuActions 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-        data-test-subj="Container"
-      >
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-        >
-          <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-          >
-            <div
-              class="euiPopover emotion-euiPopover-inline-block"
-              data-test-subj="LinkedRulesMenuItems"
-            >
-              <button
-                aria-label="Header menu Button Empty"
-                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-                data-test-subj="LinkedRulesMenuEmptyButton"
-                type="button"
-              >
-                <span
-                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-                >
-                  <span
-                    class="eui-textTruncate euiButtonEmpty__text"
-                  >
-                    Linked to 1 rules
-                  </span>
-                  <span
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          class="euiPopover emotion-euiPopover-inline-block"
+          data-test-subj="LinkedRulesMenuItems"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-            data-test-subj="LinkRulesButton"
+            aria-label="Header menu Button Empty"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+            data-test-subj="LinkedRulesMenuEmptyButton"
             type="button"
           >
             <span
-              class="emotion-euiButtonDisplayContent"
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate"
+                class="eui-textTruncate euiButtonEmpty__text"
               >
-                Link rules
+                Linked to 1 rules
               </span>
+              <span
+                color="inherit"
+                data-euiicon-type="arrowDown"
+              />
             </span>
           </button>
         </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-        >
-          <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-          >
-            <div
-              class="euiPopover emotion-euiPopover-inline-block"
-              data-test-subj="MenuActionsItems"
-            >
-              <button
-                aria-label="Header menu Button Icon"
-                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                data-test-subj="MenuActionsButtonIcon"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="boxesHorizontal"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
-  </body>,
-  "container": <div>
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-      data-test-subj="Container"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+          class="euiPopover emotion-euiPopover-inline-block"
+          data-test-subj="MenuActionsItems"
         >
-          <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            data-test-subj="LinkedRulesMenuItems"
-          >
-            <button
-              aria-label="Header menu Button Empty"
-              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-              data-test-subj="LinkedRulesMenuEmptyButton"
-              type="button"
-            >
-              <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-              >
-                <span
-                  class="eui-textTruncate euiButtonEmpty__text"
-                >
-                  Linked to 1 rules
-                </span>
-                <span
-                  color="inherit"
-                  data-euiicon-type="arrowDown"
-                />
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
-        <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-          data-test-subj="LinkRulesButton"
-          type="button"
-        >
-          <span
-            class="emotion-euiButtonDisplayContent"
+          <button
+            aria-label="Header menu Button Icon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+            data-test-subj="MenuActionsButtonIcon"
+            type="button"
           >
             <span
-              class="eui-textTruncate"
-            >
-              Link rules
-            </span>
-          </span>
-        </button>
-      </div>
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-        >
-          <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            data-test-subj="MenuActionsItems"
-          >
-            <button
-              aria-label="Header menu Button Icon"
-              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-              data-test-subj="MenuActionsButtonIcon"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="boxesHorizontal"
-              />
-            </button>
-          </div>
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="boxesHorizontal"
+            />
+          </button>
         </div>
       </div>
     </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
+  </div>
+</div>
+`;
+
+exports[`MenuItems should render linkedRules, manageRules and menuActions 1`] = `
+<div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
+    data-test-subj="Container"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      >
+        <div
+          class="euiPopover emotion-euiPopover-inline-block"
+          data-test-subj="LinkedRulesMenuItems"
+        >
+          <button
+            aria-label="Header menu Button Empty"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+            data-test-subj="LinkedRulesMenuEmptyButton"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+            >
+              <span
+                class="eui-textTruncate euiButtonEmpty__text"
+              >
+                Linked to 1 rules
+              </span>
+              <span
+                color="inherit"
+                data-euiicon-type="arrowDown"
+              />
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+        data-test-subj="LinkRulesButton"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate"
+          >
+            Link rules
+          </span>
+        </span>
+      </button>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      >
+        <div
+          class="euiPopover emotion-euiPopover-inline-block"
+          data-test-subj="MenuActionsItems"
+        >
+          <button
+            aria-label="Header menu Button Icon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+            data-test-subj="MenuActionsButtonIcon"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="boxesHorizontal"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;

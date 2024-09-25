@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.15.2>>
 * <<release-notes-8.15.1>>
 * <<release-notes-8.15.0>>
 * <<release-notes-8.14.3>>
@@ -71,6 +72,52 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.15.2]]
+== {kib} 8.15.2
+
+The 8.15.2 release includes the following enhancements and bug fixes.
+
+[float]
+[[enhancement-v8.15.2]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.15.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Bumps maximum supported package spec version to 3.2 ({kibana-pull}193574[#193574]).
+Kibana security::
+* Adds a feature to add support for handling `syslogs with unsupported message body` ({kibana-pull}192817[#192817]).
+* Automatic Import now performs reproducible sampling from the list of log entries instead of just truncating them ({kibana-pull}191598[#191598]).
+* Adds support for Google Gemini, OpenAI, and Azure OpenAI connectors to Automatic Import ({kibana-pull}191577[#191577]).
+* Displays better error messages for issues with logs sample file upload in Automatic Import ({kibana-pull}191310[#191310]).
+
+[float]
+[[fixes-v8.15.2]]
+=== Bug fixes
+Alerting::
+* Fixes error when saving a rule after toggling alerts filter properties on and off ({kibana-pull}192522[#192522]).
+Dashboards::
+* Fixes map layers that disappear from map panel when using session storage to continue editing a dashboard ({kibana-pull}193629[#193629]).
+Discover::
+* Fixes "View conflicts" button when a data view ID has special characters ({kibana-pull}192374[#192374]).
+Elastic Observability solution::
+* Fixes OpenTelemetry agent names ({kibana-pull}193134[#193134]).
+* Resolves an issue for multi-step browser journeys where timings for cached resources within the same step were inaccurate within the waterfall chart ({kibana-pull}193089[#193089]).
+* Updates parsing to skip replacing missing values in Synthetics monitors ({kibana-pull}192662[#192662]).
+Elastic Security solution::
+For the Elastic Security 8.15.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Prevents extra agent_status call with empty policyId ({kibana-pull}192549[#192549]).
+* Sets correct title for Restart upgrade agent modal under agent list ({kibana-pull}192536[#192536]).
+Kibana security::
+* Stops removing message field for unstructured logs when using Automatic Import ({kibana-pull}193678[#193678]).
+* Integrations created using Automatic Import now indicate that they have been developed by the `Community` instead of Elastic ({kibana-pull}193002[#193002]).
+* Fixes issues with rendering the package manifest in Automatic Import ({kibana-pull}192316[#192316]).
+Machine Learning::
+* Fixes deletion in Check interval input for anomaly detection rule ({kibana-pull}193420[#193420]).
+* Fixes unnecessary ML services initialization during plugin setup ({kibana-pull}193153[#193153]).
+* Fixes link to anomaly detection wizard from pattern analysis in Discover ({kibana-pull}192375[#192375]).
+* Fixes an issue with the `http_endpoint` input config loading incorrectly in an Automatic Import workflow ({kibana-pull}191964[#191964]).
 
 [[release-notes-8.15.1]]
 == {kib} 8.15.1
@@ -179,11 +226,11 @@ you make the necessary updates after you upgrade to 8.15.0.
 
 [discrete]
 [[deprecation-uptime]]
-.Uptime is deprecated in 8.15.0 and will be removed in 9.0.0.
+.Uptime is deprecated in 8.15.0 and will be removed in a future version.
 [%collapsible]
 ====
 *Details* +
-The Uptime app is already hidden from Kibana when there is no recent Heartbeat data, but will be completely removed in 9.0.0. You should migrate to Synthetics as an alternative. For more details, refer to the {observability-guide}/uptime-intro.html[Uptime documentation].
+The Uptime app is already hidden from Kibana when there is no recent Heartbeat data, and will be completely removed in early 2026. You should migrate to Synthetics as an alternative. For more details, refer to the {observability-guide}/uptime-intro.html[Uptime documentation].
 ====
 
 [float]
@@ -655,6 +702,18 @@ The visualization type, region map, comes out of technical preview and is genera
 ====
 *Details* +
 UI improvements for managed tags. For more information, refer to ({kibana-pull}177089[#177089]).
+====
+
+[discrete]
+[[breaking-178159]]
+.Downloading a CSV file from a saved search panel in a dashboard has become deprecated in favor of generating a CSV report.
+[%collapsible]
+====
+*Details* +
+The mechanism of exporting CSV data from a saved search panel in a dashboard has been changed to generate a CSV report, rather than allowing the CSV data to be downloaded
+without creating a report. To preserve the original behavior, it is necessary to update `kibana.yml` with the setting of `xpack.reporting.csv.enablePanelActionDownload:
+true`. The scope of this breaking change is limited to downloading CSV files from saved search panels only; downloading CSV files from other types of dashboard panels is
+unchanged. For more information, refer to {kibana-pull}178159[#178159].
 ====
 
 [float]
@@ -2320,6 +2379,16 @@ For the full list, refer to {kib-issue}146945[#146945].
 ====
 *Details* +
 The function `addProcessorDefinition` is removed from the Console plugin start contract (server side). For more information, refer to ({kibana-pull}159041[#159041]).
+====
+
+[discrete]
+[[breaking-162288]]
+.The Download CSV endpoint has changed.
+[%collapsible]
+====
+*Details* +
+The API endpoint for downloading a CSV file from a saved search in the Dashboard application has changed to reflect the fact that this is an internal API. The previous API path of
+`/api/reporting/v1/generate/immediate/csv_searchsource` has been changed to `/internal/reporting/generate/immediate/csv_searchsource`. For more information, refer to {kibana-pull}162288[#162288].
 ====
 
 [float]

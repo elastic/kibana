@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { binaryExpressionGroup } from '../ast/helpers';
@@ -132,7 +133,7 @@ export class BasicPrettyPrinter {
       : word.toUpperCase();
   }
 
-  protected readonly visitor = new Visitor()
+  protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx) => {
       return '<EXPRESSION>';
     })
@@ -228,6 +229,21 @@ export class BasicPrettyPrinter {
       return `${ctx.visitArgument(0)} ${this.keyword('AS')} ${ctx.visitArgument(1)}`;
     })
 
+    .on('visitOrderExpression', (ctx) => {
+      const node = ctx.node;
+      let text = ctx.visitArgument(0);
+
+      if (node.order) {
+        text += ` ${node.order}`;
+      }
+
+      if (node.nulls) {
+        text += ` ${node.nulls}`;
+      }
+
+      return text;
+    })
+
     .on('visitCommandOption', (ctx) => {
       const opts = this.opts;
       const option = opts.lowercaseOptions ? ctx.node.name : ctx.node.name.toUpperCase();
@@ -280,14 +296,14 @@ export class BasicPrettyPrinter {
     });
 
   public print(query: ESQLAstQueryNode) {
-    return this.visitor.visitQuery(query);
+    return this.visitor.visitQuery(query, undefined);
   }
 
   public printCommand(command: ESQLAstCommand) {
-    return this.visitor.visitCommand(command);
+    return this.visitor.visitCommand(command, undefined);
   }
 
   public printExpression(expression: ESQLAstExpressionNode) {
-    return this.visitor.visitExpression(expression);
+    return this.visitor.visitExpression(expression, undefined);
   }
 }

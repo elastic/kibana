@@ -87,12 +87,12 @@ describe('NewChat', () => {
     expect(newChatButton.querySelector('.euiButtonContent__icon')).not.toBeInTheDocument();
   });
 
-  it('calls showAssistantOverlay on click', () => {
+  it('calls showAssistantOverlay on click', async () => {
     render(<NewChat {...defaultProps} />);
 
     const newChatButton = screen.getByTestId('newChat');
 
-    userEvent.click(newChatButton);
+    await userEvent.click(newChatButton);
 
     expect(mockUseAssistantOverlay.showAssistantOverlay).toHaveBeenCalledWith(true);
   });
@@ -105,24 +105,24 @@ describe('NewChat', () => {
     expect(newChatLink).toBeInTheDocument();
   });
 
-  it('calls onShowOverlay callback on click', () => {
+  it('calls onShowOverlay callback on click', async () => {
     const onShowOverlaySpy = jest.fn();
     render(<NewChat {...defaultProps} onShowOverlay={onShowOverlaySpy} />);
 
     const newChatButton = screen.getByTestId('newChat');
 
-    userEvent.click(newChatButton);
+    await userEvent.click(newChatButton);
 
     expect(onShowOverlaySpy).toHaveBeenCalled();
   });
 
-  it('calls onShowOverlay callback on click for link', () => {
+  it('calls onShowOverlay callback on click for link', async () => {
     const onShowOverlaySpy = jest.fn();
     render(<NewChat {...defaultProps} asLink={true} onShowOverlay={onShowOverlaySpy} />);
 
     const newChatLink = screen.getByTestId('newChatLink');
 
-    userEvent.click(newChatLink);
+    await userEvent.click(newChatLink);
 
     expect(onShowOverlaySpy).toHaveBeenCalled();
   });

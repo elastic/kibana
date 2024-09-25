@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -16,9 +17,10 @@ import {
   EuiSplitPanel,
   transparentize,
 } from '@elastic/eui';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { has } from 'lodash';
+import { selectDefaultWidths, selectUserSectionWidths, useSelector } from '../store/redux';
 import {
   PREVIEW_SECTION_BACK_BUTTON_TEST_ID,
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
@@ -66,13 +68,13 @@ interface PreviewSectionProps {
    */
   component: React.ReactElement;
   /**
-   * Left position used when rendering the panel
-   */
-  leftPosition: number;
-  /**
    * Preview banner shown at the top of preview panel
    */
   banner?: PreviewBanner;
+  /**
+   * Flag to indicate whether the preview section is expanded, use to calculate the width of the section
+   */
+  showExpanded: boolean;
 }
 
 /**
@@ -80,11 +82,20 @@ interface PreviewSectionProps {
  * Will display a back and close button in the header for the previous and close feature respectively.
  */
 export const PreviewSection: React.FC<PreviewSectionProps> = memo(
-  ({ component, leftPosition, banner }: PreviewSectionProps) => {
+  ({ component, banner, showExpanded }: PreviewSectionProps) => {
     const { euiTheme } = useEuiTheme();
     const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutApi();
 
-    const left = leftPosition + 4;
+    const { rightPercentage } = useSelector(selectUserSectionWidths);
+    const defaultPercentages = useSelector(selectDefaultWidths);
+
+    // Calculate the width of the preview section based on the following
+    // - if only the right section is visible, then we use 100% of the width (minus some padding)
+    // - if both the right and left sections are visible, we use the width of the right section (minus the same padding)
+    const width = useMemo(() => {
+      const percentage = rightPercentage ? rightPercentage : defaultPercentages.rightPercentage;
+      return showExpanded ? `calc(${percentage}% - 8px)` : `calc(100% - 8px)`;
+    }, [defaultPercentages.rightPercentage, rightPercentage, showExpanded]);
 
     const closeButton = (
       <EuiFlexItem grow={false}>
@@ -121,14 +132,14 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
           top: 8px;
           bottom: 8px;
           right: 4px;
-          left: ${left}px;
+          width: ${width};
           z-index: 1000;
         `}
       >
         <EuiSplitPanel.Outer
           css={css`
             margin: ${euiTheme.size.xs};
-            box-shadow: 0 0 16px 0px ${transparentize(euiTheme.colors.mediumShade, 0.5)};
+            box-shadow: 0 0 16px 0 ${transparentize(euiTheme.colors.mediumShade, 0.5)};
           `}
           data-test-subj={PREVIEW_SECTION_TEST_ID}
           className="eui-fullHeight"

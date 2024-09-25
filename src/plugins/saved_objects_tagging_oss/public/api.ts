@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
@@ -11,8 +12,6 @@ import { SearchFilterConfig, EuiTableFieldDataColumnType, EuiComboBoxProps } fro
 import type { FunctionComponent } from 'react';
 import { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import { SavedObject as SavedObjectClass } from '@kbn/saved-objects-plugin/public';
-import { TagDecoratedSavedObject } from './decorator';
 import { ITagsClient, Tag, TagWithOptionalId } from '../common';
 
 /**
@@ -50,11 +49,6 @@ export interface ITagsCache {
 }
 
 /**
- * @public
- */
-export type SavedObjectTagDecoratorTypeGuard = SavedObjectsTaggingApiUi['hasTagDecoration'];
-
-/**
  * React components and utility methods to use the SO tagging feature
  *
  * @public
@@ -70,13 +64,6 @@ export interface SavedObjectsTaggingApiUi {
    * Return a list of available tags
    */
   getTagList(): Tag[];
-
-  /**
-   * Type-guard to safely manipulate tag-enhanced `SavedObject` from the `savedObject` plugin.
-   *
-   * @param object
-   */
-  hasTagDecoration(object: SavedObjectClass): object is TagDecoratedSavedObject;
 
   /**
    * Return a filter that can be used to filter by tag with `EuiSearchBar` or EUI tables using `EuiSearchBar`.

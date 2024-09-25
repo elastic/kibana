@@ -49,6 +49,46 @@ const READ_SCENARIOS = [
   },
 ];
 
+const READ_SCENARIOS_FULL_POLICIES = [
+  {
+    user: testUsers.fleet_all_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_read_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_agent_policies_read_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_agent_policies_all_only,
+    statusCode: 200,
+  },
+  {
+    // Expect minimal access
+    user: testUsers.fleet_agents_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_no_access,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_minimal_all_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_minimal_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_settings_read_only,
+    statusCode: 403,
+  },
+];
+
 const ALL_SCENARIOS = [
   {
     user: testUsers.fleet_all_only,
@@ -103,8 +143,30 @@ export default function (providerContext: FtrProviderContext) {
     },
     {
       method: 'GET',
+      path: '/api/fleet/agent_policies?full=true',
+      scenarios: READ_SCENARIOS_FULL_POLICIES,
+    },
+    {
+      method: 'GET',
       path: '/api/fleet/agent_policies/policy-test-privileges-1',
       scenarios: READ_SCENARIOS,
+    },
+    {
+      method: 'POST',
+      path: '/api/fleet/agent_policies/_bulk_get',
+      scenarios: READ_SCENARIOS,
+      send: {
+        ids: ['policy-test-privileges-1'],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/api/fleet/agent_policies/_bulk_get',
+      scenarios: READ_SCENARIOS_FULL_POLICIES,
+      send: {
+        ids: ['policy-test-privileges-1'],
+        full: true,
+      },
     },
     {
       method: 'POST',

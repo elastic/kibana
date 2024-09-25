@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
@@ -79,7 +79,7 @@ describe('StepRuleActions', () => {
   };
   it('renders correctly', () => {
     const wrapper = mount(<TestComp setFormRef={() => {}} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     expect(wrapper.find('Form[data-test-subj="stepRuleActions"]')).toHaveLength(1);

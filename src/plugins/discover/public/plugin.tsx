@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -52,14 +53,14 @@ import {
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
 import type { ConfigSchema, ExperimentalFeatures } from '../server/config';
-import {
-  DataSourceProfileService,
-  DocumentProfileService,
-  ProfilesManager,
-  RootProfileService,
-} from './context_awareness';
 import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
 import { deserializeState } from './embeddable/utils/serialization_utils';
+import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
+import { RootProfileService } from './context_awareness/profiles/root_profile';
+import { DataSourceProfileService } from './context_awareness/profiles/data_source_profile';
+import { DocumentProfileService } from './context_awareness/profiles/document_profile';
+import { ProfilesManager } from './context_awareness/profiles_manager';
+import { DiscoverEBTContextManager } from './services/discover_ebt_context_manager';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -149,6 +150,9 @@ export class DiscoverPlugin
     this.urlTracker = { setTrackedUrl, restorePreviousUrl, setTrackingEnabled };
     this.stopUrlTracking = stopUrlTracker;
 
+    const ebtContextManager = new DiscoverEBTContextManager();
+    ebtContextManager.initialize({ core });
+
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
@@ -173,6 +177,8 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
+        ebtContextManager.enable();
+
         const services = buildServices({
           core: coreStart,
           plugins: discoverStartPlugins,
@@ -183,7 +189,11 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
-          profilesManager: await this.createProfilesManager(),
+          profilesManager: await this.createProfilesManager({
+            plugins: discoverStartPlugins,
+            ebtContextManager,
+          }),
+          ebtContextManager,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -216,6 +226,7 @@ export class DiscoverPlugin
         });
 
         return () => {
+          ebtContextManager.disableAndReset();
           unlistenParentHistory();
           unmount();
           appUnMounted();
@@ -270,6 +281,7 @@ export class DiscoverPlugin
 
     plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
+    plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
@@ -284,7 +296,12 @@ export class DiscoverPlugin
     }
 
     const getDiscoverServicesInternal = () => {
-      return this.getDiscoverServices(core, plugins, this.createEmptyProfilesManager());
+      return this.getDiscoverServices(
+        core,
+        plugins,
+        this.createEmptyProfilesManager(),
+        new DiscoverEBTContextManager() // it's not enabled outside of Discover
+      );
     };
 
     return {
@@ -301,14 +318,15 @@ export class DiscoverPlugin
     }
   }
 
-  private createProfileServices = once(async () => {
+  private createProfileServices = once(async ({ plugins }: { plugins: DiscoverStartPlugins }) => {
     const { registerProfileProviders } = await import('./context_awareness/profile_providers');
     const rootProfileService = new RootProfileService();
     const dataSourceProfileService = new DataSourceProfileService();
     const documentProfileService = new DocumentProfileService();
     const enabledExperimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
 
-    registerProfileProviders({
+    await registerProfileProviders({
+      plugins,
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
@@ -318,14 +336,21 @@ export class DiscoverPlugin
     return { rootProfileService, dataSourceProfileService, documentProfileService };
   });
 
-  private async createProfilesManager() {
+  private async createProfilesManager({
+    plugins,
+    ebtContextManager,
+  }: {
+    plugins: DiscoverStartPlugins;
+    ebtContextManager: DiscoverEBTContextManager;
+  }) {
     const { rootProfileService, dataSourceProfileService, documentProfileService } =
-      await this.createProfileServices();
+      await this.createProfileServices({ plugins });
 
     return new ProfilesManager(
       rootProfileService,
       dataSourceProfileService,
-      documentProfileService
+      documentProfileService,
+      ebtContextManager
     );
   }
 
@@ -333,14 +358,16 @@ export class DiscoverPlugin
     return new ProfilesManager(
       new RootProfileService(),
       new DataSourceProfileService(),
-      new DocumentProfileService()
+      new DocumentProfileService(),
+      new DiscoverEBTContextManager() // it's not enabled outside of Discover
     );
   }
 
   private getDiscoverServices = (
     core: CoreStart,
     plugins: DiscoverStartPlugins,
-    profilesManager: ProfilesManager
+    profilesManager: ProfilesManager,
+    ebtContextManager: DiscoverEBTContextManager
   ) => {
     return buildServices({
       core,
@@ -352,6 +379,7 @@ export class DiscoverPlugin
       history: this.historyService.getHistory(),
       urlTracker: this.urlTracker!,
       profilesManager,
+      ebtContextManager,
     });
   };
 
@@ -366,8 +394,12 @@ export class DiscoverPlugin
 
     const getDiscoverServicesInternal = async () => {
       const [coreStart, deps] = await core.getStartServices();
-      const profilesManager = await this.createProfilesManager();
-      return this.getDiscoverServices(coreStart, deps, profilesManager);
+      const ebtContextManager = new DiscoverEBTContextManager(); // it's not enabled outside of Discover
+      const profilesManager = await this.createProfilesManager({
+        plugins: deps,
+        ebtContextManager,
+      });
+      return this.getDiscoverServices(coreStart, deps, profilesManager, ebtContextManager);
     };
 
     plugins.embeddable.registerReactEmbeddableSavedObject<SavedSearchAttributes>({

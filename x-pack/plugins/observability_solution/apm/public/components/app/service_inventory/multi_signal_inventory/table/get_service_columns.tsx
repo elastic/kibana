@@ -36,10 +36,9 @@ import { NotAvailableApmMetrics } from '../../../../shared/not_available_popover
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
 import { EntityDataStreamType } from '../../../../../../common/entities/types';
-import { isApmSignal, isLogsSignal } from '../../../../../utils/get_signal_type';
+import { isApmSignal } from '../../../../../utils/get_signal_type';
 import { ColumnHeader } from './column_header';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { NotAvailableLogsMetrics } from '../../../../shared/not_available_popover/not_available_log_metrics';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/entities/services/detailed_statistics'>;
@@ -204,10 +203,6 @@ export function getServiceColumns({
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
       render: (_, { metrics, serviceName, dataStreamTypes, hasLogMetrics }) => {
-        if (isLogsSignal(dataStreamTypes) && !hasLogMetrics) {
-          return <NotAvailableLogsMetrics />;
-        }
-
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_RATE);
         return (
           <ListMetric
@@ -256,10 +251,6 @@ export function getServiceColumns({
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
       render: (_, { metrics, serviceName, dataStreamTypes, hasLogMetrics }) => {
-        if (isLogsSignal(dataStreamTypes) && !hasLogMetrics) {
-          return <NotAvailableLogsMetrics />;
-        }
-
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_ERROR_RATE);
 
         return (

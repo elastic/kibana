@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'path';
@@ -45,10 +46,10 @@ export class ChromiumArchivePaths {
       platform: 'darwin',
       architecture: 'x64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: 'fa8004f3c8c5574c089c901e48429d1b01720bf3dd25e05ac56c41d0ab470c10',
-      binaryChecksum: '56f25cb6881e5c2b1aac0d8e87630517d1af8effdc9319d35f872add048df1ca',
+      archiveChecksum: '0a3d18efd00b3406f66139a673616b4b2b4b00323776678cb82295996f5a6733',
+      binaryChecksum: '8bcdaa973ee11110f6b70eaac2418fda3bb64446cf37f964fce331cdc8907a20',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
-      revision: 1300317, // 1300313 is not available for Mac_x64
+      revision: 1331485, // 1331488 is not available for Mac_x64
       location: 'common',
       archivePath: 'Mac',
       isPreInstalled: false,
@@ -57,10 +58,10 @@ export class ChromiumArchivePaths {
       platform: 'darwin',
       architecture: 'arm64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: 'bea49fd3ccd6aaccd7cdc4df38306f002a2934aaa2c044f3b5a3272b31ec77ca',
-      binaryChecksum: '4c55d9e47deb1179c377c9785afdcdb5f3d3f351bff62b414d43e32ff195bd55',
+      archiveChecksum: '426eddf16acb88b9446a91de53cc4364c7d487414248f33e30f68cf488cea0c0',
+      binaryChecksum: '827931739bfdd2b6790a81d5ade8886c159cd051581d79b84d1ede447293e9cf',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
-      revision: 1300314, // 1300313 is not available for Mac_Arm
+      revision: 1331488,
       location: 'common',
       archivePath: 'Mac_Arm',
       isPreInstalled: false,
@@ -68,22 +69,22 @@ export class ChromiumArchivePaths {
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-5b5d829-locales-linux_x64.zip',
-      archiveChecksum: '799e8fd5f47ea70b8a3972d39b2617c9cbebc7fc433a89251dae312a7c77534b',
-      binaryChecksum: '216b8f7ff9b41e985397342c2df54e4f8e07a01a3b8a929f39b9a10931d26ff5',
+      archiveFilename: 'chromium-fe621c5-locales-linux_x64.zip',
+      archiveChecksum: '12ce2e0eac184072dfcbc7a267328e3eb7fbe10a682997f4111c0378f2397341',
+      binaryChecksum: '670481cfa8db209401106cd23051009d390c03608724d0822a12c8c0a92b4c25',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
-      revision: 1300313,
+      revision: 1331488,
       location: 'custom',
       isPreInstalled: true,
     },
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-5b5d829-locales-linux_arm64.zip',
-      archiveChecksum: '961e20c45c61f8e948efdc4128bb17c23217bbcb28537f270ccf5bf0826981e7',
-      binaryChecksum: 'fc4027fb6b1c96bef9374d5d9f791097fae2ec2ddc4e0134167075bd52d1458f',
+      archiveFilename: 'chromium-fe621c5-locales-linux_arm64.zip',
+      archiveChecksum: 'f7333eaff5235046c8775f0c1a0b7395b7ebc2e054ea638710cf511c4b6f9daf',
+      binaryChecksum: '8a3a3371b3d04f4b0880b137a3611c223e0d8e65a218943cb7be1ec4a91f5e35',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
-      revision: 1300313,
+      revision: 1331488,
       location: 'custom',
       isPreInstalled: true,
     },
@@ -91,10 +92,10 @@ export class ChromiumArchivePaths {
       platform: 'win32',
       architecture: 'x64',
       archiveFilename: 'chrome-win.zip',
-      archiveChecksum: '27a2ed1473cefc6f48ff5665faa1fbcc69ef5be47ee21777a60e87c8379fdd93',
-      binaryChecksum: 'd603401a5e6f8bd734b329876e4221a4d24a1999f14df6e32eeb5e6a72520d96',
+      archiveChecksum: 'fa62be702f55f37e455bab4291c59ceb40e81e1922d30cf9453a4ee176b909bc',
+      binaryChecksum: '1345e66583bad1a1f16885f381d1173de8bf931487da9ba155e1b58bf23b2c66',
       binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
-      revision: 1300320, // 1300313 is not available for win32
+      revision: 1331487, // 1331488 is not available for win32
       location: 'common',
       archivePath: 'Win',
       isPreInstalled: true,

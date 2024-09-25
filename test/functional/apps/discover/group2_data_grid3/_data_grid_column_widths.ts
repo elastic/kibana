@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -15,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects([
+  const { common, discover, header, timePicker, dashboard, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'header',
@@ -38,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
@@ -48,27 +49,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should not show reset width button for auto width column', async () => {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('@message');
+      await unifiedFieldList.clickFieldListItemAdd('@message');
       expect(await dataGrid.resetColumnWidthExists('@message')).to.be(false);
     });
 
     it('should show reset width button for absolute width column, and allow resetting to auto width', async () => {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('@message');
+      await unifiedFieldList.clickFieldListItemAdd('@message');
       await testResizeColumn('@message');
     });
 
     it('should reset the last column to auto width if only absolute width columns remain', async () => {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('@message');
+      await unifiedFieldList.clickFieldListItemAdd('@message');
       const { originalWidth: messageOriginalWidth, newWidth: messageNewWidth } =
         await dataGrid.resizeColumn('@message', -300);
       expect(messageNewWidth).to.be(messageOriginalWidth - 300);
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
       const { originalWidth: bytesOriginalWidth, newWidth: bytesNewWidth } =
         await dataGrid.resizeColumn('bytes', -100);
       expect(bytesNewWidth).to.be(bytesOriginalWidth - 100);
@@ -80,12 +81,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not reset the last column to auto width when there are remaining auto width columns', async () => {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('@message');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+      await unifiedFieldList.clickFieldListItemAdd('@message');
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
       const { originalWidth: bytesOriginalWidth, newWidth: bytesNewWidth } =
         await dataGrid.resizeColumn('bytes', -200);
       expect(bytesNewWidth).to.be(bytesOriginalWidth - 200);
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent');
+      await unifiedFieldList.clickFieldListItemAdd('agent');
       const { originalWidth: agentOriginalWidth, newWidth: agentNewWidth } =
         await dataGrid.resizeColumn('agent', -100);
       expect(agentNewWidth).to.be(agentOriginalWidth - 100);
@@ -95,34 +96,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow resetting column width in surrounding docs view', async () => {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('@message');
+      await unifiedFieldList.clickFieldListItemAdd('@message');
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const [, surroundingActionEl] = await dataGrid.getRowActions({ rowIndex: 0 });
       await surroundingActionEl.click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testResizeColumn('@message');
     });
 
     it('should allow resetting column width in Dashboard panel', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      await common.navigateToApp('dashboard');
+      await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testResizeColumn('_source');
     });
 
     it('should use custom column width on Dashboard when specified', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      await common.navigateToApp('dashboard');
+      await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       const { originalWidth, newWidth } = await dataGrid.resizeColumn('_source', -100);
       expect(newWidth).to.be(originalWidth - 100);
-      await PageObjects.dashboard.saveDashboard('test');
+      await dashboard.saveDashboard('test');
       await browser.refresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       const initialWidth = (await (await dataGrid.getHeaderElement('_source')).getSize()).width;
       expect(initialWidth).to.be(newWidth);
     });
