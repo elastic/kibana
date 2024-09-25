@@ -95,6 +95,10 @@ export class InjectedMetadataService {
       getCustomBranding: () => {
         return this.state.customBranding;
       },
+
+      getFeatureFlags: () => {
+        return this.state.featureFlags;
+      },
     };
   }
 }

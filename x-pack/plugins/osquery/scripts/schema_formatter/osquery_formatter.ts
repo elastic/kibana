@@ -28,7 +28,7 @@ run(
     formattedSchema.push(...elasticTables);
 
     await fs.writeFile(
-      path.join(schemaPath, `v${flags.schema_version}-formatted`),
+      path.join(schemaPath, `v${flags.schema_version}-formatted.json`),
       JSON.stringify(formattedSchema)
     );
   },

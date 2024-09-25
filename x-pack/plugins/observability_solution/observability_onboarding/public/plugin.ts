@@ -21,7 +21,6 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
@@ -62,7 +61,6 @@ export interface ObservabilityOnboardingPluginStartDeps {
   fleet: FleetStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
-  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 export type ObservabilityOnboardingContextValue = CoreStart &

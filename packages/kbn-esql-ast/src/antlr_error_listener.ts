@@ -12,7 +12,7 @@ import { ErrorListener } from 'antlr4';
 import type { EditorError } from './types';
 import { getPosition } from './ast_position_utils';
 
-const REPLACE_DEV = /,*\s*DEV_\w+\s*/g;
+const REPLACE_DEV = /,{0,1}(?<!\s)\s*DEV_\w+\s*/g;
 export class ESQLErrorListener extends ErrorListener<any> {
   protected errors: EditorError[] = [];
 
