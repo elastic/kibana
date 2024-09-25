@@ -16,6 +16,7 @@ import type { CustomFieldType } from '../types';
 import { MappedSelectField } from './components/mapped_select_field';
 import { getListFieldConfig } from './config';
 import { listCustomFieldOptionsToEuiSelectOptions } from './helpers/list_custom_field_options_to_eui_select_options';
+import { keyToOptionValue } from './helpers/key_to_option_value';
 
 const CreateComponent: CustomFieldType<
   CaseCustomFieldList,
@@ -30,10 +31,7 @@ const CreateComponent: CustomFieldType<
 
   const defaultKeyValuePair = useMemo(() => {
     if (defaultValue && setDefaultValue) {
-      return [
-        String(defaultValue),
-        String(options.find((option) => option.key === defaultValue)?.label),
-      ];
+      return keyToOptionValue(defaultValue, options);
     }
     return null;
   }, [defaultValue, setDefaultValue, options]);
