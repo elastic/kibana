@@ -360,22 +360,6 @@ export const SingleTimelineResponseType = runtimeTypes.type({
 
 export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineResponseType>;
 
-/** Resolved Timeline Response */
-export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes.intersection([
-  runtimeTypes.type({
-    timeline: TimelineSavedToReturnObjectRuntimeType,
-    outcome: SavedObjectResolveOutcome,
-  }),
-  runtimeTypes.partial({
-    alias_target_id: SavedObjectResolveAliasTargetId,
-    alias_purpose: SavedObjectResolveAliasPurpose,
-  }),
-]);
-
-export type ResolvedTimelineWithOutcomeSavedObject = runtimeTypes.TypeOf<
-  typeof ResolvedTimelineSavedObjectToReturnObjectRuntimeType
->;
-
 const responseTimelines = runtimeTypes.type({
   timeline: runtimeTypes.array(TimelineSavedToReturnObjectRuntimeType),
   totalCount: runtimeTypes.number,
