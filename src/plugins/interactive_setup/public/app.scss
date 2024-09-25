@@ -12,7 +12,7 @@
   @include kibanaCircleLogo;
   @include euiBottomShadowMedium;
 
-  margin-bottom: $euiSizeXL;
+  &{margin-bottom: $euiSizeXL};
 }
 
 .interactiveSetup__content {
