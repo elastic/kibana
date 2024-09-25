@@ -7,7 +7,7 @@
 import { uniq } from 'lodash';
 import type { EndpointMetadataServiceTestContextMock } from './mocks';
 import { createEndpointMetadataServiceTestContextMock } from './mocks';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   legacyMetadataSearchResponseMock,
@@ -37,7 +37,7 @@ describe('EndpointMetadataService', () => {
     endpointDocGenerator = new EndpointDocGenerator('seed');
     testMockedContext = createEndpointMetadataServiceTestContextMock();
     metadataService = testMockedContext.endpointMetadataService;
-    esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+    esClient = testMockedContext.esClient;
     soClient = savedObjectsClientMock.create();
     soClient.find = jest.fn().mockResolvedValue({ saved_objects: [] });
     fleetAppContextService.start(
@@ -83,7 +83,6 @@ describe('EndpointMetadataService', () => {
 
     beforeEach(() => {
       agentPolicyServiceMock = testMockedContext.agentPolicyService;
-      esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     });
 
     it('should throw wrapped error if es error', async () => {

@@ -106,7 +106,10 @@ describe('test endpoint routes', () => {
 
     endpointAppContextService = new EndpointAppContextService();
     endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-    endpointAppContextService.start({ ...startContract });
+    endpointAppContextService.start({
+      ...startContract,
+      esClient: mockScopedClient.asInternalUser,
+    });
     mockAgentClient = startContract.fleetStartServices.agentService
       .asInternalUser as jest.Mocked<AgentClient>;
     mockAgentPolicyService = startContract.fleetStartServices

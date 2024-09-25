@@ -165,6 +165,7 @@ describe('Response actions', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
+        esClient: mockScopedClient.asInternalUser,
         licenseService,
       });
 
