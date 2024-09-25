@@ -32,6 +32,7 @@ export {
   dashboardCreateResultSchema,
   dashboardItemSchema,
   dashboardSearchResultsSchema,
+  referenceSchema,
 } from './cm_services';
 export {
   dashboardAttributesOut,

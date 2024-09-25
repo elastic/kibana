@@ -24,6 +24,7 @@ import {
   dashboardGetResultSchema,
   dashboardCreateResultSchema,
   dashboardSearchResultsSchema,
+  referenceSchema,
 } from '../content_management/v3';
 
 interface RegisterAPIRoutesArgs {
@@ -78,7 +79,7 @@ export function registerAPIRoutes({
           }),
           body: schema.object({
             attributes: dashboardAttributesSchema,
-            references: schema.maybe(schema.arrayOf(schema.any())),
+            references: schema.maybe(schema.arrayOf(referenceSchema)),
             spaces: schema.maybe(schema.arrayOf(schema.string())),
           }),
         },
@@ -106,8 +107,15 @@ export function registerAPIRoutes({
         }));
       } catch (e) {
         // TODO do some error handling
-        logger.error(e);
-        throw e;
+        if (e.isBoom && e.output.statusCode === 409) {
+          return res.conflict();
+        }
+
+        if (e.isBoom && e.output.statusCode === 403) {
+          return res.forbidden();
+        }
+
+        return res.badRequest();
       }
 
       const body = recursiveSortObjectByKeys(result);
@@ -131,7 +139,10 @@ export function registerAPIRoutes({
           params: schema.object({
             id: schema.string(),
           }),
-          body: dashboardAttributesSchema,
+          body: schema.object({
+            attributes: dashboardAttributesSchema,
+            references: schema.maybe(schema.arrayOf(referenceSchema)),
+          }),
         },
         response: {
           200: {
@@ -141,16 +152,21 @@ export function registerAPIRoutes({
       },
     },
     async (ctx, req, res) => {
+      const { attributes, references } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
       let result;
       try {
-        ({ result } = await client.update(req.params.id, req.body, {}));
+        ({ result } = await client.update(req.params.id, attributes, { references }));
       } catch (e) {
-        // TODO do some error handling
-        logger.error(e);
-        throw e;
+        if (e.isBoom && e.output.statusCode === 404) {
+          return res.notFound();
+        }
+        if (e.isBoom && e.output.statusCode === 403) {
+          return res.forbidden();
+        }
+        return res.badRequest();
       }
 
       const body = recursiveSortObjectByKeys(result);
@@ -197,9 +213,15 @@ export function registerAPIRoutes({
         // TODO add kuery filtering
         ({ result } = await client.search({ cursor: page.toString(), limit }));
       } catch (e) {
-        // TODO do some error handling
-        logger.error(e);
-        throw e;
+        if (e.isBoom && e.output.statusCode === 404) {
+          return res.notFound();
+        }
+
+        if (e.isBoom && e.output.statusCode === 403) {
+          return res.forbidden();
+        }
+
+        return res.badRequest();
       }
 
       const body = {
@@ -241,9 +263,15 @@ export function registerAPIRoutes({
       try {
         ({ result } = await client.get(req.params.id));
       } catch (e) {
-        // TODO do some error handling
-        logger.error(e);
-        throw e;
+        if (e.isBoom && e.output.statusCode === 404) {
+          return res.notFound();
+        }
+
+        if (e.isBoom && e.output.statusCode === 403) {
+          return res.forbidden();
+        }
+
+        return res.badRequest();
       }
 
       const body = recursiveSortObjectByKeys(result);
@@ -276,9 +304,13 @@ export function registerAPIRoutes({
       try {
         await client.delete(req.params.id);
       } catch (e) {
-        // TODO do some error handling
-        logger.error(e);
-        throw e;
+        if (e.isBoom && e.output.statusCode === 404) {
+          return res.notFound();
+        }
+        if (e.isBoom && e.output.statusCode === 403) {
+          return res.forbidden();
+        }
+        return res.badRequest();
       }
 
       return res.ok();
