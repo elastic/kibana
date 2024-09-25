@@ -53,7 +53,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
         } = configEntry;
 
         const helpText = defaultValue
-          ? i18n.translate('searchConnectors.configurationConnector.config.defaultValue', {
+          ? i18n.translate('xpack.stackConnectors.components.inference.config.defaultValue', {
               defaultMessage: 'Defaults to {defaultValue}',
               values: { defaultValue },
             })
@@ -74,7 +74,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
 
         const optionalLabel = !required ? (
           <EuiText color="subdued" size="xs">
-            {i18n.translate('searchConnectors.configurationConnector.config.optionalValue', {
+            {i18n.translate('xpack.stackConnectors.components.inference.config.optionalValue', {
               defaultMessage: 'Optional',
             })}
           </EuiText>

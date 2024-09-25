@@ -26,6 +26,7 @@ import {
   EuiButtonEmpty,
   EuiCopy,
   EuiButton,
+  useEuiFontSize,
 } from '@elastic/eui';
 import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
@@ -73,6 +74,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   registerPreSubmitValidator,
 }) => {
   const { http } = useKibana().services;
+  const xsFontSize = useEuiFontSize('xs').fontSize;
   const { euiTheme } = useEuiTheme();
   const { updateFieldValues, setFieldValue, validateFields } = useFormContext();
   const [{ config, secrets }] = useFormData<ConnectorFormSchema<Config, Secrets>>({
@@ -349,7 +351,13 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
               />
             </h4>
           </EuiTitle>
-          <div className="euiFormHelpText euiFormRow__text">
+          <EuiSpacer size="xs" />
+          <div
+            css={css`
+              font-size: ${xsFontSize};
+              color: ${euiTheme.colors.subduedText};
+            `}
+          >
             <FormattedMessage
               id="xpack.stackConnectors.components.inference.taskTypeHelpLabel"
               defaultMessage="Configure the inference task. These settings are specific to the task type you specified."
@@ -422,6 +430,8 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     [
       selectedTaskType,
       config?.taskType,
+      xsFontSize,
+      euiTheme.colors.subduedText,
       taskTypeFormFields,
       onSetTaskTypeConfigEntry,
       isEdit,
@@ -469,11 +479,17 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
                   <h4>
                     <FormattedMessage
                       id="xpack.stackConnectors.components.inference.providerOptionalSettingsLabel"
-                      defaultMessage="Provider settings"
+                      defaultMessage="Service settings"
                     />
                   </h4>
                 </EuiTitle>
-                <div className="euiFormHelpText euiFormRow__text">
+                <EuiSpacer size="xs" />
+                <div
+                  css={css`
+                    font-size: ${xsFontSize};
+                    color: ${euiTheme.colors.subduedText};
+                  `}
+                >
                   <FormattedMessage
                     id="xpack.stackConnectors.components.inference.providerOptionalSettingsHelpLabel"
                     defaultMessage="Configure the inference provider. These settings are optional provider settings."
@@ -501,7 +517,13 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
                 />
               </h4>
             </EuiTitle>
-            <div className="euiFormHelpText euiFormRow__text">
+            <EuiSpacer size="xs" />
+            <div
+              css={css`
+                font-size: ${xsFontSize};
+                color: ${euiTheme.colors.subduedText};
+              `}
+            >
               <FormattedMessage
                 id="xpack.stackConnectors.components.inference.inferenceEndpointHelpLabel"
                 defaultMessage="Inference endpoints provide a simplified method for using this configuration, ecpecially from the API"
@@ -568,6 +590,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       config?.inferenceId,
       config?.provider,
       euiTheme.colors.primary,
+      euiTheme.colors.subduedText,
       inferenceUri,
       isEdit,
       onSetProviderConfigEntry,
@@ -575,6 +598,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       readOnly,
       setFieldValue,
       taskTypeSettings,
+      xsFontSize,
     ]
   );
   const providerSecretsHiddenField = (
@@ -649,7 +673,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
               label={
                 <FormattedMessage
                   id="xpack.stackConnectors.components.inference.providerLabel"
-                  defaultMessage="Provider"
+                  defaultMessage="Service"
                 />
               }
               isInvalid={isInvalid}
