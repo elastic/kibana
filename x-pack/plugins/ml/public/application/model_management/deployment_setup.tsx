@@ -343,6 +343,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
       }
     } else if (!showNodeInfo) {
       // Running a Search project in serverless
+      const vcuRange = deploymentParamsMapper.getVCURange(config.vCPUUsage);
+
       if (config.adaptiveResources) {
         // With adaptive resources
         switch (config.vCPUUsage) {
@@ -352,7 +354,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               {
                 defaultMessage:
                   'This level limits resources to {vcus, plural, one {VCU} other {# VCUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
-                values: { vcus: vcpuRange.max },
+                values: { vcus: vcuRange.max },
               }
             );
           case 'medium':
@@ -361,7 +363,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               {
                 defaultMessage:
                   'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {# VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
-                values: { vcus: vcpuRange.max },
+                values: { vcus: vcuRange.max },
               }
             );
           case 'high':
@@ -370,7 +372,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               {
                 defaultMessage:
                   'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {# VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
-                values: { vcus: vcpuRange.max },
+                values: { vcus: vcuRange.max },
               }
             );
         }
