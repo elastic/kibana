@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 
 import { UserAtSpaceScenarios } from '../../../scenarios';
@@ -33,6 +34,52 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
               connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo');
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to delete actions',
+              });
+              objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should call the post-save hook appropriately', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: 'test.connector-with-hooks',
+              config: {
+                index: '???',
+                reference: uuidv4(),
               },
               secrets: {
                 encrypted: 'This value should be encrypted',

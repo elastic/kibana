@@ -113,6 +113,9 @@ const mockTaskManager = taskManagerMock.createSetup();
 const configurationUtilities = actionsConfigMock.create();
 const eventLogClient = eventLogClientMock.create();
 const getEventLogClient = jest.fn();
+const preSaveHook = jest.fn();
+const postSaveHook = jest.fn();
+const postDeleteHook = jest.fn();
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -377,7 +380,8 @@ describe('create()', () => {
         name: 'my name',
         actionTypeId: 'my-action-type',
         isMissingSecrets: false,
-        config: {},
+        config: { foo: 42 },
+        secrets: { bar: 2001 },
       },
       references: [],
     };
@@ -387,19 +391,25 @@ describe('create()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
+        config: { schema: schema.object({ foo: schema.number() }) },
+        secrets: { schema: schema.object({ bar: schema.number() }) },
         params: { schema: schema.object({}) },
       },
       executor,
+      preSaveHook: async (params) => {
+        preSaveHook(params);
+      },
+      postSaveHook: async (params) => {
+        postSaveHook(params);
+      },
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await actionsClient.create({
       action: {
         name: 'my name',
         actionTypeId: 'my-action-type',
-        config: {},
-        secrets: {},
+        config: { foo: 42 },
+        secrets: { bar: 2001 },
       },
     });
     expect(result).toEqual({
@@ -410,7 +420,7 @@ describe('create()', () => {
       name: 'my name',
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
-      config: {},
+      config: { foo: 42 },
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -418,16 +428,51 @@ describe('create()', () => {
         "action",
         Object {
           "actionTypeId": "my-action-type",
-          "config": Object {},
+          "config": Object {
+            "foo": 42,
+          },
           "isMissingSecrets": false,
           "name": "my name",
-          "secrets": Object {},
+          "secrets": Object {
+            "bar": 2001,
+          },
         },
         Object {
           "id": "mock-saved-object-id",
         },
       ]
     `);
+    expect(preSaveHook).toHaveBeenCalledTimes(1);
+    expect(preSaveHook.mock.calls[0]).toEqual([
+      {
+        connectorId: 'mock-saved-object-id',
+        config: { foo: 42 },
+        secrets: { bar: 2001 },
+        logger,
+        request,
+        services: {
+          // this will be checked with a function test
+          scopedClusterClient: expect.any(Object),
+        },
+        isUpdate: false,
+      },
+    ]);
+    expect(postSaveHook).toHaveBeenCalledTimes(1);
+    expect(postSaveHook.mock.calls[0]).toEqual([
+      {
+        connectorId: 'mock-saved-object-id',
+        config: { foo: 42 },
+        secrets: { bar: 2001 },
+        logger,
+        request,
+        services: {
+          // this will be checked with a function test
+          scopedClusterClient: expect.any(Object),
+        },
+        isUpdate: false,
+        wasSuccessful: true,
+      },
+    ]);
   });
 
   test('validates config', async () => {
@@ -1973,6 +2018,33 @@ describe('getOAuthAccessToken()', () => {
 });
 
 describe('delete()', () => {
+  beforeEach(() => {
+    actionTypeRegistry.register({
+      id: 'my-action-delete',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({ foo: schema.number() }) },
+        secrets: { schema: schema.object({ bar: schema.number() }) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+      postDeleteHook: async (options) => postDeleteHook(options),
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-delete',
+        isMissingSecrets: false,
+        config: { foo: 42 },
+        secrets: { bar: 2001 },
+      },
+      references: [],
+    });
+  });
+
   describe('authorization', () => {
     test('ensures user is authorised to delete actions', async () => {
       await actionsClient.delete({ id: '1' });
@@ -1998,6 +2070,7 @@ describe('delete()', () => {
 
     test(`failing to delete tokens logs error instead of throw`, async () => {
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
+
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to delete auth tokens for connector "1" after delete: Fail`
@@ -2041,6 +2114,7 @@ describe('delete()', () => {
   test('calls unsecuredSavedObjectsClient with id', async () => {
     const expectedResult = Symbol();
     unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+
     const result = await actionsClient.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
@@ -2050,6 +2124,35 @@ describe('delete()', () => {
         "1",
       ]
     `);
+  });
+
+  test('calls postDeleteHook', async () => {
+    const expectedResult = Symbol();
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+
+    const result = await actionsClient.delete({ id: '1' });
+    expect(result).toEqual(expectedResult);
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        "1",
+      ]
+    `);
+    expect(postDeleteHook).toHaveBeenCalledTimes(1);
+    expect(postDeleteHook.mock.calls[0]).toEqual([
+      {
+        connectorId: '1',
+        config: { foo: 42 },
+        secrets: { bar: 2001 },
+        logger,
+        request,
+        services: {
+          // this will be checked with a function test
+          scopedClusterClient: expect.any(Object),
+        },
+      },
+    ]);
   });
 
   it('throws when trying to delete a preconfigured connector', async () => {
@@ -2141,6 +2244,12 @@ describe('update()', () => {
         params: { schema: schema.object({}) },
       },
       executor,
+      preSaveHook: async (params) => {
+        preSaveHook(params);
+      },
+      postSaveHook: async (params) => {
+        postSaveHook(params);
+      },
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -2245,11 +2354,17 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
+        config: { schema: schema.object({ foo: schema.number() }) },
+        secrets: { schema: schema.object({ bar: schema.number() }) },
         params: { schema: schema.object({}) },
       },
       executor,
+      preSaveHook: async (params) => {
+        preSaveHook(params);
+      },
+      postSaveHook: async (params) => {
+        postSaveHook(params);
+      },
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -2267,8 +2382,8 @@ describe('update()', () => {
         actionTypeId: 'my-action-type',
         isMissingSecrets: false,
         name: 'my name',
-        config: {},
-        secrets: {},
+        config: { foo: 42 },
+        secrets: { bar: 2001 },
       },
       references: [],
     });
@@ -2276,8 +2391,8 @@ describe('update()', () => {
       id: 'my-action',
       action: {
         name: 'my name',
-        config: {},
-        secrets: {},
+        config: { foo: 42 },
+        secrets: { bar: 2001 },
       },
     });
     expect(result).toEqual({
@@ -2288,7 +2403,7 @@ describe('update()', () => {
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
       name: 'my name',
-      config: {},
+      config: { foo: 42 },
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2296,10 +2411,14 @@ describe('update()', () => {
         "action",
         Object {
           "actionTypeId": "my-action-type",
-          "config": Object {},
+          "config": Object {
+            "foo": 42,
+          },
           "isMissingSecrets": false,
           "name": "my name",
-          "secrets": Object {},
+          "secrets": Object {
+            "bar": 2001,
+          },
         },
         Object {
           "id": "my-action",
@@ -2315,6 +2434,39 @@ describe('update()', () => {
         "my-action",
       ]
     `);
+
+    expect(preSaveHook).toHaveBeenCalledTimes(1);
+    expect(preSaveHook.mock.calls[0]).toEqual([
+      {
+        connectorId: 'my-action',
+        config: { foo: 42 },
+        secrets: { bar: 2001 },
+        logger,
+        request,
+        services: {
+          // this will be checked with a function test
+          scopedClusterClient: expect.any(Object),
+        },
+        isUpdate: true,
+      },
+    ]);
+
+    expect(postSaveHook).toHaveBeenCalledTimes(1);
+    expect(postSaveHook.mock.calls[0]).toEqual([
+      {
+        connectorId: 'my-action',
+        config: { foo: 42 },
+        secrets: { bar: 2001 },
+        logger,
+        request,
+        services: {
+          // this will be checked with a function test
+          scopedClusterClient: expect.any(Object),
+        },
+        isUpdate: true,
+        wasSuccessful: true,
+      },
+    ]);
   });
 
   test('updates an action with isMissingSecrets "true" (set true as the import result), to isMissingSecrets', async () => {
@@ -3548,4 +3700,15 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
     `);
     expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
   });
+});
+
+describe('hook failure cases', () => {
+  test('preSave hook throws error in create', async () => {});
+  test('preSave hook throws error in update', async () => {});
+  test('postSave hook throws error in create', async () => {});
+  test('postSave hook throws error in update', async () => {});
+  test('postDelete hook throws error in delete', async () => {});
+  test('postSave hook called on SO error in create', async () => {});
+  test('postSave hook called on SO error in update', async () => {});
+  test('postDelete hook not called on SO error in delete', async () => {});
 });

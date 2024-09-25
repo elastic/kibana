@@ -76,6 +76,7 @@ export function defineActionTypes(
   actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
   actions.registerType(getExcludedActionType());
+  actions.registerType(getHookedActionType());
 
   /**
    * System actions
@@ -134,6 +135,66 @@ function getIndexRecordActionType() {
         },
       });
       return { status: 'ok', actionId };
+    },
+  };
+  return result;
+}
+
+function getHookedActionType() {
+  const paramsSchema = schema.object({});
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const configSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ConfigType = TypeOf<typeof configSchema>;
+  const secretsSchema = schema.object({
+    encrypted: schema.string(),
+  });
+  type SecretsType = TypeOf<typeof secretsSchema>;
+  const result: ActionType<ConfigType, SecretsType, ParamsType> = {
+    id: 'test.connector-with-hooks',
+    name: 'Test: Connector with hooks',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      params: { schema: paramsSchema },
+      config: { schema: configSchema },
+      secrets: { schema: secretsSchema },
+    },
+    async executor({ config, secrets, params, services, actionId }) {
+      return { status: 'ok', actionId };
+    },
+    async preSaveHook({ config, secrets, services, isUpdate, logger }) {
+      // just validate it doesn't blow up :-)
+      logger.info('running a pre-save hook for a connector');
+
+      await services.scopedClusterClient.index({
+        index: config.index,
+        refresh: 'wait_for',
+        body: {
+          config,
+          secrets,
+          isUpdate,
+          reference: config.reference,
+          source: 'action:test.connector-with-hooks-pre-save',
+        },
+      });
+    },
+    async postDeleteHook({ config, secrets, services, logger }) {
+      // just validate it doesn't blow up :-)
+      logger.info('running a pre-save hook for a connector');
+
+      await services.scopedClusterClient.index({
+        index: config.index,
+        refresh: 'wait_for',
+        body: {
+          config,
+          secrets,
+          reference: config.reference,
+          source: 'action:test.connector-with-hooks-post-delete',
+        },
+      });
     },
   };
   return result;

@@ -50,6 +50,7 @@ import {
   InMemoryConnector,
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
+  HookServices,
 } from '../types';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import { ExecuteOptions } from '../lib/action_executor';
@@ -246,6 +247,33 @@ export class ActionsClient {
     }
     this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
+    const hookServices: HookServices = {
+      scopedClusterClient: this.context.scopedClusterClient.asCurrentUser,
+    };
+
+    if (actionType.preSaveHook) {
+      try {
+        await actionType.preSaveHook({
+          connectorId: id,
+          config,
+          secrets,
+          logger: this.context.logger,
+          request: this.context.request,
+          services: hookServices,
+          isUpdate: false,
+        });
+      } catch (error) {
+        this.context.auditLogger?.log(
+          connectorAuditEvent({
+            action: ConnectorAuditAction.CREATE,
+            savedObject: { type: 'action', id },
+            error,
+          })
+        );
+        throw error;
+      }
+    }
+
     this.context.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.CREATE,
@@ -254,17 +282,47 @@ export class ActionsClient {
       })
     );
 
-    const result = await this.context.unsecuredSavedObjectsClient.create(
-      'action',
-      {
-        actionTypeId,
-        name,
-        isMissingSecrets: false,
-        config: validatedActionTypeConfig as SavedObjectAttributes,
-        secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-      },
-      { id }
+    const result = await tryCatch(
+      async () =>
+        await this.context.unsecuredSavedObjectsClient.create(
+          'action',
+          {
+            actionTypeId,
+            name,
+            isMissingSecrets: false,
+            config: validatedActionTypeConfig as SavedObjectAttributes,
+            secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          },
+          { id }
+        )
     );
+
+    const wasSuccessful = !(result instanceof Error);
+    const label = `connectorId: "${id}"; type: ${actionTypeId}`;
+    const tags = ['post-save-hook', id];
+
+    if (actionType.postSaveHook) {
+      try {
+        await actionType.postSaveHook({
+          connectorId: id,
+          config,
+          secrets,
+          logger: this.context.logger,
+          request: this.context.request,
+          services: hookServices,
+          isUpdate: false,
+          wasSuccessful,
+        });
+      } catch (err) {
+        this.context.logger.error(`postSaveHook crearte error for ${label}: ${err.message}`, {
+          tags,
+        });
+      }
+    }
+
+    if (!wasSuccessful) {
+      throw result;
+    }
 
     return {
       id: result.id,
@@ -558,7 +616,37 @@ export class ActionsClient {
       );
     }
 
-    return await this.context.unsecuredSavedObjectsClient.delete('action', id);
+    const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+      'action',
+      id
+    );
+    const { actionTypeId, config, secrets } = attributes;
+    const actionType = this.context.actionTypeRegistry.get(actionTypeId);
+    const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
+
+    const hookServices: HookServices = {
+      scopedClusterClient: this.context.scopedClusterClient.asCurrentUser,
+    };
+
+    if (actionType.postDeleteHook) {
+      try {
+        await actionType.postDeleteHook({
+          connectorId: id,
+          config,
+          secrets,
+          logger: this.context.logger,
+          request: this.context.request,
+          services: hookServices,
+        });
+      } catch (error) {
+        const tags = ['post-delete-hook', id];
+        this.context.logger.error(
+          `The post delete hook failed for for connector "${id}": ${error.message}`,
+          { tags }
+        );
+      }
+    }
+    return result;
   }
 
   private getSystemActionKibanaPrivileges(connectorId: string, params?: ExecuteOptions['params']) {
@@ -830,5 +918,13 @@ export class ActionsClient {
       );
       throw err;
     }
+  }
+}
+
+async function tryCatch<T>(fn: () => Promise<T>): Promise<T | Error> {
+  try {
+    return await fn();
+  } catch (err) {
+    return err;
   }
 }
