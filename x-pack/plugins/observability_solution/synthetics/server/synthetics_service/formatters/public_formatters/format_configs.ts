@@ -11,15 +11,14 @@ import { replaceStringWithParams } from '../formatting_utils';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 import {
   BrowserFields,
-  BrowserSimpleFields,
   ConfigKey,
   HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitor,
   TLSFields,
 } from '../../../../common/runtime_types';
+import { mapInlineToProjectFields } from '../../utils/map_inline_to_project_field';
 import { publicFormatters } from '.';
-import { inlineToProjectZip } from '../../../common/inline_to_zip';
 
 const UI_KEYS_TO_SKIP = [
   ConfigKey.JOURNEY_ID,
@@ -119,14 +118,7 @@ export const formatHeartbeatRequest = async (
     },
     fields_under_root: true,
     params: monitor.type === 'browser' ? paramsString : '',
-    [ConfigKey.SOURCE_INLINE]: '',
-    [ConfigKey.SOURCE_PROJECT_CONTENT]: !!(monitor as BrowserSimpleFields)[ConfigKey.SOURCE_INLINE]
-      ? await inlineToProjectZip(
-          (monitor as BrowserSimpleFields)[ConfigKey.SOURCE_INLINE]!,
-          monitor[ConfigKey.CONFIG_ID],
-          logger
-        )
-      : (monitor as BrowserSimpleFields)[ConfigKey.SOURCE_PROJECT_CONTENT] ?? '',
+    ...(await mapInlineToProjectFields(monitor.type, monitor, logger)),
   };
 };
 

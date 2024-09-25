@@ -42,7 +42,7 @@ import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monit
 import { formatSecrets } from '../../../synthetics_service/utils';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
-import { inlineToProjectZip } from '../../../common/inline_to_zip';
+import { mapInlineToProjectFields } from '../../../synthetics_service/utils/map_inline_to_project_field';
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
@@ -320,9 +320,7 @@ export class AddEditMonitorAPI {
       [ConfigKey.NAMESPACE]: preserveNamespace
         ? normalizedMonitor[ConfigKey.NAMESPACE]
         : this.getMonitorNamespace(normalizedMonitor[ConfigKey.NAMESPACE]),
-      [ConfigKey.SOURCE_PROJECT_CONTENT]: !!inlineSource
-        ? await inlineToProjectZip(inlineSource, newMonitorId, this.logger)
-        : '',
+      ...(await mapInlineToProjectFields(normalizedMonitor.type, normalizedMonitor, this.logger)),
     };
   }
 
