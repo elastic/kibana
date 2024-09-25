@@ -298,7 +298,7 @@ apply_elastic_agent_config() {
     sed -i '' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
   if [ "$?" -eq 0 ]; then
     printf "\e[1;32m✓\e[0m %s\n" "Config written to:"
-    tar --list --file "$elastic_agent_tmp_config_path" | while read -r file; do
+    tar --list --file "$elastic_agent_tmp_config_path" | grep '\.yml$' | while read -r file; do
       echo "  - $(dirname "$elastic_agent_config_path")/$file"
     done
 
