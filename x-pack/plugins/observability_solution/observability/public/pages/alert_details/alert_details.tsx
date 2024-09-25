@@ -260,14 +260,14 @@ export function AlertDetails() {
     },
   ];
 
-  if (relatedAlertsKuery) {
+  if (relatedAlertsKuery && alertDetail?.formatted) {
     tabs.push({
       id: RELATED_ALERTS_TAB_ID,
       name: i18n.translate('xpack.observability.alertDetails.tab.relatedAlertsLabel', {
         defaultMessage: 'Related Alerts',
       }),
       'data-test-subj': 'relatedAlertsTab',
-      content: <RelatedAlerts alert={alertDetail?.formatted} kuery={relatedAlertsKuery} />,
+      content: <RelatedAlerts alert={alertDetail.formatted} kuery={relatedAlertsKuery} />,
     });
   }
 

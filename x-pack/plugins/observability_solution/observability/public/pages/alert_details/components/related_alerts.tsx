@@ -41,8 +41,8 @@ const RELATED_ALERTS_SEARCH_BAR_ID = 'related-alerts-search-bar-o11y';
 const ALERTS_TABLE_ID = 'xpack.observability.related.alerts.table';
 
 interface Props {
-  alert?: TopAlert;
-  kuery?: string;
+  alert: TopAlert;
+  kuery: string;
 }
 
 const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE, status: 'active' };
@@ -62,9 +62,9 @@ export function InternalRelatedAlerts({ alert, kuery }: Props) {
   });
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const alertStart = alert?.fields[ALERT_START];
-  const alertEnd = alert?.fields[ALERT_END];
-  const alertId = alert?.fields[ALERT_UUID];
+  const alertStart = alert.fields[ALERT_START];
+  const alertEnd = alert.fields[ALERT_END];
+  const alertId = alert.fields[ALERT_UUID];
 
   const defaultQuery = useRef<Query[]>([
     { query: `not kibana.alert.uuid: ${alertId}`, language: 'kuery' },
@@ -79,7 +79,7 @@ export function InternalRelatedAlerts({ alert, kuery }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertStart, alertEnd]);
 
-  return kuery ? (
+  return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
         <EuiSpacer size="l" />
@@ -135,7 +135,7 @@ export function InternalRelatedAlerts({ alert, kuery }: Props) {
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
-  ) : null;
+  );
 }
 
 export function RelatedAlerts(props: Props) {
