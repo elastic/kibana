@@ -24,7 +24,6 @@ import {
   SyntheticsMonitor,
   ConfigKey,
   MonitorLocations,
-  BrowserSensitiveSimpleFields,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { MonitorValidationError, normalizeAPIConfig, validateMonitor } from './monitor_validation';
@@ -34,9 +33,9 @@ import {
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
-import { inlineToProjectZip } from '../../common/inline_to_zip';
 import { SyntheticsServerSetup } from '../../types';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { mapInlineToProjectFields } from '../../synthetics_service/utils/map_inline_to_project_field';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -227,26 +226,17 @@ export const refreshInlineZip = async (
   previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>,
   server: SyntheticsServerSetup
 ) => {
-  let monitorWithId = {
+  return {
     ...normalizedMonitor,
     [ConfigKey.MONITOR_QUERY_ID]:
       normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
     [ConfigKey.CONFIG_ID]: previousMonitor.id,
+    ...(await mapInlineToProjectFields(
+      normalizedMonitor[ConfigKey.MONITOR_TYPE],
+      normalizedMonitor,
+      server.logger
+    )),
   };
-  const inlineScript = (monitorWithId as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_INLINE] as
-    | string
-    | undefined;
-  if (!!inlineScript) {
-    monitorWithId = {
-      ...monitorWithId,
-      [ConfigKey.SOURCE_PROJECT_CONTENT]: await inlineToProjectZip(
-        inlineScript,
-        monitorWithId[ConfigKey.CONFIG_ID],
-        server.logger
-      ),
-    };
-  }
-  return monitorWithId;
 };
 
 export const syncEditedMonitor = async ({
