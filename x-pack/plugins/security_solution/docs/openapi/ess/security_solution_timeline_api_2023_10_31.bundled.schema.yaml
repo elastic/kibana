@@ -876,10 +876,9 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/TimelineResponse'
+                        $ref: '#/components/schemas/ResolvedTimeline'
                     required:
                       - data
-                  - type: object
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
@@ -1374,6 +1373,20 @@ components:
                 type: string
               nullable: true
               type: array
+    ResolvedTimeline:
+      type: object
+      properties:
+        alias_purpose:
+          $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+        alias_target_id:
+          type: string
+        outcome:
+          $ref: '#/components/schemas/SavedObjectResolveOutcome'
+        timeline:
+          $ref: '#/components/schemas/TimelineSavedToReturnObject'
+      required:
+        - timeline
+        - outcome
     ResponseNote:
       type: object
       properties:
@@ -1407,6 +1420,17 @@ components:
         - system_socket
         - threat_match
         - zeek
+      type: string
+    SavedObjectResolveAliasPurpose:
+      enum:
+        - savedObjectConversion
+        - savedObjectImport
+      type: string
+    SavedObjectResolveOutcome:
+      enum:
+        - exactMatch
+        - aliasMatch
+        - conflict
       type: string
     SavedTimeline:
       type: object
