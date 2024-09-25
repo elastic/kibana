@@ -101,7 +101,6 @@ export const createDashboard = async (
       id: input.id,
     },
     hasRunClientsideMigrations: savedObjectResult.anyMigrationRun,
-    hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
     lastSavedId: savedObjectId,
   };*/
 

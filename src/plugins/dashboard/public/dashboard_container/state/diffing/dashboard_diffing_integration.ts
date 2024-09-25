@@ -26,9 +26,7 @@ import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/das
  */
 export const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
   'setTimeslice',
-  'setFullScreenMode',
   'setExpandedPanelId',
-  'setHasUnsavedChanges',
 ];
 
 /**
@@ -124,8 +122,8 @@ export function startDiffingDashboardState(
         Object.keys(omit(dashboardChanges, keysNotConsideredUnsavedChanges)).length > 0 ||
         unsavedPanelState !== undefined ||
         controlGroupChanges !== undefined;
-      if (hasUnsavedChanges !== this.getState().componentState.hasUnsavedChanges) {
-        this.dispatch.setHasUnsavedChanges(hasUnsavedChanges);
+      if (hasUnsavedChanges !== this.hasUnsavedChanges$.value) {
+        this.setHasUnsavedChanges(hasUnsavedChanges);
       }
 
       // backup unsaved changes if configured to do so

@@ -42,7 +42,6 @@ export interface DashboardPublicState {
   lastSavedInput: DashboardContainerInput;
   hasRunClientsideMigrations?: boolean;
   expandedPanelId?: string;
-  fullScreenMode?: boolean;
   savedQueryId?: string;
   lastSavedId?: string;
   highlightPanelId?: string;

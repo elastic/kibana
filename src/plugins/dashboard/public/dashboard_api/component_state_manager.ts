@@ -19,14 +19,17 @@ export interface InitialComponentState {
  */
 export function initializeComponentStateManager(initialComponentState: InitialComponentState) {
   const animatePanelTransforms$ = new BehaviorSubject(false); // set panel transforms to false initially to avoid panels animating on initial render.
+  const fullScreenMode$ = new BehaviorSubject(false);
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const managed$ = new BehaviorSubject(initialComponentState.managed);
   return {
     animatePanelTransforms$,
+    fullScreenMode$,
     hasUnsavedChanges$,
     isEmbeddedExternally: initialComponentState.isEmbeddedExternally,
     managed$,
     setAnimatePanelTransforms: (animate: boolean) => animatePanelTransforms$.next(animate),
+    setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
     setHasUnsavedChanges: (hasUnsavedChanges: boolean) =>
       hasUnsavedChanges$.next(hasUnsavedChanges),
     setManaged: (managed: boolean) => managed$.next(managed),

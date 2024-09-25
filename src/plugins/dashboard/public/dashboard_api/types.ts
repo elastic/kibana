@@ -51,7 +51,7 @@ export type DashboardApi = CanExpandPanels &
     animatePanelTransforms$: PublishingSubject<boolean>;
     asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
-    fullScreenMode$: PublishingSubject<boolean | undefined>;
+    fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
     getRuntimeStateForControlGroup: () => UnsavedPanelState | undefined;

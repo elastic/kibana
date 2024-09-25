@@ -195,10 +195,6 @@ export const dashboardContainerReducers = {
     state.componentState.expandedPanelId = action.payload;
   },
 
-  setFullScreenMode: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.componentState.fullScreenMode = action.payload;
-  },
-
   // ------------------------------------------------------------------------------
   // Component state reducers
   // ------------------------------------------------------------------------------
