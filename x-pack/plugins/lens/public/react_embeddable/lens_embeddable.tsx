@@ -23,7 +23,7 @@ import { UserMessages } from './user_messages/container';
 import { useMessages } from './user_messages/use_messages';
 import { initializeEditApi } from './initializers/inizialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
-import { initializePanelAndLibraryServices } from './initializers/initialize_panel_and_library_services';
+import { initializeDashboardServices } from './initializers/initialize_dashboard_services';
 import { initializeObservables } from './initializers/initialize_observables';
 import { initializeSearchContext } from './initializers/initialize_search_context';
 import { initializeData } from './initializers/initialize_data';
@@ -97,7 +97,7 @@ export const createLensEmbeddableFactory = (
         initialState.savedObjectId
       );
 
-      const libraryConfig = initializePanelAndLibraryServices(
+      const dashboardConfig = initializeDashboardServices(
         initialState,
         getState,
         parentApi,
@@ -111,7 +111,7 @@ export const createLensEmbeddableFactory = (
         uuid,
         initialState,
         getState,
-        libraryConfig.api,
+        dashboardConfig.api,
         visualizationContextHelper,
         services
       );
@@ -126,7 +126,7 @@ export const createLensEmbeddableFactory = (
           ...actionsConfig.serialize(),
           ...editConfig.serialize(),
           ...inspectorConfig.serialize(),
-          ...libraryConfig.serialize(),
+          ...dashboardConfig.serialize(),
           ...searchContextConfig.serialize(),
           ...dataConfig.serialize(),
           ...integrationsConfig.serialize(),
@@ -143,7 +143,7 @@ export const createLensEmbeddableFactory = (
           ...editConfig.api,
           ...inspectorConfig.api,
           ...searchContextConfig.api,
-          ...libraryConfig.api,
+          ...dashboardConfig.api,
           ...dataConfig.api,
           ...actionsConfig.api,
           ...integrationsConfig.api,
@@ -158,7 +158,7 @@ export const createLensEmbeddableFactory = (
           ...observables.comparators,
           ...actionsConfig.comparators,
           ...integrationsConfig.comparators,
-          ...libraryConfig.comparators,
+          ...dashboardConfig.comparators,
         }
       );
 
@@ -213,7 +213,7 @@ export const createLensEmbeddableFactory = (
               expression.cleanup();
               actionsConfig.cleanup();
               integrationsConfig.cleanup();
-              libraryConfig.cleanup();
+              dashboardConfig.cleanup();
             };
           }, []);
 

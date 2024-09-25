@@ -4,11 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ComparatorDefinition,
-  PublishesDataViews,
-  StateComparators,
-} from '@kbn/presentation-publishing';
+import type { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
@@ -36,8 +32,12 @@ export function createComparatorForStatePortion<K extends keyof LensRuntimeState
  * management at the embeddable level, so here's the initializers for it
  */
 export function initializeStateManagement(initialState: LensRuntimeState): {
-  variables: { state$: BehaviorSubject<LensRuntimeState> };
-  api: Pick<IntegrationCallbacks, 'updateState'> & PublishesDataViews;
+  variables: {
+    state$: BehaviorSubject<LensRuntimeState>;
+    //
+    dataViews$: BehaviorSubject<DataView[] | undefined>;
+  };
+  api: Pick<IntegrationCallbacks, 'updateState'>;
   serialize: () => LensRuntimeState;
   comparators: StateComparators<Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>>;
   cleanup: () => void;
@@ -48,10 +48,12 @@ export function initializeStateManagement(initialState: LensRuntimeState): {
   return {
     variables: {
       state$,
+      // export dataViews as variable to keep its BehaviorSubject type in order to be able to update it
+      // later on will add it to the API too but with a reduced PublishSubject type
+      dataViews$,
     },
     api: {
       updateState: (newState: LensRuntimeState) => state$.next(newState),
-      dataViews: dataViews$,
     },
     serialize: getCurrentState,
     comparators: {

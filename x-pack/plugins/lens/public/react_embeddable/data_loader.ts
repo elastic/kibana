@@ -11,6 +11,7 @@ import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfac
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import { BehaviorSubject, type Subscription, distinctUntilChanged, skip } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { getEditPath } from '../../common/constants';
 import type {
   ExpressionWrapperProps,
@@ -28,6 +29,7 @@ import { buildUserMessagesHelper } from './user_messages/methods';
 import { getLogError } from './expressions/telemetry';
 import type { SharingSavedObjectProps } from '../types';
 import { apiHasLensComponentCallbacks } from './type_guards';
+import { getUsedDataViews } from './expressions/update_dataViews';
 
 /**
  * The function computes the expression used to render the panel and produces the necessary props
@@ -46,7 +48,11 @@ export function loadEmbeddableData(
     hasRenderCompleted$,
     state$,
     dataLoading$,
-  }: ReactiveConfigs['variables'] & { state$: BehaviorSubject<LensRuntimeState> },
+    dataViews$,
+  }: ReactiveConfigs['variables'] & {
+    state$: BehaviorSubject<LensRuntimeState>;
+    dataViews$: BehaviorSubject<DataView[] | undefined>;
+  },
   services: LensEmbeddableStartServices,
   { getVisualizationContext, updateVisualizationContext }: VisualizationContextHelper,
   updateRenderCount: () => void,
@@ -83,6 +89,15 @@ export function loadEmbeddableData(
     dataLoading$.next(true);
 
     const currentState = getState();
+
+    // Publish the used dataViews on the Lens API
+    dataViews$.next(
+      await getUsedDataViews(
+        currentState.attributes.references,
+        currentState.attributes.state?.adHocDataViews,
+        services.dataViews
+      )
+    );
 
     const { searchSessionId, ...unifiedSearch } = unifiedSearch$.getValue();
 

@@ -8,8 +8,10 @@
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   HasInPlaceLibraryTransforms,
+  PublishesDataViews,
   PublishesPanelTitle,
   PublishesSavedObjectId,
   PublishesWritablePanelTitle,
@@ -39,18 +41,25 @@ type SerializedProps = SerializedTitles &
   LensOverrides &
   Omit<LensSharedProps, 'viewMode'>;
 
-export function initializePanelAndLibraryServices(
+/**
+ * Everything about panel and library services
+ */
+export function initializeDashboardServices(
   initialState: LensRuntimeState,
   getLatestState: () => LensRuntimeState,
   parentApi: unknown,
   {
     variables,
   }: {
-    variables: { state$: BehaviorSubject<LensRuntimeState> };
+    variables: {
+      state$: BehaviorSubject<LensRuntimeState>;
+      dataViews$: BehaviorSubject<DataView[] | undefined>;
+    };
   },
   { attributeService }: LensEmbeddableStartServices
 ): {
   api: PublishesPanelTitle &
+    PublishesDataViews &
     PublishesWritablePanelTitle &
     PublishesSavedObjectId &
     HasInPlaceLibraryTransforms;
@@ -68,6 +77,7 @@ export function initializePanelAndLibraryServices(
     api: {
       defaultPanelTitle: defaultPanelTitle$,
       ...titlesApi,
+      dataViews: variables.dataViews$,
       savedObjectId: savedObjectId$,
       libraryId$: savedObjectId$,
       saveToLibrary: async (_title: string) => {
