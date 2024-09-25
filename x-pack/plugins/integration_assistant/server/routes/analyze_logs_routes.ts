@@ -17,11 +17,8 @@ import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse, UnsupportedLogFormatError } from '../lib/errors';
-import { handleError } from './routes_util';
-import {
-  RECURSION_LIMIT_ANALYZE_LOGS_ERROR_CODE,
-  UNSUPPORTED_LOG_SAMPLES_FORMAT_ERROR_CODE,
-} from '../../common/constants';
+import { handleCustomErrors } from './routes_util';
+import { ErrorCode } from '../../common/constants';
 
 export function registerAnalyzeLogsRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -88,12 +85,12 @@ export function registerAnalyzeLogsRoutes(
           const graphResults = await graph.invoke(logFormatParameters, options);
           const graphLogFormat = graphResults.results.samplesFormat.name;
           if (graphLogFormat === 'unsupported' || graphLogFormat === 'csv') {
-            throw new UnsupportedLogFormatError(UNSUPPORTED_LOG_SAMPLES_FORMAT_ERROR_CODE);
+            throw new UnsupportedLogFormatError(ErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT);
           }
           return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });
         } catch (err) {
           try {
-            handleError(err, RECURSION_LIMIT_ANALYZE_LOGS_ERROR_CODE);
+            handleCustomErrors(err, ErrorCode.RECURSION_LIMIT_ANALYZE_LOGS);
           } catch (e) {
             if (isErrorThatHandlesItsOwnResponse(e)) {
               return e.sendResponse(res);

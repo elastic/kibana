@@ -18,7 +18,7 @@ import { RecursionLimitError } from '../lib/errors';
  * @throws {RecursionLimitError} If the error is an instance of GraphRecursionError.
  * @throws {Error} The original error.
  */
-export function handleError(err: Error, errorCode: string) {
+export function handleCustomErrors(err: Error, errorCode: string) {
   if (err instanceof GraphRecursionError) {
     throw new RecursionLimitError(err.message, errorCode);
   }

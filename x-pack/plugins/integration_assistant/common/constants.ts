@@ -28,6 +28,9 @@ export const FLEET_PACKAGES_PATH = `/api/fleet/epm/packages`;
 export const MINIMUM_LICENSE_TYPE: LicenseType = 'enterprise';
 
 // ErrorCodes
-export const RECURSION_LIMIT_ERROR_CODE: string = 'recursion-limit';
-export const RECURSION_LIMIT_ANALYZE_LOGS_ERROR_CODE: string = 'recursion-limit-analyze-logs';
-export const UNSUPPORTED_LOG_SAMPLES_FORMAT_ERROR_CODE: string = 'unsupported-log-samples-format';
+
+export enum ErrorCode {
+  RECURSION_LIMIT = 'recursion-limit',
+  RECURSION_LIMIT_ANALYZE_LOGS = 'recursion-limit-analyze-logs',
+  UNSUPPORTED_LOG_SAMPLES_FORMAT = 'unsupported-log-samples-format',
+}

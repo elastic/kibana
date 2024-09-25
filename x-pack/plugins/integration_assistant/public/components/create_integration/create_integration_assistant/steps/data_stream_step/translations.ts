@@ -6,11 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  RECURSION_LIMIT_ANALYZE_LOGS_ERROR_CODE,
-  RECURSION_LIMIT_ERROR_CODE,
-  UNSUPPORTED_LOG_SAMPLES_FORMAT_ERROR_CODE,
-} from '../../../../../../common/constants';
+import { ErrorCode } from '../../../../../../common/constants';
 
 export const INTEGRATION_NAME_TITLE = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.integrationNameTitle',
@@ -203,20 +199,20 @@ export const RETRY = i18n.translate('xpack.integrationAssistant.step.dataStream.
 });
 
 export const ERROR_TRANSLATION = {
-  [RECURSION_LIMIT_ANALYZE_LOGS_ERROR_CODE]: i18n.translate(
+  [ErrorCode.RECURSION_LIMIT_ANALYZE_LOGS]: i18n.translate(
     'xpack.integrationAssistant.errors.recursionLimitAnalyzeLogsErrorMessage',
     {
       defaultMessage:
         'Please verify the format of log samples is correct and try again. Try with a fewer samples if error persists.',
     }
   ),
-  [RECURSION_LIMIT_ERROR_CODE]: i18n.translate(
+  [ErrorCode.RECURSION_LIMIT]: i18n.translate(
     'xpack.integrationAssistant.errors.recursionLimitReached',
     {
       defaultMessage: 'Max attempts exceeded. Please try again.',
     }
   ),
-  [UNSUPPORTED_LOG_SAMPLES_FORMAT_ERROR_CODE]: i18n.translate(
+  [ErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT]: i18n.translate(
     'xpack.integrationAssistant.errors.unsupportedLogSamples',
     {
       defaultMessage: 'Unsupported log format in the samples.',

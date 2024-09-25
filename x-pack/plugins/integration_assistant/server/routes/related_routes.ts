@@ -17,8 +17,8 @@ import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
-import { handleError } from './routes_util';
-import { RECURSION_LIMIT_ERROR_CODE } from '../../common/constants';
+import { handleCustomErrors } from './routes_util';
+import { ErrorCode } from '../../common/constants';
 
 export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -94,7 +94,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
           return res.ok({ body: RelatedResponse.parse(results) });
         } catch (err) {
           try {
-            handleError(err, RECURSION_LIMIT_ERROR_CODE);
+            handleCustomErrors(err, ErrorCode.RECURSION_LIMIT);
           } catch (e) {
             if (isErrorThatHandlesItsOwnResponse(e)) {
               return e.sendResponse(res);

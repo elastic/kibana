@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { handleError } from './routes_util';
+import { handleCustomErrors } from './routes_util';
 import { GraphRecursionError } from '@langchain/langgraph';
 import { RecursionLimitError } from '../lib/errors';
 
@@ -16,10 +16,10 @@ describe('handleError', () => {
     const recursionError = new GraphRecursionError(errorMessage);
 
     expect(() => {
-      handleError(recursionError, errorCode);
+      handleCustomErrors(recursionError, errorCode);
     }).toThrow(RecursionLimitError);
     expect(() => {
-      handleError(recursionError, errorCode);
+      handleCustomErrors(recursionError, errorCode);
     }).toThrowError(errorMessage);
   });
 
@@ -29,10 +29,10 @@ describe('handleError', () => {
     const otherError = new Error(errorMessage);
 
     expect(() => {
-      handleError(otherError, errorCode);
+      handleCustomErrors(otherError, errorCode);
     }).toThrow(otherError);
     expect(() => {
-      handleError(otherError, errorCode);
+      handleCustomErrors(otherError, errorCode);
     }).toThrowError(errorMessage);
   });
 });

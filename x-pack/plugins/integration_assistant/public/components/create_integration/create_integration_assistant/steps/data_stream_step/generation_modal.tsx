@@ -42,6 +42,7 @@ import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
 import * as i18n from './translations';
 import { useTelemetry } from '../../../telemetry';
+import type { ErrorCode } from '../../../../../../common/constants';
 
 export type OnComplete = (result: State['result']) => void;
 
@@ -182,17 +183,12 @@ export const useGeneration = ({
           error: originalErrorMessage,
         });
 
-        const errorCode = e.body?.attributes?.errorCode;
-        let errorMessage;
+        let errorMessage = originalErrorMessage;
+        const errorCode = e.body?.attributes?.errorCode as ErrorCode | undefined;
         if (errorCode != null) {
           errorMessage = i18n.ERROR_TRANSLATION[errorCode];
         }
-
-        if (errorMessage != null) {
-          setError(errorMessage);
-        } else {
-          setError(originalErrorMessage);
-        }
+        setError(errorMessage);
       } finally {
         setIsRequesting(false);
       }

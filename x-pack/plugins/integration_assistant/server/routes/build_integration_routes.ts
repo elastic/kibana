@@ -12,8 +12,8 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
-import { handleError } from './routes_util';
-import { RECURSION_LIMIT_ERROR_CODE } from '../../common/constants';
+import { handleCustomErrors } from './routes_util';
+import { ErrorCode } from '../../common/constants';
 export function registerIntegrationBuilderRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
 ) {
@@ -42,7 +42,7 @@ export function registerIntegrationBuilderRoutes(
           });
         } catch (err) {
           try {
-            handleError(err, RECURSION_LIMIT_ERROR_CODE);
+            handleCustomErrors(err, ErrorCode.RECURSION_LIMIT);
           } catch (e) {
             if (isErrorThatHandlesItsOwnResponse(e)) {
               return e.sendResponse(response);
