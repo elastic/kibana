@@ -17,6 +17,7 @@ This guide covers the following topics:
 ## API authorization
 Kibana API routes do not have any authorization checks applied by default. This means that your APIs are accessible to anyone with valid credentials, regardless of their permissions. This includes users with no roles assigned.
 This on its own is insufficient, and care must be taken to ensure that only authorized users can invoke your endpoints.
+From `9.0` version onwards, teams are required to provide an opt-out reason for disabling API authorization.
 
 ### [Deprecated] Adding API authorization before `9.0`
 Kibana leverages <DocLink id="kibDevDocsSavedObjectsIntro" text="Saved Objects" /> for a majority of its persistence. The Saved Objects Service performs its own authorization checks, so if your API route is primarily a CRUD interface to Saved Objects, then your authorization needs are already met.
