@@ -133,7 +133,7 @@ export const schema = Joi.object()
         // The best path forward it to prefer functions like `testSubjects.existOrFail` or
         // `testSubjects.missingOrFail` instead of just the `exists` checks, and be deterministic about
         // where your user is and what they should click next.
-        waitForExists: Joi.number().default(2500),
+        waitForExists: Joi.number().default(500),
       })
       .default(),
 
