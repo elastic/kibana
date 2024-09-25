@@ -58,7 +58,7 @@ export type DashboardApi = CanExpandPanels &
     getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
     getSettings: () => DashboardStateFromSettingsFlyout;
     getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
-    hasOverlays$: PublishingSubject<boolean | undefined>;
+    hasOverlays$: PublishingSubject<boolean>;
     hasRunMigrations$: PublishingSubject<boolean | undefined>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;

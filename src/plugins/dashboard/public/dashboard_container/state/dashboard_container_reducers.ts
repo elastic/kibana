@@ -203,18 +203,7 @@ export const dashboardContainerReducers = {
   // Component state reducers
   // ------------------------------------------------------------------------------
 
-  setHasOverlays: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.componentState.hasOverlays = action.payload;
-  },
-
-  setScrollToPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
-    state.componentState.scrollToPanelId = action.payload;
-  },
-
   setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
     state.componentState.highlightPanelId = action.payload;
-  },
-  setFocusedPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
-    state.componentState.focusedPanelId = action.payload;
   },
 };

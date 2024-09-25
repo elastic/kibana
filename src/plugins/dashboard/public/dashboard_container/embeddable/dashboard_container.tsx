@@ -106,6 +106,7 @@ import {
   InitialComponentState,
   initializeComponentStateManager,
 } from '../../dashboard_api/component_state_manager';
+import { initializeTracksOverlaysApi } from '../../dashboard_api/tracks_overlays_api';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -150,6 +151,9 @@ export class DashboardContainer
   public setAnimatePanelTransforms: (animate: boolean) => void;
   public setManaged: (managed: boolean) => void;
   public setHasUnsavedChanges: (hasUnsavedChanges: boolean) => void;
+  public openOverlay: (ref: OverlayRef, options?: { focusedPanelId?: string }) => void;
+  public clearOverlays: () => void;
+  public setScrollToPanelId: (id: string | undefined) => void;
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
@@ -169,7 +173,6 @@ export class DashboardContainer
   public readonly executionContext: KibanaExecutionContext;
 
   private domNode?: HTMLElement;
-  private overlayRef?: OverlayRef;
 
   // performance monitoring
   public lastLoadStartTime?: number;
@@ -316,16 +319,21 @@ export class DashboardContainer
     this.setHasUnsavedChanges = componentStateManager.setHasUnsavedChanges;
     this.setManaged = componentStateManager.setManaged;
 
+    const tracksOverlayApi = initializeTracksOverlaysApi();
+    this.clearOverlays = tracksOverlayApi.clearOverlays;
+    this.focusedPanelId$ = tracksOverlayApi.focusedPanelId$;
+    this.hasOverlays$ = tracksOverlayApi.hasOverlayers$;
+    this.openOverlay = tracksOverlayApi.openOverlay;
+    this.scrollToPanelId$ = tracksOverlayApi.scrollToPanelId$;
+    this.setScrollToPanelId = tracksOverlayApi.setScrollToPanelId;
+
     this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
     this.expandedPanelId = new BehaviorSubject(this.getExpandedPanelId());
-    this.focusedPanelId$ = new BehaviorSubject(this.getState().componentState.focusedPanelId);
     this.fullScreenMode$ = new BehaviorSubject(this.getState().componentState.fullScreenMode);
     this.hasRunMigrations$ = new BehaviorSubject(
       this.getState().componentState.hasRunClientsideMigrations
     );
-    this.hasOverlays$ = new BehaviorSubject(this.getState().componentState.hasOverlays);
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
-    this.scrollToPanelId$ = new BehaviorSubject(this.getState().componentState.scrollToPanelId);
     this.highlightPanelId$ = new BehaviorSubject(this.getState().componentState.highlightPanelId);
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
     this.publishingSubscription.add(
@@ -337,20 +345,11 @@ export class DashboardContainer
         if (this.expandedPanelId.value !== this.getExpandedPanelId()) {
           this.expandedPanelId.next(this.getExpandedPanelId());
         }
-        if (this.focusedPanelId$.value !== state.componentState.focusedPanelId) {
-          this.focusedPanelId$.next(state.componentState.focusedPanelId);
-        }
         if (this.fullScreenMode$.value !== state.componentState.fullScreenMode) {
           this.fullScreenMode$.next(state.componentState.fullScreenMode);
         }
-        if (this.hasOverlays$.value !== state.componentState.hasOverlays) {
-          this.hasOverlays$.next(state.componentState.hasOverlays);
-        }
         if (this.useMargins$.value !== state.explicitInput.useMargins) {
           this.useMargins$.next(state.explicitInput.useMargins);
-        }
-        if (this.scrollToPanelId$.value !== state.componentState.scrollToPanelId) {
-          this.scrollToPanelId$.next(state.componentState.scrollToPanelId);
         }
         if (this.highlightPanelId$.value !== state.componentState.highlightPanelId) {
           this.highlightPanelId$.next(state.componentState.highlightPanelId);
@@ -577,7 +576,7 @@ export class DashboardContainer
   public fullScreenMode$: BehaviorSubject<boolean | undefined>;
   public hasRunMigrations$: BehaviorSubject<boolean | undefined>;
   public hasUnsavedChanges$: BehaviorSubject<boolean>;
-  public hasOverlays$: BehaviorSubject<boolean | undefined>;
+  public hasOverlays$: BehaviorSubject<boolean>;
   public useMargins$: BehaviorSubject<boolean>;
   public scrollToPanelId$: BehaviorSubject<string | undefined>;
   public highlightPanelId$: BehaviorSubject<string | undefined>;
@@ -886,21 +885,6 @@ export class DashboardContainer
     this.updateInput({ tags });
   };
 
-  public openOverlay = (ref: OverlayRef, options?: { focusedPanelId?: string }) => {
-    this.clearOverlays();
-    this.dispatch.setHasOverlays(true);
-    this.overlayRef = ref;
-    if (options?.focusedPanelId) {
-      this.setFocusedPanelId(options?.focusedPanelId);
-    }
-  };
-
-  public clearOverlays = () => {
-    this.dispatch.setHasOverlays(false);
-    this.dispatch.setFocusedPanelId(undefined);
-    this.overlayRef?.close();
-  };
-
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
   };
@@ -926,12 +910,8 @@ export class DashboardContainer
     return titles;
   }
 
-  public setScrollToPanelId = (id: string | undefined) => {
-    this.dispatch.setScrollToPanelId(id);
-  };
-
   public scrollToPanel = async (panelRef: HTMLDivElement) => {
-    const id = this.getState().componentState.scrollToPanelId;
+    const id = this.scrollToPanelId$.value;
     if (!id) return;
 
     this.untilEmbeddableLoaded(id).then(() => {
@@ -972,11 +952,6 @@ export class DashboardContainer
       });
     }
     this.setHighlightPanelId(undefined);
-  };
-
-  public setFocusedPanelId = (id: string | undefined) => {
-    this.dispatch.setFocusedPanelId(id);
-    this.setScrollToPanelId(id);
   };
 
   public setPanels = (panels: DashboardPanelMap) => {
