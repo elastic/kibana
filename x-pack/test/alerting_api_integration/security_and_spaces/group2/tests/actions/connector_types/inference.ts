@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import {
-  OpenAISimulator,
-  genAiSuccessResponse,
-} from '@kbn/actions-simulators-plugin/server/openai_simulation';
+  InferenceSimulator,
+  inferenceSuccessResponse,
+} from '@kbn/actions-simulators-plugin/server/inference_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
@@ -54,7 +54,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
       await objectRemover.removeAll();
     });
     describe('action creation', () => {
-      const simulator = new OpenAISimulator({
+      const simulator = new InferenceSimulator({
         returnError: false,
         proxy: {
           config: configService.get('kbnTestServer.serverArgs'),
@@ -220,7 +220,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
 
     describe('executor', () => {
       describe('validation', () => {
-        const simulator = new OpenAISimulator({
+        const simulator = new InferenceSimulator({
           proxy: {
             config: configService.get('kbnTestServer.serverArgs'),
           },
@@ -277,7 +277,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
 
       describe('execution', () => {
         describe('successful response simulator', () => {
-          const simulator = new OpenAISimulator({
+          const simulator = new InferenceSimulator({
             proxy: {
               config: configService.get('kbnTestServer.serverArgs'),
             },
@@ -315,7 +315,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
             expect(body).to.eql({
               status: 'ok',
               connector_id: genAiActionId,
-              data: genAiSuccessResponse,
+              data: inferenceSuccessResponse,
             });
 
             const events: IValidatedEvent[] = await retry.try(async () => {
@@ -399,7 +399,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
           });
         });
         describe('non-default space simulator', () => {
-          const simulator = new OpenAISimulator({
+          const simulator = new InferenceSimulator({
             proxy: {
               config: configService.get('kbnTestServer.serverArgs'),
             },
@@ -450,7 +450,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
         });
 
         describe('error response simulator', () => {
-          const simulator = new OpenAISimulator({
+          const simulator = new InferenceSimulator({
             returnError: true,
             proxy: {
               config: configService.get('kbnTestServer.serverArgs'),
