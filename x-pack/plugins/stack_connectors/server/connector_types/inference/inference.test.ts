@@ -7,26 +7,21 @@
 
 import { InferenceConnector } from './inference';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import {
-  DEFAULT_OPENAI_MODEL,
-  DEFAULT_TIMEOUT_MS,
-  OPENAI_CONNECTOR_ID,
-  OpenAiProviderType,
-} from '../../../common/openai/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/openai/schema';
-import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { PassThrough, Transform } from 'stream';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import {} from '@kbn/actions-plugin/server/types';
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 const mockTee = jest.fn();
+
+const OPENAI_CONNECTOR_ID = '123';
+const DEFAULT_OPENAI_MODEL = 'gpt-4o';
 
 const mockCreate = jest.fn().mockImplementation(() => ({
   tee: mockTee.mockReturnValue([jest.fn(), jest.fn()]),
 }));
 const mockDefaults = {
-  timeout: DEFAULT_TIMEOUT_MS,
   url: 'https://api.openai.com/v1/chat/completions',
   method: 'post',
   responseSchema: RunActionResponseSchema,
@@ -46,8 +41,6 @@ jest.mock('openai', () => ({
 describe('InferenceConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
-  let connectorUsageCollector: ConnectorUsageCollector;
-
   const logger = loggingSystemMock.createLogger();
   const mockResponseString = 'Hello! How can I assist you today?';
   const mockResponse = {
@@ -75,10 +68,6 @@ describe('InferenceConnector', () => {
     },
   };
   beforeEach(() => {
-    connectorUsageCollector = new ConnectorUsageCollector({
-      logger,
-      connectorId: 'test-connector-id',
-    });
     mockRequest = jest.fn().mockResolvedValue(mockResponse);
     mockError = jest.fn().mockImplementation(() => {
       throw new Error('API Error');
@@ -122,74 +111,62 @@ describe('InferenceConnector', () => {
 
     describe('runApi', () => {
       it('uses the default model if none is supplied', async () => {
-        const response = await connector.runApi(
-          { body: JSON.stringify(sampleOpenAiBody) },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletion({
+          input: JSON.stringify(sampleOpenAiBody),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            ...mockDefaults,
-            data: JSON.stringify({
-              ...sampleOpenAiBody,
-              stream: false,
-              model: DEFAULT_OPENAI_MODEL,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          ...mockDefaults,
+          data: JSON.stringify({
+            ...sampleOpenAiBody,
+
+            model: DEFAULT_OPENAI_MODEL,
+          }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual(mockResponse.data);
       });
 
       it('overrides the default model with the default model specified in the body', async () => {
         const requestBody = { model: 'gpt-3.5-turbo', ...sampleOpenAiBody };
-        const response = await connector.runApi(
-          { body: JSON.stringify(requestBody) },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletion({
+          input: JSON.stringify(requestBody),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            ...mockDefaults,
-            data: JSON.stringify({ ...requestBody, stream: false }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          ...mockDefaults,
+          data: JSON.stringify({ ...requestBody, stream: false }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual(mockResponse.data);
       });
 
       it('the OpenAI API call is successful with correct parameters', async () => {
-        const response = await connector.runApi(
-          { body: JSON.stringify(sampleOpenAiBody) },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletion({
+          input: JSON.stringify(sampleOpenAiBody),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            ...mockDefaults,
-            data: JSON.stringify({
-              ...sampleOpenAiBody,
-              stream: false,
-              model: DEFAULT_OPENAI_MODEL,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          ...mockDefaults,
+          data: JSON.stringify({
+            ...sampleOpenAiBody,
+
+            model: DEFAULT_OPENAI_MODEL,
+          }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual(mockResponse.data);
       });
 
@@ -203,31 +180,23 @@ describe('InferenceConnector', () => {
             },
           ],
         };
-        const response = await connector.runApi(
-          {
-            body: JSON.stringify({
-              ...body,
-              stream: true,
-            }),
-          },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletion({
+          input: JSON.stringify({
+            ...body,
+          }),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            ...mockDefaults,
-            data: JSON.stringify({
-              ...body,
-              stream: false,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          ...mockDefaults,
+          data: JSON.stringify({
+            ...body,
+          }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual(mockResponse.data);
       });
 
@@ -236,70 +205,56 @@ describe('InferenceConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
+          connector.performApiCompletion({ input: JSON.stringify(sampleOpenAiBody) })
         ).rejects.toThrow('API Error');
       });
     });
 
     describe('streamApi', () => {
       it('the OpenAI API call is successful with correct parameters when stream = false', async () => {
-        const response = await connector.streamApi(
-          {
-            body: JSON.stringify(sampleOpenAiBody),
-            stream: false,
-          },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletionStream({
+          input: JSON.stringify(sampleOpenAiBody),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            url: 'https://api.openai.com/v1/chat/completions',
-            method: 'post',
-            responseSchema: RunActionResponseSchema,
-            data: JSON.stringify({
-              ...sampleOpenAiBody,
-              stream: false,
-              model: DEFAULT_OPENAI_MODEL,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: RunActionResponseSchema,
+          data: JSON.stringify({
+            ...sampleOpenAiBody,
+
+            model: DEFAULT_OPENAI_MODEL,
+          }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual(mockResponse.data);
       });
 
       it('the OpenAI API call is successful with correct parameters when stream = true', async () => {
-        const response = await connector.streamApi(
-          {
-            body: JSON.stringify(sampleOpenAiBody),
-            stream: true,
-          },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletionStream({
+          input: JSON.stringify(sampleOpenAiBody),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            responseType: 'stream',
-            url: 'https://api.openai.com/v1/chat/completions',
-            method: 'post',
-            responseSchema: StreamingResponseSchema,
-            data: JSON.stringify({
-              ...sampleOpenAiBody,
-              stream: true,
-              model: DEFAULT_OPENAI_MODEL,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          responseType: 'stream',
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          data: JSON.stringify({
+            ...sampleOpenAiBody,
+
+            model: DEFAULT_OPENAI_MODEL,
+          }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
           ...mockResponse.data,
@@ -316,35 +271,26 @@ describe('InferenceConnector', () => {
             },
           ],
         };
-        const response = await connector.streamApi(
-          {
-            body: JSON.stringify({
-              ...body,
-              stream: false,
-            }),
-            stream: true,
-          },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletionStream({
+          input: JSON.stringify({
+            ...body,
+          }),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            responseType: 'stream',
-            url: 'https://api.openai.com/v1/chat/completions',
-            method: 'post',
-            responseSchema: StreamingResponseSchema,
-            data: JSON.stringify({
-              ...body,
-              stream: true,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          responseType: 'stream',
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          data: JSON.stringify({
+            ...body,
+          }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
           ...mockResponse.data,
@@ -356,10 +302,7 @@ describe('InferenceConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.streamApi(
-            { body: JSON.stringify(sampleOpenAiBody), stream: true },
-            connectorUsageCollector
-          )
+          connector.performApiCompletionStream({ input: JSON.stringify(sampleOpenAiBody) })
         ).rejects.toThrow('API Error');
       });
     });
@@ -384,79 +327,47 @@ describe('InferenceConnector', () => {
       });
 
       it('the API call is successful with correct request parameters', async () => {
-        await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
+        await connector.performApiCompletionStream({ input: JSON.stringify(sampleOpenAiBody) });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            url: 'https://api.openai.com/v1/chat/completions',
-            method: 'post',
-            responseSchema: StreamingResponseSchema,
-            responseType: 'stream',
-            data: JSON.stringify({
-              ...sampleOpenAiBody,
-              stream: true,
-              model: DEFAULT_OPENAI_MODEL,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          responseType: 'stream',
+          data: JSON.stringify({
+            ...sampleOpenAiBody,
+
+            model: DEFAULT_OPENAI_MODEL,
+          }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
       });
 
       it('signal is properly passed to streamApi', async () => {
         const signal = jest.fn();
-        await connector.invokeStream({ ...sampleOpenAiBody, signal }, connectorUsageCollector);
+        await connector.performApiCompletionStream({ input: JSON.stringify(sampleOpenAiBody) });
 
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            url: 'https://api.openai.com/v1/chat/completions',
-            method: 'post',
-            responseSchema: StreamingResponseSchema,
-            responseType: 'stream',
-            data: JSON.stringify({
-              ...sampleOpenAiBody,
-              stream: true,
-              model: DEFAULT_OPENAI_MODEL,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
-            signal,
+        expect(mockRequest).toHaveBeenCalledWith({
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          responseType: 'stream',
+          data: JSON.stringify({
+            ...sampleOpenAiBody,
+
+            model: DEFAULT_OPENAI_MODEL,
+          }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
-      });
-
-      it('timeout is properly passed to streamApi', async () => {
-        const timeout = 180000;
-        await connector.invokeStream({ ...sampleOpenAiBody, timeout }, connectorUsageCollector);
-
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            url: 'https://api.openai.com/v1/chat/completions',
-            method: 'post',
-            responseSchema: StreamingResponseSchema,
-            responseType: 'stream',
-            data: JSON.stringify({
-              ...sampleOpenAiBody,
-              stream: true,
-              model: DEFAULT_OPENAI_MODEL,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
-            timeout,
-          },
-          connectorUsageCollector
-        );
+          signal,
+        });
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -464,252 +375,40 @@ describe('InferenceConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.invokeStream(sampleOpenAiBody, connectorUsageCollector)
+          connector.performApiCompletionStream({ input: JSON.stringify(sampleOpenAiBody) })
         ).rejects.toThrow('API Error');
       });
 
       it('responds with a readable stream', async () => {
         // @ts-ignore
         connector.request = mockStream();
-        const response = await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
+        const response = await connector.performApiCompletionStream({
+          input: JSON.stringify(sampleOpenAiBody),
+        });
         expect(response instanceof PassThrough).toEqual(true);
       });
     });
 
     describe('invokeAI', () => {
       it('the API call is successful with correct parameters', async () => {
-        const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            ...mockDefaults,
-            data: JSON.stringify({
-              ...sampleOpenAiBody,
-              stream: false,
-              model: DEFAULT_OPENAI_MODEL,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
-          },
-          connectorUsageCollector
-        );
-        expect(response.message).toEqual(mockResponseString);
-        expect(response.usage.total_tokens).toEqual(9);
-      });
-
-      it('signal is properly passed to runApi', async () => {
-        const signal = jest.fn();
-        await connector.invokeAI({ ...sampleOpenAiBody, signal }, connectorUsageCollector);
-
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            ...mockDefaults,
-            data: JSON.stringify({
-              ...sampleOpenAiBody,
-              stream: false,
-              model: DEFAULT_OPENAI_MODEL,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
-            signal,
-          },
-          connectorUsageCollector
-        );
-      });
-
-      it('timeout is properly passed to runApi', async () => {
-        const timeout = 180000;
-        await connector.invokeAI({ ...sampleOpenAiBody, timeout }, connectorUsageCollector);
-
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            ...mockDefaults,
-            data: JSON.stringify({
-              ...sampleOpenAiBody,
-              stream: false,
-              model: DEFAULT_OPENAI_MODEL,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'X-My-Custom-Header': 'foo',
-              'content-type': 'application/json',
-            },
-            timeout,
-          },
-          connectorUsageCollector
-        );
-      });
-
-      it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
-        connector.request = mockError;
-
-        await expect(connector.invokeAI(sampleOpenAiBody, connectorUsageCollector)).rejects.toThrow(
-          'API Error'
-        );
-      });
-    });
-
-    describe('invokeAsyncIterator', () => {
-      it('the API call is successful with correct request parameters', async () => {
-        await connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(0);
-        expect(mockCreate).toHaveBeenCalledWith(
-          {
-            ...sampleOpenAiBody,
-            stream: true,
-            model: DEFAULT_OPENAI_MODEL,
-          },
-          { signal: undefined }
-        );
-        expect(mockTee).toBeCalledTimes(1);
-      });
-      it('signal and timeout is properly passed', async () => {
-        const timeout = 180000;
-        const signal = jest.fn();
-        await connector.invokeAsyncIterator(
-          { ...sampleOpenAiBody, signal, timeout },
-          connectorUsageCollector
-        );
-        expect(mockRequest).toBeCalledTimes(0);
-        expect(mockCreate).toHaveBeenCalledWith(
-          {
-            ...sampleOpenAiBody,
-            stream: true,
-            model: DEFAULT_OPENAI_MODEL,
-          },
-          {
-            signal,
-            timeout,
-          }
-        );
-        expect(mockTee).toBeCalledTimes(1);
-      });
-
-      it('errors during API calls are properly handled', async () => {
-        mockCreate.mockImplementationOnce(() => {
-          throw new Error('API Error');
+        const response = await connector.performApiCompletionStream({
+          input: JSON.stringify(sampleOpenAiBody),
         });
-
-        await expect(
-          connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector)
-        ).rejects.toThrow('API Error');
-      });
-    });
-    describe('getResponseErrorMessage', () => {
-      it('returns an unknown error message', () => {
-        // @ts-expect-error expects an axios error as the parameter
-        expect(connector.getResponseErrorMessage({})).toEqual(
-          `Unexpected API Error:  - Unknown error`
-        );
-      });
-
-      it('returns the error.message', () => {
-        // @ts-expect-error expects an axios error as the parameter
-        expect(connector.getResponseErrorMessage({ message: 'a message' })).toEqual(
-          `Unexpected API Error:  - a message`
-        );
-      });
-
-      it('returns the error.response.data.error.message', () => {
-        const err = {
-          response: {
-            headers: {},
-            status: 404,
-            statusText: 'Resource Not Found',
-            data: {
-              error: {
-                message: 'Resource not found',
-              },
-            },
-          },
-        } as AxiosError<{ error?: { message?: string } }>;
-        expect(
-          // @ts-expect-error expects an axios error as the parameter
-          connector.getResponseErrorMessage(err)
-        ).toEqual(`API Error: Resource Not Found - Resource not found`);
-      });
-
-      it('returns auhtorization error', () => {
-        const err = {
-          response: {
-            headers: {},
-            status: 401,
-            statusText: 'Auth error',
-            data: {
-              error: {
-                message: 'The api key was invalid.',
-              },
-            },
-          },
-        } as AxiosError<{ error?: { message?: string } }>;
-
-        // @ts-expect-error expects an axios error as the parameter
-        expect(connector.getResponseErrorMessage(err)).toEqual(
-          `Unauthorized API Error - The api key was invalid.`
-        );
-      });
-    });
-  });
-
-  describe('OpenAI without headers', () => {
-    const connector = new OpenAIConnector({
-      configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
-      config: {
-        apiUrl: 'https://api.openai.com/v1/chat/completions',
-        apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
-      },
-      secrets: { apiKey: '123' },
-      logger: loggingSystemMock.createLogger(),
-      services: actionsMock.createServices(),
-    });
-
-    const sampleOpenAiBody = {
-      messages: [
-        {
-          role: 'user',
-          content: 'Hello world',
-        },
-      ],
-    };
-
-    beforeEach(() => {
-      // @ts-ignore
-      connector.request = mockRequest;
-      jest.clearAllMocks();
-    });
-
-    describe('runApi', () => {
-      it('uses the default model if none is supplied', async () => {
-        const response = await connector.runApi(
-          { body: JSON.stringify(sampleOpenAiBody) },
-          connectorUsageCollector
-        );
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            ...mockDefaults,
-            data: JSON.stringify({
-              ...sampleOpenAiBody,
-              stream: false,
-              model: DEFAULT_OPENAI_MODEL,
-            }),
-            headers: {
-              Authorization: 'Bearer 123',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          ...mockDefaults,
+          data: JSON.stringify({
+            ...sampleOpenAiBody,
+
+            model: DEFAULT_OPENAI_MODEL,
+          }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
-        expect(response).toEqual(mockResponse.data);
+        });
+        expect(response).toEqual(mockResponseString);
       });
     });
   });
@@ -719,11 +418,16 @@ describe('InferenceConnector', () => {
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: {
-        apiUrl:
-          'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-        apiProvider: OpenAiProviderType.AzureAi,
+        providerConfig: {
+          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
+        },
+        provider: 'azureai',
+        taskType: '',
+        inferenceId: '',
+        providerSchema: [],
+        taskTypeConfig: {},
       },
-      secrets: { apiKey: '123' },
+      secrets: { providerSecrets: {} },
       logger: loggingSystemMock.createLogger(),
       services: actionsMock.createServices(),
     });
@@ -745,23 +449,19 @@ describe('InferenceConnector', () => {
 
     describe('runApi', () => {
       it('test the AzureAI API call is successful with correct parameters', async () => {
-        const response = await connector.runApi(
-          { body: JSON.stringify(sampleAzureAiBody) },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletion({
+          input: JSON.stringify(sampleAzureAiBody),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            ...mockDefaults,
-            url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-            data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
-            headers: {
-              'api-key': '123',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          ...mockDefaults,
+          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
+          data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
+          headers: {
+            'api-key': '123',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual(mockResponse.data);
       });
 
@@ -774,25 +474,19 @@ describe('InferenceConnector', () => {
             },
           ],
         };
-        const response = await connector.runApi(
-          {
-            body: JSON.stringify({ ...body, stream: true }),
-          },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletion({
+          input: JSON.stringify({ ...body }),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            ...mockDefaults,
-            url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-            data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
-            headers: {
-              'api-key': '123',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          ...mockDefaults,
+          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
+          data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
+          headers: {
+            'api-key': '123',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual(mockResponse.data);
       });
 
@@ -801,60 +495,46 @@ describe('InferenceConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.runApi({ body: JSON.stringify(sampleAzureAiBody) }, connectorUsageCollector)
+          connector.performApiCompletion({ input: JSON.stringify(sampleAzureAiBody) })
         ).rejects.toThrow('API Error');
       });
     });
 
     describe('streamApi', () => {
       it('the AzureAI API call is successful with correct parameters when stream = false', async () => {
-        const response = await connector.streamApi(
-          {
-            body: JSON.stringify(sampleAzureAiBody),
-            stream: false,
-          },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletionStream({
+          input: JSON.stringify(sampleAzureAiBody),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-            method: 'post',
-            responseSchema: RunActionResponseSchema,
-            data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
-            headers: {
-              'api-key': '123',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
+          method: 'post',
+          responseSchema: RunActionResponseSchema,
+          data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
+          headers: {
+            'api-key': '123',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual(mockResponse.data);
       });
 
       it('the AzureAI API call is successful with correct parameters when stream = true', async () => {
-        const response = await connector.streamApi(
-          {
-            body: JSON.stringify(sampleAzureAiBody),
-            stream: true,
-          },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletionStream({
+          input: JSON.stringify(sampleAzureAiBody),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            responseType: 'stream',
-            url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-            method: 'post',
-            responseSchema: StreamingResponseSchema,
-            data: JSON.stringify({ ...sampleAzureAiBody, stream: true }),
-            headers: {
-              'api-key': '123',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          responseType: 'stream',
+          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          data: JSON.stringify({ ...sampleAzureAiBody }),
+          headers: {
+            'api-key': '123',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
           ...mockResponse.data,
@@ -870,31 +550,23 @@ describe('InferenceConnector', () => {
             },
           ],
         };
-        const response = await connector.streamApi(
-          {
-            body: JSON.stringify({ ...body, stream: false }),
-            stream: true,
-          },
-          connectorUsageCollector
-        );
+        const response = await connector.performApiCompletionStream({
+          input: JSON.stringify({ ...body, stream: false }),
+        });
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(
-          {
-            responseType: 'stream',
-            url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-            method: 'post',
-            responseSchema: StreamingResponseSchema,
-            data: JSON.stringify({
-              ...body,
-              stream: true,
-            }),
-            headers: {
-              'api-key': '123',
-              'content-type': 'application/json',
-            },
+        expect(mockRequest).toHaveBeenCalledWith({
+          responseType: 'stream',
+          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          data: JSON.stringify({
+            ...body,
+          }),
+          headers: {
+            'api-key': '123',
+            'content-type': 'application/json',
           },
-          connectorUsageCollector
-        );
+        });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
           ...mockResponse.data,
@@ -906,88 +578,9 @@ describe('InferenceConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.streamApi(
-            { body: JSON.stringify(sampleAzureAiBody), stream: true },
-            connectorUsageCollector
-          )
+          connector.performApiCompletionStream({ input: JSON.stringify(sampleAzureAiBody) })
         ).rejects.toThrow('API Error');
       });
-    });
-  });
-
-  describe('Token dashboard', () => {
-    const connector = new InferenceConnector({
-      configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
-      config: { apiUrl: 'https://example.com/api', apiProvider: OpenAiProviderType.AzureAi },
-      secrets: { apiKey: '123' },
-      logger: loggingSystemMock.createLogger(),
-      services: actionsMock.createServices(),
-    });
-    const mockGenAi = initDashboard as jest.Mock;
-    beforeEach(() => {
-      // @ts-ignore
-      connector.esClient.transport.request = mockRequest;
-      mockRequest.mockResolvedValue({ has_all_requested: true });
-      mockGenAi.mockResolvedValue({ success: true });
-      jest.clearAllMocks();
-    });
-    it('the create dashboard API call returns available: true when user has correct permissions', async () => {
-      const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        path: '/_security/user/_has_privileges',
-        method: 'POST',
-        body: {
-          index: [
-            {
-              names: ['.kibana-event-log-*'],
-              allow_restricted_indices: true,
-              privileges: ['read'],
-            },
-          ],
-        },
-      });
-      expect(response).toEqual({ available: true });
-    });
-    it('the create dashboard API call returns available: false when user has correct permissions', async () => {
-      mockRequest.mockResolvedValue({ has_all_requested: false });
-      const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        path: '/_security/user/_has_privileges',
-        method: 'POST',
-        body: {
-          index: [
-            {
-              names: ['.kibana-event-log-*'],
-              allow_restricted_indices: true,
-              privileges: ['read'],
-            },
-          ],
-        },
-      });
-      expect(response).toEqual({ available: false });
-    });
-
-    it('the create dashboard API call returns available: false when init dashboard fails', async () => {
-      mockGenAi.mockResolvedValue({ success: false });
-      const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        path: '/_security/user/_has_privileges',
-        method: 'POST',
-        body: {
-          index: [
-            {
-              names: ['.kibana-event-log-*'],
-              allow_restricted_indices: true,
-              privileges: ['read'],
-            },
-          ],
-        },
-      });
-      expect(response).toEqual({ available: false });
     });
   });
 });

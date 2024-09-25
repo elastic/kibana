@@ -53,9 +53,7 @@ import { Config, Secrets, ServiceProviderKeys } from './types';
 import {
   generateInferenceEndpointId,
   getTaskTypeOptions,
-  missingConfigFieldValidator,
-  missingSecretsFieldValidator,
-  missingTaskTypeFieldValidator,
+  getValidator,
   TaskTypeOption,
 } from './helpers';
 import { InferenceProvider } from './providers/get_providers';
@@ -71,7 +69,6 @@ const buttonCss = css`
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
   isEdit,
-  registerPreSubmitValidator,
 }) => {
   const { http } = useKibana().services;
   const xsFontSize = useEuiFontSize('xs').fontSize;
@@ -143,7 +140,12 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
             ...(selectedProvider?.configuration[k] as ConfigProperties),
           }))
     ).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-  }, [config, secrets?.providerSecrets, selectedProvider]);
+  }, [
+    config?.providerConfig,
+    config?.providerSchema,
+    secrets?.providerSecrets,
+    selectedProvider?.configuration,
+  ]);
 
   const requiredProviderFormFields: ConfigEntryView[] = useMemo(() => {
     return providerFormFields.filter((p) => p.required);
@@ -608,7 +610,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       config={{
         validations: [
           {
-            validator: missingSecretsFieldValidator,
+            validator: getValidator('config.providerSchema', setFieldValue, true),
             isBlocking: true,
           },
         ],
@@ -622,7 +624,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       config={{
         validations: [
           {
-            validator: missingConfigFieldValidator,
+            validator: getValidator('config.providerSchema', setFieldValue),
             isBlocking: true,
           },
         ],
@@ -642,7 +644,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       config={{
         validations: [
           {
-            validator: missingTaskTypeFieldValidator,
+            validator: getValidator('config.taskTypeSchema', setFieldValue),
             isBlocking: true,
           },
         ],
