@@ -234,7 +234,7 @@ export const AnomalyDetectionSettings: FC = () => {
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
-                id="xpack.ml.settings.anomalyDetection.calendarsTitle"
+                id="xpack.ml.settings.anomalyDetection.calendarsDstTitle"
                 defaultMessage="Calendars DST"
               />
             </h3>
@@ -244,7 +244,7 @@ export const AnomalyDetectionSettings: FC = () => {
             <EuiTextColor color="subdued">
               <p>
                 <FormattedMessage
-                  id="xpack.ml.settings.anomalyDetection.calendarsText"
+                  id="xpack.ml.settings.anomalyDetection.calendarsDstText"
                   defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays."
                 />
               </p>
@@ -256,7 +256,7 @@ export const AnomalyDetectionSettings: FC = () => {
               <EuiFlexItem grow={false} style={{ display: 'block' }}>
                 <EuiText>
                   <FormattedMessage
-                    id="xpack.ml.settings.anomalyDetection.calendarsSummaryCount"
+                    id="xpack.ml.settings.anomalyDetection.calendarsDstSummaryCount"
                     defaultMessage="You have {calendarsCountBadge} {calendarsDstCount, plural, one {calendar} other {calendars}}"
                     values={{
                       calendarsCountBadge: <EuiBadge>{calendarsDstCount}</EuiBadge>,
@@ -268,28 +268,28 @@ export const AnomalyDetectionSettings: FC = () => {
             )}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="mlCalendarsMngButton"
+                data-test-subj="mlCalendarsDstMngButton"
                 flush="left"
                 color="primary"
                 onClick={redirectToCalendarDstList}
                 isDisabled={canGetCalendars === false}
               >
                 <FormattedMessage
-                  id="xpack.ml.settings.anomalyDetection.manageCalendarsLink"
+                  id="xpack.ml.settings.anomalyDetection.manageCalendarsDstLink"
                   defaultMessage="Manage"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="mlCalendarsCreateButton"
+                data-test-subj="mlCalendarsDstCreateButton"
                 flush="left"
                 color="primary"
                 onClick={redirectToNewCalendarDstPage}
                 isDisabled={canCreateCalendar === false}
               >
                 <FormattedMessage
-                  id="xpack.ml.settings.anomalyDetection.createCalendarLink"
+                  id="xpack.ml.settings.anomalyDetection.createCalendarDstLink"
                   defaultMessage="Create"
                 />
               </EuiButtonEmpty>
