@@ -40,7 +40,6 @@ describe('unrecognized task types', () => {
     const setupResult = await setupTestServers({
       xpack: {
         task_manager: {
-          claim_strategy: `update_by_query`,
           monitored_aggregated_stats_refresh_rate: 5000,
         },
       },
