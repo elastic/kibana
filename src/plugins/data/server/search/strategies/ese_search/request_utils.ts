@@ -86,6 +86,18 @@ export const toKibanaResponse = async (
   let result = { ...resp };
   if ((resp.rawResponse as unknown as Readable).pipe) {
     result = await parseJsonFromStream(resp.rawResponse as unknown as Readable);
+
+    if (result.error) {
+      // eslint-disable-next-line no-throw-literal
+      throw {
+        message: result.error.reason,
+        statusCode: result.status,
+        attributes: {
+          error: result.error,
+          requestParams: resp.requestParams,
+        },
+      };
+    }
   }
   if (!result.rawResponse) {
     const typedResult = result as unknown as AsyncSearchResponse;
