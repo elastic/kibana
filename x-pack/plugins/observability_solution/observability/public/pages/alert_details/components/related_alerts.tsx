@@ -18,7 +18,6 @@ import {
   AlertSearchBarContainerState,
   DEFAULT_STATE,
 } from '../../../components/alert_search_bar/containers/state_container';
-import type { Group } from '../../../../common/typings';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { renderGroupPanel } from '../../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../../components/alerts_table/grouping/get_group_stats';
@@ -43,15 +42,13 @@ const ALERTS_TABLE_ID = 'xpack.observability.related.alerts.table';
 
 interface Props {
   alert?: TopAlert;
-  groups?: Group[];
-  tags?: string[];
   kuery?: string;
 }
 
 const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE, status: 'active' };
 const DEFAULT_FILTERS: Filter[] = [];
 
-export function InternalRelatedAlerts({ alert, groups, tags, kuery }: Props) {
+export function InternalRelatedAlerts({ alert, kuery }: Props) {
   const kibanaServices = useKibana().services;
   const {
     http,
