@@ -183,7 +183,6 @@ export function ApmMainTemplate({
   const showInventoryCallout =
     !dismissedInventoryCallout &&
     isEntityCentricExperienceSettingEnabled &&
-    serviceInventoryViewLocalStorageSetting === ServiceInventoryView.classic &&
     selectedNavButton === 'allServices';
 
   const inventoryLocator = share.url.locators.get<SerializableRecord>(ENTITY_INVENTORY_LOCATOR_ID);
