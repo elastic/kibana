@@ -84,10 +84,7 @@ export function InternalDashboardTopNav({
   const [isLabsShown, setIsLabsShown] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
-  /**
-   * Unpack dashboard services
-   */
-  const isLabsEnabled = coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
+  const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();

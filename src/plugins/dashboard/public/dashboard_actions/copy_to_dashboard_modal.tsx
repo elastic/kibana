@@ -37,11 +37,11 @@ interface CopyToDashboardModalProps {
 const DashboardPicker = withSuspense(LazyDashboardPicker);
 
 export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalProps) {
-  // Setup the necessary services
-  const [{ createNew: canCreateNew, showWriteControls: canEditExisting }, stateTransfer] =
-    useMemo(() => {
-      return [getDashboardCapabilities(), embeddableService.getStateTransfer()];
-    }, []);
+  const stateTransfer = useMemo(() => embeddableService.getStateTransfer(), []);
+  const { createNew: canCreateNew, showWriteControls: canEditExisting } = useMemo(
+    () => getDashboardCapabilities(),
+    []
+  );
 
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing'>('existing');
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(

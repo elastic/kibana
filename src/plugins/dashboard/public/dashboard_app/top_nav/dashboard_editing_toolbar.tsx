@@ -10,7 +10,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
@@ -33,13 +33,9 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
 
   const dashboardApi = useDashboardApi();
 
-  const stateTransferService = embeddableService.getStateTransfer();
-
-  const lensAlias = visualizationsService.getAliases().find(({ name }) => name === 'lens');
-
-  const trackUiMetric = usageCollectionService?.reportUiCounter.bind(
-    usageCollectionService,
-    DASHBOARD_UI_METRIC_ID
+  const lensAlias = useMemo(
+    () => visualizationsService.getAliases().find(({ name }) => name === 'lens'),
+    []
   );
 
   const createNewVisType = useCallback(
@@ -48,6 +44,10 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       let appId = '';
 
       if (visType) {
+        const trackUiMetric = usageCollectionService?.reportUiCounter.bind(
+          usageCollectionService,
+          DASHBOARD_UI_METRIC_ID
+        );
         if (trackUiMetric) {
           trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
         }
@@ -66,6 +66,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
         path = '#/create?';
       }
 
+      const stateTransferService = embeddableService.getStateTransfer();
       stateTransferService.navigateToEditor(appId, {
         path,
         state: {
@@ -75,7 +76,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
         },
       });
     },
-    [stateTransferService, dashboardApi, trackUiMetric]
+    [dashboardApi]
   );
 
   /**

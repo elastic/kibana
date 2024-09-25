@@ -194,9 +194,14 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
     dashboardApi.viewMode
   );
 
+  const deferBelowFoldEnabled = useMemo(
+    () => presentationUtilService.labsService.isProjectEnabled('labs:dashboard:deferBelowFold'),
+    []
+  );
+
   const isEnabled =
     viewMode !== 'print' &&
-    presentationUtilService.labsService.isProjectEnabled('labs:dashboard:deferBelowFold') &&
+    deferBelowFoldEnabled &&
     (!focusedPanelId || focusedPanelId === props.id);
 
   return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;

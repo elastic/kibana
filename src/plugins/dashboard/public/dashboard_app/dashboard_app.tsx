@@ -77,10 +77,8 @@ export function DashboardApp({
   });
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
 
-  /**
-   * Set up dashboard services
-   */
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
+
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
   useObservabilityAIAssistantContext({

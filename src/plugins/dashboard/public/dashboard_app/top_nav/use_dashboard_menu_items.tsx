@@ -20,12 +20,12 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { openSettingsFlyout } from '../../dashboard_container/embeddable/api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
+import { dashboardBackupService } from '../../services/dashboard_backup_service';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
 import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
-import { dashboardBackupService } from '../../services/dashboard_backup_service';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -41,11 +41,6 @@ export const useDashboardMenuItems = ({
   const isMounted = useMountedState();
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
-
-  /**
-   * Unpack dashboard services
-   */
-  const isLabsEnabled = coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
   /**
    * Unpack dashboard state from redux
@@ -270,6 +265,8 @@ export const useDashboardMenuItems = ({
   /**
    * Build ordered menus for view and edit mode.
    */
+  const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
+
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();
 
