@@ -36,8 +36,6 @@ describe('Registration', () => {
     getService: (serviceParams: ServiceParams<TestConfig, TestSecrets>) =>
       new TestSubActionConnector(serviceParams),
     renderParameterTemplates: mockRenderParameterTemplates,
-    postDeleteEventHandler: mockDeleteEventHandler,
-    preSaveEventHandler: mockSaveEventHandler,
   };
 
   const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -51,7 +49,11 @@ describe('Registration', () => {
   it('registers the connector correctly', async () => {
     register<TestConfig, TestSecrets>({
       actionTypeRegistry,
-      connector,
+      connector: {
+        ...connector,
+        postDeleteEventHandler: mockDeleteEventHandler,
+        preSaveEventHandler: mockSaveEventHandler,
+      },
       configurationUtilities: mockedActionsConfig,
       logger,
     });
