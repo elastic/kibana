@@ -41,8 +41,6 @@ export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & Das
 export interface DashboardPublicState {
   lastSavedInput: DashboardContainerInput;
   hasRunClientsideMigrations?: boolean;
-  isEmbeddedExternally?: boolean;
-  hasUnsavedChanges?: boolean;
   hasOverlays?: boolean;
   expandedPanelId?: string;
   fullScreenMode?: boolean;

@@ -10,6 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 
 export interface InitialComponentState {
+  isEmbeddedExternally: boolean;
   managed: boolean;
 }
 
@@ -18,11 +19,16 @@ export interface InitialComponentState {
  */
 export function initializeComponentStateManager(initialComponentState: InitialComponentState) {
   const animatePanelTransforms$ = new BehaviorSubject(false); // set panel transforms to false initially to avoid panels animating on initial render.
+  const hasUnsavedChanges$ = new BehaviorSubject(false);
   const managed$ = new BehaviorSubject(initialComponentState.managed);
   return {
     animatePanelTransforms$,
+    hasUnsavedChanges$,
+    isEmbeddedExternally: initialComponentState.isEmbeddedExternally,
     managed$,
     setAnimatePanelTransforms: (animate: boolean) => animatePanelTransforms$.next(animate),
+    setHasUnsavedChanges: (hasUnsavedChanges: boolean) =>
+      hasUnsavedChanges$.next(hasUnsavedChanges),
     setManaged: (managed: boolean) => managed$.next(managed),
   };
 }

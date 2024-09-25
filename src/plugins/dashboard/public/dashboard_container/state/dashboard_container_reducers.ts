@@ -100,12 +100,6 @@ export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
   // Unsaved Changes Reducers
   // ------------------------------------------------------------------------------
-  setHasUnsavedChanges: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardPublicState['hasUnsavedChanges']>
-  ) => {
-    state.componentState.hasUnsavedChanges = action.payload;
-  },
 
   setLastSavedInput: (
     state: DashboardReduxState,

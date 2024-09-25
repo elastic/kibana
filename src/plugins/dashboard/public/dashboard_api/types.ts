@@ -51,7 +51,6 @@ export type DashboardApi = CanExpandPanels &
     animatePanelTransforms$: PublishingSubject<boolean>;
     asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
-    embeddedExternally$: PublishingSubject<boolean | undefined>;
     fullScreenMode$: PublishingSubject<boolean | undefined>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
@@ -61,9 +60,10 @@ export type DashboardApi = CanExpandPanels &
     getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
     hasOverlays$: PublishingSubject<boolean | undefined>;
     hasRunMigrations$: PublishingSubject<boolean | undefined>;
-    hasUnsavedChanges$: PublishingSubject<boolean | undefined>;
+    hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
+    isEmbeddedExternally: boolean;
     managed$: PublishingSubject<boolean>;
     panels$: PublishingSubject<DashboardPanelMap>;
     registerChildApi: (api: DefaultEmbeddableApi) => void;

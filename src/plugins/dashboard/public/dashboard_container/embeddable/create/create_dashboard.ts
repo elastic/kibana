@@ -101,12 +101,12 @@ export const createDashboard = async (
       id: input.id,
     },
     hasRunClientsideMigrations: savedObjectResult.anyMigrationRun,
-    isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
     hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
     lastSavedId: savedObjectId,
   };*/
 
   const initialComponentState: InitialComponentState = {
+    isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
     managed: savedObjectResult.managed ?? false,
   };
 

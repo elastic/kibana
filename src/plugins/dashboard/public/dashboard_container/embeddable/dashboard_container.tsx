@@ -149,6 +149,7 @@ export class DashboardContainer
   public anyReducerRun: Subject<null> = new Subject();
   public setAnimatePanelTransforms: (animate: boolean) => void;
   public setManaged: (managed: boolean) => void;
+  public setHasUnsavedChanges: (hasUnsavedChanges: boolean) => void;
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
@@ -303,12 +304,16 @@ export class DashboardContainer
       initialComponentState
         ? initialComponentState
         : {
+            isEmbeddedExternally: false,
             managed: false,
           }
     );
     this.animatePanelTransforms$ = componentStateManager.animatePanelTransforms$;
+    this.hasUnsavedChanges$ = componentStateManager.hasUnsavedChanges$;
+    this.isEmbeddedExternally = componentStateManager.isEmbeddedExternally;
     this.managed$ = componentStateManager.managed$;
     this.setAnimatePanelTransforms = componentStateManager.setAnimatePanelTransforms;
+    this.setHasUnsavedChanges = componentStateManager.setHasUnsavedChanges;
     this.setManaged = componentStateManager.setManaged;
 
     this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
@@ -318,15 +323,11 @@ export class DashboardContainer
     this.hasRunMigrations$ = new BehaviorSubject(
       this.getState().componentState.hasRunClientsideMigrations
     );
-    this.hasUnsavedChanges$ = new BehaviorSubject(this.getState().componentState.hasUnsavedChanges);
     this.hasOverlays$ = new BehaviorSubject(this.getState().componentState.hasOverlays);
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
     this.scrollToPanelId$ = new BehaviorSubject(this.getState().componentState.scrollToPanelId);
     this.highlightPanelId$ = new BehaviorSubject(this.getState().componentState.highlightPanelId);
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
-    this.embeddedExternally$ = new BehaviorSubject(
-      this.getState().componentState.isEmbeddedExternally
-    );
     this.publishingSubscription.add(
       this.onStateChange(() => {
         const state = this.getState();
@@ -342,12 +343,6 @@ export class DashboardContainer
         if (this.fullScreenMode$.value !== state.componentState.fullScreenMode) {
           this.fullScreenMode$.next(state.componentState.fullScreenMode);
         }
-        if (this.hasRunMigrations$.value !== state.componentState.hasRunClientsideMigrations) {
-          this.hasRunMigrations$.next(state.componentState.hasRunClientsideMigrations);
-        }
-        if (this.hasUnsavedChanges$.value !== state.componentState.hasUnsavedChanges) {
-          this.hasUnsavedChanges$.next(state.componentState.hasUnsavedChanges);
-        }
         if (this.hasOverlays$.value !== state.componentState.hasOverlays) {
           this.hasOverlays$.next(state.componentState.hasOverlays);
         }
@@ -359,9 +354,6 @@ export class DashboardContainer
         }
         if (this.highlightPanelId$.value !== state.componentState.highlightPanelId) {
           this.highlightPanelId$.next(state.componentState.highlightPanelId);
-        }
-        if (this.embeddedExternally$.value !== state.componentState.isEmbeddedExternally) {
-          this.embeddedExternally$.next(state.componentState.isEmbeddedExternally);
         }
         if (this.panels$.value !== state.explicitInput.panels) {
           this.panels$.next(state.explicitInput.panels);
@@ -584,14 +576,14 @@ export class DashboardContainer
   public managed$: BehaviorSubject<boolean>;
   public fullScreenMode$: BehaviorSubject<boolean | undefined>;
   public hasRunMigrations$: BehaviorSubject<boolean | undefined>;
-  public hasUnsavedChanges$: BehaviorSubject<boolean | undefined>;
+  public hasUnsavedChanges$: BehaviorSubject<boolean>;
   public hasOverlays$: BehaviorSubject<boolean | undefined>;
   public useMargins$: BehaviorSubject<boolean>;
   public scrollToPanelId$: BehaviorSubject<string | undefined>;
   public highlightPanelId$: BehaviorSubject<string | undefined>;
   public animatePanelTransforms$: BehaviorSubject<boolean>;
   public panels$: BehaviorSubject<DashboardPanelMap>;
-  public embeddedExternally$: BehaviorSubject<boolean | undefined>;
+  public isEmbeddedExternally: boolean;
   public uuid$: BehaviorSubject<string>;
 
   public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
