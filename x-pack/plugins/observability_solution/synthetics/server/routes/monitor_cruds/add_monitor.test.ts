@@ -82,7 +82,7 @@ step('fail', () => {
 
     expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeDefined();
     // zip is not deterministic, so we can't check the exact value
-    expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT].length).toBeGreaterThan(0);
+    expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]?.length).toBeGreaterThan(0);
   });
 
   it('does not add b64 zip data to lightweight monitors', async () => {

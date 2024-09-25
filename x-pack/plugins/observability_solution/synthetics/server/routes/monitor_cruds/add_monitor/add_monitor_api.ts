@@ -19,7 +19,6 @@ import { monitorAttributes, syntheticsMonitorType } from '../../../../common/typ
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
 import {
-  BrowserSensitiveSimpleFields,
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   MonitorTypeEnum,
@@ -309,9 +308,6 @@ export class AddEditMonitorAPI {
       string,
       { preserve_namespace?: boolean }
     >;
-    const inlineSource = (normalizedMonitor as BrowserSensitiveSimpleFields)?.[
-      ConfigKey.SOURCE_INLINE
-    ] as string | undefined;
     return {
       ...normalizedMonitor,
       [ConfigKey.MONITOR_QUERY_ID]:

@@ -13,7 +13,7 @@ export async function mapInlineToProjectFields(
   monitorType: string,
   monitor: unknown,
   logger: Logger
-): Promise<Record<string, string> | {}> {
+) {
   if (monitorType !== 'browser') return {};
   const asBrowserMonitor = monitor as BrowserSimpleFields;
   const inlineScript = asBrowserMonitor?.[ConfigKey.SOURCE_INLINE];

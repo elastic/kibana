@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import { ConfigKey } from '../../../common/runtime_types';
 import { unzipFile } from '../../common/unzip_project_code';
 import { mapInlineToProjectFields } from './map_inline_to_project_field';
@@ -43,16 +44,16 @@ describe('mapInlineToProjectFields', () => {
     const result = await mapInlineToProjectFields(
       'browser',
       {
-        [ConfigKey.SOURCE_INLINE]: 'foo',
+        [ConfigKey.SOURCE_INLINE]: `step('goto', () => page.goto('https://elastic.co'))`,
       },
       logger as any
     );
     expect(result[ConfigKey.SOURCE_INLINE]).toEqual('');
-    expect(await unzipFile(result[ConfigKey.SOURCE_PROJECT_CONTENT])).toMatchInlineSnapshot(`
+    expect(await unzipFile(result[ConfigKey.SOURCE_PROJECT_CONTENT] ?? '')).toMatchInlineSnapshot(`
       "import { journey, step, expect } from '@elastic/synthetics';
 
       journey('inline', ({ page, context, browser, params, request }) => {
-      foo
+      step('goto', () => page.goto('https://elastic.co'))
       });"
     `);
   });

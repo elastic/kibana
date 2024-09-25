@@ -641,7 +641,6 @@ describe('formatHeartbeatRequest', () => {
         },
       },
       [ConfigKey.SOURCE_INLINE]: '',
-      [ConfigKey.SOURCE_PROJECT_CONTENT]: '',
       fields_under_root: true,
     });
   });
