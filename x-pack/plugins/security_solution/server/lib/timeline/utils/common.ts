@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { ZodError } from '@kbn/zod';
-import { stringifyZodError } from '@kbn/zod-helpers';
-
 import { set } from '@kbn/safer-lodash-set/fp';
 import readline from 'readline';
 import fs from 'fs';
@@ -39,12 +36,6 @@ export const buildFrameworkRequest = async (
 };
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
-
-type ErrorFactory = (message: string) => Error;
-
-export const throwErrors = (createError: ErrorFactory) => (errors: ZodError) => {
-  throw createError(stringifyZodError(errors));
-};
 
 export const getReadables = (dataPath: string): Promise<Readable> =>
   new Promise((resolved, reject) => {

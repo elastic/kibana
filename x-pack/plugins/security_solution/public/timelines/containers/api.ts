@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ZodError, ZodType } from '@kbn/zod';
-import { type Either, fold, left, right } from 'fp-ts/lib/Either';
+import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isEmpty } from 'lodash';
@@ -48,6 +47,7 @@ import {
 
 import { KibanaServices } from '../../common/lib/kibana';
 import { ToasterError } from '../../common/components/toasters';
+import { parseOrThrowErrorFactory } from '../../../common/utils/zod_errors';
 import type {
   ExportDocumentsProps,
   ImportDataProps,
@@ -69,19 +69,7 @@ interface RequestPatchTimeline<T = string> extends RequestPostTimeline {
 type RequestPersistTimeline = RequestPostTimeline & Partial<RequestPatchTimeline<null | string>>;
 const createToasterPlainError = (message: string) => new ToasterError([message]);
 
-type ErrorFactory = (message: string) => Error;
-
-const parseRuntimeType =
-  <T>(zodType: ZodType<T>) =>
-  (v: unknown): Either<ZodError<T>, T> => {
-    const result = zodType.safeParse(v);
-    return result.success ? right(result.data) : left(result.error);
-  };
-
-const decodeOrThrow =
-  (runtimeType: ZodType, createError: ErrorFactory = createToasterPlainError) =>
-  (inputValue: unknown) =>
-    pipe(parseRuntimeType(runtimeType)(inputValue), fold(throwErrors(createError), identity));
+const parseOrThrow = parseOrThrowErrorFactory(createToasterPlainError);
 
 const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorResponse) =>
   pipe(
@@ -90,13 +78,13 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorR
   );
 
 const decodeSingleTimelineResponse = (respTimeline?: SingleTimelineResponse) =>
-  decodeOrThrow(GetTimelineResponse)(respTimeline);
+  parseOrThrow(GetTimelineResponse)(respTimeline);
 
 const decodeResolvedSingleTimelineResponse = (respTimeline?: ResolveTimelineResponse) =>
-  decodeOrThrow(ResolveTimelineResponse)(respTimeline);
+  parseOrThrow(ResolveTimelineResponse)(respTimeline);
 
 const decodeGetTimelinesResponse = (respTimeline: GetTimelinesResponse) =>
-  decodeOrThrow(GetTimelinesResponse)(respTimeline);
+  parseOrThrow(GetTimelinesResponse)(respTimeline);
 
 const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse) =>
   pipe(
@@ -111,7 +99,7 @@ const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResultSche
   );
 
 const decodeResponseFavoriteTimeline = (respTimeline?: PersistFavoriteRouteResponse) =>
-  decodeOrThrow(PersistFavoriteRouteResponse)(respTimeline);
+  parseOrThrow(PersistFavoriteRouteResponse)(respTimeline);
 
 const postTimeline = async ({
   timeline,
