@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { AlertConsumers, type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins } from './types';
 import { DEFAULT_VALID_CONSUMERS, GET_DEFAULT_FORM_DATA } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
@@ -40,6 +40,8 @@ export interface CreateRuleFormProps {
   validConsumers?: RuleCreationValidConsumer[];
   filteredRuleTypes?: string[];
   shouldUseRuleProducer?: boolean;
+  canShowConsumerSelection?: boolean;
+  showMustacheAutocompleteSwitch?: boolean;
   returnUrl: string;
 }
 
@@ -47,11 +49,13 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   const {
     ruleTypeId,
     plugins,
-    consumer = AlertConsumers.STACK_ALERTS,
+    consumer = 'alerts',
     multiConsumerSelection,
     validConsumers = DEFAULT_VALID_CONSUMERS,
     filteredRuleTypes = [],
     shouldUseRuleProducer = false,
+    canShowConsumerSelection = true,
+    showMustacheAutocompleteSwitch = false,
     returnUrl,
   } = props;
 
@@ -169,7 +173,8 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           selectedRuleTypeModel: ruleTypeModel,
           selectedRuleType: ruleType,
           validConsumers,
-          canShowConsumerSelection: true,
+          canShowConsumerSelection,
+          showMustacheAutocompleteSwitch,
           multiConsumerSelection: getInitialMultiConsumer({
             multiConsumerSelection,
             validConsumers,

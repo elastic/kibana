@@ -258,9 +258,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
                 <RuleActionsAlertsFilter
                   action={action}
                   onChange={onAlertsFilterChange}
-                  featureIds={[
-                    producerId === 'alerts' ? 'stackAlerts' : (producerId as ValidFeatureId),
-                  ]}
+                  featureIds={[producerId as ValidFeatureId]}
                   appName="stackAlerts"
                   ruleTypeId={selectedRuleType.id}
                 />

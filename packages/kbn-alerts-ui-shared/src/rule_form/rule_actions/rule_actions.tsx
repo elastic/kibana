@@ -25,6 +25,7 @@ export const RuleActions = () => {
   const {
     formData: { actions, consumer },
     plugins: { actionTypeRegistry },
+    multiConsumerSelection,
     selectedRuleType,
     connectorTypes,
   } = useRuleFormState();
@@ -76,10 +77,10 @@ export const RuleActions = () => {
 
   const producerId = useMemo(() => {
     if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(selectedRuleType.id)) {
-      return consumer;
+      return multiConsumerSelection || consumer;
     }
     return selectedRuleType.producer;
-  }, [consumer, selectedRuleType]);
+  }, [consumer, multiConsumerSelection, selectedRuleType]);
 
   return (
     <>

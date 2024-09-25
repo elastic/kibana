@@ -29,11 +29,12 @@ import { parseRuleCircuitBreakerErrorMessage } from './utils';
 export interface EditRuleFormProps {
   id: string;
   plugins: RuleFormPlugins;
+  showMustacheAutocompleteSwitch?: boolean;
   returnUrl: string;
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
-  const { id, plugins, returnUrl } = props;
+  const { id, plugins, returnUrl, showMustacheAutocompleteSwitch = false } = props;
   const { http, notifications, docLinks, ruleTypeRegistry, i18n, theme, application } = plugins;
   const { toasts } = notifications;
 
@@ -114,18 +115,18 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     );
   }
 
-  if (!ruleType || !ruleTypeModel) {
-    return (
-      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
-        <RuleFormRuleTypeError />
-      </RuleFormErrorPromptWrapper>
-    );
-  }
-
   if (!fetchedFormData) {
     return (
       <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
         <RuleFormResolveRuleError />
+      </RuleFormErrorPromptWrapper>
+    );
+  }
+
+  if (!ruleType || !ruleTypeModel) {
+    return (
+      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
+        <RuleFormRuleTypeError />
       </RuleFormErrorPromptWrapper>
     );
   }
@@ -159,6 +160,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleType: ruleType,
           selectedRuleTypeModel: ruleTypeModel,
+          showMustacheAutocompleteSwitch,
         }}
       >
         <RulePage isEdit={true} isSaving={isSaving} returnUrl={returnUrl} onSave={onSave} />

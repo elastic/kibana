@@ -8,11 +8,19 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import { EuiCallOut, EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiErrorBoundary,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
 import { useRuleFormState } from '../hooks';
 import { ActionConnector, ActionConnectorMode, RuleAction, RuleUiAction } from '../../common';
 import { getSelectedActionGroup } from '../utils';
+import { ACTION_USE_AAD_TEMPLATE_FIELDS_LABEL } from '../translations';
 
 export interface RuleActionsMessageProps {
   action: RuleUiAction;
@@ -23,6 +31,7 @@ export interface RuleActionsMessageProps {
   producerId: string;
   warning?: string | null;
   onParamsChange: (key: string, value: RuleActionParam) => void;
+  onUseAadTemplateFieldsChange?: () => void;
 }
 
 export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
@@ -35,6 +44,7 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     producerId,
     warning,
     onParamsChange,
+    onUseAadTemplateFieldsChange,
   } = props;
 
   const {
@@ -43,6 +53,7 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     selectedRuleType,
     selectedRuleTypeModel,
     connectorTypes,
+    showMustacheAutocompleteSwitch,
   } = useRuleFormState();
 
   const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
@@ -87,6 +98,16 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
   return (
     <EuiErrorBoundary>
       <EuiFlexGroup direction="column" data-test-subj="ruleActionsMessage">
+        {showMustacheAutocompleteSwitch && onUseAadTemplateFieldsChange && (
+          <EuiFlexItem>
+            <EuiSwitch
+              label={ACTION_USE_AAD_TEMPLATE_FIELDS_LABEL}
+              checked={(action as RuleAction).useAlertDataForTemplate || false}
+              onChange={onUseAadTemplateFieldsChange}
+              data-test-subj="ruleActionsMessageUseAadTemplateFieldsSwitch"
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <Suspense fallback={null}>
             <ParamsFieldsComponent

@@ -337,7 +337,7 @@ export const HEALTH_CHECK_ACTION_TEXT = i18n.translate('alertsUIShared.healthChe
 export const RULE_FORM_ROUTE_PARAMS_ERROR_TITLE = i18n.translate(
   'alertsUIShared.ruleForm.routeParamsErrorTitle',
   {
-    defaultMessage: 'Unable to load rule form.',
+    defaultMessage: 'Unable to load rule form',
   }
 );
 
@@ -351,7 +351,7 @@ export const RULE_FORM_ROUTE_PARAMS_ERROR_TEXT = i18n.translate(
 export const RULE_FORM_RULE_TYPE_NOT_FOUND_ERROR_TITLE = i18n.translate(
   'alertsUIShared.ruleForm.ruleTypeNotFoundErrorTitle',
   {
-    defaultMessage: 'Unable to load rule type.',
+    defaultMessage: 'Unable to load rule type',
   }
 );
 
@@ -374,7 +374,7 @@ export const RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT = i18n.translate(
   'alertsUIShared.ruleForm.ruleNotFoundErrorText',
   {
     defaultMessage:
-      'There was an error loading the rule. Please ensure you have access to the rule selected.',
+      'There was an error loading the rule. Please ensure the rule exists and you have access to the rule selected.',
   }
 );
 
@@ -550,6 +550,13 @@ export const ACTION_UNABLE_TO_LOAD_CONNECTOR_DESCRIPTION = i18n.translate(
   'alertsUIShared.ruleActionsItem.actionUnableToLoadConnectorTitle',
   {
     defaultMessage: `Create a connector and try again. If you can't create a connector, contact your system administrator.`,
+  }
+);
+
+export const ACTION_USE_AAD_TEMPLATE_FIELDS_LABEL = i18n.translate(
+  'alertsUIShared.ruleActionsItem.actionUseAadTemplateFieldsLabel',
+  {
+    defaultMessage: 'Use template fields from alerts index',
   }
 );
 
