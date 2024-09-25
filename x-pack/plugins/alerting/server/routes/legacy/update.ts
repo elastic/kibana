@@ -47,7 +47,8 @@ const bodySchema = schema.object({
 export const updateAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.put(
     {
@@ -57,7 +58,7 @@ export const updateAlertRoute = (
         params: paramSchema,
       },
       options: {
-        access: 'public',
+        access: isServerless ? 'internal' : 'public',
         summary: 'Update an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,

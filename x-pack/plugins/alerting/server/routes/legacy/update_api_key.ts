@@ -22,7 +22,8 @@ const paramSchema = schema.object({
 export const updateApiKeyRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.post(
     {
@@ -31,7 +32,7 @@ export const updateApiKeyRoute = (
         params: paramSchema,
       },
       options: {
-        access: 'public',
+        access: isServerless ? 'internal' : 'public',
         summary: 'Update the API key for an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,

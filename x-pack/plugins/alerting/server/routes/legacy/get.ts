@@ -20,7 +20,8 @@ const paramSchema = schema.object({
 export const getAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.get(
     {
@@ -29,7 +30,7 @@ export const getAlertRoute = (
         params: paramSchema,
       },
       options: {
-        access: 'public',
+        access: isServerless ? 'internal' : 'public',
         summary: 'Get an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,
