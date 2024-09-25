@@ -24,10 +24,10 @@ export const getPackagePolicyDeleteCallback =
         if (deletedOsqueryManagerPolicy.policy_id) {
           const foundPacks = await packsClient.find({
             type: packSavedObjectType,
-            hasReference: {
+            hasReference: deletedOsqueryManagerPolicy.policy_ids.map((policyId: string) => ({
               type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-              id: deletedOsqueryManagerPolicy.policy_id,
-            },
+              id: policyId,
+            })),
             perPage: 1000,
           });
 
@@ -45,13 +45,15 @@ export const getPackagePolicyDeleteCallback =
                   {
                     shards: filter(
                       pack.attributes.shards,
-                      (shard) => shard.key !== deletedOsqueryManagerPolicy.policy_id
+                      (shard) =>
+                        shard.key !== deletedOsqueryManagerPolicy.policy_ids.indexOf(shard.key) > -1
                     ),
                   },
                   {
                     references: filter(
                       pack.references,
-                      (reference) => reference.id !== deletedOsqueryManagerPolicy.policy_id
+                      (reference) =>
+                        deletedOsqueryManagerPolicy.policy_ids.indexOf(reference.id) > -1
                     ),
                   }
                 )

@@ -39,7 +39,7 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
       let kuery = '';
 
       if (osqueryPolicies?.length) {
-        kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
+        kuery = `(policy_ids: ${osqueryPolicies})`;
 
         if (searchValue) {
           kuery += ` and (local_metadata.host.hostname.keyword:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}* or policy_id: *${searchValue}* or local_metadata.os.platform: *${searchValue}* or policy_name:${searchValue} )`;
