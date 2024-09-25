@@ -535,10 +535,17 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
             hasChildLabel={false}
             fullWidth
             label={
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.vCpuUsageLabel"
-                defaultMessage="vCPUs usage level"
-              />
+              showNodeInfo ? (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.vCpuUsageLabel"
+                  defaultMessage="vCPUs usage level"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.vCUUsageLabel"
+                  defaultMessage="VCU usage level"
+                />
+              )
             }
           >
             <EuiRange
@@ -561,10 +568,15 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               showTicks
               ticks={customTicks}
               levels={customColorsLevels}
-              aria-label={i18n.translate(
-                'xpack.ml.trainedModels.modelsList.startDeployment.vCpuLevel',
-                { defaultMessage: 'vCPUs level selector' }
-              )}
+              aria-label={
+                showNodeInfo
+                  ? i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.vCpuLevel', {
+                      defaultMessage: 'vCPUs level selector',
+                    })
+                  : i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.vCULevel', {
+                      defaultMessage: 'VCUs level selector',
+                    })
+              }
               aria-describedby={'vCpuRangeHelp'}
               data-test-subj={'mlModelsStartDeploymentModalVCPULevel'}
             />
