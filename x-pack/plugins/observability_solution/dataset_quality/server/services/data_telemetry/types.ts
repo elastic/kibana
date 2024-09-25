@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RootSchema } from '@elastic/ebt';
 import {
   IndexName,
   IndicesGetMappingResponse,
@@ -87,11 +86,11 @@ export interface DataTelemetryEvent {
   beat: string[];
 }
 
-export enum LogsDataTelemetryEventTypes {
-  LogsDataTelemetryEvent = 'Logs Data Telemetry Event',
+export interface DataTelemetryObject {
+  data: DataTelemetryEvent[];
 }
 
-export interface LogsDataTelemetryEvent {
-  eventType: LogsDataTelemetryEventTypes.LogsDataTelemetryEvent;
-  schema: RootSchema<DataTelemetryEvent>;
+export interface TelemetryTaskState {
+  data: DataTelemetryEvent[] | null;
+  ran: boolean;
 }
