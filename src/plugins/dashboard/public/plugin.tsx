@@ -79,7 +79,6 @@ import {
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
-import { getDashboardContentManagementCache } from './services/dashboard_content_management_service';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
