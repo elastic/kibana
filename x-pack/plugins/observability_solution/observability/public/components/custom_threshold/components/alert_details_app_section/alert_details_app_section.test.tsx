@@ -78,6 +78,7 @@ jest.mock('../../../../utils/kibana_react', () => ({
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
   const mockedSetAlertSummaryFields = jest.fn();
+  const mockedSetRelatedAlertsKuery = jest.fn();
 
   const renderComponent = (
     alert: Partial<CustomThresholdAlert> = {},
@@ -90,6 +91,7 @@ describe('AlertDetailsAppSection', () => {
             alert={buildCustomThresholdAlert(alert, alertFields)}
             rule={buildCustomThresholdRule()}
             setAlertSummaryFields={mockedSetAlertSummaryFields}
+            setRelatedAlertsKuery={mockedSetRelatedAlertsKuery}
           />
         </QueryClientProvider>
       </IntlProvider>
