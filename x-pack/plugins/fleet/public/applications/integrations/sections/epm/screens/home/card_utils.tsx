@@ -39,30 +39,30 @@ import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
 import type { PackageListItem } from '../../../../types';
 
 export interface IntegrationCardItem {
-  url: string;
-  release?: IntegrationCardReleaseLabel;
-  description: string;
-  name: string;
-  title: string;
-  version: string;
-  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
-  integration: string;
-  id: string;
   categories: string[];
+  description: string;
+  descriptionLineClamp?: number;
+  extraLabelsBadges?: React.ReactNode[];
+  maxCardHeight?: number;
   fromIntegrations?: string;
+  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
+  id: string;
+  installStatus: EpmPackageInstallStatus | null | undefined;
+  integration: string;
+  isCollectionCard?: boolean;
+  isQuickstart?: boolean;
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
-  isQuickstart?: boolean;
-  showLabels?: boolean;
-  extraLabelsBadges?: React.ReactNode[];
+  name: string;
   onCardClick?: () => void;
-  isCollectionCard?: boolean;
+  release?: IntegrationCardReleaseLabel;
   showInstallationStatus?: boolean;
-  installStatus: EpmPackageInstallStatus | null | undefined;
+  showLabels?: boolean;
+  title: string;
   titleLineClamp?: number;
-  descriptionLineClamp?: number;
-  fixedCardHeight?: number;
+  url: string;
+  version: string;
 }
 
 export const mapToCard = ({

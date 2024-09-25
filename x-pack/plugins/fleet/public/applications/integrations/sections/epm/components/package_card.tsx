@@ -45,11 +45,11 @@ export type PackageCardProps = IntegrationCardItem;
 
 // Min-height is roughly 3 lines of content.
 // This keeps the cards from looking overly unbalanced because of content differences.
-const Card = styled(EuiCard)<{ isquickstart?: boolean; fixedCardHeight?: number }>`
+const Card = styled(EuiCard)<{ isquickstart?: boolean; maxCardHeight?: number }>`
   min-height: 127px;
   border-color: ${({ isquickstart }) => (isquickstart ? '#ba3d76' : null)};
-  ${({ fixedCardHeight }) =>
-    fixedCardHeight ? `max-height: ${fixedCardHeight}px; overflow: hidden;` : ''};
+  ${({ maxCardHeight }) =>
+    maxCardHeight ? `max-height: ${maxCardHeight}px; overflow: hidden;` : ''};
 `;
 
 export function PackageCard({
@@ -75,7 +75,7 @@ export function PackageCard({
   isCollectionCard = false,
   titleLineClamp,
   descriptionLineClamp,
-  fixedCardHeight,
+  maxCardHeight,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -229,7 +229,7 @@ export function PackageCard({
             />
           }
           onClick={onClickProp ?? onCardClick}
-          fixedCardHeight={fixedCardHeight}
+          maxCardHeight={maxCardHeight}
         >
           <EuiFlexGroup gutterSize="xs" wrap={true}>
             {showLabels && extraLabelsBadges ? extraLabelsBadges : null}

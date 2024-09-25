@@ -85,6 +85,7 @@ import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
 import { DocumentationPage, hasDocumentation } from './documentation';
 import { Configs } from './configs';
+import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 
 import './index.scss';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
