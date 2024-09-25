@@ -50,7 +50,19 @@
         "label": "InventoryServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /internal/inventory/entities/types\": ",
+          "{ \"GET /internal/inventory/has_data\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/inventory/has_data\", undefined, ",
+          "InventoryRouteHandlerResources",
+          ", { hasData: boolean; }, ",
+          "InventoryRouteCreateOptions",
+          ">; \"GET /internal/inventory/entities/types\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
