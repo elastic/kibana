@@ -108,7 +108,7 @@ describe('DiscoverEBTContextManager', () => {
 
   describe('trackFieldUsageEvent', () => {
     it('should track the field usage when a field is added to the table', async () => {
-      discoverEBTContextManager.register({ core: coreSetupMock });
+      discoverEBTContextManager.initialize({ core: coreSetupMock });
       discoverEBTContextManager.enable();
 
       await discoverEBTContextManager.trackDataTableSelection({
@@ -132,7 +132,7 @@ describe('DiscoverEBTContextManager', () => {
     });
 
     it('should track the field usage when a field is removed from the table', async () => {
-      discoverEBTContextManager.register({ core: coreSetupMock });
+      discoverEBTContextManager.initialize({ core: coreSetupMock });
       discoverEBTContextManager.enable();
 
       await discoverEBTContextManager.trackDataTableRemoval({
@@ -156,7 +156,7 @@ describe('DiscoverEBTContextManager', () => {
     });
 
     it('should track the field usage when a filter is created', async () => {
-      discoverEBTContextManager.register({ core: coreSetupMock });
+      discoverEBTContextManager.initialize({ core: coreSetupMock });
       discoverEBTContextManager.enable();
 
       await discoverEBTContextManager.trackFilterAddition({
