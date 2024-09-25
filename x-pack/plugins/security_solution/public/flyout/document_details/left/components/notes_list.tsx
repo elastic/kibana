@@ -93,7 +93,7 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
   const notes: Note[] = useSelector((state: State) =>
     selectSortedNotesByDocumentId(state, {
       documentId: eventId,
-      sort: { field: 'created', direction: 'desc' },
+      sort: { field: 'created', direction: 'asc' },
     })
   );
 
