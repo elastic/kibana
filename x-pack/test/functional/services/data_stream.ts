@@ -9,7 +9,7 @@ import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 /**
- * High level interface to operate with Elasticsearch data stream and TSDS.
+ * High level interface to operate with Elasticsearch data stream and TSDS/LogsDB.
  */
 export function DataStreamProvider({ getService, getPageObject }: FtrProviderContext) {
   const es = getService('es');
@@ -112,23 +112,25 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
   async function updateDataStreamTemplate(
     stream: string,
     mapping: Record<string, MappingProperty>,
-    tsdb?: boolean
+    mode?: 'tsdb' | 'logsdb'
   ) {
     await es.cluster.putComponentTemplate({
       name: `${stream}_mapping`,
       template: {
-        settings: tsdb
-          ? {
+        settings: !mode
+          ? { mode: undefined }
+          : mode === 'logsdb'
+          ? { mode: 'logsdb' }
+          : {
               mode: 'time_series',
               routing_path: 'request',
-            }
-          : { mode: undefined },
+            },
         mappings: {
           properties: mapping,
         },
       },
     });
-    log.info(`Updating ${stream} index template${tsdb ? ' for TSDB' : ''}...`);
+    log.info(`Updating ${stream} index template${mode ? ` for ${mode.toUpperCase()}` : ''}...`);
     await es.indices.putIndexTemplate({
       name: `${stream}_index_template`,
       index_patterns: [stream],
@@ -141,46 +143,54 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
   }
 
   /**
-   * "Upgrade" a given data stream into a time series data series (TSDB/TSDS)
+   * "Upgrade" a given data stream into a a TSDB or LogsDB data series
    * @param stream the data stream name
    * @param newMapping the new mapping already with time series metrics/dimensions configured
    */
-  async function upgradeStreamToTSDB(stream: string, newMapping: Record<string, MappingProperty>) {
-    // rollover to upgrade the index type to time_series
+  async function upgradeStream(
+    stream: string,
+    newMapping: Record<string, MappingProperty>,
+    mode: 'tsdb' | 'logsdb'
+  ) {
+    // rollover to upgrade the index type
     // uploading a new mapping for the stream index using the provided metric/dimension list
-    log.info(`Updating ${stream} data stream component template with TSDB stuff...`);
-    await updateDataStreamTemplate(stream, newMapping, true);
+    log.info(`Updating ${stream} data stream component template with ${mode} stuff...`);
+    await updateDataStreamTemplate(stream, newMapping, mode);
 
-    log.info('Rolling over the backing index for TSDB');
+    log.info('Rolling over the backing index for ${mode}');
     await es.indices.rollover({
       alias: stream,
     });
   }
 
   /**
-   * "Downgrade" a TSDB/TSDS data stream into a regular data stream
-   * @param tsdbStream the TSDB/TSDS data stream to "downgrade"
+   * "Downgrade" a TSDB/TSDS/LogsDB data stream into a regular data stream
+   * @param stream the TSDB/TSDS/LogsDB data stream to "downgrade"
    * @param oldMapping the new mapping already with time series metrics/dimensions already removed
    */
-  async function downgradeTSDBtoStream(
-    tsdbStream: string,
-    newMapping: Record<string, MappingProperty>
+  async function downgradeStream(
+    stream: string,
+    newMapping: Record<string, MappingProperty>,
+    mode: 'tsdb' | 'logsdb'
   ) {
-    // strip out any time-series specific mapping
-    for (const fieldMapping of Object.values(newMapping || {})) {
-      if ('time_series_metric' in fieldMapping) {
-        delete fieldMapping.time_series_metric;
+    if (mode === 'tsdb') {
+      // strip out any time-series specific mapping
+      for (const fieldMapping of Object.values(newMapping || {})) {
+        if ('time_series_metric' in fieldMapping) {
+          delete fieldMapping.time_series_metric;
+        }
+        if ('time_series_dimension' in fieldMapping) {
+          delete fieldMapping.time_series_dimension;
+        }
       }
-      if ('time_series_dimension' in fieldMapping) {
-        delete fieldMapping.time_series_dimension;
-      }
+      log.info(`Updating ${stream} data stream component template with TSDB stuff...`);
+      await updateDataStreamTemplate(stream, newMapping);
     }
-    log.info(`Updating ${tsdbStream} data stream component template with TSDB stuff...`);
-    await updateDataStreamTemplate(tsdbStream, newMapping, false);
+
     // rollover to downgrade the index type to regular stream
-    log.info(`Rolling over the ${tsdbStream} data stream into a regular data stream...`);
+    log.info(`Rolling over the ${stream} data stream into a regular data stream...`);
     await es.indices.rollover({
-      alias: tsdbStream,
+      alias: stream,
     });
   }
 
@@ -188,16 +198,16 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
    * Takes care of the entire process to create a data stream
    * @param streamIndex name of the new data stream to create
    * @param mappings the mapping to associate with the data stream
-   * @param tsdb when enabled it will configure the data stream as a TSDB/TSDS
+   * @param tsdb when enabled it will configure the data stream as a TSDB/TSDS/LogsDB
    */
   async function createDataStream(
     streamIndex: string,
     mappings: Record<string, MappingProperty>,
-    tsdb: boolean = true
+    mode: 'tsdb' | 'logsdb' | undefined
   ) {
     log.info(`Creating ${streamIndex} data stream component template...`);
 
-    await updateDataStreamTemplate(streamIndex, mappings, tsdb);
+    await updateDataStreamTemplate(streamIndex, mappings, mode);
 
     log.info(`Creating ${streamIndex} data stream index...`);
     await es.indices.createDataStream({
@@ -226,7 +236,7 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
     createDataStream,
     deleteDataStream,
     downsampleTSDBIndex,
-    upgradeStreamToTSDB,
-    downgradeTSDBtoStream,
+    upgradeStream,
+    downgradeStream,
   };
 }

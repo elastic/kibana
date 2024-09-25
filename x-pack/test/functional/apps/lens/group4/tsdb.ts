@@ -666,7 +666,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     await dataStreams.createDataStream(
                       index,
                       getDataMapping({ tsdb, removeTSDBFields }),
-                      tsdb
+                      tsdb ? 'tsdb' : undefined
                     );
                   } else {
                     log.info(`creating a index "${index}" with mapping...`);
@@ -747,7 +747,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         before(async () => {
           log.info(`Creating "${streamIndex}" data stream...`);
-          await dataStreams.createDataStream(streamIndex, getDataMapping(), false);
+          await dataStreams.createDataStream(streamIndex, getDataMapping(), undefined);
 
           // add some data to the stream
           await createDocs(streamIndex, { isStream: true }, fromTimeForScenarios);
@@ -760,7 +760,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.info(`Upgrade "${streamIndex}" stream to TSDB...`);
 
           const tsdbMapping = getDataMapping({ tsdb: true });
-          await dataStreams.upgradeStreamToTSDB(streamIndex, tsdbMapping);
+          await dataStreams.upgradeStream(streamIndex, tsdbMapping, 'tsdb');
           log.info(
             `Add more data to new "${streamConvertedToTsdbIndex}" dataView (now with TSDB backing index)...`
           );
@@ -850,7 +850,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         before(async () => {
           log.info(`Creating "${tsdbStream}" data stream...`);
-          await dataStreams.createDataStream(tsdbStream, getDataMapping({ tsdb: true }), true);
+          await dataStreams.createDataStream(tsdbStream, getDataMapping({ tsdb: true }), 'tsdb');
 
           // add some data to the stream
           await createDocs(tsdbStream, { isStream: true }, fromTimeForScenarios);
@@ -864,7 +864,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             `Dowgrade "${tsdbStream}" stream into regular stream "${tsdbConvertedToStream}"...`
           );
 
-          await dataStreams.downgradeTSDBtoStream(tsdbStream, getDataMapping({ tsdb: true }));
+          await dataStreams.downgradeStream(tsdbStream, getDataMapping({ tsdb: true }), 'tsdb');
           log.info(`Add more data to new "${tsdbConvertedToStream}" dataView (no longer TSDB)...`);
           // add some more data when upgraded
           await createDocs(tsdbConvertedToStream, { isStream: true }, toTimeForScenarios);

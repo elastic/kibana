@@ -13,11 +13,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const TEST_DOC_COUNT = 100;
 const TIME_PICKER_FORMAT = 'MMM D, YYYY [@] HH:mm:ss.SSS';
-const timeSeriesMetrics: Record<string, 'gauge' | 'counter'> = {
-  bytes_gauge: 'gauge',
-  bytes_counter: 'counter',
-};
-const timeSeriesDimensions = ['request', 'url'];
 
 type TestDoc = Record<string, string | string[] | number | null | Record<string, unknown>>;
 
@@ -32,7 +27,9 @@ const testDocTemplate: TestDoc = {
     dest: 'US',
     coordinates: { lat: 39.41042861, lon: -88.8454325 },
   },
-  host: 'artifacts.elastic.co',
+  host: {
+    name: 'artifacts.elastic.co',
+  },
   index: 'kibana_sample_data_logs',
   ip: '223.87.60.27',
   machine: { ram: 8589934592, os: 'win 8' },
@@ -52,11 +49,7 @@ const testDocTemplate: TestDoc = {
   bytes_counter: 0,
 };
 
-function getDataMapping(
-  { tsdb, removeTSDBFields }: { tsdb: boolean; removeTSDBFields?: boolean } = {
-    tsdb: false,
-  }
-): Record<string, MappingProperty> {
+function getDataMapping(): Record<string, MappingProperty> {
   const dataStreamMapping: Record<string, MappingProperty> = {
     '@timestamp': {
       type: 'date',
@@ -115,13 +108,11 @@ function getDataMapping(
       },
     },
     host: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
+      properties: {
+        name: {
           type: 'keyword',
         },
       },
-      type: 'text',
     },
     index: {
       fields: {
@@ -201,36 +192,16 @@ function getDataMapping(
       type: 'date',
     },
   };
-
-  if (tsdb) {
-    // augment the current mapping
-    for (const [fieldName, fieldMapping] of Object.entries(dataStreamMapping || {})) {
-      if (
-        timeSeriesMetrics[fieldName] &&
-        (fieldMapping.type === 'double' || fieldMapping.type === 'long')
-      ) {
-        fieldMapping.time_series_metric = timeSeriesMetrics[fieldName];
-      }
-
-      if (timeSeriesDimensions.includes(fieldName) && fieldMapping.type === 'keyword') {
-        fieldMapping.time_series_dimension = true;
-      }
-    }
-  } else if (removeTSDBFields) {
-    for (const fieldName of Object.keys(timeSeriesMetrics)) {
-      delete dataStreamMapping[fieldName];
-    }
-  }
   return dataStreamMapping;
 }
 
-function sumFirstNValues(n: number, bars: Array<{ y: number }>): number {
+function sumFirstNValues(n: number, bars: Array<{ y: number }> | undefined): number {
   const indexes = Array(n)
     .fill(1)
     .map((_, i) => i);
   let countSum = 0;
   for (const index of indexes) {
-    if (bars[index]) {
+    if (bars?.[index]) {
       countSum += bars[index].y;
     }
   }
@@ -238,13 +209,7 @@ function sumFirstNValues(n: number, bars: Array<{ y: number }>): number {
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'common',
-    'timePicker',
-    'lens',
-    'dashboard',
-    'svlCommonPage',
-  ]);
+  const { common, lens, dashboard } = getPageObjects(['common', 'lens', 'dashboard']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
@@ -258,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const createDocs = async (
     esIndex: string,
-    { isStream, removeTSDBFields }: { isStream: boolean; removeTSDBFields?: boolean },
+    { isStream }: { isStream: boolean },
     startTime: string
   ) => {
     log.info(
@@ -283,11 +248,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           bytes_gauge: Math.floor(Math.random() * 10000 * i),
           bytes_counter: 5000,
         };
-        if (removeTSDBFields) {
-          for (const field of Object.keys(timeSeriesMetrics)) {
-            delete doc[field];
-          }
-        }
+
         return doc;
       });
 
@@ -317,26 +278,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.info(`Indexed ${res.items.length} test data docs.`);
   };
 
-  describe('lens tsdb', function () {
-    const tsdbIndex = 'kibana_sample_data_logstsdb';
-    const tsdbDataView = tsdbIndex;
-    const tsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb';
+  describe('lens logsdb', function () {
+    const logsdbIndex = 'kibana_sample_data_logslogsdb';
+    const logsdbDataView = logsdbIndex;
+    const logsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb';
     const fromTime = 'Apr 16, 2023 @ 00:00:00.000';
     const toTime = 'Jun 16, 2023 @ 00:00:00.000';
 
     before(async () => {
-      await PageObjects.svlCommonPage.loginAsAdmin();
-      log.info(`loading ${tsdbIndex} index...`);
-      await esArchiver.loadIfNeeded(tsdbEsArchive);
-      log.info(`creating a data view for "${tsdbDataView}"...`);
+      log.info(`loading ${logsdbIndex} index...`);
+      await esArchiver.loadIfNeeded(logsdbEsArchive);
+      log.info(`creating a data view for "${logsdbDataView}"...`);
       await indexPatterns.create(
         {
-          title: tsdbDataView,
+          title: logsdbDataView,
           timeFieldName: '@timestamp',
         },
         { override: true }
       );
-      log.info(`updating settings to use the "${tsdbDataView}" dataView...`);
+      log.info(`updating settings to use the "${logsdbDataView}" dataView...`);
       await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
         defaultIndex: '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51',
@@ -347,92 +307,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
-      await es.indices.delete({ index: [tsdbIndex] });
-    });
-
-    describe('downsampling', () => {
-      const downsampleDataView: { index: string; dataView: string } = { index: '', dataView: '' };
-      before(async () => {
-        const downsampledTargetIndex = await dataStreams.downsampleTSDBIndex(tsdbIndex, {
-          isStream: false,
-        });
-        downsampleDataView.index = downsampledTargetIndex;
-        downsampleDataView.dataView = `${tsdbIndex},${downsampledTargetIndex}`;
-
-        log.info(`creating a data view for "${downsampleDataView.dataView}"...`);
-        await indexPatterns.create(
-          {
-            title: downsampleDataView.dataView,
-            timeFieldName: '@timestamp',
-          },
-          { override: true }
-        );
-      });
-
-      after(async () => {
-        await es.indices.delete({ index: [downsampleDataView.index] });
-      });
-
-      describe('for regular metric', () => {
-        it('defaults to median for non-rolled up metric', async () => {
-          await PageObjects.common.navigateToApp('lens');
-          await PageObjects.lens.switchDataPanelIndexPattern(tsdbDataView);
-          await PageObjects.lens.waitForField('bytes_gauge');
-          await PageObjects.lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
-          expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-            'Median of bytes_gauge'
-          );
-        });
-
-        it('does not show a warning', async () => {
-          await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
-          await testSubjects.missingOrFail('median-partial-warning');
-          await PageObjects.lens.assertNoEditorWarning();
-          await PageObjects.lens.closeDimensionEditor();
-        });
-      });
-
-      describe('for rolled up metric (downsampled)', () => {
-        it('defaults to average for rolled up metric', async () => {
-          await PageObjects.lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
-          await PageObjects.lens.removeLayer();
-          await PageObjects.lens.waitForField('bytes_gauge');
-          await PageObjects.lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
-          expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-            'Average of bytes_gauge'
-          );
-        });
-        it('shows warnings in editor when using median', async () => {
-          await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
-          await testSubjects.existOrFail('median-partial-warning');
-          await testSubjects.click('lns-indexPatternDimension-median');
-          await PageObjects.lens.waitForVisualization('xyVisChart');
-          await PageObjects.lens.assertMessageListContains(
-            'Median of bytes_gauge uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-            'warning'
-          );
-        });
-        it('shows warnings in dashboards as well', async () => {
-          await PageObjects.lens.save('New', false, false, false, 'new');
-
-          await PageObjects.dashboard.waitForRenderComplete();
-          await PageObjects.lens.assertMessageListContains(
-            'Median of bytes_gauge uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-            'warning'
-          );
-        });
-      });
+      await es.indices.delete({ index: [logsdbIndex] });
     });
 
     describe('time series special field types support', () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('lens');
-        await PageObjects.lens.switchDataPanelIndexPattern(tsdbDataView);
-        await PageObjects.lens.goToTimeRange();
+        await common.navigateToApp('lens');
+        await lens.switchDataPanelIndexPattern(logsdbDataView);
+        await lens.goToTimeRange();
       });
 
       afterEach(async () => {
-        await PageObjects.lens.removeLayer();
+        await lens.removeLayer();
       });
 
       // skip count for now as it's a special function and will
@@ -467,14 +353,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         if (supportedOperations.length) {
           it(`should allow operations when supported by ${fieldType} field type`, async () => {
             // Counter rate requires a date histogram dimension configured to work
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
 
-            // minimum supports all tsdb field types
-            await PageObjects.lens.configureDimension({
+            // minimum supports all logsdb field types
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'min',
               field: `bytes_${fieldType}`,
@@ -492,7 +378,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             for (const supportedOp of supportedOperations) {
               // try to change to the provided function and check all is ok
-              await PageObjects.lens.selectOperation(supportedOp.name);
+              await lens.selectOperation(supportedOp.name);
 
               expect(
                 await find.existsByCssSelector(
@@ -501,22 +387,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               ).to.be(false);
 
               // return in a clean state before checking the next operation
-              await PageObjects.lens.selectOperation('min');
+              await lens.selectOperation('min');
             }
-            await PageObjects.lens.closeDimensionEditor();
+            await lens.closeDimensionEditor();
           });
         }
         if (unsupportedOperatons.length) {
           it(`should notify the incompatibility of unsupported operations for the ${fieldType} field type`, async () => {
             // Counter rate requires a date histogram dimension configured to work
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
 
-            // minimum supports all tsdb field types
-            await PageObjects.lens.configureDimension({
+            // minimum supports all logsdb field types
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'min',
               field: `bytes_${fieldType}`,
@@ -537,7 +423,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             for (const unsupportedOp of unsupportedOperatons) {
               // try to change to the provided function and check if it's in an incompatibility state
-              await PageObjects.lens.selectOperation(unsupportedOp.name, true);
+              await lens.selectOperation(unsupportedOp.name, true);
 
               const fieldSelectErrorEl = await find.byCssSelector(
                 '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText'
@@ -548,28 +434,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               );
 
               // return in a clean state before checking the next operation
-              await PageObjects.lens.selectOperation('min');
+              await lens.selectOperation('min');
             }
-            await PageObjects.lens.closeDimensionEditor();
+            await lens.closeDimensionEditor();
           });
         }
       }
 
       describe('show time series dimension groups within breakdown', () => {
         it('should show the time series dimension group on field picker when configuring a breakdown', async () => {
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
             operation: 'date_histogram',
             field: '@timestamp',
           });
 
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
             operation: 'min',
             field: 'bytes_counter',
           });
 
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
             operation: 'terms',
             keepOpen: true,
@@ -577,24 +463,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const list = await comboBox.getOptionsList('indexPattern-dimension-field');
           expect(list).to.contain('Time series dimensions');
-          await PageObjects.lens.closeDimensionEditor();
+          await lens.closeDimensionEditor();
         });
 
         it("should not show the time series dimension group on field picker if it's not a breakdown", async () => {
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
             operation: 'min',
             field: 'bytes_counter',
           });
 
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
             operation: 'date_histogram',
             keepOpen: true,
           });
           const list = await comboBox.getOptionsList('indexPattern-dimension-field');
           expect(list).to.not.contain('Time series dimensions');
-          await PageObjects.lens.closeDimensionEditor();
+          await lens.closeDimensionEditor();
         });
       });
     });
@@ -613,9 +499,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         indexes: Array<{
           index: string;
           create?: boolean;
-          downsample?: boolean;
-          tsdb?: boolean;
-          removeTSDBFields?: boolean;
+          logsdb?: boolean;
         }>;
       }> => [
         {
@@ -624,29 +508,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
         {
           name: 'Dataview with an additional regular index',
-          indexes: [
-            { index: initialIndex },
-            { index: 'regular_index', create: true, removeTSDBFields: true },
-          ],
+          indexes: [{ index: initialIndex }, { index: 'regular_index', create: true }],
         },
         {
-          name: 'Dataview with an additional downsampled TSDB stream',
+          name: 'Dataview with an additional LogsDB stream',
           indexes: [
             { index: initialIndex },
-            { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
+            { index: 'logsdb_index_2', create: true, logsdb: true },
           ],
-        },
-        {
-          name: 'Dataview with additional regular index and a downsampled TSDB stream',
-          indexes: [
-            { index: initialIndex },
-            { index: 'regular_index', create: true, removeTSDBFields: true },
-            { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
-          ],
-        },
-        {
-          name: 'Dataview with an additional TSDB stream',
-          indexes: [{ index: initialIndex }, { index: 'tsdb_index_2', create: true, tsdb: true }],
         },
       ];
 
@@ -656,51 +525,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           indexes: Array<{
             index: string;
             create?: boolean;
-            downsample?: boolean;
-            tsdb?: boolean;
-            removeTSDBFields?: boolean;
+            logsdb?: boolean;
           }>
         ) => void
       ): void {
         for (const { name, indexes } of getScenarios(initialIndex)) {
           describe(name, () => {
             let dataViewName: string;
-            let downsampledTargetIndex: string = '';
 
             before(async () => {
-              for (const { index, create, downsample, tsdb, removeTSDBFields } of indexes) {
+              for (const { index, create, logsdb } of indexes) {
                 if (create) {
-                  if (tsdb) {
-                    await dataStreams.createDataStream(
-                      index,
-                      getDataMapping({ tsdb, removeTSDBFields }),
-                      'tsdb'
-                    );
+                  if (logsdb) {
+                    await dataStreams.createDataStream(index, getDataMapping(), 'logsdb');
                   } else {
                     log.info(`creating a index "${index}" with mapping...`);
                     await es.indices.create({
                       index,
                       mappings: {
-                        properties: getDataMapping({ tsdb: Boolean(tsdb), removeTSDBFields }),
+                        properties: getDataMapping(),
                       },
                     });
                   }
                   // add data to the newly created index
-                  await createDocs(
-                    index,
-                    { isStream: Boolean(tsdb), removeTSDBFields },
-                    fromTimeForScenarios
-                  );
-                }
-                if (downsample) {
-                  downsampledTargetIndex = await dataStreams.downsampleTSDBIndex(index, {
-                    isStream: Boolean(tsdb),
-                  });
+                  await createDocs(index, { isStream: Boolean(logsdb) }, fromTimeForScenarios);
                 }
               }
-              dataViewName = `${indexes.map(({ index }) => index).join(',')}${
-                downsampledTargetIndex ? `,${downsampledTargetIndex}` : ''
-              }`;
+              dataViewName = indexes.map(({ index }) => index).join(',');
               log.info(`creating a data view for "${dataViewName}"...`);
               await indexPatterns.create(
                 {
@@ -709,10 +560,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
                 { override: true }
               );
-              await PageObjects.common.navigateToApp('lens');
+              await common.navigateToApp('lens');
               await elasticChart.setNewChartUiDebugFlag(true);
               // go to the
-              await PageObjects.lens.goToTimeRange(
+              await lens.goToTimeRange(
                 fromTimeForScenarios,
                 moment
                   .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
@@ -722,9 +573,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             after(async () => {
-              for (const { index, create, tsdb } of indexes) {
+              for (const { index, create, logsdb } of indexes) {
                 if (create) {
-                  if (tsdb) {
+                  if (logsdb) {
                     await dataStreams.deleteDataStream(index);
                   } else {
                     log.info(`deleting the index "${index}"...`);
@@ -733,14 +584,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     });
                   }
                 }
-                // no need to cleant he specific downsample index as everything linked to the stream
-                // is cleaned up automatically
               }
             });
 
             beforeEach(async () => {
-              await PageObjects.lens.switchDataPanelIndexPattern(dataViewName);
-              await PageObjects.lens.removeLayer();
+              await lens.switchDataPanelIndexPattern(dataViewName);
+              await lens.removeLayer();
             });
 
             testingFn(indexes);
@@ -748,10 +597,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       }
 
-      describe('Data-stream upgraded to TSDB scenarios', () => {
+      describe('Data-stream upgraded to LogsDB scenarios', () => {
         const streamIndex = 'data_stream';
         // rollover does not allow to change name, it will just change backing index underneath
-        const streamConvertedToTsdbIndex = streamIndex;
+        const streamConvertedToLogsDBIndex = streamIndex;
 
         before(async () => {
           log.info(`Creating "${streamIndex}" data stream...`);
@@ -765,30 +614,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'dateFormat:tz': 'UTC',
             'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
           });
-          log.info(`Upgrade "${streamIndex}" stream to TSDB...`);
+          log.info(`Upgrade "${streamIndex}" stream to LogsDB...`);
 
-          const tsdbMapping = getDataMapping({ tsdb: true });
-          await dataStreams.upgradeStream(streamIndex, tsdbMapping, 'tsdb');
+          const logsdbMapping = getDataMapping();
+          await dataStreams.upgradeStream(streamIndex, logsdbMapping, 'logsdb');
           log.info(
-            `Add more data to new "${streamConvertedToTsdbIndex}" dataView (now with TSDB backing index)...`
+            `Add more data to new "${streamConvertedToLogsDBIndex}" dataView (now with LogsDB backing index)...`
           );
           // add some more data when upgraded
-          await createDocs(streamConvertedToTsdbIndex, { isStream: true }, toTimeForScenarios);
+          await createDocs(streamConvertedToLogsDBIndex, { isStream: true }, toTimeForScenarios);
         });
 
         after(async () => {
           await dataStreams.deleteDataStream(streamIndex);
         });
 
-        runTestsForEachScenario(streamConvertedToTsdbIndex, (indexes) => {
-          it('should detect the data stream has now been upgraded to TSDB', async () => {
-            await PageObjects.lens.configureDimension({
+        runTestsForEachScenario(streamConvertedToLogsDBIndex, (indexes) => {
+          it('should detect the data stream has now been upgraded to LogsDB', async () => {
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
 
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'min',
               field: `bytes_counter`,
@@ -800,97 +649,99 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 timeout: 500,
               })
             ).to.eql(false);
-            await PageObjects.lens.closeDimensionEditor();
+            await lens.closeDimensionEditor();
           });
 
           it(`should visualize a date histogram chart for counter field`, async () => {
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
 
             // check the counter field works
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'min',
               field: `bytes_counter`,
             });
             // and also that the count of documents should be "indexes.length" times overall
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'count',
             });
 
-            await PageObjects.lens.waitForVisualization('xyVisChart');
-            const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-            const counterBars = data.bars![0].bars;
-            const countBars = data.bars![1].bars;
+            await lens.waitForVisualization('xyVisChart');
+            const data = await lens.getCurrentChartDebugState('xyVisChart');
+            const counterBars = data?.bars![0].bars;
+            const countBars = data?.bars![1].bars;
 
             log.info('Check counter data before the upgrade');
             // check there's some data before the upgrade
-            expect(counterBars[0].y).to.eql(5000);
+            expect(counterBars?.[0].y).to.eql(5000);
             log.info('Check counter data after the upgrade');
             // check there's some data after the upgrade
-            expect(counterBars[counterBars.length - 1].y).to.eql(5000);
+            expect(counterBars?.[counterBars.length - 1].y).to.eql(5000);
 
             // due to the flaky nature of exact check here, we're going to relax it
             // as long as there's data before and after it is ok
             log.info('Check count before the upgrade');
-            const columnsToCheck = countBars.length / 2;
+            const columnsToCheck = countBars ? countBars.length / 2 : 0;
             // Before the upgrade the count is N times the indexes
             expect(sumFirstNValues(columnsToCheck, countBars)).to.be.greaterThan(
               indexes.length * TEST_DOC_COUNT - 1
             );
             log.info('Check count after the upgrade');
             // later there are only documents for the upgraded stream
-            expect(sumFirstNValues(columnsToCheck, [...countBars].reverse())).to.be.greaterThan(
-              TEST_DOC_COUNT - 1
-            );
+            expect(
+              sumFirstNValues(columnsToCheck, [...(countBars ?? [])].reverse())
+            ).to.be.greaterThan(TEST_DOC_COUNT - 1);
           });
         });
       });
 
-      describe('TSDB downgraded to regular data stream scenarios', () => {
-        const tsdbStream = 'tsdb_stream_dowgradable';
+      describe('LogsDB downgraded to regular data stream scenarios', () => {
+        const logsdbStream = 'logsdb_stream_dowgradable';
         // rollover does not allow to change name, it will just change backing index underneath
-        const tsdbConvertedToStream = tsdbStream;
+        const logsdbConvertedToStream = logsdbStream;
 
         before(async () => {
-          log.info(`Creating "${tsdbStream}" data stream...`);
-          await dataStreams.createDataStream(tsdbStream, getDataMapping({ tsdb: true }), 'tsdb');
+          log.info(`Creating "${logsdbStream}" data stream...`);
+          await dataStreams.createDataStream(logsdbStream, getDataMapping(), 'logsdb');
 
           // add some data to the stream
-          await createDocs(tsdbStream, { isStream: true }, fromTimeForScenarios);
+          await createDocs(logsdbStream, { isStream: true }, fromTimeForScenarios);
 
-          log.info(`Update settings for "${tsdbStream}" dataView...`);
+          log.info(`Update settings for "${logsdbStream}" dataView...`);
           await kibanaServer.uiSettings.update({
             'dateFormat:tz': 'UTC',
             'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
           });
           log.info(
-            `Dowgrade "${tsdbStream}" stream into regular stream "${tsdbConvertedToStream}"...`
+            `Dowgrade "${logsdbStream}" stream into regular stream "${logsdbConvertedToStream}"...`
           );
 
-          await dataStreams.downgradeStream(tsdbStream, getDataMapping({ tsdb: true }), 'tsdb');
-          log.info(`Add more data to new "${tsdbConvertedToStream}" dataView (no longer TSDB)...`);
+          await dataStreams.downgradeStream(logsdbStream, getDataMapping(), 'logsdb');
+          log.info(
+            `Add more data to new "${logsdbConvertedToStream}" dataView (no longer LogsDB)...`
+          );
           // add some more data when upgraded
-          await createDocs(tsdbConvertedToStream, { isStream: true }, toTimeForScenarios);
+          await createDocs(logsdbConvertedToStream, { isStream: true }, toTimeForScenarios);
         });
 
         after(async () => {
-          await dataStreams.deleteDataStream(tsdbConvertedToStream);
+          await dataStreams.deleteDataStream(logsdbConvertedToStream);
         });
 
-        runTestsForEachScenario(tsdbConvertedToStream, (indexes) => {
-          it('should keep TSDB restrictions only if a tsdb stream is in the dataView mix', async () => {
-            await PageObjects.lens.configureDimension({
+        runTestsForEachScenario(logsdbConvertedToStream, (indexes) => {
+          it('should keep LogsDB restrictions only if a logsDB stream is in the dataView mix', async () => {
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
 
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'min',
               field: `bytes_counter`,
@@ -901,28 +752,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
                 timeout: 500,
               })
-            ).to.eql(indexes.some(({ tsdb }) => tsdb));
-            await PageObjects.lens.closeDimensionEditor();
+            ).to.eql(indexes.some(({ logsdb }) => logsdb));
+            await lens.closeDimensionEditor();
           });
 
           it(`should visualize a date histogram chart for counter field`, async () => {
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
             // just check the data is shown
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'count',
             });
 
+            await lens.waitForVisualization('xyVisChart');
+            const data = await lens.getCurrentChartDebugState('xyVisChart');
+            const bars = data?.bars![0].bars;
+            const columnsToCheck = bars ? bars.length / 2 : 0;
             // due to the flaky nature of exact check here, we're going to relax it
             // as long as there's data before and after it is ok
-            await PageObjects.lens.waitForVisualization('xyVisChart');
-            const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-            const bars = data.bars![0].bars;
-            const columnsToCheck = bars.length / 2;
             log.info('Check count before the downgrade');
             // Before the upgrade the count is N times the indexes
             expect(sumFirstNValues(columnsToCheck, bars)).to.be.greaterThan(
@@ -930,14 +781,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
             log.info('Check count after the downgrade');
             // later there are only documents for the upgraded stream
-            expect(sumFirstNValues(columnsToCheck, [...bars].reverse())).to.be.greaterThan(
+            expect(sumFirstNValues(columnsToCheck, [...(bars ?? [])].reverse())).to.be.greaterThan(
               TEST_DOC_COUNT - 1
             );
           });
 
           it('should visualize data when moving the time window around the downgrade moment', async () => {
             // check after the downgrade
-            await PageObjects.lens.goToTimeRange(
+            await lens.goToTimeRange(
               moment
                 .utc(fromTimeForScenarios, TIME_PICKER_FORMAT)
                 .subtract(1, 'hour')
@@ -948,23 +799,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 .format(TIME_PICKER_FORMAT) // consider only new documents
             );
 
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
               field: '@timestamp',
             });
-            await PageObjects.lens.configureDimension({
+            await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'count',
             });
 
-            await PageObjects.lens.waitForVisualization('xyVisChart');
-            const dataBefore = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-            const barsBefore = dataBefore.bars![0].bars;
-            expect(barsBefore.some(({ y }) => y)).to.eql(true);
+            await lens.waitForVisualization('xyVisChart');
+            const dataBefore = await lens.getCurrentChartDebugState('xyVisChart');
+            const barsBefore = dataBefore?.bars![0].bars;
+            expect(barsBefore?.some(({ y }) => y)).to.eql(true);
 
             // check after the downgrade
-            await PageObjects.lens.goToTimeRange(
+            await lens.goToTimeRange(
               moment
                 .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
                 .add(1, 'second')
@@ -975,10 +826,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 .format(TIME_PICKER_FORMAT) // consider also new documents
             );
 
-            await PageObjects.lens.waitForVisualization('xyVisChart');
-            const dataAfter = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-            const barsAfter = dataAfter.bars![0].bars;
-            expect(barsAfter.some(({ y }) => y)).to.eql(true);
+            await lens.waitForVisualization('xyVisChart');
+            const dataAfter = await lens.getCurrentChartDebugState('xyVisChart');
+            const barsAfter = dataAfter?.bars![0].bars;
+            expect(barsAfter?.some(({ y }) => y)).to.eql(true);
           });
         });
       });
