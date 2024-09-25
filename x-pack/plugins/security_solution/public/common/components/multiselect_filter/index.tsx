@@ -32,6 +32,23 @@ interface MultiselectFilterOption<T> {
   checked?: FilterChecked;
 }
 
+/**
+ * Please use this component instead of [MultiselectFilter](../../../detection_engine/rule_monitoring/components/basic/filters/multiselect_filter/index.tsx)
+ *
+ * The new version uses `EuiSelectable` instead of the deprecated `EuiFilterSelectItem`. That required a width param, which wasn't previously necessary.
+ * It also exports the filter without the `EuiFilterGroup` wrapper, allowing several filters to be grouped.
+ *
+ * To migrate to the new version, you need to:
+ * 1. Wrap it with EuiFilterGroup
+ * @example
+ * <EuiFilterGroup>
+ *   <MultiselectFilter>
+ * </EuiFilterGroup>`
+ *
+ * 2. Provide the desired width
+ * @example
+ * <MultiselectFilter<MyType> width={150} />
+ */
 const MultiselectFilterComponent = <T extends unknown>({
   'data-test-subj': dataTestSubj = 'multiselectFilter',
   title,
