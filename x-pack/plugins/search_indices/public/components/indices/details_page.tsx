@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiPageTemplate,
   EuiFlexItem,
-  EuiTabbedContent,
   EuiFlexGroup,
   EuiPopover,
   EuiButtonIcon,
@@ -19,8 +18,10 @@ import {
   EuiText,
   EuiIcon,
   EuiButtonEmpty,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -33,11 +34,15 @@ import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 import { IndexDocuments } from '../index_documents/index_documents';
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
+import { SearchIndexDetailsTabs } from '../../routes';
+import { SearchIndexDetailsMappings } from './details_page_mappings';
+import { SearchIndexDetailsSettings } from './details_page_settings';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
-  const { console: consolePlugin, docLinks, application } = useKibana().services;
+  const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
+  const { console: consolePlugin, docLinks, application, history } = useKibana().services;
   const { data: index, refetch, isError: isIndexError, isInitialLoading } = useIndex(indexName);
   const {
     data: mappings,
@@ -45,6 +50,48 @@ export const SearchIndexDetailsPage = () => {
     isInitialLoading: isMappingsInitialLoading,
   } = useIndexMapping(indexName);
 
+  const detailsPageTabs: EuiTabbedContentTab[] = useMemo(() => {
+    return [
+      {
+        id: SearchIndexDetailsTabs.DATA,
+        name: i18n.translate('xpack.searchIndices.documentsTabLabel', {
+          defaultMessage: 'Data',
+        }),
+        content: <IndexDocuments indexName={indexName} />,
+        'data-test-subj': `${SearchIndexDetailsTabs.DATA}Tab`,
+      },
+      {
+        id: SearchIndexDetailsTabs.MAPPINGS,
+        name: i18n.translate('xpack.searchIndices.mappingsTabLabel', {
+          defaultMessage: 'Mappings',
+        }),
+        content: <SearchIndexDetailsMappings index={index} />,
+        'data-test-subj': `${SearchIndexDetailsTabs.MAPPINGS}Tab`,
+      },
+      {
+        id: SearchIndexDetailsTabs.SETTINGS,
+        name: i18n.translate('xpack.searchIndices.settingsTabLabel', {
+          defaultMessage: 'Settings',
+        }),
+        content: <SearchIndexDetailsSettings indexName={indexName} />,
+        'data-test-subj': `${SearchIndexDetailsTabs.SETTINGS}Tab`,
+      },
+    ];
+  }, [index, indexName]);
+  const [selectedTab, setSelectedTab] = useState(detailsPageTabs[0]);
+
+  useEffect(() => {
+    const newTab = detailsPageTabs.find((tab) => tab.id === tabId);
+    if (newTab) setSelectedTab(newTab);
+  }, [detailsPageTabs, tabId]);
+
+  const handleTabClick = useCallback(
+    (tab) => {
+      history.push(`index_details/${indexName}/${tab.id}`);
+    },
+
+    [history, indexName]
+  );
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
@@ -176,15 +223,9 @@ export const SearchIndexDetailsPage = () => {
               <EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTabbedContent
-                    tabs={[
-                      {
-                        id: 'data',
-                        name: i18n.translate('xpack.searchIndices.documentsTabLabel', {
-                          defaultMessage: 'Data',
-                        }),
-                        content: <IndexDocuments indexName={indexName} />,
-                      },
-                    ]}
+                    tabs={detailsPageTabs}
+                    onTabClick={handleTabClick}
+                    selectedTab={selectedTab}
                   />
                 </EuiFlexItem>
               </EuiFlexItem>

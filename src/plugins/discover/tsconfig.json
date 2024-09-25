@@ -96,7 +96,10 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/security-solution-common",
-    "@kbn/logs-data-access-plugin"
+    "@kbn/router-utils",
+    "@kbn/management-settings-ids",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/core-lifecycle-browser"
   ],
   "exclude": [
     "target/**/*"
