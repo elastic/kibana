@@ -87,9 +87,9 @@ export function SearchBar() {
         />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        {dataView ? <DiscoverButton dataView={dataView} /> : null}
-      </EuiFlexItem>
+      {dataView ? <EuiFlexItem grow={false}>
+        <DiscoverButton dataView={dataView} />
+      </EuiFlexItem : null>
     </EuiFlexGroup>
   );
 }
