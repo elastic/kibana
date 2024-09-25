@@ -27,6 +27,11 @@ import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
 import { useKibana } from '../common/hooks/use_kibana';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
 import { CloudSecurityPostureStartServices } from '../types';
+import {
+  CREATE_DETECTION_FROM_TABLE_ROW_ACTION,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 
@@ -239,7 +244,10 @@ const CreateDetectionRule = ({
     <EuiContextMenuItem
       key="createRule"
       disabled={isCreateDetectionRuleDisabled}
-      onClick={() => mutate()}
+      onClick={() => {
+        mutate();
+        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, CREATE_DETECTION_FROM_TABLE_ROW_ACTION);
+      }}
       data-test-subj={CREATE_RULE_ACTION_SUBJ}
     >
       <FormattedMessage

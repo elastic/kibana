@@ -14,6 +14,11 @@ import { useUrlQuery } from '../../common/hooks/use_url_query';
 
 import { FindingsBaseURLQuery } from '../../common/types';
 import { useBaseEsQuery, usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
+import {
+  GROUP_BY_CLICK,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_MAX_GROUPING_LEVELS = 3;
@@ -73,6 +78,7 @@ export const useCloudSecurityGrouping = ({
       setUrlQuery({
         groupBy: groupByFields,
       });
+      uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GROUP_BY_CLICK);
     },
   });
 

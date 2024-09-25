@@ -9,24 +9,29 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export const APP_NAME = 'cloud-security';
-export const UIM_ES_DEPRECATIONS_PAGE_LOAD = 'es_deprecations_page_load';
-export const UIM_KIBANA_DEPRECATIONS_PAGE_LOAD = 'kibana_deprecations_page_load';
-export const UIM_OVERVIEW_PAGE_LOAD = 'overview_page_load';
-export const UIM_ES_DEPRECATION_LOGS_PAGE_LOAD = 'es_deprecation_logs_page_load';
-export const UIM_REINDEX_OPEN_FLYOUT_CLICK = 'reindex_open_flyout_click';
-export const UIM_REINDEX_CLOSE_FLYOUT_CLICK = 'reindex_close_flyout_click';
-export const UIM_REINDEX_START_CLICK = 'reindex_start_click';
-export const UIM_REINDEX_STOP_CLICK = 'reindex_stop_click';
-export const UIM_BACKUP_DATA_CLOUD_CLICK = 'backup_data_cloud_click';
-export const UIM_BACKUP_DATA_ON_PREM_CLICK = 'backup_data_on_prem_click';
-export const UIM_RESET_LOGS_COUNTER_CLICK = 'reset_logs_counter_click';
-export const UIM_OBSERVABILITY_CLICK = 'observability_click';
-export const UIM_DISCOVER_CLICK = 'discover_click';
-export const UIM_ML_SNAPSHOT_UPGRADE_CLICK = 'ml_snapshot_upgrade_click';
-export const UIM_ML_SNAPSHOT_DELETE_CLICK = 'ml_snapshot_delete_click';
-export const UIM_INDEX_SETTINGS_DELETE_CLICK = 'index_settings_delete_click';
-export const UIM_KIBANA_QUICK_RESOLVE_CLICK = 'kibana_quick_resolve_click';
-export const UIM_CLUSTER_SETTINGS_DELETE_CLICK = 'cluster_settings_delete_click';
+
+export const NAV_TO_FINDINGS_FROM_ENTITY_FLUTOUT = 'nav-to-findings-from-entity-flyout';
+export const NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT =
+  'nav-to-findings-by-host-name-from-entity-flyout';
+export const NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT =
+  'nav-to-findings-by-rule-name-from-entity-flyout';
+export const CREATE_DETECTION_RULE_FROM_FLYOUT = 'create-detection-rule-from-flyout';
+export const CREATE_DETECTION_FROM_TABLE_ROW_ACTION = 'create-detection-from-table-row-action';
+export const OPEN_VULNERABILITIES_FLYOUT = 'open-vulnerabilities-flyout';
+export const OPEN_FINDINGS_FLYOUT = 'open-findings-flyout';
+export const GROUP_BY_CLICK = 'group-by-click';
+export const CHANGE_RULE_STATE = 'change-rule-state';
+
+type cloudSecurityUiCounters =
+  | typeof NAV_TO_FINDINGS_FROM_ENTITY_FLUTOUT
+  | typeof NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
+  | typeof OPEN_VULNERABILITIES_FLYOUT
+  | typeof NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
+  | typeof OPEN_FINDINGS_FLYOUT
+  | typeof CREATE_DETECTION_RULE_FROM_FLYOUT
+  | typeof CREATE_DETECTION_FROM_TABLE_ROW_ACTION
+  | typeof GROUP_BY_CLICK
+  | typeof CHANGE_RULE_STATE;
 
 export class UiMetricService {
   private usageCollection: UsageCollectionSetup | undefined;
@@ -35,7 +40,7 @@ export class UiMetricService {
     this.usageCollection = usageCollection;
   }
 
-  private track(metricType: UiCounterMetricType, eventName: string | string[]) {
+  private track(metricType: UiCounterMetricType, eventName: cloudSecurityUiCounters) {
     if (!this.usageCollection) {
       // Usage collection might be disabled in Kibana config.
       return;
@@ -43,7 +48,7 @@ export class UiMetricService {
     return this.usageCollection.reportUiCounter(APP_NAME, metricType, eventName);
   }
 
-  public trackUiMetric(metricType: UiCounterMetricType, eventName: string | string[]) {
+  public trackUiMetric(metricType: UiCounterMetricType, eventName: cloudSecurityUiCounters) {
     return this.track(metricType, eventName);
   }
 }

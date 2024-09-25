@@ -18,6 +18,11 @@ import { RuleResponse } from '../common/types';
 import { useKibana } from '../common/hooks/use_kibana';
 import { showCreateDetectionRuleSuccessToast } from './take_action';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
+import {
+  CREATE_DETECTION_RULE_FROM_FLYOUT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 const RULES_PAGE_PATH = '/rules/management';
 const ALERTS_PAGE_PATH = '/alerts';
@@ -62,6 +67,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   }, [history]);
 
   const createDetectionRuleOnClick = useCallback(async () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, CREATE_DETECTION_RULE_FROM_FLYOUT);
     const startServices = { analytics, notifications, i18n, theme };
     setIsCreateRuleLoading(true);
     const ruleResponse = await createRuleFn(http);
