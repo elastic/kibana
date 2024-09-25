@@ -58,10 +58,6 @@ export const persistPinnedEventRoute = (router: SecuritySolutionPluginRouter) =>
             timelineId
           );
 
-          const body: PersistPinnedEventRouteResponse = {
-            data: { persistPinnedEventOnTimeline: res },
-          };
-
           return response.ok({
             body: {
               data: { persistPinnedEventOnTimeline: res },
