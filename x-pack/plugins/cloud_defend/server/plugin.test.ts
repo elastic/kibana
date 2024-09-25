@@ -55,15 +55,13 @@ const createMockFleetStartContract = (): DeeplyMockedKeys<FleetStartContract> =>
       fromRequest: jest.fn(async (_) => createFleetAuthzMock()),
     },
     fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
-    // @ts-expect-error 2322
     agentService: createMockAgentService(),
-    // @ts-expect-error 2322
     packageService: createMockPackageService(),
     agentPolicyService: createMockAgentPolicyService(),
     registerExternalCallback: jest.fn((..._: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
     createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
-  };
+  } as unknown as DeeplyMockedKeys<FleetStartContract>;
 };
 
 describe('Cloud Defend Plugin', () => {
