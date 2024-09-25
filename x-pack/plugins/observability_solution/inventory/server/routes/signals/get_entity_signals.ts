@@ -5,282 +5,124 @@
  * 2.0.
  */
 
-import {
-  AggregationsCompositeAggregateKey,
-  AggregationsCompositeBucket,
-  QueryDslBoolQuery,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
-import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_RULE_UUID,
   ALERT_TIME_RANGE,
-  ALERT_UUID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import { castArray, groupBy, last, memoize, uniq, uniqBy } from 'lodash';
-import pLimit from 'p-limit';
-import type { RuleAsset } from '../../../common/assets';
-import type {
-  Entity,
-  EntityDefinition,
-  EntityWithSignals,
-  IdentityField,
-} from '../../../common/entities';
-import { getEntitySourceDslFilter } from '../../../common/utils/get_entity_source_dsl_filter';
+import { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import { SloClient } from '@kbn/slo-plugin/server';
+import { Entity, EntityDefinition } from '../../../common/entities';
+import { entitySourceQuery } from '../../../common/utils/queries/entity_source_query';
 import { withInventorySpan } from '../../lib/with_inventory_span';
-
-async function getActiveAlertsCountsByEntity({
-  alertsClient,
-  start,
-  end,
-  query,
-  identityFields,
-}: {
-  alertsClient: AlertsClient;
-  start: number;
-  end: number;
-  query: QueryDslBoolQuery;
-  identityFields: IdentityField[];
-}): Promise<Array<{ properties: Record<string, string | number | null>; count: number }>> {
-  async function getAlerts(afterKey?: unknown): Promise<AggregationsCompositeBucket[]> {
-    const alerts = await alertsClient.find({
-      size: 0,
-      query: {
-        bool: {
-          filter: [...rangeQuery(start, end), query],
-        },
-      },
-      aggs: {
-        groups: {
-          composite: {
-            after: afterKey,
-            sources: identityFields.map(({ field, optional }) => {
-              return {
-                [field]: {
-                  terms: {
-                    field,
-                    missing_bucket: optional,
-                  },
-                },
-              };
-            }),
-            size: 10_000,
-          },
-        },
-      },
-    });
-
-    const groups = alerts.aggregations?.groups as {
-      buckets: AggregationsCompositeBucket[];
-      after_key?: AggregationsCompositeAggregateKey;
-    };
-    if (groups.after_key) {
-      return [...groups.buckets, ...(await getAlerts(groups.after_key))];
-    }
-    return groups.buckets;
-  }
-
-  const alertGroups = await getAlerts();
-
-  const alertsByEntity = alertGroups.map((group) => {
-    return {
-      properties: Object.fromEntries(identityFields.map(({ field }) => [field, group.key[field]])),
-      count: group.count as number,
-    };
-  });
-
-  return alertsByEntity;
-}
+import { searchPaginateThroughSignals } from './search_paginate_through_signals';
 
 export async function getEntitySignals({
-  entities,
-  typeDefinitions,
-  rulesClient,
+  entity,
+  definition,
   alertsClient,
+  sloClient,
   logger,
   start,
   end,
 }: {
-  entities: Entity[];
-  typeDefinitions?: EntityDefinition[];
-  rulesClient: RulesClient;
+  entity: Entity;
+  definition: EntityDefinition;
   alertsClient: AlertsClient;
+  sloClient: SloClient;
   logger: Logger;
   start: number;
   end: number;
-}): Promise<EntityWithSignals[]> {
-  const usedTypes = uniq(entities.map((entity) => entity.type));
-
-  const typeDefinitionsMap = new Map(typeDefinitions?.map((def) => [def.type, def]) ?? []);
-
-  const ruleIdsToFetch = uniqBy(
-    entities.flatMap((entity) =>
-      entity.links
+}) {
+  return withInventorySpan(
+    'get_entity_signals',
+    async () => {
+      const ruleIds = entity.links
         .filter((link) => link.asset.type === 'rule')
-        .map((link) => link.asset as RuleAsset)
-    ),
-    (ruleAsset) => ruleAsset.id
-  );
+        .map((link) => link.asset.id);
 
-  const limiter = pLimit(10);
+      const sloIds = entity.links
+        .filter((link) => link.asset.type === 'sloDefinition')
+        .map((link) => link.asset.id);
 
-  const rules = await withInventorySpan(
-    'get_rules',
-    () =>
-      Promise.all(
-        ruleIdsToFetch.map((rule) => {
-          return limiter(() => {
-            return rulesClient.get<Record<string, unknown>>({ id: rule.id });
-          });
-        })
-      ),
-    logger
-  );
-
-  const entityQueries = entities.map((entity) => {
-    const type = typeDefinitionsMap.get(entity.type);
-    if (!type) {
-      return { entity };
-    }
-    return {
-      entity,
-      query: getEntitySourceDslFilter({
-        entity,
-        identityFields: type.identityFields,
-      }),
-    };
-  });
-
-  const allQueries = rules
-    .map((rule): QueryDslQueryContainer => {
-      return {
-        term: {
-          [ALERT_RULE_UUID]: rule.id,
+      const alertsQuery = {
+        bool: {
+          filter: [...rangeQuery(start, end, ALERT_TIME_RANGE)],
+          should: [
+            {
+              bool: {
+                filter: ruleIds.length ? [{ terms: { [ALERT_RULE_UUID]: ruleIds } }] : [],
+              },
+            },
+            {
+              bool: {
+                filter: entitySourceQuery({ entity, identityFields: definition.identityFields }),
+              },
+            },
+          ],
+          minimum_should_match: 1,
         },
       };
-    })
-    .concat(
-      entityQueries.flatMap((entity) => (entity.query ? [{ bool: { filter: entity.query } }] : []))
-    );
 
-  async function getAlerts(searchAfter?: Array<string | number>): Promise<ParsedTechnicalFields[]> {
-    const perPage = 10_000;
-
-    const query = {
-      bool: {
-        filter: [...rangeQuery(start, end, ALERT_TIME_RANGE)],
-        should: allQueries,
-        minimum_should_match: 1,
-      },
-    };
-
-    const alertsResponse = await withInventorySpan(
-      'get_alerts_page',
-      () =>
-        alertsClient.find({
-          query,
-          size: perPage,
-          track_total_hits: false,
-          search_after: searchAfter,
-          sort: [{ '@timestamp': 'desc' }, { [ALERT_UUID]: 'desc' }],
-        }),
-      logger
-    );
-
-    const alerts = alertsResponse.hits.hits.map((hit) => hit._source!);
-
-    if (alertsResponse.hits.hits.length < perPage) {
-      return alerts;
-    }
-
-    const lastAlert = last(alertsResponse.hits.hits);
-
-    const nextSearchAfter = lastAlert?.sort!;
-
-    return [...alerts, ...(await getAlerts(nextSearchAfter))];
-  }
-
-  const allAlerts = await withInventorySpan('get_all_alerts', () => getAlerts(), logger);
-
-  const alertsByRuleId: Record<string, ParsedTechnicalFields[]> = groupBy(
-    allAlerts,
-    (alert) => alert[ALERT_RULE_UUID]
-  );
-
-  const alertsWithEntityLookupIds: Record<string, ParsedTechnicalFields[]> = {};
-
-  const logWarningForType = memoize((type: string) =>
-    logger.warn(() => `Did not find entity definition for type ${type}`)
-  );
-
-  function getEntityLookupIds(
-    source: Record<string, unknown>,
-    type: string,
-    identityFields: string[]
-  ) {
-    const lookupIds = identityFields.flatMap((field) => {
-      const values = castArray(source[field]);
-      return values.map((value) => {
-        return `${type}:${field}:${value}`;
+      const slosWithIdsQuery = await sloClient.getDataScopeForSummarySlos({
+        ids: sloIds,
+        start,
+        end,
       });
-    });
-    return lookupIds;
-  }
+      const slosWithoutIdsQuery = await sloClient.getDataScopeForSummarySlos({ start, end });
 
-  allAlerts.forEach((alert) => {
-    usedTypes.forEach((type) => {
-      const def = typeDefinitionsMap.get(type);
-      if (!def) {
-        logWarningForType(type);
-        return;
-      }
-      const lookupIds = getEntityLookupIds(
-        alert,
-        type,
-        def.identityFields.map((field) => field.field)
-      );
+      const sloQuery = {
+        bool: {
+          should: [
+            slosWithIdsQuery,
+            {
+              bool: {
+                filter: [
+                  slosWithoutIdsQuery,
+                  ...entitySourceQuery({ entity, identityFields: definition.identityFields }),
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      };
 
-      lookupIds.forEach((lookupId) => {
-        const alertsForId = alertsWithEntityLookupIds[lookupId] ?? [];
-        alertsForId.push(alert);
-        alertsWithEntityLookupIds[lookupId] = alertsForId;
-      });
-    });
-  });
+      const [allAlerts, allSlos] = await Promise.all([
+        withInventorySpan(
+          'get_alerts_for_entity',
+          () =>
+            searchPaginateThroughSignals({}, (searchAfter) => {
+              return alertsClient.find({
+                search_after: searchAfter,
+                size: 10_000,
+                track_total_hits: false,
+                query: alertsQuery,
+              });
+            }),
+          logger
+        ),
+        withInventorySpan(
+          'get_slos_for_entity',
+          () =>
+            searchPaginateThroughSignals({}, (searchAfter) => {
+              return sloClient.searchSloSummaryIndex({
+                search_after: searchAfter,
+                size: 10_000,
+                track_total_hits: false,
+                query: sloQuery,
+              });
+            }),
+          logger
+        ),
+      ]);
 
-  const entityWithSignals = entities.map((entity) => {
-    const def = typeDefinitionsMap.get(entity.type);
-    if (!def) {
-      logWarningForType(entity.type);
-      return { ...entity, signals: [] };
-    }
-    const entityLookupId = getEntityLookupIds(
-      entity.properties,
-      entity.type,
-      def.identityFields.map(({ field }) => field)
-    )[0];
-
-    const alertsForEntity = alertsWithEntityLookupIds[entityLookupId] ?? [];
-    const alertsForEntityViaRules = entity.links.flatMap((link) => {
-      if (link.asset.type === 'rule') {
-        const alerts = alertsByRuleId[link.asset.id] ?? [];
-        return alerts;
-      }
-      return [];
-    });
-
-    return {
-      ...entity,
-      signals: [...alertsForEntity, ...alertsForEntityViaRules].map((alert) => ({
-        type: 'alert' as const,
-        id: alert[ALERT_UUID],
-      })),
-    };
-  });
-
-  return entityWithSignals;
+      return {
+        alerts: allAlerts.hits.map((hit) => hit._source!),
+        slos: allSlos.hits.map((hit) => hit._source!),
+      };
+    },
+    logger
+  );
 }

@@ -7,7 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 
-export function dedotObject(source: Record<string, any>, target: Record<string, any>) {
+export function unflattenObject(source: Record<string, any>, target: Record<string, any> = {}) {
   // eslint-disable-next-line guard-for-in
   for (const key in source) {
     const val = source[key as keyof typeof source];

@@ -14,14 +14,14 @@ import {
   EuiLink,
   EuiSelect,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { TimeRange } from '@kbn/data-plugin/common';
-import { css } from '@emotion/css';
+import { EntitySortField, EntityWithSignalCounts } from '../../../common/entities';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { InventorySearchBar } from '../inventory_search_bar';
-import { EntityWithSignals } from '../../../common/entities';
 
 export function ControlledEntityTable({
   rows,
@@ -40,9 +40,11 @@ export function ControlledEntityTable({
   selectedType,
   availableTypes,
   onSelectedTypeChange,
+  sort,
+  onSortChange,
 }: {
-  rows: EntityWithSignals[];
-  columns: Array<EuiBasicTableColumn<EntityWithSignals>>;
+  rows: EntityWithSignalCounts[];
+  columns: Array<EuiBasicTableColumn<EntityWithSignalCounts>>;
   kqlFilter: string;
   timeRange: TimeRange;
   onTimeRangeChange: (nextTimeRange: TimeRange) => void;
@@ -57,13 +59,15 @@ export function ControlledEntityTable({
   selectedType?: string;
   onSelectedTypeChange?: (nextType: string) => void;
   availableTypes?: Array<{ label: string; value: string }>;
+  sort?: { field: EntitySortField; order: 'asc' | 'desc' };
+  onSortChange?: (nextSort: { field: EntitySortField; order: 'asc' | 'desc' }) => void;
 }) {
   const router = useInventoryRouter();
 
-  const displayedColumns = useMemo<Array<EuiBasicTableColumn<EntityWithSignals>>>(() => {
+  const displayedColumns = useMemo<Array<EuiBasicTableColumn<EntityWithSignalCounts>>>(() => {
     return [
       {
-        field: 'type',
+        field: 'entity.type',
         name: i18n.translate('xpack.inventory.entityTable.typeColumnLabel', {
           defaultMessage: 'Type',
         }),
@@ -73,10 +77,11 @@ export function ControlledEntityTable({
         },
       },
       {
-        field: 'name',
+        field: 'entity.displayName',
         name: i18n.translate('xpack.inventory.entityTable.nameColumnLabel', {
           defaultMessage: 'Name',
         }),
+        sortable: true,
         render: (_, { type, displayName }) => {
           return (
             <EuiLink
@@ -94,18 +99,80 @@ export function ControlledEntityTable({
         },
       },
       {
+        field: 'slos',
+        name: i18n.translate('xpack.inventory.entityTable.slosColumnLabel', {
+          defaultMessage: 'Health status',
+        }),
+        sortable: true,
+        width: '96px',
+        render: (_, { slos }) => {
+          if (slos.violated > 0) {
+            return (
+              <EuiBadge color="danger">
+                {i18n.translate('xpack.inventory.displayedColumns.violatedBadgeLabel', {
+                  defaultMessage: 'Violated',
+                })}
+              </EuiBadge>
+            );
+          }
+
+          const isMixed = Object.values(slos).filter((count) => count > 0).length > 1;
+
+          if (isMixed) {
+            return (
+              <EuiBadge color="warning">
+                {i18n.translate('xpack.inventory.displayedColumns.mixedBadgeLabel', {
+                  defaultMessage: 'Mixed',
+                })}
+              </EuiBadge>
+            );
+          }
+
+          if (slos.no_data) {
+            return (
+              <EuiBadge color="text">
+                {i18n.translate('xpack.inventory.displayedColumns.noDataBadgeLabel', {
+                  defaultMessage: 'No data',
+                })}
+              </EuiBadge>
+            );
+          }
+
+          if (slos.degraded) {
+            return (
+              <EuiBadge color="text">
+                {i18n.translate('xpack.inventory.displayedColumns.degradedBadgeLabel', {
+                  defaultMessage: 'Degraded',
+                })}
+              </EuiBadge>
+            );
+          }
+
+          if (slos.healthy) {
+            return (
+              <EuiBadge color="success">
+                {i18n.translate('xpack.inventory.displayedColumns.healthyBadgeLabel', {
+                  defaultMessage: 'Healthy',
+                })}
+              </EuiBadge>
+            );
+          }
+
+          return <></>;
+        },
+      },
+      {
         field: 'alerts',
         name: i18n.translate('xpack.inventory.entityTable.alertsColumnLabel', {
           defaultMessage: 'Alerts',
         }),
+        sortable: true,
         width: '96px',
-        render: (_, { signals }) => {
-          const alerts = signals.filter((signal) => signal.type === 'alert');
-          if (!alerts.length) {
+        render: (_, { alerts }) => {
+          if (!alerts.active) {
             return <></>;
           }
-
-          return <EuiBadge color="danger">{alerts.length}</EuiBadge>;
+          return <EuiBadge color="danger">{alerts.active}</EuiBadge>;
         },
       },
     ];
@@ -158,7 +225,7 @@ export function ControlledEntityTable({
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-      <EuiBasicTable<EntityWithSignals>
+      <EuiBasicTable<EntityWithSignalCounts>
         columns={displayedColumns}
         items={displayedRows}
         itemId="name"
@@ -167,13 +234,29 @@ export function ControlledEntityTable({
           pageIndex,
           totalItemCount,
         }}
+        sorting={
+          sort
+            ? {
+                sort: {
+                  direction: sort.order,
+                  field: sort.field as any,
+                },
+              }
+            : {}
+        }
         loading={loading}
         noItemsMessage={i18n.translate('xpack.inventory.entityTable.noItemsMessage', {
           defaultMessage: `No entities found`,
         })}
-        onChange={(criteria: CriteriaWithPagination<EntityWithSignals>) => {
+        onChange={(criteria: CriteriaWithPagination<EntityWithSignalCounts>) => {
           const { size, index } = criteria.page;
           onPaginationChange({ pageIndex: index, pageSize: size });
+          if (criteria.sort) {
+            onSortChange?.({
+              field: criteria.sort.field as EntitySortField,
+              order: criteria.sort.direction,
+            });
+          }
         }}
       />
     </EuiFlexGroup>

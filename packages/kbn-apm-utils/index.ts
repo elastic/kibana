@@ -46,16 +46,30 @@ export async function withSpan<T>(
     time = performance.now();
   }
 
-  function logTook() {
+  function logTook(failed: boolean) {
     if (time) {
       logger?.debug(
-        () => `Operation ${name} took ${Math.round(performance.now() - time!) / 1000}s`
+        () =>
+          `Operation ${name}${failed ? ` (failed)` : ''} ${
+            Math.round(performance.now() - time!) / 1000
+          }s`
       );
     }
   }
 
+  const withLogTook = [
+    <TR>(res: TR): TR | Promise<TR> => {
+      logTook(false);
+      return res;
+    },
+    (err: any): never => {
+      logTook(true);
+      throw err;
+    },
+  ];
+
   if (!agent.isStarted()) {
-    return cb().finally(logTook);
+    return cb().then(...withLogTook);
   }
 
   let createdSpan: Span | undefined;
@@ -71,7 +85,7 @@ export async function withSpan<T>(
     createdSpan = agent.startSpan(name) ?? undefined;
 
     if (!createdSpan) {
-      return cb().finally(logTook);
+      return cb().then(...withLogTook);
     }
   }
 
@@ -90,7 +104,7 @@ export async function withSpan<T>(
     }
 
     if (!span) {
-      return promise;
+      return promise.then(...withLogTook);
     }
 
     const targetedSpan = span;
@@ -112,6 +126,7 @@ export async function withSpan<T>(
     }
 
     return promise
+      .then(...withLogTook)
       .then((res) => {
         if (!targetedSpan.outcome || targetedSpan.outcome === 'unknown') {
           targetedSpan.outcome = 'success';
@@ -126,7 +141,6 @@ export async function withSpan<T>(
       })
       .finally(() => {
         targetedSpan.end();
-        logTook();
       });
   });
 }

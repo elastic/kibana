@@ -44,7 +44,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/es-query",
     "@kbn/deeplinks-analytics",
-    "@kbn/core-http-browser",
     "@kbn/core-analytics-browser",
     "@kbn/global-search-plugin",
     "@kbn/config-schema",
@@ -64,5 +63,7 @@
     "@kbn/sse-utils",
     "@kbn/zod",
     "@kbn/licensing-plugin",
+    "@kbn/slo-plugin",
+    "@kbn/observability-ai-assistant-plugin",
   ]
 }

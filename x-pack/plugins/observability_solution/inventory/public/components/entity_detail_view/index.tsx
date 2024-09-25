@@ -183,7 +183,7 @@ export function EntityDetailViewWithoutParams({
 
   const { alerts } = useMemo(() => {
     return {
-      alerts: entity?.signals.filter((signal) => signal.type === 'alert') ?? [],
+      alerts: entity?.signals.alerts ?? [],
     };
   }, [entity?.signals]);
 

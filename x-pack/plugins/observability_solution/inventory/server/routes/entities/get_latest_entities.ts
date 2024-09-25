@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import pLimit from 'p-limit';
-import type { Logger } from '@kbn/logging';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { Logger } from '@kbn/logging';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import type { EntityWithSignals, InventoryEntityDefinition } from '../../../common/entities';
+import { SloClient } from '@kbn/slo-plugin/server';
+import pLimit from 'p-limit';
+import type {
+  EntitySortField,
+  EntityWithSignalCounts,
+  InventoryEntityDefinition,
+} from '../../../common/entities';
+import { withInventorySpan } from '../../lib/with_inventory_span';
 import { getEntitiesFromSource } from './get_entities_from_source';
 import { lookupEntitiesById } from './lookup_entities_by_id';
 import { searchLatestEntitiesIndex } from './search_latest_entities_index';
-import { esqlResponseToEntities } from '../../../common/utils/esql_response_to_entities';
-import { getEntitySignals } from '../signals/get_entity_signals';
-import { withInventorySpan } from '../../lib/with_inventory_span';
+import { getEntitySignalCounts } from '../signals/get_entity_signal_counts';
 
 export async function getLatestEntities({
   esClient,
@@ -28,23 +31,37 @@ export async function getLatestEntities({
   typeDefinitions,
   logger,
   dslFilter,
-  rulesClient,
   alertsClient,
+  sloClient,
+  sortField,
+  sortOrder,
 }: {
   esClient: ObservabilityElasticsearchClient;
   kuery: string;
   start: number;
   end: number;
   fromSourceIfEmpty?: boolean;
-  typeDefinitions?: InventoryEntityDefinition[];
+  typeDefinitions: InventoryEntityDefinition[];
   logger: Logger;
   dslFilter?: QueryDslQueryContainer[];
-  rulesClient: RulesClient;
   alertsClient: AlertsClient;
-}): Promise<EntityWithSignals[]> {
+  sloClient: SloClient;
+  sortField: EntitySortField;
+  sortOrder: 'asc' | 'desc';
+}): Promise<EntityWithSignalCounts[]> {
   return withInventorySpan(
     'get_latest_entities',
     async () => {
+      const signals = await getEntitySignalCounts({
+        alertsClient,
+        end,
+        esClient,
+        logger,
+        sloClient,
+        start,
+        typeDefinitions,
+      });
+
       const response = await searchLatestEntitiesIndex({
         esClient,
         start,
@@ -62,20 +79,13 @@ export async function getLatestEntities({
               ]
             : []),
         ],
+        signals,
+        sortOrder,
+        sortField,
       });
 
-      if (response.values.length || !fromSourceIfEmpty || !typeDefinitions?.length) {
-        const entities = esqlResponseToEntities(response);
-
-        return getEntitySignals({
-          entities,
-          alertsClient,
-          rulesClient,
-          typeDefinitions,
-          logger,
-          start,
-          end,
-        });
+      if (response.length || !fromSourceIfEmpty) {
+        return response;
       }
 
       const limiter = pLimit(10);
@@ -97,21 +107,14 @@ export async function getLatestEntities({
         })
       );
 
-      return getEntitySignals({
-        alertsClient,
-        logger,
-        rulesClient,
-        typeDefinitions,
-        entities: esqlResponseToEntities(
-          await lookupEntitiesById({
-            esClient,
-            start,
-            end,
-            entities: entitiesFromSourceResults.flat(),
-          })
-        ).map((entity) => ({ ...entity, links: [] })),
+      return await lookupEntitiesById({
+        esClient,
         start,
         end,
+        entities: entitiesFromSourceResults.flat(),
+        signals,
+        sortOrder,
+        sortField,
       });
     },
     logger

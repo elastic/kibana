@@ -14,6 +14,7 @@ import {
   Plugin,
   Logger,
   SavedObjectsClient,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -43,8 +44,14 @@ import { SloConfig } from '.';
 import { registerRoutes } from './routes/register_routes';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
 import { sloSettings, SO_SLO_SETTINGS_TYPE } from './saved_objects/slo_settings';
+import { SloClient, getSloClientWithRequest } from './client';
 
-export type SloPluginSetup = ReturnType<SloPlugin['setup']>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SloPluginSetup {}
+
+export interface SloPluginStart {
+  getSloClientWithRequest: (request: KibanaRequest) => Promise<SloClient>;
+}
 
 export interface PluginSetup {
   alerting: PluginSetupContract;
@@ -193,15 +200,29 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
       this.logger,
       config
     );
+
+    return {};
   }
 
-  public start(core: CoreStart, plugins: PluginStart) {
+  public start(core: CoreStart, plugins: PluginStart): SloPluginStart {
     const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const internalEsClient = core.elasticsearch.client.asInternalUser;
 
     this.sloOrphanCleanupTask
       ?.start(plugins.taskManager, internalSoClient, internalEsClient)
       .catch(() => {});
+
+    return {
+      getSloClientWithRequest: (request) => {
+        return getSloClientWithRequest({
+          logger: this.logger,
+          request,
+          soClient: core.savedObjects.getScopedClient(request),
+          spaces: plugins.spaces,
+          esClient: internalEsClient,
+        });
+      },
+    };
   }
 
   public stop() {}

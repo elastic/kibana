@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { notFound } from '@hapi/boom';
+import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { ServerSentEventBase } from '@kbn/sse-utils';
 import { z } from '@kbn/zod';
 import { map, tap, type Observable } from 'rxjs';
-import { notFound } from '@hapi/boom';
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { getEntitySourceDslFilter } from '../../../common/utils/get_entity_source_dsl_filter';
 import {
   ExtractMetricDefinitionProcess,
   extractMetricDefinitions,
 } from '../../lib/datasets/extract_metric_definitions';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
-import { lookupEntitiesById } from '../entities/lookup_entities_by_id';
-import { esqlResponseToEntities } from '../../../common/utils/esql_response_to_entities';
-import { getEntitySourceDslFilter } from '../../../common/utils/get_entity_source_dsl_filter';
+import { getEntityById } from '../entities/get_entity_by_id';
 import { fetchEntityDefinitions } from '../entities/route';
 
 const suggestMetricsRoute = createInventoryServerRoute({
@@ -60,17 +59,11 @@ const suggestMetricsRoute = createInventoryServerRoute({
     });
 
     const [entityFromIndex, typeDefinition] = await Promise.all([
-      lookupEntitiesById({
+      getEntityById({
+        displayName: entity.displayName,
+        type: entity.type,
         esClient,
-        start,
-        end,
-        entities: [
-          {
-            type: entity.type,
-            displayName: entity.displayName,
-          },
-        ],
-      }).then((response) => esqlResponseToEntities(response)[0]),
+      }),
       fetchEntityDefinitions({
         plugins,
         request,

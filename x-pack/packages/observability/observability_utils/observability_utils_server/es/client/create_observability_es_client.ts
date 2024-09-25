@@ -16,6 +16,7 @@ import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse, ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { Required } from 'utility-types';
+import { ESQLRequest } from '@kbn/es-types/src/search';
 
 type SearchRequest = ESSearchRequest & {
   index: string | string[];
@@ -41,7 +42,7 @@ export interface ObservabilityElasticsearchClient {
     operationName: string,
     request: Required<FieldCapsRequest, 'index_filter' | 'fields' | 'index'>
   ): Promise<FieldCapsResponse>;
-  esql(operationName: string, parameters: EsqlQueryRequest): Promise<ESQLSearchResponse>;
+  esql(operationName: string, parameters: ESQLRequest): Promise<ESQLSearchResponse>;
   client: ElasticsearchClient;
 }
 
@@ -88,13 +89,18 @@ export function createObservabilityEsClient({
     },
     esql(operationName: string, parameters: EsqlQueryRequest) {
       return callWithLogger(operationName, parameters, () => {
-        return client.esql.query(
+        return client.esql.transport.request(
           {
-            ...parameters,
-          },
-          {
+            path: '_query',
+            method: 'POST',
+            body: JSON.stringify(parameters),
             querystring: {
               drop_null_columns: true,
+            },
+          },
+          {
+            headers: {
+              'content-type': 'application/json',
             },
           }
         ) as unknown as Promise<ESQLSearchResponse>;

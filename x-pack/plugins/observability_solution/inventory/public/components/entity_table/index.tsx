@@ -12,7 +12,7 @@ import { keyBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { ControlledEntityTable } from './controlled_entity_table';
-import { LATEST_ENTITIES_INDEX } from '../../../common/entities';
+import { EntitySortField, LATEST_ENTITIES_INDEX } from '../../../common/entities';
 
 export function EntityTable({
   type,
@@ -51,6 +51,11 @@ export function EntityTable({
 
   const [selectedType, setSelectedType] = useState(type);
 
+  const [sort, setSort] = useState<{ field: EntitySortField; order: 'asc' | 'desc' }>({
+    field: 'entity.displayName',
+    order: 'desc',
+  });
+
   const queryFetch = useAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('POST /internal/inventory/entities/inventory', {
@@ -63,11 +68,22 @@ export function EntityTable({
             type: selectedType,
             fromSourceIfEmpty: true,
             dslFilter,
+            sortField: sort.field,
+            sortOrder: sort.order,
           },
         },
       });
     },
-    [inventoryAPIClient, selectedType, persistedKqlFilter, start, end, dslFilter]
+    [
+      inventoryAPIClient,
+      selectedType,
+      persistedKqlFilter,
+      start,
+      end,
+      dslFilter,
+      sort.field,
+      sort.order,
+    ]
   );
 
   const availableTypesFetch = useAbortableAsync(
@@ -127,7 +143,6 @@ export function EntityTable({
     pageSize: 10,
     pageIndex: 0,
   });
-
   const dataViewsFetch = useAbortableAsync(() => {
     return dataViews
       .create(
@@ -205,6 +220,10 @@ export function EntityTable({
       onSelectedTypeChange={(nextType) => {
         setSelectedType(nextType);
       }}
+      onSortChange={(nextSort) => {
+        setSort(nextSort);
+      }}
+      sort={sort}
     />
   );
 }

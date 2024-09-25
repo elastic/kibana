@@ -19,7 +19,8 @@
       "share",
       "alerting",
       "ruleRegistry",
-      "globalSearch"
+      "globalSearch",
+      "slo"
     ],
     "requiredBundles": [
       "kibanaReact",

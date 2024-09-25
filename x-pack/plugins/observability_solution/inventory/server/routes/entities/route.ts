@@ -20,6 +20,7 @@ import {
   type EntityWithSignals,
   type InventoryEntityDefinition,
   type VirtualEntityDefinition,
+  EntityWithSignalCounts,
 } from '../../../common/entities';
 import { serializeLink } from '../../../common/links';
 import { esqlResultToPlainObjects } from '../../../common/utils/esql_result_to_plain_objects';
@@ -31,7 +32,6 @@ import { createInventoryEsClient } from '../../lib/clients/create_inventory_es_c
 import { createRulesClient } from '../../lib/clients/create_rules_client';
 import { withInventorySpan } from '../../lib/with_inventory_span';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
-import { getEntitySignals } from '../signals/get_entity_signals';
 import { InventoryRouteHandlerResources } from '../types';
 import {
   DashboardWithEntityDataCheck,
@@ -44,6 +44,10 @@ import { getEntityById } from './get_entity_by_id';
 import { getEntityDefinition } from './get_entity_definition';
 import { getLatestEntities } from './get_latest_entities';
 import { searchEntities } from './search_entities';
+import { toEntity } from '../../../common/utils/to_entity';
+import { getEntitySignals } from '../signals/get_entity_signals';
+import { createAlertsClient } from '../../lib/clients/create_alerts_client';
+import { createSloClient } from '../../lib/clients/create_slo_client';
 
 export async function fetchEntityDefinitions({
   request,
@@ -97,6 +101,13 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
         start: t.number,
         end: t.number,
         type: t.union([t.literal('all'), t.string]),
+        sortField: t.union([
+          t.literal('entity.type'),
+          t.literal('entity.displayName'),
+          t.literal('alerts'),
+          t.literal('slos'),
+        ]),
+        sortOrder: t.union([t.literal('asc'), t.literal('desc')]),
       }),
       t.partial({
         fromSourceIfEmpty: t.boolean,
@@ -113,7 +124,7 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
     params,
     plugins,
     request,
-  }): Promise<{ entities: EntityWithSignals[] }> => {
+  }): Promise<{ entities: EntityWithSignalCounts[] }> => {
     const esClient = createObservabilityEsClient({
       client: (await context.core).elasticsearch.client.asCurrentUser,
       logger,
@@ -121,16 +132,12 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
     });
 
     const {
-      body: { start, end, kuery, type, fromSourceIfEmpty, dslFilter },
+      body: { start, end, kuery, type, fromSourceIfEmpty, dslFilter, sortOrder, sortField },
     } = params;
 
-    const [rulesClient, alertsClient, { definitions }] = await Promise.all([
-      plugins.alerting
-        .start()
-        .then((alertingStart) => alertingStart.getRulesClientWithRequest(request)),
-      plugins.ruleRegistry
-        .start()
-        .then((ruleRegistryStart) => ruleRegistryStart.getRacClientWithRequest(request)),
+    const [alertsClient, sloClient, { definitions }] = await Promise.all([
+      createAlertsClient({ request, plugins }),
+      createSloClient({ request, plugins }),
       fetchEntityDefinitions({ plugins, request, logger }),
     ]);
 
@@ -147,8 +154,10 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
         ).map(eemToInventoryDefinition),
         logger,
         dslFilter,
-        rulesClient,
         alertsClient,
+        sloClient,
+        sortField,
+        sortOrder,
       }),
     };
   },
@@ -315,7 +324,7 @@ const getEntityRoute = createInventoryServerRoute({
       query: { start, end },
     } = params;
 
-    const [entity, typeDefinition, alertsClient, rulesClient] = await Promise.all([
+    const [entity, definition, alertsClient, sloClient] = await Promise.all([
       getEntityById({ displayName, type, esClient }),
       getEntityDefinition({
         request,
@@ -323,30 +332,32 @@ const getEntityRoute = createInventoryServerRoute({
         type,
         logger,
       }),
-      plugins.ruleRegistry
-        .start()
-        .then((ruleRegistryStart) => ruleRegistryStart.getRacClientWithRequest(request)),
-      plugins.alerting
-        .start()
-        .then((alertingStart) => alertingStart.getRulesClientWithRequest(request)),
+      createAlertsClient({ request, plugins }),
+      createSloClient({ request, plugins }),
     ]);
 
-    if (!entity || !typeDefinition) {
+    if (!entity || !definition) {
       throw notFound();
     }
 
-    const entityWithSignals = await getEntitySignals({
+    const { slos, alerts } = await getEntitySignals({
       alertsClient,
-      rulesClient,
+      sloClient,
       start,
       end,
       logger,
-      entities: [entity],
-      typeDefinitions: [typeDefinition],
+      definition,
+      entity,
     });
 
     return {
-      entity: entityWithSignals[0],
+      entity: {
+        ...entity,
+        signals: {
+          alerts,
+          slos,
+        },
+      },
     };
   },
 });
@@ -621,7 +632,7 @@ const listEntitiesRoute = createInventoryServerRoute({
     }
 
     return {
-      entities: esqlResultToPlainObjects(response),
+      entities: esqlResultToPlainObjects(response).map(toEntity),
     };
   },
 });

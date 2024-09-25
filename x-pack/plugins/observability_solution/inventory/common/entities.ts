@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { Asset } from './assets';
 import { Link } from './links';
-import { Signal } from './signals';
 
 export const LATEST_ENTITIES_INDEX = `.entities*instance*`;
 
@@ -71,5 +72,23 @@ export interface EntityLink extends Link {
 }
 
 export interface EntityWithSignals extends Entity {
-  signals: Signal[];
+  signals: {
+    alerts: ParsedTechnicalFields[];
+    slos: SLOWithSummaryResponse[];
+  };
 }
+
+export interface EntityWithSignalCounts extends Entity {
+  alerts: {
+    active: number;
+    total: number;
+  };
+  slos: {
+    healthy: number;
+    violated: number;
+    degraded: number;
+    no_data: number;
+  };
+}
+
+export type EntitySortField = 'alerts' | 'slos' | 'entity.type' | 'entity.displayName';

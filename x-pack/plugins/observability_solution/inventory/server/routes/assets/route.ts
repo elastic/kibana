@@ -97,7 +97,7 @@ const getSuggestedAssetsRoute = createInventoryServerRoute({
       throw notFound();
     }
 
-    const [dashboardDataChecks, ruleSuggestions] = await withInventorySpan(
+    const [dashboardDataChecks, ruleSuggestions, sloSuggestions] = await withInventorySpan(
       'get_suggestions',
       () =>
         Promise.all([
@@ -120,6 +120,7 @@ const getSuggestedAssetsRoute = createInventoryServerRoute({
             ruleTypes: Array.from(ruleTypes.values()),
             logger,
           }),
+          Promise.resolve([]),
         ]),
       logger
     );

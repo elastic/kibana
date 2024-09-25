@@ -21,6 +21,7 @@ import type {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
+import type { SloPluginStart, SloPluginSetup } from '@kbn/slo-plugin/server';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -31,6 +32,7 @@ export interface InventorySetupDependencies {
   dataViews: DataViewsServerPluginSetup;
   alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  slo: SloPluginSetup;
 }
 
 export interface InventoryStartDependencies {
@@ -39,6 +41,7 @@ export interface InventoryStartDependencies {
   dataViews: DataViewsServerPluginStart;
   alerting: AlertingServerStart;
   ruleRegistry: RuleRegistryPluginStartContract;
+  slo: SloPluginStart;
 }
 
 export interface InventoryServerSetup {}

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ESQLSearchResponse } from '@kbn/es-types';
 import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { groupBy } from 'lodash';
+import { EntitySortField, EntityWithSignalCounts } from '../../../common/entities';
 import { searchLatestEntitiesIndex } from './search_latest_entities_index';
 
 export async function lookupEntitiesById({
@@ -15,17 +15,20 @@ export async function lookupEntitiesById({
   entities,
   start,
   end,
+  signals,
+  sortOrder,
+  sortField,
 }: {
   esClient: ObservabilityElasticsearchClient;
   entities: Array<{ type: string; displayName: string }>;
   start: number;
   end: number;
-}): Promise<ESQLSearchResponse> {
+  signals: Array<Pick<EntityWithSignalCounts, 'type' | 'displayName' | 'alerts' | 'slos'>>;
+  sortOrder: 'asc' | 'desc';
+  sortField: EntitySortField;
+}): Promise<EntityWithSignalCounts[]> {
   if (!entities.length) {
-    return {
-      columns: [],
-      values: [],
-    };
+    return [];
   }
 
   const byType = groupBy(entities, (entity) => entity.type);
@@ -34,6 +37,7 @@ export async function lookupEntitiesById({
     esClient,
     start,
     end,
+    signals,
     dslFilter: [
       {
         bool: {
@@ -60,5 +64,7 @@ export async function lookupEntitiesById({
         },
       },
     ],
+    sortOrder,
+    sortField,
   });
 }

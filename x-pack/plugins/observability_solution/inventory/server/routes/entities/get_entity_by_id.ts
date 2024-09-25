@@ -30,12 +30,6 @@ export async function getEntityById({
 
   const { _source, ...result } = esqlResultToPlainObjects(response)[0];
 
-  console.log(
-    JSON.stringify({
-      _source,
-      result,
-    })
-  );
   return {
     ...toEntity(result),
     _source,
