@@ -191,7 +191,18 @@ function processAlertsLimitReached<
   maintenanceWindowIds: string[],
   startedAt?: string | null
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
-  const existingAlertIds = new Set(Object.keys(existingAlerts));
+  // MaxAlerts limit may cause one or more alerts to be dropped when there are new alerts.
+  // We remove them here to open up a space for the new alerts in the  existingAlerts list
+  // We check if the existing alert is also in the new alerts list and has a scheduled action,
+  // which means the alert hasn't been dropped by the rule type executor.
+  const activeExistingAlerts = Object.entries(existingAlerts).reduce((acc, [key, value]) => {
+    if (alerts[key] && alerts[key].hasScheduledActions()) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {} as Record<string, Alert<State, Context>>);
+
+  const existingAlertIds = new Set(Object.keys(activeExistingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
 
   // When the alert limit has been reached,
@@ -204,7 +215,7 @@ function processAlertsLimitReached<
 
   // all existing alerts stay active
   const activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = cloneDeep(
-    existingAlerts
+    activeExistingAlerts
   );
 
   // update duration for existing alerts
@@ -213,7 +224,7 @@ function processAlertsLimitReached<
       if (Object.hasOwn(alerts, id)) {
         activeAlerts[id] = alerts[id];
       }
-      const state = existingAlerts[id].getState();
+      const state = activeExistingAlerts[id].getState();
       const durationInMs =
         new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
       const duration = state.start ? millisToNanos(durationInMs) : undefined;
