@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 import { EuiLink } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ApmMainTemplate } from '../templates/apm_main_template';
+import { ApmMainTemplate } from '../templates/apm_main_template/apm_main_template';
 import { Breadcrumb } from '../../app/breadcrumb';
 import {
   indexLifecyclePhaseRt,

@@ -19,7 +19,7 @@ import { mobileServiceDetailRoute } from './mobile_service_detail';
 import { settingsRoute } from './settings';
 import { onboarding } from './onboarding';
 import { tutorialRedirectRoute } from './onboarding/redirect';
-import { ApmMainTemplate } from './templates/apm_main_template';
+import { ApmMainTemplate } from './templates/apm_main_template/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
 import { diagnosticsRoute } from '../app/diagnostics';

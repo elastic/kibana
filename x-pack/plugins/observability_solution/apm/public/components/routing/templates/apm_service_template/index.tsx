@@ -21,7 +21,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { replace } from '../../../shared/links/url_helpers';
 import { SearchBar } from '../../../shared/search_bar/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
-import { ApmMainTemplate } from '../apm_main_template';
+import { ApmMainTemplate } from '../apm_main_template/apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { Tab, useTabs } from './use_tabs';
 

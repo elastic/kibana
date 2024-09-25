@@ -16,7 +16,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
 import { BetaBadge } from '../../shared/beta_badge';
 import { ApmRouter } from '../apm_route_config';
-import { ApmMainTemplate } from './apm_main_template';
+import { ApmMainTemplate } from './apm_main_template/apm_main_template';
 import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 
