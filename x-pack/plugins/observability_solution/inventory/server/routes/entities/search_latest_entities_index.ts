@@ -83,7 +83,7 @@ export async function searchLatestEntitiesIndex({
   const sortOrderUC = sortOrder.toUpperCase();
 
   if (sortField === 'alerts') {
-    commands.push(`SORT alerts.active ${sortOrderUC} NULLS_LAST`);
+    commands.push(`SORT alerts.active ${sortOrderUC} NULLS LAST`);
   } else if (sortField === 'slos') {
     commands.push(
       `SORT slos.violated ${sortOrderUC} NULLS LAST, slos.degraded ${sortOrderUC} NULLS LAST, slos.no_data ${sortOrderUC} NULLS LAST, slos.healthy ${sortOrderUC} NULLS LAST`
