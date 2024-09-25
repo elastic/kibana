@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('apis', () => {
-    // load new oblt deployment-agnostic test here
-    loadTestFile(require.resolve('../../apis/observability/alerting'));
-    loadTestFile(require.resolve('../../apis/observability/dataset_quality'));
+  describe('Dataset quality', () => {
+    loadTestFile(require.resolve('./integrations/integrations'));
   });
 }
