@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiCard } from '@elastic/eui';
 import { NoDataViewsPrompt } from './no_data_views.component';
 import { DocumentationLink } from './documentation_link';
 
@@ -24,7 +24,7 @@ describe('<NoDataViewsPromptComponent />', () => {
         onTryESQL={jest.fn()}
       />
     );
-    expect(component.find(EuiEmptyPrompt).length).toBe(2);
+    expect(component.find(EuiCard).length).toBe(2);
     expect(component.find(EuiButton).length).toBe(2);
     expect(component.find(DocumentationLink).length).toBe(2);
 
@@ -53,10 +53,14 @@ describe('<NoDataViewsPromptComponent />', () => {
   test('onClickCreate', () => {
     const onClickCreate = jest.fn();
     const component = mountWithIntl(
-      <NoDataViewsPrompt canCreateNewDataView={true} onClickCreate={onClickCreate} />
+      <NoDataViewsPrompt
+        canCreateNewDataView={true}
+        onClickCreate={onClickCreate}
+        dataViewsDocLink="doc-link/data-view"
+      />
     );
 
-    component.find('button').simulate('click');
+    component.find('button[data-test-subj="createDataViewButton"]').simulate('click');
 
     expect(onClickCreate).toHaveBeenCalledTimes(1);
   });
@@ -64,7 +68,11 @@ describe('<NoDataViewsPromptComponent />', () => {
   test('onClickTryEsql', () => {
     const onClickTryEsql = jest.fn();
     const component = mountWithIntl(
-      <NoDataViewsPrompt canCreateNewDataView={false} onTryESQL={onClickTryEsql} />
+      <NoDataViewsPrompt
+        canCreateNewDataView={false}
+        onTryESQL={onClickTryEsql}
+        esqlDocLink="doc-link/esql"
+      />
     );
 
     component.find('button[data-test-subj="tryESQLLink"]').simulate('click');
