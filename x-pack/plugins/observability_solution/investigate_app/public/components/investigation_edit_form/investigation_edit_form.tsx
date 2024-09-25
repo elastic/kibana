@@ -67,7 +67,9 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
 
   const methods = useForm<InvestigationForm>({
     defaultValues: {
-      title: 'New investigation',
+      title: i18n.translate('xpack.investigateApp.investigationDetailsPage.newInvestigationLabel', {
+        defaultMessage: 'New investigation',
+      }),
       status: 'triage',
       tags: [],
       externalIncidentUrl: null,
