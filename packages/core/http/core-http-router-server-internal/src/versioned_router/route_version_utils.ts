@@ -54,7 +54,10 @@ type KibanaRequestWithQueryVersion = KibanaRequest<
   { [ELASTIC_HTTP_VERSION_QUERY_PARAM]: unknown }
 >;
 
-export type RequestLike = Pick<KibanaRequest, 'headers' | 'query'>;
+export interface RequestLike {
+  headers: KibanaRequest['headers'];
+  query?: KibanaRequest['query'];
+}
 
 export function hasQueryVersion(
   request: Mutable<KibanaRequest>
