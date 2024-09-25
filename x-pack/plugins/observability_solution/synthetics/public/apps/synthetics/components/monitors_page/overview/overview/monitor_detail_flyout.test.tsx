@@ -23,11 +23,6 @@ TagsListMock.mockReturnValue(<div>Tags list</div>);
 
 describe('Monitor Detail Flyout', () => {
   beforeEach(() => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
-      status: observabilitySharedPublic.FETCH_STATUS.PENDING,
-      data: null,
-      refetch: () => null,
-    });
     jest
       .spyOn(observabilitySharedPublic, 'useTheme')
       .mockReturnValue({ eui: { euiColorVis0: 'red', euiColorVis9: 'red' } } as any);
@@ -76,11 +71,6 @@ describe('Monitor Detail Flyout', () => {
 
   it('renders error boundary for fetch failure', () => {
     const testErrorText = 'This is a test error';
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
-      status: observabilitySharedPublic.FETCH_STATUS.FAILURE,
-      error: new Error('This is a test error'),
-      refetch: () => null,
-    });
 
     const { getByText } = render(
       <MonitorDetailFlyout
@@ -91,17 +81,19 @@ describe('Monitor Detail Flyout', () => {
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
-      />
+      />,
+      {
+        state: {
+          monitorDetails: {
+            syntheticsMonitorError: { body: { message: 'This is a test error' } },
+          },
+        },
+      }
     );
     getByText(testErrorText);
   });
 
   it('renders loading state while fetching', () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
-      status: observabilitySharedPublic.FETCH_STATUS.LOADING,
-      refetch: jest.fn(),
-    });
-
     const { getByRole } = render(
       <MonitorDetailFlyout
         configId="123456"
@@ -111,28 +103,20 @@ describe('Monitor Detail Flyout', () => {
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
-      />
+      />,
+      {
+        state: {
+          monitorDetails: {
+            syntheticsMonitorLoading: true,
+          },
+        },
+      }
     );
 
     expect(getByRole('progressbar'));
   });
 
   it('renders details for fetch success', () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
-      status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
-      data: {
-        enabled: true,
-        type: 'http',
-        name: 'test-monitor',
-        schedule: {
-          number: '1',
-          unit: 'm',
-        },
-        tags: ['prod'],
-        config_id: 'test-id',
-      },
-      refetch: jest.fn(),
-    });
     const detailLink = '/app/synthetics/monitor/test-id';
     jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
     jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
@@ -146,7 +130,24 @@ describe('Monitor Detail Flyout', () => {
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
-      />
+      />,
+      {
+        state: {
+          monitorDetails: {
+            syntheticsMonitor: {
+              enabled: true,
+              type: 'http',
+              name: 'test-monitor',
+              schedule: {
+                number: '1',
+                unit: 'm',
+              },
+              tags: ['prod'],
+              config_id: 'test-id',
+            } as any,
+          },
+        },
+      }
     );
 
     expect(getByText('Every 1 minute'));

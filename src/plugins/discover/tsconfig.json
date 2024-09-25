@@ -99,7 +99,8 @@
     "@kbn/router-utils",
     "@kbn/management-settings-ids",
     "@kbn/react-hooks",
-    "@kbn/logs-data-access-plugin"
+    "@kbn/logs-data-access-plugin",
+    "@kbn/core-lifecycle-browser"
   ],
   "exclude": [
     "target/**/*"
