@@ -89,7 +89,7 @@ describe('AlertsSearchBar', () => {
     jest.clearAllMocks();
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     render(
       <AlertsSearchBar
         rangeFrom="now/d"
@@ -103,7 +103,7 @@ describe('AlertsSearchBar', () => {
         featureIds={['observability', 'stackAlerts']}
       />
     );
-    expect(screen.getByTestId('querySubmitButton')).toBeInTheDocument();
+    expect(await screen.findByTestId('querySubmitButton')).toBeInTheDocument();
   });
 
   it('calls onQuerySubmit correctly', async () => {
@@ -123,7 +123,7 @@ describe('AlertsSearchBar', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('querySubmitButton'));
+    fireEvent.click(await screen.findByTestId('querySubmitButton'));
 
     await waitFor(() => {
       expect(onQuerySubmitMock).toHaveBeenCalled();
@@ -180,7 +180,7 @@ describe('AlertsSearchBar', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('filtersSubmitButton'));
+    fireEvent.click(await screen.findByTestId('filtersSubmitButton'));
 
     await waitFor(() => {
       expect(onFiltersUpdatedMock).toHaveBeenCalledWith(filters);

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,7 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { Filter } from '@kbn/es-query';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { useLoadRuleTypesQuery, useRuleAADFields, useAlertsDataView } from '../common/hooks';
-import { AlertsSearchBar } from './';
+import { AlertsSearchBar } from '.';
 import { HttpStart } from '@kbn/core-http-browser';
 
 const mockDataPlugin = dataPluginMock.createStartContract();
@@ -74,7 +76,7 @@ describe('AlertsSearchBar', () => {
     jest.clearAllMocks();
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     render(
       <AlertsSearchBar
         rangeFrom="now/d"
@@ -90,7 +92,7 @@ describe('AlertsSearchBar', () => {
         dataService={mockDataPlugin}
       />
     );
-    expect(screen.getByTestId('querySubmitButton')).toBeInTheDocument();
+    expect(await screen.findByTestId('querySubmitButton')).toBeInTheDocument();
   });
 
   it('calls onQuerySubmit correctly', async () => {
@@ -112,7 +114,7 @@ describe('AlertsSearchBar', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('querySubmitButton'));
+    fireEvent.click(await screen.findByTestId('querySubmitButton'));
 
     await waitFor(() => {
       expect(onQuerySubmitMock).toHaveBeenCalled();
@@ -161,7 +163,7 @@ describe('AlertsSearchBar', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('filtersSubmitButton'));
+    fireEvent.click(await screen.findByTestId('filtersSubmitButton'));
 
     await waitFor(() => {
       expect(onFiltersUpdatedMock).toHaveBeenCalledWith(filters);
