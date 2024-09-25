@@ -13,9 +13,18 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { registerExpressionsLanguage } from '.';
 import { PresentationLabsService } from './services/labs/types';
+import { EnvironmentName, Project, ProjectID, SolutionName } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}
+
+export interface PresentationLabsService {
+  isProjectEnabled: (id: ProjectID) => boolean;
+  getProject: (id: ProjectID) => Project;
+  getProjects: (solutions?: SolutionName[]) => Record<ProjectID, Project>;
+  setProjectStatus: (id: ProjectID, env: EnvironmentName, status: boolean) => void;
+  reset: () => void;
+}
 
 export interface PresentationUtilPluginStart {
   ContextProvider: FC<PropsWithChildren<unknown>>;
