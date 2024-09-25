@@ -20,10 +20,10 @@ import type {
   DiffableAllFields,
   DiffableRule,
   ThreeWayDiff,
-} from '../../../../../../common/api/detection_engine';
-import { ThreeWayDiffConflict } from '../../../../../../common/api/detection_engine';
-import { ComparisonSide } from './comparison_side/comparison_side';
-import { FinalSide } from './final_side/final_side';
+} from '../../../../../../../common/api/detection_engine';
+import { ThreeWayDiffConflict } from '../../../../../../../common/api/detection_engine';
+import { ComparisonSide } from '../comparison_side/comparison_side';
+import { FinalSide } from '../final_side/final_side';
 
 interface RuleDiffFieldProps<FieldName extends keyof DiffableAllFields> {
   fieldName: FieldName;
