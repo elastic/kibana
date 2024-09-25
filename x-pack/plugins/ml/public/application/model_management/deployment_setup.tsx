@@ -350,7 +350,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.serverless.lowCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'This level limits resources to {vcus} VCUs, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                  'This level limits resources to {vcus, plural, one {VCU} other {VCUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
                 values: { vcus: vcpuRange.max },
               }
             );
@@ -359,7 +359,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.serverless.mediumCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'Your model will scale up to a maximum of {vcus} VCUs per hour if required by your search or ingest load. Note that it will scale down automatically as needed and that you only pay for what you use.',
+                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {VCUs}} per hour if required by your search or ingest load. Note that it will scale down automatically as needed and that you only pay for what you use.',
                 values: { vcus: vcpuRange.max },
               }
             );
@@ -368,7 +368,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.serverless.highCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'Your model will scale up to a maximum of {vcus} VCUs per hour if required by your search or ingest load. Note that it will scale down automatically as needed and that you only pay for what you use.',
+                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {VCUs}} per hour if required by your search or ingest load. Note that it will scale down automatically as needed and that you only pay for what you use.',
                 values: { vcus: vcpuRange.max },
               }
             );
