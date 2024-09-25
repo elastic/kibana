@@ -438,7 +438,7 @@ function getMonitorDetailsMockSlice() {
       tags: [],
       timeout: null,
       name: 'One pixel monitor',
-      locations: [{ isServiceManaged: true, id: 'us_central' }],
+      locations: [{ isServiceManaged: true, id: 'us_central', label: 'US Central' }],
       namespace: 'default',
       origin: SourceType.UI,
       max_attempts: 2,
