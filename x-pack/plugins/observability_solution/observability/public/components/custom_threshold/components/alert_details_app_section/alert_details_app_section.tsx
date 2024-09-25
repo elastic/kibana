@@ -115,7 +115,9 @@ export default function AlertDetailsAppSection({
   const annotations: EventAnnotationConfig[] = [];
   annotations.push(alertStartAnnotation, alertRangeAnnotation);
 
-  setRelatedAlertsKuery(getRelatedAlertKuery(tags, groups));
+  useEffect(() => {
+    setRelatedAlertsKuery(getRelatedAlertKuery(tags, groups));
+  }, [groups, setRelatedAlertsKuery, tags]);
 
   useEffect(() => {
     setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));
