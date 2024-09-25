@@ -42,6 +42,24 @@ describe('DeploymentParamsMapper', () => {
         );
       });
 
+      it('should get correct VCU levels', () => {
+        expect(mapper.getVCURange('low')).toEqual({
+          min: 0,
+          max: 16,
+          static: 16,
+        });
+        expect(mapper.getVCURange('medium')).toEqual({
+          min: 24,
+          max: 256,
+          static: 256,
+        });
+        expect(mapper.getVCURange('high')).toEqual({
+          min: 264,
+          max: 4000,
+          static: 800,
+        });
+      });
+
       it('should enforce adaptive allocations', () => {
         expect(
           mapper.mapUiToApiDeploymentParams({
@@ -99,9 +117,9 @@ describe('DeploymentParamsMapper', () => {
       });
 
       it('should provide vCPU level', () => {
-        expect(mapper.getVCPURange('low')).toEqual({ min: 1, max: 2 });
-        expect(mapper.getVCPURange('medium')).toEqual({ min: 3, max: 16 });
-        expect(mapper.getVCPURange('high')).toEqual({ min: 17, max: 32 });
+        expect(mapper.getVCPURange('low')).toEqual({ min: 1, max: 2, static: 2 });
+        expect(mapper.getVCPURange('medium')).toEqual({ min: 3, max: 16, static: 16 });
+        expect(mapper.getVCPURange('high')).toEqual({ min: 17, max: 32, static: 32 });
       });
     });
 

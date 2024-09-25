@@ -17,7 +17,18 @@ export type MlStartTrainedModelDeploymentRequestNew = MlStartTrainedModelDeploym
 
 const THREADS_MAX_EXPONENT = 5;
 
-type VCPUBreakpoints = Record<DeploymentParamsUI['vCPUUsage'], { min: number; max: number }>;
+type VCPUBreakpoints = Record<
+  DeploymentParamsUI['vCPUUsage'],
+  {
+    min: number;
+    max: number;
+    /** Static value is used for the number of vCPUs when the adaptive resources are disabled */
+    static: number;
+  }
+>;
+
+type BreakpointValues = VCPUBreakpoints[keyof VCPUBreakpoints];
+
 /**
  * Class responsible for mapping deployment params between API and UI
  */
@@ -28,22 +39,23 @@ export class DeploymentParamsMapper {
    * vCPUs level breakpoints for cloud cluster with enabled ML autoscaling
    */
   private readonly autoscalingVCPUBreakpoints: VCPUBreakpoints = {
-    low: { min: 1, max: 2 },
-    medium: { min: 3, max: 32 },
-    high: { min: 33, max: 99999 },
+    low: { min: 1, max: 2, static: 2 },
+    medium: { min: 3, max: 32, static: 32 },
+    high: { min: 33, max: 99999, static: 100 },
   };
 
   /**
    * vCPUs level breakpoints for serverless projects
    */
   private readonly serverlessVCPUBreakpoints: VCPUBreakpoints = {
-    low: { min: 1, max: 2 },
-    medium: { min: 3, max: 32 },
-    high: { min: 33, max: 500 },
+    low: { min: 0, max: 2, static: 2 },
+    medium: { min: 3, max: 32, static: 32 },
+    high: { min: 33, max: 500, static: 100 },
   };
 
   /**
-   * vCPUs level breakpoints based on the ML server limits
+   * vCPUs level breakpoints based on the ML server limits.
+   * Either on-prem or cloud with disabled ML autoscaling
    */
   private readonly hardwareVCPUBreakpoints: VCPUBreakpoints;
 
@@ -68,11 +80,12 @@ export class DeploymentParamsMapper {
     const mediumValue = this.mlServerLimits!.total_ml_processors! / 2;
 
     this.hardwareVCPUBreakpoints = {
-      low: { min: 1, max: 2 },
-      medium: { min: Math.min(3, mediumValue), max: mediumValue },
+      low: { min: 1, max: 2, static: 2 },
+      medium: { min: Math.min(3, mediumValue), max: mediumValue, static: mediumValue },
       high: {
         min: mediumValue + 1,
         max: this.mlServerLimits!.total_ml_processors!,
+        static: this.mlServerLimits!.total_ml_processors!,
       },
     };
 
@@ -112,9 +125,32 @@ export class DeploymentParamsMapper {
     };
   }
 
+  /**
+   * Gets vCPU (virtual CPU) range based on the vCPU usage level
+   * @param vCPUUsage
+   * @returns
+   */
   public getVCPURange(vCPUUsage: DeploymentParamsUI['vCPUUsage']) {
     return this.vCpuBreakpoints[vCPUUsage];
   }
+
+  /**
+   * Gets VCU (Virtual Compute Units) range based on the vCPU usage level
+   * @param vCPUUsage
+   * @returns
+   */
+  public getVCURange(vCPUUsage: DeploymentParamsUI['vCPUUsage']) {
+    // general purpose (c6gd) 1VCU = 1GB RAM / 0.5 vCPU
+    // vector optimized (r6gd) 1VCU = 1GB RAM / 0.125 vCPU
+    const vCPUBreakpoints = this.serverlessVCPUBreakpoints[vCPUUsage];
+
+    return Object.entries(vCPUBreakpoints).reduce((acc, [key, val]) => {
+      // as we can't retrieve Search project configuration, we assume that the vector optimized instance is used
+      acc[key as keyof BreakpointValues] = Math.round(val / 0.125);
+      return acc;
+    }, {} as BreakpointValues);
+  }
+
   /**
    * Maps UI params to the actual start deployment API request
    * @param input
