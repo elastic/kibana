@@ -259,7 +259,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.mediumCpuStaticHelp',
               {
                 defaultMessage:
-                  'Your model will consume {staticVCPUs} vCPUs consistently, if provided by the Cloud console.',
+                  'Your model will consume {staticVCPUs} vCPUs, even when not in use, if provided by the Cloud console.',
                 values: { staticVCPUs: vcpuRange.static },
               }
             );
@@ -268,7 +268,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.highCpuStaticHelp',
               {
                 defaultMessage:
-                  'Your model will consume {staticVCPUs} vCPUs consistently, if provided by the Cloud console.',
+                  'Your model will consume {staticVCPUs} vCPUs, even when not in use, if provided by the Cloud console.',
                 values: { staticVCPUs: vcpuRange.static },
               }
             );
@@ -318,14 +318,15 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.lowCpuStaticHelp',
               {
                 defaultMessage:
-                  'This level limits resources to the minimum required for ELSER to run. It may not be sufficient for a production application.',
+                  'This level sets resources to the minimum required for ELSER to run. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
             return i18n.translate(
               'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.mediumCpuStaticHelp',
               {
-                defaultMessage: 'Your model will consume {staticVCPUs} vCPUs consistently.',
+                defaultMessage:
+                  'Your model will consume {staticVCPUs} vCPUs, even when not in use.',
                 values: { staticVCPUs: vcpuRange.static },
               }
             );
@@ -359,7 +360,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.serverless.mediumCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {VCUs}} per hour if required by your search or ingest load. Note that it will scale down automatically as needed and that you only pay for what you use.',
+                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
                 values: { vcus: vcpuRange.max },
               }
             );
@@ -368,7 +369,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.serverless.highCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {VCUs}} per hour if required by your search or ingest load. Note that it will scale down automatically as needed and that you only pay for what you use.',
+                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
                 values: { vcus: vcpuRange.max },
               }
             );
