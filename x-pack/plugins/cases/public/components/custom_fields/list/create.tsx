@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { useMemo } from 'react';
 import type {
   CaseCustomFieldList,
   ListCustomFieldConfiguration,
 } from '../../../../common/types/domain';
-import type { CustomFieldType } from '../types';
-import { getListFieldConfig } from './config';
 import { OptionalFieldLabel } from '../../optional_field_label';
+import type { CustomFieldType } from '../types';
 import { MappedSelectField } from './components/mapped_select_field';
+import { getListFieldConfig } from './config';
 import { listCustomFieldOptionsToEuiSelectOptions } from './helpers/list_custom_field_options_to_eui_select_options';
 
 const CreateComponent: CustomFieldType<
@@ -30,7 +30,10 @@ const CreateComponent: CustomFieldType<
 
   const defaultKeyValuePair = useMemo(() => {
     if (defaultValue && setDefaultValue) {
-      return [String(defaultValue), String(options.find((option) => option.key === defaultValue))];
+      return [
+        String(defaultValue),
+        String(options.find((option) => option.key === defaultValue)?.label),
+      ];
     }
     return null;
   }, [defaultValue, setDefaultValue, options]);
