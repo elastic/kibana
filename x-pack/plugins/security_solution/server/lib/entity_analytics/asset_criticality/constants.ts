@@ -16,6 +16,12 @@ const assetCriticalityMapping = {
   required: false,
 };
 
+const assetCriticalityMapping = {
+  type: 'keyword',
+  array: false,
+  required: false,
+};
+
 export const assetCriticalityFieldMap: FieldMap = {
   '@timestamp': {
     type: 'date',
