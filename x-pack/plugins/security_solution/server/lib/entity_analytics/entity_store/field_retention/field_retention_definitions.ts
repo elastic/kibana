@@ -13,11 +13,11 @@ const DEFAULT_FIELD_RETENTION_COUNT = 10;
 const getBaseFields = (entityType: EntityType): FieldRetentionDefinition['fields'] => [
   {
     field: 'asset.criticality',
-    operation: 'keep_oldest_value',
+    operation: 'prefer_newest_value',
   },
   {
     field: `${entityType}.risk.calculated_level`,
-    operation: 'keep_oldest_value',
+    operation: 'prefer_newest_value',
   },
 ];
 
@@ -39,7 +39,7 @@ const HOST_FIELD_RETENTION_DEFINITION: FieldRetentionDefinition = {
     },
     {
       field: 'host.risk.calculated_level',
-      operation: 'keep_oldest_value',
+      operation: 'prefer_newest_value',
     },
   ],
 };
