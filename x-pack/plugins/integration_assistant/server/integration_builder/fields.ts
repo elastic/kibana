@@ -15,7 +15,7 @@ export function createFieldMapping(
   specificDataStreamDir: string,
   docs: object[]
 ): void {
-  const dataStreamFieldsDir = `${specificDataStreamDir}/fields`
+  const dataStreamFieldsDir = `${specificDataStreamDir}/fields`;
   createBaseFields(dataStreamFieldsDir, packageName, dataStreamName);
   createCustomFields(dataStreamFieldsDir, docs);
 }
