@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 
-import { MappingProperty, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetMappingResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   EuiButtonEmpty,
@@ -38,10 +38,14 @@ interface DocumentListProps {
   docs: SearchHit[];
   docsPerPage: number;
   isLoading: boolean;
-  mappings: Record<string, MappingProperty> | undefined;
+  mappings: IndicesGetMappingResponse | undefined;
   meta: Pagination;
   onPaginate: (newPageIndex: number) => void;
   setDocsPerPage: (docsPerPage: number) => void;
+  defaultVisibleFields?: number;
+  compactCard?: boolean;
+  showScore?: boolean;
+  expandAction?: (doc: SearchHit) => void;
 }
 
 export const DocumentList: React.FC<DocumentListProps> = ({
@@ -53,6 +57,10 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   meta,
   onPaginate,
   setDocsPerPage,
+  defaultVisibleFields = 3,
+  compactCard = true,
+  showScore = false,
+  expandAction,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -99,7 +107,14 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       {docs.map((doc) => {
         return (
           <React.Fragment key={doc._id}>
-            <Result fields={resultToField(doc, mappings)} metaData={resultMetaData(doc)} />
+            <Result
+              fields={resultToField(doc, mappings)}
+              metaData={resultMetaData(doc)}
+              defaultVisibleFields={defaultVisibleFields}
+              showScore={showScore}
+              compactCard={compactCard}
+              expandAction={expandAction ? () => expandAction(doc) : undefined}
+            />
             <EuiSpacer size="s" />
           </React.Fragment>
         );

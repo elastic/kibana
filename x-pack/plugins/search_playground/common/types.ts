@@ -51,6 +51,7 @@ export enum APIRoutes {
   POST_QUERY_SOURCE_FIELDS = '/internal/search_playground/query_source_fields',
   GET_INDICES = '/internal/search_playground/indices',
   POST_SEARCH_QUERY = '/internal/search_playground/search',
+  GET_INDEX_MAPPINGS = '/internal/search_playground/mappings',
 }
 
 export enum LLMs {
