@@ -69,6 +69,9 @@ function once(emitter, event) {
  * @param {import('./types').BazelRunOptions | undefined} options
  */
 async function runBazelRunner(runner, args, options = undefined) {
+  console.log('Running bazel command: ', args, options);
+  console.error(new Error('No bazel!'));
+  return;
   const proc = ChildProcess.spawn(runner, options?.quiet ? [...args, '--color=no'] : args, {
     env: {
       ...process.env,

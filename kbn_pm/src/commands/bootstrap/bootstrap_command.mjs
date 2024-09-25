@@ -11,6 +11,8 @@ import { run } from '../../lib/spawn.mjs';
 import * as Bazel from '../../lib/bazel.mjs';
 import External from '../../lib/external_packages.js';
 
+import { yarnInstallDeps, buildWebpackBundles } from './replacements.mjs';
+
 import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } from './yarn.mjs';
 import { setupRemoteCache } from './setup_remote_cache.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
@@ -109,12 +111,13 @@ export const command = {
       await time('force install dependencies', async () => {
         await removeYarnIntegrityFileIfExists();
         await Bazel.expungeCache(log, { quiet });
-        await Bazel.installYarnDeps(log, { offline, quiet });
+        await yarnInstallDeps(log, { offline, quiet });
       });
     }
 
     await time('pre-build webpack bundles for packages', async () => {
-      await Bazel.buildWebpackBundles(log, { offline, quiet });
+      // await Bazel.buildWebpackBundles(log, { offline, quiet });
+      await buildWebpackBundles(log, { offline, quiet });
     });
 
     await Promise.all([
