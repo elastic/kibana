@@ -4,7 +4,7 @@ info:
     Exceptions API allows you to manage detection rule exceptions to prevent a
     rule from generating an alert from incoming events even when the rule's
     other criteria are met.
-  title: Security Solution Exceptions API (Elastic Cloud Serverless)
+  title: Security Exceptions API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
@@ -76,7 +76,7 @@ paths:
           description: Internal server error response
       summary: Create rule exception list items
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
   /api/exception_lists:
     delete:
       description: Delete an exception list using the `id` or `list_id` field.
@@ -141,7 +141,7 @@ paths:
           description: Internal server error response
       summary: Delete an exception list
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
     get:
       description: Get the details of an exception list using the `id` or `list_id` field.
       operationId: ReadExceptionList
@@ -205,7 +205,7 @@ paths:
           description: Internal server error response
       summary: Get exception list details
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
     post:
       description: >
         An exception list groups exception items and can be associated with
@@ -295,7 +295,7 @@ paths:
           description: Internal server error response
       summary: Create an exception list
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
     put:
       description: Update an exception list using the `id` or `list_id` field.
       operationId: UpdateExceptionList
@@ -376,7 +376,7 @@ paths:
           description: Internal server error response
       summary: Update an exception list
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
   /api/exception_lists/_duplicate:
     post:
       description: Duplicate an existing exception list.
@@ -446,7 +446,7 @@ paths:
           description: Internal server error response
       summary: Duplicate an exception list
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
   /api/exception_lists/_export:
     post:
       description: Export an exception list and its associated items to an NDJSON file.
@@ -526,7 +526,7 @@ paths:
           description: Internal server error response
       summary: Export an exception list
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
   /api/exception_lists/_find:
     get:
       description: Get a list of all exception lists.
@@ -647,7 +647,7 @@ paths:
           description: Internal server error response
       summary: Get exception lists
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
   /api/exception_lists/_import:
     post:
       description: Import an exception list and its associated items from an NDJSON file.
@@ -763,7 +763,7 @@ paths:
           description: Internal server error response
       summary: Import an exception list
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
   /api/exception_lists/items:
     delete:
       description: Delete an exception list item using the `id` or `item_id` field.
@@ -828,7 +828,7 @@ paths:
           description: Internal server error response
       summary: Delete an exception list item
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
     get:
       description: >-
         Get the details of an exception list item using the `id` or `item_id`
@@ -894,7 +894,7 @@ paths:
           description: Internal server error response
       summary: Get an exception list item
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
     post:
       description: >
         Create an exception item and associate it with the specified exception
@@ -988,7 +988,7 @@ paths:
           description: Internal server error response
       summary: Create an exception list item
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
     put:
       description: Update an exception list item using the `id` or `item_id` field.
       operationId: UpdateExceptionListItem
@@ -1080,7 +1080,7 @@ paths:
           description: Internal server error response
       summary: Update an exception list item
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
   /api/exception_lists/items/_find:
     get:
       description: Get a list of all exception list items in the specified list.
@@ -1217,7 +1217,7 @@ paths:
           description: Internal server error response
       summary: Get exception list items
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
   /api/exception_lists/summary:
     get:
       description: Get a summary of the specified exception list.
@@ -1301,7 +1301,7 @@ paths:
           description: Internal server error response
       summary: Get an exception list summary
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
   /api/exceptions/shared:
     post:
       description: >
@@ -1373,7 +1373,7 @@ paths:
           description: Internal server error response
       summary: Create a shared exception list
       tags:
-        - Security Solution Exceptions API
+        - Security Exceptions API
 components:
   schemas:
     CreateExceptionListItemComment:
@@ -1903,4 +1903,4 @@ tags:
       Exceptions API allows you to manage detection rule exceptions to prevent a
       rule from generating an alert from incoming events even when the rule's
       other criteria are met.
-    name: Security Solution Exceptions API
+    name: Security Exceptions API

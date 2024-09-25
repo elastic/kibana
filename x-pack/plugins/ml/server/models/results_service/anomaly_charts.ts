@@ -26,6 +26,8 @@ import {
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import type { MlClient } from '../../lib/ml_client';
 import type {
   MetricData,
@@ -48,7 +50,6 @@ import {
 } from '../../../common/util/job_utils';
 import type { CriteriaField } from './results_service';
 import type { CombinedJob, Datafeed } from '../../shared';
-import { parseInterval } from '../../../common/util/parse_interval';
 
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
