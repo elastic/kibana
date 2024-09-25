@@ -43,7 +43,6 @@ import {
   ContentInsightsProvider,
   useContentInsightsServices,
 } from '@kbn/content-management-content-insights-public';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 
 import {
   Table,
@@ -1023,7 +1022,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   useDebounce(fetchItems, 300, [fetchItems, refreshListBouncer]);
 
   // set the initial state from the URL
-  useEffectOnce(() => {
+  useEffect(() => {
     if (!urlStateEnabled) {
       return;
     }
@@ -1077,7 +1076,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     updateQueryFromURL(initialUrlState.s);
     updateSortFromURL(initialUrlState.sort);
     updateFilterFromURL(initialUrlState.filter);
-  });
+  }, [initialUrlState, buildQueryFromText, urlStateEnabled]);
 
   useEffect(() => {
     isMounted.current = true;
