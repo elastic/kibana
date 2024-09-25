@@ -165,7 +165,7 @@ export class TaskManagerRunner implements TaskRunner {
   private onTaskEvent: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
-  private readonly executionContext: ExecutionContextStart;
+  // private readonly executionContext: ExecutionContextStart;
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private readonly taskValidator: TaskValidator;
@@ -206,7 +206,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
-    this.executionContext = executionContext;
+    // this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.uuid = uuidv4();
     this.config = config;
@@ -379,16 +379,18 @@ export class TaskManagerRunner implements TaskRunner {
     try {
       this.task = definition.createTaskRunner(modifiedContext);
 
-      const ctx = {
-        type: 'task manager',
-        name: `run ${this.instance.task.taskType}`,
-        id: this.instance.task.id,
-        description: 'run task',
-      };
+      // const ctx = {
+      //   type: 'task manager',
+      //   name: `run ${this.instance.task.taskType}`,
+      //   id: this.instance.task.id,
+      //   description: 'run task',
+      // };
 
-      const result = await this.executionContext.withContext(ctx, () =>
-        withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
-      );
+      const result = undefined;
+      this.logger.info(`Running a noop task`);
+      // const result = await this.executionContext.withContext(ctx, () =>
+      //   withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+      // );
 
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
