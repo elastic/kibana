@@ -40,6 +40,7 @@
     "@kbn/data-plugin",
     "@kbn/core-analytics-browser",
     "@kbn/core-http-browser",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/shared-svg"
   ]
 }
