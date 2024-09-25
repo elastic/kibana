@@ -199,7 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await cell.getVisibleText()).to.be(' - ');
         expect(await dataGrid.getHeaders()).to.eql([
-          'Select column',
+          "Select columnPress the Enter key to interact with this cell's contents.", // contains screen reader help text
           'Control column',
           'Access to degraded docs',
           'Access to available stacktraces',
