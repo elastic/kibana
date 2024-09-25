@@ -96,9 +96,11 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       expect(resp.body).empty();
     });
 
-    it('returns "sizeBytes" as null in serverless', async () => {
+    it('returns "sizeBytes" correctly', async () => {
       const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
-      expect(resp.body.sizeBytes).to.be(null);
+
+      expect(isNaN(resp.body.sizeBytes as number)).to.be(false);
+      expect(resp.body.sizeBytes).to.be.greaterThan(0);
     });
 
     it('returns service.name and host.name correctly', async () => {
