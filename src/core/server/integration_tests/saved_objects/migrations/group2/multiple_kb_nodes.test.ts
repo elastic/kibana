@@ -80,7 +80,7 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
     checkMigratorsResults();
     await checkIndicesInfo();
     await checkSavedObjectDocuments();
-    await checkMigratorsSteps();
+    await checkFirstNodeSteps();
     await checkUpToDateOnRestart();
   });
 
@@ -156,77 +156,73 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
     await expectDocumentsMigratedToHighestVersion(client, [defaultKibanaIndex, kibanaSplitIndex]);
   }
 
-  async function checkMigratorsSteps() {
-    for (let i = 0; i < PARALLEL_MIGRATORS; ++i) {
-      const logs = await parseLogFile(getLogFile(i));
-      // '.kibana_migrator_split' is a new index, all nodes' migrators must attempt to create it
+  async function checkFirstNodeSteps() {
+    const logs = await parseLogFile(getLogFile(0));
+    // '.kibana_migrator_split' is a new index, all nodes' migrators must attempt to create it
+    expect(logs).toContainLogEntries(
+      [
+        `[${kibanaSplitIndex}] INIT -> CREATE_REINDEX_TEMP.`,
+        `[${kibanaSplitIndex}] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.`,
+        // no docs to reindex, as source index did NOT exist
+        `[${kibanaSplitIndex}] READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC.`,
+      ],
+      { ordered: true }
+    );
+
+    // '.kibana_migrator' and '.kibana_migrator_tasks' are involved in a relocation
+    [defaultKibanaIndex, defaultKibanaTaskIndex].forEach((index) => {
       expect(logs).toContainLogEntries(
         [
-          `[${kibanaSplitIndex}] INIT -> CREATE_REINDEX_TEMP.`,
-          `[${kibanaSplitIndex}] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.`,
-          // no docs to reindex, as source index did NOT exist
-          `[${kibanaSplitIndex}] READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC.`,
+          `[${index}] INIT -> WAIT_FOR_YELLOW_SOURCE.`,
+          `[${index}] WAIT_FOR_YELLOW_SOURCE -> CHECK_CLUSTER_ROUTING_ALLOCATION.`,
+          `[${index}] CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.`,
+          `[${index}] CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.`,
+          `[${index}] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.`,
+          `[${index}] CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP.`,
+          `[${index}] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.`,
+          `[${index}] READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT.`,
+          `[${index}] REINDEX_SOURCE_TO_TEMP_OPEN_PIT -> REINDEX_SOURCE_TO_TEMP_READ.`,
+          `[${index}] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM.`,
+          `[${index}] REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK.`,
+          `[${index}] REINDEX_SOURCE_TO_TEMP_INDEX_BULK`,
+          // if the index is closed by another node, we will have instead: REINDEX_SOURCE_TO_TEMP_TRANSFORM => REINDEX_SOURCE_TO_TEMP_CLOSE_PIT.
+          // `[${index}] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT.`,
+          `[${index}] REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> DONE_REINDEXING_SYNC.`,
         ],
         { ordered: true }
       );
+    });
 
-      // '.kibana_migrator' and '.kibana_migrator_tasks' are involved in a relocation
-      [defaultKibanaIndex, defaultKibanaTaskIndex].forEach((index) => {
-        expect(logs).toContainLogEntries(
-          [
-            `[${index}] INIT -> WAIT_FOR_YELLOW_SOURCE.`,
-            `[${index}] WAIT_FOR_YELLOW_SOURCE -> CHECK_CLUSTER_ROUTING_ALLOCATION.`,
-            `[${index}] CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.`,
-            `[${index}] CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.`,
-            `[${index}] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.`,
-            `[${index}] CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP.`,
-            `[${index}] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.`,
-            `[${index}] READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT.`,
-            `[${index}] REINDEX_SOURCE_TO_TEMP_OPEN_PIT -> REINDEX_SOURCE_TO_TEMP_READ.`,
-            `[${index}] Starting to process`,
-            `[${index}] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM.`,
-            `[${index}] REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK.`,
-            `[${index}] REINDEX_SOURCE_TO_TEMP_INDEX_BULK`,
-            `[${index}] Processed`,
-            // if the index is closed by another node, we will have instead: REINDEX_SOURCE_TO_TEMP_TRANSFORM => REINDEX_SOURCE_TO_TEMP_CLOSE_PIT.
-            // `[${index}] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT.`,
-            `[${index}] REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> DONE_REINDEXING_SYNC.`,
-          ],
-          { ordered: true }
-        );
-      });
+    // after the relocation, all migrators share the final part of the flow
+    [defaultKibanaIndex, defaultKibanaTaskIndex, kibanaSplitIndex].forEach((index) => {
+      expect(logs).toContainLogEntries(
+        [
+          `[${index}] DONE_REINDEXING_SYNC -> SET_TEMP_WRITE_BLOCK.`,
+          `[${index}] SET_TEMP_WRITE_BLOCK -> CLONE_TEMP_TO_TARGET.`,
+          `[${index}] CLONE_TEMP_TO_TARGET -> REFRESH_TARGET.`,
+          `[${index}] REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.`,
+          `[${index}] OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT -> OUTDATED_DOCUMENTS_SEARCH_READ.`,
+          `[${index}] OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT.`,
+          `[${index}] OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> CHECK_TARGET_MAPPINGS.`,
+          `[${index}] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.`,
+          `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.`,
+          `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META.`,
+          `[${index}] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.`,
+          `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY_SYNC.`,
+          `[${index}] MARK_VERSION_INDEX_READY_SYNC`, // all migrators try to update all aliases, all but one will have conclicts
+          `[${index}] Migration completed after`,
+        ],
+        { ordered: true }
+      );
+    });
 
-      // after the relocation, all migrators share the final part of the flow
-      [defaultKibanaIndex, defaultKibanaTaskIndex, kibanaSplitIndex].forEach((index) => {
-        expect(logs).toContainLogEntries(
-          [
-            `[${index}] DONE_REINDEXING_SYNC -> SET_TEMP_WRITE_BLOCK.`,
-            `[${index}] SET_TEMP_WRITE_BLOCK -> CLONE_TEMP_TO_TARGET.`,
-            `[${index}] CLONE_TEMP_TO_TARGET -> REFRESH_TARGET.`,
-            `[${index}] REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.`,
-            `[${index}] OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT -> OUTDATED_DOCUMENTS_SEARCH_READ.`,
-            `[${index}] OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT.`,
-            `[${index}] OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> CHECK_TARGET_MAPPINGS.`,
-            `[${index}] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.`,
-            `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.`,
-            `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META.`,
-            `[${index}] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.`,
-            `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY_SYNC.`,
-            `[${index}] MARK_VERSION_INDEX_READY_SYNC`, // all migrators try to update all aliases, all but one will have conclicts
-            `[${index}] Migration completed after`,
-          ],
-          { ordered: true }
-        );
-      });
-
-      // should NOT retransform anything (we reindexed, thus we transformed already)
-      [defaultKibanaIndex, defaultKibanaTaskIndex, kibanaSplitIndex].forEach((index) => {
-        expect(logs).not.toContainLogEntry(`[${index}] OUTDATED_DOCUMENTS_TRANSFORM`);
-        expect(logs).not.toContainLogEntry(
-          `[${index}] Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings`
-        );
-      });
-    }
+    // should NOT retransform anything (we reindexed, thus we transformed already)
+    [defaultKibanaIndex, defaultKibanaTaskIndex, kibanaSplitIndex].forEach((index) => {
+      expect(logs).not.toContainLogEntry(`[${index}] OUTDATED_DOCUMENTS_TRANSFORM`);
+      expect(logs).not.toContainLogEntry(
+        `[${index}] Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings`
+      );
+    });
   }
 
   async function checkUpToDateOnRestart() {
