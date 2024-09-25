@@ -13,8 +13,12 @@ interface BaseFieldRetentionOperator {
 }
 
 // A field retention operator that always keeps the oldest value of the field. e.g first_seen_timestamp
-export interface KeepOldestValue extends BaseFieldRetentionOperator {
-  operation: 'keep_oldest_value';
+export interface PreferNewestValue extends BaseFieldRetentionOperator {
+  operation: 'prefer_newest_value';
+}
+
+export interface PreferOldestValue extends BaseFieldRetentionOperator {
+  operation: 'prefer_oldest_value';
 }
 
 // A field retention operator that collects up to `maxLength` values of the field. e.g collect up to 10 values of ip_address
@@ -23,7 +27,7 @@ export interface CollectValues extends BaseFieldRetentionOperator {
   maxLength: number;
 }
 
-export type FieldRetentionOperator = KeepOldestValue | CollectValues;
+export type FieldRetentionOperator = PreferNewestValue | PreferOldestValue | CollectValues;
 
 export interface FieldRetentionDefinition {
   version: number;

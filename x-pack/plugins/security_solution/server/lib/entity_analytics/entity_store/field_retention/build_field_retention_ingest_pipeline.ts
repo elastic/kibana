@@ -10,7 +10,8 @@ import type {
   CollectValues,
   FieldRetentionDefinition,
   FieldRetentionOperator,
-  KeepOldestValue,
+  PreferNewestValue,
+  PreferOldestValue,
 } from './types';
 
 const ENRICH_FIELD = 'historical';
@@ -137,12 +138,23 @@ const isFieldMissingOrEmpty = (field: string): string => {
   ].join(' || ');
 };
 
-const keepOldestValueProcessor = ({ field }: KeepOldestValue): IngestProcessorContainer => {
+const preferNewestValueProcessor = ({ field }: PreferNewestValue): IngestProcessorContainer => {
   const historicalField = `${ENRICH_FIELD}.${field}`;
   const ctxField = `ctx.${field}`;
   return {
     set: {
       if: isFieldMissingOrEmpty(ctxField),
+      field,
+      value: `{{${historicalField}}}`,
+    },
+  };
+};
+
+const preferOldestValueProcessor = ({ field }: PreferOldestValue): IngestProcessorContainer => {
+  const historicalField = `${ENRICH_FIELD}.${field}`;
+  return {
+    set: {
+      if: `!(${isFieldMissingOrEmpty(historicalField)})`,
       field,
       value: `{{${historicalField}}}`,
     },
@@ -225,8 +237,10 @@ const collectValuesProcessor = ({ field, maxLength }: CollectValues) => {
 
 const fieldToProcessorStep = (fieldOperator: FieldRetentionOperator): IngestProcessorContainer => {
   switch (fieldOperator.operation) {
-    case 'keep_oldest_value':
-      return keepOldestValueProcessor(fieldOperator);
+    case 'prefer_newest_value':
+      return preferNewestValueProcessor(fieldOperator);
+    case 'prefer_oldest_value':
+      return preferOldestValueProcessor(fieldOperator);
     case 'collect_values':
       return collectValuesProcessor(fieldOperator);
   }
