@@ -8,3 +8,11 @@
 export function combineToNdJson(...parts: unknown[]): string {
   return parts.map((p) => JSON.stringify(p)).join('\n');
 }
+
+export function combineArrayToNdJson(parts: unknown[]): string {
+  return parts.map((p) => JSON.stringify(p)).join('\n');
+}
+
+export function combineArraysToNdJson(...arrays: unknown[][]): string {
+  return arrays.map((array) => combineArrayToNdJson(array)).join('\n');
+}

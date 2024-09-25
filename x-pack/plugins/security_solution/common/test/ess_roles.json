@@ -29,6 +29,7 @@
           "ml": ["read"],
           "siem": ["read", "read_alerts"],
           "securitySolutionAssistant": ["none"],
+          "securitySolutionAttackDiscovery": ["none"],
           "securitySolutionCases": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
@@ -77,6 +78,7 @@
           "ml": ["read"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCases": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"]
@@ -125,6 +127,7 @@
           "ml": ["read"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCases": ["all"],
           "builtInAlerts": ["all"]
         },

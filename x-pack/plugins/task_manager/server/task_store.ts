@@ -26,6 +26,7 @@ import {
   ElasticsearchClient,
 } from '@kbn/core/server';
 
+import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { RequestTimeoutsConfig } from './config';
 import { asOk, asErr, Result } from './lib/result_type';
 
@@ -36,12 +37,16 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
+  PartialConcreteTaskInstance,
+  PartialSerializedConcreteTaskInstance,
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
+import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
+import { ErrorOutput } from './lib/bulk_operation_buffer';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -84,10 +89,13 @@ export interface FetchResult {
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
-export type BulkUpdateResult = Result<
-  ConcreteTaskInstance,
-  { type: string; id: string; error: SavedObjectError }
->;
+export interface BulkUpdateOpts {
+  validate: boolean;
+}
+
+export type BulkUpdateResult = Result<ConcreteTaskInstance, ErrorOutput>;
+
+export type PartialBulkUpdateResult = Result<PartialConcreteTaskInstance, ErrorOutput>;
 
 export type BulkGetResult = Array<
   Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
@@ -232,15 +240,13 @@ export class TaskStore {
    * Fetches a list of scheduled tasks with default sorting.
    *
    * @param opts - The query options used to filter tasks
+   * @param limitResponse - Whether to exclude the task state and params from the source for a smaller respose payload
    */
-  public async fetch({
-    sort = [{ 'task.runAt': 'asc' }],
-    ...opts
-  }: SearchOpts = {}): Promise<FetchResult> {
-    return this.search({
-      ...opts,
-      sort,
-    });
+  public async fetch(
+    { sort = [{ 'task.runAt': 'asc' }], ...opts }: SearchOpts = {},
+    limitResponse: boolean = false
+  ): Promise<FetchResult> {
+    return this.search({ ...opts, sort }, limitResponse);
   }
 
   /**
@@ -296,11 +302,11 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    options: { validate: boolean }
+    { validate }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
       const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
-        validate: options.validate,
+        validate,
       });
       attrsById.set(doc.id, taskInstanceToAttributes(taskInstance, doc.id));
       return attrsById;
@@ -342,9 +348,70 @@ export class TaskStore {
         ),
       });
       const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
-        validate: options.validate,
+        validate,
       });
       return asOk(result);
+    });
+  }
+
+  public async bulkPartialUpdate(
+    docs: PartialConcreteTaskInstance[]
+  ): Promise<PartialBulkUpdateResult[]> {
+    if (docs.length === 0) {
+      return [];
+    }
+
+    const bulkBody = [];
+    for (const doc of docs) {
+      bulkBody.push({
+        update: {
+          _id: `task:${doc.id}`,
+          ...(doc.version ? decodeRequestVersion(doc.version) : {}),
+        },
+      });
+      bulkBody.push({
+        doc: {
+          task: partialTaskInstanceToAttributes(doc),
+        },
+      });
+    }
+
+    let result: estypes.BulkResponse;
+    try {
+      result = await this.esClient.bulk({ index: this.index, refresh: false, body: bulkBody });
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    return result.items.map((item) => {
+      if (!item.update || !item.update._id) {
+        return asErr({
+          type: 'task',
+          id: 'unknown',
+          error: { type: 'malformed response' },
+        });
+      }
+
+      const docId = item.update._id.startsWith('task:')
+        ? item.update._id.slice(5)
+        : item.update._id;
+
+      if (item.update?.error) {
+        return asErr({
+          type: 'task',
+          id: docId,
+          status: item.update.status,
+          error: item.update.error,
+        });
+      }
+
+      const doc = docs.find((d) => d.id === docId);
+
+      return asOk({
+        ...doc,
+        id: docId,
+      });
     });
   }
 
@@ -489,49 +556,107 @@ export class TaskStore {
     }
   }
 
-  private async search(opts: SearchOpts = {}): Promise<FetchResult> {
+  // like search(), only runs multiple searches in parallel returning the combined results
+  async msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
+    const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
+      ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
+    );
+    const body = queries.flatMap((query) => [{}, query]);
+
+    const result = await this.esClientWithoutRetries.msearch<SavedObjectsRawDoc['_source']>({
+      index: this.index,
+      ignore_unavailable: true,
+      body,
+    });
+    const { responses } = result;
+
+    const versionMap = this.createVersionMap([]);
+    let allTasks = new Array<ConcreteTaskInstance>();
+
+    for (const response of responses) {
+      if (response.status !== 200) {
+        const err = new Error(`Unexpected status code from taskStore::msearch: ${response.status}`);
+        this.errors$.next(err);
+        throw err;
+      }
+
+      const { hits } = response as estypes.MsearchMultiSearchItem<SavedObjectsRawDoc['_source']>;
+      const { hits: tasks } = hits;
+      this.addTasksToVersionMap(versionMap, tasks);
+      allTasks = allTasks.concat(this.filterTasks(tasks));
+    }
+
+    const allSortedTasks = claimSort(this.definitions, allTasks);
+
+    return { docs: allSortedTasks, versionMap };
+  }
+
+  private async search(
+    opts: SearchOpts = {},
+    limitResponse: boolean = false
+  ): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
       const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
-        body: {
-          ...opts,
-          query,
-        },
+        body: { ...opts, query },
+        ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
       });
+
       const {
         hits: { hits: tasks },
       } = result;
 
-      const versionMap = new Map<string, ConcreteTaskInstanceVersion>();
-      for (const task of tasks) {
-        if (task._seq_no == null || task._primary_term == null) continue;
-
-        const esId = task._id!.startsWith('task:') ? task._id!.slice(5) : task._id!;
-        versionMap.set(esId, {
-          esId: task._id!,
-          seqNo: task._seq_no,
-          primaryTerm: task._primary_term,
-        });
-      }
-
+      const versionMap = this.createVersionMap(tasks);
       return {
-        docs: tasks
-          // @ts-expect-error @elastic/elasticsearch _source is optional
-          .filter((doc) => this.serializer.isRawSavedObject(doc))
-          // @ts-expect-error @elastic/elasticsearch _source is optional
-          .map((doc) => this.serializer.rawToSavedObject(doc))
-          .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
-          .map((doc) => savedObjectToConcreteTaskInstance(doc))
-          .filter((doc): doc is ConcreteTaskInstance => !!doc),
+        docs: this.filterTasks(tasks),
         versionMap,
       };
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
+  }
+
+  private filterTasks(
+    tasks: Array<estypes.SearchHit<SavedObjectsRawDoc['_source']>>
+  ): ConcreteTaskInstance[] {
+    return (
+      tasks
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        .filter((doc) => this.serializer.isRawSavedObject(doc))
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        .map((doc) => this.serializer.rawToSavedObject(doc))
+        .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
+        .map((doc) => savedObjectToConcreteTaskInstance(doc))
+        .filter((doc): doc is ConcreteTaskInstance => !!doc)
+    );
+  }
+
+  private addTasksToVersionMap(
+    versionMap: Map<string, ConcreteTaskInstanceVersion>,
+    tasks: Array<estypes.SearchHit<SavedObjectsRawDoc['_source']>>
+  ): void {
+    for (const task of tasks) {
+      if (task._id == null || task._seq_no == null || task._primary_term == null) continue;
+
+      const esId = task._id.startsWith('task:') ? task._id.slice(5) : task._id;
+      versionMap.set(esId, {
+        esId: task._id,
+        seqNo: task._seq_no,
+        primaryTerm: task._primary_term,
+      });
+    }
+  }
+
+  private createVersionMap(
+    tasks: Array<estypes.SearchHit<SavedObjectsRawDoc['_source']>>
+  ): Map<string, ConcreteTaskInstanceVersion> {
+    const versionMap = new Map<string, ConcreteTaskInstanceVersion>();
+    this.addTasksToVersionMap(versionMap, tasks);
+    return versionMap;
   }
 
   public async aggregate<TSearchRequest extends AggregationOpts>({
@@ -627,7 +752,10 @@ export function correctVersionConflictsForContinuation(
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
-function taskInstanceToAttributes(doc: TaskInstance, id: string): SerializedConcreteTaskInstance {
+export function taskInstanceToAttributes(
+  doc: TaskInstance,
+  id: string
+): SerializedConcreteTaskInstance {
   return {
     ...omit(doc, 'id', 'version'),
     params: JSON.stringify(doc.params || {}),
@@ -640,6 +768,20 @@ function taskInstanceToAttributes(doc: TaskInstance, id: string): SerializedConc
     status: (doc as ConcreteTaskInstance).status || 'idle',
     partition: doc.partition || murmurhash.v3(id) % MAX_PARTITIONS,
   } as SerializedConcreteTaskInstance;
+}
+
+export function partialTaskInstanceToAttributes(
+  doc: PartialConcreteTaskInstance
+): PartialSerializedConcreteTaskInstance {
+  return {
+    ...omit(doc, 'id', 'version'),
+    ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
+    ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
+    ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),
+    ...(doc.startedAt ? { startedAt: doc.startedAt.toISOString() } : {}),
+    ...(doc.retryAt ? { retryAt: doc.retryAt.toISOString() } : {}),
+    ...(doc.runAt ? { runAt: doc.runAt.toISOString() } : {}),
+  } as PartialSerializedConcreteTaskInstance;
 }
 
 export function savedObjectToConcreteTaskInstance(

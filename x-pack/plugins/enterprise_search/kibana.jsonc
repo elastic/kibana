@@ -15,6 +15,7 @@
       "features",
       "licensing",
       "logsShared",
+      "logsDataAccess",
       "esUiShared",
       "navigation",
     ],

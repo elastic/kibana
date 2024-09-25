@@ -14,14 +14,35 @@ import {
   ViewDashboardSteps,
 } from './types';
 import { ProductLine, ProductTier } from './configs';
-import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import type { AppContextTestRender } from '../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../mock/endpoint';
+import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
+
+const mockedUseKibana = mockUseKibana();
+const mockedStorageGet = jest.fn();
+const mockedStorageSet = jest.fn();
+
+jest.mock('../../../lib/kibana', () => {
+  const original = jest.requireActual('../../../lib/kibana');
+
+  return {
+    ...original,
+    useCurrentUser: jest.fn().mockReturnValue({ fullName: 'UserFullName' }),
+    useKibana: () => ({
+      mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        storage: {
+          ...mockedUseKibana.services.storage,
+          get: mockedStorageGet,
+          set: mockedStorageSet,
+        },
+      },
+    }),
+  };
+});
 
 jest.mock('./toggle_panel');
-jest.mock('../../../lib/kibana');
-
-(useCurrentUser as jest.Mock).mockReturnValue({ fullName: 'UserFullName' });
 
 describe('OnboardingComponent', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -53,26 +74,31 @@ describe('OnboardingComponent', () => {
     render();
 
     const pageTitle = renderResult.getByText('Hi UserFullName!');
-    const subtitle = renderResult.getByText(`Get started with Security`);
-    const description = renderResult.getByText(
-      `This area shows you everything you need to know. Feel free to explore all content. You can always come back here at any time.`
-    );
+    const subtitle = renderResult.getByText(`Welcome to Elastic Security`);
+    const description = renderResult.getByText(`Follow these steps to set up your workspace.`);
 
     expect(pageTitle).toBeInTheDocument();
     expect(subtitle).toBeInTheDocument();
     expect(description).toBeInTheDocument();
   });
 
-  it('should render welcomeHeader and TogglePanel', () => {
+  it('should render dataIngestionHubHeader and TogglePanel', () => {
     render();
-
-    const welcomeHeader = renderResult.getByTestId('welcome-header');
+    const dataIngestionHubHeader = renderResult.getByTestId('data-ingestion-hub-header');
     const togglePanel = renderResult.getByTestId('toggle-panel');
 
-    expect(welcomeHeader).toBeInTheDocument();
+    expect(dataIngestionHubHeader).toBeInTheDocument();
     expect(togglePanel).toBeInTheDocument();
   });
+
   describe('AVC 2024 Results banner', () => {
+    beforeEach(() => {
+      mockedStorageGet.mockReturnValue(true);
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+      jest.useRealTimers();
+    });
     it('should render on the page', () => {
       render();
       expect(renderResult.getByTestId('avcResultsBanner')).toBeTruthy();
@@ -82,7 +108,7 @@ describe('OnboardingComponent', () => {
       render();
       expect(renderResult.getByTestId('avcReadTheBlog')).toHaveAttribute(
         'href',
-        'https://www.elastic.co/blog/elastic-security-malware-protection-test-av-comparatives'
+        'https://www.elastic.co/blog/elastic-av-comparatives-business-security-test'
       );
     });
 
@@ -90,15 +116,25 @@ describe('OnboardingComponent', () => {
       render();
       renderResult.getByTestId('euiDismissCalloutButton').click();
       expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
-      expect(useKibana().services.storage.set).toHaveBeenCalledWith(
-        'securitySolution.showAvcBanner',
-        false
-      );
+      expect(mockedStorageSet).toHaveBeenCalledWith('securitySolution.showAvcBanner', false);
     });
+
     it('should stay dismissed if it has been closed once', () => {
-      (useKibana().services.storage.get as jest.Mock).mockReturnValue(false);
+      mockedStorageGet.mockReturnValueOnce(false);
       render();
       expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
+    });
+
+    it('should not be shown if the current date is January 1, 2025', () => {
+      jest.useFakeTimers().setSystemTime(new Date('2025-01-01T05:00:00.000Z'));
+      render();
+      expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
+      jest.useRealTimers();
+    });
+    it('should be shown if the current date is before January 1, 2025', () => {
+      jest.useFakeTimers().setSystemTime(new Date('2024-12-31T05:00:00.000Z'));
+      render();
+      expect(renderResult.queryByTestId('avcResultsBanner')).toBeTruthy();
     });
   });
 });

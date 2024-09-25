@@ -23,11 +23,13 @@ describe('AppClientFactory', () => {
         config: createMockConfig(),
         kibanaVersion: '8.7',
         kibanaBranch: 'main',
+        buildFlavor: 'traditional',
       });
       factory.create(mockRequest);
 
       expect(mockClient).toHaveBeenCalledWith(
         'mockSpace',
+        expect.anything(),
         expect.anything(),
         expect.anything(),
         expect.anything()
@@ -42,11 +44,13 @@ describe('AppClientFactory', () => {
         config: createMockConfig(),
         kibanaVersion: '8.7',
         kibanaBranch: 'main',
+        buildFlavor: 'traditional',
       });
       factory.create(mockRequest);
 
       expect(mockClient).toHaveBeenCalledWith(
         'default',
+        expect.anything(),
         expect.anything(),
         expect.anything(),
         expect.anything()

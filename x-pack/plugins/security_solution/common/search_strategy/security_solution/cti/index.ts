@@ -15,14 +15,6 @@ export { CtiQueries } from '../../../api/search_strategy';
 export type CtiEnrichment = Record<string, unknown[]>;
 export type EventFields = Record<string, unknown>;
 
-export interface CtiEnrichmentIdentifiers {
-  id: string | undefined;
-  field: string | undefined;
-  value: string | undefined;
-  type: string | undefined;
-  feedName: string | undefined;
-}
-
 export interface CtiEventEnrichmentStrategyResponse extends IEsSearchResponse {
   enrichments: CtiEnrichment[];
   inspect: Inspect;

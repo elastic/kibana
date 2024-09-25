@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, ZodFirstPartyTypeKind } from 'zod';
+import { z, ZodFirstPartyTypeKind } from '@kbn/zod';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';

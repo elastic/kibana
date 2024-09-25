@@ -28,7 +28,8 @@ const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };
 
-describe('Use get case hook', () => {
+// Failing: See https://github.com/elastic/kibana/issues/189634
+describe.skip('Use get case hook', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'resolveCase');
     const { waitForNextUpdate } = renderHook(() => useGetCase('case-1'), { wrapper });

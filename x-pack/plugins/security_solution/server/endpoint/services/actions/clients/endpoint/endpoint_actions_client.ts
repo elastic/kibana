@@ -24,6 +24,9 @@ import type {
   UploadActionApiRequestBody,
   ResponseActionsRequestBody,
   ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  KillProcessRequestBody,
+  UnisolationRouteRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 import type {
@@ -44,8 +47,6 @@ import type {
   UploadedFileInfo,
   ResponseActionScanParameters,
   ResponseActionScanOutputContent,
-  KillProcessRequestBody,
-  SuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   CommonResponseActionMethodOptions,
@@ -236,10 +237,10 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   }
 
   async release(
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: UnisolationRouteRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
-    return this.handleResponseAction<IsolationRouteRequestBody, ActionDetails>(
+    return this.handleResponseAction<UnisolationRouteRequestBody, ActionDetails>(
       'unisolate',
       actionRequest,
       options

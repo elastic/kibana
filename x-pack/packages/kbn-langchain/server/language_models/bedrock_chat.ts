@@ -69,7 +69,7 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
           params: {
             subAction: 'invokeAIRaw',
             subActionParams: {
-              messages: inputBody.messages,
+              messages: prepareMessages(inputBody.messages),
               temperature: params.temperature ?? inputBody.temperature,
               stopSequences: inputBody.stop_sequences,
               system: inputBody.system,
@@ -99,3 +99,20 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
     });
   }
 }
+
+const prepareMessages = (messages: Array<{ role: string; content: string[] }>) =>
+  messages.reduce((acc, { role, content }) => {
+    const lastMessage = acc[acc.length - 1];
+
+    if (!lastMessage || lastMessage.role !== role) {
+      acc.push({ role, content });
+      return acc;
+    }
+
+    if (lastMessage.role === role) {
+      acc[acc.length - 1].content = lastMessage.content.concat(content);
+      return acc;
+    }
+
+    return acc;
+  }, [] as Array<{ role: string; content: string[] }>);

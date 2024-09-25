@@ -107,7 +107,7 @@ export function SettingsPage() {
   };
 
   return (
-    <>
+    <div data-test-subj="aiAssistantSettingsPage">
       <EuiTitle size="l">
         <h2>
           {i18n.translate(
@@ -141,6 +141,6 @@ export function SettingsPage() {
       {selectedTabContent}
 
       <EuiSpacer size="l" />
-    </>
+    </div>
   );
 }

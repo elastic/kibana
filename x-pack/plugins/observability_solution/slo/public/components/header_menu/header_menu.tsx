@@ -27,11 +27,11 @@ export function HeaderMenu(): React.ReactElement | null {
           <EuiHeaderLinks>
             <EuiHeaderLink
               color="primary"
-              href={http.basePath.prepend('/app/integrations/browse')}
+              href={http.basePath.prepend('/app/observabilityOnboarding')}
               iconType="indexOpen"
             >
               {i18n.translate('xpack.slo.headerMenu.addData', {
-                defaultMessage: 'Add integrations',
+                defaultMessage: 'Add data',
               })}
             </EuiHeaderLink>
             {!isServerless && (

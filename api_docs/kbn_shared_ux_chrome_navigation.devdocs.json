@@ -210,11 +210,31 @@
                 "section": "def-public.ChromeNavLink",
                 "text": "ChromeNavLink"
               },
-              "[]>; }; getIsSideNavCollapsed$: () => ",
+              "[]>; }; sideNav: { getIsCollapsed$: () => ",
               "Observable",
-              "<boolean>; }; http: { basePath: BasePathService; getLoadingCount$(): ",
+              "<boolean>; getPanelSelectedNode$: () => ",
               "Observable",
-              "<number>; }; }"
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.PanelSelectedNode",
+                "text": "PanelSelectedNode"
+              },
+              " | null>; setPanelSelectedNode(node: string | ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.PanelSelectedNode",
+                "text": "PanelSelectedNode"
+              },
+              " | null): void; }; }; http: { basePath: ",
+              "BasePathService",
+              "; getLoadingCount$(): ",
+              "Observable",
+              "<number>; }; analytics: { reportEvent: (eventType: string, eventData: object) => void; }; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
@@ -267,7 +287,7 @@
             "label": "basePath",
             "description": [],
             "signature": [
-              "{ prepend: (url: string) => string; }"
+              "{ prepend: (url: string) => string; remove: (url: string) => string; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
@@ -397,6 +417,88 @@
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.NavigationServices.eventTracker",
+            "type": "Object",
+            "tags": [],
+            "label": "eventTracker",
+            "description": [],
+            "signature": [
+              "EventTracker"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.NavigationServices.selectedPanelNode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "selectedPanelNode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.PanelSelectedNode",
+                "text": "PanelSelectedNode"
+              },
+              " | null | undefined"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.NavigationServices.setSelectedPanelNode",
+            "type": "Function",
+            "tags": [],
+            "label": "setSelectedPanelNode",
+            "description": [],
+            "signature": [
+              "((node: ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.PanelSelectedNode",
+                "text": "PanelSelectedNode"
+              },
+              " | null) => void) | undefined"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+                "id": "def-public.NavigationServices.setSelectedPanelNode.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-public.PanelSelectedNode",
+                    "text": "PanelSelectedNode"
+                  },
+                  " | null"
+                ],
+                "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -448,7 +550,7 @@
                 "section": "def-public.ChromeProjectNavigationNode",
                 "text": "ChromeProjectNavigationNode"
               },
-              ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\"> & { title: React.ReactNode; }"
+              ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
@@ -603,7 +705,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+        "id": "def-public.FieldType",
+        "type": "Enum",
+        "tags": [],
+        "label": "FieldType",
+        "description": [],
+        "path": "packages/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-chrome-navigation",
@@ -639,6 +754,18 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+        "id": "def-public.EventType",
+        "type": "string",
+        "tags": [],
+        "label": "EventType",
+        "description": [],
+        "path": "packages/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

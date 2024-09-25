@@ -7,7 +7,7 @@ parameters:
 get:
   summary: Get enrollment API key by ID
   tags:
-    - Enrollment API keys
+    - Fleet enrollment API keys
   responses:
     '200':
       description: OK
@@ -24,9 +24,9 @@ get:
       $ref: ../components/responses/error.yaml
   operationId: get-enrollment-api-key
 delete:
-  summary: Delete enrollment API key by ID
+  summary: Revoke enrollment API key by ID by marking it as inactive
   tags:
-    - Enrollment API keys
+    - Fleet enrollment API keys
   responses:
     '200':
       description: OK

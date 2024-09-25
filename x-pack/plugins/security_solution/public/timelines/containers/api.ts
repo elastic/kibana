@@ -17,7 +17,6 @@ import type {
   TimelineResponse,
   TimelineErrorResponse,
   ImportTimelineResultSchema,
-  ResponseFavoriteTimeline,
   AllTimelinesResponse,
   SingleTimelineResponse,
   SingleTimelineResolveResponse,
@@ -25,13 +24,14 @@ import type {
 } from '../../../common/api/timeline';
 import {
   TimelineResponseType,
-  TimelineStatus,
+  TimelineStatusEnum,
   TimelineErrorResponseType,
   importTimelineResultSchema,
   allTimelinesResponse,
-  responseFavoriteTimeline,
+  PersistFavoriteRouteResponse,
   SingleTimelineResponseType,
-  TimelineType,
+  type TimelineType,
+  TimelineTypeEnum,
   ResolvedSingleTimelineResponseType,
 } from '../../../common/api/timeline';
 import {
@@ -104,11 +104,8 @@ const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResultSche
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-const decodeResponseFavoriteTimeline = (respTimeline?: ResponseFavoriteTimeline) =>
-  pipe(
-    responseFavoriteTimeline.decode(respTimeline),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+const decodeResponseFavoriteTimeline = (respTimeline?: PersistFavoriteRouteResponse) =>
+  PersistFavoriteRouteResponse.parse(respTimeline);
 
 const postTimeline = async ({
   timeline,
@@ -229,7 +226,7 @@ export const persistTimeline = async ({
   savedSearch,
 }: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   try {
-    if (isEmpty(timelineId) && timeline.status === TimelineStatus.draft && timeline) {
+    if (isEmpty(timelineId) && timeline.status === TimelineStatusEnum.draft && timeline) {
       const temp: TimelineResponse | TimelineErrorResponse = await cleanDraftTimeline({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineType: timeline.timelineType!,
@@ -239,7 +236,7 @@ export const persistTimeline = async ({
 
       const draftTimeline = decodeTimelineResponse(temp);
       const templateTimelineInfo =
-        timeline.timelineType === TimelineType.template
+        timeline.timelineType === TimelineTypeEnum.template
           ? {
               templateTimelineId:
                 draftTimeline.data.persistTimeline.timeline.templateTimelineId ??
@@ -355,7 +352,7 @@ export const cleanDraftTimeline = async ({
 }): Promise<TimelineResponse | TimelineErrorResponse> => {
   let requestBody;
   const templateTimelineInfo =
-    timelineType === TimelineType.template
+    timelineType === TimelineTypeEnum.template
       ? {
           templateTimelineId,
           templateTimelineVersion,
@@ -468,7 +465,7 @@ export const persistFavorite = async ({
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
 
-  const response = await KibanaServices.get().http.patch<ResponseFavoriteTimeline>(
+  const response = await KibanaServices.get().http.patch<PersistFavoriteRouteResponse>(
     TIMELINE_FAVORITE_URL,
     {
       method: 'PATCH',

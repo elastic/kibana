@@ -47,6 +47,12 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
           },
         });
       },
+
+      async expectInSession(key: string, value: string | undefined): Promise<void> {
+        const session = (await browser.getLocalStorageItem(SESSION_KEY)) || '{}';
+        const state = JSON.parse(session);
+        expect(state[key]).to.be(value);
+      },
     },
     PlaygroundStartChatPage: {
       async expectPlaygroundStartChatPageComponentsToExist() {
@@ -151,6 +157,20 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('summarizationPanel');
       },
 
+      async updatePrompt(prompt: string) {
+        await testSubjects.setValue('instructionsPrompt', prompt);
+      },
+
+      async updateQuestion(question: string) {
+        await testSubjects.setValue('questionInput', question);
+      },
+
+      async expectQuestionInputToBeEmpty() {
+        const questionInput = await testSubjects.find('questionInput');
+        const question = await questionInput.getAttribute('value');
+        expect(question).to.be.empty();
+      },
+
       async sendQuestion() {
         await testSubjects.setValue('questionInput', 'test question');
         await testSubjects.click('sendQuestionButton');
@@ -210,6 +230,15 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
         await testSubjects.click('queryMode');
         await testSubjects.existOrFail('field-baz-false');
+      },
+
+      async clickManageButton() {
+        await testSubjects.click('manageConnectorsLink');
+        await testSubjects.existOrFail('manageConnectorsLink');
+        await browser.switchTab(1);
+        await testSubjects.existOrFail('edit-connector-flyout');
+        await browser.closeCurrentWindow();
+        await browser.switchTab(0);
       },
     },
   };

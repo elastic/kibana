@@ -15,6 +15,7 @@ import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockedUseKibana = mockUseKibana();
@@ -70,18 +71,15 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
 });
 
 const mockOpenRightPanel = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => {
-  return {
-    useExpandableFlyoutApi: () => ({
-      openRightPanel: mockOpenRightPanel,
-    }),
-  };
-});
+jest.mock('@kbn/expandable-flyout');
 
 describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'EntityAnalyticsRiskScores entityType: %s',
   (riskEntity) => {
     beforeEach(() => {
+      (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
+        openRightPanel: mockOpenRightPanel,
+      });
       jest.clearAllMocks();
       mockUseRiskScoreKpi.mockReturnValue({
         severityCount: mockSeverityCount,

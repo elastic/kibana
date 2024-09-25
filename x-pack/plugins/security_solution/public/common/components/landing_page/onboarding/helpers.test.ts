@@ -149,11 +149,6 @@ describe('setupActiveSections', () => {
     ).toEqual([CreateProjectSteps.createFirstProject]);
 
     expect(
-      getCard(QuickStartSectionCardsId.watchTheOverviewVideo, SectionId.quickStart, activeSections)
-        .activeStepIds
-    ).toEqual([OverviewSteps.getToKnowElasticSecurity]);
-
-    expect(
       getCard(
         AddAndValidateYourDataCardsId.addIntegrations,
         SectionId.addAndValidateYourData,

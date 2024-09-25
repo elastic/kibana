@@ -42,6 +42,7 @@ describe('CasesConnector', () => {
   const timeWindow = '7d';
   const reopenClosedCases = false;
   const maximumCasesToOpen = 5;
+  const templateId = null;
 
   const mockExecute = jest.fn();
   const getCasesClient = jest.fn().mockResolvedValue({ foo: 'bar' });
@@ -94,6 +95,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
 
     expect(CasesConnectorExecutorMock).toBeCalledWith({
@@ -114,6 +116,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
 
     expect(mockExecute).toBeCalledWith({
@@ -124,6 +127,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
   });
 
@@ -136,6 +140,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
 
     expect(getCasesClient).toBeCalled();
@@ -153,6 +158,7 @@ describe('CasesConnector', () => {
         timeWindow,
         reopenClosedCases,
         maximumCasesToOpen,
+        templateId,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Bad request"`);
 
@@ -173,6 +179,7 @@ describe('CasesConnector', () => {
         timeWindow,
         reopenClosedCases,
         maximumCasesToOpen,
+        templateId,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden"`);
 
@@ -193,6 +200,7 @@ describe('CasesConnector', () => {
         timeWindow,
         reopenClosedCases,
         maximumCasesToOpen,
+        templateId,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Server error"`);
 
@@ -215,6 +223,7 @@ describe('CasesConnector', () => {
         timeWindow,
         reopenClosedCases,
         maximumCasesToOpen,
+        templateId,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden: Server error"`);
 
@@ -237,6 +246,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
 
     expect(nextBackOff).toBeCalledTimes(2);
@@ -258,6 +268,7 @@ describe('CasesConnector', () => {
         timeWindow,
         reopenClosedCases,
         maximumCasesToOpen,
+        templateId,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Kibana request is not defined"`);
 
@@ -278,6 +289,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
 
     expect(getCasesClient).not.toBeCalled();

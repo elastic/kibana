@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { faker } from '@faker-js/faker';
 import { omit, sample } from 'lodash';
 import { SERVICE_LOGS } from '../../constants';
 import { GeneratorFunction } from '../../types';
 import { generateService } from './lib/generate_service';
+import { generateLogMessage } from './lib/generate_log_message';
 
 export const generateEvent: GeneratorFunction = (_config, _schedule, index, timestamp) => {
   const service = generateService(index + 1);
@@ -19,10 +19,10 @@ export const generateEvent: GeneratorFunction = (_config, _schedule, index, time
     {
       namespace: SERVICE_LOGS,
       '@timestamp': timestamp.toISOString(),
-      message: faker.git.commitMessage(),
       data_stream: { type: 'logs', dataset: SERVICE_LOGS, namespace: 'default' },
       service: omit(service, 'hostsWithCloud'),
       ...hostWithCloud,
+      ...generateLogMessage(timestamp),
     },
   ];
 };

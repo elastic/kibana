@@ -54,10 +54,10 @@ type SelectInferenceIdContentProps = SelectInferenceIdProps & {
 
 const defaultEndpoints = [
   {
-    model_id: 'elser_model_2',
+    inference_id: 'elser_model_2',
   },
   {
-    model_id: 'e5',
+    inference_id: 'e5',
   },
 ];
 
@@ -135,15 +135,15 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     );
 
     const missingDefaultEndpoints = defaultEndpoints.filter(
-      (endpoint) => !(filteredEndpoints || []).find((e) => e.model_id === endpoint.model_id)
+      (endpoint) => !(filteredEndpoints || []).find((e) => e.inference_id === endpoint.inference_id)
     );
     const newOptions: EuiSelectableOption[] = [
       ...(filteredEndpoints || []),
       ...missingDefaultEndpoints,
     ].map((endpoint) => ({
-      label: endpoint.model_id,
-      'data-test-subj': `custom-inference_${endpoint.model_id}`,
-      checked: value === endpoint.model_id ? 'on' : undefined,
+      label: endpoint.inference_id,
+      'data-test-subj': `custom-inference_${endpoint.inference_id}`,
+      checked: value === endpoint.inference_id ? 'on' : undefined,
     }));
     if (value && !newOptions.find((option) => option.label === value)) {
       // Sometimes we create a new endpoint but the backend is slow in updating so we need to optimistically update

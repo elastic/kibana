@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
+import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import {
   visualizeESQLFunction,
-  type VisualizeQueryResponsev1,
+  VisualizeQueryResponsev2,
 } from '../../common/functions/visualize_esql';
 import type { FunctionRegistrationParameters } from '.';
 import { runAndValidateEsqlQuery } from './query/validate_esql_query';
@@ -32,12 +33,15 @@ export function registerVisualizeESQLFunction({
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     visualizeESQLFunction,
-    async ({ arguments: { query, intention } }): Promise<VisualizeQueryResponsev1> => {
+    async ({ arguments: { query, intention } }): Promise<VisualizeQueryResponsev2> => {
       // errorMessages contains the syntax errors from the client side valdation
       // error contains the error from the server side validation, it is always one error
       // and help us identify errors like index not found, field not found etc.
+
+      const correctedQuery = correctCommonEsqlMistakes(query).output;
+
       const { columns, errorMessages, rows, error } = await runAndValidateEsqlQuery({
-        query,
+        query: correctedQuery,
         client: (await resources.context.core).elasticsearch.client.asCurrentUser,
       });
 
@@ -47,6 +51,7 @@ export function registerVisualizeESQLFunction({
         data: {
           columns: columns ?? [],
           rows: rows ?? [],
+          correctedQuery,
         },
         content: {
           message,
@@ -56,6 +61,7 @@ export function registerVisualizeESQLFunction({
           ],
         },
       };
-    }
+    },
+    ['all']
   );
 }

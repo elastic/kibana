@@ -11,7 +11,7 @@ import React from 'react';
 
 import { AlertField } from './alert_field';
 import type { RowRenderer } from '../../../../../../../common/types';
-import { RowRendererId } from '../../../../../../../common/api/timeline';
+import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
 import {
   ID,
   DESTINATION_IP,
@@ -52,7 +52,7 @@ export const ALERT_RENDERER_FIELDS = [
 ];
 
 export const alertRenderer: RowRenderer = {
-  id: RowRendererId.alert,
+  id: RowRendererIdEnum.alert,
   isInstance: (ecs) => eventKindMatches(get('event.kind', ecs)),
   renderRow: ({ contextId = DEFAULT_CONTEXT_ID, data, isDraggable, scopeId }) => {
     const eventId = get(ID, data);

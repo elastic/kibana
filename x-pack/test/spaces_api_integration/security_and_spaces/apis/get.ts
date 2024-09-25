@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SuperTest } from 'supertest';
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
 import { getTestSuiteFactory } from '../../common/suites/get';
@@ -21,7 +22,7 @@ export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
     createExpectNotFoundResult,
     createExpectRbacForbidden,
     nonExistantSpaceId,
-  } = getTestSuiteFactory(esArchiver, supertestWithoutAuth);
+  } = getTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   describe('get', () => {
     [

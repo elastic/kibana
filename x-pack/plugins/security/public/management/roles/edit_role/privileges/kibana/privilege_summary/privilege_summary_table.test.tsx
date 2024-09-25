@@ -9,6 +9,11 @@ import { act } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import type { RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
+import {
+  createKibanaPrivileges,
+  kibanaFeatures,
+} from '@kbn/security-role-management-model/src/__fixtures__';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -16,9 +21,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
 import type { PrivilegeSummaryTableProps } from './privilege_summary_table';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
-import type { RoleKibanaPrivilege } from '../../../../../../../common';
-import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 
 const createRole = (roleKibanaPrivileges: RoleKibanaPrivilege[]) => ({
   name: 'some-role',

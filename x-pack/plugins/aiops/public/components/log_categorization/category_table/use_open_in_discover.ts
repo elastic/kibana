@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 import moment from 'moment';
 
@@ -20,8 +20,8 @@ import type { LogCategorizationAppState } from '../../../application/url_state/l
 import { getLabels } from './labels';
 
 export interface OpenInDiscover {
-  openFunction: (mode: QueryMode, category?: Category) => void;
-  labels: ReturnType<typeof getLabels>;
+  openFunction: (mode: QueryMode, navigateToDiscover: boolean, category?: Category) => void;
+  getLabels: (navigateToDiscover: boolean) => ReturnType<typeof getLabels>;
   count: number;
 }
 
@@ -31,7 +31,6 @@ export function useOpenInDiscover(
   selectedCategories: Category[],
   aiopsListState: LogCategorizationAppState,
   timefilter: TimefilterContract,
-  navigateToDiscover?: boolean,
   onAddFilter?: (values: Filter, alias?: string) => void,
   additionalFilter?: CategorizationAdditionalFilter,
   onClose: () => void = () => {}
@@ -39,7 +38,7 @@ export function useOpenInDiscover(
   const { openInDiscoverWithFilter } = useDiscoverLinks();
 
   const openFunction = useCallback(
-    (mode: QueryMode, category?: Category) => {
+    (mode: QueryMode, navigateToDiscover: boolean, category?: Category) => {
       if (
         onAddFilter !== undefined &&
         selectedField !== undefined &&
@@ -80,7 +79,6 @@ export function useOpenInDiscover(
     [
       onAddFilter,
       selectedField,
-      navigateToDiscover,
       additionalFilter,
       timefilter,
       openInDiscoverWithFilter,
@@ -91,10 +89,5 @@ export function useOpenInDiscover(
     ]
   );
 
-  const labels = useMemo(() => {
-    const isFlyout = onAddFilter !== undefined && onClose !== undefined;
-    return getLabels(isFlyout && navigateToDiscover === false);
-  }, [navigateToDiscover, onAddFilter, onClose]);
-
-  return { openFunction, labels, count: selectedCategories.length };
+  return { openFunction, getLabels, count: selectedCategories.length };
 }

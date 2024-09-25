@@ -140,10 +140,11 @@ export const createThreatSignals = async ({
     if (newPitId) threatPitId = newPitId;
   };
 
+  const dataViews = await services.getDataViews();
   const threatIndexFields = await getFieldsForWildcard({
     index: threatIndex,
     language: threatLanguage ?? 'kuery',
-    dataViews: services.dataViews,
+    dataViews,
     ruleExecutionLogger,
   });
 

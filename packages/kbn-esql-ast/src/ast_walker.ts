@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ParserRuleContext, TerminalNode } from 'antlr4';
@@ -61,6 +62,7 @@ import {
   InputNamedOrPositionalParamContext,
   InputParamContext,
   IndexPatternContext,
+  InlinestatsCommandContext,
 } from './antlr/esql_parser';
 import {
   createSource,
@@ -82,9 +84,10 @@ import {
   textExistsAndIsValid,
   createInlineCast,
   createUnknownItem,
+  createOrderExpression,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
-import type {
+import {
   ESQLLiteral,
   ESQLColumn,
   ESQLFunction,
@@ -95,6 +98,7 @@ import type {
   ESQLUnnamedParamLiteral,
   ESQLPositionalParamLiteral,
   ESQLNamedParamLiteral,
+  ESQLOrderExpression,
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
@@ -289,7 +293,7 @@ function visitOperatorExpression(
     const arg = visitOperatorExpression(ctx.operatorExpression());
     // this is a number sign thing
     const fn = createFunction('*', ctx, undefined, 'binary-expression');
-    fn.args.push(createFakeMultiplyLiteral(ctx));
+    fn.args.push(createFakeMultiplyLiteral(ctx, 'integer'));
     if (arg) {
       fn.args.push(arg);
     }
@@ -328,16 +332,21 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     // e.g. 1 year, 15 months
     return createTimeUnit(ctx);
   }
+
+  // Decimal type covers multiple ES|QL types: long, double, etc.
   if (ctx instanceof DecimalLiteralContext) {
-    return createNumericLiteral(ctx.decimalValue());
+    return createNumericLiteral(ctx.decimalValue(), 'decimal');
   }
+
+  // Integer type encompasses integer
   if (ctx instanceof IntegerLiteralContext) {
-    return createNumericLiteral(ctx.integerValue());
+    return createNumericLiteral(ctx.integerValue(), 'integer');
   }
   if (ctx instanceof BooleanLiteralContext) {
     return getBooleanValue(ctx);
   }
   if (ctx instanceof StringLiteralContext) {
+    // String literal covers multiple ES|QL types: text and keyword types
     return createLiteral('string', ctx.string_().QUOTED_STRING());
   }
   if (
@@ -346,14 +355,18 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     ctx instanceof StringArrayLiteralContext
   ) {
     const values: ESQLLiteral[] = [];
+
     for (const numericValue of ctx.getTypedRuleContexts(NumericValueContext)) {
+      const isDecimal =
+        numericValue.decimalValue() !== null && numericValue.decimalValue() !== undefined;
       const value = numericValue.decimalValue() || numericValue.integerValue();
-      values.push(createNumericLiteral(value!));
+      values.push(createNumericLiteral(value!, isDecimal ? 'decimal' : 'integer'));
     }
     for (const booleanValue of ctx.getTypedRuleContexts(BooleanValueContext)) {
       values.push(getBooleanValue(booleanValue)!);
     }
     for (const string of ctx.getTypedRuleContexts(StringContext)) {
+      // String literal covers multiple ES|QL types: text and keyword types
       const literal = createLiteral('string', string.QUOTED_STRING());
       if (literal) {
         values.push(literal);
@@ -585,7 +598,10 @@ export function collectAllFields(ctx: FieldsContext | undefined): ESQLAstField[]
   return ast;
 }
 
-export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | undefined) {
+export function visitByOption(
+  ctx: StatsCommandContext | InlinestatsCommandContext,
+  expr: FieldsContext | undefined
+) {
   if (!ctx.BY() || !expr) {
     return [];
   }
@@ -594,34 +610,43 @@ export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | un
   return [option];
 }
 
-export function visitOrderExpression(ctx: OrderExpressionContext[]) {
-  const ast: ESQLAstItem[] = [];
-  for (const orderCtx of ctx) {
-    const expression = collectBooleanExpression(orderCtx.booleanExpression());
-    if (orderCtx._ordering) {
-      const terminalNode =
-        orderCtx.getToken(esql_parser.ASC, 0) || orderCtx.getToken(esql_parser.DESC, 0);
-      const literal = createLiteral('string', terminalNode);
-      if (literal) {
-        expression.push(literal);
-      }
-    }
-    if (orderCtx.NULLS()) {
-      expression.push(createLiteral('string', orderCtx.NULLS()!)!);
-      if (orderCtx._nullOrdering && orderCtx._nullOrdering.text !== '<first missing>') {
-        const innerTerminalNode =
-          orderCtx.getToken(esql_parser.FIRST, 0) || orderCtx.getToken(esql_parser.LAST, 0);
-        const literal = createLiteral('string', innerTerminalNode);
-        if (literal) {
-          expression.push(literal);
-        }
-      }
-    }
+const visitOrderExpression = (ctx: OrderExpressionContext): ESQLOrderExpression | ESQLAstItem => {
+  const arg = collectBooleanExpression(ctx.booleanExpression())[0];
 
-    if (expression.length) {
-      ast.push(...expression);
-    }
+  let order: ESQLOrderExpression['order'] = '';
+  let nulls: ESQLOrderExpression['nulls'] = '';
+
+  const ordering = ctx._ordering?.text?.toUpperCase();
+
+  if (ordering) order = ordering as ESQLOrderExpression['order'];
+
+  const nullOrdering = ctx._nullOrdering?.text?.toUpperCase();
+
+  switch (nullOrdering) {
+    case 'LAST':
+      nulls = 'NULLS LAST';
+      break;
+    case 'FIRST':
+      nulls = 'NULLS FIRST';
+      break;
   }
+
+  if (!order && !nulls) {
+    return arg;
+  }
+
+  return createOrderExpression(ctx, arg, order, nulls);
+};
+
+export function visitOrderExpressions(
+  ctx: OrderExpressionContext[]
+): Array<ESQLOrderExpression | ESQLAstItem> {
+  const ast: Array<ESQLOrderExpression | ESQLAstItem> = [];
+
+  for (const orderCtx of ctx) {
+    ast.push(visitOrderExpression(orderCtx));
+  }
+
   return ast;
 }
 

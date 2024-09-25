@@ -7,6 +7,7 @@
 
 import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import type {
@@ -104,6 +105,7 @@ export const getData = async (
   timeFieldName: string,
   groupBy: string | undefined | string[],
   searchConfiguration: SearchConfigurationType,
+  esQueryConfig: EsQueryConfig,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   timeframe: { start: number; end: number },
@@ -163,6 +165,7 @@ export const getData = async (
           timeFieldName,
           groupBy,
           searchConfiguration,
+          esQueryConfig,
           compositeSize,
           alertOnGroupDisappear,
           timeframe,
@@ -205,16 +208,15 @@ export const getData = async (
       compositeSize,
       alertOnGroupDisappear,
       searchConfiguration,
+      esQueryConfig,
       lastPeriodEnd,
       groupBy,
       afterKey,
       fieldsExisted
     ),
   };
-  logger.trace(`Request: ${JSON.stringify(request)}`);
   const body = await esClient.search<undefined, ResponseAggregations>(request);
   const { aggregations, _shards } = body;
-  logger.trace(`Response: ${JSON.stringify(body)}`);
   if (aggregations) {
     return handleResponse(aggregations, previousResults, _shards.successful);
   } else if (_shards.successful) {

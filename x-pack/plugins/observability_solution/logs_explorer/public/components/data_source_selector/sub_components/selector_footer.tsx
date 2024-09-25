@@ -15,6 +15,7 @@ import {
   EuiFlexGroupProps,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import { AllDatasetSelection } from '../../../../common';
 import { DiscoverEsqlUrlProps } from '../../../hooks/use_esql';
 import { createAllLogsItem } from '../utils';
 import { showAllLogsLabel, tryEsql } from '../constants';
@@ -22,6 +23,7 @@ import { showAllLogsLabel, tryEsql } from '../constants';
 interface ShowAllLogsProps {
   isSelected: boolean;
   onClick(): void;
+  allSelection: AllDatasetSelection;
 }
 
 export const SelectorFooter = (props: EuiFlexGroupProps) => {
@@ -32,8 +34,8 @@ export const SelectorFooter = (props: EuiFlexGroupProps) => {
   );
 };
 
-export const ShowAllLogsButton = ({ isSelected, onClick }: ShowAllLogsProps) => {
-  const allLogs = createAllLogsItem();
+export const ShowAllLogsButton = ({ isSelected, onClick, allSelection }: ShowAllLogsProps) => {
+  const allLogs = createAllLogsItem(allSelection);
 
   return (
     <EuiFlexItem grow={false}>

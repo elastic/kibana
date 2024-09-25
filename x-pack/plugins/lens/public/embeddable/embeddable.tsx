@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   DataViewBase,
   EsQueryConfig,
@@ -86,6 +87,7 @@ import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { canTrackContentfulRender } from '@kbn/presentation-containers';
+import { getSuccessfulRequestTimings } from '../report_performance_metric_util';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -162,7 +164,7 @@ interface PreventableEvent {
 
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
-interface LensBaseEmbeddableInput extends EmbeddableInput {
+export interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
@@ -260,7 +262,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
           <>
             {errors.length ? (
               <>
-                <p>{errors[0].longMessage}</p>
+                <p>{errors[0].longMessage as React.ReactNode}</p>
                 {showMore && !canFixInLens ? (
                   <p>
                     <FormattedMessage
@@ -792,22 +794,28 @@ export class Embeddable
         ...viz.state.datasourceStates,
         [activeDatasourceId]: datasourceState,
       };
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: this.deps.datasourceMap[datasourceId],
-          }),
-          {}
-        ),
-        datasourceStates: Object.fromEntries(
-          Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
-        ),
-        visualizationState,
-        activeVisualization: this.activeVisualizationId
-          ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
-          : undefined,
-      });
+      const references =
+        activeDatasourceId === 'formBased'
+          ? extractReferencesFromState({
+              activeDatasources: Object.keys(datasourceStates).reduce(
+                (acc, datasourceId) => ({
+                  ...acc,
+                  [datasourceId]: this.deps.datasourceMap[datasourceId],
+                }),
+                {}
+              ),
+              datasourceStates: Object.fromEntries(
+                Object.entries(datasourceStates).map(([id, state]) => [
+                  id,
+                  { isLoading: false, state },
+                ])
+              ),
+              visualizationState,
+              activeVisualization: this.activeVisualizationId
+                ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
+                : undefined,
+            })
+          : [];
       const attrs = {
         ...viz,
         state: {
@@ -1070,6 +1078,18 @@ export class Embeddable
       ...this.getOutput(),
       rendered: true,
     });
+
+    const inspectorAdapters = this.getInspectorAdapters();
+    const timings = getSuccessfulRequestTimings(inspectorAdapters);
+    if (timings) {
+      const esRequestMetrics = {
+        eventName: 'lens_chart_es_request_totals',
+        duration: timings.requestTimeTotal,
+        key1: 'es_took_total',
+        value1: timings.esTookTotal,
+      };
+      reportPerformanceMetricEvent(this.deps.coreStart.analytics, esRequestMetrics);
+    }
   };
 
   getExecutionContext() {

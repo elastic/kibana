@@ -17,6 +17,5 @@
     "@kbn/core",
     "@kbn/std",
     "@kbn/config-schema",
-    "@kbn/ebt",
   ]
 }

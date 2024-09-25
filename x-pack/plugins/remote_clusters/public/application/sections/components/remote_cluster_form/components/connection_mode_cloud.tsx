@@ -57,7 +57,7 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
             id="xpack.remoteClusters.remoteClusterForm.sectionModeCloudDescription"
             defaultMessage="Configure how to connect to the remote cluster."
           />
-          <EuiFormRow hasEmptyLabelSpace fullWidth>
+          <EuiFormRow fullWidth>
             <EuiSwitch
               label={
                 <FormattedMessage

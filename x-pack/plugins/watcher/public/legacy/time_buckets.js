@@ -345,7 +345,7 @@ TimeBuckets.__cached__ = function (self) {
   function cachedGetter(prop) {
     return {
       value: function cachedGetter(...rest) {
-        if (cache.hasOwnProperty(prop)) {
+        if (Object.hasOwn(cache, prop)) {
           return cache[prop];
         }
 
@@ -385,7 +385,7 @@ TimeBuckets.__cached__ = function (self) {
   _.forOwn(TimeBuckets.prototype, function (fn, prop) {
     if (prop[0] === '_') return;
 
-    if (breakers.hasOwnProperty(prop)) {
+    if (Object.hasOwn(breakers, prop)) {
       desc[prop] = cacheBreaker(prop);
     } else {
       desc[prop] = cachedGetter(prop);

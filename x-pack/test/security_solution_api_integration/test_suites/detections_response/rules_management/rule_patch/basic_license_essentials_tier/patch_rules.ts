@@ -99,17 +99,21 @@ export default ({ getService }: FtrProviderContext) => {
         expect(patchedRule).toMatchObject(expectedRule);
       });
 
-      it('@skipInServerless should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+      describe('@skipInServerless ', function () {
+        /* Wrapped in `describe` block, because `this.tags` only works in `describe` blocks */
+        this.tags('skipFIPS');
+        it('should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
 
-        // patch a simple rule's type to machine learning
-        const { body } = await securitySolutionApi
-          .patchRule({ body: { rule_id: 'rule-1', type: 'machine_learning' } })
-          .expect(403);
+          // patch a simple rule's type to machine learning
+          const { body } = await securitySolutionApi
+            .patchRule({ body: { rule_id: 'rule-1', type: 'machine_learning' } })
+            .expect(403);
 
-        expect(body).toEqual({
-          message: 'Your license does not support machine learning. Please upgrade your license.',
-          status_code: 403,
+          expect(body).toEqual({
+            message: 'Your license does not support machine learning. Please upgrade your license.',
+            status_code: 403,
+          });
         });
       });
 

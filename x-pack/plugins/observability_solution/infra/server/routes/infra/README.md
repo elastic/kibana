@@ -18,38 +18,19 @@ The response includes:
 - hosts: array of metrics and metadata
 - metrics: object containing name of the metric and value
 - metadata: object containing name of the metadata and value
+- hasSystemMetrics: boolean - true if host comes from system integration docs; false otherwise
 
 ### Examples:
 
 Request
 
 ```bash
-curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/infra' \
+curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/infra/host' \
 --header 'kbn-xsrf: xxxx' \
 --header 'Content-Type: application/json' \
 --data '{
-   "type": 'host',
    "limit": 100,
-   "metrics": [
-      {
-         "type": "rx"
-      },
-      {
-         "type": "tx"
-      },
-      {
-         "type": "memory"
-      },
-      {
-         "type": "cpu"
-      },
-      {
-         type: 'diskSpaceUsage',
-      },
-      {
-         type: 'memoryFree',
-      },
-   ],
+   "metrics": [ "rx", "tx", "memory", "cpu", "diskSpaceUsage", "memoryFree"],
    "query": {
       "bool": {
          "must": [],
@@ -58,11 +39,8 @@ curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/infra' 
          "must_not": []
       }
    },
-   "range": {
-      "from": "2023-04-18T11:15:31.407Z",
-      "to":   "2023-04-18T11:30:31.407Z"
-   },
-   "sourceId": "default"
+   "from": "2023-04-18T11:15:31.407Z",
+   "to":   "2023-04-18T11:30:31.407Z"
 }'
 ```
 
@@ -70,7 +48,7 @@ Response
 
 ```json
 {
-   "type": "host",
+   "assetType": "host",
    "nodes":[
       {
          "metadata":[
@@ -109,6 +87,7 @@ Response
                "value":66640704.099216014
             },
          ],
+         "hasSystemMetrics": true,
          "name":"host-0"
       }
    ]
@@ -158,5 +137,5 @@ curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/infra/host/coun
 Response
 
 ```json
-{"type":"host","count":22}
+{"assetType":"host","count":22}
 ```

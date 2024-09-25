@@ -6,15 +6,18 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { NOTE_URL } from '../../../../../common/constants';
 
 import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
-import { buildFrameworkRequest, getNotesPaginated } from '../../utils/common';
+import { buildFrameworkRequest } from '../../utils/common';
 import { getAllSavedNote, MAX_UNASSOCIATED_NOTES } from '../../saved_object/notes';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
+import { GetNotesRequestQuery, type GetNotesResponse } from '../../../../../common/api/timeline';
 
 export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
@@ -28,7 +31,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
     .addVersion(
       {
         validate: {
-          request: { query: getNotesPaginated },
+          request: { query: buildRouteValidationWithZod(GetNotesRequestQuery) },
         },
         version: '2023-10-31',
       },
@@ -47,8 +50,8 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
                 perPage: MAX_UNASSOCIATED_NOTES,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
-
-              return response.ok({ body: res ?? {} });
+              const body: GetNotesResponse = res ?? {};
+              return response.ok({ body });
             } else {
               const options = {
                 type: noteSavedObjectType,
@@ -57,15 +60,15 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
                 perPage: MAX_UNASSOCIATED_NOTES,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
-
-              return response.ok({ body: res ?? {} });
+              const body: GetNotesResponse = res ?? {};
+              return response.ok({ body });
             }
           } else {
             const perPage = queryParams?.perPage ? parseInt(queryParams.perPage, 10) : 10;
             const page = queryParams?.page ? parseInt(queryParams.page, 10) : 1;
-            const search = queryParams?.search;
-            const sortField = queryParams?.sortField;
-            const sortOrder = queryParams?.sortOrder;
+            const search = queryParams?.search ?? undefined;
+            const sortField = queryParams?.sortField ?? undefined;
+            const sortOrder = (queryParams?.sortOrder as SortOrder) ?? undefined;
             const filter = queryParams?.filter;
             const options = {
               type: noteSavedObjectType,
@@ -77,7 +80,8 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
               filter,
             };
             const res = await getAllSavedNote(frameworkRequest, options);
-            return response.ok({ body: res ?? {} });
+            const body: GetNotesResponse = res ?? {};
+            return response.ok({ body });
           }
         } catch (err) {
           const error = transformError(err);

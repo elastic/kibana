@@ -43,20 +43,35 @@
   .euiDataGridHeaderCell {
     align-items: start;
 
-    &:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__button {
-      height: 100%;
-      align-items: flex-start;
+    .euiPopover[class*='euiDataGridHeaderCell__popover'] {
+      align-self: center;
     }
   }
 
-  .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+  .euiDataGrid--bordersHorizontal .euiDataGridHeader {
+    border-top: none;
+  }
+
+  .euiDataGrid--headerUnderline .euiDataGridHeader {
     border-bottom: $euiBorderThin;
   }
 
   .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content,
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
-  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'],
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id^='additionalRowControl_'],
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id^='additionalRowControl_'] {
     padding-left: 0;
+    padding-right: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='additionalRowControl_menuControl'] .euiDataGridRowCell__content {
+    padding-bottom: 0;
+  }
+
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='select'] {
+    padding-left: $euiSizeXS;
     padding-right: 0;
   }
 
@@ -81,7 +96,8 @@
   }
 
   .euiDataGridRowCell__content--autoHeight,
-  .euiDataGridRowCell__content--lineCountHeight {
+  .euiDataGridRowCell__content--lineCountHeight,
+  .euiDataGridHeaderCell__content {
     white-space: pre-wrap;
   }
 }
@@ -90,25 +106,6 @@
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
-}
-
-// We only truncate if the cell is not a control column.
-.euiDataGridHeader {
-
-  .euiDataGridHeaderCell__content {
-    white-space: pre-wrap;
-  }
-
-  .euiDataGridHeaderCell__popover {
-    flex-grow: 0;
-    flex-basis: auto;
-    width: auto;
-    padding-left: $euiSizeXS;
-  }
-}
-
-.euiDataGridRowCell--numeric {
-  text-align: right;
 }
 
 .euiDataGrid__loading,
@@ -131,6 +128,13 @@
   margin-top: -$euiSizeXS;
   .euiDataGridRowCell__content--defaultHeight & { // "Single line" row height setting
     margin-top: 0;
+  }
+
+  &--size-normal {
+    display: inline-block;
+    width: $euiSizeL;
+    height: $euiSizeL;
+    overflow: hidden;
   }
 }
 

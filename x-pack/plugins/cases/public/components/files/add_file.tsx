@@ -31,6 +31,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { deleteFileAttachments } from '../../containers/api';
+import type { ServerError } from '../../types';
 
 interface AddFileProps {
   caseId: string;
@@ -47,7 +48,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
   const showModal = () => setIsModalVisible(true);
 
   const onError = useCallback(
-    (error) => {
+    (error: Error | ServerError) => {
       showErrorToast(error, {
         title: i18n.FAILED_UPLOAD,
       });
@@ -135,6 +136,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
     </EuiFlexItem>
   ) : null;
 };
+
 AddFileComponent.displayName = 'AddFile';
 
 export const AddFile = React.memo(AddFileComponent);

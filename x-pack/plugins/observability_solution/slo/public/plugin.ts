@@ -15,20 +15,21 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 import { PLUGIN_NAME, sloAppId } from '../common';
-import type { SloPublicSetup, SloPublicStart } from './types';
+import { ExperimentalFeatures, SloConfig } from '../common/config';
+import { SLOS_BASE_PATH } from '../common/locators/paths';
+import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
+import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
+import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
+import { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
-import { SLOS_BASE_PATH } from '../common/locators/paths';
 import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
-import { ExperimentalFeatures, SloConfig } from '../common/config';
-import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
-import { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
-import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
-import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
+import type { SloPublicSetup, SloPublicStart } from './types';
+import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
@@ -95,6 +96,7 @@ export class SloPlugin
       const hasPlatinumLicense = license.hasAtLeast('platinum');
       if (hasPlatinumLicense) {
         const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+
         pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           (serializedState: SloOverviewEmbeddableState | undefined) => {
@@ -104,6 +106,7 @@ export class SloPlugin
             return { width: 12, height: 8 };
           }
         );
+
         pluginsSetup.embeddable.registerReactEmbeddableFactory(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           async () => {
@@ -133,6 +136,24 @@ export class SloPlugin
           );
           return getErrorBudgetEmbeddableFactory(deps);
         });
+
+        pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
+          SLO_BURN_RATE_EMBEDDABLE_ID,
+          () => {
+            return { width: 14, height: 7 };
+          }
+        );
+        pluginsSetup.embeddable.registerReactEmbeddableFactory(
+          SLO_BURN_RATE_EMBEDDABLE_ID,
+          async () => {
+            const deps = { ...coreStart, ...pluginsStart };
+
+            const { getBurnRateEmbeddableFactory } = await import(
+              './embeddable/slo/burn_rate/burn_rate_react_embeddable_factory'
+            );
+            return getBurnRateEmbeddableFactory(deps);
+          }
+        );
 
         const registerAsyncSloUiActions = async () => {
           if (pluginsSetup.uiActions) {

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { setStubKibanaServices as setupPresentationPanelServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
@@ -94,7 +96,8 @@ describe('react embeddable renderer', () => {
         expect.any(Function),
         expect.any(String),
         expect.any(Object),
-        expect.any(Function)
+        expect.any(Function),
+        { bork: 'blorp?' }
       );
     });
   });
@@ -120,7 +123,8 @@ describe('react embeddable renderer', () => {
         expect.any(Function),
         '12345',
         expect.any(Object),
-        expect.any(Function)
+        expect.any(Function),
+        { bork: 'blorp?' }
       );
     });
   });
@@ -142,7 +146,8 @@ describe('react embeddable renderer', () => {
         expect.any(Function),
         expect.any(String),
         parentApi,
-        expect.any(Function)
+        expect.any(Function),
+        { bork: 'blorp?' }
       );
     });
   });

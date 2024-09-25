@@ -6,8 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
-import { setupFleetAndAgents } from '../../../../fleet_api_integration/apis/agents/services';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import { generateAgent } from '../../../../fleet_api_integration/helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../helper';
@@ -19,13 +18,15 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
     describe('STATUS = WAITING_FOR_RESULT TEST', () => {
-      setupFleetAndAgents(providerContext);
-
+      before(async () => {
+        await fleetAndAgents.setup();
+      });
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');

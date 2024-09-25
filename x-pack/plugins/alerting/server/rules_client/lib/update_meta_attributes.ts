@@ -12,7 +12,7 @@ export function updateMetaAttributes<T extends Partial<RuleAttributes>>(
   context: RulesClientContext,
   alertAttributes: T
 ): T {
-  if (alertAttributes.hasOwnProperty('apiKey') || alertAttributes.hasOwnProperty('apiKeyOwner')) {
+  if (Object.hasOwn(alertAttributes, 'apiKey') || Object.hasOwn(alertAttributes, 'apiKeyOwner')) {
     return {
       ...alertAttributes,
       meta: {

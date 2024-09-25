@@ -62,7 +62,7 @@ describe('CreateCaseFlyout', () => {
     appMockRenderer.render(<CreateCaseFlyout {...defaultProps} />);
     await waitForComponentToUpdate();
 
-    userEvent.click(await screen.findByTestId('euiFlyoutCloseButton'));
+    await userEvent.click(await screen.findByTestId('euiFlyoutCloseButton'));
 
     await waitFor(() => {
       expect(onClose).toBeCalled();

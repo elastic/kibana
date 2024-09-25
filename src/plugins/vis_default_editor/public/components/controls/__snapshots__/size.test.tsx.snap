@@ -2,11 +2,8 @@
 
 exports[`SizeParamEditor should init with the default set of props 1`] = `
 <EuiFormRow
-  describedByIds={Array []}
   display="rowCompressed"
   fullWidth={true}
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   isInvalid={false}
   label={
     <React.Fragment>
@@ -16,7 +13,6 @@ exports[`SizeParamEditor should init with the default set of props 1`] = `
       />
     </React.Fragment>
   }
-  labelType="label"
 >
   <EuiFieldNumber
     compressed={true}

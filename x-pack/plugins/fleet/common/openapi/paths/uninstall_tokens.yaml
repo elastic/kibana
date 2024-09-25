@@ -1,7 +1,7 @@
 get:
   summary: List metadata for latest uninstall tokens per agent policy
   tags:
-    - Uninstall tokens
+    - Fleet uninstall tokens
   responses:
     '200':
       description: OK

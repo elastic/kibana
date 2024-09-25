@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -294,7 +295,7 @@ export interface DataViewsServicePublicMethods {
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   updateSavedObject: (
-    indexPattern: DataView,
+    indexPattern: AbstractDataView,
     saveAttempts?: number,
     ignoreErrors?: boolean,
     displayErrors?: boolean
@@ -315,6 +316,7 @@ export interface DataViewsServicePublicMethods {
   getAllDataViewLazy: () => Promise<DataViewLazy[]>;
 
   getDataViewLazy: (id: string) => Promise<DataViewLazy>;
+  getDataViewLazyFromCache: (id: string) => Promise<DataViewLazy | undefined>;
 
   createDataViewLazy: (spec: DataViewSpec) => Promise<DataViewLazy>;
 
@@ -512,8 +514,10 @@ export class DataViewsService {
    */
   clearInstanceCache = (id?: string) => {
     if (id) {
+      this.dataViewLazyCache.delete(id);
       this.dataViewCache.delete(id);
     } else {
+      this.dataViewLazyCache.clear();
       this.dataViewCache.clear();
     }
   };
@@ -1011,6 +1015,10 @@ export class DataViewsService {
     }
   };
 
+  getDataViewLazyFromCache = async (id: string) => {
+    return this.dataViewLazyCache.get(id);
+  };
+
   /**
    * Get an index pattern by id, cache optimized.
    * @param id
@@ -1436,7 +1444,7 @@ export class DataViewsService {
   // unsaved DataViewLazy changes will not be reflected in the returned DataView
   async toDataView(dataViewLazy: DataViewLazy) {
     // if persisted
-    if (dataViewLazy.id) {
+    if (dataViewLazy.id && dataViewLazy.isPersisted()) {
       return this.get(dataViewLazy.id);
     }
 
@@ -1460,7 +1468,7 @@ export class DataViewsService {
   // unsaved DataView changes will not be reflected in the returned DataViewLazy
   async toDataViewLazy(dataView: DataView) {
     // if persisted
-    if (dataView.id) {
+    if (dataView.id && dataView.isPersisted()) {
       const dataViewLazy = await this.getDataViewLazy(dataView.id);
       return dataViewLazy!;
     }

@@ -22,9 +22,16 @@ const ROOT = resolve(__dirname, '../..');
       includeLabels: ['serverless'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Endpoint Management API (Elastic Cloud Serverless)',
+          title: 'Security Endpoint Management API (Elastic Cloud Serverless)',
           description: 'Interact with and manage endpoints running the Elastic Defend integration.',
         },
+        tags: [
+          {
+            name: 'Security Endpoint Management API',
+            description:
+              'Interact with and manage endpoints running the Elastic Defend integration.',
+          },
+        ],
       },
     },
   });
@@ -39,9 +46,16 @@ const ROOT = resolve(__dirname, '../..');
       includeLabels: ['ess'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Endpoint Management API (Elastic Cloud and self-hosted)',
+          title: 'Security Endpoint Management API (Elastic Cloud and self-hosted)',
           description: 'Interact with and manage endpoints running the Elastic Defend integration.',
         },
+        tags: [
+          {
+            name: 'Security Endpoint Management API',
+            description:
+              'Interact with and manage endpoints running the Elastic Defend integration.',
+          },
+        ],
       },
     },
   });

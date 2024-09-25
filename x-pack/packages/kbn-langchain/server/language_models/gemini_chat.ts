@@ -16,6 +16,8 @@ import {
   POSSIBLE_ROLES,
   Part,
   TextPart,
+  FinishReason,
+  SafetyRating,
 } from '@google/generative-ai';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -46,6 +48,12 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   maxTokens?: number;
 }
 
+// not sure why these properties are not on the type, as they are on the data
+interface SafetyReason extends SafetyRating {
+  blocked: boolean;
+  severity: string;
+}
+
 export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
   #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
@@ -69,7 +77,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
   }
 
   async completionWithRetry(
-    request: string | GenerateContentRequest | Array<string | Part>,
+    request: GenerateContentRequest,
     options?: this['ParsedCallOptions']
   ): Promise<GenerateContentResult> {
     return this.caller.callWithOptions({ signal: options?.signal }, async () => {
@@ -80,7 +88,8 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
             subAction: 'invokeAIRaw',
             subActionParams: {
               model: this.#model,
-              messages: request,
+              messages: request.contents,
+              tools: request.tools,
               temperature: this.#temperature,
             },
           },
@@ -97,6 +106,14 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
           throw new Error(
             `ActionsClientGeminiChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
           );
+        }
+
+        if (actionResult.data.candidates && actionResult.data.candidates.length > 0) {
+          // handle bad finish reason
+          const errorMessage = convertResponseBadFinishReasonToErrorMsg(actionResult.data);
+          if (errorMessage != null) {
+            throw new Error(errorMessage);
+          }
         }
 
         return {
@@ -237,6 +254,12 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
         if (chunk) {
           yield chunk;
           await runManager?.handleLLMNewToken(chunk.text ?? '');
+        }
+      } else if (parsedStreamChunk) {
+        // handle bad finish reason
+        const errorMessage = convertResponseBadFinishReasonToErrorMsg(parsedStreamChunk);
+        if (errorMessage != null) {
+          throw new Error(errorMessage);
         }
       }
     }
@@ -459,3 +482,40 @@ function messageContentMedia(content: Record<string, unknown>): InlineDataPart {
   }
   throw new Error('Invalid media content');
 }
+
+const badFinishReasons = [FinishReason.RECITATION, FinishReason.SAFETY];
+function hadBadFinishReason(candidate: { finishReason?: FinishReason }) {
+  return !!candidate.finishReason && badFinishReasons.includes(candidate.finishReason);
+}
+
+export function convertResponseBadFinishReasonToErrorMsg(
+  response: EnhancedGenerateContentResponse
+): string | null {
+  if (response.candidates && response.candidates.length > 0) {
+    const candidate = response.candidates[0];
+    if (hadBadFinishReason(candidate)) {
+      if (
+        candidate.finishReason === FinishReason.SAFETY &&
+        candidate.safetyRatings &&
+        (candidate.safetyRatings?.length ?? 0) > 0
+      ) {
+        const safetyReasons = getSafetyReasons(candidate.safetyRatings as SafetyReason[]);
+        return `ActionsClientGeminiChatModel: action result status is error. Candidate was blocked due to ${candidate.finishReason} - ${safetyReasons}`;
+      } else {
+        return `ActionsClientGeminiChatModel: action result status is error. Candidate was blocked due to ${candidate.finishReason}`;
+      }
+    }
+  }
+  return null;
+}
+
+const getSafetyReasons = (safetyRatings: SafetyReason[]) => {
+  const reasons = safetyRatings.filter((t: SafetyReason) => t.blocked);
+  return reasons.reduce(
+    (acc: string, t: SafetyReason, i: number) =>
+      `${acc.length ? `${acc} ` : ''}${t.category}: ${t.severity}${
+        i < reasons.length - 1 ? ',' : ''
+      }`,
+    ''
+  );
+};

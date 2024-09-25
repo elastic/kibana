@@ -26,8 +26,18 @@ import {
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { coreMock } from '@kbn/core/public/mocks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ALERTING_FEATURE_ID, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
 
 const toMapById = [
   (acc: Map<unknown, unknown>, val: { id: unknown }) => acc.set(val.id, val),
@@ -225,19 +235,21 @@ describe('rule_form', () => {
       } as unknown as Rule;
 
       wrapper = mountWithIntl(
-        <RuleForm
-          rule={initialRule}
-          config={{
-            isUsingSecurity: true,
-            minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
-          }}
-          dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
-          operation="create"
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          onChangeMetaData={jest.fn()}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleForm
+            rule={initialRule}
+            config={{
+              isUsingSecurity: true,
+              minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
+            }}
+            dispatch={() => {}}
+            errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
+            operation="create"
+            actionTypeRegistry={actionTypeRegistry}
+            ruleTypeRegistry={ruleTypeRegistry}
+            onChangeMetaData={jest.fn()}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -381,28 +393,30 @@ describe('rule_form', () => {
       } as unknown as Rule;
 
       wrapper = mountWithIntl(
-        <RuleForm
-          canShowConsumerSelection
-          rule={{
-            ...initialRule,
-            ...initialRuleOverwrite,
-          }}
-          config={{
-            isUsingSecurity: true,
-            minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
-          }}
-          dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
-          operation="create"
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          connectorFeatureId={featureId}
-          onChangeMetaData={jest.fn()}
-          validConsumers={validConsumers}
-          setConsumer={mockSetConsumer}
-          useRuleProducer={useRuleProducer}
-          selectedConsumer={selectedConsumer}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleForm
+            canShowConsumerSelection
+            rule={{
+              ...initialRule,
+              ...initialRuleOverwrite,
+            }}
+            config={{
+              isUsingSecurity: true,
+              minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
+            }}
+            dispatch={() => {}}
+            errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
+            operation="create"
+            actionTypeRegistry={actionTypeRegistry}
+            ruleTypeRegistry={ruleTypeRegistry}
+            connectorFeatureId={featureId}
+            onChangeMetaData={jest.fn()}
+            validConsumers={validConsumers}
+            setConsumer={mockSetConsumer}
+            useRuleProducer={useRuleProducer}
+            selectedConsumer={selectedConsumer}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -1105,19 +1119,21 @@ describe('rule_form', () => {
       } as unknown as Rule;
 
       wrapper = mountWithIntl(
-        <RuleForm
-          rule={initialRule}
-          config={{
-            isUsingSecurity: true,
-            minimumScheduleInterval: { value: '1m', enforce: false },
-          }}
-          dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
-          operation="create"
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          onChangeMetaData={jest.fn()}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleForm
+            rule={initialRule}
+            config={{
+              isUsingSecurity: true,
+              minimumScheduleInterval: { value: '1m', enforce: false },
+            }}
+            dispatch={() => {}}
+            errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
+            operation="create"
+            actionTypeRegistry={actionTypeRegistry}
+            ruleTypeRegistry={ruleTypeRegistry}
+            onChangeMetaData={jest.fn()}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -1164,19 +1180,21 @@ describe('rule_form', () => {
       } as unknown as Rule;
 
       wrapper = mountWithIntl(
-        <RuleForm
-          rule={initialRule}
-          config={{
-            isUsingSecurity: true,
-            minimumScheduleInterval: { value: '1m', enforce: false },
-          }}
-          dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
-          operation="create"
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          onChangeMetaData={jest.fn()}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleForm
+            rule={initialRule}
+            config={{
+              isUsingSecurity: true,
+              minimumScheduleInterval: { value: '1m', enforce: false },
+            }}
+            dispatch={() => {}}
+            errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
+            operation="create"
+            actionTypeRegistry={actionTypeRegistry}
+            ruleTypeRegistry={ruleTypeRegistry}
+            onChangeMetaData={jest.fn()}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {

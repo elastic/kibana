@@ -17,6 +17,7 @@ import {
   savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import type { SpaceContentTypeSummaryItem } from './get_content_summary';
 import { initGetSpaceContentSummaryApi } from './get_content_summary';
@@ -81,7 +82,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
       basePath: httpService.basePath,
     });
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,

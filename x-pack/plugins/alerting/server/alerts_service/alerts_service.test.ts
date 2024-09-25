@@ -12,7 +12,7 @@ import {
   IndicesDataStreamIndex,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { ReplaySubject, Subject } from 'rxjs';
+import { ReplaySubject, Subject, of } from 'rxjs';
 import { AlertsService } from './alerts_service';
 import { IRuleTypeAlerts, RecoveredActionGroup } from '../types';
 import { retryUntil } from './test_utils';
@@ -219,6 +219,7 @@ const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {
 
 describe('Alerts Service', () => {
   let pluginStop$: Subject<void>;
+  const elasticsearchAndSOAvailability$ = of(true);
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -251,6 +252,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -258,6 +260,46 @@ describe('Alerts Service', () => {
             async () => alertsService.isInitialized() === true
           );
 
+          expect(alertsService.isInitialized()).toEqual(true);
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          if (!useDataStreamForAlerts) {
+            expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+          }
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
+
+          const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+          expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
+          const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
+          expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
+          const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
+          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
+        });
+
+        test('should not initialize common resources if ES is not ready', async () => {
+          const test$ = new Subject<boolean>();
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$: test$,
+          });
+
+          await retryUntil(
+            'alert service initialized',
+            async () => alertsService.isInitialized() === true
+          );
+          expect(alertsService.isInitialized()).toEqual(false);
+
+          // ES is ready, should initialize the resources
+          test$.next(true);
+          await retryUntil(
+            'alert service initialized',
+            async () => alertsService.isInitialized() === true
+          );
           expect(alertsService.isInitialized()).toEqual(true);
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
@@ -285,6 +327,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
@@ -306,6 +349,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
@@ -386,6 +430,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -427,6 +472,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -1447,6 +1493,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -1508,6 +1555,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -1546,6 +1594,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1644,6 +1693,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1765,6 +1815,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1846,6 +1897,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1944,6 +1996,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2006,6 +2059,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2072,6 +2126,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2145,6 +2200,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2198,6 +2254,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2218,6 +2275,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2238,6 +2296,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2266,6 +2325,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2297,6 +2357,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2333,6 +2394,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2367,6 +2429,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             timeoutMs: 10,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
@@ -2383,6 +2446,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             timeoutMs: 10,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil('debug logger called', async () => logger.debug.mock.calls.length > 0);

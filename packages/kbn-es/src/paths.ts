@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Os from 'os';
@@ -24,6 +25,8 @@ export const ES_PLUGIN_BIN = maybeUseBat('bin/elasticsearch-plugin');
 export const ES_CONFIG = 'config/elasticsearch.yml';
 
 export const ES_KEYSTORE_BIN = maybeUseBat('./bin/elasticsearch-keystore');
+
+export const STATEFUL_ROLES_ROOT_PATH = resolve(__dirname, './stateful_resources');
 
 export const SERVERLESS_OPERATOR_USERS_PATH = resolve(
   __dirname,

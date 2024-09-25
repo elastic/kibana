@@ -25,15 +25,18 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
-import type {
-  CategorizationRequestBody,
-  EcsMappingRequestBody,
-  RelatedRequestBody,
+import type { ESProcessorItem } from '../../../../../../common';
+import {
+  type AnalyzeLogsRequestBody,
+  type CategorizationRequestBody,
+  type EcsMappingRequestBody,
+  type RelatedRequestBody,
 } from '../../../../../../common';
 import {
   runCategorizationGraph,
   runEcsGraph,
   runRelatedGraph,
+  runAnalyzeLogsGraph,
 } from '../../../../../common/lib/api';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
@@ -46,6 +49,7 @@ const ProgressOrder = ['ecs', 'categorization', 'related'];
 type ProgressItem = (typeof ProgressOrder)[number];
 
 const progressText: Record<ProgressItem, string> = {
+  analyzeLogs: i18n.PROGRESS_ANALYZE_LOGS,
   ecs: i18n.PROGRESS_ECS_MAPPING,
   categorization: i18n.PROGRESS_CATEGORIZATION,
   related: i18n.PROGRESS_RELATED_GRAPH,
@@ -83,10 +87,41 @@ export const useGeneration = ({
 
     (async () => {
       try {
+        let additionalProcessors: ESProcessorItem[] | undefined;
+
+        // logSamples may be modified to JSON format if they are in different formats
+        // Keeping originalLogSamples for running pipeline and generating docs
+        const originalLogSamples = integrationSettings.logSamples;
+        let logSamples = integrationSettings.logSamples;
+        let samplesFormat = integrationSettings.samplesFormat;
+
+        if (integrationSettings.samplesFormat === undefined) {
+          const analyzeLogsRequest: AnalyzeLogsRequestBody = {
+            packageName: integrationSettings.name ?? '',
+            dataStreamName: integrationSettings.dataStreamName ?? '',
+            logSamples: integrationSettings.logSamples ?? [],
+            connectorId: connector.id,
+            langSmithOptions: getLangSmithOptions(),
+          };
+
+          setProgress('analyzeLogs');
+          const analyzeLogsResult = await runAnalyzeLogsGraph(analyzeLogsRequest, deps);
+          if (abortController.signal.aborted) return;
+          if (isEmpty(analyzeLogsResult?.results)) {
+            setError('No results from Analyze Logs Graph');
+            return;
+          }
+          logSamples = analyzeLogsResult.results.parsedSamples;
+          samplesFormat = analyzeLogsResult.results.samplesFormat;
+          additionalProcessors = analyzeLogsResult.additionalProcessors;
+        }
+
         const ecsRequest: EcsMappingRequestBody = {
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
-          rawSamples: integrationSettings.logsSampleParsed ?? [],
+          rawSamples: logSamples ?? [],
+          samplesFormat: samplesFormat ?? { name: 'json' },
+          additionalProcessors: additionalProcessors ?? [],
           connectorId: connector.id,
           langSmithOptions: getLangSmithOptions(),
         };
@@ -100,6 +135,8 @@ export const useGeneration = ({
         }
         const categorizationRequest: CategorizationRequestBody = {
           ...ecsRequest,
+          rawSamples: originalLogSamples ?? [],
+          samplesFormat: samplesFormat ?? { name: 'json' },
           currentPipeline: ecsGraphResult.results.pipeline,
         };
 
@@ -125,7 +162,13 @@ export const useGeneration = ({
           durationMs: Date.now() - generationStartedAt,
         });
 
-        onComplete(relatedGraphResult.results);
+        const result = {
+          pipeline: relatedGraphResult.results.pipeline,
+          docs: relatedGraphResult.results.docs,
+          samplesFormat,
+        };
+
+        onComplete(result);
       } catch (e) {
         if (abortController.signal.aborted) return;
         const errorMessage = `${e.message}${

@@ -28,7 +28,7 @@ export const JobConfigurationOutdatedCallout: React.FC<{
   >
     <FormattedMessage
       id="xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutMessage"
-      defaultMessage="The {moduleName} ML job was created using a different source configuration. Recreate the job to apply the current configuration. This removes previously detected anomalies."
+      defaultMessage="The {moduleName} ML job was created using a different configuration. Recreate the job to apply the current configuration. This removes previously detected anomalies."
       values={{
         moduleName,
       }}

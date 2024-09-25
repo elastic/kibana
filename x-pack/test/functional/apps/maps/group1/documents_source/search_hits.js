@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const security = getService('security');
 
@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }) {
         ],
         { skipBrowserRefresh: true }
       );
-      await PageObjects.maps.loadSavedMap('document example');
+      await maps.loadSavedMap('document example');
     });
 
     after(async () => {
@@ -34,10 +34,7 @@ export default function ({ getPageObjects, getService }) {
       await inspector.open();
       await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const requestTimestamp = PageObjects.maps.getInspectorStatRowHit(
-        requestStats,
-        'Request timestamp'
-      );
+      const requestTimestamp = maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
       await inspector.close();
       return requestTimestamp;
     }
@@ -45,50 +42,48 @@ export default function ({ getPageObjects, getService }) {
     it('should re-fetch documents with refresh timer', async () => {
       const beforeRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp.length).to.be(24);
-      await PageObjects.maps.triggerSingleRefresh(1000);
+      await maps.triggerSingleRefresh(1000);
       const afterRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
     });
 
     describe('inspector', () => {
       it('should register elasticsearch request in inspector', async () => {
-        const hits = await PageObjects.maps.getHits();
+        const hits = await maps.getHits();
         expect(hits).to.equal('5');
       });
     });
 
     describe('query bar', () => {
       before(async () => {
-        await PageObjects.maps.setAndSubmitQuery(
-          'machine.os.raw : "win 8" OR machine.os.raw : "ios"'
-        );
+        await maps.setAndSubmitQuery('machine.os.raw : "win 8" OR machine.os.raw : "ios"');
       });
 
       after(async () => {
-        await PageObjects.maps.setAndSubmitQuery('');
+        await maps.setAndSubmitQuery('');
       });
 
       it('should apply query to search request', async () => {
         await inspector.open();
         await inspector.openInspectorRequestsView();
         const requestStats = await inspector.getTableData();
-        const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+        const hits = maps.getInspectorStatRowHit(requestStats, 'Hits');
         await inspector.close();
         expect(hits).to.equal('2');
       });
 
       it('should re-fetch query when "refresh" is clicked', async () => {
         const beforeQueryRefreshTimestamp = await getRequestTimestamp();
-        await PageObjects.maps.refreshQuery();
+        await maps.refreshQuery();
         const afterQueryRefreshTimestamp = await getRequestTimestamp();
         expect(beforeQueryRefreshTimestamp).not.to.equal(afterQueryRefreshTimestamp);
       });
 
       it('should apply query to fit to bounds', async () => {
         // Set view to other side of world so no matching results
-        await PageObjects.maps.setView(-15, -100, 6);
-        await PageObjects.maps.clickFitToBounds('logstash');
-        const { lat, lon, zoom } = await PageObjects.maps.getView();
+        await maps.setView(-15, -100, 6);
+        await maps.clickFitToBounds('logstash');
+        const { lat, lon, zoom } = await maps.getView();
         expect(Math.round(lat)).to.equal(41);
         expect(Math.round(lon)).to.equal(-102);
 
@@ -101,23 +96,24 @@ export default function ({ getPageObjects, getService }) {
 
     describe('layer query', () => {
       before(async () => {
-        await PageObjects.maps.setLayerQuery('logstash', 'machine.os.raw : "ios"');
+        await maps.setLayerQuery('logstash', 'machine.os.raw : "ios"');
       });
 
       it('should apply layer query to search request', async () => {
         await inspector.open();
         await inspector.openInspectorRequestsView();
         const requestStats = await inspector.getTableData();
-        const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+        const hits = maps.getInspectorStatRowHit(requestStats, 'Hits');
         await inspector.close();
         expect(hits).to.equal('2');
       });
 
-      it('should apply layer query to fit to bounds', async () => {
+      // Fails in chrome 128+: https://github.com/elastic/kibana/issues/175378
+      it.skip('should apply layer query to fit to bounds', async () => {
         // Set view to other side of world so no matching results
-        await PageObjects.maps.setView(-15, -100, 6);
-        await PageObjects.maps.clickFitToBounds('logstash');
-        const { lat, lon, zoom } = await PageObjects.maps.getView();
+        await maps.setView(-15, -100, 6);
+        await maps.clickFitToBounds('logstash');
+        const { lat, lon, zoom } = await maps.getView();
         expect(Math.round(lat)).to.equal(43);
         expect(Math.round(lon)).to.equal(-102);
         expect(Math.round(zoom)).to.equal(5);
@@ -126,14 +122,14 @@ export default function ({ getPageObjects, getService }) {
 
     describe('filter by extent', () => {
       it('should handle geo_point filtering with extents that cross antimeridian', async () => {
-        await PageObjects.maps.loadSavedMap('antimeridian points example');
-        const hits = await PageObjects.maps.getHits();
+        await maps.loadSavedMap('antimeridian points example');
+        const hits = await maps.getHits();
         expect(hits).to.equal('2');
       });
 
       it('should handle geo_shape filtering with extents that cross antimeridian', async () => {
-        await PageObjects.maps.loadSavedMap('antimeridian shapes example');
-        const hits = await PageObjects.maps.getHits();
+        await maps.loadSavedMap('antimeridian shapes example');
+        const hits = await maps.getHits();
         expect(hits).to.equal('2');
       });
     });

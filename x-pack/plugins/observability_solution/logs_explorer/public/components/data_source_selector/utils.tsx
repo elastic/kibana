@@ -8,7 +8,8 @@
 import React, { RefCallback } from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { Dataset, Integration } from '../../../common/datasets';
+import { AllDatasetSelection } from '../../../common';
+import { Integration } from '../../../common/datasets';
 import {
   DATA_SOURCE_SELECTOR_WIDTH,
   noDatasetsDescriptionLabel,
@@ -78,12 +79,11 @@ export const buildIntegrationsTree = ({
   );
 };
 
-export const createAllLogsItem = () => {
-  const allLogs = Dataset.createAllLogsDataset();
+export const createAllLogsItem = (allSelection: AllDatasetSelection) => {
   return {
     'data-test-subj': 'dataSourceSelectorShowAllLogs',
-    iconType: allLogs.iconType,
-    name: allLogs.title,
+    iconType: allSelection.selection.dataset.iconType,
+    name: allSelection.selection.dataset.title,
   };
 };
 

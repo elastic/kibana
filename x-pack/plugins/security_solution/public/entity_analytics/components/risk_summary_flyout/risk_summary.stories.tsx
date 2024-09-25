@@ -9,7 +9,7 @@ import React from 'react';
 import type { Story } from '@storybook/react';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import { mockRiskScoreState } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
+import { mockRiskScoreState } from '../../../flyout/shared/mocks';
 import { FlyoutRiskSummary } from './risk_summary';
 
 export default {

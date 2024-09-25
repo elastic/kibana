@@ -15,7 +15,7 @@ export const DISCOVER_DATA_VIEW_SWITCHER = {
   INPUT: getDataTestSubjectSelector('indexPattern-switcher--input'),
   GET_DATA_VIEW: (title: string) => `.euiSelectableListItem[role=option][title^="${title}"]`,
   CREATE_NEW: getDataTestSubjectSelector('dataview-create-new'),
-  TEXT_BASE_LANG_SWICTHER: getDataTestSubjectSelector('select-text-based-language-panel'),
+  TEXT_BASE_LANG_SWITCHER: getDataTestSubjectSelector('select-text-based-language-btn'),
 };
 
 export const DISCOVER_DATA_VIEW_EDITOR_FLYOUT = {
@@ -32,7 +32,6 @@ export const DISCOVER_ESQL_INPUT = `${DISCOVER_CONTAINER} ${getDataTestSubjectSe
 
 export const DISCOVER_ESQL_INPUT_TEXT_CONTAINER = `${DISCOVER_ESQL_INPUT} .view-lines`;
 
-export const DISCOVER_ESQL_INPUT_EXPAND = getDataTestSubjectSelector('TextBasedLangEditor-expand');
 export const DISCOVER_ESQL_EDITABLE_INPUT = `${DISCOVER_ESQL_INPUT} textarea`;
 
 export const DISCOVER_ADD_FILTER = `${DISCOVER_CONTAINER} ${getDataTestSubjectSelector(

@@ -23,8 +23,10 @@ interface Props extends ToolbarProps {
 export const MetricsAndGroupByToolbarItems = (props: Props) => {
   const metricOptions = useMemo(
     () =>
-      props.metricTypes.map(toMetricOpt).filter((v) => v) as Array<{ text: string; value: string }>,
-    [props.metricTypes]
+      props.metricTypes
+        .map((metric) => toMetricOpt(metric, props.nodeType))
+        .filter((v) => v) as Array<{ text: string; value: string }>,
+    [props.metricTypes, props.nodeType]
   );
 
   const groupByOptions = useMemo(

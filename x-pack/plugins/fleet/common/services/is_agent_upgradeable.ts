@@ -141,10 +141,18 @@ export const getNotUpgradeableMessage = (
 };
 
 const isNotDowngrade = (agentVersion: string, versionToUpgrade: string): boolean => {
-  const agentVersionNumber = semverCoerce(agentVersion);
+  const agentVersionNumber = semverCoerce(agentVersion, { includePrerelease: true });
   if (!agentVersionNumber) throw new Error(`${INVALID_VERSION_ERROR}`);
-  const versionToUpgradeNumber = semverCoerce(versionToUpgrade);
+
+  const versionToUpgradeNumber = semverCoerce(versionToUpgrade, { includePrerelease: true });
   if (!versionToUpgradeNumber) return true;
+
+  // If the versions are equal, allow upgrading to newer build versions
+  if (semverEq(agentVersionNumber, versionToUpgradeNumber)) {
+    const isUpgradeToBuildVersion = versionToUpgradeNumber.compareBuild(agentVersionNumber) === 1;
+
+    return isUpgradeToBuildVersion;
+  }
 
   return semverGt(versionToUpgradeNumber, agentVersionNumber);
 };

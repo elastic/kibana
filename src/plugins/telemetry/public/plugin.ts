@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ApmBase } from '@elastic/apm-rum';
@@ -22,10 +23,11 @@ import type {
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ElasticV3BrowserShipper } from '@kbn/ebt/shippers/elastic_v3/browser';
+import { ElasticV3BrowserShipper } from '@elastic/ebt/shippers/elastic_v3/browser';
 import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
-
 import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
+import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
+
 import type { TelemetryConfigLabels } from '../server/config';
 import { FetchTelemetryConfigRoute, INTERNAL_VERSION } from '../common/routes';
 import type { v2 } from '../common/types';
@@ -192,10 +194,12 @@ export class TelemetryPlugin
       },
     });
 
+    const sendTo = this.getSendToEnv(config.sendUsageTo);
     analytics.registerShipper(ElasticV3BrowserShipper, {
       channelName: 'kibana-browser',
       version: currentKibanaVersion,
-      sendTo: config.sendUsageTo === 'prod' ? 'production' : 'staging',
+      buildShipperHeaders,
+      buildShipperUrl: createBuildShipperUrl(sendTo),
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
@@ -294,6 +298,10 @@ export class TelemetryPlugin
 
   public stop() {
     this.telemetrySender?.stop();
+  }
+
+  private getSendToEnv(sendUsageTo: string): 'production' | 'staging' {
+    return sendUsageTo === 'prod' ? 'production' : 'staging';
   }
 
   /**

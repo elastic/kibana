@@ -9,9 +9,16 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { APMRouteHandlerResources } from '../../../../routes/apm_routes/register_apm_server_routes';
-import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_with_debug';
-import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
+import {
+  callAsyncWithDebug,
+  getDebugBody,
+  getDebugTitle,
+  cancelEsRequestOnAbort,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import {
+  type APMRouteHandlerResources,
+  inspectableEsQueriesMap,
+} from '../../../../routes/apm_routes/register_apm_server_routes';
 
 export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
@@ -71,6 +78,7 @@ export async function createInternalESClient({
       request,
       requestParams: params,
       operationName,
+      inspectableEsQueriesMap,
     });
   }
 

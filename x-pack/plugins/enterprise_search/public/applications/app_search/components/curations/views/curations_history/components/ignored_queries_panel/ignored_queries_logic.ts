@@ -130,7 +130,7 @@ export const IgnoredQueriesLogic = kea<MakeLogicType<IgnoredQueriesValues, Ignor
           ]),
         });
 
-        if (response.results[0].hasOwnProperty('error')) {
+        if (Object.hasOwn(response.results[0], 'error')) {
           throw (response.results[0] as SuggestionUpdateError).error;
         }
 

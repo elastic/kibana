@@ -8,6 +8,7 @@
 import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { RuleMetric } from '../types';
 import type { RuleSearchResult } from '../../../types';
+import { getAlertSuppressionUsage } from '../usage_utils/get_alert_suppression_usage';
 
 export interface RuleObjectCorrelationsOptions {
   ruleResults: Array<SavedObjectsFindResult<RuleSearchResult>>;
@@ -41,6 +42,13 @@ export const getRuleObjectCorrelations = ({
       attributes.actions.length > 0 &&
       attributes.muteAll !== true;
 
+    const {
+      hasAlertSuppressionPerRuleExecution,
+      hasAlertSuppressionPerTimePeriod,
+      hasAlertSuppressionMissingFieldsStrategyDoNotSuppress,
+      alertSuppressionFieldsCount,
+    } = getAlertSuppressionUsage(attributes);
+
     return {
       rule_name: attributes.name,
       rule_id: attributes.params.ruleId,
@@ -56,6 +64,11 @@ export const getRuleObjectCorrelations = ({
       has_legacy_notification: hasLegacyNotification,
       has_notification: hasNotification,
       has_legacy_investigation_field: Array.isArray(attributes.params.investigationFields),
+      has_alert_suppression_per_rule_execution: hasAlertSuppressionPerRuleExecution,
+      has_alert_suppression_per_time_period: hasAlertSuppressionPerTimePeriod,
+      has_alert_suppression_missing_fields_strategy_do_not_suppress:
+        hasAlertSuppressionMissingFieldsStrategyDoNotSuppress,
+      alert_suppression_fields_count: alertSuppressionFieldsCount,
     };
   });
 };

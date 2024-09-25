@@ -8,7 +8,7 @@
 import { type HttpStart } from '@kbn/core-http-browser';
 import { ElasticModels } from './elastic_models_service';
 import { HttpService } from './http_service';
-import { mlApiServicesProvider } from './ml_api_service';
+import { mlApiProvider } from './ml_api_service';
 
 export type MlSharedServices = ReturnType<typeof getMlSharedServices>;
 
@@ -17,10 +17,10 @@ export type MlSharedServices = ReturnType<typeof getMlSharedServices>;
  */
 export function getMlSharedServices(httpStart: HttpStart) {
   const httpService = new HttpService(httpStart);
-  const mlApiServices = mlApiServicesProvider(httpService);
+  const mlApi = mlApiProvider(httpService);
 
   return {
-    elasticModels: new ElasticModels(mlApiServices.trainedModels),
-    mlApiServices,
+    elasticModels: new ElasticModels(mlApi.trainedModels),
+    mlApi,
   };
 }

@@ -24,7 +24,8 @@ import {
 } from './helpers';
 import type { OpenTimelineResult } from './types';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import type { RowRendererId } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
@@ -325,14 +326,18 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
         version: '1',
-        status: TimelineStatus.active,
-        timelineType: TimelineType.default,
+        status: TimelineStatusEnum.active,
+        timelineType: TimelineTypeEnum.default,
       };
 
-      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
+      const newTimeline = defaultTimelineToTimelineModel(
+        timeline,
+        false,
+        TimelineTypeEnum.template
+      );
       expect(newTimeline).toEqual({
         ...defaultTimeline,
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
         columns: defaultUdtHeaders,
       });
     });
@@ -342,11 +347,11 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Template',
         version: '1',
-        status: TimelineStatus.active,
-        timelineType: TimelineType.template,
+        status: TimelineStatusEnum.active,
+        timelineType: TimelineTypeEnum.template,
       };
 
-      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineTypeEnum.default);
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         columns: defaultUdtHeaders,
@@ -484,21 +489,21 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
         version: '1',
-        status: TimelineStatus.immutable,
-        timelineType: TimelineType.template,
+        status: TimelineStatusEnum.immutable,
+        timelineType: TimelineTypeEnum.template,
       };
 
       const newTimeline = defaultTimelineToTimelineModel(
         timeline,
         false,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         false
       );
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-10-28T11:37:31.655Z', start: '2020-10-27T11:37:31.655Z' },
-        status: TimelineStatus.immutable,
-        timelineType: TimelineType.template,
+        status: TimelineStatusEnum.immutable,
+        timelineType: TimelineTypeEnum.template,
         title: 'Awesome Timeline',
         columns: defaultUdtHeaders,
         excludedRowRendererIds: [],
@@ -510,20 +515,20 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
         version: '1',
-        status: TimelineStatus.active,
-        timelineType: TimelineType.default,
+        status: TimelineStatusEnum.active,
+        timelineType: TimelineTypeEnum.default,
       };
 
       const newTimeline = defaultTimelineToTimelineModel(
         timeline,
         false,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         false
       );
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         title: 'Awesome Timeline',
         columns: defaultUdtHeaders,
       });
@@ -534,52 +539,81 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
         version: '1',
-        status: TimelineStatus.active,
-        timelineType: TimelineType.default,
+        status: TimelineStatusEnum.active,
+        timelineType: TimelineTypeEnum.default,
       };
 
       const newTimeline = defaultTimelineToTimelineModel(
         timeline,
         false,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         false
       );
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         title: 'Awesome Timeline',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         defaultColumns: defaultUdtHeaders,
         columns: defaultUdtHeaders,
       });
     });
 
-    test('should produce correct model if unifiedComponentsInTimelineDisabled is false and custom set of columns is passed', () => {
+    test('should produce correct model if unifiedComponentsInTimelineDisabled == false and custom set of columns is passed', () => {
       const customColumns = defaultUdtHeaders.slice(0, 2);
       const timeline = {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
         version: '1',
-        status: TimelineStatus.active,
-        timelineType: TimelineType.default,
+        status: TimelineStatusEnum.active,
+        timelineType: TimelineTypeEnum.default,
         columns: customColumns,
       };
 
       const newTimeline = defaultTimelineToTimelineModel(
         timeline,
         false,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         false
       );
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         title: 'Awesome Timeline',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         defaultColumns: defaultUdtHeaders,
         columns: customColumns,
+      });
+    });
+
+    test('should produce correct model if unifiedComponentsInTimelineDisabled == false and custom set of excludedRowRendererIds is passed', () => {
+      const excludedRowRendererIds: RowRendererId[] = ['zeek'];
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        title: 'Awesome Timeline',
+        version: '1',
+        status: TimelineStatusEnum.active,
+        timelineType: TimelineTypeEnum.default,
+        excludedRowRendererIds,
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(
+        timeline,
+        false,
+        TimelineTypeEnum.default,
+        false
+      );
+      expect(newTimeline).toEqual({
+        ...defaultTimeline,
+        dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
+        status: TimelineStatusEnum.active,
+        title: 'Awesome Timeline',
+        timelineType: TimelineTypeEnum.default,
+        defaultColumns: defaultUdtHeaders,
+        columns: defaultUdtHeaders,
+        excludedRowRendererIds,
       });
     });
   });
@@ -623,7 +657,7 @@ describe('helpers', () => {
         duplicate: false,
         graphEventId: '',
         timelineId: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         onError,
         onOpenTimeline,
         openTimeline: true,
@@ -682,7 +716,7 @@ describe('helpers', () => {
         duplicate: false,
         graphEventId: '',
         timelineId: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         openTimeline: true,
       };
 
@@ -754,7 +788,7 @@ describe('helpers', () => {
         duplicate: false,
         graphEventId: '',
         timelineId: '',
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
         onOpenTimeline,
         openTimeline: true,
       };
@@ -817,7 +851,7 @@ describe('helpers', () => {
           duplicate: false,
           graphEventId: '',
           timelineId: undefined,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           onOpenTimeline,
           openTimeline: true,
           unifiedComponentsInTimelineDisabled: false,
@@ -853,7 +887,7 @@ describe('helpers', () => {
           duplicate: false,
           graphEventId: '',
           timelineId: TimelineId.active,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           onOpenTimeline: undefined,
           openTimeline: true,
           unifiedComponentsInTimelineDisabled: false,
@@ -892,7 +926,7 @@ describe('helpers', () => {
           duplicate: false,
           graphEventId: '',
           timelineId: TimelineId.active,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           onOpenTimeline,
           openTimeline: true,
           unifiedComponentsInTimelineDisabled: false,

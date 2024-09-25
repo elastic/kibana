@@ -21,8 +21,8 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { convertToBuiltInComparators, getAlertUrl } from '@kbn/observability-plugin/common';
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { convertToBuiltInComparators, getAlertDetailsUrl } from '@kbn/observability-plugin/common';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import {
@@ -34,7 +34,7 @@ import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import { LogQueryFields } from '../../metrics/types';
 import {
   buildErrorAlertReason,
@@ -75,7 +75,10 @@ export type InventoryMetricThresholdAlert = Omit<
 };
 
 export const createInventoryMetricThresholdExecutor =
-  (libs: InfraBackendLibs) =>
+  (
+    libs: InfraBackendLibs,
+    { alertsLocator, assetDetailsLocator, inventoryLocator }: InfraLocators
+  ) =>
   async (
     options: RuleExecutorOptions<
       InventoryMetricThresholdParams & Record<string, unknown>,
@@ -137,13 +140,7 @@ export const createInventoryMetricThresholdExecutor =
             [ALERT_REASON]: reason,
           },
           context: {
-            alertDetailsUrl: await getAlertUrl(
-              uuid,
-              spaceId,
-              indexedStartedAt,
-              libs.alertsLocator,
-              libs.basePath.publicBaseUrl
-            ),
+            alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, uuid),
             alertState: stateToAlertMessage[AlertStates.ERROR],
             group: UNGROUPED_FACTORY_KEY,
             metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -151,11 +148,11 @@ export const createInventoryMetricThresholdExecutor =
             timestamp: startedAt.toISOString(),
             value: null,
             viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-              basePath: libs.basePath,
               criteria,
               nodeType,
               timestamp: indexedStartedAt,
-              spaceId,
+              assetDetailsLocator,
+              inventoryLocator,
             }),
           },
         });
@@ -165,9 +162,13 @@ export const createInventoryMetricThresholdExecutor =
     }
     const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
 
-    const [, { logsShared }] = await libs.getStartServices();
+    const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
+
+    const logSourcesService =
+      logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
+
     const logQueryFields: LogQueryFields | undefined = await logsShared.logViews
-      .getClient(savedObjectsClient, esClient)
+      .getClient(savedObjectsClient, esClient, logSourcesService)
       .getResolvedLogView({
         type: 'log-view-reference',
         logViewId: sourceId,
@@ -226,12 +227,13 @@ export const createInventoryMetricThresholdExecutor =
       if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
         reason = results
           .map((result) =>
-            buildReasonWithVerboseMetricName(
+            buildReasonWithVerboseMetricName({
               group,
-              result[group],
-              buildFiredAlertReason,
-              nextState === AlertStates.WARNING
-            )
+              resultItem: result[group],
+              buildReason: buildFiredAlertReason,
+              useWarningThreshold: nextState === AlertStates.WARNING,
+              nodeType,
+            })
           )
           .join('\n');
       }
@@ -240,14 +242,24 @@ export const createInventoryMetricThresholdExecutor =
           reason = results
             .filter((result) => result[group].isNoData)
             .map((result) =>
-              buildReasonWithVerboseMetricName(group, result[group], buildNoDataAlertReason)
+              buildReasonWithVerboseMetricName({
+                group,
+                resultItem: result[group],
+                buildReason: buildNoDataAlertReason,
+                nodeType,
+              })
             )
             .join('\n');
         } else if (nextState === AlertStates.ERROR) {
           reason = results
             .filter((result) => result[group].isError)
             .map((result) =>
-              buildReasonWithVerboseMetricName(group, result[group], buildErrorAlertReason)
+              buildReasonWithVerboseMetricName({
+                group,
+                resultItem: result[group],
+                buildReason: buildErrorAlertReason,
+                nodeType,
+              })
             )
             .join('\n');
         }
@@ -274,13 +286,7 @@ export const createInventoryMetricThresholdExecutor =
         scheduledActionsCount++;
 
         const context = {
-          alertDetailsUrl: await getAlertUrl(
-            uuid,
-            spaceId,
-            indexedStartedAt,
-            libs.alertsLocator,
-            libs.basePath.publicBaseUrl
-          ),
+          alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, uuid),
           alertState: stateToAlertMessage[nextState],
           group,
           reason,
@@ -291,12 +297,12 @@ export const createInventoryMetricThresholdExecutor =
             formatMetric(result[group].metric, result[group].currentValue)
           ),
           viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
             criteria,
             nodeType,
             timestamp: indexedStartedAt,
-            spaceId,
             hostName: additionalContext?.host?.name,
+            assetDetailsLocator,
+            inventoryLocator,
           }),
           ...additionalContext,
         };
@@ -328,25 +334,19 @@ export const createInventoryMetricThresholdExecutor =
       const originalActionGroup = getOriginalActionGroup(alertHits);
 
       const recoveredContext = {
-        alertDetailsUrl: await getAlertUrl(
-          alertUuid,
-          spaceId,
-          indexedStartedAt,
-          libs.alertsLocator,
-          libs.basePath.publicBaseUrl
-        ),
+        alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-          basePath: libs.basePath,
           criteria,
           nodeType,
           timestamp: indexedStartedAt,
-          spaceId,
           hostName: additionalContext?.host?.name,
+          assetDetailsLocator,
+          inventoryLocator,
         }),
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS_ID,
@@ -384,12 +384,19 @@ const formatThreshold = (metric: SnapshotMetricType, value: number | number[]) =
   return threshold;
 };
 
-const buildReasonWithVerboseMetricName = (
-  group: string,
-  resultItem: ConditionResult,
-  buildReason: (r: any) => string,
-  useWarningThreshold?: boolean
-) => {
+const buildReasonWithVerboseMetricName = ({
+  group,
+  resultItem,
+  buildReason,
+  useWarningThreshold,
+  nodeType,
+}: {
+  group: string;
+  resultItem: ConditionResult;
+  buildReason: (r: any) => string;
+  useWarningThreshold?: boolean;
+  nodeType?: InventoryItemType;
+}) => {
   if (!resultItem) return '';
 
   const thresholdToFormat = useWarningThreshold
@@ -399,7 +406,7 @@ const buildReasonWithVerboseMetricName = (
     ...resultItem,
     group,
     metric:
-      toMetricOpt(resultItem.metric)?.text ||
+      toMetricOpt(resultItem.metric, nodeType)?.text ||
       (resultItem.metric === 'custom' && resultItem.customMetric
         ? getCustomMetricLabel(resultItem.customMetric)
         : resultItem.metric),

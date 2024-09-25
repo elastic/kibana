@@ -1,0 +1,7 @@
+{
+    "name": "@kbn/cloud-security-posture-common",
+    "private": true,
+    "version": "1.0.0",
+    "license": "Elastic License 2.0",
+    "description": "Shared components for cloud security posture, both client and server side"
+  }

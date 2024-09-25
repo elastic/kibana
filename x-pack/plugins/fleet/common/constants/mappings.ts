@@ -6,7 +6,7 @@
  */
 
 /**
- * ATTENTION: Mappings for Fleet are defined in the ElasticSearch repo.
+ * ATTENTION: Mappings for Fleet are defined in the Elasticsearch repo.
  *
  * The following mappings declared here closely mirror them
  * But they are only used to perform validation on the endpoints using ListWithKuery
@@ -54,6 +54,7 @@ export const PACKAGE_POLICIES_MAPPINGS = {
     is_managed: { type: 'boolean' },
     policy_id: { type: 'keyword' },
     policy_ids: { type: 'keyword' },
+    output_id: { type: 'keyword' },
     package: {
       properties: {
         name: { type: 'keyword' },

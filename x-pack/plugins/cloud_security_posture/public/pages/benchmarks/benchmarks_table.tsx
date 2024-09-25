@@ -21,9 +21,10 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
+import type { BenchmarksCisId } from '@kbn/cloud-security-posture-common';
+import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { FINDINGS_GROUPING_OPTIONS } from '../../common/constants';
-import { useNavigateFindings } from '../../common/hooks/use_navigate_findings';
-import type { BenchmarkScore, Benchmark, BenchmarksCisId } from '../../../common/types/latest';
+import type { BenchmarkScore, Benchmark } from '../../../common/types/latest';
 import * as TEST_SUBJ from './test_subjects';
 import { isCommonError } from '../../components/cloud_posture_page';
 import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
@@ -38,6 +39,8 @@ import {
 import { useKibana } from '../../common/hooks/use_kibana';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
+export const EMPTY_EVALUATION_TEST_SUBJECT = 'benchmark-not-evaluated-account';
+export const EMPTY_SCORE_TEST_SUBJECT = 'benchmark-score-no-findings';
 
 interface BenchmarksTableProps
   extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
@@ -170,7 +173,12 @@ const getBenchmarkTableColumns = (
 
       if (benchmarkEvaluation === 0) {
         return (
-          <EuiButtonEmpty href={integrationLink} iconType="plusInCircle" flush="left">
+          <EuiButtonEmpty
+            data-test-subj={EMPTY_EVALUATION_TEST_SUBJECT}
+            href={integrationLink}
+            iconType="plusInCircle"
+            flush="left"
+          >
             {i18n.translate('xpack.csp.benchmarks.benchmarksTable.addIntegrationTitle', {
               defaultMessage: 'Add {resourceCountLabel}',
               values: { resourceCountLabel },
@@ -215,10 +223,12 @@ const getBenchmarkTableColumns = (
         );
 
       return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.noFindingsScore"
-          defaultMessage="No Findings"
-        />
+        <span data-test-subj={EMPTY_SCORE_TEST_SUBJECT}>
+          <FormattedMessage
+            id="xpack.csp.benchmarks.benchmarksTable.noFindingsScore"
+            defaultMessage="No Findings"
+          />
+        </span>
       );
     },
   },

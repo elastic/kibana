@@ -6,9 +6,8 @@
  */
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
-import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import type { InfraPluginRequestHandlerContext } from '../../types';
-import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
+import type { InfraBackendLibs } from '../infra_types';
 
 type RequiredParams = Omit<ESSearchRequest, 'index'> & {
   body: {
@@ -20,32 +19,29 @@ type RequiredParams = Omit<ESSearchRequest, 'index'> & {
 export type InfraMetricsClient = Awaited<ReturnType<typeof getInfraMetricsClient>>;
 
 export async function getInfraMetricsClient({
-  framework,
-  metricsDataAccess,
-  requestContext,
+  libs,
+  context,
   request,
 }: {
-  framework: KibanaFramework;
-  metricsDataAccess: MetricsDataClient;
-  requestContext: InfraPluginRequestHandlerContext;
+  libs: InfraBackendLibs;
+  context: InfraPluginRequestHandlerContext;
   request?: KibanaRequest;
 }) {
-  const coreContext = await requestContext.core;
-  const savedObjectsClient = coreContext.savedObjects.client;
-  const indices = await metricsDataAccess.getMetricIndices({
-    savedObjectsClient,
-  });
+  const { framework } = libs;
+  const infraContext = await context.infra;
+  const metricsIndices = await infraContext.getMetricsIndices();
 
   return {
     search<TDocument, TParams extends RequiredParams>(
       searchParams: TParams
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
       return framework.callWithRequest(
-        requestContext,
+        context,
         'search',
         {
           ...searchParams,
-          index: indices,
+          ignore_unavailable: true,
+          index: metricsIndices,
         },
         request
       ) as Promise<any>;

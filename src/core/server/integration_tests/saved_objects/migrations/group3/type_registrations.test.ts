@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
@@ -47,6 +48,7 @@ const previouslyRegisteredTypes = [
   'csp-rule-template',
   'csp_rule',
   'dashboard',
+  'dynamic-config-overrides', // Added in 8.16 to persist the dynamic config overrides and share it with other nodes
   'event-annotation-group',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',
@@ -59,12 +61,15 @@ const previouslyRegisteredTypes = [
   'event_loop_delays_daily',
   'exception-list',
   'exception-list-agnostic',
+  'favorites',
   'file',
   'fileShare',
   'file-upload-telemetry',
   'file-upload-usage-collection-telemetry',
   'fleet-agent-actions',
   'fleet-agent-events',
+  'fleet-agent-policies',
+  'fleet-package-policies',
   'fleet-agents',
   'fleet-enrollment-api-keys',
   'fleet-fleet-server-host',
@@ -119,6 +124,7 @@ const previouslyRegisteredTypes = [
   'security-rule',
   'security-solution-signals-migration',
   'risk-engine-configuration',
+  'entity-engine-status',
   'server',
   'siem-detection-engine-rule-actions',
   'siem-detection-engine-rule-execution-info',

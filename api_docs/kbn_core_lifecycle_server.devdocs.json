@@ -36,63 +36,21 @@
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.OptInConfig",
-                "text": "OptInConfig"
-              },
+              "OptInConfig",
               ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.TelemetryCounter",
-                "text": "TelemetryCounter"
-              },
+              "TelemetryCounter",
               ">; registerEventType: <EventTypeData>(eventTypeOps: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.EventTypeOpts",
-                "text": "EventTypeOpts"
-              },
+              "EventTypeOpts",
               "<EventTypeData>) => void; registerShipper: <Shipper extends ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.IShipper",
-                "text": "IShipper"
-              },
+              "IShipper",
               ", ShipperConfig>(Shipper: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.ShipperClassConstructor",
-                "text": "ShipperClassConstructor"
-              },
+              "ShipperClassConstructor",
               "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.RegisterShipperOpts",
-                "text": "RegisterShipperOpts"
-              },
+              "RegisterShipperOpts",
               " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.ContextProviderOpts",
-                "text": "ContextProviderOpts"
-              },
+              "ContextProviderOpts",
               "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_preboot.ts",
@@ -211,63 +169,21 @@
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.OptInConfig",
-                "text": "OptInConfig"
-              },
+              "OptInConfig",
               ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.TelemetryCounter",
-                "text": "TelemetryCounter"
-              },
+              "TelemetryCounter",
               ">; registerEventType: <EventTypeData>(eventTypeOps: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.EventTypeOpts",
-                "text": "EventTypeOpts"
-              },
+              "EventTypeOpts",
               "<EventTypeData>) => void; registerShipper: <Shipper extends ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.IShipper",
-                "text": "IShipper"
-              },
+              "IShipper",
               ", ShipperConfig>(Shipper: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.ShipperClassConstructor",
-                "text": "ShipperClassConstructor"
-              },
+              "ShipperClassConstructor",
               "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.RegisterShipperOpts",
-                "text": "RegisterShipperOpts"
-              },
+              "RegisterShipperOpts",
               " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.ContextProviderOpts",
-                "text": "ContextProviderOpts"
-              },
+              "ContextProviderOpts",
               "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
@@ -378,6 +294,28 @@
                 "docId": "kibKbnCoreExecutionContextServerPluginApi",
                 "section": "def-server.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreSetup.featureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [
+              "{@link FeatureFlagsSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-feature-flags-server",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
+                "section": "def-server.FeatureFlagsSetup",
+                "text": "FeatureFlagsSetup"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
@@ -718,23 +656,11 @@
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.OptInConfig",
-                "text": "OptInConfig"
-              },
+              "OptInConfig",
               ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.TelemetryCounter",
-                "text": "TelemetryCounter"
-              },
+              "TelemetryCounter",
               ">; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
@@ -845,6 +771,28 @@
                 "docId": "kibKbnCoreExecutionContextServerPluginApi",
                 "section": "def-server.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreStart.featureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [
+              "{@link FeatureFlagsStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-feature-flags-server",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
+                "section": "def-server.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",

@@ -1,4 +1,6 @@
 disabled:
+  # Stateful base config for deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
   # Base config files, only necessary to inform config finding script
   - test/functional/config.base.js
   - test/functional/firefox/config.base.ts
@@ -42,8 +44,7 @@ enabled:
   - test/api_integration/config.js
   - test/examples/config.js
   - test/functional/apps/bundles/config.ts
-  - test/functional/apps/console/monaco/config.ts
-  - test/functional/apps/console/ace/config.ts
+  - test/functional/apps/console/config.ts
   - test/functional/apps/context/config.ts
   - test/functional/apps/dashboard_elements/controls/common/config.ts
   - test/functional/apps/dashboard_elements/controls/options_list/config.ts
@@ -155,7 +156,6 @@ enabled:
   - x-pack/test/api_integration/apis/monitoring/config.ts
   - x-pack/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/test/api_integration/apis/osquery/config.ts
-  - x-pack/test/api_integration/apis/painless_lab/config.ts
   - x-pack/test/api_integration/apis/search/config.ts
   - x-pack/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
@@ -271,6 +271,7 @@ enabled:
   - x-pack/test/functional/config.firefox.js
   - x-pack/test/functional/config.upgrade_assistant.ts
   - x-pack/test/functional_cloud/config.ts
+  - x-pack/test/functional_solution_sidenav/config.ts
   - x-pack/test/kubernetes_security/basic/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
@@ -350,6 +351,7 @@ enabled:
   - x-pack/performance/journeys_e2e/tsdb_logs_data_visualizer.ts
   - x-pack/performance/journeys_e2e/promotion_tracking_dashboard.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard.ts
+  - x-pack/performance/journeys_e2e/web_logs_dashboard_esql.ts
   - x-pack/performance/journeys_e2e/data_stress_test_lens.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_tsvb_gauge_only.ts
@@ -359,3 +361,5 @@ enabled:
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
+  # stateful config files that run deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts

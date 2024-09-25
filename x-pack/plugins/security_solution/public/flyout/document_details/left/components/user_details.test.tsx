@@ -23,8 +23,9 @@ import {
   USER_DETAILS_INFO_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID,
+  USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID,
 } from './test_ids';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/security-solution-common';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
@@ -33,11 +34,9 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -253,7 +252,7 @@ describe('<UserDetails />', () => {
       );
     });
 
-    it('should render host name as clicable link when feature flag is true', () => {
+    it('should render host name and ip as clicable link when preview is enabled', () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       const { getAllByTestId } = renderUserDetails(mockContextValue);
       expect(getAllByTestId(USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID).length).toBe(1);
@@ -265,6 +264,16 @@ describe('<UserDetails />', () => {
           hostName: 'test host',
           scopeId: defaultProps.scopeId,
           banner: HOST_PREVIEW_BANNER,
+        },
+      });
+
+      getAllByTestId(USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID)[0].click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: NetworkPanelKey,
+        params: {
+          ip: '100.XXX.XXX',
+          flowTarget: 'source',
+          banner: NETWORK_PREVIEW_BANNER,
         },
       });
     });

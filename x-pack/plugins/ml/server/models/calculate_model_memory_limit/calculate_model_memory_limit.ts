@@ -65,8 +65,8 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
 
     const { detectors, influencers, bucket_span: bucketSpan } = analysisConfig;
 
-    let overallCardinality = {};
-    let maxBucketCardinality = {};
+    let overallCardinality = Object.create(null);
+    let maxBucketCardinality = Object.create(null);
 
     // Get fields required for the model memory estimation
     const overallCardinalityFields: Set<string> = detectors.reduce(

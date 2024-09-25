@@ -212,7 +212,21 @@ export class SpaceSelectorPageObject extends FtrService {
     await this.testSubjects.setValue('descriptionSpaceText', descriptionSpace);
   }
 
+  async clickSwitchSpaceButton(spaceName: string) {
+    const collapsedButtonSelector = '[data-test-subj=euiCollapsedItemActionsButton]';
+    // open context menu
+    await this.find.clickByCssSelector(`#${spaceName}-actions ${collapsedButtonSelector}`);
+    // click context menu item
+    await this.find.clickByCssSelector(
+      `.euiContextMenuItem[data-test-subj="${spaceName}-switchSpace"]` // can not use testSubj: multiple elements exist with the same data-test-subj
+    );
+  }
+
   async clickOnDeleteSpaceButton(spaceName: string) {
+    const collapsedButtonSelector = '[data-test-subj=euiCollapsedItemActionsButton]';
+    // open context menu
+    await this.find.clickByCssSelector(`#${spaceName}-actions ${collapsedButtonSelector}`);
+    // click context menu item
     await this.testSubjects.click(`${spaceName}-deleteSpace`);
   }
 
@@ -258,8 +272,8 @@ export class SpaceSelectorPageObject extends FtrService {
 
   async setSearchBoxInSpacesSelector(searchText: string) {
     const searchBox = await this.find.byCssSelector('div[role="dialog"] input[type="search"]');
-    searchBox.clearValue();
-    searchBox.type(searchText);
+    await searchBox.clearValue();
+    await searchBox.type(searchText);
     await this.common.sleep(1000);
   }
 
@@ -273,5 +287,10 @@ export class SpaceSelectorPageObject extends FtrService {
       'div[role="dialog"] div[data-test-subj="euiSelectableMessage"]'
     );
     expect(await msgElem.getVisibleText()).to.be('no spaces found');
+  }
+
+  async currentSelectedSpaceTitle() {
+    const spacesNavSelector = await this.testSubjects.find('spacesNavSelector');
+    return spacesNavSelector.getAttribute('title');
   }
 }

@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 import {
@@ -16,12 +16,12 @@ import {
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 
 import { i18n } from '@kbn/i18n';
 import type { UseTableState } from '@kbn/ml-in-memory-table';
 
 import { css } from '@emotion/react';
-import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
@@ -32,34 +32,36 @@ import type { EventRate } from '../use_categorize_request';
 
 import { ExpandedRow } from './expanded_row';
 import { FormattedPatternExamples, FormattedTokens } from '../format_category';
-import type { OpenInDiscover } from './use_open_in_discover';
 
 interface Props {
   categories: Category[];
   eventRate: EventRate;
-  pinnedCategory: Category | null;
-  setPinnedCategory: (category: Category | null) => void;
-  highlightedCategory: Category | null;
-  setHighlightedCategory: (category: Category | null) => void;
+  mouseOver?: {
+    pinnedCategory: Category | null;
+    setPinnedCategory: (category: Category | null) => void;
+    highlightedCategory: Category | null;
+    setHighlightedCategory: (category: Category | null) => void;
+  };
   setSelectedCategories: (category: Category[]) => void;
-  openInDiscover: OpenInDiscover;
   tableState: UseTableState<Category>;
+  actions: Array<Action<Category>>;
   enableRowActions?: boolean;
   displayExamples?: boolean;
+  selectable?: boolean;
+  onRenderComplete?: () => void;
 }
 
 export const CategoryTable: FC<Props> = ({
   categories,
   eventRate,
-  pinnedCategory,
-  setPinnedCategory,
-  highlightedCategory,
-  setHighlightedCategory,
+  mouseOver,
   setSelectedCategories,
-  openInDiscover,
   tableState,
+  actions,
   enableRowActions = true,
   displayExamples = true,
+  selectable = true,
+  onRenderComplete,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -72,8 +74,6 @@ export const CategoryTable: FC<Props> = ({
   const showSparkline = useMemo(() => {
     return categories.some((category) => category.sparkline !== undefined);
   }, [categories]);
-
-  const { labels: openInDiscoverLabels, openFunction: openInDiscoverFunction } = openInDiscover;
 
   const toggleDetails = useCallback(
     (category: Category) => {
@@ -134,24 +134,7 @@ export const CategoryTable: FC<Props> = ({
       }),
       sortable: false,
       width: '65px',
-      actions: [
-        {
-          name: openInDiscoverLabels.singleSelect.in,
-          description: openInDiscoverLabels.singleSelect.in,
-          icon: 'plusInCircle',
-          type: 'icon',
-          'data-test-subj': 'aiopsLogPatternsActionFilterInButton',
-          onClick: (category) => openInDiscoverFunction(QUERY_MODE.INCLUDE, category),
-        },
-        {
-          name: openInDiscoverLabels.singleSelect.out,
-          description: openInDiscoverLabels.singleSelect.out,
-          icon: 'minusInCircle',
-          type: 'icon',
-          'data-test-subj': 'aiopsLogPatternsActionFilterOutButton',
-          onClick: (category) => openInDiscoverFunction(QUERY_MODE.EXCLUDE, category),
-        },
-      ],
+      actions,
     },
   ] as Array<EuiBasicTableColumn<Category>>;
 
@@ -214,23 +197,29 @@ export const CategoryTable: FC<Props> = ({
     });
   }
 
-  const selectionValue: EuiTableSelectionType<Category> | undefined = {
-    selectable: () => true,
-    onSelectionChange: (selectedItems) => setSelectedCategories(selectedItems),
-  };
+  const selectionValue: EuiTableSelectionType<Category> | undefined = selectable
+    ? {
+        selectable: () => true,
+        onSelectionChange: (selectedItems) => setSelectedCategories(selectedItems),
+      }
+    : undefined;
 
   const getRowStyle = (category: Category) => {
+    if (mouseOver === undefined) {
+      return {};
+    }
+
     if (
-      pinnedCategory &&
-      pinnedCategory.key === category.key &&
-      pinnedCategory.key === category.key
+      mouseOver.pinnedCategory &&
+      mouseOver.pinnedCategory.key === category.key &&
+      mouseOver.pinnedCategory.key === category.key
     ) {
       return {
         backgroundColor: primaryBackgroundColor,
       };
     }
 
-    if (highlightedCategory && highlightedCategory.key === category.key) {
+    if (mouseOver.highlightedCategory && mouseOver.highlightedCategory.key === category.key) {
       return {
         backgroundColor: euiTheme.euiColorLightestShade,
       };
@@ -251,39 +240,66 @@ export const CategoryTable: FC<Props> = ({
     },
   });
 
+  const chartWrapperRef = useRef<HTMLDivElement>(null);
+
+  const renderCompleteListener = useCallback(
+    (event: Event) => {
+      if (event.target !== chartWrapperRef.current) {
+        return;
+      }
+      if (typeof onRenderComplete === 'function') {
+        onRenderComplete();
+      }
+    },
+    [onRenderComplete]
+  );
+
+  useEffect(() => {
+    if (!chartWrapperRef.current) {
+      throw new Error('Reference to the chart wrapper is not set');
+    }
+    const chartWrapper = chartWrapperRef.current;
+    chartWrapper.addEventListener('renderComplete', renderCompleteListener);
+    return () => {
+      chartWrapper.removeEventListener('renderComplete', renderCompleteListener);
+    };
+  }, [renderCompleteListener]);
+
   return (
-    <EuiInMemoryTable<Category>
-      compressed
-      items={categories}
-      columns={columns}
-      selection={selectionValue}
-      itemId="key"
-      onTableChange={onTableChange}
-      pagination={pagination}
-      sorting={sorting}
-      data-test-subj="aiopsLogPatternsTable"
-      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      css={tableStyle}
-      rowProps={(category) => {
-        return enableRowActions
-          ? {
-              onClick: () => {
-                if (category.key === pinnedCategory?.key) {
-                  setPinnedCategory(null);
-                } else {
-                  setPinnedCategory(category);
-                }
-              },
-              onMouseEnter: () => {
-                setHighlightedCategory(category);
-              },
-              onMouseLeave: () => {
-                setHighlightedCategory(null);
-              },
-              style: getRowStyle(category),
-            }
-          : undefined;
-      }}
-    />
+    <div ref={chartWrapperRef}>
+      <EuiInMemoryTable<Category>
+        compressed
+        items={categories}
+        columns={columns}
+        selection={selectionValue}
+        itemId="key"
+        onTableChange={onTableChange}
+        pagination={pagination}
+        sorting={sorting}
+        data-test-subj="aiopsLogPatternsTable"
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        css={tableStyle}
+        rowProps={(category) => {
+          return mouseOver
+            ? {
+                onClick: () => {
+                  if (category.key === mouseOver.pinnedCategory?.key) {
+                    mouseOver.setPinnedCategory(null);
+                  } else {
+                    mouseOver.setPinnedCategory(category);
+                  }
+                },
+                onMouseEnter: () => {
+                  mouseOver.setHighlightedCategory(category);
+                },
+                onMouseLeave: () => {
+                  mouseOver.setHighlightedCategory(null);
+                },
+                style: getRowStyle(category),
+              }
+            : undefined;
+        }}
+      />
+    </div>
   );
 };

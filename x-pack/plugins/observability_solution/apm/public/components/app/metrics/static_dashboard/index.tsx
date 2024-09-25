@@ -9,15 +9,14 @@ import React, { useState, useEffect } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  AwaitingDashboardAPI,
+  DashboardApi,
   DashboardCreationOptions,
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { buildExistsFilter, buildPhraseFilter, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
-import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
+import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import { NotificationsStart } from '@kbn/core/public';
 import {
   ENVIRONMENT_ALL,
@@ -29,7 +28,7 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { convertSavedDashboardToPanels, MetricsDashboardProps } from './helper';
 
 export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
-  const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
+  const [dashboard, setDashboard] = useState<DashboardApi | undefined>(undefined);
   const { dataView } = dashboardProps;
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
@@ -43,24 +42,20 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
   useEffect(() => {
     if (!dashboard) return;
-    dashboard.updateInput({
-      timeRange: { from: rangeFrom, to: rangeTo },
-      query: { query: kuery, language: 'kuery' },
-    });
+    dashboard.setTimeRange({ from: rangeFrom, to: rangeTo });
+    dashboard.setQuery({ query: kuery, language: 'kuery' });
   }, [kuery, dashboard, rangeFrom, rangeTo]);
 
   useEffect(() => {
     if (!dashboard) return;
 
-    dashboard.updateInput({
-      filters: dataView ? getFilters(serviceName, environment, dataView) : [],
-    });
+    dashboard.setFilters(dataView ? getFilters(serviceName, environment, dataView) : []);
   }, [dataView, serviceName, environment, dashboard]);
 
   return (
     <DashboardRenderer
       getCreationOptions={() => getCreationOptions(dashboardProps, notifications, dataView)}
-      ref={setDashboard}
+      onApiAvailable={setDashboard}
     />
   );
 }
@@ -71,10 +66,9 @@ async function getCreationOptions(
   dataView: DataView
 ): Promise<DashboardCreationOptions> {
   try {
-    const builder = controlGroupInputBuilder;
-    const controlGroupInput = getDefaultControlGroupInput();
+    const controlGroupState = {};
 
-    await builder.addDataControlFromField(controlGroupInput, {
+    await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
       dataViewId: dataView.id ?? '',
       title: 'Node name',
       fieldName: 'service.node.name',
@@ -92,7 +86,7 @@ async function getCreationOptions(
       getInitialInput: () => ({
         viewMode: ViewMode.VIEW,
         panels,
-        controlGroupInput,
+        controlGroupState,
       }),
     };
   } catch (error) {
