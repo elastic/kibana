@@ -11,7 +11,7 @@ import { OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT } from '../../..
 import { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
-export function useFirehoseFlow() {
+export function useKubernetesFlow() {
   const {
     services: {
       analytics,
@@ -20,7 +20,7 @@ export function useFirehoseFlow() {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const { data, status, error, refetch } = useFetcher(
     (callApi) => {
-      return callApi('POST /internal/observability_onboarding/firehose/flow');
+      return callApi('POST /internal/observability_onboarding/kubernetes/flow');
     },
     [],
     { showToastOnError: false }
@@ -29,14 +29,9 @@ export function useFirehoseFlow() {
   useEffect(() => {
     if (data?.onboardingId !== undefined) {
       analytics?.reportEvent(OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT.eventType, {
-        onboardingFlowType: 'firehose',
+        onboardingFlowType: 'kubernetes',
         onboardingId: data?.onboardingId,
         step: 'in_progress',
-        context: {
-          firehose: {
-            cloudServiceProvider,
-          },
-        },
       });
     }
   }, [analytics, cloudServiceProvider, data?.onboardingId]);

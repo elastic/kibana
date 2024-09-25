@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useState } from 'react';
 import { difference } from 'lodash';
-import { OBSERVABILITY_ONBOARDING_FIREHOSE_DATA_RECEIVED_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
+import { OBSERVABILITY_ONBOARDING_DATASET_DETECTED_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import { AWSIndexName } from '../../../../common/aws_firehose';
 import { ObservabilityOnboardingAppServices } from '../../..';
 import { CreateStackOption } from './types';
@@ -32,15 +32,17 @@ export function useDataReceivedTelemetryEvent({
 
   useEffect(() => {
     difference(populatedAWSLogsIndexList, reportedIndexList).forEach((indexName) => {
-      analytics?.reportEvent(
-        OBSERVABILITY_ONBOARDING_FIREHOSE_DATA_RECEIVED_TELEMETRY_EVENT.eventType,
-        {
-          indexName,
-          selectedCreateStackOption,
-          cloudServiceProvider,
-          onboardingId,
-        }
-      );
+      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_DATASET_DETECTED_TELEMETRY_EVENT.eventType, {
+        onboardingFlowType: 'firehose',
+        onboardingId,
+        dataset: indexName,
+        context: {
+          firehose: {
+            selectedCreateStackOption,
+            cloudServiceProvider,
+          },
+        },
+      });
     });
     setReportedIndexList(populatedAWSLogsIndexList);
   }, [

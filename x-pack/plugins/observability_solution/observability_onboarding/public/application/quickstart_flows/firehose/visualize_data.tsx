@@ -25,7 +25,6 @@ import { useAWSServiceGetStartedList } from './use_aws_service_get_started_list'
 import { AutoRefreshCallout } from './auto_refresh_callout';
 import { ProgressCallout } from './progress_callout';
 import { HAS_DATA_FETCH_INTERVAL } from './utils';
-import { useDataReceivedTelemetryEvent } from './use_data_received_telemetry_event';
 import { CreateStackOption } from './types';
 
 const REQUEST_PENDING_STATUS_LIST = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
@@ -56,7 +55,10 @@ export function VisualizeData({ onboardingId, selectedCreateStackOption }: Props
     });
   }, []);
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      context: { cloudServiceProvider },
+    },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   useEffect(() => {
@@ -108,12 +110,6 @@ export function VisualizeData({ onboardingId, selectedCreateStackOption }: Props
     refetch();
   }, HAS_DATA_FETCH_INTERVAL);
 
-  useDataReceivedTelemetryEvent({
-    populatedAWSLogsIndexList: orderedPopulatedAWSLogsIndexList,
-    selectedCreateStackOption,
-    onboardingId,
-  });
-
   if (populatedAWSLogsIndexList === undefined) {
     return null;
   }
@@ -163,6 +159,14 @@ export function VisualizeData({ onboardingId, selectedCreateStackOption }: Props
               }
             >
               <GetStartedPanel
+                onboardingFlowType="firehose"
+                dataset={indexName}
+                telemetryEventContext={{
+                  firehose: {
+                    selectedCreateStackOption,
+                    cloudServiceProvider,
+                  },
+                }}
                 integration="aws"
                 newTab
                 isLoading={false}

@@ -18,7 +18,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
@@ -26,8 +28,9 @@ import { CreateStackCommandSnippet } from './create_stack_command_snippet';
 import { CreateStackInAWSConsole } from './create_stack_in_aws_console';
 import { CreateStackOption } from './types';
 import { useFirehoseFlow } from './use_firehose_flow';
-import { useMonitoringDataFlag } from './use_monitoring_data_flag';
 import { VisualizeData } from './visualize_data';
+import { ObservabilityOnboardingAppServices } from '../../..';
+import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 
 const OPTIONS = [
   {
@@ -52,11 +55,28 @@ export function FirehosePanel() {
   const [selectedOptionId, setSelectedOptionId] = useState<CreateStackOption>(
     CreateStackOption.AWS_CONSOLE_UI
   );
+  const {
+    services: {
+      context: { cloudServiceProvider },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
   const { data, status, error, refetch } = useFirehoseFlow();
-  const isMonitoringData = useMonitoringDataFlag({
-    flowRequestStatus: status,
-    selectedCreateStackOption: selectedOptionId,
+
+  const telemetryEventContext: OnboardingFlowEventContext = useMemo(
+    () => ({
+      firehose: {
+        cloudServiceProvider,
+        selectedCreateStackOption: selectedOptionId,
+      },
+    }),
+    [cloudServiceProvider, selectedOptionId]
+  );
+
+  const isMonitoringData = useWindowBlurDataMonitoringTrigger({
+    isActive: status === FETCH_STATUS.SUCCESS,
+    onboardingFlowType: 'firehose',
     onboardingId: data?.onboardingId,
+    telemetryEventContext,
   });
 
   const onOptionChange = useCallback((id: string) => {
@@ -64,7 +84,16 @@ export function FirehosePanel() {
   }, []);
 
   if (error !== undefined) {
-    return <EmptyPrompt error={error} onRetryClick={refetch} />;
+    return (
+      <EmptyPrompt
+        onboardingFlowType="firehose"
+        error={error}
+        telemetryEventContext={{
+          firehose: { cloudServiceProvider },
+        }}
+        onRetryClick={refetch}
+      />
+    );
   }
 
   const steps = [

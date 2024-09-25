@@ -15,19 +15,28 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
+  OnboardingFlowEventContext,
+} from '../../../../common/telemetry_events';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 
 export function GetStartedPanel({
+  onboardingFlowType,
+  dataset,
   integration,
   actionLinks,
   previewImage = 'charts_screen.svg',
   newTab,
   isLoading,
   onboardingId,
+  telemetryEventContext,
 }: {
+  onboardingFlowType: string;
+  dataset: string;
   integration: string;
   newTab: boolean;
   actionLinks: Array<{
@@ -39,10 +48,27 @@ export function GetStartedPanel({
   previewImage?: string;
   isLoading: boolean;
   onboardingId?: string;
+  telemetryEventContext?: OnboardingFlowEventContext;
 }) {
   const {
-    services: { http },
+    services: { http, analytics },
   } = useKibana<ObservabilityOnboardingContextValue>();
+
+  useEffect(() => {
+    analytics?.reportEvent(
+      OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT.eventType,
+      {
+        onboardingFlowType,
+        onboardingId,
+        dataset,
+        context: telemetryEventContext,
+      }
+    );
+    /**
+     * Firing the event only once when the component mounts
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
