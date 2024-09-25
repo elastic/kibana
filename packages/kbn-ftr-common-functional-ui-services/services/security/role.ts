@@ -10,6 +10,11 @@
 import util from 'util';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+
+const HEADERS = Object.freeze({
+  [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+});
 
 export class Role {
   constructor(private log: ToolingLog, private kibanaServer: KbnClient) {}
@@ -23,6 +28,7 @@ export class Role {
         kibana: role.kibana,
         elasticsearch: role.elasticsearch,
       },
+      headers: HEADERS,
       retries: 0,
     });
     if (status !== 204) {
