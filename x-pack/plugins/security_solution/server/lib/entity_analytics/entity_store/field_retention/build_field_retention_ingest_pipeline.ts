@@ -138,17 +138,13 @@ const getFieldProcessors = (
 const isFieldMissingOrEmpty = (field: string): string => {
   const progressivePaths = getProgressivePathsNoCtx(convertPathToBracketNotation(field));
   const lastPath = progressivePaths.at(-1);
-  const emptyArrayCheck = `(${lastPath} instanceof List && ${lastPath}.isEmpty())`;
-  const emptyStringCheck = `(${lastPath} instanceof String && ${lastPath}.isEmpty())`;
-  const emptyObjectCheck = `(${lastPath} instanceof Map && ${lastPath}.isEmpty())`;
-  const isEmptySetCheck = `(${lastPath} instanceof Set && ${lastPath}.isEmpty())`;
-  return [
-    ...progressivePaths.map((path) => `${path} == null`),
-    emptyArrayCheck,
-    emptyStringCheck,
-    emptyObjectCheck,
-    isEmptySetCheck,
-  ].join(' || ');
+
+  const classesWithEmptyCheck = ['List', 'String', 'Map', 'Set'];
+  const emptyCheck = `((${classesWithEmptyCheck
+    .map((c) => `${lastPath} instanceof ${c}`)
+    .join(' || ')}) && ${lastPath}.isEmpty())`;
+
+  return [...progressivePaths.map((path) => `${path} == null`), emptyCheck].join(' || ');
 };
 
 const preferNewestValueProcessor = ({ field }: PreferNewestValue): IngestProcessorContainer => {
