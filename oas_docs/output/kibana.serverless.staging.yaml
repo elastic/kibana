@@ -16530,19 +16530,20 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
+                oneOf:
+                  - type: object
                     properties:
-                      getOneTimeline:
-                        $ref: >-
-                          #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
-                        nullable: true
+                      data:
+                        type: object
+                        properties:
+                          getOneTimeline:
+                            $ref: >-
+                              #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
+                        required:
+                          - getOneTimeline
                     required:
-                      - getOneTimeline
-                required:
-                  - data
+                      - data
+                  - type: object
           description: Indicates that the (template) Timeline was found and returned.
       summary: Get Timeline or Timeline template details
       tags:
@@ -16672,6 +16673,8 @@ paths:
                           timeline:
                             $ref: >-
                               #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
+                        required:
+                          - timeline
                     required:
                       - persistTimeline
                 required:
@@ -16689,6 +16692,53 @@ paths:
                     type: number
           description: Indicates that there was an error in the Timeline creation.
       summary: Create a Timeline or Timeline template
+      tags:
+        - Security Solution Timeline API
+        - access:securitySolution
+  /api/timeline/_copy:
+    get:
+      description: |
+        Copies and returns a timeline or timeline template.
+      operationId: CopyTimeline
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                timeline:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Timeline_API_SavedTimeline
+                timelineIdToCopy:
+                  type: string
+              required:
+                - timeline
+                - timelineIdToCopy
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      persistTimeline:
+                        type: object
+                        properties:
+                          timeline:
+                            $ref: >-
+                              #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
+                        required:
+                          - timeline
+                    required:
+                      - persistTimeline
+                required:
+                  - data
+          description: Indicates that the timeline has been successfully copied.
+      summary: Copies timeline or timeline template.
       tags:
         - Security Solution Timeline API
         - access:securitySolution
@@ -16962,29 +17012,14 @@ paths:
             schema:
               type: object
               properties:
-                file:
-                  allOf:
-                    - $ref: >-
-                        #/components/schemas/Security_Solution_Timeline_API_Readable
-                    - type: object
-                      properties:
-                        hapi:
-                          type: object
-                          properties:
-                            filename:
-                              type: string
-                            headers:
-                              type: object
-                            isImmutable:
-                              enum:
-                                - 'true'
-                                - 'false'
-                              type: string
-                          required:
-                            - filename
-                            - headers
-                      required:
-                        - hapi
+                file: {}
+                isImmutable:
+                  enum:
+                    - 'true'
+                    - 'false'
+                  type: string
+              required:
+                - file
         description: The Timelines to import as a readable stream.
         required: true
       responses:
@@ -16992,13 +17027,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: >-
-                      #/components/schemas/Security_Solution_Timeline_API_ImportTimelineResult
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Solution_Timeline_API_ImportTimelineResult
           description: Indicates the import of Timelines was successful.
         '400':
           content:
@@ -17058,7 +17088,8 @@ paths:
                 prepackagedTimelines:
                   items:
                     $ref: >-
-                      #/components/schemas/Security_Solution_Timeline_API_SavedTimeline
+                      #/components/schemas/Security_Solution_Timeline_API_TimelineSavedToReturnObject
+                    nullable: true
                   type: array
                 timelinesToInstall:
                   items:
@@ -17083,13 +17114,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: >-
-                      #/components/schemas/Security_Solution_Timeline_API_ImportTimelineResult
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Solution_Timeline_API_ImportTimelineResult
           description: Indicates the installation of prepackaged Timelines was successful.
         '500':
           content:
@@ -17127,19 +17153,15 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
+                oneOf:
+                  - type: object
                     properties:
-                      getOneTimeline:
+                      data:
                         $ref: >-
                           #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
-                        nullable: true
                     required:
-                      - getOneTimeline
-                required:
-                  - data
+                      - data
+                  - type: object
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
@@ -17207,10 +17229,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
+                oneOf:
+                  - type: object
                     properties:
                       customTemplateTimelineCount:
                         type: number
@@ -17222,7 +17242,7 @@ paths:
                         type: number
                       templateTimelineCount:
                         type: number
-                      timelines:
+                      timeline:
                         items:
                           $ref: >-
                             #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
@@ -17230,15 +17250,14 @@ paths:
                       totalCount:
                         type: number
                     required:
-                      - timelines
+                      - timeline
                       - totalCount
                       - defaultTimelineCount
                       - templateTimelineCount
                       - favoriteCount
                       - elasticTemplateTimelineCount
                       - customTemplateTimelineCount
-                required:
-                  - data
+                  - type: object
           description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
@@ -32424,30 +32443,39 @@ components:
       type: object
       properties:
         aggregatable:
+          nullable: true
           type: boolean
         category:
+          nullable: true
           type: string
         columnHeaderType:
+          nullable: true
           type: string
         description:
+          nullable: true
           type: string
         example:
-          oneOf:
-            - type: string
-            - type: number
+          nullable: true
+          type: string
         id:
+          nullable: true
           type: string
         indexes:
           items:
             type: string
+          nullable: true
           type: array
         name:
+          nullable: true
           type: string
         placeholder:
+          nullable: true
           type: string
         searchable:
+          nullable: true
           type: boolean
         type:
+          nullable: true
           type: string
     Security_Solution_Timeline_API_DataProviderQueryMatch:
       type: object
@@ -32469,6 +32497,10 @@ components:
           type: string
         queryMatch:
           $ref: '#/components/schemas/Security_Solution_Timeline_API_QueryMatchResult'
+          nullable: true
+        type:
+          $ref: '#/components/schemas/Security_Solution_Timeline_API_DataProviderType'
+          nullable: true
     Security_Solution_Timeline_API_DataProviderResult:
       type: object
       properties:
@@ -32558,41 +32590,59 @@ components:
       type: object
       properties:
         exists:
-          type: boolean
+          nullable: true
+          type: string
         match_all:
+          nullable: true
           type: string
         meta:
+          nullable: true
           type: object
           properties:
             alias:
+              nullable: true
               type: string
             controlledBy:
+              nullable: true
               type: string
             disabled:
+              nullable: true
               type: boolean
             field:
+              nullable: true
               type: string
             formattedValue:
+              nullable: true
               type: string
             index:
+              nullable: true
               type: string
             key:
+              nullable: true
               type: string
             negate:
+              nullable: true
               type: boolean
             params:
+              nullable: true
               type: string
             type:
+              nullable: true
               type: string
             value:
+              nullable: true
               type: string
         missing:
+          nullable: true
           type: string
         query:
+          nullable: true
           type: string
         range:
+          nullable: true
           type: string
         script:
+          nullable: true
           type: string
     Security_Solution_Timeline_API_GetNotesResult:
       type: object
@@ -32657,6 +32707,12 @@ components:
             version:
               nullable: true
               type: string
+          required:
+            - savedObjectId
+            - version
+            - pinnedEventIds
+            - eventNotes
+            - globalNotes
     Security_Solution_Timeline_API_Note:
       allOf:
         - $ref: '#/components/schemas/Security_Solution_Timeline_API_BareNote'
@@ -32714,34 +32770,13 @@ components:
           nullable: true
           type: string
         value:
-          nullable: true
-          type: string
-    Security_Solution_Timeline_API_Readable:
-      type: object
-      properties:
-        _data:
-          additionalProperties: true
-          type: object
-        _encoding:
-          type: string
-        _events:
-          additionalProperties: true
-          type: object
-        _eventsCount:
-          type: number
-        _maxListeners:
-          additionalProperties: true
-          type: object
-        _position:
-          type: number
-        _read:
-          additionalProperties: true
-          type: object
-        _readableState:
-          additionalProperties: true
-          type: object
-        readable:
-          type: boolean
+          oneOf:
+            - nullable: true
+              type: string
+            - items:
+                type: string
+              nullable: true
+              type: array
     Security_Solution_Timeline_API_ResponseNote:
       type: object
       properties:
@@ -32806,12 +32841,16 @@ components:
           properties:
             end:
               oneOf:
-                - type: string
-                - type: number
+                - nullable: true
+                  type: string
+                - nullable: true
+                  type: number
             start:
               oneOf:
-                - type: string
-                - type: number
+                - nullable: true
+                  type: string
+                - nullable: true
+                  type: number
         description:
           nullable: true
           type: string
@@ -32950,6 +32989,44 @@ components:
           nullable: true
           type: string
     Security_Solution_Timeline_API_TimelineResponse:
+      allOf:
+        - $ref: '#/components/schemas/Security_Solution_Timeline_API_SavedTimeline'
+        - type: object
+          properties:
+            eventIdToNoteIds:
+              items:
+                $ref: '#/components/schemas/Security_Solution_Timeline_API_Note'
+              nullable: true
+              type: array
+            noteIds:
+              items:
+                type: string
+              nullable: true
+              type: array
+            notes:
+              items:
+                $ref: '#/components/schemas/Security_Solution_Timeline_API_Note'
+              nullable: true
+              type: array
+            pinnedEventIds:
+              items:
+                type: string
+              nullable: true
+              type: array
+            pinnedEventsSaveObject:
+              items:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Timeline_API_PinnedEvent
+              nullable: true
+              type: array
+            savedObjectId:
+              type: string
+            version:
+              type: string
+          required:
+            - savedObjectId
+            - version
+    Security_Solution_Timeline_API_TimelineSavedToReturnObject:
       allOf:
         - $ref: '#/components/schemas/Security_Solution_Timeline_API_SavedTimeline'
         - type: object
