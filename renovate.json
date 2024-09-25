@@ -135,6 +135,15 @@
       "enabled": true
     },
     {
+      "groupName": "HAPI ecosystem",
+      "matchDepNames": ["@hapi/*", "brok"],
+      "reviewers": ["team:kibana-core", "team:kibana-security"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "Team:Security", "backport:prev-minor"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "babel",
       "matchDepNames": ["@types/babel__core"],
       "matchDepPatterns": ["^@babel", "^babel-plugin"],
