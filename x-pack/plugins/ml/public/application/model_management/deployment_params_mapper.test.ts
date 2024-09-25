@@ -117,7 +117,7 @@ describe('DeploymentParamsMapper', () => {
       });
 
       it('should provide vCPU level', () => {
-        expect(mapper.getVCPURange('low')).toEqual({ min: 1, max: 2, static: 2 });
+        expect(mapper.getVCPURange('low')).toEqual({ min: 0, max: 2, static: 2 });
         expect(mapper.getVCPURange('medium')).toEqual({ min: 3, max: 16, static: 16 });
         expect(mapper.getVCPURange('high')).toEqual({ min: 17, max: 32, static: 32 });
       });
@@ -242,7 +242,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 2,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 1,
+            min_number_of_allocations: 0,
             max_number_of_allocations: 1,
           },
         });
@@ -261,7 +261,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 8,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 1,
+            min_number_of_allocations: 0,
             max_number_of_allocations: 1,
           },
         });
@@ -280,7 +280,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 8,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 1,
+            min_number_of_allocations: 0,
             max_number_of_allocations: 1,
           },
         });
