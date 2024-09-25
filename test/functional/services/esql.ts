@@ -53,7 +53,7 @@ export class ESQLService extends FtrService {
 
   public async openHelpMenu() {
     await this.testSubjects.click('esql-menu-button');
-    await this.retry.waitFor('popover to apprear', async () => {
+    await this.retry.waitFor('popover to appear', async () => {
       return await this.testSubjects.exists('esql-quick-reference');
     });
   }
