@@ -161,7 +161,7 @@ export const getStructuredToolForIndexEntry = ({
   }, {});
 
   return new DynamicStructuredTool({
-    name: indexEntry.name.replaceAll(' ', ''), // Tool names cannot contain spaces, further sanitization possibly needed
+    name: indexEntry.name.replace(/[^a-zA-Z0-9-]/g, ''), // // Tool names expects a string that matches the pattern '^[a-zA-Z0-9-]+$'
     description: indexEntry.description,
     schema: z.object({
       query: z.string().describe(indexEntry.queryDescription),
