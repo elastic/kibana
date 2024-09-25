@@ -215,15 +215,15 @@ export class DataViewMgmtService {
       }, {} as Record<string, DataViewField>);
 
     const fields = Object.values(fieldRecords);
-    const indexedFieldTypes: string[] = [];
+    const indexedFieldTypes = new Set<string>();
     fields.forEach((field) => {
       // for conflicted fields, add conflict as a type
       if (field.type === 'conflict') {
-        indexedFieldTypes.push('conflict');
+        indexedFieldTypes.add('conflict');
       }
       if (field.esTypes) {
         // add all types, may be multiple
-        field.esTypes.forEach((item) => indexedFieldTypes.push(item));
+        field.esTypes.forEach((item) => indexedFieldTypes.add(item));
       }
     });
 
@@ -240,7 +240,7 @@ export class DataViewMgmtService {
     this.updateState({
       dataView,
       fields,
-      indexedFieldTypes,
+      indexedFieldTypes: Array.from(indexedFieldTypes),
       fieldConflictCount: fields.filter((field) => field.type === 'conflict').length,
       tags: await this.getTags(dataView),
       isRefreshing: false,

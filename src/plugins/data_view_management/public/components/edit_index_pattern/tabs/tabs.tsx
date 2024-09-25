@@ -224,10 +224,8 @@ export const Tabs: React.FC<TabsProps> = ({
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
   const filteredIndexedFieldTypeFilter = useMemo(() => {
-    return uniq(
-      indexedFieldTypeFilter.filter((fieldType) =>
-        indexedFieldTypes.some((item) => item.value === fieldType)
-      )
+    return indexedFieldTypeFilter.filter((fieldType) =>
+      indexedFieldTypes.some((item) => item.value === fieldType)
     );
   }, [indexedFieldTypeFilter, indexedFieldTypes]);
 
