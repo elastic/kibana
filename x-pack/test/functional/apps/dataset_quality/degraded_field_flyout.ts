@@ -207,7 +207,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         ]);
       });
 
-      describe('field ignored', () => {
+      describe('field character limit exceeded', () => {
         it('should display cause as "field ignored" when a field is ignored due to field above issue', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: degradedDatasetWithLimitDataStreamName,
@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await retry.tryForTime(5000, async () => {
             const fieldIgnoredMessageExists = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldValue-cause',
-              'field ignored'
+              'field character limit exceeded'
             );
             expect(fieldIgnoredMessageExists).to.be(true);
           });
