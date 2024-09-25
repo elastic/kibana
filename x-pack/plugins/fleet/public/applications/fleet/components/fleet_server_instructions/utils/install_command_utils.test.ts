@@ -10,12 +10,11 @@ import { getInstallCommandForPlatform } from './install_command_utils';
 describe('getInstallCommandForPlatform', () => {
   describe('without policy id', () => {
     it('should return the correct command if the the policyId is not set for linux', () => {
-      const res = getInstallCommandForPlatform(
-        'linux',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1'
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'linux',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
@@ -29,12 +28,11 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is not set for mac', () => {
-      const res = getInstallCommandForPlatform(
-        'mac',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1'
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'mac',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz
@@ -48,12 +46,11 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is not set for windows', () => {
-      const res = getInstallCommandForPlatform(
-        'windows',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1'
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'windows',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "$ProgressPreference = 'SilentlyContinue'
@@ -68,12 +65,11 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is not set for rpm', () => {
-      const res = getInstallCommandForPlatform(
-        'rpm',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1'
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'rpm',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--x86_64.rpm
@@ -88,12 +84,11 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is not set for deb', () => {
-      const res = getInstallCommandForPlatform(
-        'deb',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1'
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'deb',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
@@ -108,16 +103,12 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command sslCATrustedFingerprint option is passed', () => {
-      const res = getInstallCommandForPlatform(
-        'linux',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        undefined,
-        undefined,
-        false,
-        'fingerprint123456'
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'linux',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        sslCATrustedFingerprint: 'fingerprint123456',
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
@@ -134,13 +125,12 @@ describe('getInstallCommandForPlatform', () => {
 
   describe('with policy id', () => {
     it('should return the correct command if the the policyId is set for linux', () => {
-      const res = getInstallCommandForPlatform(
-        'linux',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        'policy-1'
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'linux',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
@@ -155,13 +145,12 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is set for mac', () => {
-      const res = getInstallCommandForPlatform(
-        'mac',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        'policy-1'
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'mac',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz
@@ -176,13 +165,12 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is set for windows', () => {
-      const res = getInstallCommandForPlatform(
-        'windows',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        'policy-1'
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'windows',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "$ProgressPreference = 'SilentlyContinue'
@@ -198,13 +186,12 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is set for rpm', () => {
-      const res = getInstallCommandForPlatform(
-        'rpm',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        'policy-1'
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'rpm',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--x86_64.rpm
@@ -220,13 +207,12 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is set for deb', () => {
-      const res = getInstallCommandForPlatform(
-        'deb',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        'policy-1'
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'deb',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
@@ -244,23 +230,18 @@ describe('getInstallCommandForPlatform', () => {
 
   describe('with policy id and downloadSource', () => {
     it('should return the correct command if the the policyId is set for linux', () => {
-      const res = getInstallCommandForPlatform(
-        'linux',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        'policy-1',
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        {
+      const res = getInstallCommandForPlatform({
+        platform: 'linux',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        downloadSource: {
           id: 'test',
           name: 'test',
           is_default: false,
           host: 'https://test.fr/8.12.0-test/',
-        }
-      );
+        },
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://test.fr/8.12.0-test/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
@@ -277,15 +258,14 @@ describe('getInstallCommandForPlatform', () => {
 
   describe('with policy id and fleet server host and production deployment', () => {
     it('should return the correct command if the the policyId is set for linux', () => {
-      const res = getInstallCommandForPlatform(
-        'linux',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        true
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'linux',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        isProductionDeployment: true,
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
@@ -304,15 +284,14 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is set for mac', () => {
-      const res = getInstallCommandForPlatform(
-        'mac',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        true
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'mac',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        isProductionDeployment: true,
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz
@@ -331,15 +310,14 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is set for windows', () => {
-      const res = getInstallCommandForPlatform(
-        'windows',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        true
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'windows',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        isProductionDeployment: true,
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "$ProgressPreference = 'SilentlyContinue'
@@ -359,15 +337,14 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is set for rpm', () => {
-      const res = getInstallCommandForPlatform(
-        'rpm',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        true
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'rpm',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        isProductionDeployment: true,
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--x86_64.rpm
@@ -387,15 +364,14 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is set for deb', () => {
-      const res = getInstallCommandForPlatform(
-        'deb',
-        'http://elasticsearch:9200',
-        undefined,
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        true
-      );
+      const res = getInstallCommandForPlatform({
+        platform: 'deb',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        isProductionDeployment: true,
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
@@ -417,35 +393,32 @@ describe('getInstallCommandForPlatform', () => {
 
   describe('with simple proxy settings', () => {
     it('should return the correct command if proxies are set for linux', () => {
-      const res = getInstallCommandForPlatform(
-        'linux',
-        'http://elasticsearch:9200',
-        {
+      const res = getInstallCommandForPlatform({
+        platform: 'linux',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
           id: 'es-proxy',
           name: 'es-proxy',
           url: 'http://es-proxy:1111',
           is_preconfigured: false,
         },
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        undefined,
-        undefined,
-        undefined,
-        {
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        downloadSource: {
           id: 'download-src',
           name: 'download-src',
           host: 'https://download-src/8.12.0-test/',
           is_default: false,
           proxy_id: 'download-proxy',
         },
-        {
+        downloadSourceProxy: {
           id: 'download-src-proxy',
           name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
           is_preconfigured: false,
-        }
-      );
+        },
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz --proxy http://download-src-proxy:2222
@@ -461,35 +434,32 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if proxies are set for mac', () => {
-      const res = getInstallCommandForPlatform(
-        'mac',
-        'http://elasticsearch:9200',
-        {
+      const res = getInstallCommandForPlatform({
+        platform: 'mac',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
           id: 'es-proxy',
           name: 'es-proxy',
           url: 'http://es-proxy:1111',
           is_preconfigured: false,
         },
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        undefined,
-        undefined,
-        undefined,
-        {
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        downloadSource: {
           id: 'download-src',
           name: 'download-src',
           host: 'https://download-src/8.12.0-test/',
           is_default: false,
           proxy_id: 'download-proxy',
         },
-        {
+        downloadSourceProxy: {
           id: 'download-src-proxy',
           name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
           is_preconfigured: false,
-        }
-      );
+        },
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz --proxy http://download-src-proxy:2222
@@ -505,35 +475,32 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if proxies are set for windows', () => {
-      const res = getInstallCommandForPlatform(
-        'windows',
-        'http://elasticsearch:9200',
-        {
+      const res = getInstallCommandForPlatform({
+        platform: 'windows',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
           id: 'es-proxy',
           name: 'es-proxy',
           url: 'http://es-proxy:1111',
           is_preconfigured: false,
         },
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        undefined,
-        undefined,
-        undefined,
-        {
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        downloadSource: {
           id: 'download-src',
           name: 'download-src',
           host: 'https://download-src/8.12.0-test/',
           is_default: false,
           proxy_id: 'download-proxy',
         },
-        {
+        downloadSourceProxy: {
           id: 'download-src-proxy',
           name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
           is_preconfigured: false,
-        }
-      );
+        },
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "$ProgressPreference = 'SilentlyContinue'
@@ -550,35 +517,32 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if proxies are set for rpm', () => {
-      const res = getInstallCommandForPlatform(
-        'rpm',
-        'http://elasticsearch:9200',
-        {
+      const res = getInstallCommandForPlatform({
+        platform: 'rpm',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
           id: 'es-proxy',
           name: 'es-proxy',
           url: 'http://es-proxy:1111',
           is_preconfigured: false,
         },
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        undefined,
-        undefined,
-        undefined,
-        {
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        downloadSource: {
           id: 'download-src',
           name: 'download-src',
           host: 'https://download-src/8.12.0-test/',
           is_default: false,
           proxy_id: 'download-proxy',
         },
-        {
+        downloadSourceProxy: {
           id: 'download-src-proxy',
           name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
           is_preconfigured: false,
-        }
-      );
+        },
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--x86_64.rpm --proxy http://download-src-proxy:2222
@@ -595,35 +559,32 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if proxies are set for deb', () => {
-      const res = getInstallCommandForPlatform(
-        'deb',
-        'http://elasticsearch:9200',
-        {
+      const res = getInstallCommandForPlatform({
+        platform: 'deb',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
           id: 'es-proxy',
           name: 'es-proxy',
           url: 'http://es-proxy:1111',
           is_preconfigured: false,
         },
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        undefined,
-        undefined,
-        undefined,
-        {
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        downloadSource: {
           id: 'download-src',
           name: 'download-src',
           host: 'https://download-src/8.12.0-test/',
           is_default: false,
           proxy_id: 'download-proxy',
         },
-        {
+        downloadSourceProxy: {
           id: 'download-src-proxy',
           name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
           is_preconfigured: false,
-        }
-      );
+        },
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--amd64.deb --proxy http://download-src-proxy:2222
@@ -642,10 +603,10 @@ describe('getInstallCommandForPlatform', () => {
 
   describe('with full proxy settings', () => {
     it('should return the correct command if proxies are set for linux', () => {
-      const res = getInstallCommandForPlatform(
-        'linux',
-        'http://elasticsearch:9200',
-        {
+      const res = getInstallCommandForPlatform({
+        platform: 'linux',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
           id: 'es-proxy',
           name: 'es-proxy',
           url: 'http://es-proxy:1111',
@@ -655,20 +616,17 @@ describe('getInstallCommandForPlatform', () => {
           },
           is_preconfigured: false,
         },
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        undefined,
-        undefined,
-        undefined,
-        {
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        downloadSource: {
           id: 'download-src',
           name: 'download-src',
           host: 'https://download-src/8.12.0-test/',
           is_default: false,
           proxy_id: 'download-proxy',
         },
-        {
+        downloadSourceProxy: {
           id: 'download-src-proxy',
           name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
@@ -677,8 +635,8 @@ describe('getInstallCommandForPlatform', () => {
             'second-header': 'second-value',
           },
           is_preconfigured: false,
-        }
-      );
+        },
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz --proxy http://download-src-proxy:2222 --proxy-header \\"Accept-Language=en-US,en;q=0.5\\" --proxy-header \\"second-header=second-value\\"
@@ -696,10 +654,10 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if proxies are set for mac', () => {
-      const res = getInstallCommandForPlatform(
-        'mac',
-        'http://elasticsearch:9200',
-        {
+      const res = getInstallCommandForPlatform({
+        platform: 'mac',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
           id: 'es-proxy',
           name: 'es-proxy',
           url: 'http://es-proxy:1111',
@@ -709,20 +667,17 @@ describe('getInstallCommandForPlatform', () => {
           },
           is_preconfigured: false,
         },
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        undefined,
-        undefined,
-        undefined,
-        {
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        downloadSource: {
           id: 'download-src',
           name: 'download-src',
           host: 'https://download-src/8.12.0-test/',
           is_default: false,
           proxy_id: 'download-proxy',
         },
-        {
+        downloadSourceProxy: {
           id: 'download-src-proxy',
           name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
@@ -731,8 +686,8 @@ describe('getInstallCommandForPlatform', () => {
             'second-header': 'second-value',
           },
           is_preconfigured: false,
-        }
-      );
+        },
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz --proxy http://download-src-proxy:2222 --proxy-header \\"Accept-Language=en-US,en;q=0.5\\" --proxy-header \\"second-header=second-value\\"
@@ -750,10 +705,10 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if proxies are set for windows', () => {
-      const res = getInstallCommandForPlatform(
-        'windows',
-        'http://elasticsearch:9200',
-        {
+      const res = getInstallCommandForPlatform({
+        platform: 'windows',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
           id: 'es-proxy',
           name: 'es-proxy',
           url: 'http://es-proxy:1111',
@@ -763,20 +718,17 @@ describe('getInstallCommandForPlatform', () => {
           },
           is_preconfigured: false,
         },
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        undefined,
-        undefined,
-        undefined,
-        {
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        downloadSource: {
           id: 'download-src',
           name: 'download-src',
           host: 'https://download-src/8.12.0-test/',
           is_default: false,
           proxy_id: 'download-proxy',
         },
-        {
+        downloadSourceProxy: {
           id: 'download-src-proxy',
           name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
@@ -785,8 +737,8 @@ describe('getInstallCommandForPlatform', () => {
             'second-header': 'second-value',
           },
           is_preconfigured: false,
-        }
-      );
+        },
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "$ProgressPreference = 'SilentlyContinue'
@@ -805,10 +757,10 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if proxies are set for rpm', () => {
-      const res = getInstallCommandForPlatform(
-        'rpm',
-        'http://elasticsearch:9200',
-        {
+      const res = getInstallCommandForPlatform({
+        platform: 'rpm',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
           id: 'es-proxy',
           name: 'es-proxy',
           url: 'http://es-proxy:1111',
@@ -818,20 +770,17 @@ describe('getInstallCommandForPlatform', () => {
           },
           is_preconfigured: false,
         },
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        undefined,
-        undefined,
-        undefined,
-        {
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        downloadSource: {
           id: 'download-src',
           name: 'download-src',
           host: 'https://download-src/8.12.0-test/',
           is_default: false,
           proxy_id: 'download-proxy',
         },
-        {
+        downloadSourceProxy: {
           id: 'download-src-proxy',
           name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
@@ -840,8 +789,8 @@ describe('getInstallCommandForPlatform', () => {
             'second-header': 'second-value',
           },
           is_preconfigured: false,
-        }
-      );
+        },
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--x86_64.rpm --proxy http://download-src-proxy:2222 --proxy-header \\"Accept-Language=en-US,en;q=0.5\\" --proxy-header \\"second-header=second-value\\"
@@ -860,10 +809,10 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if proxies are set for deb', () => {
-      const res = getInstallCommandForPlatform(
-        'deb',
-        'http://elasticsearch:9200',
-        {
+      const res = getInstallCommandForPlatform({
+        platform: 'deb',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
           id: 'es-proxy',
           name: 'es-proxy',
           url: 'http://es-proxy:1111',
@@ -873,20 +822,17 @@ describe('getInstallCommandForPlatform', () => {
           },
           is_preconfigured: false,
         },
-        'service-token-1',
-        'policy-1',
-        'http://fleetserver:8220',
-        undefined,
-        undefined,
-        undefined,
-        {
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost: 'http://fleetserver:8220',
+        downloadSource: {
           id: 'download-src',
           name: 'download-src',
           host: 'https://download-src/8.12.0-test/',
           is_default: false,
           proxy_id: 'download-proxy',
         },
-        {
+        downloadSourceProxy: {
           id: 'download-src-proxy',
           name: 'download-src-proxy',
           url: 'http://download-src-proxy:2222',
@@ -895,8 +841,8 @@ describe('getInstallCommandForPlatform', () => {
             'second-header': 'second-value',
           },
           is_preconfigured: false,
-        }
-      );
+        },
+      });
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--amd64.deb --proxy http://download-src-proxy:2222 --proxy-header \\"Accept-Language=en-US,en;q=0.5\\" --proxy-header \\"second-header=second-value\\"

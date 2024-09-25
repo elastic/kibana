@@ -76,19 +76,31 @@ function getArtifact(
   return artifactMap[platform];
 }
 
-export function getInstallCommandForPlatform(
-  platform: PLATFORM_TYPE,
-  esOutputHost: string,
-  esOutputProxy: FleetProxy | undefined,
-  serviceToken: string,
-  policyId?: string,
-  fleetServerHost?: string,
-  isProductionDeployment?: boolean,
-  sslCATrustedFingerprint?: string,
-  kibanaVersion?: string,
-  downloadSource?: DownloadSource,
-  downloadSourceProxy?: FleetProxy
-): string {
+export function getInstallCommandForPlatform({
+  platform,
+  esOutputHost,
+  esOutputProxy,
+  serviceToken,
+  policyId,
+  fleetServerHost,
+  isProductionDeployment,
+  sslCATrustedFingerprint,
+  kibanaVersion,
+  downloadSource,
+  downloadSourceProxy,
+}: {
+  platform: PLATFORM_TYPE;
+  esOutputHost: string;
+  esOutputProxy?: FleetProxy | undefined;
+  serviceToken: string;
+  policyId?: string;
+  fleetServerHost?: string;
+  isProductionDeployment?: boolean;
+  sslCATrustedFingerprint?: string;
+  kibanaVersion?: string;
+  downloadSource?: DownloadSource;
+  downloadSourceProxy?: FleetProxy;
+}): string {
   const newLineSeparator = platform === 'windows' ? '`\n' : '\\\n';
 
   const artifact = getArtifact(platform, kibanaVersion ?? '', downloadSource, downloadSourceProxy);
