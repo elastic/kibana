@@ -81,36 +81,13 @@ export class CoreKibanaRequest<
     withoutSecretHeaders: boolean = true
   ) {
     let requestParts: { params: P; query: Q; body: B };
-
-    if (isFakeRawRequest(req)) {
-      requestParts = {
-        query: {} as Q,
-        params: {} as P,
-        body: {} as B,
-      };
-
-      return new CoreKibanaRequest(
-        req,
-        requestParts.params,
-        requestParts.query,
-        requestParts.body,
-        withoutSecretHeaders
-      );
-    }
-
-    const rawParts = sanitizeRequest(req);
-
-    if (routeSchemas === undefined) {
-      requestParts = {
-        query: {} as Q,
-        params: {} as P,
-        body: {} as B,
-      };
+    if (routeSchemas === undefined || isFakeRawRequest(req)) {
+      requestParts = { query: {} as Q, params: {} as P, body: {} as B };
     } else {
       const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
-      requestParts = CoreKibanaRequest.validate<P, Q, B>(rawParts, routeValidator);
+      const rawParts = sanitizeRequest(req);
+      requestParts = CoreKibanaRequest.validate(rawParts, routeValidator);
     }
-
     return new CoreKibanaRequest(
       req,
       requestParts.params,
@@ -317,9 +294,7 @@ export class CoreKibanaRequest<
     const securityConfig = ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
       ?.security;
 
-    return isRouteSecurityGetter(securityConfig)
-      ? securityConfig(this[requestSymbol])
-      : securityConfig;
+    return isRouteSecurityGetter(securityConfig) ? securityConfig(request) : securityConfig;
   }
 
   /** set route access to internal if not declared */

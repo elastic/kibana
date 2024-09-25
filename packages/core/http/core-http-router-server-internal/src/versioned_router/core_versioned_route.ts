@@ -43,7 +43,7 @@ import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
 import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
-import type { RequestLike } from './util';
+import type { RequestLike } from './route_version_utils';
 
 type Options = AddVersionOpts<unknown, unknown, unknown>;
 
@@ -58,11 +58,6 @@ function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handl
   if (handler.options.validate === false) return undefined;
   if (typeof handler.options.validate === 'function') return handler.options.validate();
   return handler.options.validate;
-}
-
-interface RequestLike {
-  headers: KibanaRequest['headers'];
-  query: KibanaRequest['query'];
 }
 
 export class CoreVersionedRoute implements VersionedRoute {
