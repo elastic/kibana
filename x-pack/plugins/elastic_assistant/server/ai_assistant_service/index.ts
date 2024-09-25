@@ -26,7 +26,10 @@ import { conversationsFieldMap } from '../ai_assistant_data_clients/conversation
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import {
+  knowledgeBaseFieldMap,
+  knowledgeBaseFieldMapV2,
+} from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import {
   AIAssistantKnowledgeBaseDataClient,
   GetAIAssistantKnowledgeBaseDataClientParams,
@@ -176,17 +179,28 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
 
+      // If v2 is enabled, re-install data stream resources for new mappings
+      if (this.v2KnowledgeBaseEnabled) {
+        this.options.logger.debug(`Using V2 Knowledge Base Mappings`);
+        this.knowledgeBaseDataStream = this.createDataStream({
+          resource: 'knowledgeBase',
+          kibanaVersion: this.options.kibanaVersion,
+          fieldMap: knowledgeBaseFieldMapV2,
+        });
+      }
+
       await this.knowledgeBaseDataStream.install({
         esClient,
         logger: this.options.logger,
         pluginStop$: this.options.pluginStop$,
       });
 
-      // TODO: Pipeline creation is temporary as we'll be moving to semantic_text field once available in ES
+      // Note: Pipeline creation can be removed in favor of semantic_text
       const pipelineCreated = await pipelineExists({
         esClient,
         id: this.resourceNames.pipelines.knowledgeBase,
       });
+      // TODO: When FF is removed, ensure pipeline is re-created for those upgrading
       if (!pipelineCreated || this.v2KnowledgeBaseEnabled) {
         this.options.logger.debug(
           `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
