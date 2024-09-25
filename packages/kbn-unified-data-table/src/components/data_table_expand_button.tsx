@@ -31,7 +31,7 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
     defaultMessage: 'Toggle dialog with details',
   });
 
-  const testSubj = record.isAnchor
+  const testSubj = record?.isAnchor
     ? 'docTableExpandToggleColumnAnchor'
     : 'docTableExpandToggleColumn';
 
@@ -44,7 +44,7 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
     }
   }, [isCurrentRowExpanded, setPressed, pressed]);
 
-  if (!setExpanded) {
+  if (!setExpanded || !record) {
     return null;
   }
 

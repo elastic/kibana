@@ -24,10 +24,10 @@ function onFilterCell(
   mode: '+' | '-',
   field: DataViewField
 ) {
-  const row = context.rows[rowIndex];
-  const value = row.flattened[columnId];
+  const row = context.getRowByIndex(rowIndex);
 
-  if (field && context.onFilter) {
+  if (row && field && context.onFilter) {
+    const value = row.flattened[columnId];
     context.onFilter(field, value, mode);
   }
 }
