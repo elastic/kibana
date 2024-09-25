@@ -23,7 +23,8 @@ export const MAX_STREAMS_TO_REPORT = 1000;
 export const NON_LOG_SIGNALS = ['metrics', 'traces', 'internal', 'synthetics'];
 export const EXCLUDE_ELASTIC_LOGS = ['logs-synth', 'logs-elastic', 'logs-endpoint'];
 
-const LOGS_INDEX_PATTERN_NAMES = [
+type ObsPatternName = (typeof DATA_DATASETS_INDEX_PATTERNS_UNIQUE)[number]['patternName'];
+const LOGS_INDEX_PATTERN_NAMES: ObsPatternName[] = [
   'filebeat',
   'generic-filebeat',
   'metricbeat',
@@ -41,6 +42,7 @@ const LOGS_INDEX_PATTERN_NAMES = [
   'fluentbit',
   'nginx',
   'apache',
+  'dsns-logs',
   'generic-logs',
 ];
 
