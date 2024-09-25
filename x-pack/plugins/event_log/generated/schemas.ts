@@ -150,14 +150,7 @@ export const EventSchema = schema.maybe(
                   schema.object({
                     status: ecsString(),
                     range: ecsDateRange(),
-                    intervals: schema.maybe(
-                      schema.arrayOf(
-                        schema.object({
-                          from: ecsDate(),
-                          to: ecsDate(),
-                        })
-                      )
-                    ),
+                    filled_intervals: ecsDateRange(),
                   })
                 ),
                 execution: schema.maybe(

@@ -110,16 +110,8 @@ exports.EcsCustomPropertyMappings = {
                     type: 'date_range',
                     format: 'strict_date_optional_time||epoch_millis',
                   },
-                  intervals: {
-                    type: 'nested',
-                    properties: {
-                      from: {
-                        type: 'date',
-                      },
-                      to: {
-                        type: 'date',
-                      },
-                    },
+                  filled_intervals: {
+                    type: 'date_range',
                   },
                 },
               },
