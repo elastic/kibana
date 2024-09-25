@@ -27,7 +27,6 @@ export interface ResponseHitSource {
 }
 
 export interface ResponseHit {
-  _source: ResponseHitSource;
   fields: ResponseHitSource;
 }
 
