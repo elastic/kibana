@@ -43,6 +43,7 @@ import {
   ContentInsightsProvider,
   useContentInsightsServices,
 } from '@kbn/content-management-content-insights-public';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 
 import {
   Table,
@@ -384,7 +385,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     );
   }
 
-  const [urlState, setUrlState] = useUrlState<URLState, URLQueryParams>({
+  const [initialUrlState, setUrlState] = useUrlState<URLState, URLQueryParams>({
     queryParamsDeserializer: urlStateDeserializer,
     queryParamsSerializer: urlStateSerializer,
   });
@@ -495,7 +496,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     (query: Query) => {
       if (urlStateEnabled) {
         setUrlState({ s: query.text });
-        return;
       }
 
       dispatch({
@@ -849,12 +849,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         });
       }
 
-      if (data.page || !urlStateEnabled) {
-        dispatch({
-          type: 'onTableChange',
-          data,
-        });
-      }
+      dispatch({
+        type: 'onTableChange',
+        data,
+      });
     },
     [setUrlState, urlStateEnabled]
   );
@@ -1024,7 +1022,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   useDebounce(fetchItems, 300, [fetchItems, refreshListBouncer]);
 
-  useEffect(() => {
+  // set the initial state from the URL
+  useEffectOnce(() => {
     if (!urlStateEnabled) {
       return;
     }
@@ -1075,10 +1074,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       });
     };
 
-    updateQueryFromURL(urlState.s);
-    updateSortFromURL(urlState.sort);
-    updateFilterFromURL(urlState.filter);
-  }, [urlState, buildQueryFromText, urlStateEnabled]);
+    updateQueryFromURL(initialUrlState.s);
+    updateSortFromURL(initialUrlState.sort);
+    updateFilterFromURL(initialUrlState.filter);
+  });
 
   useEffect(() => {
     isMounted.current = true;
