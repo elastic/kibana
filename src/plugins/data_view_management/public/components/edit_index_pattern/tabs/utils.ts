@@ -9,7 +9,8 @@
 
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AbstractDataView, DataViewLazy, DataViewField } from '@kbn/data-views-plugin/public';
+import { AbstractDataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { FilterChecked } from '@elastic/eui';
 import {
   TAB_INDEXED_FIELDS,
   TAB_SCRIPTED_FIELDS,
@@ -75,7 +76,7 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
 }
 
 export function getTabs(
-  dataView: DataViewLazy,
+  dataView: AbstractDataView,
   fields: DataViewField[],
   fieldFilter: string,
   relationshipCount = 0,
@@ -122,12 +123,12 @@ export function getPath(field: DataViewField, indexPattern: AbstractDataView) {
   return `/dataView/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
-export function convertToEuiFilterOptions(options: string[]): Array<{
-  value: string;
-  name: string;
-  checked?: boolean;
-}> {
-  return uniq(options).map((option) => {
+export function convertToEuiFilterOptions(options: string[]) {
+  return uniq(options).map<{
+    value: string;
+    name: string;
+    checked?: FilterChecked;
+  }>((option) => {
     return {
       value: option,
       name: option,

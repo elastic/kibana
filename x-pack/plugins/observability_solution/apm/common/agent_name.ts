@@ -8,6 +8,7 @@ export {
   OPEN_TELEMETRY_AGENT_NAMES,
   AGENT_NAMES,
   isOpenTelemetryAgentName,
+  hasOpenTelemetryPrefix,
   JAVA_AGENT_NAMES,
   isJavaAgentName,
   RUM_AGENT_NAMES,

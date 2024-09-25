@@ -11,6 +11,7 @@ import { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import { BehaviorSubject, Observable, map, distinctUntilChanged } from 'rxjs';
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { FilterChecked } from '@elastic/eui';
 
 import {
   SavedObjectsManagementPluginStart,
@@ -19,10 +20,10 @@ import {
 } from '@kbn/saved-objects-management-plugin/public';
 
 import {
-  DataViewsServicePublic,
+  DataViewsPublicPluginStart,
   INDEX_PATTERN_TYPE,
   DataViewField,
-  DataViewLazy,
+  DataView,
 } from '@kbn/data-views-plugin/public';
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -30,6 +31,8 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { getTags } from '../components/utils';
 
 import { APP_STATE_STORAGE_KEY } from '../components/edit_index_pattern/edit_index_pattern_state_container';
+
+import { convertToEuiFilterOptions } from '../components/edit_index_pattern/tabs/utils';
 
 export interface SavedObjectRelationWithTitle extends SavedObjectRelation {
   title: string;
@@ -53,7 +56,7 @@ export interface DataViewMgmtServiceConstructorArgs {
    */
   services: {
     application: ApplicationStart;
-    dataViews: DataViewsServicePublic;
+    dataViews: DataViewsPublicPluginStart;
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     uiSettings: IUiSettingsClient;
   };
@@ -72,12 +75,16 @@ export interface DataViewMgmtServiceConstructorArgs {
 }
 
 export interface DataViewMgmtState {
-  dataView?: DataViewLazy;
+  dataView?: DataView;
   allowedTypes: SavedObjectManagementTypeInfo[];
   relationships: SavedObjectRelationWithTitle[];
   fields: DataViewField[];
   scriptedFields: DataViewField[];
-  scriptedFieldLangs: string[];
+  scriptedFieldLangs: Array<{
+    value: string;
+    name: string;
+    checked?: FilterChecked;
+  }>;
   indexedFieldTypes: string[];
   fieldConflictCount: number;
   tags: Array<{ key: string; 'data-test-subj': string; name: string }>;
@@ -123,16 +130,10 @@ export class DataViewMgmtService {
 
     this.state$ = this.internalState$ as BehaviorObservable<DataViewMgmtState>;
 
-    // todo look at updates
-    /*
-    uiSettings.get('defaultIndex').then((defaultIndex: string) => {
-      this.updateState({ defaultIndex });
-    });
-    */
-
     // allowed types are set once and never change
     this.allowedTypes = new Promise((resolve) => {
       savedObjectsManagement.getAllowedTypes().then((resp) => {
+        this.updateState({ allowedTypes: resp });
         resolve(resp);
       });
     });
@@ -140,7 +141,7 @@ export class DataViewMgmtService {
 
   private services: {
     application: ApplicationStart;
-    dataViews: DataViewsServicePublic;
+    dataViews: DataViewsPublicPluginStart;
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     uiSettings: IUiSettingsClient;
   };
@@ -154,7 +155,7 @@ export class DataViewMgmtService {
     this.internalState$.next({ ...this.state$.getValue(), ...newState });
   };
 
-  private getKbnUrl = (dataViewId: string) =>
+  private getConflictFieldsKbnUrl = (dataViewId: string) =>
     setStateToKbnUrl(
       APP_STATE_STORAGE_KEY,
       {
@@ -167,9 +168,9 @@ export class DataViewMgmtService {
       })
     );
 
-  private getTags = async (dataView: DataViewLazy) => {
+  private getTags = async (dataView: DataView) => {
     if (dataView) {
-      const defaultIndex = await this.services.uiSettings.get('defaultIndex'); // todo use const
+      const defaultIndex = await this.services.uiSettings.get('defaultIndex');
       const tags = getTags(
         dataView,
         dataView.id === defaultIndex,
@@ -184,7 +185,7 @@ export class DataViewMgmtService {
   async updateScriptedFields() {
     const dataView = this.state$.getValue().dataView;
     if (dataView) {
-      const scriptedFieldRecords = dataView.getScriptedFields({ fieldName: ['*'] });
+      const scriptedFieldRecords = dataView.getScriptedFields();
       const scriptedFields = Object.values(scriptedFieldRecords);
 
       const scriptedFieldLangs = Array.from(
@@ -198,28 +199,31 @@ export class DataViewMgmtService {
 
       this.updateState({
         scriptedFields,
-        scriptedFieldLangs,
+        scriptedFieldLangs: convertToEuiFilterOptions(scriptedFieldLangs),
       });
     }
   }
 
-  async setDataView(dataView: DataViewLazy) {
+  async setDataView(dataView: DataView) {
     this.updateState({ isRefreshing: true });
-    // todo this should probably load the data view here
-    const fieldRecords = (
-      await dataView.getFields({ scripted: false, fieldName: ['*'] })
-    ).getFieldMapSorted();
+
+    const fieldRecords = dataView.fields
+      .filter((field) => !field.scripted)
+      .reduce((acc, field) => {
+        acc[field.name] = field;
+        return acc;
+      }, {} as Record<string, DataViewField>);
 
     const fields = Object.values(fieldRecords);
-    const indexedFieldTypes: string[] = [];
+    const indexedFieldTypes = new Set<string>();
     fields.forEach((field) => {
       // for conflicted fields, add conflict as a type
       if (field.type === 'conflict') {
-        indexedFieldTypes.push('conflict');
+        indexedFieldTypes.add('conflict');
       }
       if (field.esTypes) {
         // add all types, may be multiple
-        field.esTypes.forEach((item) => indexedFieldTypes.push(item));
+        field.esTypes.forEach((item) => indexedFieldTypes.add(item));
       }
     });
 
@@ -233,23 +237,24 @@ export class DataViewMgmtService {
         });
       });
 
-    this.updateScriptedFields();
-
     this.updateState({
       dataView,
       fields,
-      indexedFieldTypes,
+      indexedFieldTypes: Array.from(indexedFieldTypes),
       fieldConflictCount: fields.filter((field) => field.type === 'conflict').length,
       tags: await this.getTags(dataView),
       isRefreshing: false,
-      conflictFieldsUrl: this.getKbnUrl(dataView.id!),
-      scriptedFields: Object.values(dataView.getScriptedFields({ fieldName: ['*'] })),
+      conflictFieldsUrl: this.getConflictFieldsKbnUrl(dataView.id!),
+      scriptedFields: dataView.getScriptedFields(),
     });
+
+    this.updateScriptedFields();
   }
 
-  refreshFields() {
+  async refreshFields() {
     const dataView = this.state$.getValue().dataView;
     if (dataView) {
+      await this.services.dataViews.refreshFields(dataView, undefined, true);
       return this.setDataView(dataView);
     }
   }
@@ -261,6 +266,29 @@ export class DataViewMgmtService {
     }
     await this.services.uiSettings.set('defaultIndex', dataView.id);
 
-    this.updateState({ tags: await this.getTags(dataView) });
+    this.updateState({ tags: await this.getTags(dataView), defaultIndex: dataView.id });
+  }
+
+  setScriptedFieldLangSelection(index: number) {
+    const items = this.state$.getValue().scriptedFieldLangs;
+
+    if (!items[index]) {
+      return;
+    }
+
+    const scriptedFieldLangs = [...items];
+
+    switch (scriptedFieldLangs[index].checked) {
+      case 'on':
+        scriptedFieldLangs[index].checked = undefined;
+        break;
+
+      default:
+        scriptedFieldLangs[index].checked = 'on';
+    }
+
+    this.updateState({
+      scriptedFieldLangs,
+    });
   }
 }

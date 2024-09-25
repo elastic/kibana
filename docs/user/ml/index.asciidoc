@@ -19,10 +19,22 @@ if your data is stored in {es} and contains a time field, you can use the
 [role="screenshot"]
 image::user/ml/images/ml-data-visualizer-sample.png[{data-viz} for sample flight data]
 
-You can also upload a CSV, NDJSON, or log file. The *{data-viz}*
-identifies the file format and field mappings. You can then optionally import
-that data into an {es} index. To change the default file size limit, see
-<<kibana-general-settings, fileUpload:maxFileSize advanced settings>>.
+You can upload different file formats for analysis with the *{data-viz}*.
+
+File formats supported up to 500 MB:
+* CSV
+* TSV
+* NDJSON
+* Log files
+
+File formats supported up to 60 MB:
+* PDF
+* Microsoft Office files (Word, Excel, PowerPoint)
+* Plain Text (TXT)
+* Rich Text (RTF)
+* Open Document Format (ODF)
+
+The *{data-viz}* identifies the file format and field mappings, and you can import the data into an {es} index. To change the default file size limit, see <<kibana-general-settings, `fileUpload:maxFileSize`>> in advanced settings.
 
 If {stack-security-features} are enabled, users must have the necessary
 privileges to use {ml-features}. Refer to

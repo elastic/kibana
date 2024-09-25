@@ -26,3 +26,13 @@ export type BaseResponseType =
   | 'application/yaml'
   | 'unknown'
   | 'application/vnd.mapbox-vector-tile';
+
+// Used by history view to restore a request into the editor
+export enum RestoreMethod {
+  RESTORE = 1,
+  RESTORE_AND_EXECUTE = 2,
+}
+export interface RequestToRestore {
+  request: string;
+  restoreMethod: RestoreMethod;
+}

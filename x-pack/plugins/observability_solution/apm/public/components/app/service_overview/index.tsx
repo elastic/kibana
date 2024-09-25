@@ -60,9 +60,9 @@ export function ServiceOverview() {
   const hasSignal =
     serviceEntitySummary?.dataStreamTypes && serviceEntitySummary?.dataStreamTypes?.length > 0;
 
-  const hasLogsSignal = hasSignal && isLogsSignal(serviceEntitySummary.dataStreamTypes);
-
   const hasLogsOnlySignal = hasSignal && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
+
+  const hasLogsSignal = hasSignal && isLogsSignal(serviceEntitySummary.dataStreamTypes);
 
   // Shows APM overview when entity has APM signal or when Entity centric is not enabled
   const hasApmSignal = hasSignal && isApmSignal(serviceEntitySummary.dataStreamTypes);
