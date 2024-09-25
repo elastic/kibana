@@ -72,8 +72,8 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
           });
           const currentUser = ctx.elasticAssistant.getCurrentUser();
           const userFilter = getKBUserFilter(currentUser);
-          const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
           const systemFilter = ` AND NOT kb_resource:"${ESQL_RESOURCE}"`;
+          const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
 
           // TODO: Either plumb through new `findDocuments` that takes query DSL so you can do agg + pagination to collapse
           // TODO: system entries, use scoped esClient from request, or query them separate and mess with pagination...latter for now.

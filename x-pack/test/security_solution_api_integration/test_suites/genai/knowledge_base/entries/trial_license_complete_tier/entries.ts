@@ -18,7 +18,7 @@ import {
 import { removeServerGeneratedProperties } from '../utils/remove_server_generated_properties';
 import { MachineLearningProvider } from '../../../../../../functional/services/ml';
 import { documentEntry, indexEntry, globalDocumentEntry } from './mocks/entries';
-import { secOnly, secOnlySpace2, secOnlySpacesAll } from '../utils/auth/users';
+import { secOnlySpacesAll } from '../utils/auth/users';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -43,6 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Create Entries', () => {
       // TODO: KB-RBAC: Added stubbed admin tests for when RBAC is enabled. Hopefully this helps :]
+      // NOTE: Will need to update each section with the expected user, can use `createEntryForUser()` helper
       describe('Admin User', () => {
         it('should create a new document entry for the current user', async () => {
           const entry = await createEntry({ supertest, log, entry: documentEntry });
@@ -68,25 +69,6 @@ export default ({ getService }: FtrProviderContext) => {
           expect(removeServerGeneratedProperties(entry)).toEqual(expectedIndexEntry);
         });
 
-        // TODO: KB-RBAC: Action not currently allowed without RBAC
-        it.skip('should create a new entry for another user', async () => {
-          const entry = await createEntry({
-            supertest,
-            log,
-            entry: {
-              ...documentEntry,
-              users: [{ name: 'george' }],
-            },
-          });
-
-          const expectedDocumentEntry = {
-            ...documentEntry,
-            users: [{ name: 'george' }],
-          };
-
-          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
-        });
-
         it('should create a new global entry for all users', async () => {
           const entry = await createEntry({ supertest, log, entry: globalDocumentEntry });
 
@@ -94,22 +76,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should create a new global entry for all users in another space', async () => {
-          const entry = await createEntry({
-            supertest,
-            log,
-            entry: globalDocumentEntry,
-            space: 'space-x',
-          });
-
-          const expectedDocumentEntry = {
-            ...globalDocumentEntry,
-            namespace: 'space-x',
-          };
-
-          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
-        });
-
-        it('should not create a new entry in a space ', async () => {
           const entry = await createEntry({
             supertest,
             log,
@@ -184,29 +150,43 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Find Entries', () => {
-      describe('Admin User', () => {
-        // TODO: KB-RBAC: Action not currently allowed without RBAC
-        it.skip('should see all users entries for a given space', async () => {
-          const users = [secOnly, secOnlySpace2, secOnlySpacesAll];
+      it('should see other users global entries', async () => {
+        const users = [secOnlySpacesAll];
 
-          await Promise.all(
-            users.map((user) =>
-              createEntryForUser({
-                supertestWithoutAuth,
-                log,
-                entry: documentEntry,
-                user,
-              })
-            )
-          );
+        await Promise.all(
+          users.map((user) =>
+            createEntryForUser({
+              supertestWithoutAuth,
+              log,
+              entry: globalDocumentEntry,
+              user,
+            })
+          )
+        );
 
-          const entries = await findEntries({ supertest, log });
+        const entries = await findEntries({ supertest, log });
 
-          expect(entries.total).toEqual(3);
-        });
+        expect(entries.total).toEqual(1);
       });
 
-      describe('Non-Admin User', () => {});
+      it('should not see other users private entries', async () => {
+        const users = [secOnlySpacesAll];
+
+        await Promise.all(
+          users.map((user) =>
+            createEntryForUser({
+              supertestWithoutAuth,
+              log,
+              entry: documentEntry,
+              user,
+            })
+          )
+        );
+
+        const entries = await findEntries({ supertest, log });
+
+        expect(entries.total).toEqual(0);
+      });
     });
   });
 };

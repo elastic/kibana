@@ -221,6 +221,13 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     );
   }
 
+  const sorting = {
+    sort: {
+      field: 'name',
+      direction: 'desc' as const,
+    },
+  };
+
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -247,7 +254,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
           columns={columns}
           items={entries.data ?? []}
           search={search}
-          // onChange={onTableChange}
+          sorting={sorting}
         />
       </EuiPanel>
       <EuiSpacer size="m" />

@@ -63,15 +63,17 @@ export const useKnowledgeBaseTable = () => {
         },
         {
           name: i18n.COLUMN_SHARING,
+          sortable: ({ users }: KnowledgeBaseEntryResponse) => users.length,
           render: ({ id, users }: KnowledgeBaseEntryResponse) => {
             const sharingItem = users.length > 0 ? i18n.PRIVATE : i18n.GLOBAL;
             const color = users.length > 0 ? 'hollow' : 'primary';
             return <BadgesColumn items={[sharingItem]} prefix={id} color={color} />;
           },
-          width: '75px',
+          width: '100px',
         },
         {
           name: i18n.COLUMN_AUTHOR,
+          sortable: ({ users }: KnowledgeBaseEntryResponse) => users[0]?.name,
           render: (entry: KnowledgeBaseEntryResponse) => {
             // TODO: Look up user from `createdBy` id if privileges allow
             const userName = entry.users?.[0]?.name ?? 'Unknown';

@@ -11,6 +11,9 @@ import {
   EuiForm,
   EuiFormRow,
   EuiComboBoxOptionOption,
+  EuiText,
+  EuiIcon,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { IndexEntry } from '@kbn/elastic-assistant-common';
@@ -27,6 +30,48 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ entry, setEntry }
     (e) => setEntry((prevEntry) => ({ ...prevEntry, name: e.target.value })),
     [setEntry]
   );
+
+  // Sharing
+  const setSharingOptions = useCallback(
+    (value) =>
+      setEntry((prevEntry) => ({
+        ...prevEntry,
+        users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : undefined,
+      })),
+    [setEntry]
+  );
+  // TODO: KB-RBAC Disable global option if no RBAC
+  const sharingOptions = [
+    {
+      value: i18n.SHARING_PRIVATE_OPTION_LABEL,
+      inputDisplay: (
+        <EuiText size={'s'}>
+          <EuiIcon
+            color="subdued"
+            style={{ lineHeight: 'inherit', marginRight: '4px' }}
+            type="lock"
+          />
+          {i18n.SHARING_PRIVATE_OPTION_LABEL}
+        </EuiText>
+      ),
+    },
+    {
+      value: i18n.SHARING_GLOBAL_OPTION_LABEL,
+      inputDisplay: (
+        <EuiText size={'s'}>
+          <EuiIcon
+            color="subdued"
+            style={{ lineHeight: 'inherit', marginRight: '4px' }}
+            type="globe"
+          />
+          {i18n.SHARING_GLOBAL_OPTION_LABEL}
+        </EuiText>
+      ),
+    },
+  ];
+  const selectedSharingOption =
+    entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
+
   // Index
   const setIndex = useCallback(
     (e: Array<EuiComboBoxOptionOption<string>>) =>
@@ -46,19 +91,21 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ entry, setEntry }
       value: searchValue,
     };
 
-    // Select the option.
     setIndex([newOption]);
   };
+
   // Field
   const setField = useCallback(
     (e) => setEntry((prevEntry) => ({ ...prevEntry, field: e.target.value })),
     [setEntry]
   );
+
   // Description
   const setDescription = useCallback(
     (e) => setEntry((prevEntry) => ({ ...prevEntry, description: e.target.value })),
     [setEntry]
   );
+
   // Query Description
   const setQueryDescription = useCallback(
     (e) => setEntry((prevEntry) => ({ ...prevEntry, queryDescription: e.target.value })),
@@ -74,6 +121,18 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ entry, setEntry }
           fullWidth
           value={entry?.name}
           onChange={setName}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.ENTRY_SHARING_INPUT_LABEL}
+        helpText={i18n.SHARING_HELP_TEXT}
+        fullWidth
+      >
+        <EuiSuperSelect
+          options={sharingOptions}
+          valueOfSelected={selectedSharingOption}
+          onChange={setSharingOptions}
+          fullWidth
         />
       </EuiFormRow>
       <EuiFormRow label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL} fullWidth>
