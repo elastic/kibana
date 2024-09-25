@@ -682,7 +682,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   };
 
   return (
-    <EuiModal onClose={onClose} data-test-subj="mlModelsStartDeploymentModal" maxWidth={500}>
+    <EuiModal onClose={onClose} data-test-subj="mlModelsStartDeploymentModal" maxWidth={640}>
       <EuiModalHeader>
         <EuiModalHeaderTitle size="s">
           {isUpdate ? (
