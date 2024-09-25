@@ -166,7 +166,7 @@ describe('LayerPanel', () => {
     it('should call the clear callback when resetting layer', async () => {
       const cb = jest.fn();
       renderLayerPanel({ onRemoveLayer: cb });
-      userEvent.click(screen.getByRole('button', { name: /clear layer/i }));
+      await userEvent.click(screen.getByRole('button', { name: /clear layer/i }));
       expect(cb).toHaveBeenCalled();
     });
   });
@@ -376,7 +376,7 @@ describe('LayerPanel', () => {
         ],
       });
       renderLayerPanel();
-      userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
+      await userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
       expect(screen.queryByTestId('lnsVisDimensionEditor')).toBeInTheDocument();
     });
     it('should not render visualization dimension editor when clicking on empty dimension', async () => {
@@ -391,7 +391,7 @@ describe('LayerPanel', () => {
       });
 
       renderLayerPanel();
-      userEvent.click(screen.getByTestId('lns-empty-dimension'));
+      await userEvent.click(screen.getByTestId('lns-empty-dimension'));
       expect(screen.queryByTestId('lnsVisDimensionEditor')).not.toBeInTheDocument();
     });
     it('should not break if visualization dimensionEditor is not defined', async () => {
@@ -406,7 +406,7 @@ describe('LayerPanel', () => {
       });
       mockVisualization.DimensionEditorComponent = undefined;
       renderLayerPanel();
-      userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
+      await userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
       expect(screen.queryByTestId('lnsVisDimensionEditor')).not.toBeInTheDocument();
     });
     it('should not update the visualization if the datasource is incomplete', async () => {
@@ -423,7 +423,7 @@ describe('LayerPanel', () => {
         updateDatasourceAsync,
       });
 
-      userEvent.click(screen.getByTestId('lns-empty-dimension'));
+      await userEvent.click(screen.getByTestId('lns-empty-dimension'));
 
       expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'newid' })
@@ -452,7 +452,7 @@ describe('LayerPanel', () => {
         updateDatasourceAsync,
       });
 
-      userEvent.click(screen.getByTestId('lns-empty-dimension'));
+      await userEvent.click(screen.getByTestId('lns-empty-dimension'));
       expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'newid' })
       );
@@ -482,7 +482,7 @@ describe('LayerPanel', () => {
       });
       const onRemoveDimension = jest.fn();
       renderLayerPanel({ onRemoveDimension, layerId: 'first' });
-      userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
+      await userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
 
       expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'columnId' })
@@ -529,7 +529,7 @@ describe('LayerPanel', () => {
 
       (generateId as jest.Mock).mockReturnValueOnce(`secondColumnId`);
       renderLayerPanel();
-      userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
+      await userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
       expect(screen.getByRole('heading', { name: defaultGroup.groupLabel })).toBeInTheDocument();
 
       const lastArgs =
@@ -561,16 +561,16 @@ describe('LayerPanel', () => {
       // no pending state update
       mockDatasource.updateStateOnCloseDimension = jest.fn().mockReturnValueOnce(undefined);
       renderLayerPanel({ updateDatasource });
-      userEvent.click(screen.getAllByTestId('lnsLayerPanel-dimensionLink')[0]);
-      userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
+      await userEvent.click(screen.getAllByTestId('lnsLayerPanel-dimensionLink')[0]);
+      await userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
       expect(updateDatasource).not.toHaveBeenCalled();
 
       // // a pending state update
       mockDatasource.updateStateOnCloseDimension = jest.fn().mockReturnValueOnce({ newState: {} });
 
-      userEvent.click(screen.getAllByTestId('lnsLayerPanel-dimensionLink')[0]);
-      userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
+      await userEvent.click(screen.getAllByTestId('lnsLayerPanel-dimensionLink')[0]);
+      await userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
 
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
       expect(updateDatasource).toHaveBeenCalledWith('testDatasource', { newState: {} });
@@ -619,7 +619,7 @@ describe('LayerPanel', () => {
 
       const onEmptyDimensionAdd = jest.fn();
       renderLayerPanel({ onEmptyDimensionAdd });
-      userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
+      await userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
       expect(onEmptyDimensionAdd).toHaveBeenCalledWith('newid', defaultGroup);
     });
   });

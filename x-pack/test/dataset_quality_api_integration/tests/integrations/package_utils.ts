@@ -7,31 +7,6 @@
 
 import { Agent as SuperTestAgent } from 'supertest';
 
-export interface CustomIntegration {
-  integrationName: string;
-  datasets: IntegrationDataset[];
-}
-
-export interface IntegrationDataset {
-  name: string;
-  type: 'logs' | 'metrics' | 'synthetics';
-}
-
-export async function installCustomIntegration({
-  supertest,
-  customIntegration,
-}: {
-  supertest: SuperTestAgent;
-  customIntegration: CustomIntegration;
-}) {
-  const { integrationName, datasets } = customIntegration;
-
-  return supertest
-    .post(`/api/fleet/epm/custom_integrations`)
-    .set('kbn-xsrf', 'xxxx')
-    .send({ integrationName, datasets });
-}
-
 export async function installPackage({
   supertest,
   pkg,

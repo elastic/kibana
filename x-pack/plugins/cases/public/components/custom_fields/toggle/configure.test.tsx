@@ -37,7 +37,7 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -57,9 +57,9 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
-    userEvent.click(await screen.findByTestId('toggle-custom-field-default-value'));
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('toggle-custom-field-default-value'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -80,8 +80,8 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid

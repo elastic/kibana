@@ -17,6 +17,7 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { DocumentDetailsContext } from '../../shared/context';
+import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../../rule_details/right';
 
 jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../../common/hooks/use_experimental_features');
@@ -59,6 +60,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
             'kibana.alert.rule.name': ['Rule1'],
             'kibana.alert.reason': ['Reason1'],
             'kibana.alert.severity': ['Severity1'],
+            'kibana.alert.rule.uuid': ['uuid1'],
           },
         },
         {
@@ -69,6 +71,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
             'kibana.alert.rule.name': ['Rule2'],
             'kibana.alert.reason': ['Reason2'],
             'kibana.alert.severity': ['Severity2'],
+            'kibana.alert.rule.uuid': ['uuid2'],
           },
         },
       ],
@@ -123,5 +126,28 @@ describe('CorrelationsDetailsAlertsTable', () => {
         isPreviewMode: true,
       },
     });
+  });
+
+  it('opens rule preview when feature flag is on and isPreview is false', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    const { getAllByTestId } = renderCorrelationsTable(mockContextValue);
+
+    expect(getAllByTestId(`${TEST_ID}RulePreview`).length).toBe(2);
+
+    getAllByTestId(`${TEST_ID}RulePreview`)[0].click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: RulePreviewPanelKey,
+      params: {
+        ruleId: 'uuid1',
+        banner: RULE_PREVIEW_BANNER,
+        isPreviewMode: true,
+      },
+    });
+  });
+
+  it('does not render preview link when feature flag is on and isPreview is true', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    const { queryByTestId } = renderCorrelationsTable({ ...mockContextValue, isPreview: true });
+    expect(queryByTestId(`${TEST_ID}RulePreview`)).not.toBeInTheDocument();
   });
 });

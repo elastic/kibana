@@ -288,7 +288,7 @@ describe('ReportingAPIClient', () => {
     it('should send a post request', async () => {
       await apiClient.verifyBrowser();
 
-      expect(httpClient.post).toHaveBeenCalledWith(expect.stringContaining('/diagnose/browser'));
+      expect(httpClient.get).toHaveBeenCalledWith(expect.stringContaining('/diagnose/browser'));
     });
   });
 

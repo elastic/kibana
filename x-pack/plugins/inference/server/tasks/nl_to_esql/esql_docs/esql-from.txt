@@ -1,21 +1,24 @@
-## FROM
+# FROM
 
-The `FROM` source command returns a table with data from a data stream, index, or alias. Each row in the resulting table represents a document, and each column corresponds to a field that can be accessed by the name of that field. This command is fundamental for querying data in Elasticsearch using ES|QL.
+The `FROM` command retrieves a table of data from a specified data stream, index, or alias.
 
-### Use Cases
+## Syntax
 
-- **Basic Data Retrieval**: Fetch data from a specific index or data stream.
-- **Time Series Data**: Use date math to access indices relevant to specific time periods.
-- **Multiple Indices**: Query multiple data streams, indices, or aliases using comma-separated lists or wildcards.
-- **Remote Clusters**: Query data streams and indices on remote clusters.
-- **Metadata Retrieval**: Retrieve specific metadata fields using the `METADATA` directive.
+`FROM index_pattern [METADATA fields]`
 
-### Limitations
+### Parameters
 
-- By default, an ES|QL query without an explicit `LIMIT` uses an implicit limit of 1000 rows. This applies to the `FROM` command as well.
-- Queries do not return more than 10,000 rows, regardless of the `LIMIT` command’s value.
+#### index_pattern
 
-### Examples
+This parameter represents a list of indices, data streams, or aliases. It supports the use of wildcards and date math.
+
+#### fields
+
+This is a comma-separated list of metadata fields to be retrieved.
+
+## Description
+
+The `FROM` command retrieves a table of data from a specified data stream, index, or alias. Each row in the resulting table represents a document, and each column corresponds to a field. The field can be accessed using its name.
 
 #### Basic Data Retrieval
 ```esql
@@ -51,3 +54,8 @@ Use enclosing double quotes (") or three enclosing double quotes (""") to escape
 ```esql
 FROM "this=that","""this[that"""
 ```
+
+### Limitations
+
+- By default, an ES|QL query without an explicit `LIMIT` uses an implicit limit of 1000 rows. This applies to the `FROM` command as well.
+- Queries do not return more than 10,000 rows, regardless of the `LIMIT` command’s value.

@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupInput } from '@kbn/controls-plugin/common';
-import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
-
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../../../mocks';
 import { DashboardEmbeddableService } from '../../embeddable/types';
 import { SavedDashboardInput } from '../types';
@@ -33,23 +30,6 @@ describe('Migrate dashboard input', () => {
       panel3: getSampleDashboardPanel({ type: 'ultraDiscover', explicitInput: { id: 'panel3' } }),
       panel4: getSampleDashboardPanel({ type: 'ultraDiscover', explicitInput: { id: 'panel4' } }),
     };
-    const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
-    controlGroupInputBuilder.addOptionsListControl(controlGroupInput, {
-      dataViewId: 'positions-remain-fixed',
-      title: 'Results can be mixed',
-      fieldName: 'theres-a-stasis',
-      width: 'medium',
-      grow: false,
-    });
-    controlGroupInputBuilder.addRangeSliderControl(controlGroupInput, {
-      dataViewId: 'an-object-set-in-motion',
-      title: 'The arbiter of time',
-      fieldName: 'unexpressed-emotion',
-      width: 'medium',
-      grow: false,
-    });
-    controlGroupInputBuilder.addTimeSliderControl(controlGroupInput);
-    dashboardInput.controlGroupInput = controlGroupInput;
 
     const embeddableService: DashboardEmbeddableService = {
       getEmbeddableFactory: jest.fn(() => ({
@@ -63,11 +43,8 @@ describe('Migrate dashboard input', () => {
     // migration run should be true because the runEmbeddableFactoryMigrations mock above returns true.
     expect(result.anyMigrationRun).toBe(true);
 
-    expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledTimes(7); // should be called 4 times for the panels, and 3 times for the controls
+    expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledTimes(4); // should be called 4 times for the panels, and 3 times for the controls
     expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledWith('superLens');
     expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledWith('ultraDiscover');
-    expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledWith('optionsListControl');
-    expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledWith('rangeSliderControl');
-    expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledWith('timeSlider');
   });
 });

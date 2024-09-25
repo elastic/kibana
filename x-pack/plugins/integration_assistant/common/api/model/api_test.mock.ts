@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { BuildIntegrationRequestBody } from '../build_integration/build_integration';
-import type { CategorizationRequestBody } from '../categorization/categorization_route';
-import type { EcsMappingRequestBody } from '../ecs/ecs_route';
-import type { RelatedRequestBody } from '../related/related_route';
-import type { DataStream, Integration, Pipeline } from './common_attributes';
+import type { AnalyzeLogsRequestBody } from '../analyze_logs/analyze_logs_route.gen';
+import type { BuildIntegrationRequestBody } from '../build_integration/build_integration.gen';
+import type { CategorizationRequestBody } from '../categorization/categorization_route.gen';
+import type { EcsMappingRequestBody } from '../ecs/ecs_route.gen';
+import type { RelatedRequestBody } from '../related/related_route.gen';
+import type { DataStream, Integration, Pipeline } from './common_attributes.gen';
 
 const rawSamples = ['{"test1": "test1"}'];
 
@@ -61,6 +62,7 @@ export const getCategorizationRequestMock = (): CategorizationRequestBody => ({
   dataStreamName: 'test-data-stream-name',
   packageName: 'test-package-name',
   rawSamples,
+  samplesFormat: { name: 'ndjson' },
 });
 
 export const getBuildIntegrationRequestMock = (): BuildIntegrationRequestBody => ({
@@ -72,6 +74,7 @@ export const getEcsMappingRequestMock = (): EcsMappingRequestBody => ({
   dataStreamName: 'test-data-stream-name',
   packageName: 'test-package-name',
   connectorId: 'test-connector-id',
+  samplesFormat: { name: 'json', multiline: false },
 });
 
 export const getRelatedRequestMock = (): RelatedRequestBody => ({
@@ -80,4 +83,12 @@ export const getRelatedRequestMock = (): RelatedRequestBody => ({
   rawSamples,
   connectorId: 'test-connector-id',
   currentPipeline: getPipelineMock(),
+  samplesFormat: { name: 'structured', multiline: false },
+});
+
+export const getAnalyzeLogsRequestBody = (): AnalyzeLogsRequestBody => ({
+  dataStreamName: 'test-data-stream-name',
+  packageName: 'test-package-name',
+  connectorId: 'test-connector-id',
+  logSamples: rawSamples,
 });

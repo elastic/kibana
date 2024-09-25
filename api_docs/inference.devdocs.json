@@ -74,7 +74,9 @@
               "section": "def-common.Message",
               "text": "Message"
             },
-            "[]; } & TToolOptions) => ",
+            "[]; functionCalling?: ",
+            "FunctionCallingMode",
+            " | undefined; } & TToolOptions) => ",
             "ChatCompletionResponse",
             "<TToolOptions>"
           ],
@@ -99,7 +101,9 @@
                   "section": "def-common.Message",
                   "text": "Message"
                 },
-                "[]; } & TToolOptions"
+                "[]; functionCalling?: ",
+                "FunctionCallingMode",
+                " | undefined; } & TToolOptions"
               ],
               "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
               "deprecated": false,
@@ -123,7 +127,9 @@
               "section": "def-common.Message",
               "text": "Message"
             },
-            "[] | undefined; }) => ",
+            "[] | undefined; functionCalling?: ",
+            "FunctionCallingMode",
+            " | undefined; }) => ",
             "Observable",
             "<",
             "OutputEvent",
@@ -166,7 +172,9 @@
                   "section": "def-common.Message",
                   "text": "Message"
                 },
-                "[] | undefined; }"
+                "[] | undefined; functionCalling?: ",
+                "FunctionCallingMode",
+                " | undefined; }"
               ],
               "path": "x-pack/plugins/inference/common/output/index.ts",
               "deprecated": false,
@@ -208,29 +216,15 @@
         "label": "naturalLanguageToEsql",
         "description": [],
         "signature": [
-          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  ...rest\n}: { client: Pick<",
-          "InferenceClient",
-          ", \"output\" | \"chatComplete\">; connectorId: string; logger: Pick<",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "common",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-common.Logger",
-            "text": "Logger"
-          },
-          ", \"debug\">; } & TToolOptions & ({ input: string; } | { messages: ",
-          {
-            "pluginId": "inference",
-            "scope": "common",
-            "docId": "kibInferencePluginApi",
-            "section": "def-common.Message",
-            "text": "Message"
-          },
-          "[]; })) => ",
+          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  ...rest\n}: ",
+          "NlToEsqlTaskParams",
+          "<TToolOptions>) => ",
           "Observable",
-          "<NlToEsqlTaskEvent<TToolOptions>>"
+          "<",
+          "NlToEsqlTaskEvent",
+          "<TToolOptions>>"
         ],
-        "path": "x-pack/plugins/inference/server/tasks/nl_to_esql/index.ts",
+        "path": "x-pack/plugins/inference/server/tasks/nl_to_esql/task.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -239,30 +233,13 @@
             "id": "def-server.naturalLanguageToEsql.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  ...rest\n}",
+            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  ...rest\n}",
             "description": [],
             "signature": [
-              "{ client: Pick<",
-              "InferenceClient",
-              ", \"output\" | \"chatComplete\">; connectorId: string; logger: Pick<",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "common",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-common.Logger",
-                "text": "Logger"
-              },
-              ", \"debug\">; } & TToolOptions & ({ input: string; } | { messages: ",
-              {
-                "pluginId": "inference",
-                "scope": "common",
-                "docId": "kibInferencePluginApi",
-                "section": "def-common.Message",
-                "text": "Message"
-              },
-              "[]; })"
+              "NlToEsqlTaskParams",
+              "<TToolOptions>"
             ],
-            "path": "x-pack/plugins/inference/server/tasks/nl_to_esql/index.ts",
+            "path": "x-pack/plugins/inference/server/tasks/nl_to_esql/task.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -302,9 +279,9 @@
         "signature": [
           "() => ",
           "OperatorFunction",
-          "<T, Exclude<T, ",
-          "OutputUpdateEvent",
-          "<string>>>"
+          "<T, Exclude<T, { id: string; content: string; } & { type: ",
+          "OutputEventType",
+          ".OutputUpdate; }>>"
         ],
         "path": "x-pack/plugins/inference/common/output/without_output_update_events.ts",
         "deprecated": false,
@@ -335,7 +312,190 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.InferenceClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceClient",
+        "description": [],
+        "path": "x-pack/plugins/inference/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.InferenceClient.chatComplete",
+            "type": "Function",
+            "tags": [],
+            "label": "chatComplete",
+            "description": [
+              "\n`chatComplete` requests the LLM to generate a response to\na prompt or conversation, which might be plain text\nor a tool call, or a combination of both."
+            ],
+            "signature": [
+              "<TToolOptions extends ",
+              "ToolOptions",
+              "<string> = ",
+              "ToolOptions",
+              "<string>>(options: { connectorId: string; system?: string | undefined; messages: ",
+              {
+                "pluginId": "inference",
+                "scope": "common",
+                "docId": "kibInferencePluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]; functionCalling?: ",
+              "FunctionCallingMode",
+              " | undefined; } & TToolOptions) => ",
+              "ChatCompletionResponse",
+              "<TToolOptions>"
+            ],
+            "path": "x-pack/plugins/inference/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "inference",
+                "id": "def-server.InferenceClient.chatComplete.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "{ connectorId: string; system?: string | undefined; messages: ",
+                  {
+                    "pluginId": "inference",
+                    "scope": "common",
+                    "docId": "kibInferencePluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
+                  },
+                  "[]; functionCalling?: ",
+                  "FunctionCallingMode",
+                  " | undefined; } & TToolOptions"
+                ],
+                "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.InferenceClient.output",
+            "type": "Function",
+            "tags": [],
+            "label": "output",
+            "description": [
+              "\n`output` asks the LLM to generate a structured (JSON)\nresponse based on a schema and a prompt or conversation."
+            ],
+            "signature": [
+              "<TId extends string = string, TOutputSchema extends ToolSchemaTypeObject | undefined = ToolSchemaTypeObject | undefined>(id: TId, options: { connectorId: string; system?: string | undefined; input: string; schema?: TOutputSchema | undefined; previousMessages?: ",
+              {
+                "pluginId": "inference",
+                "scope": "common",
+                "docId": "kibInferencePluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[] | undefined; functionCalling?: ",
+              "FunctionCallingMode",
+              " | undefined; }) => ",
+              "Observable",
+              "<",
+              "OutputEvent",
+              "<TId, TOutputSchema extends ToolSchemaTypeObject ? ",
+              "FromToolSchema",
+              "<TOutputSchema> : undefined>>"
+            ],
+            "path": "x-pack/plugins/inference/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "inference",
+                "id": "def-server.InferenceClient.output.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "TId"
+                ],
+                "path": "x-pack/plugins/inference/common/output/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "inference",
+                "id": "def-server.InferenceClient.output.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "{ connectorId: string; system?: string | undefined; input: string; schema?: TOutputSchema | undefined; previousMessages?: ",
+                  {
+                    "pluginId": "inference",
+                    "scope": "common",
+                    "docId": "kibInferencePluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
+                  },
+                  "[] | undefined; functionCalling?: ",
+                  "FunctionCallingMode",
+                  " | undefined; }"
+                ],
+                "path": "x-pack/plugins/inference/common/output/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.InferenceClient.getConnectorById",
+            "type": "Function",
+            "tags": [],
+            "label": "getConnectorById",
+            "description": [
+              "\n`getConnectorById` returns an inference connector by id.\nNon-inference connectors will throw an error."
+            ],
+            "signature": [
+              "(id: string) => Promise<",
+              "InferenceConnector",
+              ">"
+            ],
+            "path": "x-pack/plugins/inference/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inference",
+                "id": "def-server.InferenceClient.getConnectorById.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/inference/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
@@ -375,7 +535,13 @@
           ],
           "signature": [
             "(options: InferenceClientCreateOptions) => ",
-            "InferenceClient"
+            {
+              "pluginId": "inference",
+              "scope": "server",
+              "docId": "kibInferencePluginApi",
+              "section": "def-server.InferenceClient",
+              "text": "InferenceClient"
+            }
           ],
           "path": "x-pack/plugins/inference/server/types.ts",
           "deprecated": false,

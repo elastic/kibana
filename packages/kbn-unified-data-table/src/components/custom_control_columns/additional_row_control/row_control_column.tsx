@@ -15,8 +15,8 @@ import {
   EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
+import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
 import { DataTableRowControl, Size } from '../../data_table_row_control';
-import type { RowControlColumn, RowControlProps } from '../../../types';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
@@ -26,14 +26,22 @@ export const RowControlCell = ({
 }: EuiDataGridCellValueElementProps & {
   renderControl: RowControlColumn['renderControl'];
 }) => {
-  const rowProps = useControlColumn(props);
+  const { record, rowIndex } = useControlColumn(props);
 
   const Control: React.FC<RowControlProps> = useMemo(
     () =>
-      ({ 'data-test-subj': dataTestSubj, color, disabled, label, iconType, onClick }) => {
+      ({
+        'data-test-subj': dataTestSubj,
+        color,
+        disabled,
+        iconType,
+        label,
+        onClick,
+        tooltipContent,
+      }) => {
         return (
           <DataTableRowControl size={Size.normal}>
-            <EuiToolTip content={label} delay="long">
+            <EuiToolTip content={tooltipContent ?? label} delay="long">
               <EuiButtonIcon
                 data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
                 disabled={disabled}
@@ -42,17 +50,19 @@ export const RowControlCell = ({
                 color={color ?? 'text'}
                 aria-label={label}
                 onClick={() => {
-                  onClick?.(rowProps);
+                  if (record) {
+                    onClick?.({ record, rowIndex });
+                  }
                 }}
               />
             </EuiToolTip>
           </DataTableRowControl>
         );
       },
-    [props.columnId, rowProps]
+    [props.columnId, record, rowIndex]
   );
 
-  return renderControl(Control, rowProps);
+  return record ? renderControl(Control, { record, rowIndex }) : null;
 };
 
 export const getRowControlColumn = (

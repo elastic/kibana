@@ -58,6 +58,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
+    it('should open the context view with the same columns', async () => {
+      const columnNames = await dataGrid.getHeaderFields();
+      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
+    });
+
     it('should open the context view with the selected document as anchor and allows selecting next anchor', async () => {
       /**
        * Helper function to get the first timestamp of the document table
@@ -93,11 +98,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const anchorTimestamp = await getTimestamp(true);
         return anchorTimestamp === firstContextTimestamp;
       });
-    });
-
-    it('should open the context view with the same columns', async () => {
-      const columnNames = await dataGrid.getHeaderFields();
-      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the filters disabled', async () => {

@@ -237,7 +237,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('insights', () => {
+    describe('insights', function () {
+      this.tags('skipFIPS');
       const DASHBOARD_NAME = 'Insights Dashboard';
 
       before(async () => {

@@ -26,10 +26,9 @@ import type {
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRendererApi, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { css } from '@emotion/react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { ControlsPanels } from '@kbn/controls-plugin/common';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -343,7 +342,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           );
         },
         PrependFilterBar: () => {
-          const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
+          const [controlGroupAPI, setControlGroupAPI] = useState<
+            ControlGroupRendererApi | undefined
+          >();
           const stateStorage = stateContainer.stateStorage;
           const dataView = useObservable(
             stateContainer.internalState.state$,
@@ -356,19 +357,20 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             }
 
             const stateSubscription = stateStorage
-              .change$<ControlsPanels>('controlPanels')
-              .subscribe((panels) => controlGroupAPI.updateInput({ panels: panels ?? undefined }));
+              .change$<ControlPanelsState>('controlPanels')
+              .subscribe((panels) =>
+                controlGroupAPI.updateInput({ initialChildControlState: panels ?? undefined })
+              );
 
             const inputSubscription = controlGroupAPI.getInput$().subscribe((input) => {
-              if (input && input.panels) stateStorage.set('controlPanels', input.panels);
+              if (input && input.initialChildControlState)
+                stateStorage.set('controlPanels', input.initialChildControlState);
             });
 
-            const filterSubscription = controlGroupAPI.onFiltersPublished$.subscribe(
-              (newFilters) => {
-                stateContainer.internalState.transitions.setCustomFilters(newFilters);
-                stateContainer.actions.fetchData();
-              }
-            );
+            const filterSubscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
+              stateContainer.internalState.transitions.setCustomFilters(newFilters);
+              stateContainer.actions.fetchData();
+            });
 
             return () => {
               stateSubscription.unsubscribe();
@@ -406,12 +408,12 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               `}
             >
               <ControlGroupRenderer
-                ref={setControlGroupAPI}
-                getCreationOptions={async (initialInput, builder) => {
-                  const panels = stateStorage.get<ControlsPanels>('controlPanels');
+                onApiAvailable={setControlGroupAPI}
+                getCreationOptions={async (initialState, builder) => {
+                  const panels = stateStorage.get<ControlPanelsState>('controlPanels');
 
                   if (!panels) {
-                    await builder.addOptionsListControl(initialInput, {
+                    builder.addOptionsListControl(initialState, {
                       dataViewId: dataView?.id!,
                       title: fieldToFilterOn.name.split('.')[0],
                       fieldName: fieldToFilterOn.name,
@@ -421,14 +423,13 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                   }
 
                   return {
-                    initialInput: {
-                      ...initialInput,
-                      panels: panels ?? initialInput.panels,
-                      viewMode: ViewMode.VIEW,
-                      filters: stateContainer.appState.get().filters ?? [],
+                    initialState: {
+                      ...initialState,
+                      initialChildControlState: panels ?? initialState.initialChildControlState,
                     },
                   };
                 }}
+                filters={stateContainer.appState.get().filters ?? []}
               />
             </EuiFlexItem>
           );

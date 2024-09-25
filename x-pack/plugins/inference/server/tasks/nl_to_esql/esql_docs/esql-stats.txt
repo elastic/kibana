@@ -1,21 +1,55 @@
-## STATS
+# STATS ... BY
 
-The `STATS ... BY` processing command in ES|QL groups rows according to a common value and calculates one or more aggregated values over the grouped rows. This command is highly useful for performing statistical analysis and aggregations on datasets. It supports a variety of aggregation functions such as `AVG`, `COUNT`, `COUNT_DISTINCT`, `MAX`, `MEDIAN`, `MIN`, `SUM`, and more. 
+The `STATS ... BY` command groups rows based on a common value and calculates one or more aggregated values over these grouped rows.
 
-### Use Cases
-- **Statistical Analysis**: Calculate average, sum, count, and other statistical measures over grouped data.
-- **Data Aggregation**: Aggregate data based on specific fields to derive meaningful insights.
-- **Time-Series Analysis**: Group data by time intervals to analyze trends over time.
+## Syntax
 
-### Limitations
-- **Performance**: `STATS` without any groups is much faster than adding a group. Grouping on a single expression is more optimized than grouping on multiple expressions.
-- **Multivalue Fields**: If the grouping key is multivalued, the input row is included in all groups.
-- **Technical Preview**: Some functions like `PERCENTILE`, `ST_CENTROID_AGG`, `VALUES`, and `WEIGHTED_AVG` are in technical preview and may change in future releases.
+```esql
+STATS [column1 =] expression1[, ..., [columnN =] expressionN] [BY grouping_expression1[, ..., grouping_expressionN]]
+```
 
-### Examples
+### Parameters
 
-#### Example 1: Grouping by a Single Column
-Calculate the count of employees grouped by languages:
+#### columnX
+
+The name for the aggregated value in the output. If not provided, the name defaults to the corresponding expression (`expressionX`).
+
+#### expressionX
+
+An expression that computes an aggregated value.
+
+#### grouping_expressionX
+
+An expression that outputs the values to group by. If its name coincides with one of the computed columns, that column will be ignored.
+
+## Description
+
+The `STATS ... BY` command groups rows based on a common value and calculates one or more aggregated values over these grouped rows.
+If `BY` is omitted, the output table contains exactly one row with the aggregations applied over the entire dataset.
+
+The following aggregation functions are supported:
+
+- `AVG`
+- `COUNT`
+- `COUNT_DISTINCT`
+- `MAX`
+- `MEDIAN`
+- `MEDIAN_ABSOLUTE_DEVIATION`
+- `MIN`
+- `PERCENTILE`
+- `ST_CENTROID_AGG`
+- `SUM`
+- `TOP`
+- `VALUES`
+- `WEIGHTED_AVG`
+
+> Note: `STATS` without any groups is significantly faster than adding a group.
+
+> Note: Grouping on a single expression is currently much more optimized than grouping on many expressions. In some tests, grouping on a single `keyword` column was found to be five times faster than grouping on two `keyword` columns. Do not attempt to work around this by combining the two columns together with a function like `CONCAT` and then grouping - this will not be faster.
+
+## Examples
+
+Calculate a statistic and group by the values of another column:
 
 ```esql
 FROM employees
@@ -23,24 +57,27 @@ FROM employees
 | SORT languages
 ```
 
-#### Example 2: Aggregation Without Grouping
-Calculate the average number of languages spoken by employees:
+Omitting `BY` returns one row with the aggregations applied over the entire dataset:
 
 ```esql
 FROM employees
 | STATS avg_lang = AVG(languages)
 ```
 
-#### Example 3: Multiple Aggregations
-Calculate both the average and maximum number of languages spoken by employees:
+It’s possible to calculate multiple values:
 
 ```esql
 FROM employees
 | STATS avg_lang = AVG(languages), max_lang = MAX(languages)
 ```
 
-#### Example 4: Grouping by Multiple Values
-Calculate the average salary grouped by the year of hire and language:
+If the grouping key is multivalued then the input row is in all groups:
+
+```esql
+ROW i=1, a=["a", "b"] | STATS MIN(i) BY a | SORT a ASC
+```
+
+It’s also possible to group by multiple values:
 
 ```esql
 FROM employees
@@ -50,8 +87,20 @@ FROM employees
 | SORT hired, languages.long
 ```
 
-#### Example 5: Grouping by an Expression
-Group employees by the first letter of their last name and count them:
+If all grouping keys are multivalued then the input row is in all groups:
+
+```esql
+ROW i=1, a=["a", "b"], b=[2, 3] | STATS MIN(i) BY a, b | SORT a ASC, b ASC
+```
+
+Both the aggregating functions and the grouping expressions accept other functions. This is useful for using `STATS...BY` on multivalue columns.
+
+```esql
+FROM employees
+| STATS avg_salary_change = ROUND(AVG(MV_AVG(salary_change)), 10)
+```
+
+An example of grouping by an expression is grouping employees on the first letter of their last name:
 
 ```esql
 FROM employees
@@ -59,13 +108,26 @@ FROM employees
 | SORT `LEFT(last_name, 1)`
 ```
 
-#### Example 6: Using Multivalue Columns
-Calculate the minimum value of a multivalue column:
+Specifying the output column name is optional. If not specified, the new column name is equal to the expression. The following query returns a column named `AVG(salary)`:
 
 ```esql
-ROW i=1, a=["a", "b"], b=[2, 3]
-| STATS MIN(i) BY a, b
-| SORT a ASC, b ASC
+FROM employees
+| STATS AVG(salary)
 ```
 
-These examples showcase the versatility and power of the `STATS ... BY` command in performing various types of data aggregations and statistical analyses.
+Because this name contains special characters, it needs to be quoted with backticks (`) when using it in subsequent commands:
+
+```esql
+FROM employees
+| STATS AVG(salary)
+| EVAL avg_salary_rounded = ROUND(`AVG(salary)`)
+```
+
+## Notes
+
+- If multiple columns share the same name, all but the rightmost column with this name are ignored.
+
+### Limitations
+
+- **Performance**: `STATS` without any groups is much faster than adding a group. Grouping on a single expression is more optimized than grouping on multiple expressions.
+- **Multivalue Fields**: If the grouping key is multivalued, the input row is included in all groups.

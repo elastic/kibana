@@ -42,7 +42,7 @@ import type { FormBasedPrivateState } from './types';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from '../common/field_item';
 
-export type Props = Omit<
+export type FormBasedDataPanelProps = Omit<
   DatasourceDataPanelProps<FormBasedPrivateState, Query>,
   'core' | 'onChangeIndexPattern'
 > & {
@@ -98,7 +98,7 @@ export function FormBasedDataPanel({
   onIndexPatternRefresh,
   usedIndexPatterns,
   layerFields,
-}: Props) {
+}: FormBasedDataPanelProps) {
   const { indexPatterns, indexPatternRefs } = frame.dataViews;
   const { currentIndexPatternId } = state;
 

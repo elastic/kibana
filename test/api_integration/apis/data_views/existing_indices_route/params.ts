@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { EXISTING_INDICES_PATH } from '@kbn/data-views-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -29,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({})
         .expect(400));
 
@@ -36,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           indices: 'filebeat-*',
         })
@@ -45,6 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           indices: ['filebeat-*'],
         })
@@ -54,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           indices: ['filebeat-*', 'packetbeat-*'],
         })
@@ -63,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           [randomness.word()]: randomness.word(),
         })
@@ -72,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           indices: 'filebeat-*,packetbeat-*',
         })

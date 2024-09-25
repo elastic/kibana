@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import { fieldList } from '@kbn/data-views-plugin/common';
+import { FieldSpec } from '@kbn/data-views-plugin/public';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 const fields = [
@@ -16,6 +17,7 @@ const fields = [
     type: 'string',
     scripted: false,
     filterable: true,
+    searchable: true,
   },
   {
     name: 'timestamp',
@@ -25,6 +27,7 @@ const fields = [
     filterable: true,
     aggregatable: true,
     sortable: true,
+    searchable: true,
   },
   {
     name: 'message',
@@ -32,6 +35,7 @@ const fields = [
     type: 'string',
     scripted: false,
     filterable: false,
+    searchable: true,
   },
   {
     name: 'extension',
@@ -40,6 +44,7 @@ const fields = [
     scripted: false,
     filterable: true,
     aggregatable: true,
+    searchable: true,
   },
   {
     name: 'bytes',
@@ -48,6 +53,7 @@ const fields = [
     scripted: false,
     filterable: true,
     aggregatable: true,
+    searchable: true,
   },
   {
     name: 'scripted',
@@ -56,10 +62,10 @@ const fields = [
     scripted: true,
     filterable: false,
   },
-] as DataView['fields'];
+];
 
 export const dataViewWithTimefieldMock = buildDataViewMock({
   name: 'index-pattern-with-timefield',
-  fields,
+  fields: fieldList(fields as unknown as FieldSpec[]),
   timeFieldName: 'timestamp',
 });

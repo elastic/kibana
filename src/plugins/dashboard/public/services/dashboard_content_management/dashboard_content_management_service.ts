@@ -57,8 +57,15 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
         contentManagement,
         savedObjectsTagging,
       }),
-    saveDashboardState: ({ currentState, saveOptions, lastSavedId, panelReferences }) =>
+    saveDashboardState: ({
+      controlGroupReferences,
+      currentState,
+      saveOptions,
+      lastSavedId,
+      panelReferences,
+    }) =>
       saveDashboardState({
+        controlGroupReferences,
         data,
         embeddable,
         saveOptions,

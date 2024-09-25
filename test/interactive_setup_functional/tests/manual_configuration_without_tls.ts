@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Interactive Setup Functional Tests (Manual configuration without TLS)', function () {
-    this.tags('skipCloud');
+    this.tags(['skipCloud', 'skipFIPS']);
 
     let verificationCode: string;
     before(async function () {

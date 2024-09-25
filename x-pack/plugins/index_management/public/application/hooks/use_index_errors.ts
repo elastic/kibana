@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Index } from '@kbn/index-management';
+import { Index } from '@kbn/index-management-shared-types';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { useState, useEffect } from 'react';
 import { normalize } from '../components/mappings_editor/lib';

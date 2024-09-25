@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { omit } from 'lodash';
 import {
@@ -60,7 +61,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
-  describe('alerts as data', () => {
+  describe('alerts as data', function () {
+    this.tags('skipFIPS');
     afterEach(async () => {
       await objectRemover.removeAll();
       await es.deleteByQuery({
@@ -86,6 +88,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       it(`should write alert docs during rule execution with flapping.enabled: ${enableFlapping}`, async () => {
         await setFlappingSettings(enableFlapping);
+        // wait so cache expires
+        await setTimeoutAsync(10000);
 
         const pattern = {
           alertA: [true, true, true], // stays active across executions

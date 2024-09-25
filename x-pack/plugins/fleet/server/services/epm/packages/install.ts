@@ -87,7 +87,6 @@ import { _stateMachineInstallPackage } from './install_state_machine/_state_mach
 import { formatVerificationResultForSO } from './package_verification';
 import { getInstallation, getInstallationObject } from './get';
 import { getInstalledPackageWithAssets, getPackageSavedObjects } from './get';
-import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
@@ -545,167 +544,6 @@ function getElasticSubscription(packageInfo: ArchivePackage) {
   return subscription || packageInfo.license || 'basic';
 }
 
-// TODO: when installByUpload and installBundle are migrated, remove this function in favor of installWithStateMachine
-async function installPackageCommon(options: {
-  pkgName: string;
-  pkgVersion: string;
-  installSource: InstallSource;
-  installedPkg?: SavedObject<Installation>;
-  installType: InstallType;
-  savedObjectsClient: SavedObjectsClientContract;
-  esClient: ElasticsearchClient;
-  spaceId: string;
-  force?: boolean;
-  packageInstallContext: PackageInstallContext;
-  paths: string[];
-  verificationResult?: PackageVerificationResult;
-  telemetryEvent?: PackageUpdateEvent;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
-  ignoreMappingUpdateErrors?: boolean;
-  skipDataStreamRollover?: boolean;
-}): Promise<InstallResult> {
-  const packageInfo = options.packageInstallContext.packageInfo;
-
-  const {
-    pkgName,
-    pkgVersion,
-    installSource,
-    installedPkg,
-    installType,
-    savedObjectsClient,
-    force,
-    esClient,
-    spaceId,
-    verificationResult,
-    authorizationHeader,
-    ignoreMappingUpdateErrors,
-    skipDataStreamRollover,
-    packageInstallContext,
-  } = options;
-  let { telemetryEvent } = options;
-  const logger = appContextService.getLogger();
-  logger.info(`Install - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `);
-
-  // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
-  await Promise.resolve();
-  const span = apm.startSpan(
-    `Install package from ${installSource} ${pkgName}@${pkgVersion}`,
-    'package'
-  );
-
-  if (!telemetryEvent) {
-    telemetryEvent = getTelemetryEvent(pkgName, pkgVersion);
-    telemetryEvent.installType = installType;
-    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
-  }
-
-  try {
-    span?.addLabels({
-      packageName: pkgName,
-      packageVersion: pkgVersion,
-      installType,
-    });
-
-    const filteredPackages = getFilteredInstallPackages();
-    if (filteredPackages.includes(pkgName)) {
-      throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
-    }
-
-    // if the requested version is the same as installed version, check if we allow it based on
-    // current installed package status and force flag, if we don't allow it,
-    // just return the asset references from the existing installation
-    if (
-      installedPkg?.attributes.version === pkgVersion &&
-      installedPkg?.attributes.install_status === 'installed'
-    ) {
-      if (!force) {
-        logger.debug(`${pkgName}-${pkgVersion} is already installed, skipping installation`);
-        return {
-          assets: [
-            ...installedPkg.attributes.installed_es,
-            ...installedPkg.attributes.installed_kibana,
-          ],
-          status: 'already_installed',
-          installType,
-          installSource,
-        };
-      }
-    }
-    const elasticSubscription = getElasticSubscription(packageInfo);
-    if (!licenseService.hasAtLeast(elasticSubscription)) {
-      logger.error(`Installation requires ${elasticSubscription} license`);
-      const err = new FleetError(`Installation requires ${elasticSubscription} license`);
-      sendEvent({
-        ...telemetryEvent,
-        errorMessage: err.message,
-      });
-      return { error: err, installType, installSource };
-    }
-
-    // try installing the package, if there was an error, call error handler and rethrow
-    return await _installPackage({
-      savedObjectsClient,
-      esClient,
-      logger,
-      installedPkg,
-      packageInstallContext,
-      installType,
-      spaceId,
-      verificationResult,
-      installSource,
-      authorizationHeader,
-      force,
-      ignoreMappingUpdateErrors,
-      skipDataStreamRollover,
-    })
-      .then(async (assets) => {
-        logger.debug(`Removing old assets from previous versions of ${pkgName}`);
-        await removeOldAssets({
-          soClient: savedObjectsClient,
-          pkgName: packageInfo.name,
-          currentVersion: packageInfo.version,
-        });
-        sendEvent({
-          ...telemetryEvent!,
-          status: 'success',
-        });
-        return { assets, status: 'installed' as InstallResultStatus, installType, installSource };
-      })
-      .catch(async (err: Error) => {
-        logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
-          error: { stack_trace: err.stack },
-        });
-        await handleInstallPackageFailure({
-          savedObjectsClient,
-          error: err,
-          pkgName,
-          pkgVersion,
-          installedPkg,
-          spaceId,
-          esClient,
-          authorizationHeader,
-        });
-        sendEvent({
-          ...telemetryEvent!,
-          errorMessage: err.message,
-        });
-        return { error: err, installType, installSource };
-      });
-  } catch (e) {
-    sendEvent({
-      ...telemetryEvent,
-      errorMessage: e.message,
-    });
-    return {
-      error: e,
-      installType,
-      installSource,
-    };
-  } finally {
-    span?.end();
-  }
-}
-
 async function installPackageWithStateMachine(options: {
   pkgName: string;
   pkgVersion: string;
@@ -966,8 +804,7 @@ async function installPackageByUpload({
     // update the timestamp of latest installation
     setLastUploadInstallCache();
 
-    // TODO: use installPackageWithStateMachine instead of installPackageCommon https://github.com/elastic/kibana/issues/189346
-    return await installPackageCommon({
+    return await installPackageWithStateMachine({
       packageInstallContext,
       pkgName,
       pkgVersion,
@@ -1156,8 +993,7 @@ export async function installCustomPackage(
     paths,
     packageInfo,
   };
-  // TODO: use installPackageWithStateMachine instead of installPackageCommon https://github.com/elastic/kibana/issues/189347
-  return await installPackageCommon({
+  return await installPackageWithStateMachine({
     packageInstallContext,
     pkgName,
     pkgVersion: INITIAL_VERSION,

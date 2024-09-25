@@ -1,8 +1,18 @@
-## TO_CARTESIANPOINT
+# TO_CARTESIANPOINT
 
-Converts an input value to a `cartesian_point` value. A string will only be successfully converted if it respects the WKT Point format.
+The TO_CARTESIANPOINT function converts an input value into a `cartesian_point` value.
 
-### Examples
+## Syntax
+
+`TO_CARTESIANPOINT(field)`
+
+### Parameters
+
+#### field
+
+This is the input value. It can be a single or multi-valued column or an expression.
+
+## Examples
 
 ```esql
 ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]

@@ -39,13 +39,16 @@ describe('gauge toolbar', () => {
     jest.useRealTimers();
   });
 
-  const renderGaugeToolbarAndOpen = (
+  const renderGaugeToolbarAndOpen = async (
     propsOverrides?: Partial<VisualizationToolbarProps<GaugeVisualizationState>>,
     toolbarName = 'Appearance'
   ) => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const rtlRender = render(<GaugeToolbar {...defaultProps} {...propsOverrides} />);
-    const openPopover = () => userEvent.click(screen.getByRole('button', { name: toolbarName }));
-    openPopover();
+    const openPopover = async () =>
+      await user.click(screen.getByRole('button', { name: toolbarName }));
+    await openPopover();
     return {
       ...rtlRender,
     };
@@ -57,7 +60,7 @@ describe('gauge toolbar', () => {
     const getTitleSelectValue = () => screen.getByTestId('lnsToolbarGaugeLabelMajor-select');
     const getSubtitleSelectValue = () => screen.getByTestId('lnsToolbarGaugeLabelMinor-select');
     it('should reflect state in the UI for default props', async () => {
-      renderGaugeToolbarAndOpen(undefined, 'Titles and text');
+      await renderGaugeToolbarAndOpen(undefined, 'Titles and text');
       expect(getTitleLabel()).toHaveValue('');
       const titleSelect = getTitleSelectValue();
       expect(titleSelect).toHaveValue('auto');
@@ -66,7 +69,7 @@ describe('gauge toolbar', () => {
       expect(subtitleSelect).toHaveValue('none');
     });
     it('should reflect state in the UI for non-default props', async () => {
-      renderGaugeToolbarAndOpen(
+      await renderGaugeToolbarAndOpen(
         {
           state: {
             ...defaultProps.state,
@@ -88,8 +91,8 @@ describe('gauge toolbar', () => {
     });
 
     describe('labelMajor', () => {
-      it('labelMajor label is disabled if labelMajor is selected to be none', () => {
-        renderGaugeToolbarAndOpen(
+      it('labelMajor label is disabled if labelMajor is selected to be none', async () => {
+        await renderGaugeToolbarAndOpen(
           {
             state: {
               ...defaultProps.state,
@@ -103,8 +106,8 @@ describe('gauge toolbar', () => {
         const titleSelect = getTitleSelectValue();
         expect(titleSelect).toHaveValue('none');
       });
-      it('labelMajor mode switches to custom when user starts typing', () => {
-        renderGaugeToolbarAndOpen(
+      it('labelMajor mode switches to custom when user starts typing', async () => {
+        await renderGaugeToolbarAndOpen(
           {
             state: {
               ...defaultProps.state,
@@ -134,8 +137,8 @@ describe('gauge toolbar', () => {
       });
     });
     describe('labelMinor', () => {
-      it('labelMinor label is enabled if labelMinor is string', () => {
-        renderGaugeToolbarAndOpen(
+      it('labelMinor label is enabled if labelMinor is string', async () => {
+        await renderGaugeToolbarAndOpen(
           {
             state: {
               ...defaultProps.state,
@@ -149,8 +152,8 @@ describe('gauge toolbar', () => {
         expect(subtitleSelect).toHaveValue('custom');
         expect(getSubtitleLabel()).not.toBeDisabled();
       });
-      it('labelMajor mode can switch to custom', () => {
-        renderGaugeToolbarAndOpen(
+      it('labelMajor mode can switch to custom', async () => {
+        await renderGaugeToolbarAndOpen(
           {
             state: {
               ...defaultProps.state,
@@ -180,7 +183,7 @@ describe('gauge toolbar', () => {
 
   describe('gauge shape', () => {
     it('should reflect state in the UI for default props', async () => {
-      renderGaugeToolbarAndOpen();
+      await renderGaugeToolbarAndOpen();
 
       const shapeSelect = screen.getByRole('combobox', { name: /gauge shape/i });
       expect(shapeSelect).toHaveValue('Linear');
@@ -188,7 +191,7 @@ describe('gauge toolbar', () => {
       expect(verticalBulletOption).toHaveAttribute('aria-pressed', 'true');
     });
     it('should reflect state in the UI for non-default props', async () => {
-      renderGaugeToolbarAndOpen({
+      await renderGaugeToolbarAndOpen({
         state: {
           ...defaultProps.state,
           shape: 'horizontalBullet',
@@ -200,7 +203,7 @@ describe('gauge toolbar', () => {
       expect(horizontalBulletOption).toHaveAttribute('aria-pressed', 'true');
     });
     it('should call setState when changing shape type', async () => {
-      renderGaugeToolbarAndOpen();
+      await renderGaugeToolbarAndOpen();
       const shapeSelect = screen.getByRole('combobox', { name: /gauge shape/i });
       fireEvent.click(shapeSelect);
       fireEvent.click(screen.getByRole('option', { name: /minor arc/i }));
@@ -213,7 +216,7 @@ describe('gauge toolbar', () => {
       );
     });
     it('should call setState when changing subshape type', async () => {
-      renderGaugeToolbarAndOpen();
+      await renderGaugeToolbarAndOpen();
       const horizontalBulletOption = screen.getByRole('button', { name: /horizontal/i });
       fireEvent.click(horizontalBulletOption);
       expect(defaultProps.setState).toHaveBeenCalledTimes(1);

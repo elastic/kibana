@@ -8,11 +8,11 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { DashboardContainerInput } from '../../../common';
-import { DashboardCrudTypes } from '../../../common/content_management';
+import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content_management';
 import { DashboardStartDependencies } from '../../plugin';
 import { DashboardBackupServiceType } from '../dashboard_backup/types';
 import { DashboardDataService } from '../data/types';
@@ -65,7 +65,17 @@ export interface LoadDashboardFromSavedObjectProps {
 type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];
 
 export type SavedDashboardInput = DashboardContainerInput & {
-  controlGroupInput?: PersistableControlGroupInput;
+  /**
+   * Serialized control group state.
+   * Contains state loaded from dashboard saved object
+   */
+  controlGroupInput?: DashboardAttributes['controlGroupInput'] | undefined;
+  /**
+   * Runtime control group state.
+   * Contains state passed from dashboard locator
+   * Use runtime state when building input for portable dashboards
+   */
+  controlGroupState?: Partial<ControlGroupRuntimeState>;
 };
 
 export interface LoadDashboardReturn {
@@ -90,6 +100,7 @@ export interface LoadDashboardReturn {
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
 
 export interface SaveDashboardProps {
+  controlGroupReferences?: Reference[];
   currentState: SavedDashboardInput;
   saveOptions: SavedDashboardSaveOpts;
   panelReferences?: Reference[];

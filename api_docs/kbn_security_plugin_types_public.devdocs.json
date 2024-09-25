@@ -209,6 +209,97 @@
       },
       {
         "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.BulkUpdatePayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkUpdatePayload",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdatePayload.rolesUpdate",
+            "type": "Array",
+            "tags": [],
+            "label": "rolesUpdate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.BulkUpdateRoleResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkUpdateRoleResponse",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdateRoleResponse.created",
+            "type": "Array",
+            "tags": [],
+            "label": "created",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdateRoleResponse.updated",
+            "type": "Array",
+            "tags": [],
+            "label": "updated",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdateRoleResponse.errors",
+            "type": "Object",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "Record<string, { type: string; reason: string; }> | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
         "id": "def-public.GetUserProfileResponse",
         "type": "Interface",
         "tags": [],
@@ -505,6 +596,60 @@
                     "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
                     "section": "def-public.RolePutPayload",
                     "text": "RolePutPayload"
+                  }
+                ],
+                "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolesAPIClient.bulkUpdateRoles",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkUpdateRoles",
+            "description": [],
+            "signature": [
+              "(payload: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.BulkUpdatePayload",
+                "text": "BulkUpdatePayload"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.BulkUpdateRoleResponse",
+                "text": "BulkUpdateRoleResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.RolesAPIClient.bulkUpdateRoles.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "payload",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-public",
+                    "scope": "public",
+                    "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                    "section": "def-public.BulkUpdatePayload",
+                    "text": "BulkUpdatePayload"
                   }
                 ],
                 "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",

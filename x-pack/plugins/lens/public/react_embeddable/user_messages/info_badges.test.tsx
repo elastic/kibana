@@ -8,23 +8,23 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import { FeatureBadge } from './info_badges';
+import { EmbeddableFeatureBadge } from './info_badges';
 import { UserMessage } from '../../types';
 
-describe('FeatureBadge', () => {
-  function renderPopup(messages: UserMessage[], count: number = messages.length) {
-    render(<FeatureBadge messages={messages} />);
-    userEvent.click(screen.getByText(`${count}`));
+describe('EmbeddableFeatureBadge', () => {
+  async function renderPopup(messages: UserMessage[], count: number = messages.length) {
+    render(<EmbeddableFeatureBadge messages={messages} />);
+    await userEvent.click(screen.getByText(`${count}`));
   }
 
   it('should render no badge', () => {
-    render(<FeatureBadge messages={[]} />);
+    render(<EmbeddableFeatureBadge messages={[]} />);
     expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 
   it('should render the message in the popover', async () => {
     render(
-      <FeatureBadge
+      <EmbeddableFeatureBadge
         messages={[
           {
             uniqueId: 'unique_id',
@@ -38,12 +38,12 @@ describe('FeatureBadge', () => {
       />
     );
     expect(screen.getByText('1')).toBeInTheDocument();
-    userEvent.click(screen.getByText('1'));
+    await userEvent.click(screen.getByText('1'));
     expect(await screen.findByText('Long text')).toBeInTheDocument();
   });
 
   it('should render a description of the badge in a tooltip on hover', async () => {
-    renderPopup([
+    await renderPopup([
       {
         uniqueId: 'unique_id',
         shortMessage: 'Short message',
@@ -57,7 +57,7 @@ describe('FeatureBadge', () => {
   });
 
   it('should render a separate section for each unique-id', async () => {
-    renderPopup([
+    await renderPopup([
       {
         uniqueId: '1',
         shortMessage: 'Section1',
@@ -80,7 +80,7 @@ describe('FeatureBadge', () => {
   });
 
   it('should group multiple messages with same id', async () => {
-    renderPopup(
+    await renderPopup(
       [
         {
           uniqueId: '1',
@@ -108,7 +108,7 @@ describe('FeatureBadge', () => {
 
   describe('Horizontal rules', () => {
     it('should render no rule for single message', async () => {
-      renderPopup([
+      await renderPopup([
         {
           uniqueId: 'unique_id',
           shortMessage: `Section1`,
@@ -159,7 +159,7 @@ describe('FeatureBadge', () => {
           displayLocations: [],
         },
       ];
-      renderPopup(messages, 3);
+      await renderPopup(messages, 3);
       expect(await screen.getAllByTestId('lns-feature-badges-horizontal-rule')).toHaveLength(2);
     });
   });

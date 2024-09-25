@@ -305,7 +305,7 @@ describe('EmailActionConnectorFields', () => {
       await waitForComponentToUpdate();
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -369,7 +369,7 @@ describe('EmailActionConnectorFields', () => {
       await waitForComponentToUpdate();
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -428,7 +428,7 @@ describe('EmailActionConnectorFields', () => {
       await waitForComponentToUpdate();
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -476,7 +476,7 @@ describe('EmailActionConnectorFields', () => {
       await waitForComponentToUpdate();
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -522,7 +522,7 @@ describe('EmailActionConnectorFields', () => {
       await waitForComponentToUpdate();
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -569,7 +569,7 @@ describe('EmailActionConnectorFields', () => {
       await waitForComponentToUpdate();
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -616,7 +616,7 @@ describe('EmailActionConnectorFields', () => {
         await waitForComponentToUpdate();
 
         await act(async () => {
-          userEvent.click(getByTestId('form-test-provide-submit'));
+          await userEvent.click(getByTestId('form-test-provide-submit'));
         });
 
         expect(onSubmit).toBeCalledWith({
@@ -662,7 +662,7 @@ describe('EmailActionConnectorFields', () => {
       await waitForComponentToUpdate();
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({

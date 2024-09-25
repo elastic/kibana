@@ -39,7 +39,8 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('without write permission', () => {
+      describe('without write permission', function () {
+        this.tags('skipFIPS');
         before(async () => {
           await security.testUser.setRoles(
             ['global_maps_read', 'global_visualize_all', 'test_logstash_reader'],

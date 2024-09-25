@@ -70,7 +70,7 @@ void run(async ({ log, flagsReader }) => {
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
     logger.write(`--- ${failedChecks.length} quick check(s) failed. ❌`);
-    logger.write(`See above for details.`);
+    logger.write(`See the script(s) marked with ❌ above for details.`);
     process.exitCode = 1;
   } else {
     logger.write('--- All checks passed. ✅');

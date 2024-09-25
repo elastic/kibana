@@ -808,6 +808,10 @@
               "path": "x-pack/plugins/fleet/server/telemetry/sender.ts"
             },
             {
+              "plugin": "datasetQuality",
+              "path": "x-pack/plugins/observability_solution/dataset_quality/server/services/data_telemetry/data_telemetry_service.ts"
+            },
+            {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts"
             },

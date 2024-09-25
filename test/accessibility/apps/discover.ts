@@ -159,7 +159,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for data-grid actions on columns', async () => {
-      await testSubjects.click('dataGridHeaderCellActionButton-Carrier');
+      await dataGrid.openColMenuByField('Carrier');
       await a11y.testAppSnapshot();
     });
 
