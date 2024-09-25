@@ -14,6 +14,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
+import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store/common.gen';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -174,18 +175,29 @@ export const runTask = async ({
       log('entity store data client is not available; exiting task');
       return { state: updatedState };
     }
+    // TODO: permissions issue with finding engines
+    //   [2024-09-25T10:25:02.617+01:00][ERROR][plugins.taskManager] Task entity_store:field_retention:enrichment "entity_store:field_retention:enrichment:default:1.0.0" failed: ResponseError: security_exception
+    // Root causes:
+    // 	security_exception: missing authentication credentials for REST request [/_security/user/_has_privileges]
 
-    debugLog('fetching engines');
-    const { engines } = await entityStoreDataClient.list();
-    debugLog(`fetched engines: ${engines.length}`);
+    // debugLog('fetching engines');
+    // const { engines } = await entityStoreDataClient.list();
+    // debugLog(`fetched engines: ${engines.length}`);
 
-    for (const engine of engines) {
-      if (engine.type) {
+    const entityTypes: EntityType[] = ['host', 'user'];
+    for (const entityType of entityTypes) {
+      if (entityType) {
         // TODO: why is this optional?
         const start = Date.now();
-        debugLog(`executing field retention enrich policy for ${engine.type}`);
-        await entityStoreDataClient.executeFieldRetentionEnrichPolicy(engine.type);
-        log(`executed field retention enrich policy for ${engine.type} in ${Date.now() - start}ms`);
+        debugLog(`executing field retention enrich policy for ${entityType}`);
+        try {
+          await entityStoreDataClient.executeFieldRetentionEnrichPolicy(entityType);
+          log(
+            `executed field retention enrich policy for ${entityType} in ${Date.now() - start}ms`
+          );
+        } catch (e) {
+          log(`error executing field retention enrich policy for ${entityType}: ${e.message}`);
+        }
       }
     }
 
