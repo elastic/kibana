@@ -281,7 +281,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ]);
           });
 
-          it('filters deleted asset criticality data when calculating score', async () => {
+          it('filters out deleted asset criticality data when calculating score', async () => {
             await assetCriticalityRoutes.upsert({
               id_field: 'host.name',
               id_value: 'host-2',
