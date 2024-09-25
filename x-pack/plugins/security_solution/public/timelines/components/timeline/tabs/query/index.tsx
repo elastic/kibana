@@ -72,6 +72,8 @@ const compareQueryProps = (prevProps: Props, nextProps: Props) =>
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
+const PAGE_OPTIONS = [10, 100, 1000];
+
 export const QueryTabContentComponent: React.FC<Props> = ({
   activeTab,
   columns,
@@ -521,7 +523,7 @@ const makeMapStateToProps = () => {
       eventIdToNoteIds,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
-      itemsPerPageOptions: [10, 100, 1000],
+      itemsPerPageOptions: PAGE_OPTIONS,
       kqlMode,
       kqlQueryExpression,
       kqlQueryLanguage,

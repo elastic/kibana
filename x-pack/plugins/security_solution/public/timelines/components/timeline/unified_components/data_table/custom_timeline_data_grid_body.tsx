@@ -62,14 +62,13 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       footerRow,
     } = props;
 
-    // Set custom props onto the grid body wrapper
-    const bodyRef = useRef<HTMLDivElement | null>(null);
-    useEffect(() => {
-      setCustomGridBodyProps({
-        ref: bodyRef,
-        onScroll: () => console.debug('scrollTop:', bodyRef.current?.scrollTop),
-      });
-    }, [setCustomGridBodyProps]);
+    // // Set custom props onto the grid body wrapper
+    // const bodyRef = useRef<HTMLDivElement | null>(null);
+    // useEffect(() => {
+    //   setCustomGridBodyProps({
+    //     ref: bodyRef,
+    //   });
+    // }, [setCustomGridBodyProps]);
 
     const visibleRows = useMemo(
       () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
@@ -90,6 +89,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
     const rowHeights = useRef<number[]>([]);
 
     const setRowHeight = useCallback((index: number, height: number) => {
+      if (rowHeights.current[index] === height) return;
       listRef.current?.resetAfterIndex(index);
 
       rowHeights.current[index] = height;
@@ -114,37 +114,40 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
                   {headerRow}
                   {footerRow}
                 </div>
-                <VariableSizeList
-                  width={(gridWidth ?? width) + 22}
-                  data-grid-width={gridWidth}
-                  height={height - 26}
-                  itemCount={visibleRows.length}
-                  itemSize={getRowHeight} // dummy. Will not be used
-                  overscanCount={10}
-                  ref={listRef}
-                >
-                  {({ index, style }) => {
-                    return (
-                      <div
-                        style={{
-                          ...style,
-                          width: 'fit-content',
-                        }}
-                        key={index}
-                      >
-                        <CustomDataGridSingleRow
-                          rowData={visibleRows[index]}
-                          rowIndex={index}
-                          visibleColumns={visibleColumns}
-                          Cell={Cell}
-                          enabledRowRenderers={enabledRowRenderers}
-                          refetch={refetch}
-                          setRowHeight={setRowHeight}
-                        />
-                      </div>
-                    );
-                  }}
-                </VariableSizeList>
+                {gridWidth !== 0 && (
+                  <VariableSizeList
+                    width={(gridWidth ?? width) + 22}
+                    data-grid-width={gridWidth}
+                    height={height - 26}
+                    itemCount={visibleRows.length}
+                    itemSize={getRowHeight}
+                    overscanCount={0}
+                    ref={listRef}
+                  >
+                    {({ index, style }) => {
+                      return (
+                        <div
+                          style={{
+                            ...style,
+                            width: 'fit-content',
+                          }}
+                          key={index}
+                        >
+                          <CustomDataGridSingleRow
+                            rowData={visibleRows[index]}
+                            rowIndex={index}
+                            visibleColumns={visibleColumns}
+                            Cell={Cell}
+                            enabledRowRenderers={enabledRowRenderers}
+                            refetch={refetch}
+                            setRowHeight={setRowHeight}
+                            rowHeight={rowHeight}
+                          />
+                        </div>
+                      );
+                    }}
+                  </VariableSizeList>
+                )}
               </>
             );
           }}
@@ -167,10 +170,6 @@ const CustomGridRow = styled.div.attrs<{
 }))`
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
-  . euiDataGridRowCell--controlColumn {
-    height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
-    min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
-  }
   .udt--customRow {
     border-radius: 0;
     padding: ${(props) => (props.theme as EuiTheme).eui.euiDataGridCellPaddingM};
@@ -288,7 +287,6 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     >
       <CustomGridRowCellWrapper className={eventTypeRowClassName} $cssRowHeight={cssRowHeight}>
         {visibleColumns.map((column, colIndex) => {
-          // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
           if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
             return (
               <Cell
@@ -306,9 +304,8 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
       {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (
         <Cell
-          /* below style overrides all the styles provided by EUI so should be used carefully */
-          style={{
-            width: '100%',
+          rowHeightsOptions={{
+            defaultHeight: 'auto',
           }}
           colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
           visibleRowIndex={rowIndex}

@@ -75,7 +75,7 @@ export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = mem
         data-test-subj={`timeline-row-renderer-${rowIndex}`}
       >
         <EuiFlexItem grow={false}>
-          <EventsTrSupplement ref={eventDetailRowRef}>
+          <EventsTrSupplement>
             <StatefulRowRenderer
               ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
               containerRef={containerRef}
