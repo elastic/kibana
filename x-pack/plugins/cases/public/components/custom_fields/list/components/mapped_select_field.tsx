@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode, OptionHTMLAttributes } from 'react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import {
@@ -24,27 +24,18 @@ export interface Props {
   };
   idAria?: string;
   [key: string]: unknown;
-  onChangeKey: (key: string) => void;
 }
 
 /*
- * This component is used to render a select field which maps the EuiSelectOption `text` to the field value,
- * while emitting the EuiSelectOption `value` on change to be used as a key. This allows us to store the custom field
- * state with the schema: { key: 'customFieldKey.selectedOptionKey', value: 'Text of selected option' }
+ * This component is used to render a select field which emits [value, text] pairs from the chosen EuiSelectOption
  */
 
 // eslint-disable-next-line react/display-name
-export const MappedSelectField = ({
-  field,
-  euiFieldProps,
-  idAria,
-  onChangeKey,
-  ...rest
-}: Props) => {
+export const MappedSelectField = ({ field, euiFieldProps, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { options } = euiFieldProps;
 
-  const currentKey = useMemo(() => field.path.split('.').pop(), [field.path]);
+  const [key] = field.value as string[];
 
   return (
     <EuiFormRow
@@ -58,11 +49,10 @@ export const MappedSelectField = ({
     >
       <EuiSelect
         fullWidth
-        value={currentKey}
+        value={key}
         onChange={(e) => {
-          const newValue = options.find((option) => option.value === e.target.value)?.text;
-          field.setValue(newValue);
-          onChangeKey(e.target.value);
+          const label = options.find((option) => option.value === e.target.value)?.text;
+          field.setValue([e.target.value, label]);
         }}
         hasNoInitialSelection={true}
         isInvalid={isInvalid}

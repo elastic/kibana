@@ -18,7 +18,7 @@ export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiT
       className="eui-textTruncate"
       data-test-subj={`list-custom-field-column-view-${customField.key}`}
     >
-      {customField.value}
+      {Array.isArray(customField.value) && customField.value[1]}
     </p>
   ),
   'data-test-subj': 'list-custom-field-column',

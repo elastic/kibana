@@ -5,7 +5,10 @@
  * 2.0.
  */
 import type { CustomFieldFactory } from '../types';
-import type { CaseCustomFieldList } from '../../../../common/types/domain';
+import type {
+  CaseCustomFieldList,
+  ListCustomFieldConfiguration,
+} from '../../../../common/types/domain';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import * as i18n from '../translations';
@@ -15,7 +18,10 @@ import { View } from './view';
 import { Configure } from './configure';
 import { Create } from './create';
 
-export const configureListCustomFieldFactory: CustomFieldFactory<CaseCustomFieldList> = () => ({
+export const configureListCustomFieldFactory: CustomFieldFactory<
+  CaseCustomFieldList,
+  ListCustomFieldConfiguration
+> = () => ({
   id: CustomFieldTypes.LIST,
   label: i18n.LIST_LABEL,
   getEuiTableColumn,

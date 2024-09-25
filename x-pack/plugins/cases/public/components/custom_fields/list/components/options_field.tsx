@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiDragDropContext,
@@ -27,10 +26,11 @@ import { isEqual } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { v4 as uuidv4 } from 'uuid';
+import type { ListCustomFieldOption } from '../../../../../common/types/domain';
 import * as i18n from '../../translations';
 
 interface Props {
-  field: FieldHook;
+  field: FieldHook<ListCustomFieldOption[]>;
   euiFieldProps?: Record<string, unknown>;
   idAria?: string;
   [key: string]: unknown;
@@ -39,10 +39,10 @@ interface Props {
 export const INITIAL_OPTIONS = [
   {
     // Key used to identify the initial default option
-    // String literal 'default' is not used to avoid confusion in case the user changes the \
+    // String literal 'default' is not used to avoid confusion in case the user changes the
     // default value to a different option,
-    value: '00000000-0000-0000-0000-000000000000',
-    text: '',
+    key: '00000000-0000-0000-0000-000000000000',
+    label: '',
   },
 ];
 
@@ -50,7 +50,7 @@ export const INITIAL_OPTIONS = [
 export const OptionsField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-  const currentOptions: EuiSelectOption[] = useMemo(() => {
+  const currentOptions: ListCustomFieldOption[] = useMemo(() => {
     const parsedValue = field.value ?? INITIAL_OPTIONS;
     return Array.isArray(parsedValue) ? parsedValue : INITIAL_OPTIONS;
   }, [field.value]);
@@ -62,9 +62,9 @@ export const OptionsField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pro
   });
 
   const onChangeOptionLabel = useCallback(
-    ({ value, text }) => {
+    ({ key, label }) => {
       const newOptions = currentOptions.map((option) =>
-        value === option.value ? { ...option, text } : option
+        key === option.key ? { ...option, label } : option
       );
       field.setValue(newOptions);
     },
@@ -72,13 +72,13 @@ export const OptionsField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pro
   );
 
   const onAddOption = useCallback(() => {
-    const newOptions = [...currentOptions, { value: uuidv4(), text: '' }];
+    const newOptions = [...currentOptions, { key: uuidv4(), label: '' }];
     field.setValue(newOptions);
   }, [currentOptions, field]);
 
   const onRemoveOption = useCallback(
-    (value) => {
-      const newOptions = currentOptions.filter((option) => option.value !== value);
+    (key) => {
+      const newOptions = currentOptions.filter((option) => option.key !== key);
       field.setValue(newOptions);
     },
     [currentOptions, field]
@@ -110,8 +110,8 @@ export const OptionsField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pro
             {currentOptions.map((option, index) => (
               <EuiDraggable
                 spacing="m"
-                key={`option-${option.value}`}
-                draggableId={`option-${option.value}`}
+                key={`option-${option.key}`}
+                draggableId={`option-${option.key}`}
                 index={index}
                 customDragHandle
                 hasInteractiveChildren
@@ -132,10 +132,10 @@ export const OptionsField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pro
                       <EuiFlexItem>
                         <EuiFieldText
                           fullWidth
-                          value={option.text as string}
+                          value={option.label as string}
                           placeholder={i18n.LIST_OPTION_PLACEHOLDER_TEXT}
                           onChange={(e) =>
-                            onChangeOptionLabel({ value: option.value, text: e.target.value })
+                            onChangeOptionLabel({ key: option.key, label: e.target.value })
                           }
                         />
                       </EuiFlexItem>
@@ -144,7 +144,7 @@ export const OptionsField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pro
                           <EuiButtonEmpty
                             iconType={'minusInCircle'}
                             color={'danger'}
-                            onClick={() => onRemoveOption(option.value)}
+                            onClick={() => onRemoveOption(option.key)}
                           />
                         </EuiFlexItem>
                       )}

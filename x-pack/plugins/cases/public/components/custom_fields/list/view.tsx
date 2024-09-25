@@ -12,7 +12,7 @@ import type { CaseCustomFieldList } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 
 const ViewComponent: CustomFieldType<CaseCustomFieldList>['View'] = ({ customField }) => {
-  const value = customField?.value ?? '-';
+  const [, value] = customField?.value ?? [null, '-'];
 
   return (
     <EuiText

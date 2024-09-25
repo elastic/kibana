@@ -68,16 +68,16 @@ export const ToggleCustomFieldConfigurationRt = rt.intersection([
   ),
 ]);
 
+export const ListCustomFieldOptionRt = rt.strict({
+  label: rt.string,
+  key: rt.string,
+});
+
 export const ListCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldListTypeRt }),
   CustomFieldConfigurationWithoutTypeRt,
   rt.strict({
-    options: rt.array(
-      rt.strict({
-        text: rt.string,
-        value: rt.string,
-      })
-    ),
+    options: rt.array(ListCustomFieldOptionRt),
   }),
   rt.exact(
     rt.partial({

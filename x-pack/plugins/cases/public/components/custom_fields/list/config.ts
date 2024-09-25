@@ -19,8 +19,8 @@ export const getListFieldConfig = ({
 }: {
   required: boolean;
   label: string;
-  defaultValue?: string | null;
-}): FieldConfig<string> => {
+  defaultValue?: string[] | null;
+}): FieldConfig<string[]> => {
   const validators = [];
 
   if (required) {

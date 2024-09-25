@@ -15,20 +15,20 @@ import type {
   CaseUICustomField,
 } from '../../containers/types';
 
-export interface CustomFieldType<T extends CaseUICustomField> {
+export interface CustomFieldType<T extends CaseUICustomField, I = CasesConfigurationUICustomField> {
   Configure: React.FC;
   View: React.FC<{
     customField?: T;
   }>;
   Edit: React.FC<{
     customField?: T;
-    customFieldConfiguration: CasesConfigurationUICustomField;
+    customFieldConfiguration: I;
     onSubmit: (customField: T) => void;
     isLoading: boolean;
     canUpdate: boolean;
   }>;
   Create: React.FC<{
-    customFieldConfiguration: CasesConfigurationUICustomField;
+    customFieldConfiguration: I;
     isLoading: boolean;
     setAsOptional?: boolean;
     setDefaultValue?: boolean;
@@ -48,11 +48,14 @@ export type CustomFieldEuiTableColumn = Pick<
   render: (customField: CaseCustomField) => React.ReactNode;
 };
 
-export type CustomFieldFactory<T extends CaseUICustomField> = () => {
+export type CustomFieldFactory<
+  T extends CaseUICustomField,
+  I = CasesConfigurationUICustomField
+> = () => {
   id: string;
   label: string;
   getEuiTableColumn: (params: { label: string }) => CustomFieldEuiTableColumn;
-  build: () => CustomFieldType<T>;
+  build: () => CustomFieldType<T, I>;
   filterOptions?: CustomFieldFactoryFilterOption[];
   getDefaultValue?: () => string | boolean | null;
   convertNullToEmpty?: (value: string | boolean | null) => string;

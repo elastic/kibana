@@ -5,49 +5,56 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { UseField, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { CaseCustomFieldList } from '../../../../common/types/domain';
+import React, { useMemo } from 'react';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type {
+  CaseCustomFieldList,
+  ListCustomFieldConfiguration,
+} from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import { getListFieldConfig } from './config';
 import { OptionalFieldLabel } from '../../optional_field_label';
 import { MappedSelectField } from './components/mapped_select_field';
+import { listCustomFieldOptionsToEuiSelectOptions } from './helpers/list_custom_field_options_to_eui_select_options';
 
-const CreateComponent: CustomFieldType<CaseCustomFieldList>['Create'] = ({
-  customFieldConfiguration,
-  isLoading,
-  setAsOptional,
-  setDefaultValue = true,
-}) => {
+const CreateComponent: CustomFieldType<
+  CaseCustomFieldList,
+  ListCustomFieldConfiguration
+>['Create'] = ({ customFieldConfiguration, isLoading, setAsOptional, setDefaultValue = true }) => {
   const { key, label, required, defaultValue, options } = customFieldConfiguration;
 
-  const [selectedOptionKey, setSelectedOptionKey] = useState<string | null>(
-    defaultValue && setDefaultValue ? String(defaultValue) : null
+  const euiSelectOptions = useMemo(
+    () => listCustomFieldOptionsToEuiSelectOptions(options),
+    [options]
   );
-  const form = useFormContext();
-  console.log('FORM', form, form.getFields());
+
+  const defaultKeyValuePair = useMemo(() => {
+    if (defaultValue && setDefaultValue) {
+      return [String(defaultValue), String(options.find((option) => option.key === defaultValue))];
+    }
+    return null;
+  }, [defaultValue, setDefaultValue, options]);
 
   const config = getListFieldConfig({
     required: setAsOptional ? false : required,
     label,
-    ...(defaultValue && setDefaultValue && { defaultValue: String(defaultValue) }),
+    ...(defaultKeyValuePair && { defaultValue: defaultKeyValuePair }),
   });
 
   return (
     <UseField
-      path={`customFields.${key}.${selectedOptionKey}`}
+      path={`customFields.${key}`}
       config={config}
       component={MappedSelectField}
       label={label}
       componentProps={{
         labelAppend: setAsOptional ? OptionalFieldLabel : null,
-        onChangeKey: (newKey: string) => setSelectedOptionKey(newKey),
         euiFieldProps: {
           'data-test-subj': `${key}-list-create-custom-field`,
           fullWidth: true,
           disabled: isLoading,
           isLoading,
-          options,
+          options: euiSelectOptions,
         },
       }}
     />
