@@ -35,6 +35,7 @@ describe('Get Knowledge Base Status Route', () => {
       },
       isModelInstalled: jest.fn().mockResolvedValue(true),
       isSetupAvailable: jest.fn().mockResolvedValue(true),
+      isModelDeployed: jest.fn().mockResolvedValue(true),
     });
 
     getKnowledgeBaseStatusRoute(server.router);
