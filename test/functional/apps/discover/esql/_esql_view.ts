@@ -709,10 +709,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const editorValue = await monacoEditor.getCodeEditorValue();
-        expect(editorValue).to.eql(`from logstash-*\nAND \`extension\`=="png"`);
+        expect(editorValue).to.eql(`from logstash-*\n| WHERE \`extension\`=="png"`);
       });
 
       it('should save breakdown field in saved search', async () => {
+        // revert the filter
+        const testQuery = 'from logstash-*';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
         await discover.saveSearch('esql view with breakdown');
 
         await discover.clickNewSearchButton();
