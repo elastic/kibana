@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   description: ''
-  title: Security Solution Entity Analytics API (Elastic Cloud Serverless)
+  title: Security Entity Analytics API (Elastic Cloud Serverless)
   version: '1'
 servers:
   - url: http://{kibana_host}:{port}
@@ -41,7 +41,7 @@ paths:
           description: Unexpected error
       summary: Cleanup the Risk Engine
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
 components:
   schemas:
     CleanUpRiskEngineErrorResponse:
@@ -85,4 +85,4 @@ security:
   - BasicAuth: []
 tags:
   - description: ''
-    name: Security Solution Entity Analytics API
+    name: Security Entity Analytics API
