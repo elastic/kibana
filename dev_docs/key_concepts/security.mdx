@@ -18,7 +18,7 @@ This guide covers the following topics:
 Kibana API routes do not have any authorization checks applied by default. This means that your APIs are accessible to anyone with valid credentials, regardless of their permissions. This includes users with no roles assigned.
 This on its own is insufficient, and care must be taken to ensure that only authorized users can invoke your endpoints.
 
-### Adding API authorization
+### [Deprecated] Adding API authorization before 9.0
 Kibana leverages <DocLink id="kibDevDocsSavedObjectsIntro" text="Saved Objects" /> for a majority of its persistence. The Saved Objects Service performs its own authorization checks, so if your API route is primarily a CRUD interface to Saved Objects, then your authorization needs are already met.
 This is also true for derivatives of the Saved Objects Service, such as the Alerting and Cases services.
 
@@ -33,6 +33,112 @@ More information on adding `access` tags to your routes can be found temporarily
 ### Why not add `access` tags to all routes by default?
 Each authorization check that we perform involves a round-trip to Elasticsearch, so they are not as cheap as we'd like. Therefore, we want to keep the number of authorization checks we perform within a single route to a minimum.
 Adding an `access` tag to routes that leverage the Saved Objects Service would be redundant in most cases, since the Saved Objects Service will be performing authorization anyway.
+
+
+### Adding API authorization after 9.0
+In Kibana 9.0, we extended `KibanaRouteOptions` to include security configuration at the route definition level.
+Kibana now supports flexible security configurations for both **Classic** and **Versioned** routes.
+
+```ts
+// Before
+router.get({
+  path: '/api/path',
+  options: {
+    tags: ['access:<privilege_1>', 'access:<privilege_2>'],
+  },
+  ...
+}, handler);
+
+// After
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: ['<privilege_1>', '<privilege_2>'],
+    },
+  },
+  ...
+}, handler);
+```
+
+#### Classic Router Examples
+Simple configuration with all required privileges: Requires `privilege_1` AND both `privilege_2` to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: ['<privilege_1>', '<privilege_2>'],
+    },
+  },
+  ...
+}, handler);
+```
+
+Simple configuration with any required privileges: Requires `privilege_1` OR `privilege_2` to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [{ anyRequired: ['<privilege_1>', '<privilege_2>'] }],
+    },
+  },
+  ...
+}, handler);
+```
+
+Complex configuration: Requires `privilege_1` AND `privilege_2` AND (`privilege_3` OR `privilege_4`) to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [{ allRequired: ['<privilege_1>', '<privilege_2>'], anyRequired: ['<privilege_3>', '<privilege_4>'] }],
+    },
+  },
+  ...
+}, handler);
+```
+
+#### Versioned Router Examples
+Versioned routes allow different security configurations per version, giving flexibility when evolving API security over time.
+
+1. **Default Configuration (applies to versions without specific authorization)**:
+   - Requires `<privilege_1>`.
+
+2. **Version 1**:
+   - Requires **both** `<privilege_1>` and `<privilege_2>` privileges.
+
+3. **Version 2**:
+   - Inherits the default authorization configuration, requiring `<privilege_1>`.
+
+```ts
+router.versioned
+  .get({
+    path: '/internal/path',
+    access: 'internal',
+    // default security configuration, will be used for version unless overridden
+    security: {
+      authz: {
+        requiredPrivileges: ['<privilege_1>'],
+      },
+    },
+  })
+  .addVersion({
+    version: '1',
+    validate: false,
+    security: {
+      authz: {
+        requiredPrivileges: ['<privilege_1>', '<privilege_2>'],
+      },
+    },
+  }, handlerV1)
+  .addVersion({
+    version: '2',
+    validate: false,
+  }, handlerV2);
+```
 
 
 ## The `kibana_system` user
