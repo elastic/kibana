@@ -62,7 +62,7 @@ export class InventoryPlugin
             return [
               {
                 label: '',
-                sortKey: 101,
+                sortKey: 300,
                 entries: [
                   {
                     label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
@@ -94,7 +94,7 @@ export class InventoryPlugin
       appRoute: '/app/observability/inventory',
       category: DEFAULT_APP_CATEGORIES.observability,
       visibleIn: ['sideNav', 'globalSearch'],
-      order: 8004,
+      order: 8200,
       status: isEntityCentricExperienceSettingEnabled
         ? AppStatus.accessible
         : AppStatus.inaccessible,
