@@ -129,15 +129,13 @@ export class ObservabilityLogsExplorerPlugin
   }
 
   public start(core: CoreStart, _pluginsStart: ObservabilityLogsExplorerStartDeps) {
-    const { discover, integrations } = core.application.capabilities.navLinks;
+    const { discover, fleet } = core.application.capabilities;
 
-    if (!(discover && integrations)) {
-      this.appStateUpdater.next(() => {
-        return {
-          status: AppStatus.inaccessible,
-          visibleIn: [],
-        };
-      });
+    if (!(discover?.show && fleet?.read)) {
+      this.appStateUpdater.next(() => ({
+        status: AppStatus.inaccessible,
+        visibleIn: [],
+      }));
     }
 
     return {};
