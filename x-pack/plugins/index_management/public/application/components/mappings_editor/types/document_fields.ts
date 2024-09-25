@@ -160,6 +160,7 @@ export type ParameterName =
   | 'path'
   | 'dims'
   | 'priority'
+  | 'dynamic_passthrough'
   | 'inference_id'
   | 'reference_field'
   | 'depth_limit'

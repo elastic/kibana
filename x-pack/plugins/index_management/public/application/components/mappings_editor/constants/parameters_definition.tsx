@@ -1090,6 +1090,16 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.string,
   },
+  dynamic_passthrough: {
+    fieldConfig: {
+      defaultValue: false,
+      type: FIELD_TYPES.CHECKBOX,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicFieldLabel', {
+        defaultMessage: 'Dynamic',
+      }),
+    },
+    schema: t.boolean,
+  },
   reference_field: {
     fieldConfig: {
       defaultValue: '',

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { UseField, Field } from '../../../../shared_imports';
+import { UseField, Field, CheckBoxField } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { BasicParametersSection } from '../edit_field';
 
@@ -15,6 +15,7 @@ export const PassthroughType = () => {
   return (
     <BasicParametersSection>
       <UseField path="priority" config={getFieldConfig('priority')} component={Field} />
+      <UseField path="dynamic" config={getFieldConfig('dynamic_passthrough')} component={CheckBoxField} />
     </BasicParametersSection>
   );
 };
