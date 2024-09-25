@@ -32,12 +32,8 @@ import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { composeValidators, dictionaryValidator, requiredValidator } from '@kbn/ml-validators';
 import { getNewJobLimits, isCloudTrial } from '../services/ml_server_info';
-import {
-  composeValidators,
-  dictionaryValidator,
-  requiredValidator,
-} from '../../../common/util/validators';
 import type { ModelItem } from './models_list';
 import { useEnabledFeatures } from '../contexts/ml';
 
