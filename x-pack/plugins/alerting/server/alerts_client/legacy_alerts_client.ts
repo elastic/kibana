@@ -176,7 +176,7 @@ export class LegacyAlertsClient<
         keys(processedAlertsRecovered).length > 0
       ) {
         const { maintenanceWindowsWithoutScopedQueryIds } =
-          await this.options.maintenanceWindowsService.loadMaintenanceWindows({
+          await this.options.maintenanceWindowsService.getMaintenanceWindows({
             eventLogger: this.options.alertingEventLogger,
             request: this.options.request,
             ruleTypeCategory: this.options.ruleType.category,

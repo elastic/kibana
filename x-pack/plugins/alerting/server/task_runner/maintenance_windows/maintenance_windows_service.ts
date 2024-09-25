@@ -25,12 +25,12 @@ interface MaintenanceWindowData {
   maintenanceWindowsWithoutScopedQueryIds: string[];
 }
 
-interface GetMaintenanceWindowsOpts {
+interface LoadMaintenanceWindowsOpts {
   request: KibanaRequest;
   spaceId: string;
 }
 
-type LoadMaintenanceWindowsOpts = GetMaintenanceWindowsOpts & {
+type GetMaintenanceWindowsOpts = LoadMaintenanceWindowsOpts & {
   eventLogger: AlertingEventLogger;
   ruleTypeCategory: string;
 };
@@ -51,10 +51,10 @@ export class MaintenanceWindowsService {
     }
   }
 
-  public async loadMaintenanceWindows(
-    opts: LoadMaintenanceWindowsOpts
+  public async getMaintenanceWindows(
+    opts: GetMaintenanceWindowsOpts
   ): Promise<MaintenanceWindowData> {
-    const activeMaintenanceWindows = await this.getMaintenanceWindows({
+    const activeMaintenanceWindows = await this.loadMaintenanceWindows({
       request: opts.request,
       spaceId: opts.spaceId,
     });
@@ -93,8 +93,8 @@ export class MaintenanceWindowsService {
     return { maintenanceWindows, maintenanceWindowsWithoutScopedQueryIds };
   }
 
-  private async getMaintenanceWindows(
-    opts: GetMaintenanceWindowsOpts
+  private async loadMaintenanceWindows(
+    opts: LoadMaintenanceWindowsOpts
   ): Promise<MaintenanceWindow[]> {
     const now = Date.now();
     if (this.windows.has(opts.spaceId)) {

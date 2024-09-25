@@ -699,7 +699,7 @@ export class AlertsClient<
     }
 
     const { maintenanceWindows } =
-      await this.options.maintenanceWindowsService.loadMaintenanceWindows({
+      await this.options.maintenanceWindowsService.getMaintenanceWindows({
         eventLogger: this.options.alertingEventLogger,
         request: this.options.request,
         ruleTypeCategory: this.ruleType.category,

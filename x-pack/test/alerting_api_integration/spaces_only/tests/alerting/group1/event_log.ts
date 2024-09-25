@@ -22,6 +22,7 @@ import {
   resetRulesSettings,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 
 const InstanceActions = new Set<string | undefined>([
   'new-instance',
@@ -1684,7 +1685,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, window3.id, 'rules/maintenance_window', 'alerting', true);
 
           // wait so cache expires
-          await setTimeoutAsync(10000);
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
@@ -1788,7 +1789,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, window.id, 'rules/maintenance_window', 'alerting', true);
 
           // wait so cache expires
-          await setTimeoutAsync(10000);
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
@@ -1873,7 +1874,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
         it('should generate expected events with a alertDelay', async () => {
           // wait so cache expires so maintenance window from previous test will be cleared
-          await setTimeoutAsync(10000);
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
           const ACTIVE_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.active';
           const NEW_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.new';

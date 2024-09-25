@@ -348,7 +348,7 @@ describe('Alerts Client', () => {
           spaceId: 'space1',
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
         };
-        maintenanceWindowsService.loadMaintenanceWindows.mockReturnValue({
+        maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
           maintenanceWindows: [
             {
               ...getMockMaintenanceWindow(),
@@ -580,7 +580,7 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -606,7 +606,7 @@ describe('Alerts Client', () => {
           await alertsClient.persistAlerts();
 
           expect(clusterClient.bulk).not.toHaveBeenCalled();
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -679,7 +679,7 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -787,7 +787,7 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -879,7 +879,7 @@ describe('Alerts Client', () => {
               getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc', [ALERT_CONSECUTIVE_MATCHES]: 0 }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -978,7 +978,7 @@ describe('Alerts Client', () => {
               getRecoveredIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -1142,7 +1142,7 @@ describe('Alerts Client', () => {
               },
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -1258,7 +1258,7 @@ describe('Alerts Client', () => {
               }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -1376,7 +1376,7 @@ describe('Alerts Client', () => {
               }),
             ],
           });
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -1399,7 +1399,7 @@ describe('Alerts Client', () => {
           await alertsClient.persistAlerts();
 
           expect(clusterClient.bulk).not.toHaveBeenCalled();
-          expect(maintenanceWindowsService.loadMaintenanceWindows).not.toHaveBeenCalled();
+          expect(maintenanceWindowsService.getMaintenanceWindows).not.toHaveBeenCalled();
         });
 
         test('should log if bulk indexing fails for some alerts', async () => {
@@ -1468,7 +1468,7 @@ describe('Alerts Client', () => {
             `Error writing alerts ${ruleInfo}: 1 successful, 0 conflicts, 2 errors: Validation Failed: 1: index is missing;2: type is missing;; failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.`,
             { tags: ['test.rule-type', '1', 'resolve-alert-conflicts'] }
           );
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -1554,7 +1554,7 @@ describe('Alerts Client', () => {
             logTags
           );
 
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -1588,7 +1588,7 @@ describe('Alerts Client', () => {
             logTags
           );
 
-          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,
             ruleTypeCategory: 'test',
@@ -1630,7 +1630,7 @@ describe('Alerts Client', () => {
             logTags
           );
           expect(clusterClient.bulk).not.toHaveBeenCalled();
-          expect(maintenanceWindowsService.loadMaintenanceWindows).not.toHaveBeenCalled();
+          expect(maintenanceWindowsService.getMaintenanceWindows).not.toHaveBeenCalled();
         });
       });
 
@@ -2184,7 +2184,7 @@ describe('Alerts Client', () => {
 
       describe('updatePersistedAlertsWithMaintenanceWindowIds', () => {
         test('should update alerts with MW ids when provided with maintenance windows', async () => {
-          maintenanceWindowsService.loadMaintenanceWindows.mockReturnValueOnce({
+          maintenanceWindowsService.getMaintenanceWindows.mockReturnValueOnce({
             maintenanceWindows: [
               ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
               { id: 'mw3' } as unknown as MaintenanceWindow,

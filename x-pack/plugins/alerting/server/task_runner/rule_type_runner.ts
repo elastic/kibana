@@ -220,7 +220,7 @@ export class RuleTypeRunner<
                   getMaintenanceWindowIds: async () => {
                     if (context.maintenanceWindowsService) {
                       const { maintenanceWindowsWithoutScopedQueryIds } =
-                        await context.maintenanceWindowsService.loadMaintenanceWindows({
+                        await context.maintenanceWindowsService.getMaintenanceWindows({
                           eventLogger: context.alertingEventLogger,
                           request: context.request,
                           ruleTypeCategory: ruleType.category,

@@ -244,7 +244,7 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('processAlerts() should call processAlerts, trimRecoveredAlerts and getAlertsForNotifications', async () => {
-    maintenanceWindowsService.loadMaintenanceWindows.mockReturnValue({
+    maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [
         {
           ...getMockMaintenanceWindow(),
@@ -348,7 +348,7 @@ describe('Legacy Alerts Client', () => {
       '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
     });
 
-    expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+    expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
       eventLogger: alertingEventLogger,
       request: fakeRequest,
       ruleTypeCategory: 'test',
@@ -357,7 +357,7 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('processAlerts() should set maintenance windows IDs on new alerts', async () => {
-    maintenanceWindowsService.loadMaintenanceWindows.mockReturnValue({
+    maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [
         {
           ...getMockMaintenanceWindow(),
@@ -425,7 +425,7 @@ describe('Legacy Alerts Client', () => {
       alertDelay: 5,
     });
 
-    expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalledWith({
+    expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
       eventLogger: alertingEventLogger,
       request: fakeRequest,
       ruleTypeCategory: 'test',

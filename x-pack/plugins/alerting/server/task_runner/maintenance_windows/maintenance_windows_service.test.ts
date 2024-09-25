@@ -75,7 +75,7 @@ describe('MaintenanceWindowsService', () => {
     // @ts-ignore - accessing private variable
     expect(maintenanceWindowsService.windows.get('default')).toBeUndefined();
 
-    const windows = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windows = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,
@@ -109,7 +109,7 @@ describe('MaintenanceWindowsService', () => {
     // @ts-ignore - accessing private variable
     expect(maintenanceWindowsService.windows.get('default')).toBeUndefined();
 
-    const windows = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windows = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,
@@ -147,13 +147,13 @@ describe('MaintenanceWindowsService', () => {
     // @ts-ignore - accessing private variable
     expect(maintenanceWindowsService.windows.get('new-space')).toBeUndefined();
 
-    const windowsDefault = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windowsDefault = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,
       ruleTypeCategory: 'rule-category',
     });
-    const windowsNewSpace = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windowsNewSpace = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'new-space',
       eventLogger: alertingEventLogger,
@@ -194,14 +194,14 @@ describe('MaintenanceWindowsService', () => {
       logger,
     });
 
-    const windows1 = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windows1 = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,
       ruleTypeCategory: 'rule-category',
     });
     fakeTimer.tick(30000);
-    const windows2 = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windows2 = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,
@@ -230,14 +230,14 @@ describe('MaintenanceWindowsService', () => {
       logger,
     });
 
-    const windows1 = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windows1 = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,
       ruleTypeCategory: 'rule-category',
     });
     fakeTimer.tick(61000);
-    const windows2 = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windows2 = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,
@@ -267,14 +267,14 @@ describe('MaintenanceWindowsService', () => {
       logger,
     });
 
-    const windows1 = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windows1 = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,
       ruleTypeCategory: 'rule-category',
     });
     fakeTimer.tick(61000);
-    const windows2 = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windows2 = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,
@@ -307,7 +307,7 @@ describe('MaintenanceWindowsService', () => {
       logger,
     });
 
-    const windows = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windows = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,
@@ -357,7 +357,7 @@ describe('MaintenanceWindowsService', () => {
       logger,
     });
 
-    const windows = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windows = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,
@@ -411,7 +411,7 @@ describe('MaintenanceWindowsService', () => {
       logger,
     });
 
-    const windows = await maintenanceWindowsService.loadMaintenanceWindows({
+    const windows = await maintenanceWindowsService.getMaintenanceWindows({
       request: fakeRequest,
       spaceId: 'default',
       eventLogger: alertingEventLogger,

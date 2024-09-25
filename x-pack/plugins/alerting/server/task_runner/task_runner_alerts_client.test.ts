@@ -259,7 +259,7 @@ describe('Task Runner', () => {
         alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
         (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
 
-        maintenanceWindowsService.loadMaintenanceWindows.mockReturnValue({
+        maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
           maintenanceWindows: [
             {
               ...getMockMaintenanceWindow(),

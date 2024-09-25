@@ -243,7 +243,7 @@ describe('Task Runner', () => {
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
     });
-    maintenanceWindowsService.loadMaintenanceWindows.mockResolvedValue({
+    maintenanceWindowsService.getMaintenanceWindows.mockResolvedValue({
       maintenanceWindows: [],
       maintenanceWindowsWithoutScopedQueryIds: [],
     });
@@ -654,7 +654,7 @@ describe('Task Runner', () => {
       } as MaintenanceWindow,
     ];
     const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
-    maintenanceWindowsService.loadMaintenanceWindows.mockResolvedValue({
+    maintenanceWindowsService.getMaintenanceWindows.mockResolvedValue({
       maintenanceWindows: mw,
       maintenanceWindowsWithoutScopedQueryIds: maintenanceWindowIds,
     });
@@ -726,7 +726,7 @@ describe('Task Runner', () => {
       } as MaintenanceWindow,
     ];
     const maintenanceWindowIds = ['test-id-1'];
-    maintenanceWindowsService.loadMaintenanceWindows.mockResolvedValue({
+    maintenanceWindowsService.getMaintenanceWindows.mockResolvedValue({
       maintenanceWindows: mw,
       maintenanceWindowsWithoutScopedQueryIds: maintenanceWindowIds,
     });
@@ -789,7 +789,7 @@ describe('Task Runner', () => {
   });
 
   test('allows alert notification if active maintenance window does not contain the rule type category', async () => {
-    maintenanceWindowsService.loadMaintenanceWindows.mockResolvedValue({
+    maintenanceWindowsService.getMaintenanceWindows.mockResolvedValue({
       maintenanceWindows: [],
       maintenanceWindowsWithoutScopedQueryIds: [],
     });

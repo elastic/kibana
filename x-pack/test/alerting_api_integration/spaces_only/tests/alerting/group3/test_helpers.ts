@@ -14,6 +14,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
+import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 
 export const createRule = async ({
   actionId,
@@ -112,7 +113,7 @@ export const createMaintenanceWindow = async ({
   objectRemover.add(Spaces.space1.id, window.id, 'rules/maintenance_window', 'alerting', true);
 
   // wait so cache expires
-  await setTimeoutAsync(10000);
+  await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
   return window;
 };
 
@@ -140,7 +141,7 @@ export const finishMaintenanceWindow = async ({
     .expect(200);
 
   // wait so cache expires
-  await setTimeoutAsync(10000);
+  await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 };
 
 export const getRuleEvents = async ({

@@ -187,7 +187,7 @@ describe('Task Runner Cancel', () => {
       queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
     });
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    maintenanceWindowsService.loadMaintenanceWindows.mockReturnValue({
+    maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [],
       maintenanceWindowsWithoutScopedQueryIds: [],
     });
