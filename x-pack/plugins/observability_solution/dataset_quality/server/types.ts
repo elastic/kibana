@@ -12,7 +12,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 
 export interface DatasetQualityPluginSetupDependencies {
   fleet: FleetSetupContract;
@@ -25,6 +25,7 @@ export interface DatasetQualityPluginStartDependencies {
   fleet: FleetStartContract;
   telemetry: TelemetryPluginStart;
   taskManager: TaskManagerStartContract;
+  usageCollection?: UsageCollectionStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
