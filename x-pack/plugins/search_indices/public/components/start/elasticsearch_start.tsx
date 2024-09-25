@@ -25,13 +25,16 @@ import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 
 import { generateRandomIndexName } from '../../utils/indices';
+import { getDefaultCodingLanguage } from '../../utils/language';
 import { CreateIndexForm } from './create_index';
 import { CreateIndexCodeView } from './create_index_code';
 import { CreateIndexFormState } from './types';
+import { AvailableLanguages } from '../../code_examples';
 
 function initCreateIndexState(): CreateIndexFormState {
   return {
     indexName: generateRandomIndexName(),
+    codingLanguage: getDefaultCodingLanguage(),
   };
 }
 
@@ -50,7 +53,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
   const [createIndexView, setCreateIndexView] = useState<CreateIndexView>(
     userPrivileges?.privileges.canCreateIndex === false ? CreateIndexView.Code : CreateIndexView.UI
   );
-  const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState());
+  const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState);
   const usageTracker = useUsageTracker();
   useEffect(() => {
     usageTracker.load(AnalyticsEvents.startPageOpened);
@@ -75,6 +78,15 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
       }
     },
     [usageTracker]
+  );
+  const onChangeCodingLanguage = useCallback(
+    (language: AvailableLanguages) => {
+      setFormState({
+        ...formState,
+        codingLanguage: language,
+      });
+    },
+    [formState, setFormState]
   );
 
   return (
@@ -169,7 +181,10 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
               />
             )}
             {createIndexView === CreateIndexView.Code && (
-              <CreateIndexCodeView createIndexForm={formState} />
+              <CreateIndexCodeView
+                createIndexForm={formState}
+                changeCodingLanguage={onChangeCodingLanguage}
+              />
             )}
           </EuiFlexGroup>
         </EuiForm>

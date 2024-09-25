@@ -67,7 +67,7 @@ export const CreateIndexForm = ({
   };
 
   return (
-    <EuiForm data-test-subj="createIndexUIView" fullWidth>
+    <EuiForm data-test-subj="createIndexUIView" fullWidth component="form">
       <EuiFormRow
         label={i18n.translate('xpack.searchIndices.startPage.createIndex.name.label', {
           defaultMessage: 'Name your index',
@@ -129,6 +129,7 @@ export const CreateIndexForm = ({
               disabled={indexNameHasError || isLoading}
               isLoading={isLoading}
               onClick={onCreateIndex}
+              type="submit"
             >
               {CREATE_INDEX_CONTENT}
             </EuiButton>
