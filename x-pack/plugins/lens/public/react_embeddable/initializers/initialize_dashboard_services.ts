@@ -69,9 +69,11 @@ export function initializeDashboardServices(
 } {
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState.savedObjectId);
   const { titlesApi, serializeTitles, titleComparators } = initializeTitles(initialState);
-  const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(initialState.title);
+  const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(
+    initialState.title || initialState.attributes.title
+  );
   const [defaultPanelDescription$] = buildObservableVariable<string | undefined>(
-    initialState.description
+    initialState.description || initialState.attributes.description
   );
   return {
     api: {
@@ -80,10 +82,10 @@ export function initializeDashboardServices(
       dataViews: variables.dataViews$,
       savedObjectId: savedObjectId$,
       libraryId$: savedObjectId$,
-      saveToLibrary: async (_title: string) => {
+      saveToLibrary: async (title: string) => {
         const state = getLatestState();
         const savedObjectId = await attributeService.saveToLibrary(
-          state.attributes,
+          { ...state.attributes, title },
           state.attributes.references
         );
         return savedObjectId;
