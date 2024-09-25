@@ -20465,23 +20465,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Timeline_API_TimelineResponse
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_PersistTimelineResponse
           description: >-
             Indicates that the draft Timeline was successfully created. In the
             event the user already has a draft Timeline, the existing draft
@@ -20543,23 +20528,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Timeline_API_TimelineResponse
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_PersistTimelineResponse
           description: Indicates the Timeline was successfully created.
         '405':
           content:
@@ -20600,23 +20570,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Timeline_API_TimelineResponse
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_PersistTimelineResponse
           description: Indicates that the timeline has been successfully copied.
       summary: Copies timeline or timeline template.
       tags:
@@ -20640,23 +20595,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Timeline_API_TimelineResponse
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_PersistTimelineResponse
           description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
@@ -20718,23 +20658,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Timeline_API_TimelineResponse
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_PersistTimelineResponse
           description: >-
             Indicates that the draft Timeline was successfully created. In the
             event the user already has a draft Timeline, the existing draft
@@ -21029,14 +20954,13 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      data:
-                        $ref: >-
-                          #/components/schemas/Security_Timeline_API_ResolvedTimeline
-                    required:
-                      - data
+                type: object
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/Security_Timeline_API_ResolvedTimeline
+                required:
+                  - data
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
@@ -21103,35 +21027,33 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      customTemplateTimelineCount:
-                        type: number
-                      defaultTimelineCount:
-                        type: number
-                      elasticTemplateTimelineCount:
-                        type: number
-                      favoriteCount:
-                        type: number
-                      templateTimelineCount:
-                        type: number
-                      timeline:
-                        items:
-                          $ref: >-
-                            #/components/schemas/Security_Timeline_API_TimelineResponse
-                        type: array
-                      totalCount:
-                        type: number
-                    required:
-                      - timeline
-                      - totalCount
-                      - defaultTimelineCount
-                      - templateTimelineCount
-                      - favoriteCount
-                      - elasticTemplateTimelineCount
-                      - customTemplateTimelineCount
-                  - type: object
+                type: object
+                properties:
+                  customTemplateTimelineCount:
+                    type: number
+                  defaultTimelineCount:
+                    type: number
+                  elasticTemplateTimelineCount:
+                    type: number
+                  favoriteCount:
+                    type: number
+                  templateTimelineCount:
+                    type: number
+                  timeline:
+                    items:
+                      $ref: >-
+                        #/components/schemas/Security_Timeline_API_TimelineResponse
+                    type: array
+                  totalCount:
+                    type: number
+                required:
+                  - timeline
+                  - totalCount
+                  - defaultTimelineCount
+                  - templateTimelineCount
+                  - favoriteCount
+                  - elasticTemplateTimelineCount
+                  - customTemplateTimelineCount
           description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
@@ -39434,6 +39356,23 @@ components:
                 #/components/schemas/Security_Timeline_API_PinnedEventBaseResponseBody
         - nullable: true
           type: object
+    Security_Timeline_API_PersistTimelineResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            persistTimeline:
+              type: object
+              properties:
+                timeline:
+                  $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+              required:
+                - timeline
+          required:
+            - persistTimeline
+      required:
+        - data
     Security_Timeline_API_PinnedEvent:
       allOf:
         - $ref: '#/components/schemas/Security_Timeline_API_BarePinnedEvent'
