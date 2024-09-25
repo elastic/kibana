@@ -125,9 +125,21 @@ export const esqlAsyncSearchStrategyProvider = (
     }).pipe(
       mergeMap(async (response) => {
         if (!options.stream) {
+          const raw = await parseJsonFromStream(response.rawResponse as unknown as Readable);
+          if (raw.error) {
+            // eslint-disable-next-line no-throw-literal
+            throw {
+              message: raw.error.reason,
+              statusCode: raw.status,
+              attributes: {
+                error: raw.error,
+                requestParams: response.requestParams,
+              },
+            };
+          }
           const data = {
             ...response,
-            rawResponse: await parseJsonFromStream(response.rawResponse as unknown as Readable),
+            rawResponse: raw,
           };
           return data;
         }
