@@ -36,7 +36,6 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../utils/kibana_react';
 import { buildEsQuery } from '../../../utils/build_es_query';
 import { mergeBoolQueries } from '../../alerts/helpers/merge_bool_queries';
-import { getRelatedAlertKuery } from '../helpers/get_related_alerts_query';
 
 const ALERTS_PER_PAGE = 50;
 const RELATED_ALERTS_SEARCH_BAR_ID = 'related-alerts-search-bar-o11y';
@@ -46,12 +45,13 @@ interface Props {
   alert?: TopAlert;
   groups?: Group[];
   tags?: string[];
+  kuery?: string;
 }
 
 const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE, status: 'active' };
 const DEFAULT_FILTERS: Filter[] = [];
 
-export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
+export function InternalRelatedAlerts({ alert, groups, tags, kuery }: Props) {
   const kibanaServices = useKibana().services;
   const {
     http,
@@ -82,7 +82,7 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertStart, alertEnd]);
 
-  return (
+  return kuery ? (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
         <EuiSpacer size="l" />
@@ -93,7 +93,7 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
           defaultSearchQueries={defaultQuery.current}
           defaultState={{
             ...defaultState,
-            kuery: getRelatedAlertKuery(tags, groups) ?? '',
+            kuery,
           }}
         />
       </EuiFlexItem>
@@ -138,7 +138,7 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
+  ) : null;
 }
 
 export function RelatedAlerts(props: Props) {

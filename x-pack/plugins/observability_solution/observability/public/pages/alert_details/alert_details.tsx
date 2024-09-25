@@ -98,6 +98,7 @@ export function AlertDetails() {
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
 
+  const [relatedAlertsKuery, setRelatedAlertsKuery] = useState<string>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
     const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
@@ -213,6 +214,7 @@ export function AlertDetails() {
               rule={rule}
               timeZone={timeZone}
               setAlertSummaryFields={setSummaryFields}
+              setRelatedAlertsKuery={setRelatedAlertsKuery}
             />
             <EuiSpacer size="l" />
             <AlertHistoryChart
@@ -258,7 +260,10 @@ export function AlertDetails() {
       'data-test-subj': 'metadataTab',
       content: metadataTab,
     },
-    {
+  ];
+
+  if (relatedAlertsKuery) {
+    tabs.push({
       id: RELATED_ALERTS_TAB_ID,
       name: i18n.translate('xpack.observability.alertDetails.tab.relatedAlertsLabel', {
         defaultMessage: 'Related Alerts',
@@ -269,10 +274,11 @@ export function AlertDetails() {
           alert={alertDetail?.formatted}
           tags={alertDetail?.formatted.fields.tags}
           groups={alertDetail?.formatted.fields[ALERT_GROUP] as Group[]}
+          kuery={relatedAlertsKuery}
         />
       ),
-    },
-  ];
+    });
+  }
 
   return (
     <ObservabilityPageTemplate
