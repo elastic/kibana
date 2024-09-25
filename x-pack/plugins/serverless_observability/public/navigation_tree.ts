@@ -69,7 +69,6 @@ export const navigationTree: NavigationTreeDefinition = {
           }),
           link: 'slo',
         },
-        { link: 'inventory' },
         {
           id: 'aiops',
           title: 'AIOps',
@@ -122,6 +121,7 @@ export const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
+        { link: 'inventory', spaceBefore: 'm' },
         {
           id: 'apm',
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
