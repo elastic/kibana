@@ -11,25 +11,20 @@ import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CellRenderersExtensionParams } from '../../../../context_awareness';
 import type { SummaryColumnProps } from './summary_column';
 
 const SummaryColumn = dynamic(() => import('./summary_column'));
 
-export interface SummaryColumnGetterDeps {
-  data: DataPublicPluginStart;
-  params: CellRenderersExtensionParams;
-}
+export type SummaryColumnGetterDeps = CellRenderersExtensionParams;
 
-export const getSummaryColumn = ({ data, params }: SummaryColumnGetterDeps) => {
+export const getSummaryColumn = (params: SummaryColumnGetterDeps) => {
   const { actions, dataView, density, rowHeight } = params;
   const shouldShowFieldHandler = createGetShouldShowFieldHandler(dataView);
 
   return (props: SummaryColumnProps) => (
     <SummaryColumn
       {...props}
-      data={data}
       density={density}
       onFilter={actions.addFilter}
       rowHeight={rowHeight}

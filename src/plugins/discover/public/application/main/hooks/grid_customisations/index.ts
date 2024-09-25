@@ -8,16 +8,14 @@
  */
 
 import { useMemo } from 'react';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { DataGridColumnsDeps, getDataGridColumnsConfiguration } from './logs';
 
 export * from './logs';
 
-type ContextualGridCustomizationParams = DataGridColumnsDeps['params'];
+type ContextualGridCustomizationParams = DataGridColumnsDeps;
 
 export const useContextualGridCustomisations = (params: ContextualGridCustomizationParams) => {
-  const { data } = useDiscoverServices();
   // TODO / NOTE: This will eventually rely on Discover's context resolution to determine which fields
   // are returned based on the data type.
   const isLogsContext = useDiscoverCustomization('data_table')?.logsEnabled;
@@ -25,8 +23,8 @@ export const useContextualGridCustomisations = (params: ContextualGridCustomizat
   const virtualColumnsConfiguration = useMemo(() => {
     if (!isLogsContext) return null;
 
-    return getDataGridColumnsConfiguration({ data, params });
-  }, [data, isLogsContext, params]);
+    return getDataGridColumnsConfiguration(params);
+  }, [isLogsContext, params]);
 
   return virtualColumnsConfiguration;
 };

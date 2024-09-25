@@ -15,18 +15,18 @@ import {
 
 export type DataGridColumnsDeps = CustomCellRendererDeps;
 
-export const getDataGridColumnsConfiguration = ({ data, params }: DataGridColumnsDeps) => {
+export const getDataGridColumnsConfiguration = (params: DataGridColumnsDeps) => {
   return {
-    customCellRenderer: createCustomCellRenderer({ data, params }),
+    customCellRenderer: createCustomCellRenderer(params),
     customGridColumnsConfiguration: createCustomGridColumnsConfiguration(),
   };
 };
 
 type CustomCellRendererDeps = SummaryColumnGetterDeps;
 
-export const createCustomCellRenderer = (deps: CustomCellRendererDeps) => {
+export const createCustomCellRenderer = (params: CustomCellRendererDeps) => {
   return {
-    [SOURCE_COLUMN]: getSummaryColumn(deps),
+    [SOURCE_COLUMN]: getSummaryColumn(params),
   };
 };
 

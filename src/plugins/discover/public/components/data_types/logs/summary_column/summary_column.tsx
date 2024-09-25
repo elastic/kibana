@@ -13,7 +13,6 @@ import {
   DataGridDensity,
 } from '@kbn/unified-data-table';
 import React from 'react';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import {
   ShouldShowFieldInTableHandler,
@@ -22,14 +21,12 @@ import {
 } from '@kbn/discover-utils';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { DataGridCellServicesProvider } from '../../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
-import { Resource, StaticResource } from './resource';
+import { Resource } from './resource';
 import { Content } from './content';
 import { contentLabel, jsonLabel, resourceLabel } from '../translations';
 import { createResourceFields, formatJsonDocumentForContent } from './utils';
 
 export interface SummaryColumnFactoryDeps {
-  data: DataPublicPluginStart;
   density: DataGridDensity | undefined;
   rowHeight: number | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
@@ -56,7 +53,7 @@ const SummaryCell = ({
   rowHeight: maybeNullishRowHeight,
   ...props
 }: SummaryColumnProps & SummaryColumnFactoryDeps) => {
-  const { data, dataView, onFilter, row } = props;
+  const { onFilter, row } = props;
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
@@ -66,24 +63,38 @@ const SummaryCell = ({
 
   const resourceFields = createResourceFields(row);
   const shouldRenderResource = resourceFields.length > 0;
-  const gutterSize = isSingleLine ? 's' : 'none';
 
-  return (
-    <DataGridCellServicesProvider services={{ data, dataView }}>
-      <EuiFlexGroup gutterSize={gutterSize} direction={isSingleLine ? 'row' : 'column'}>
-        {shouldRenderResource && (
-          <EuiFlexItem grow={false} css={{ lineHeight: 'normal', marginTop: -1 }}>
-            <Resource fields={resourceFields} limited={isSingleLine} onFilter={onFilter} />
-          </EuiFlexItem>
-        )}
-        <Content {...props} isCompressed={isCompressed} />
-      </EuiFlexGroup>
-    </DataGridCellServicesProvider>
+  return isSingleLine ? (
+    <EuiFlexGroup gutterSize="s">
+      {shouldRenderResource && (
+        <EuiFlexItem grow={false}>
+          <Resource
+            fields={resourceFields}
+            limited={isSingleLine}
+            onFilter={onFilter}
+            css={singleLineResourceCss}
+          />
+        </EuiFlexItem>
+      )}
+      <Content {...props} isCompressed={isCompressed} isSingleLine />
+    </EuiFlexGroup>
+  ) : (
+    <>
+      {shouldRenderResource && (
+        <Resource
+          fields={resourceFields}
+          limited={isSingleLine}
+          onFilter={onFilter}
+          css={multiLineResourceCss}
+        />
+      )}
+      <Content {...props} isCompressed={isCompressed} />
+    </>
   );
 };
 
 const SummaryCellPopover = (props: SummaryColumnProps & SummaryColumnFactoryDeps) => {
-  const { row, data, dataView, fieldFormats } = props;
+  const { row, dataView, fieldFormats, onFilter } = props;
 
   const resourceFields = createResourceFields(row);
   const shouldRenderResource = resourceFields.length > 0;
@@ -95,46 +106,51 @@ const SummaryCellPopover = (props: SummaryColumnProps & SummaryColumnFactoryDeps
   const shouldRenderSource = !shouldRenderContent;
 
   return (
-    <DataGridCellServicesProvider services={{ data, dataView }}>
-      <EuiFlexGroup direction="column" css={{ width: 580 }}>
-        {shouldRenderResource && (
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiTitle size="xxs">
-              <span>{resourceLabel}</span>
-            </EuiTitle>
-            <StaticResource fields={resourceFields} />
-          </EuiFlexGroup>
-        )}
+    <EuiFlexGroup direction="column" css={{ width: 580 }}>
+      {shouldRenderResource && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiTitle size="xxs">
-            <span>{contentLabel}</span>
+            <span>{resourceLabel}</span>
           </EuiTitle>
-          {shouldRenderContent && (
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiText color="subdued" size="xs">
-                {field}
-              </EuiText>
-              <EuiCodeBlock
-                overflowHeight={100}
-                paddingSize="s"
-                isCopyable
-                language="txt"
-                fontSize="s"
-              >
-                {value}
-              </EuiCodeBlock>
-            </EuiFlexGroup>
-          )}
-          {shouldRenderSource && (
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiText color="subdued" size="xs">
-                {jsonLabel}
-              </EuiText>
-              <JsonCodeEditor json={formatJsonDocumentForContent(row).raw} height={300} />
-            </EuiFlexGroup>
-          )}
+          <Resource fields={resourceFields} onFilter={onFilter} />
         </EuiFlexGroup>
+      )}
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiTitle size="xxs">
+          <span>{contentLabel}</span>
+        </EuiTitle>
+        {shouldRenderContent && (
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiText color="subdued" size="xs">
+              {field}
+            </EuiText>
+            <EuiCodeBlock
+              overflowHeight={100}
+              paddingSize="s"
+              isCopyable
+              language="txt"
+              fontSize="s"
+            >
+              {value}
+            </EuiCodeBlock>
+          </EuiFlexGroup>
+        )}
+        {shouldRenderSource && (
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiText color="subdued" size="xs">
+              {jsonLabel}
+            </EuiText>
+            <JsonCodeEditor json={formatJsonDocumentForContent(row).raw} height={300} />
+          </EuiFlexGroup>
+        )}
       </EuiFlexGroup>
-    </DataGridCellServicesProvider>
+    </EuiFlexGroup>
   );
 };
+
+const singleLineResourceCss = {
+  lineHeight: 'normal',
+  marginTop: -1,
+};
+
+const multiLineResourceCss = { display: 'inline-flex' };

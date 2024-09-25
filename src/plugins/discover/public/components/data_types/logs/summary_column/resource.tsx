@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ResourceFieldDescriptor } from './utils';
 
@@ -21,12 +21,12 @@ interface ResourceProps {
   onFilter?: DocViewFilterFn;
 }
 
-export const Resource = ({ fields, limited = false, onFilter }: ResourceProps) => {
+export const Resource = ({ fields, limited = false, onFilter, ...props }: ResourceProps) => {
   const displayedFields = limited ? fields.slice(0, MAX_LIMITED_FIELDS_VISIBLE) : fields;
   const extraFieldsCount = limited ? fields.length - MAX_LIMITED_FIELDS_VISIBLE : 0;
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" {...props}>
       {displayedFields.map(({ name, value, ResourceBadge, Icon }) => (
         <ResourceBadge key={name} property={name} value={value} icon={Icon} onFilter={onFilter} />
       ))}
@@ -36,17 +36,5 @@ export const Resource = ({ fields, limited = false, onFilter }: ResourceProps) =
         </div>
       )}
     </EuiFlexGroup>
-  );
-};
-
-export const StaticResource = ({ fields }: Pick<ResourceProps, 'fields'>) => {
-  return (
-    <EuiBadgeGroup gutterSize="s">
-      {fields.map(({ name, value, Icon }) => (
-        <EuiBadge key={name} color="hollow" iconType={Icon} iconSide="left">
-          {value}
-        </EuiBadge>
-      ))}
-    </EuiBadgeGroup>
   );
 };

@@ -16,12 +16,9 @@ import {
 import { getLogLevelBadgeCell } from '../../../../../components/data_types/logs/log_level_badge_cell';
 import { getServiceNameCell } from '../../../../../components/data_types/logs/service_name_cell';
 import type { DataSourceProfileProvider } from '../../../../profiles';
-import { ProfileProviderServices } from '../../../profile_provider_services';
 
-export const makeGetCellRenderersHandler =
-  (services: ProfileProviderServices): DataSourceProfileProvider['profile']['getCellRenderers'] =>
-  (prev) =>
-  (params) => ({
+export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
+  (prev) => (params) => ({
     ...prev(params),
     ...LOG_LEVEL_FIELDS.reduce(
       (acc, field) => ({
@@ -39,5 +36,5 @@ export const makeGetCellRenderersHandler =
       }),
       {}
     ),
-    [SOURCE_COLUMN]: getSummaryColumn({ data: services.data, params }),
+    [SOURCE_COLUMN]: getSummaryColumn(params),
   });

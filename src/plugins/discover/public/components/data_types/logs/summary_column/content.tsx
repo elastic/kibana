@@ -26,16 +26,19 @@ import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
   isCompressed: boolean;
+  isSingleLine?: boolean;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }
 
 const LogMessage = ({
   field,
   value,
+  className,
   isCompressed,
 }: {
   field: string;
   value: string;
+  className: string;
   isCompressed: boolean;
 }) => {
   const shouldRenderFieldName = field !== constants.MESSAGE_FIELD;
@@ -60,7 +63,8 @@ const LogMessage = ({
   }
 
   return (
-    <span
+    <p
+      className={className}
       data-test-subj="discoverDataTableMessageValue"
       dangerouslySetInnerHTML={{ __html: value }}
     />
@@ -72,6 +76,7 @@ export const Content = ({
   dataView,
   fieldFormats,
   isCompressed,
+  isSingleLine = false,
   row,
   shouldShowFieldHandler,
 }: ContentProps) => {
@@ -80,7 +85,12 @@ export const Content = ({
   const shouldRenderContent = !!field && !!value;
 
   return shouldRenderContent ? (
-    <LogMessage field={field} value={value} isCompressed={isCompressed} />
+    <LogMessage
+      field={field}
+      value={value}
+      isCompressed={isCompressed}
+      className={isSingleLine ? 'eui-textTruncate' : ''}
+    />
   ) : (
     <FormattedSourceDocument
       columnId={columnId}

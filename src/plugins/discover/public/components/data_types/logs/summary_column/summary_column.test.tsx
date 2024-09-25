@@ -13,7 +13,6 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
 import SummaryColumn, { SummaryColumnFactoryDeps, SummaryColumnProps } from './summary_column';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import * as constants from '../../../../../common/data_types/logs/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -37,7 +36,6 @@ const renderSummary = (
         fieldFormats={fieldFormatsMock}
         setCellProps={() => {}}
         closePopover={() => {}}
-        data={dataPluginMock.createStartContract()}
         density={DataGridDensity.COMPACT}
         rowHeight={ROWS_HEIGHT_OPTIONS.single}
         onFilter={jest.fn()}
