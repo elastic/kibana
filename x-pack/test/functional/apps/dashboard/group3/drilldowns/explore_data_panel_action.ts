@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const ACTION_ID = 'ACTION_EXPLORE_DATA';
@@ -54,6 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('is a link <a> element', async () => {
+      await panelActions.openContextMenuByTitle('Visualization PieChart');
       const actionElement = await testSubjects.find(ACTION_TEST_SUBJ);
       const tag = await actionElement.getTagName();
 
