@@ -335,11 +335,9 @@
       "groupName": "@elastic/kibana-core dependencies",
       "matchDepNames": [
         "@elastic/request-crypto",
-        "ansi-regex",
         "axios",
         "cacheable-lookup",
         "getos",
-        "has-ansi",
         "joi-to-json",
         "json5",
         "load-json-file",
@@ -355,7 +353,6 @@
         "@types/hapi__h2o2",
         "@types/hapi__hapi",
         "@types/hapi__inert",
-        "@types/has-ansi",
         "@types/json5",
         "@types/mime",
         "@types/mime-types",
@@ -578,6 +575,15 @@
         "Team:Core",
         "backport:skip"
       ],
+      "enabled": true
+    },
+    {
+      "groupName": "ansi-regex",
+      "matchDepNames": ["ansi-regex", "has-ansi", "strip-ansi"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:all-open"],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
