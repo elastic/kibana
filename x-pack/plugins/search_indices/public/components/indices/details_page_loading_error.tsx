@@ -48,7 +48,7 @@ export const IndexloadingError = ({
           id="xpack.searchIndices.pageLoadError.description"
           defaultMessage="{message}"
           values={{
-            message: message,
+            message,
           }}
         />
       </EuiText>
