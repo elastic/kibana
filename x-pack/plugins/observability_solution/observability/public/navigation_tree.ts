@@ -49,22 +49,6 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
               return pathNameSerialized.startsWith(prepend('/app/dashboards'));
             },
           },
-          ...(pluginsStart.inventory
-            ? [
-                {
-                  link: 'inventory' as const,
-                  getIsActive: ({
-                    pathNameSerialized,
-                    prepend,
-                  }: {
-                    pathNameSerialized: string;
-                    prepend: (path: string) => string;
-                  }) => {
-                    return pathNameSerialized.startsWith(prepend('/app/observability/inventory'));
-                  },
-                },
-              ]
-            : []),
           {
             link: 'observability-overview:alerts',
           },
@@ -82,6 +66,9 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
           },
           {
             link: 'slo',
+          },
+          {
+            link: 'inventory',
           },
           {
             id: 'aiMl',
@@ -285,6 +272,7 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
         breadcrumbStatus: 'hidden',
         children: [
           {
+            id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
             link: 'management',
             title: i18n.translate('xpack.observability.obltNav.stackManagement', {
               defaultMessage: 'Stack Management',

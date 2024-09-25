@@ -11,8 +11,6 @@ import { Filter } from '@kbn/es-query';
 import { combineDashboardFiltersWithControlGroupFilters } from './dashboard_control_group_integration';
 import { BehaviorSubject } from 'rxjs';
 
-jest.mock('@kbn/controls-plugin/public/control_group/embeddable/control_group_container');
-
 const testFilter1: Filter = {
   meta: {
     key: 'testfield',
