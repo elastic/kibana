@@ -1089,7 +1089,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       return body;
     },
 
-    async findRule(ruleId: string, roleAuthc: RoleCredentials) {
+    async findRuleInRules(roleAuthc: RoleCredentials, ruleId: string) {
       const response = await supertestWithoutAuth
         .get('/api/alerting/rules/_find')
         .set(roleAuthc.apiKeyHeader)
