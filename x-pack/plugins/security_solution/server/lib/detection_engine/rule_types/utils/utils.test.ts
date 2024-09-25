@@ -533,8 +533,8 @@ describe('utils', () => {
       });
       expect(remainingGap.asMilliseconds()).toEqual(12000);
       expect(warningStatusMessage).toEqual(undefined);
-      expect(gap?.from).toEqual(previousStartedAt.toISOString());
-      expect(gap?.to).toEqual(moment(previousStartedAt).add(remainingGap, 'ms').toISOString());
+      expect(gap?.gte).toEqual(previousStartedAt.toISOString());
+      expect(gap?.lte).toEqual(moment(previousStartedAt).add(remainingGap, 'ms').toISOString());
     });
 
     test('should return a single tuple when give a negative gap (rule ran sooner than expected)', async () => {
