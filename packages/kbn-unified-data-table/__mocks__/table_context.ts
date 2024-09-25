@@ -69,6 +69,7 @@ export function buildSelectedDocsState(selectedDocIds: string[]): UseSelectedDoc
     selectedDocsCount: selectedDocsSet.size,
     docIdsInSelectionOrder: selectedDocIds,
     toggleDocSelection: jest.fn(),
+    toggleMultipleDocsSelection: jest.fn(),
     selectAllDocs: jest.fn(),
     selectMoreDocs: jest.fn(),
     deselectSomeDocs: jest.fn(),
