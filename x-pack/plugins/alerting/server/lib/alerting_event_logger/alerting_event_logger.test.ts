@@ -2063,7 +2063,7 @@ describe('helper functions', () => {
       expect(record?.rule?.name).toEqual(ruleDataWithName.name);
 
       // these fields should not be set by this function
-      expect(record.kibana?.alert?.rule?.gap?.intervals).toEqual(undefined);
+      expect(record.kibana?.alert?.rule?.gap?.filled_intervals).toEqual(undefined);
       expect(record['@timestamp']).toBeUndefined();
       expect(record.event?.provider).toBeUndefined();
       expect(record.event?.outcome).toBeUndefined();
