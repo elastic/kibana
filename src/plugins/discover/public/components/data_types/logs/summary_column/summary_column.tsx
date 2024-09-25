@@ -13,14 +13,7 @@ import {
   DataGridDensity,
 } from '@kbn/unified-data-table';
 import React from 'react';
-import {
-  EuiButtonIcon,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiCodeBlock, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
 import {
   ShouldShowFieldInTableHandler,
   getLogDocumentOverview,
@@ -79,14 +72,12 @@ const SummaryCell = ({
   return isSingleLine ? (
     <EuiFlexGroup gutterSize="s">
       {shouldRenderResource && (
-        <EuiFlexItem grow={false}>
-          <Resource
-            fields={resourceFields}
-            limited={isSingleLine}
-            onFilter={onFilter}
-            css={singleLineResourceCss}
-          />
-        </EuiFlexItem>
+        <Resource
+          fields={resourceFields}
+          limited={isSingleLine}
+          onFilter={onFilter}
+          css={singleLineResourceCss}
+        />
       )}
       <Content {...props} isCompressed={isCompressed} isSingleLine />
     </EuiFlexGroup>
@@ -170,6 +161,7 @@ const SummaryCellPopover = (props: SummaryColumnProps & SummaryColumnFactoryDeps
 };
 
 const singleLineResourceCss = {
+  flexGrow: 0,
   lineHeight: 'normal',
   marginTop: -1,
 };
