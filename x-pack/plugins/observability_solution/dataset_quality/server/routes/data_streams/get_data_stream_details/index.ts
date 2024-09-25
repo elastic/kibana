@@ -20,6 +20,7 @@ import { DataStreamDetails, DataStreamSettings } from '../../../../common/api_ty
 import { createDatasetQualityESClient } from '../../../utils';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 import { getDataStreams } from '../get_data_streams';
+import { getDataStreamsMeteringStats } from '../get_data_streams_metering_stats';
 
 export async function getDataStreamSettings({
   esClient,
@@ -80,12 +81,13 @@ export async function getDataStreamDetails({
       end
     );
 
-    const whenSizeStatsNotAvailable = NaN; // This will indicate size cannot be calculated
-    const avgDocSizeInBytes = isServerless
-      ? whenSizeStatsNotAvailable
-      : hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
-      ? await getAvgDocSizeInBytes(esClient, dataStream)
-      : 0;
+    const avgDocSizeInBytes =
+      hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
+        ? isServerless
+          ? await getMeteringAvgDocSizeInBytes(esClient, dataStream)
+          : await getAvgDocSizeInBytes(esClient, dataStream)
+        : 0;
+
     const sizeBytes = Math.ceil(avgDocSizeInBytes * dataStreamSummaryStats.docsCount);
 
     return {
@@ -170,6 +172,18 @@ async function getDataStreamSummaryStats(
     services: getTermsFromAgg(serviceNamesAgg, response.aggregations),
     hosts: getTermsFromAgg(hostsAgg, response.aggregations),
   };
+}
+
+async function getMeteringAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string) {
+  const meteringStats = await getDataStreamsMeteringStats({
+    esClient,
+    dataStreams: [index],
+  });
+
+  const docCount = meteringStats[index].totalDocs ?? 0;
+  const sizeInBytes = meteringStats[index].sizeBytes ?? 0;
+
+  return docCount ? sizeInBytes / docCount : 0;
 }
 
 async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string) {
