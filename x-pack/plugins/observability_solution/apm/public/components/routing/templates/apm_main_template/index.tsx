@@ -5,27 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPageHeaderProps,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
-import {
-  ObservabilityPageTemplateProps,
-  TechnicalPreviewBadge,
-} from '@kbn/observability-shared-plugin/public';
+import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { SerializableRecord } from '@kbn/utility-types';
-import { ENTITY_INVENTORY_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
@@ -40,6 +27,7 @@ import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { getNoDataConfig } from '../no_data_config';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ServiceInventoryView } from '../../../../context/entity_manager_context/entity_manager_context';
+import { InventoryCallout } from './inventory_callout';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
@@ -84,7 +72,7 @@ export function ApmMainTemplate({
   const { http, docLinks, observabilityShared, application } = services;
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
-  const { config, core, share } = useApmPluginContext();
+  const { config, core } = useApmPluginContext();
   const isEntityCentricExperienceSettingEnabled = core.uiSettings.get<boolean>(
     entityCentricExperience,
     true
@@ -185,42 +173,6 @@ export function ApmMainTemplate({
     isEntityCentricExperienceSettingEnabled &&
     selectedNavButton === 'allServices';
 
-  const inventoryLocator = share.url.locators.get<SerializableRecord>(ENTITY_INVENTORY_LOCATOR_ID);
-
-  const inventoryCallout = (
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <TechnicalPreviewBadge icon="beaker" style={{ verticalAlign: 'middle' }} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiLink data-test-subj="inventoryCalloutLink" href={inventoryLocator?.useUrl({})}>
-          <FormattedMessage
-            id="xpack.apm.inventoryCallout.linklabel"
-            defaultMessage="Try our new Inventory!"
-          />
-        </EuiLink>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
-            <FormattedMessage
-              id="xpack.apm.inventoryCallout.linkTooltip"
-              defaultMessage="Hide this"
-            />
-          }
-        >
-          <EuiButtonIcon
-            data-test-subj="inventoryCalloutDismiss"
-            iconType="cross"
-            onClick={() => {
-              setDismissedInventoryCallout(true);
-            }}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   return (
     <EnvironmentsContextProvider>
       <ObservabilityPageTemplate
@@ -237,7 +189,13 @@ export function ApmMainTemplate({
           pageTitle: pageHeaderTitle,
           children: (
             <EuiFlexGroup direction="column">
-              {showInventoryCallout ? inventoryCallout : null}
+              {showInventoryCallout ? (
+                <InventoryCallout
+                  onDissmiss={() => {
+                    setDismissedInventoryCallout(true);
+                  }}
+                />
+              ) : null}
               {showServiceGroupsNav && selectedNavButton && (
                 <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
               )}
