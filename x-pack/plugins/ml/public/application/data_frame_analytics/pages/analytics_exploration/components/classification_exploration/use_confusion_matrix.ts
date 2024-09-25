@@ -17,7 +17,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { useMlApiContext } from '../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../contexts/kibana';
 
 import type { ResultsSearchQuery, ClassificationMetricItem } from '../../../../common/analytics';
 import { isClassificationEvaluateResponse } from '../../../../common/analytics';
@@ -60,7 +60,7 @@ export const useConfusionMatrix = (
   jobConfig: DataFrameAnalyticsConfig,
   searchQuery: ResultsSearchQuery
 ) => {
-  const mlApiServices = useMlApiContext();
+  const mlApi = useMlApi();
   const newJobCapsServiceAnalytics = useNewJobCapsServiceAnalytics();
   const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
   const [overallAccuracy, setOverallAccuracy] = useState<null | number>(null);
@@ -89,7 +89,7 @@ export const useConfusionMatrix = (
       }
 
       const evalData = await loadEvalData({
-        mlApiServices,
+        mlApi,
         isTraining,
         index: jobConfig.dest.index,
         dependentVariable,
@@ -101,7 +101,7 @@ export const useConfusionMatrix = (
       });
 
       const docsCountResp = await loadDocsCount({
-        mlApiServices,
+        mlApi,
         isTraining,
         searchQuery,
         resultsField,

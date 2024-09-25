@@ -15,9 +15,10 @@ import {
   GetIntegrationDashboardsParams,
   GetDataStreamDegradedFieldsParams,
   DegradedFieldResponse,
+  GetDataStreamDegradedFieldValuesPathParams,
 } from '../../../common/data_streams_stats';
 import { GetDataStreamIntegrationParams } from '../../../common/data_stream_details/types';
-import { Dashboard } from '../../../common/api_types';
+import { Dashboard, DegradedFieldValues } from '../../../common/api_types';
 
 export type DataStreamDetailsServiceSetup = void;
 
@@ -35,6 +36,9 @@ export interface IDataStreamDetailsClient {
   getDataStreamDegradedFields(
     params: GetDataStreamDegradedFieldsParams
   ): Promise<DegradedFieldResponse>;
+  getDataStreamDegradedFieldValues(
+    params: GetDataStreamDegradedFieldValuesPathParams
+  ): Promise<DegradedFieldValues>;
   getIntegrationDashboards(params: GetIntegrationDashboardsParams): Promise<Dashboard[]>;
   getDataStreamIntegration(
     params: GetDataStreamIntegrationParams

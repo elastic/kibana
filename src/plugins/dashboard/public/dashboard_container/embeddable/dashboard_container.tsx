@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -49,7 +50,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import deepEqual from 'fast-deep-equal';
 import { omit } from 'lodash';
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription, first, skipWhile, switchMap } from 'rxjs';
@@ -58,8 +59,13 @@ import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
-import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
-import { DashboardAttributes, DashboardContainerInput, DashboardPanelState } from '../../../common';
+import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE, DashboardApi } from '../..';
+import {
+  DashboardAttributes,
+  DashboardContainerInput,
+  DashboardPanelMap,
+  DashboardPanelState,
+} from '../../../common';
 import {
   getReferencesForControls,
   getReferencesForPanelId,
@@ -77,18 +83,16 @@ import { pluginServices } from '../../services/plugin_services';
 import { placePanel } from '../panel_placement';
 import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
-import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
 import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
-import { DashboardPublicState, DashboardReduxState, UnsavedPanelState } from '../types';
 import {
-  addFromLibrary,
-  addOrUpdateEmbeddable,
-  runQuickSave,
-  runInteractiveSave,
-  showSettings,
-} from './api';
+  DashboardPublicState,
+  DashboardReduxState,
+  DashboardStateFromSettingsFlyout,
+  UnsavedPanelState,
+} from '../types';
+import { addFromLibrary, addOrUpdateEmbeddable, runQuickSave, runInteractiveSave } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
 import {
   combineDashboardFiltersWithControlGroupFilters,
@@ -102,6 +106,7 @@ import {
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
+import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -124,19 +129,9 @@ type DashboardReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof dashboardContainerReducers
 >;
 
-export const DashboardContainerContext = createContext<DashboardContainer | null>(null);
-export const useDashboardContainer = (): DashboardContainer => {
-  const dashboard = useContext<DashboardContainer | null>(DashboardContainerContext);
-  if (dashboard == null) {
-    throw new Error('useDashboardContainer must be used inside DashboardContainerContext.');
-  }
-  return dashboard!;
-};
-
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
   implements
-    DashboardExternallyAccessibleApi,
     TrackContentfulRender,
     TracksQueryPerformance,
     HasSaveNotification,
@@ -173,7 +168,6 @@ export class DashboardContainer
 
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
-  private allDataViews: DataView[] = [];
 
   // performance monitoring
   public lastLoadStartTime?: number;
@@ -229,7 +223,12 @@ export class DashboardContainer
           .pipe(
             skipWhile((controlGroupApi) => !controlGroupApi),
             switchMap(async (controlGroupApi) => {
-              await controlGroupApi?.untilInitialized();
+              // Bug in main where panels are loaded before control filters are ready
+              // Want to migrate to react embeddable controls with same behavior
+              // TODO - do not load panels until control filters are ready
+              /*
+                await controlGroupApi?.untilInitialized();
+              */
             }),
             first()
           )
@@ -251,9 +250,7 @@ export class DashboardContainer
       { embeddableLoaded: {} },
       getEmbeddableFactory,
       parent,
-      {
-        untilContainerInitialized,
-      }
+      { untilContainerInitialized }
     );
 
     this.controlGroupApi$ = controlGroupApi$;
@@ -296,24 +293,77 @@ export class DashboardContainer
     this.dispatch = reduxTools.dispatch;
     this.select = reduxTools.select;
 
-    this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
-    this.publishingSubscription.add(
-      this.onStateChange(() => {
-        if (this.savedObjectId.value === this.getDashboardSavedObjectId()) return;
-        this.savedObjectId.next(this.getDashboardSavedObjectId());
-      })
-    );
-    this.publishingSubscription.add(
-      this.savedObjectId.subscribe(() => {
-        this.hadContentfulRender = false;
-      })
-    );
+    this.uuid$ = embeddableInputToSubject<string>(
+      this.publishingSubscription,
+      this,
+      'id'
+    ) as BehaviorSubject<string>;
 
-    this.expandedPanelId = new BehaviorSubject(this.getDashboardSavedObjectId());
+    this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
+    this.expandedPanelId = new BehaviorSubject(this.getExpandedPanelId());
+    this.focusedPanelId$ = new BehaviorSubject(this.getState().componentState.focusedPanelId);
+    this.managed$ = new BehaviorSubject(this.getState().componentState.managed);
+    this.fullScreenMode$ = new BehaviorSubject(this.getState().componentState.fullScreenMode);
+    this.hasRunMigrations$ = new BehaviorSubject(
+      this.getState().componentState.hasRunClientsideMigrations
+    );
+    this.hasUnsavedChanges$ = new BehaviorSubject(this.getState().componentState.hasUnsavedChanges);
+    this.hasOverlays$ = new BehaviorSubject(this.getState().componentState.hasOverlays);
+    this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
+    this.scrollToPanelId$ = new BehaviorSubject(this.getState().componentState.scrollToPanelId);
+    this.highlightPanelId$ = new BehaviorSubject(this.getState().componentState.highlightPanelId);
+    this.animatePanelTransforms$ = new BehaviorSubject(
+      this.getState().componentState.animatePanelTransforms
+    );
+    this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
+    this.embeddedExternally$ = new BehaviorSubject(
+      this.getState().componentState.isEmbeddedExternally
+    );
     this.publishingSubscription.add(
       this.onStateChange(() => {
-        if (this.expandedPanelId.value === this.getExpandedPanelId()) return;
-        this.expandedPanelId.next(this.getExpandedPanelId());
+        const state = this.getState();
+        if (this.savedObjectId.value !== this.getDashboardSavedObjectId()) {
+          this.savedObjectId.next(this.getDashboardSavedObjectId());
+        }
+        if (this.expandedPanelId.value !== this.getExpandedPanelId()) {
+          this.expandedPanelId.next(this.getExpandedPanelId());
+        }
+        if (this.focusedPanelId$.value !== state.componentState.focusedPanelId) {
+          this.focusedPanelId$.next(state.componentState.focusedPanelId);
+        }
+        if (this.managed$.value !== state.componentState.managed) {
+          this.managed$.next(state.componentState.managed);
+        }
+        if (this.fullScreenMode$.value !== state.componentState.fullScreenMode) {
+          this.fullScreenMode$.next(state.componentState.fullScreenMode);
+        }
+        if (this.hasRunMigrations$.value !== state.componentState.hasRunClientsideMigrations) {
+          this.hasRunMigrations$.next(state.componentState.hasRunClientsideMigrations);
+        }
+        if (this.hasUnsavedChanges$.value !== state.componentState.hasUnsavedChanges) {
+          this.hasUnsavedChanges$.next(state.componentState.hasUnsavedChanges);
+        }
+        if (this.hasOverlays$.value !== state.componentState.hasOverlays) {
+          this.hasOverlays$.next(state.componentState.hasOverlays);
+        }
+        if (this.useMargins$.value !== state.explicitInput.useMargins) {
+          this.useMargins$.next(state.explicitInput.useMargins);
+        }
+        if (this.scrollToPanelId$.value !== state.componentState.scrollToPanelId) {
+          this.scrollToPanelId$.next(state.componentState.scrollToPanelId);
+        }
+        if (this.highlightPanelId$.value !== state.componentState.highlightPanelId) {
+          this.highlightPanelId$.next(state.componentState.highlightPanelId);
+        }
+        if (this.animatePanelTransforms$.value !== state.componentState.animatePanelTransforms) {
+          this.animatePanelTransforms$.next(state.componentState.animatePanelTransforms);
+        }
+        if (this.embeddedExternally$.value !== state.componentState.isEmbeddedExternally) {
+          this.embeddedExternally$.next(state.componentState.isEmbeddedExternally);
+        }
+        if (this.panels$.value !== state.explicitInput.panels) {
+          this.panels$.next(state.explicitInput.panels);
+        }
       })
     );
 
@@ -370,7 +420,7 @@ export class DashboardContainer
       })
     );
 
-    this.dataViews = new BehaviorSubject<DataView[] | undefined>(this.getAllDataViews());
+    this.dataViews = new BehaviorSubject<DataView[] | undefined>([]);
 
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getInput().query);
     this.query$ = query$;
@@ -432,9 +482,9 @@ export class DashboardContainer
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: this.chrome, customBranding: this.customBranding }}
         >
-          <DashboardContainerContext.Provider value={this}>
+          <DashboardContext.Provider value={this as DashboardApi}>
             <DashboardViewport />
-          </DashboardContainerContext.Provider>
+          </DashboardContext.Provider>
         </ExitFullScreenButtonKibanaProvider>
       </KibanaRenderContextProvider>,
       dom
@@ -515,7 +565,6 @@ export class DashboardContainer
   public runInteractiveSave = runInteractiveSave;
   public runQuickSave = runQuickSave;
 
-  public showSettings = showSettings;
   public addFromLibrary = addFromLibrary;
 
   public duplicatePanel(id: string) {
@@ -529,6 +578,19 @@ export class DashboardContainer
 
   public savedObjectId: BehaviorSubject<string | undefined>;
   public expandedPanelId: BehaviorSubject<string | undefined>;
+  public focusedPanelId$: BehaviorSubject<string | undefined>;
+  public managed$: BehaviorSubject<boolean | undefined>;
+  public fullScreenMode$: BehaviorSubject<boolean | undefined>;
+  public hasRunMigrations$: BehaviorSubject<boolean | undefined>;
+  public hasUnsavedChanges$: BehaviorSubject<boolean | undefined>;
+  public hasOverlays$: BehaviorSubject<boolean | undefined>;
+  public useMargins$: BehaviorSubject<boolean>;
+  public scrollToPanelId$: BehaviorSubject<string | undefined>;
+  public highlightPanelId$: BehaviorSubject<string | undefined>;
+  public animatePanelTransforms$: BehaviorSubject<boolean | undefined>;
+  public panels$: BehaviorSubject<DashboardPanelMap>;
+  public embeddedExternally$: BehaviorSubject<boolean | undefined>;
+  public uuid$: BehaviorSubject<string>;
 
   public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
     const newId = await this.replaceEmbeddable(
@@ -771,19 +833,10 @@ export class DashboardContainer
   };
 
   /**
-   * Gets all the dataviews that are actively being used in the dashboard
-   * @returns An array of dataviews
-   */
-  public getAllDataViews = () => {
-    return this.allDataViews;
-  };
-
-  /**
    * Use this to set the dataviews that are used in the dashboard when they change/update
    * @param newDataViews The new array of dataviews that will overwrite the old dataviews array
    */
   public setAllDataViews = (newDataViews: DataView[]) => {
-    this.allDataViews = newDataViews;
     (this.dataViews as BehaviorSubject<DataView[] | undefined>).next(newDataViews);
   };
 
@@ -791,8 +844,48 @@ export class DashboardContainer
     return this.getState().componentState.expandedPanelId;
   };
 
+  public getPanelsState = () => {
+    return this.getState().explicitInput.panels;
+  };
+
+  public getSettings = (): DashboardStateFromSettingsFlyout => {
+    const state = this.getState();
+    return {
+      description: state.explicitInput.description,
+      hidePanelTitles: state.explicitInput.hidePanelTitles,
+      lastSavedId: state.componentState.lastSavedId,
+      syncColors: state.explicitInput.syncColors,
+      syncCursor: state.explicitInput.syncCursor,
+      syncTooltips: state.explicitInput.syncTooltips,
+      tags: state.explicitInput.tags,
+      timeRestore: state.explicitInput.timeRestore,
+      title: state.explicitInput.title,
+      useMargins: state.explicitInput.useMargins,
+    };
+  };
+
+  public setSettings = (settings: DashboardStateFromSettingsFlyout) => {
+    this.dispatch.setStateFromSettingsFlyout(settings);
+  };
+
   public setExpandedPanelId = (newId?: string) => {
     this.dispatch.setExpandedPanelId(newId);
+  };
+
+  public setViewMode = (viewMode: ViewMode) => {
+    this.dispatch.setViewMode(viewMode);
+  };
+
+  public setFullScreenMode = (fullScreenMode: boolean) => {
+    this.dispatch.setFullScreenMode(fullScreenMode);
+  };
+
+  public setQuery = (query?: Query | undefined) => this.updateInput({ query });
+
+  public setFilters = (filters?: Filter[] | undefined) => this.updateInput({ filters });
+
+  public setTags = (tags: string[]) => {
+    this.updateInput({ tags });
   };
 
   public openOverlay = (ref: OverlayRef, options?: { focusedPanelId?: string }) => {
@@ -886,6 +979,10 @@ export class DashboardContainer
   public setFocusedPanelId = (id: string | undefined) => {
     this.dispatch.setFocusedPanelId(id);
     this.setScrollToPanelId(id);
+  };
+
+  public setPanels = (panels: DashboardPanelMap) => {
+    this.dispatch.setPanels(panels);
   };
 
   // ------------------------------------------------------------------------------------------------------

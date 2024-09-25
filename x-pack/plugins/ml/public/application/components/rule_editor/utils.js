@@ -68,14 +68,7 @@ export function isValidRule(rule) {
   return isValid;
 }
 
-export function saveJobRule(
-  mlJobService,
-  job,
-  detectorIndex,
-  ruleIndex,
-  editedRule,
-  mlApiServices
-) {
+export function saveJobRule(mlJobService, job, detectorIndex, ruleIndex, editedRule, mlApi) {
   const detector = job.analysis_config.detectors[detectorIndex];
 
   // Filter out any scope expression where the UI=specific 'enabled'
@@ -108,16 +101,16 @@ export function saveJobRule(
     }
   }
 
-  return updateJobRules(mlJobService, job, detectorIndex, rules, mlApiServices);
+  return updateJobRules(mlJobService, job, detectorIndex, rules, mlApi);
 }
 
-export function deleteJobRule(mlJobService, job, detectorIndex, ruleIndex, mlApiServices) {
+export function deleteJobRule(mlJobService, job, detectorIndex, ruleIndex, mlApi) {
   const detector = job.analysis_config.detectors[detectorIndex];
   let customRules = [];
   if (detector.custom_rules !== undefined && ruleIndex < detector.custom_rules.length) {
     customRules = cloneDeep(detector.custom_rules);
     customRules.splice(ruleIndex, 1);
-    return updateJobRules(mlJobService, job, detectorIndex, customRules, mlApiServices);
+    return updateJobRules(mlJobService, job, detectorIndex, customRules, mlApi);
   } else {
     return Promise.reject(
       new Error(
@@ -133,7 +126,7 @@ export function deleteJobRule(mlJobService, job, detectorIndex, ruleIndex, mlApi
   }
 }
 
-export function updateJobRules(mlJobService, job, detectorIndex, rules, mlApiServices) {
+export function updateJobRules(mlJobService, job, detectorIndex, rules, mlApi) {
   // Pass just the detector with the edited rule to the updateJob endpoint.
   const jobId = job.job_id;
   const jobData = {
@@ -152,7 +145,7 @@ export function updateJobRules(mlJobService, job, detectorIndex, rules, mlApiSer
     jobData.custom_settings = customSettings;
   }
   return new Promise((resolve, reject) => {
-    mlApiServices
+    mlApi
       .updateJob({ jobId: jobId, job: jobData })
       .then(() => {
         mlJobService
@@ -172,9 +165,9 @@ export function updateJobRules(mlJobService, job, detectorIndex, rules, mlApiSer
 
 // Updates an ML filter used in the scope part of a rule,
 // adding an item to the filter with the specified ID.
-export function addItemToFilter(item, filterId, mlApiServices) {
+export function addItemToFilter(item, filterId, mlApi) {
   return new Promise((resolve, reject) => {
-    mlApiServices.filters
+    mlApi.filters
       .updateFilter(filterId, undefined, [item], undefined)
       .then((updatedFilter) => {
         resolve(updatedFilter);

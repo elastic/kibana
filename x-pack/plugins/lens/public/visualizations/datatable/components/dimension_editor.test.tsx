@@ -8,7 +8,7 @@
 import React from 'react';
 import { DEFAULT_COLOR_MAPPING_CONFIG, type PaletteRegistry } from '@kbn/coloring';
 import { act, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
@@ -24,8 +24,10 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { TableDimensionEditor } from './dimension_editor';
 import { ColumnState } from '../../../../common/expressions';
 import { capitalize } from 'lodash';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('data table dimension editor', () => {
+  let user: UserEvent;
   let frame: FramePublicAPI;
   let state: DatatableVisualizationState;
   let btnGroups: {
@@ -59,6 +61,7 @@ describe('data table dimension editor', () => {
   });
 
   beforeEach(() => {
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     btnGroups = {
       colorMode: new EuiButtonGroupTestHarness('lnsDatatable_dynamicColoring_groups'),
       alignment: new EuiButtonGroupTestHarness('lnsDatatable_alignment_groups'),
@@ -120,10 +123,10 @@ describe('data table dimension editor', () => {
   ) => {
     return render(<TableDimensionEditor {...props} {...overrideProps} />, {
       wrapper: ({ children }) => (
-        <>
+        <I18nProvider>
           <div ref={props.panelRef} />
           {children}
-        </>
+        </I18nProvider>
       ),
     });
   };
@@ -145,7 +148,7 @@ describe('data table dimension editor', () => {
     expect(btnGroups.alignment.selected).toHaveTextContent('Center');
   });
 
-  it('should set state for the right column', () => {
+  it('should set state for the right column', async () => {
     state.columns = [
       {
         columnId: 'foo',
@@ -155,7 +158,7 @@ describe('data table dimension editor', () => {
       },
     ];
     renderTableDimensionEditor();
-    userEvent.click(screen.getByRole('button', { name: 'Center' }));
+    await user.click(screen.getByRole('button', { name: 'Center' }));
     jest.advanceTimersByTime(256);
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
@@ -208,10 +211,10 @@ describe('data table dimension editor', () => {
     }
   );
 
-  it('should set the coloring mode to the right column', () => {
+  it('should set the coloring mode to the right column', async () => {
     state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
-    userEvent.click(screen.getByRole('button', { name: 'Cell' }));
+    await user.click(screen.getByRole('button', { name: 'Cell' }));
     jest.advanceTimersByTime(256);
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
@@ -234,12 +237,13 @@ describe('data table dimension editor', () => {
     { flyout: 'values', isBucketed: false, dataType: 'number' },
   ])(
     'should show color by $flyout flyout when bucketing is $isBucketed with $dataType column',
-    ({ flyout, isBucketed, dataType }) => {
+    async ({ flyout, isBucketed, dataType }) => {
       state.columns[0].colorMode = 'cell';
       mockOperationForFirstColumn({ isBucketed, dataType });
       renderTableDimensionEditor();
 
-      userEvent.click(screen.getByLabelText('Edit colors'));
+      await user.click(screen.getByLabelText('Edit colors'));
+      act(() => jest.advanceTimersByTime(256));
 
       expect(screen.getByTestId(`lns-palettePanel-${flyout}`)).toBeInTheDocument();
     }

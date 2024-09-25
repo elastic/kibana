@@ -61,7 +61,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
   const { toasts: toastNotifications } = useNotifications();
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
@@ -103,7 +103,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
      */
     const loadAnnotations = async (jobId: string) => {
       try {
-        const resp = await mlApiServices.annotations.getAnnotations({
+        const resp = await mlApi.annotations.getAnnotations({
           jobIds: [jobId],
           earliestMs: searchBounds.min.valueOf(),
           latestMs: searchBounds.max.valueOf(),

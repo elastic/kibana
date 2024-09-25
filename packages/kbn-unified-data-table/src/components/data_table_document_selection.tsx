@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -43,6 +45,10 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
     values: { rowNumber: rowIndex + 1 },
   });
 
+  if (!record) {
+    return null;
+  }
+
   return (
     <EuiFlexGroup
       responsive={false}
@@ -69,13 +75,13 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
   );
 };
 
-export const SelectAllButton = () => {
-  const { selectedDocsState, pageIndex, pageSize, rows } = useContext(UnifiedDataTableContext);
+export const getSelectAllButton = (rows: DataTableRecord[]) => () => {
+  const { selectedDocsState, pageIndex, pageSize } = useContext(UnifiedDataTableContext);
   const { getCountOfFilteredSelectedDocs, deselectSomeDocs, selectMoreDocs } = selectedDocsState;
 
   const docIdsFromCurrentPage = useMemo(() => {
     return getDocIdsForCurrentPage(rows, pageIndex, pageSize);
-  }, [rows, pageIndex, pageSize]);
+  }, [pageIndex, pageSize]);
 
   const countOfSelectedDocs = useMemo(() => {
     return docIdsFromCurrentPage?.length
@@ -198,6 +204,7 @@ export function DataTableDocumentToolbarBtn({
       // Copy results to clipboard as text
       <DataTableCopyRowsAsText
         key="copyRowsAsText"
+        rows={rows}
         toastNotifications={toastNotifications}
         columns={columns}
         onCompleted={closePopover}
@@ -205,6 +212,7 @@ export function DataTableDocumentToolbarBtn({
       // Copy results to clipboard as JSON
       <DataTableCopyRowsAsJson
         key="copyRowsAsJson"
+        rows={rows}
         toastNotifications={toastNotifications}
         onCompleted={closePopover}
       />,
@@ -270,17 +278,18 @@ export function DataTableDocumentToolbarBtn({
       </EuiContextMenuItem>,
     ];
   }, [
-    isFilterActive,
-    isPlainRecord,
-    setIsFilterActive,
-    clearAllSelectedDocs,
+    enableComparisonMode,
     selectedDocsCount,
     docIdsInSelectionOrder,
-    enableComparisonMode,
     setIsCompareActive,
     toastNotifications,
     columns,
     closePopover,
+    rows,
+    isFilterActive,
+    isPlainRecord,
+    setIsFilterActive,
+    clearAllSelectedDocs,
   ]);
 
   const toggleSelectionToolbar = useCallback(

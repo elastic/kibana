@@ -130,6 +130,9 @@ import {
   RELATED_INTEGRATION_COMBO_BOX_INPUT,
   SAVE_WITH_ERRORS_MODAL,
   SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN,
+  PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON,
+  PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON,
+  PREVIEW_LOGGED_REQUESTS_CHECKBOX,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -904,7 +907,7 @@ export const enablesAndPopulatesThresholdSuppression = (
 
   // enables suppression for threshold rule
   cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('not.be.checked');
-  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).siblings('label').click();
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).click();
 
   setAlertSuppressionDuration(interval, timeUnit);
 
@@ -935,11 +938,11 @@ export const selectAlertSuppressionPerInterval = () => {
 };
 
 export const selectAlertSuppressionPerRuleExecution = () => {
-  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).siblings('label').click();
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).click();
 };
 
 export const selectDoNotSuppressForMissingFields = () => {
-  cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).siblings('label').click();
+  cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).click();
 };
 
 export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm' | 'h') => {
@@ -995,4 +998,21 @@ export const uncheckLoadQueryDynamically = () => {
 
 export const openAddFilterPopover = () => {
   cy.get(QUERY_BAR_ADD_FILTER).click();
+};
+
+export const checkEnableLoggedRequests = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).click();
+  cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).should('be.checked');
+};
+
+export const submitRulePreview = () => {
+  cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).click();
+};
+
+export const toggleLoggedRequestsAccordion = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON).first().click();
+};
+
+export const toggleLoggedRequestsItemAccordion = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON).should('be.visible').first().click();
 };

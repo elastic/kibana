@@ -24,6 +24,8 @@ const handleCreateMappingChunks = async ({ state }: EcsBaseNodeParams) => {
     ecs: state.ecs,
     dataStreamName: state.dataStreamName,
     packageName: state.packageName,
+    samplesFormat: state.samplesFormat,
+    additionalProcessors: state.additionalProcessors,
   };
   if (Object.keys(state.currentMapping).length === 0) {
     return state.sampleChunks.map((chunk) => {
@@ -34,6 +36,9 @@ const handleCreateMappingChunks = async ({ state }: EcsBaseNodeParams) => {
 };
 
 function chainRouter({ state }: EcsBaseNodeParams): string {
+  if (Object.keys(state.finalMapping).length === 0 && state.hasTriedOnce) {
+    return 'modelOutput';
+  }
   if (Object.keys(state.duplicateFields).length > 0) {
     return 'duplicateFields';
   }
@@ -50,7 +55,7 @@ function chainRouter({ state }: EcsBaseNodeParams): string {
 }
 
 // This is added as a separate graph to be able to run these steps concurrently from handleCreateMappingChunks
-async function getEcsSubGraph({ model }: EcsGraphParams) {
+export async function getEcsSubGraph({ model }: EcsGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
@@ -99,8 +104,13 @@ export async function getEcsGraph({ model }: EcsGraphParams) {
     .addEdge('handleMissingKeys', 'handleValidation')
     .addEdge('handleInvalidEcs', 'handleValidation')
     .addEdge('handleMergedSubGraphResponse', 'handleValidation')
-    .addConditionalEdges('modelInput', (state: EcsMappingState) =>
-      handleCreateMappingChunks({ state })
+    .addConditionalEdges(
+      'modelInput',
+      (state: EcsMappingState) => handleCreateMappingChunks({ state }),
+      {
+        modelOutput: 'modelOutput',
+        subGraph: 'subGraph',
+      }
     )
     .addConditionalEdges('handleValidation', (state: EcsMappingState) => chainRouter({ state }), {
       duplicateFields: 'handleDuplicates',

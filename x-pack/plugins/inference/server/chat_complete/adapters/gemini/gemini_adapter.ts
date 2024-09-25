@@ -106,12 +106,16 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
           type: Gemini.FunctionDeclarationSchemaType.OBJECT,
           description: def.description,
           required: def.required as string[],
-          properties: Object.entries(def.properties).reduce<
-            Record<string, Gemini.FunctionDeclarationSchema>
-          >((properties, [key, prop]) => {
-            properties[key] = convertSchemaType({ def: prop }) as Gemini.FunctionDeclarationSchema;
-            return properties;
-          }, {}),
+          properties: def.properties
+            ? Object.entries(def.properties).reduce<
+                Record<string, Gemini.FunctionDeclarationSchema>
+              >((properties, [key, prop]) => {
+                properties[key] = convertSchemaType({
+                  def: prop,
+                }) as Gemini.FunctionDeclarationSchema;
+                return properties;
+              }, {})
+            : undefined,
         };
       case 'string':
         return {
@@ -137,7 +141,7 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
   return {
     type: Gemini.FunctionDeclarationSchemaType.OBJECT,
     required: schema.required as string[],
-    properties: Object.entries(schema.properties).reduce<
+    properties: Object.entries(schema.properties ?? {}).reduce<
       Record<string, Gemini.FunctionDeclarationSchemaProperty>
     >((properties, [key, def]) => {
       properties[key] = convertSchemaType({ def });

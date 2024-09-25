@@ -975,32 +975,27 @@ export interface VisualizationType {
    * Visible label used in the chart switcher and above the workspace panel in collapsed state
    */
   label: string;
+  description: string;
   /**
    * Optional label used in visualization type search if chart switcher is expanded and for tooltips
    */
   fullLabel?: string;
   /**
-   * The group the visualization belongs to
-   */
-  groupLabel: string;
-  /**
-   * Adds to the priority of the group, accumulated from all visualizations within the same group
-   * Total priority is used to sort groups. Higher number means higher priority (aka top of list).
+   * Priority of the visualization for sorting in chart switch
+   * Lower number means higher priority (aka top of list).
    *
-   * @default 0
    */
-  sortPriority?: number;
-  /**
-   * The sort order of the visualization in the grouping
-   * Items arranged from highest on top to lowest on bottom.
-   *
-   * @default 0
-   */
-  sortOrder?: number;
+  sortPriority: number;
   /**
    * Indicates if visualization is in the experimental stage.
    */
   showExperimentalBadge?: boolean;
+  /**
+   * Indicates if visualization is deprecated.
+   */
+  isDeprecated?: boolean;
+  subtypes?: string[];
+  getCompatibleSubtype?: (seriesType?: string) => string | undefined;
 }
 
 export interface VisualizationDisplayOptions {
@@ -1097,7 +1092,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * Return the ID of the current visualization. Used to highlight
    * the active subtype of the visualization.
    */
-  getVisualizationTypeId: (state: T) => string;
+  getVisualizationTypeId: (state: T, layerId?: string) => string;
 
   hideFromChartSwitch?: (frame: FramePublicAPI) => boolean;
   /**
@@ -1191,6 +1186,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   getCustomLayerHeader?: (
     props: VisualizationLayerWidgetProps<T>
   ) => undefined | ReactElement<VisualizationLayerWidgetProps<T>>;
+
+  getSubtypeSwitch?: (props: VisualizationLayerWidgetProps<T>) => (() => JSX.Element) | null;
 
   /**
    * Layer panel content rendered. This can be used to render a custom content below the title,

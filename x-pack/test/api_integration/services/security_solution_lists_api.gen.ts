@@ -39,6 +39,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
 
   return {
+    /**
+     * Create a new list.
+     */
     createList(props: CreateListProps) {
       return supertest
         .post('/api/lists')
@@ -47,6 +50,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Create `.lists` and `.items` data streams in the relevant space.
+     */
     createListIndex() {
       return supertest
         .post('/api/lists/index')
@@ -54,6 +60,14 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+      * Create a list item and associate it with the specified list.
+
+All list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+> info
+> Before creating a list item, you must create a list.
+
+      */
     createListItem(props: CreateListItemProps) {
       return supertest
         .post('/api/lists/items')
@@ -62,6 +76,12 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Delete a list using the list ID.
+> info
+> When you delete a list, all of its list items are also deleted.
+
+      */
     deleteList(props: DeleteListProps) {
       return supertest
         .delete('/api/lists')
@@ -70,6 +90,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Delete the `.lists` and `.items` data streams.
+     */
     deleteListIndex() {
       return supertest
         .delete('/api/lists/index')
@@ -77,6 +100,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Delete a list item using its `id`, or its `list_id` and `value` fields.
+     */
     deleteListItem(props: DeleteListItemProps) {
       return supertest
         .delete('/api/lists/items')
@@ -86,7 +112,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-     * Exports list item values from the specified list
+     * Export list item values from the specified list.
      */
     exportListItems(props: ExportListItemsProps) {
       return supertest
@@ -96,6 +122,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get all list items in the specified list.
+     */
     findListItems(props: FindListItemsProps) {
       return supertest
         .get('/api/lists/items/_find')
@@ -104,6 +133,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a paginated subset of lists. By default, the first page is returned, with 20 results per page.
+     */
     findLists(props: FindListsProps) {
       return supertest
         .get('/api/lists/_find')
@@ -113,7 +145,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-      * Imports a list of items from a `.txt` or `.csv` file. The maximum file size is 9 million bytes.
+      * Import list items from a TXT or CSV file. The maximum file size is 9 million bytes.
 
 You can import items to a new or existing list.
 
@@ -126,6 +158,9 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Update specific fields of an existing list using the list ID.
+     */
     patchList(props: PatchListProps) {
       return supertest
         .patch('/api/lists')
@@ -134,6 +169,9 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Update specific fields of an existing list item using the list item ID.
+     */
     patchListItem(props: PatchListItemProps) {
       return supertest
         .patch('/api/lists/items')
@@ -142,6 +180,9 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Get the details of a list using the list ID.
+     */
     readList(props: ReadListProps) {
       return supertest
         .get('/api/lists')
@@ -150,6 +191,9 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Verify that `.lists` and `.items` data streams exist.
+     */
     readListIndex() {
       return supertest
         .get('/api/lists/index')
@@ -157,6 +201,9 @@ You can import items to a new or existing list.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Get the details of a list item.
+     */
     readListItem(props: ReadListItemProps) {
       return supertest
         .get('/api/lists/items')
@@ -172,6 +219,12 @@ You can import items to a new or existing list.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+      * Update a list using the list ID. The original list is replaced, and all unspecified fields are deleted.
+> info
+> You cannot modify the `id` value.
+
+      */
     updateList(props: UpdateListProps) {
       return supertest
         .put('/api/lists')
@@ -180,6 +233,12 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Update a list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
+> info
+> You cannot modify the `id` value.
+
+      */
     updateListItem(props: UpdateListItemProps) {
       return supertest
         .put('/api/lists/items')

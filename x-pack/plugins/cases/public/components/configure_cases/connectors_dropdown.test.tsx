@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ReactWrapper, ComponentType } from 'enzyme';
 import { mount } from 'enzyme';
 import { EuiSuperSelect } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -34,7 +34,9 @@ describe('ConnectorsDropdown', () => {
   };
 
   beforeAll(() => {
-    wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
+    wrapper = mount(<ConnectorsDropdown {...props} />, {
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+    });
   });
 
   test('it renders', () => {
@@ -298,7 +300,7 @@ describe('ConnectorsDropdown', () => {
 
   test('it disables the dropdown', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} disabled={true} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(
@@ -308,7 +310,7 @@ describe('ConnectorsDropdown', () => {
 
   test('it loading correctly', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} isLoading={true} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(
@@ -318,7 +320,7 @@ describe('ConnectorsDropdown', () => {
 
   test('it selects the correct connector', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} selectedConnector={'servicenow-1'} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(
@@ -348,7 +350,7 @@ describe('ConnectorsDropdown', () => {
           ]}
         />,
         {
-          wrappingComponent: TestProviders,
+          wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
         }
       )
     ).not.toThrowError();
@@ -402,7 +404,7 @@ describe('ConnectorsDropdown', () => {
       { wrapper: ({ children }) => <TestProviders>{children}</TestProviders> }
     );
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await userEvent.click(screen.getByTestId('dropdown-connectors'));
     expect(screen.queryByTestId('dropdown-connector-add-connector')).not.toBeInTheDocument();
   });
 });

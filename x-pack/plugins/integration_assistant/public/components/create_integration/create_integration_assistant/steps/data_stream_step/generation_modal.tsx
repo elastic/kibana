@@ -25,6 +25,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
+import type { ESProcessorItem } from '../../../../../../common';
 import {
   type AnalyzeLogsRequestBody,
   type CategorizationRequestBody,
@@ -86,11 +87,18 @@ export const useGeneration = ({
 
     (async () => {
       try {
+        let additionalProcessors: ESProcessorItem[] | undefined;
+
+        // logSamples may be modified to JSON format if they are in different formats
+        // Keeping originalLogSamples for running pipeline and generating docs
+        const originalLogSamples = integrationSettings.logSamples;
         let logSamples = integrationSettings.logSamples;
         let samplesFormat = integrationSettings.samplesFormat;
 
         if (integrationSettings.samplesFormat === undefined) {
           const analyzeLogsRequest: AnalyzeLogsRequestBody = {
+            packageName: integrationSettings.name ?? '',
+            dataStreamName: integrationSettings.dataStreamName ?? '',
             logSamples: integrationSettings.logSamples ?? [],
             connectorId: connector.id,
             langSmithOptions: getLangSmithOptions(),
@@ -105,12 +113,15 @@ export const useGeneration = ({
           }
           logSamples = analyzeLogsResult.results.parsedSamples;
           samplesFormat = analyzeLogsResult.results.samplesFormat;
+          additionalProcessors = analyzeLogsResult.additionalProcessors;
         }
 
         const ecsRequest: EcsMappingRequestBody = {
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
           rawSamples: logSamples ?? [],
+          samplesFormat: samplesFormat ?? { name: 'json' },
+          additionalProcessors: additionalProcessors ?? [],
           connectorId: connector.id,
           langSmithOptions: getLangSmithOptions(),
         };
@@ -124,6 +135,8 @@ export const useGeneration = ({
         }
         const categorizationRequest: CategorizationRequestBody = {
           ...ecsRequest,
+          rawSamples: originalLogSamples ?? [],
+          samplesFormat: samplesFormat ?? { name: 'json' },
           currentPipeline: ecsGraphResult.results.pipeline,
         };
 

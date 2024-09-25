@@ -32,17 +32,47 @@ jobs:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
 
-    - name: setup node
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: '.nvmrc'
-    - name: yarn kbn bootstrap
+    # TODO: Possibly required to follow all call paths, however, when enabled, the step below runs out of memory.
+    # Possible workarounds: Apply for access to the GitHub beta where we can use beefier machines, or run it ourselves on Buildkite
+    # - name: yarn kbn bootstrap
+    #   run: |
+    #     mkdir ~/.npm-global
+    #     npm config set prefix '~/.npm-global'
+    #     export PATH=~/.npm-global/bin:$PATH
+    #     yarn kbn bootstrap --no-validate --no-vscode
+
+    - name: Set sha and branch
       run: |
-        yarn kbn bootstrap --no-validate --no-vscode
+        echo "CHECKOUT_REF=$(git symbolic-ref HEAD)" >> "$GITHUB_ENV"
+        echo "CHECKOUT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
-      # env:
-      #   NODE_OPTIONS: "--max-old-space-size=6144"
+      env:
+        NODE_OPTIONS: "--max-old-space-size=6144"
       with:
         category: "/language:${{matrix.language}}"
+        ref: ${{ env.CHECKOUT_REF }}
+        sha: ${{ env.CHECKOUT_SHA }}
+  alert:
+    name: Alert
+    runs-on: ubuntu-latest
+    needs: analyze
+    if: github.repository == 'elastic/kibana' # Hack: Do not run on forks
+    steps:
+    - name: Checkout kibana-operations
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      with:
+        repository: 'elastic/kibana-operations'
+        ref: main
+        path: ./kibana-operations
+        token: ${{secrets.KIBANAMACHINE_TOKEN}}
+
+    - name: CodeQL alert
+      working-directory: ./kibana-operations/triage
+      env:
+        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+        SLACK_TOKEN: ${{secrets.CODE_SCANNING_SLACK_TOKEN}}
+      run: |
+        npm ci --omit=dev
+        node codeql-alert 

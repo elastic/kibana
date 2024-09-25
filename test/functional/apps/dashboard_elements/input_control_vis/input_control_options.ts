@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -12,7 +13,12 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header', 'timePicker']);
+  const { common, visualize, visEditor, timePicker } = getPageObjects([
+    'common',
+    'visualize',
+    'visEditor',
+    'timePicker',
+  ]);
   const testSubjects = getService('testSubjects');
   const inspector = getService('inspector');
   const find = getService('find');
@@ -21,9 +27,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('input control options', () => {
     before(async () => {
-      await PageObjects.visualize.initTests();
-      await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.visualize.loadSavedVisualization('input control options', {
+      await visualize.initTests();
+      await common.navigateToApp('visualize');
+      await visualize.loadSavedVisualization('input control options', {
         navigateToVisualize: false,
       });
     });
@@ -67,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add filter pill when submit button is clicked', async () => {
-        await PageObjects.visEditor.inputControlSubmit();
+        await visEditor.inputControlSubmit();
 
         const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilter).to.equal(true);
@@ -76,8 +82,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should replace existing filter pill(s) when new item is selected', async () => {
         await comboBox.clear('listControlSelect0');
         await comboBox.set('listControlSelect0', 'osx');
-        await PageObjects.visEditor.inputControlSubmit();
-        await PageObjects.common.sleep(1000);
+        await visEditor.inputControlSubmit();
+        await common.sleep(1000);
 
         const hasOldFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
         const hasNewFilter = await filterBar.hasFilter(FIELD_NAME, 'osx');
@@ -87,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should clear dropdown when filter pill removed', async () => {
         await filterBar.removeFilter(FIELD_NAME);
-        await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
+        await common.sleep(500); // give time for filter to be removed and event handlers to fire
 
         const hasValue = await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0');
         expect(hasValue).to.equal(false);
@@ -95,11 +101,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should clear form when Clear button is clicked but not remove filter pill', async () => {
         await comboBox.set('listControlSelect0', 'ios');
-        await PageObjects.visEditor.inputControlSubmit();
+        await visEditor.inputControlSubmit();
         const hasFilterBeforeClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilterBeforeClearBtnClicked).to.equal(true);
 
-        await PageObjects.visEditor.inputControlClear();
+        await visEditor.inputControlClear();
         const hasValue = await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0');
         expect(hasValue).to.equal(false);
 
@@ -108,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should remove filter pill when cleared form is submitted', async () => {
-        await PageObjects.visEditor.inputControlSubmit();
+        await visEditor.inputControlSubmit();
         const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilter).to.equal(false);
       });
@@ -116,17 +122,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('updateFiltersOnChange is true', () => {
       before(async () => {
-        await PageObjects.visEditor.clickVisEditorTab('options');
-        await PageObjects.visEditor.checkSwitch('inputControlEditorUpdateFiltersOnChangeCheckbox');
-        await PageObjects.visEditor.clickGo();
+        await visEditor.clickVisEditorTab('options');
+        await visEditor.checkSwitch('inputControlEditorUpdateFiltersOnChangeCheckbox');
+        await visEditor.clickGo();
       });
 
       after(async () => {
-        await PageObjects.visEditor.clickVisEditorTab('options');
-        await PageObjects.visEditor.uncheckSwitch(
-          'inputControlEditorUpdateFiltersOnChangeCheckbox'
-        );
-        await PageObjects.visEditor.clickGo();
+        await visEditor.clickVisEditorTab('options');
+        await visEditor.uncheckSwitch('inputControlEditorUpdateFiltersOnChangeCheckbox');
+        await visEditor.clickGo();
       });
 
       it('should not display staging control buttons', async () => {
@@ -151,9 +155,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('useTimeFilter', () => {
       it('should use global time filter when getting terms', async () => {
-        await PageObjects.visEditor.clickVisEditorTab('options');
+        await visEditor.clickVisEditorTab('options');
         await testSubjects.setCheckbox('inputControlEditorUseTimeFilterCheckbox', 'check');
-        await PageObjects.visEditor.clickGo();
+        await visEditor.clickGo();
 
         // Expect control to be disabled because no terms could be gathered with time filter applied
         const input = await find.byCssSelector('[data-test-subj="inputControl0"] input');
@@ -162,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should re-create control when global time filter is updated', async () => {
-        await PageObjects.timePicker.setAbsoluteRange(
+        await timePicker.setAbsoluteRange(
           'Jan 1, 2015 @ 00:00:00.000',
           'Jan 1, 2016 @ 00:00:00.000'
         );
@@ -174,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
   });
 }

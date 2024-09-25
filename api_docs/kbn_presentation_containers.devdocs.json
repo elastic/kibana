@@ -330,6 +330,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.apiPublishesSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesSettings",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.PublishesSettings",
+            "text": "PublishesSettings"
+          }
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.apiPublishesSettings.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.canTrackContentfulRender",
         "type": "Function",
         "tags": [],
@@ -1064,23 +1104,23 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<string | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string | undefined>; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
+              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; observers: ",
+              "Observer",
+              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string | undefined>; }"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
@@ -1693,25 +1733,61 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<{ [key: string]: unknown; }>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, { [key: string]: unknown; }> | undefined; lift: <R>(operator: ",
               "Operator",
               "<{ [key: string]: unknown; }, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<{ [key: string]: unknown; }>; operator: ",
-              "Operator",
-              "<any, { [key: string]: unknown; }> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<{ [key: string]: unknown; }>> | ((value: { [key: string]: unknown; }) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: { [key: string]: unknown; }) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<{ [key: string]: unknown; } | undefined>; (PromiseCtor: PromiseConstructor): Promise<{ [key: string]: unknown; } | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<{ [key: string]: unknown; } | undefined>; }; }"
+              "; }; toPromise: { (): Promise<{ [key: string]: unknown; } | undefined>; (PromiseCtor: PromiseConstructor): Promise<{ [key: string]: unknown; } | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<{ [key: string]: unknown; } | undefined>; }; observers: ",
+              "Observer",
+              "<{ [key: string]: unknown; }>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<{ [key: string]: unknown; }>; }"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.PublishesSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesSettings",
+        "description": [],
+        "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.PublishesSettings.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<boolean | undefined>; }"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -29,12 +29,13 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { useMlApiContext, useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
   FieldStatsFlyoutProvider,
-} from '../../../../../components/field_stats_flyout';
-import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+  type FieldForStats,
+} from '@kbn/ml-field-stats-flyout';
+
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useDataSource } from '../../../../../contexts/ml';
 
@@ -116,7 +117,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 }) => {
   const { services } = useMlKibana();
   const toastNotifications = services.notifications.toasts;
-  const mlApiServices = useMlApiContext();
+  const mlApi = useMlApi();
   const newJobCapsServiceAnalytics = useNewJobCapsServiceAnalytics();
   const { selectedDataView, selectedSavedSearch } = useDataSource();
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
@@ -288,7 +289,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fieldSelection,
       errorMessage,
       noDocsContainMappedFields: noDocsWithFields,
-    } = await fetchExplainData(mlApiServices, formToUse);
+    } = await fetchExplainData(mlApi, formToUse);
 
     if (success) {
       if (shouldUpdateEstimatedMml) {
@@ -444,7 +445,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           fieldSelection,
           errorMessage,
           noDocsContainMappedFields: noDocsWithFields,
-        } = await fetchExplainData(mlApiServices, formCopy);
+        } = await fetchExplainData(mlApi, formCopy);
         if (success) {
           // update the field selection table
           const hasRequiredFields = fieldSelection.some(

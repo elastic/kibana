@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Task } from '../../lib';
@@ -147,14 +148,14 @@ export const CreateDockerCloud: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       context: false,
       cloud: true,
       image: true,
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       context: false,
       cloud: true,
       image: true,
@@ -204,7 +205,7 @@ export const CreateDockerContexts: Task = {
       image: false,
     });
     await runDockerGenerator(config, log, build, {
-      baseImage: 'ubuntu',
+      baseImage: 'wolfi',
       cloud: true,
       context: true,
       image: false,

@@ -5,31 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import {
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+  CLOUD_SECURITY_POSTURE_BASE_PATH,
+} from '@kbn/cloud-security-posture-common';
+import { NAV_ITEMS_NAMES } from '@kbn/cloud-security-posture/constants/navigation';
 import type { CspBenchmarksPage, CspPage, CspPageNavigationItem } from './types';
-
-const NAV_ITEMS_NAMES = {
-  DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
-    defaultMessage: 'Cloud Security Posture',
-  }),
-  VULNERABILITY_DASHBOARD: i18n.translate(
-    'xpack.csp.navigation.vulnerabilityDashboardNavItemLabel',
-    { defaultMessage: 'Cloud Native Vulnerability Management' }
-  ),
-  FINDINGS: i18n.translate('xpack.csp.navigation.findingsNavItemLabel', {
-    defaultMessage: 'Findings',
-  }),
-  BENCHMARKS: i18n.translate('xpack.csp.navigation.myBenchmarksNavItemLabel', {
-    defaultMessage: 'Benchmarks',
-  }),
-  RULES: i18n.translate('xpack.csp.navigation.rulesNavItemLabel', {
-    defaultMessage: 'Rules',
-  }),
-};
-
-/** The base path for all cloud security posture pages. */
-export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/cloud_security_posture';
 
 const CSPM_DASHBOARD_TAB_NAME = 'Cloud';
 const KSPM_DASHBOARD_TAB_NAME = 'Kubernetes';
@@ -72,39 +54,6 @@ export const benchmarksNavigation: Record<CspBenchmarksPage, CspPageNavigationIt
     name: NAV_ITEMS_NAMES.RULES,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:benchmarkId/:benchmarkVersion/rules/:ruleId?`,
     id: 'cloud_security_posture-benchmarks-rules',
-  },
-};
-
-export const findingsNavigation = {
-  findings_default: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/configurations`,
-    id: 'cloud_security_posture-findings-default',
-  },
-  findings_by_resource: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource`,
-    id: 'cloud_security_posture-findings-resource',
-  },
-  resource_findings: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource/:resourceId`,
-    id: 'cloud_security_posture-findings-resourceId',
-  },
-  vulnerabilities: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities`,
-    id: 'cloud_security_posture-findings-vulnerabilities',
-  },
-  vulnerabilities_by_resource: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities/resource`,
-    id: 'cloud_security_posture-findings-vulnerabilities-resource',
-  },
-  resource_vulnerabilities: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities/resource/:resourceId`,
-    id: 'cloud_security_posture-findings-vulnerabilities-resourceId',
   },
 };
 

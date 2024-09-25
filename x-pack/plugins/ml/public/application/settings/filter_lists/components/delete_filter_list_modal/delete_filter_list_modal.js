@@ -51,7 +51,7 @@ export class DeleteFilterListModal extends Component {
     const { selectedFilterLists, refreshFilterLists } = this.props;
     await deleteFilterLists(
       this.context.services.notifications.toasts,
-      this.context.services.mlServices.mlApiServices,
+      this.context.services.mlServices.mlApi,
       selectedFilterLists
     );
 

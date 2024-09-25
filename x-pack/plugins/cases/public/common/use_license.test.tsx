@@ -18,7 +18,11 @@ describe('useLicense', () => {
         () => {
           return useLicense();
         },
-        { wrapper: ({ children }) => <TestProviders>{children}</TestProviders> }
+        {
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+            <TestProviders>{children}</TestProviders>
+          ),
+        }
       );
 
       expect(result.current.isAtLeast('basic')).toBeTruthy();
@@ -29,7 +33,11 @@ describe('useLicense', () => {
         () => {
           return useLicense();
         },
-        { wrapper: ({ children }) => <TestProviders>{children}</TestProviders> }
+        {
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+            <TestProviders>{children}</TestProviders>
+          ),
+        }
       );
 
       expect(result.current.isAtLeast('platinum')).toBeFalsy();
@@ -44,7 +52,11 @@ describe('useLicense', () => {
         () => {
           return useLicense();
         },
-        { wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders> }
+        {
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+            <TestProviders license={license}>{children}</TestProviders>
+          ),
+        }
       );
 
       expect(result.current.isAtLeast('basic')).toBeFalsy();
@@ -59,7 +71,11 @@ describe('useLicense', () => {
         () => {
           return useLicense();
         },
-        { wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders> }
+        {
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+            <TestProviders license={license}>{children}</TestProviders>
+          ),
+        }
       );
 
       expect(result.current.isAtLeast('basic')).toBeFalsy();
@@ -76,7 +92,11 @@ describe('useLicense', () => {
         () => {
           return useLicense();
         },
-        { wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders> }
+        {
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+            <TestProviders license={license}>{children}</TestProviders>
+          ),
+        }
       );
 
       expect(result.current.isAtLeastPlatinum()).toBeTruthy();
@@ -91,7 +111,11 @@ describe('useLicense', () => {
         () => {
           return useLicense();
         },
-        { wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders> }
+        {
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+            <TestProviders license={license}>{children}</TestProviders>
+          ),
+        }
       );
 
       expect(result.current.isAtLeastPlatinum()).toBeFalsy();
@@ -108,7 +132,11 @@ describe('useLicense', () => {
         () => {
           return useLicense();
         },
-        { wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders> }
+        {
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+            <TestProviders license={license}>{children}</TestProviders>
+          ),
+        }
       );
 
       expect(result.current.isAtLeastGold()).toBeTruthy();
@@ -123,7 +151,11 @@ describe('useLicense', () => {
         () => {
           return useLicense();
         },
-        { wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders> }
+        {
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+            <TestProviders license={license}>{children}</TestProviders>
+          ),
+        }
       );
 
       expect(result.current.isAtLeastGold()).toBeFalsy();
@@ -140,7 +172,11 @@ describe('useLicense', () => {
         () => {
           return useLicense();
         },
-        { wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders> }
+        {
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+            <TestProviders license={license}>{children}</TestProviders>
+          ),
+        }
       );
 
       expect(result.current.isAtLeastEnterprise()).toBeTruthy();
@@ -155,7 +191,11 @@ describe('useLicense', () => {
         () => {
           return useLicense();
         },
-        { wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders> }
+        {
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+            <TestProviders license={license}>{children}</TestProviders>
+          ),
+        }
       );
 
       expect(result.current.isAtLeastEnterprise()).toBeFalsy();
@@ -172,7 +212,11 @@ describe('useLicense', () => {
         () => {
           return useLicense();
         },
-        { wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders> }
+        {
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+            <TestProviders license={license}>{children}</TestProviders>
+          ),
+        }
       );
 
       expect(result.current.getLicense()).toEqual(license);

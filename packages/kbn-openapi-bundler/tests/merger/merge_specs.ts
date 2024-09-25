@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { join } from 'path';
@@ -16,7 +17,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'fs';
-import { safeDump, safeLoad } from 'js-yaml';
+import { dump, load } from 'js-yaml';
 import { OpenAPIV3 } from 'openapi-types';
 import { merge, MergerConfig } from '../../src/openapi_merger';
 
@@ -58,7 +59,7 @@ function dumpSpecs(folderPath: string, oasSpecs: Record<string, OpenAPIV3.Docume
   for (const [fileName, oasSpec] of Object.entries(oasSpecs)) {
     writeFileSync(
       join(folderPath, `${fileName}.schema.yaml`),
-      safeDump(oasSpec, { skipInvalid: true })
+      dump(oasSpec, { skipInvalid: true })
     );
   }
 }
@@ -69,7 +70,7 @@ export function readMergedSpecs(folderPath: string): Record<string, OpenAPIV3.Do
   for (const fileName of readdirSync(folderPath)) {
     const yaml = readFileSync(join(folderPath, fileName), { encoding: 'utf8' });
 
-    mergedSpecs[fileName] = safeLoad(yaml);
+    mergedSpecs[fileName] = load(yaml);
   }
 
   return mergedSpecs;

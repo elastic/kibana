@@ -24,12 +24,14 @@ import {
 } from '@elastic/eui';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnboardingFlowPackageList } from '../packages_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
 import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
 import { useVirtualSearchResults } from './use_virtual_search_results';
 import { LogoIcon, SupportedLogo } from '../shared/logo_icon';
+import { ObservabilityOnboardingAppServices } from '../..';
 
 interface UseCaseOption {
   id: Category;
@@ -90,6 +92,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     },
   ];
 
+  const {
+    services: {
+      context: { isCloud },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
   const customMargin = useCustomMargin();
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
   const categorySelectorTitleId = useGeneratedHtmlId();
@@ -134,6 +141,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     searchParams.get('category') as Category | null
   );
   const virtualSearchResults = useVirtualSearchResults();
+  /**
+   * Cloud deployments have the new Firehose quick start
+   * flow enabled, so the ond card 'epr:awsfirehose' should
+   * not show up in the search results.
+   */
+  const searchExcludePackageIdList = isCloud ? ['epr:awsfirehose'] : [];
 
   let isSelectingCategoryWithKeyboard: boolean = false;
 
@@ -264,6 +277,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 (card) => card.type === 'virtual' && !card.isCollectionCard
               )
               .concat(virtualSearchResults)}
+            excludePackageIdList={searchExcludePackageIdList}
             joinCardLists
           />
         </div>

@@ -10,8 +10,6 @@ export * from './use_url_params';
 export * from './use_breadcrumbs';
 export * from './use_enablement';
 export * from './use_locations';
-export * from './use_last_x_checks';
-export * from './use_last_50_duration_chart';
 export * from './use_location_name';
 export * from './use_status_by_location';
 export * from './use_status_by_location_overview';

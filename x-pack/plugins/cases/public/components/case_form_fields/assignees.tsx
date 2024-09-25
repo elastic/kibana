@@ -113,45 +113,48 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
       setValue([...selectedAssignees, { uid: currentUserProfile.uid }]);
     }, [currentUserProfile, selectedAssignees, setValue]);
 
-    const renderOption = useCallback((option, searchValue: string, contentClassName: string) => {
-      const { user, data } = option as UserProfileComboBoxOption;
+    const renderOption = useCallback(
+      (option: EuiComboBoxOptionOption<string>, searchValue: string, contentClassName: string) => {
+        const { user, data } = option as UserProfileComboBoxOption;
 
-      const displayName = getUserDisplayName(user);
+        const displayName = getUserDisplayName(user);
 
-      return (
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="flexStart"
-          gutterSize="s"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <UserAvatar user={user} avatar={data.avatar} size="s" />
-          </EuiFlexItem>
+        return (
           <EuiFlexGroup
             alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="none"
+            justifyContent="flexStart"
+            gutterSize="s"
             responsive={false}
           >
-            <EuiFlexItem>
-              <EuiHighlight search={searchValue} className={contentClassName}>
-                {displayName}
-              </EuiHighlight>
+            <EuiFlexItem grow={false}>
+              <UserAvatar user={user} avatar={data.avatar} size="s" />
             </EuiFlexItem>
-            {user.email && user.email !== displayName ? (
-              <EuiFlexItem grow={false}>
-                <EuiTextColor color={'subdued'}>
-                  <EuiHighlight search={searchValue} className={contentClassName}>
-                    {user.email}
-                  </EuiHighlight>
-                </EuiTextColor>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="none"
+              responsive={false}
+            >
+              <EuiFlexItem>
+                <EuiHighlight search={searchValue} className={contentClassName}>
+                  {displayName}
+                </EuiHighlight>
               </EuiFlexItem>
-            ) : null}
+              {user.email && user.email !== displayName ? (
+                <EuiFlexItem grow={false}>
+                  <EuiTextColor color={'subdued'}>
+                    <EuiHighlight search={searchValue} className={contentClassName}>
+                      {user.email}
+                    </EuiHighlight>
+                  </EuiTextColor>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </EuiFlexGroup>
-        </EuiFlexGroup>
-      );
-    }, []);
+        );
+      },
+      []
+    );
 
     const isCurrentUserSelected = Boolean(
       selectedAssignees?.find((assignee) => assignee.uid === currentUserProfile?.uid)

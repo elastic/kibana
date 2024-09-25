@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom/extend-expect';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../contexts/kibana/use_create_url', () => ({
@@ -84,7 +83,7 @@ const mockKibanaContext = {
     docLinks: { links: { ml: { calendars: 'test' } } },
     notifications: { toasts: { addDanger: mockAddDanger, addError: jest.fn() } },
     mlServices: {
-      mlApiServices: {
+      mlApi: {
         calendars: () => {
           return Promise.resolve([]);
         },

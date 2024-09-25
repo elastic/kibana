@@ -7,13 +7,17 @@
 
 import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import {
   getSingleMetricViewerJobErrorMessage,
   parseTimeIntervalForJob,
   isJobWithGeoData,
+  createDatafeedId,
 } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import type { JobAction } from '../../../common/constants/job_actions';
@@ -51,7 +55,6 @@ import type { MlClient } from '../../lib/ml_client';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
-import { parseInterval } from '../../../common/util/parse_interval';
 
 interface Results {
   [id: string]: {
@@ -626,7 +629,7 @@ export function jobsProvider(
   }
 
   async function getLookBackProgress(jobId: string, start: number, end: number) {
-    const datafeedId = `datafeed-${jobId}`;
+    const datafeedId = createDatafeedId(jobId);
     const [body, isRunning] = await Promise.all([
       mlClient.getJobStats({ job_id: jobId }),
       isDatafeedRunning(datafeedId),

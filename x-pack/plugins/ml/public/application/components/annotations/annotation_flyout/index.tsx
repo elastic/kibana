@@ -136,10 +136,10 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
 
     this.deletionInProgress = true;
 
-    const ml = this.context.services.mlServices.mlApiServices;
+    const mlApi = this.context.services.mlServices.mlApi;
     const toastNotifications = this.context.services.notifications.toasts;
     try {
-      await ml.annotations.deleteAnnotation(annotationState._id);
+      await mlApi.annotations.deleteAnnotation(annotationState._id);
       toastNotifications.addSuccess(
         i18n.translate(
           'xpack.ml.timeSeriesExplorer.timeSeriesChart.deletedAnnotationNotificationMessage',
@@ -241,9 +241,9 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     annotation.event = annotation.event ?? ANNOTATION_EVENT_USER;
     annotationUpdatesService.setValue(null);
 
-    const ml = this.context.services.mlServices.mlApiServices;
+    const mlApi = this.context.services.mlServices.mlApi;
     const toastNotifications = this.context.services.notifications.toasts;
-    ml.annotations
+    mlApi.annotations
       .indexAnnotation(annotation)
       .then(() => {
         annotationsRefreshed();

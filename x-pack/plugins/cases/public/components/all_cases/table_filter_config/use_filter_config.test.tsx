@@ -64,7 +64,9 @@ describe('useFilterConfig', () => {
 
   it('should remove a selected option if the filter is deleted', async () => {
     const { rerender } = renderHook(useFilterConfig, {
-      wrapper: ({ children }) => <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>,
+      wrapper: ({ children }: React.PropsWithChildren<Parameters<typeof useFilterConfig>[0]>) => (
+        <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>
+      ),
       initialProps: {
         systemFilterConfig: filters,
         onFilterOptionsChange,
@@ -104,7 +106,9 @@ describe('useFilterConfig', () => {
     );
 
     const { result } = renderHook(useFilterConfig, {
-      wrapper: ({ children }) => <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>,
+      wrapper: ({ children }: React.PropsWithChildren<Parameters<typeof useFilterConfig>[0]>) => (
+        <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>
+      ),
       initialProps: {
         systemFilterConfig: filters,
         onFilterOptionsChange,

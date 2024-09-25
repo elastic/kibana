@@ -2151,7 +2151,7 @@
         "label": "ControlPanels",
         "description": [],
         "signature": [
-          "{ [x: string]: { order: number; width: \"small\" | \"medium\" | \"large\"; grow: boolean; type: string; explicitInput: { id: string; } & { dataViewId?: string | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; fieldName?: string | undefined; selectedOptions?: string[] | undefined; title?: string | undefined; }; }; }"
+          "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/types.ts",
         "deprecated": false,
@@ -2406,55 +2406,28 @@
               },
               {
                 "parentPluginId": "logsExplorer",
-                "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.explicitInput",
-                "type": "Object",
+                "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.fieldName",
+                "type": "string",
                 "tags": [],
-                "label": "explicitInput",
+                "label": "fieldName",
+                "description": [],
+                "signature": [
+                  "\"data_stream.namespace\""
+                ],
+                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "logsExplorer",
+                "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
                 "description": [],
                 "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "logsExplorer",
-                    "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.explicitInput.id",
-                    "type": "string",
-                    "tags": [],
-                    "label": "id",
-                    "description": [],
-                    "signature": [
-                      "\"data_stream.namespace\""
-                    ],
-                    "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "logsExplorer",
-                    "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.explicitInput.fieldName",
-                    "type": "string",
-                    "tags": [],
-                    "label": "fieldName",
-                    "description": [],
-                    "signature": [
-                      "\"data_stream.namespace\""
-                    ],
-                    "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "logsExplorer",
-                    "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.explicitInput.title",
-                    "type": "string",
-                    "tags": [],
-                    "label": "title",
-                    "description": [],
-                    "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
+                "trackAdoption": false
               }
             ]
           }
@@ -2473,10 +2446,16 @@
           "<",
           "StringC",
           ", ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ order: ",
           "NumberC",
-          "; width: ",
+          "; type: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ width: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -2486,35 +2465,25 @@
           "LiteralC",
           "<\"large\">]>; grow: ",
           "BooleanC",
-          "; type: ",
+          "; dataViewId: ",
           "StringC",
-          "; explicitInput: ",
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; }>, ",
-          "PartialC",
-          "<{ dataViewId: ",
+          "; fieldName: ",
           "StringC",
           "; exclude: ",
           "BooleanC",
           "; existsSelected: ",
           "BooleanC",
-          "; fieldName: ",
-          "StringC",
-          "; selectedOptions: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; title: ",
+          "; title: ",
           "UnionC",
           "<[",
           "StringC",
           ", ",
           "UndefinedC",
-          "]>; }>]>; }>>"
+          "]>; selectedOptions: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>]>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/types.ts",
         "deprecated": false,

@@ -81,7 +81,7 @@ exports[`useUrlParams deletes keys that do not have truthy values 1`] = `
       }
     >
       <div>
-        {"pagination":"foo","absoluteDateRangeStart":20,"absoluteDateRangeEnd":20,"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-12","dateRangeEnd":"now","filters":"","excludedFilters":"","search":"","statusFilter":"","focusConnectorField":false,"query":""}
+        {"pagination":"foo","absoluteDateRangeStart":20,"absoluteDateRangeEnd":20,"autorefreshInterval":300000,"autorefreshIsPaused":false,"dateRangeStart":"now-12","dateRangeEnd":"now","filters":"","excludedFilters":"","search":"","statusFilter":"","focusConnectorField":false,"query":""}
       </div>
       <button
         id="setUrlParams"
@@ -176,7 +176,7 @@ exports[`useUrlParams gets the expected values using the context 1`] = `
       hook={[Function]}
     >
       <div>
-        {"absoluteDateRangeStart":20,"absoluteDateRangeEnd":20,"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-15m","dateRangeEnd":"now","filters":"","excludedFilters":"","search":"","statusFilter":"","focusConnectorField":false,"query":""}
+        {"absoluteDateRangeStart":20,"absoluteDateRangeEnd":20,"autorefreshInterval":300000,"autorefreshIsPaused":false,"dateRangeStart":"now-15m","dateRangeEnd":"now","filters":"","excludedFilters":"","search":"","statusFilter":"","focusConnectorField":false,"query":""}
       </div>
       <button
         id="setUrlParams"

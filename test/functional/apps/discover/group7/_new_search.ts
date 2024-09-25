@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -11,12 +12,11 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects([
+  const { common, discover, timePicker, header } = getPageObjects([
     'common',
     'discover',
     'timePicker',
     'header',
-    'unifiedSearch',
   ]);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
@@ -32,8 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
@@ -45,18 +45,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should work correctly for data view mode', async function () {
       await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await queryBar.setQuery('bytes > 15000');
       await queryBar.submitQuery();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await PageObjects.discover.getHitCount()).to.be('353');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      expect(await discover.getHitCount()).to.be('353');
       expect(await filterBar.hasFilter('extension', 'png')).to.be(true);
       expect(await queryBar.getQueryString()).to.be('bytes > 15000');
 
-      await PageObjects.discover.clickNewSearchButton();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await PageObjects.discover.getHitCount()).to.be('14,004');
+      await discover.clickNewSearchButton();
+      await discover.waitUntilSearchingHasFinished();
+      expect(await discover.getHitCount()).to.be('14,004');
       expect(await filterBar.hasFilter('extension', 'png')).to.be(false);
       expect(await queryBar.getQueryString()).to.be('');
     });
@@ -67,25 +67,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         adHoc: true,
         hasTimeField: true,
       });
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'css' });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await queryBar.setQuery('bytes > 100');
       await queryBar.submitQuery();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await PageObjects.discover.getHitCount()).to.be('2,108');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      expect(await discover.getHitCount()).to.be('2,108');
       expect(await filterBar.hasFilter('extension', 'css')).to.be(true);
       expect(await queryBar.getQueryString()).to.be('bytes > 100');
 
-      await PageObjects.discover.saveSearch('adHoc');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await PageObjects.discover.getHitCount()).to.be('2,108');
+      await discover.saveSearch('adHoc');
+      await discover.waitUntilSearchingHasFinished();
+      expect(await discover.getHitCount()).to.be('2,108');
 
-      await PageObjects.discover.clickNewSearchButton();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await PageObjects.discover.getHitCount()).to.be('14,004');
+      await discover.clickNewSearchButton();
+      await discover.waitUntilSearchingHasFinished();
+      expect(await discover.getHitCount()).to.be('14,004');
       expect(await filterBar.hasFilter('extension', 'css')).to.be(false);
       expect(await queryBar.getQueryString()).to.be('');
       expect(await dataViews.getSelectedName()).to.be('logs**');
@@ -93,41 +93,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should work correctly for ESQL mode', async () => {
-      await PageObjects.discover.selectTextBaseLang();
+      await discover.selectTextBaseLang();
 
       const testQuery = `from logstash-* | limit 100 | stats countB = count(bytes) by geo.dest | sort countB`;
       await monacoEditor.setCodeEditorValue(testQuery);
       await testSubjects.click('querySubmitButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await PageObjects.discover.getHitCountInt()).to.greaterThan(10);
-      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      expect(await discover.getHitCountInt()).to.greaterThan(10);
+      expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
-      await PageObjects.discover.clickNewSearchButton();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.clickNewSearchButton();
+      await discover.waitUntilSearchingHasFinished();
       expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-* | LIMIT 10');
-      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('histogramForESQL');
-      expect(await PageObjects.discover.getHitCount()).to.be('10');
+      expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
+      expect(await discover.getHitCount()).to.be('10');
     });
 
     it('should work correctly for a saved search in ESQL mode', async () => {
-      await PageObjects.discover.selectTextBaseLang();
+      await discover.selectTextBaseLang();
 
       const testQuery = `from logstash-* | limit 100 | stats countB = count(bytes) by geo.dest | sort countB`;
       await monacoEditor.setCodeEditorValue(testQuery);
       await testSubjects.click('querySubmitButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await PageObjects.discover.getHitCountInt()).to.greaterThan(10);
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      expect(await discover.getHitCountInt()).to.greaterThan(10);
 
-      await PageObjects.discover.saveSearch('esql');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await PageObjects.discover.getHitCountInt()).to.greaterThan(10);
+      await discover.saveSearch('esql');
+      await discover.waitUntilSearchingHasFinished();
+      expect(await discover.getHitCountInt()).to.greaterThan(10);
 
-      await PageObjects.discover.clickNewSearchButton();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.clickNewSearchButton();
+      await discover.waitUntilSearchingHasFinished();
       expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-* | LIMIT 10');
-      expect(await PageObjects.discover.getHitCount()).to.be('10');
+      expect(await discover.getHitCount()).to.be('10');
     });
   });
 }

@@ -115,7 +115,7 @@ const PatternComponent: React.FC<Props> = ({
   }, []);
 
   const handleFlyoutIndexExpandAction = useCallback(
-    (indexName) => {
+    (indexName: string) => {
       checkIndex({
         abortController: flyoutIndexExpandActionAbortControllerRef.current,
         indexName,
@@ -130,7 +130,7 @@ const PatternComponent: React.FC<Props> = ({
   );
 
   const handleTableRowIndexCheckNowAction = useCallback(
-    (indexName) => {
+    (indexName: string) => {
       checkIndex({
         abortController: tableRowIndexCheckNowActionAbortControllerRef.current,
         indexName,

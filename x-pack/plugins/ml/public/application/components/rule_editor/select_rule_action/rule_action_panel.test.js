@@ -31,7 +31,7 @@ const mockTestFilter = {
 
 const kibanaReactContextMock = createKibanaReactContext({
   mlServices: {
-    mlApiServices: {
+    mlApi: {
       filters: {
         filters: () => {
           return Promise.resolve(mockTestFilter);

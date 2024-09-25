@@ -60,6 +60,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
               {...reactRouterNavigate(history, getTemplateDetailsLink(name), () =>
                 uiMetricService.trackMetric(METRIC_TYPE.CLICK, UIM_TEMPLATE_SHOW_DETAILS_CLICK)
               )}
+              role="button"
               data-test-subj="templateDetailsLink"
             >
               {name}
