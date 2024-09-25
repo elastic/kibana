@@ -48,6 +48,7 @@ export function LensRenderer({
   syncColors,
   syncCursor,
   syncTooltips,
+  viewMode,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -58,6 +59,12 @@ export function LensRenderer({
       syncTooltips$: new BehaviorSubject(false),
     };
   }, []);
+
+  // view mode needs to be a BehaviorSubject
+  const viewMode$Ref = useRef(new BehaviorSubject(viewMode));
+  if (viewMode !== viewMode$Ref.current.getValue()) {
+    viewMode$Ref.current.next(viewMode);
+  }
 
   const apiRef = useRef<LensApi | undefined>(undefined);
   const initialStateRef = useRef<LensSerializedState>(
@@ -101,15 +108,16 @@ export function LensRenderer({
         ...searchApi,
         // forward the Lens components to the embeddable
         ...props,
+        viewMode: viewMode$Ref.current,
         // pass the sync* settings with the unified settings interface
         settings,
         // make sure to provide the initial state (useful for the comparison check)
         getSerializedStateForChild: () => ({ rawState: initialStateRef.current, references: [] }),
         // update the runtime state on changes
-        // getRuntimeStateForChild: () => ({
-        //   ...initialStateRef.current,
-        //   attributes: props.attributes,
-        // }),
+        getRuntimeStateForChild: () => ({
+          ...initialStateRef.current,
+          attributes: props.attributes,
+        }),
       })}
       onApiAvailable={(api) => {
         apiRef.current = api;
