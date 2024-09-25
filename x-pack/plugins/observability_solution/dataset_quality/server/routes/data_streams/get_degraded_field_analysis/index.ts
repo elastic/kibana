@@ -40,7 +40,7 @@ export async function analyzeDegradedField({
       lastBackingIndex,
       logger,
     }),
-    getDataStreamSettings({ datasetQualityESClient, dataStream, lastBackingIndex, logger }),
+    getDataStreamSettings({ datasetQualityESClient, dataStream, lastBackingIndex }),
   ]);
 
   return {
