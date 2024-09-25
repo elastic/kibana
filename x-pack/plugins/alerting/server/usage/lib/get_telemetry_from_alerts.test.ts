@@ -77,6 +77,45 @@ describe('kibana index telemetry', () => {
     });
   });
 
+  it('should return ', async () => {
+    esClient.search.mockResponseOnce({
+      took: 4,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: 0,
+          relation: 'eq',
+        },
+        max_score: null,
+        hits: [],
+      },
+      aggregations: {
+        by_rule_type_id: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [],
+        },
+      },
+    });
+
+    const telemetry = await getTotalAlertsCountAggregations({
+      esClient,
+      logger,
+    });
+
+    expect(telemetry).toEqual({
+      hasErrors: false,
+      count_alerts_total: 0,
+      count_alerts_by_rule_type: {},
+    });
+  });
+
   test('should return empty results and log warning if query throws error', async () => {
     esClient.search.mockRejectedValueOnce(new Error('test'));
 
