@@ -191,6 +191,7 @@ describe('IndexPatterns', () => {
       pattern: 'something',
       rollupIndex: undefined,
       type: undefined,
+      forceRefresh: false,
     };
 
     await indexPatterns.get(id);
@@ -205,12 +206,14 @@ describe('IndexPatterns', () => {
     const id = '1';
     await indexPatterns.get(id);
     expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+      allowHidden: undefined,
       allowNoIndex: true,
       indexFilter: undefined,
       metaFields: false,
       pattern: 'something',
       rollupIndex: undefined,
       type: undefined,
+      forceRefresh: false,
     });
   });
 

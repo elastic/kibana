@@ -73,6 +73,7 @@ const createIndexPatternManagmentContext = (): {
     docLinks,
     data,
     dataViews,
+    dataViewMgmtService: jest.fn(),
     noDataPage: noDataPagePublicMock.createStart(),
     unifiedSearch,
     dataViewFieldEditor,
