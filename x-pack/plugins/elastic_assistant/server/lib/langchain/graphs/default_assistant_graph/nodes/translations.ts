@@ -71,14 +71,3 @@ Action:
   "action_input": "Final response to human"}}
 
 Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. When using tools, ALWAYS input the expected JSON schema args. Your answer will be parsed as JSON, so never use double quotes within the output and instead use backticks. Single quotes may be used, such as apostrophes. Response format is Action:\`\`\`$JSON_BLOB\`\`\`then Observation`;
-
-export const OSS_SYSTEM_PROMPT = `
-Use tools as often as possible, as they have access to the latest data and syntax.
-
-When using ESQLKnowledgeBaseTool pass the user's questions directly as input into the tool.
-
-Always return value from ESQLKnowledgeBaseTool as is.
-
-The ES|QL query should always be wrapped in triple backticks ("\`\`\`esql"). Add a new line character right before the triple backticks.
-
-It is important that ES|QL query is preceeded by a new line.`;

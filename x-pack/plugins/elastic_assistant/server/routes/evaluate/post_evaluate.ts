@@ -51,7 +51,6 @@ import {
   bedrockToolCallingAgentPrompt,
   geminiToolCallingAgentPrompt,
   openAIFunctionAgentPrompt,
-  ossLlmStructuredChatAgentPrompt,
   structuredChatAgentPrompt,
 } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getLlmClass, getLlmType } from '../utils';
@@ -308,9 +307,7 @@ export const postEvaluateRoute = (
                 : await createStructuredChatAgent({
                     llm,
                     tools,
-                    prompt: isOssModel
-                      ? ossLlmStructuredChatAgentPrompt
-                      : structuredChatAgentPrompt,
+                    prompt: structuredChatAgentPrompt,
                     streamRunnable: false,
                   });
 

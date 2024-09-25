@@ -166,9 +166,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     : await createStructuredChatAgent({
         llm: createLlmInstance(),
         tools,
-        prompt: isOssModel
-          ? formatPromptStructured(systemPrompts.ossLlm, systemPrompt)
-          : formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
+        prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
         streamRunnable: isStream,
       });
 

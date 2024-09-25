@@ -10,7 +10,6 @@ import {
   BEDROCK_SYSTEM_PROMPT,
   DEFAULT_SYSTEM_PROMPT,
   GEMINI_SYSTEM_PROMPT,
-  OSS_SYSTEM_PROMPT,
   STRUCTURED_SYSTEM_PROMPT,
 } from './nodes/translations';
 
@@ -26,7 +25,6 @@ export const systemPrompts = {
   openai: DEFAULT_SYSTEM_PROMPT,
   bedrock: `${DEFAULT_SYSTEM_PROMPT} ${BEDROCK_SYSTEM_PROMPT}`,
   gemini: `${DEFAULT_SYSTEM_PROMPT} ${GEMINI_SYSTEM_PROMPT}`,
-  ossLlm: `${DEFAULT_SYSTEM_PROMPT} ${STRUCTURED_SYSTEM_PROMPT} ${OSS_SYSTEM_PROMPT}`,
   structuredChat: STRUCTURED_SYSTEM_PROMPT,
 };
 
@@ -47,5 +45,3 @@ export const formatPromptStructured = (prompt: string, additionalPrompt?: string
   ]);
 
 export const structuredChatAgentPrompt = formatPromptStructured(systemPrompts.structuredChat);
-
-export const ossLlmStructuredChatAgentPrompt = formatPromptStructured(systemPrompts.ossLlm);
