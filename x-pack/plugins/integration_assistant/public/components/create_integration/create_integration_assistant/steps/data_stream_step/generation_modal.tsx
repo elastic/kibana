@@ -42,6 +42,7 @@ import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
 import * as i18n from './translations';
 import { useTelemetry } from '../../../telemetry';
+import type { ErrorCode } from '../../../../../../common/constants';
 
 export type OnComplete = (result: State['result']) => void;
 
@@ -171,7 +172,7 @@ export const useGeneration = ({
         onComplete(result);
       } catch (e) {
         if (abortController.signal.aborted) return;
-        const errorMessage = `${e.message}${
+        const originalErrorMessage = `${e.message}${
           e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
         }`;
 
@@ -179,9 +180,14 @@ export const useGeneration = ({
           connector,
           integrationSettings,
           durationMs: Date.now() - generationStartedAt,
-          error: errorMessage,
+          error: originalErrorMessage,
         });
 
+        let errorMessage = originalErrorMessage;
+        const errorCode = e.body?.attributes?.errorCode as ErrorCode | undefined;
+        if (errorCode != null) {
+          errorMessage = i18n.ERROR_TRANSLATION[errorCode];
+        }
         setError(errorMessage);
       } finally {
         setIsRequesting(false);
