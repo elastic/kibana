@@ -20,7 +20,7 @@ import {
   SavedTimeline,
   TimelineStatus,
   TimelineType,
-  TimelineResponse,
+  PersistTimelineResponse,
 } from '../model/components.gen';
 
 export type CreateTimelinesRequestBody = z.infer<typeof CreateTimelinesRequestBody>;
@@ -36,10 +36,4 @@ export const CreateTimelinesRequestBody = z.object({
 export type CreateTimelinesRequestBodyInput = z.input<typeof CreateTimelinesRequestBody>;
 
 export type CreateTimelinesResponse = z.infer<typeof CreateTimelinesResponse>;
-export const CreateTimelinesResponse = z.object({
-  data: z.object({
-    persistTimeline: z.object({
-      timeline: TimelineResponse,
-    }),
-  }),
-});
+export const CreateTimelinesResponse = PersistTimelineResponse;

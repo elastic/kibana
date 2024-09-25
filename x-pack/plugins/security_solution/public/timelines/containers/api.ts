@@ -21,6 +21,7 @@ import type {
   SingleTimelineResponse,
   GetAllTimelineVariables,
   TimelineType,
+  PatchTimelineResponse,
 } from '../../../common/api/timeline';
 import {
   TimelineResponseType,
@@ -110,7 +111,7 @@ const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResultSche
   );
 
 const decodeResponseFavoriteTimeline = (respTimeline?: PersistFavoriteRouteResponse) =>
-  PersistFavoriteRouteResponse.parse(respTimeline);
+  decodeOrThrow(PersistFavoriteRouteResponse)(respTimeline);
 
 const postTimeline = async ({
   timeline,
@@ -136,7 +137,7 @@ const patchTimeline = async ({
   timeline,
   version,
   savedSearch,
-}: RequestPatchTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
+}: RequestPatchTimeline): Promise<PatchTimelineResponse | TimelineErrorResponse> => {
   let response = null;
   let requestBody = null;
   try {
@@ -158,7 +159,7 @@ const patchTimeline = async ({
   }
 
   try {
-    response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
+    response = await KibanaServices.get().http.patch<PatchTimelineResponse>(TIMELINE_URL, {
       method: 'PATCH',
       body: requestBody,
       version: '2023-10-31',

@@ -317,22 +317,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: '#/components/schemas/TimelineResponse'
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: >-
             Indicates that the draft Timeline was successfully created. In the
             event the user already has a draft Timeline, the existing draft
@@ -394,22 +379,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: '#/components/schemas/TimelineResponse'
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates the Timeline was successfully created.
         '405':
           content:
@@ -450,22 +420,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: '#/components/schemas/TimelineResponse'
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates that the timeline has been successfully copied.
       summary: Copies timeline or timeline template.
       tags:
@@ -489,22 +444,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: '#/components/schemas/TimelineResponse'
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
@@ -566,22 +506,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: '#/components/schemas/TimelineResponse'
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: >-
             Indicates that the draft Timeline was successfully created. In the
             event the user already has a draft Timeline, the existing draft
@@ -1329,6 +1254,23 @@ components:
             - $ref: '#/components/schemas/PinnedEventBaseResponseBody'
         - nullable: true
           type: object
+    PersistTimelineResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            persistTimeline:
+              type: object
+              properties:
+                timeline:
+                  $ref: '#/components/schemas/TimelineResponse'
+              required:
+                - timeline
+          required:
+            - persistTimeline
+      required:
+        - data
     PinnedEvent:
       allOf:
         - $ref: '#/components/schemas/BarePinnedEvent'

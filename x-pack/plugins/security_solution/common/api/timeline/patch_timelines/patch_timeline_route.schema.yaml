@@ -42,19 +42,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    type: object
-                    required: [persistTimeline]
-                    properties:
-                      persistTimeline:
-                        type: object
-                        required: [timeline]
-                        properties:
-                          timeline:
-                            $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                $ref: '../model/components.schema.yaml#/components/schemas/PersistTimelineResponse'
         '405':
           description: Indicates that the user does not have the required access to create a draft Timeline.
           content:

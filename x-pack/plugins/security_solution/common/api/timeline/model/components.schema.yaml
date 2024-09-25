@@ -237,6 +237,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FavoriteTimelineResult'
+    PersistTimelineResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [persistTimeline]
+          properties:
+            persistTimeline:
+              type: object
+              required: [timeline]
+              properties:
+                timeline:
+                  $ref: '#/components/schemas/TimelineResponse'
     ColumnHeaderResult:
       type: object
       properties:

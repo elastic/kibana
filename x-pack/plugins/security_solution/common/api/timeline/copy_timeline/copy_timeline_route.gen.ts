@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { SavedTimeline, TimelineResponse } from '../model/components.gen';
+import { SavedTimeline, PersistTimelineResponse } from '../model/components.gen';
 
 export type CopyTimelineRequestBody = z.infer<typeof CopyTimelineRequestBody>;
 export const CopyTimelineRequestBody = z.object({
@@ -26,10 +26,4 @@ export const CopyTimelineRequestBody = z.object({
 export type CopyTimelineRequestBodyInput = z.input<typeof CopyTimelineRequestBody>;
 
 export type CopyTimelineResponse = z.infer<typeof CopyTimelineResponse>;
-export const CopyTimelineResponse = z.object({
-  data: z.object({
-    persistTimeline: z.object({
-      timeline: TimelineResponse,
-    }),
-  }),
-});
+export const CopyTimelineResponse = PersistTimelineResponse;

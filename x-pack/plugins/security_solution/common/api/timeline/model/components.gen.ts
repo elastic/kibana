@@ -311,6 +311,15 @@ export const FavoriteTimelineResponse = z.object({
   favorite: z.array(FavoriteTimelineResult).optional(),
 });
 
+export type PersistTimelineResponse = z.infer<typeof PersistTimelineResponse>;
+export const PersistTimelineResponse = z.object({
+  data: z.object({
+    persistTimeline: z.object({
+      timeline: TimelineResponse,
+    }),
+  }),
+});
+
 export type BareNoteWithoutExternalRefs = z.infer<typeof BareNoteWithoutExternalRefs>;
 export const BareNoteWithoutExternalRefs = z.object({
   eventId: z.string().nullable().optional(),
