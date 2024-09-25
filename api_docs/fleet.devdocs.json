@@ -1554,10 +1554,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/middleware/policy_settings_middleware.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               }
             ]
@@ -10955,7 +10951,7 @@
                 "section": "def-server.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
-              ", pkgName: string, logger?: ",
+              ", pkgName: string, options?: { logger?: ",
               {
                 "pluginId": "@kbn/logging",
                 "scope": "common",
@@ -10963,7 +10959,7 @@
                 "section": "def-common.Logger",
                 "text": "Logger"
               },
-              " | undefined) => Promise<",
+              " | undefined; installMissingPackage?: boolean | undefined; } | undefined) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -11018,22 +11014,48 @@
                 "id": "def-server.PackagePolicyClient.buildPackagePolicyFromPackage.$3",
                 "type": "Object",
                 "tags": [],
-                "label": "logger",
+                "label": "options",
                 "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/logging",
-                    "scope": "common",
-                    "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-common.Logger",
-                    "text": "Logger"
-                  },
-                  " | undefined"
-                ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.buildPackagePolicyFromPackage.$3.logger",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "logger",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/logging",
+                        "scope": "common",
+                        "docId": "kibKbnLoggingPluginApi",
+                        "section": "def-common.Logger",
+                        "text": "Logger"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.buildPackagePolicyFromPackage.$3.installMissingPackage",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "installMissingPackage",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -23884,10 +23906,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/support/endpoint_package_policies.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/middleware/policy_settings_middleware.ts"
               },
               {
                 "plugin": "securitySolution",

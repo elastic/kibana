@@ -71,6 +71,7 @@ export interface CreateTestEsClusterOptions {
    * `['key.1=val1', 'key.2=val2']`
    */
   esArgs?: string[];
+  esVersion?: string;
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
@@ -169,6 +170,7 @@ export function createTestEsCluster<
     log,
     writeLogsToPath,
     basePath = Path.resolve(REPO_ROOT, '.es'),
+    esVersion = esTestConfig.getVersion(),
     esFrom = esTestConfig.getBuildFrom(),
     esServerlessOptions,
     dataArchive,
@@ -196,7 +198,7 @@ export function createTestEsCluster<
   const esArgs = assignArgs(defaultEsArgs, customEsArgs);
 
   const config = {
-    version: esTestConfig.getVersion(),
+    version: esVersion,
     installPath: Path.resolve(basePath, clusterName),
     sourcePath: Path.resolve(REPO_ROOT, '../elasticsearch'),
     password,
