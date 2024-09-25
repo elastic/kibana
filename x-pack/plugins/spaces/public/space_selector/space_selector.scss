@@ -4,8 +4,10 @@
 
 .spcSelectorBackground {
   @include kibanaFullScreenGraphics;
-  z-index: -1;
-  pointer-events: none;
+  & {
+    z-index: -1;
+    pointer-events: none;
+  }
 }
 
 // Fix forced focus outline on text that isn't a link to just be an underline

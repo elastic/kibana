@@ -8,8 +8,10 @@
 
 .secAccessAgreementPage__text {
   @include euiYScrollWithShadows;
-  max-height: 400px;
-  padding: $euiSize $euiSizeL 0;
+  & {
+    max-height: 400px;
+    padding: $euiSize $euiSizeL 0;
+  }
 }
 
 .secAccessAgreementPage__footer {
