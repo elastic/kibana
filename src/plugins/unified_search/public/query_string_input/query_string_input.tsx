@@ -796,10 +796,11 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
       'kbnQueryBar__textarea--withIcon': this.props.iconType,
       'kbnQueryBar__textarea--isClearable': this.props.isClearable,
       'kbnQueryBar__textarea--withPrepend': prependElement,
-      'kbnQueryBar__textarea--isSuggestionsVisible':
+    });
+    const inputWrapClassName = classNames('kbnQueryBar__textareaWrap', {
+      'kbnQueryBar__textareaWrap--withSuggestionVisible':
         isSuggestionsVisible && !isEmpty(this.state.suggestions),
     });
-    const inputWrapClassName = classNames('kbnQueryBar__textareaWrap');
     return (
       <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
         {prependElement}
