@@ -79,6 +79,7 @@ import {
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { getDashboardContentManagementCache } from './services/dashboard_content_management_service';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -169,11 +170,12 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            const { dashboardContentManagementService } = await import(
-              './services/dashboard_content_management_service'
-            );
+            const [{ getDashboardContentManagementService }] = await Promise.all([
+              import('./services/dashboard_content_management_service'),
+              untilPluginStartServicesReady(),
+            ]);
             return (
-              (await dashboardContentManagementService.loadDashboardState({ id: dashboardId }))
+              (await getDashboardContentManagementService().loadDashboardState({ id: dashboardId }))
                 .dashboardInput?.filters ?? []
             );
           },
@@ -331,28 +333,24 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
-    Promise.all([
-      import('./services/dashboard_content_management_service'),
-      import('./dashboard_actions'),
-      untilPluginStartServicesReady(),
-    ]).then(([{ setDashboardContentManagementService }, { buildAllDashboardActions }]) => {
-      setDashboardContentManagementService();
-
-      buildAllDashboardActions({
-        plugins,
-        allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
-      });
-    });
+    Promise.all([import('./dashboard_actions'), untilPluginStartServicesReady()]).then(
+      ([{ buildAllDashboardActions }]) => {
+        buildAllDashboardActions({
+          plugins,
+          allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
+        });
+      }
+    );
 
     return {
       locator: this.locator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
-        const { dashboardContentManagementService } = await import(
+        const { getDashboardContentManagementService } = await import(
           './services/dashboard_content_management_service'
         );
-        return dashboardContentManagementService.findDashboards;
+        return getDashboardContentManagementService().findDashboards;
       },
     };
   }

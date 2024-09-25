@@ -27,8 +27,8 @@ setStubKibanaServices();
 // Mock the dashboard services
 jest.mock('./public/services/dashboard_content_management_service', () => {
   return {
-    dashboardContentManagementCache: mockDashboardContentManagementCache,
-    dashboardContentManagementService: mockDashboardContentManagementService,
+    getDashboardContentManagementCache: () => mockDashboardContentManagementCache,
+    getDashboardContentManagementService: () => mockDashboardContentManagementService,
   };
 });
 

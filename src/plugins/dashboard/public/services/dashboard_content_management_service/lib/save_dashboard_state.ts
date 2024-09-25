@@ -13,7 +13,7 @@ import moment, { Moment } from 'moment';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 
-import { dashboardContentManagementCache } from '..';
+import { getDashboardContentManagementCache } from '..';
 import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
 import { DashboardAttributes, DashboardCrudTypes } from '../../../../common/content_management';
 import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
@@ -54,6 +54,7 @@ export const saveDashboardState = async ({
       timefilter: { timefilter },
     },
   } = dataService;
+  const dashboardContentManagementCache = getDashboardContentManagementCache();
 
   const {
     tags,

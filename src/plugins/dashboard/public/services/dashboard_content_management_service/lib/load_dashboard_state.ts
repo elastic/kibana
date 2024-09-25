@@ -16,7 +16,7 @@ import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 
-import { dashboardContentManagementCache } from '..';
+import { getDashboardContentManagementCache } from '..';
 import {
   convertSavedPanelsToPanelMap,
   injectReferences,
@@ -50,6 +50,7 @@ export const loadDashboardState = async ({
     search: dataSearchService,
     query: { queryString },
   } = dataService;
+  const dashboardContentManagementCache = getDashboardContentManagementCache();
 
   const savedObjectId = id;
   const embeddableId = uuidv4();

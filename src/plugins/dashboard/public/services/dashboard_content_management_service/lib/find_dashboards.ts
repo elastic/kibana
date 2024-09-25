@@ -10,7 +10,7 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
-import { dashboardContentManagementCache } from '..';
+import { getDashboardContentManagementCache } from '..';
 import {
   DashboardAttributes,
   DashboardCrudTypes,
@@ -69,6 +69,8 @@ export type FindDashboardsByIdResponse = { id: string } & (
 );
 
 export async function findDashboardById(id: string): Promise<FindDashboardsByIdResponse> {
+  const dashboardContentManagementCache = getDashboardContentManagementCache();
+
   /** If the dashboard exists in the cache, then return the result from that */
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
   if (cachedDashboard) {

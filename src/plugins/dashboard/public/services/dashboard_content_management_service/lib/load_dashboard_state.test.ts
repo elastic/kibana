@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dashboardContentManagementCache } from '..';
+import { getDashboardContentManagementCache } from '..';
 import { getSampleDashboardInput } from '../../../mocks';
 import { contentManagementService } from '../../kibana_services';
 import { loadDashboardState } from './load_dashboard_state';
 
 describe('Load dashboard state', () => {
+  const dashboardContentManagementCache = getDashboardContentManagementCache();
+
   it('should return cached result if available', async () => {
     dashboardContentManagementCache.fetchDashboard = jest.fn().mockImplementation((id: string) => {
       return {

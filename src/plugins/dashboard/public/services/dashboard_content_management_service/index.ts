@@ -19,15 +19,17 @@ import {
 import { loadDashboardState } from './lib/load_dashboard_state';
 import { saveDashboardState } from './lib/save_dashboard_state';
 import { updateDashboardMeta } from './lib/update_dashboard_meta';
-import { DashboardContentManagementService } from './types';
 
-export let dashboardContentManagementService: DashboardContentManagementService;
-export let dashboardContentManagementCache: DashboardContentManagementCache;
+let dashboardContentManagementCache: DashboardContentManagementCache;
 
-export const setDashboardContentManagementService = () => {
-  dashboardContentManagementCache = new DashboardContentManagementCache();
+export const getDashboardContentManagementCache = () => {
+  if (!dashboardContentManagementCache)
+    dashboardContentManagementCache = new DashboardContentManagementCache();
+  return dashboardContentManagementCache;
+};
 
-  dashboardContentManagementService = {
+export const getDashboardContentManagementService = () => {
+  return {
     loadDashboardState,
     saveDashboardState,
     findDashboards: {
