@@ -9,4 +9,4 @@
 
 export { pluginServices } from './plugin_services';
 
-export type { PresentationCapabilitiesService, PresentationLabsService } from './types';
+export type { PresentationLabsService } from './types';

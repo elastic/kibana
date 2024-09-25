@@ -16,7 +16,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import { PresentationUtilPluginStartDeps } from '../types';
 
-// export let coreServices: CoreStart;
+export let coreServices: CoreStart;
 export let contentManagementService: ContentManagementPublicStart;
 export let dataViewsService: DataViewsPublicPluginStart;
 export let uiActionsService: UiActionsPublicStart;
@@ -24,7 +24,7 @@ export let uiActionsService: UiActionsPublicStart;
 const servicesReady$ = new BehaviorSubject(false);
 
 export const setKibanaServices = (kibanaCore: CoreStart, deps: PresentationUtilPluginStartDeps) => {
-  // coreServices = kibanaCore;
+  coreServices = kibanaCore;
   contentManagementService = deps.contentManagement;
   dataViewsService = deps.dataViews;
   uiActionsService = deps.uiActions;

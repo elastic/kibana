@@ -12,11 +12,9 @@ import { PluginServiceProvider, PluginServiceProviders, PluginServices } from '.
 import { registry as stubRegistry } from './plugin_services.story';
 import { PresentationUtilServices } from './types';
 
-import { capabilitiesServiceFactory } from './capabilities/capabilities.story';
 import { labsServiceFactory } from './labs/labs.story';
 
 export const providers: PluginServiceProviders<PresentationUtilServices> = {
-  capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
 };
 

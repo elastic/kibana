@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PresentationCapabilitiesService } from './capabilities/types';
 import { PresentationLabsService } from './labs/types';
 
 export interface PresentationUtilServices {
-  capabilities: PresentationCapabilitiesService;
   labs: PresentationLabsService;
 }
 
-export type { PresentationCapabilitiesService, PresentationLabsService };
+export type { PresentationLabsService };

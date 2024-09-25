@@ -16,7 +16,6 @@ import {
   PluginServices,
 } from './create';
 
-import { capabilitiesServiceFactory } from './capabilities/capabilities_service';
 import { labsServiceFactory } from './labs/labs_service';
 import { PresentationUtilServices } from './types';
 
@@ -24,7 +23,6 @@ export const providers: PluginServiceProviders<
   PresentationUtilServices,
   KibanaPluginServiceParams<PresentationUtilPluginStartDeps>
 > = {
-  capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
 };
 
