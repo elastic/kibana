@@ -15,7 +15,7 @@ import { streamSlice } from '@kbn/ml-response-stream/client';
 import { logRateAnalysisResultsSlice } from '../api/stream_reducer';
 
 import { logRateAnalysisSlice } from './log_rate_analysis_slice';
-import { logRateAnalysisTableRowSlice } from './log_rate_analysis_table_row_slice';
+import { logRateAnalysisTableSlice } from './log_rate_analysis_table_slice';
 import { logRateAnalysisFieldCandidatesSlice } from './log_rate_analysis_field_candidates_slice';
 import type { InitialAnalysisStart } from './log_rate_analysis_slice';
 
@@ -30,8 +30,8 @@ const getReduxStore = () =>
       logRateAnalysisResults: logRateAnalysisResultsSlice.reducer,
       // Handles running the analysis
       logRateAnalysisStream: streamSlice.reducer,
-      // Handles hovering and pinning table rows
-      logRateAnalysisTableRow: logRateAnalysisTableRowSlice.reducer,
+      // Handles hovering and pinning table rows and column selection
+      logRateAnalysisTable: logRateAnalysisTableSlice.reducer,
     },
   });
 

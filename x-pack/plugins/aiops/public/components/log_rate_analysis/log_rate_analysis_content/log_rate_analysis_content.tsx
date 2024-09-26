@@ -28,6 +28,7 @@ import {
   setInitialAnalysisStart,
   useAppDispatch,
   useAppSelector,
+  setGroupResults,
 } from '@kbn/aiops-log-rate-analysis/state';
 
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
@@ -116,6 +117,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const { documentCountStats } = documentStats;
 
   function clearSelectionHandler() {
+    dispatch(setGroupResults(false));
     dispatch(clearSelection());
     dispatch(clearAllRowState());
   }
