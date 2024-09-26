@@ -256,7 +256,7 @@ export class DataViewMgmtService {
   async refreshFields() {
     const dataView = this.state$.getValue().dataView;
     if (dataView?.id) {
-      // await this.services.dataViews.refreshFields(dataView, undefined, true);
+      await this.services.dataViews.get(dataView.id, undefined, true);
       return this.setDataView(dataView.id);
     }
   }

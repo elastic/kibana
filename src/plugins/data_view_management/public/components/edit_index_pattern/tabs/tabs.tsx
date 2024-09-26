@@ -590,7 +590,7 @@ export const Tabs: React.FC<TabsProps> = ({
                   dataViewMgmtService.refreshFields();
                 }}
                 indexPattern={indexPattern}
-                // fields={fields}
+                fields={fields}
                 filterFilter={fieldFilter}
                 fieldWildcardMatcher={fieldWildcardMatcherDecorated}
               />

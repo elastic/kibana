@@ -11,12 +11,13 @@ import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 
 import { EuiSpacer } from '@elastic/eui';
-import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewsPublicPluginStart, DataViewField } from '@kbn/data-views-plugin/public';
 import { AddFilter, Table, Header, DeleteFilterConfirmationModal } from './components';
 import { SourceFiltersTableFilter } from './types';
 
 export interface SourceFiltersTableProps {
   indexPattern: DataView;
+  fields: DataViewField[];
   filterFilter: string;
   fieldWildcardMatcher: Function;
   onAddOrRemoveFilter?: Function;
