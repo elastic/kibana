@@ -101,7 +101,7 @@ import {
   ESQLNamedParamLiteral,
   ESQLOrderExpression,
 } from '../types';
-import { lastItem } from '../visitor/utils';
+import { firstItem, lastItem } from '../visitor/utils';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
   const fromContexts = ctx.getTypedRuleContexts(IndexPatternContext);
@@ -452,9 +452,11 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
             option.args.push(createColumn(arg));
           }
         }
-        option.location.min = asToken.symbol.start;
+        const firstArg = firstItem(option.args);
         const lastArg = lastItem(option.args);
-        if (lastArg) option.location.max = lastArg.location.max;
+        const location = option.location;
+        if (firstArg) location.min = firstArg.location.min;
+        if (lastArg) location.max = lastArg.location.max;
         return option;
       } else if (textExistsAndIsValid(clause._oldName?.getText())) {
         return createColumn(clause._oldName);
