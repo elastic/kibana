@@ -40,6 +40,14 @@ export function generateLatestTransform(
       });
   }
 
+  filter.push({
+    range: {
+      [definition.latest.timestampField]: {
+        gte: `now-${definition.latest.lookbackPeriod}`,
+      },
+    },
+  });
+
   return generateTransformPutRequest({
     definition,
     filter,

@@ -13,13 +13,14 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
   }
 
   return definition.metadata.reduce((aggs, metadata) => {
+    const lookbackPeriod = metadata.aggregation.lookbackPeriod || definition.latest.lookbackPeriod;
     let agg;
     if (metadata.aggregation.type === 'terms') {
       agg = {
         filter: {
           range: {
             '@timestamp': {
-              gte: `now-${metadata.aggregation.lookbackPeriod ?? '1h'}`,
+              gte: `now-${lookbackPeriod}`,
             },
           },
         },
@@ -40,7 +41,7 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${metadata.aggregation.lookbackPeriod ?? '1h'}`,
+                    gte: `now-${lookbackPeriod}`,
                   },
                 },
               },

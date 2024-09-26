@@ -20,16 +20,3 @@ export const getCustomLatestTemplateComponents = (definition: EntityDefinition) 
     `${definition.id}-latest@custom`,
   ];
 };
-
-export const getCustomHistoryTemplateComponents = (definition: EntityDefinition) => {
-  if (isBuiltinDefinition(definition)) {
-    return [];
-  }
-
-  return [
-    `${definition.id}@platform`, // @platform goes before so it can be overwritten by custom
-    `${definition.id}-history@platform`,
-    `${definition.id}@custom`,
-    `${definition.id}-history@custom`,
-  ];
-};
