@@ -18,13 +18,14 @@ import {
 } from '@elastic/eui';
 
 export interface CodeSampleProps {
+  id?: string;
   title: string;
   language: string;
   code: string;
   onCodeCopyClick?: React.MouseEventHandler<HTMLElement>;
 }
 
-export const CodeSample = ({ title, language, code, onCodeCopyClick }: CodeSampleProps) => {
+export const CodeSample = ({ id, title, language, code, onCodeCopyClick }: CodeSampleProps) => {
   const onCodeClick = React.useCallback(
     (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
       if (onCodeCopyClick === undefined) return;
@@ -38,7 +39,7 @@ export const CodeSample = ({ title, language, code, onCodeCopyClick }: CodeSampl
   );
 
   return (
-    <EuiFlexItem>
+    <EuiFlexItem id={id}>
       <EuiText size="s">
         <strong>{title}</strong>
       </EuiText>
@@ -47,6 +48,7 @@ export const CodeSample = ({ title, language, code, onCodeCopyClick }: CodeSampl
         <EuiPanel color="subdued" paddingSize="none" hasShadow={false}>
           <div onClick={onCodeClick}>
             <EuiCodeBlock
+              data-test-subj={`${id}-code-block`}
               language={language}
               fontSize="m"
               paddingSize="m"
