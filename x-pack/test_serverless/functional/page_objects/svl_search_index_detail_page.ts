@@ -115,11 +115,41 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectShouldDefaultToDataTab() {
       expect(await browser.getCurrentUrl()).contain('/data');
     },
-    async withDataChangeTabs(tab: 'dataTab' | 'mappingsTab') {
+    async withDataChangeTabs(tab: 'dataTab' | 'mappingsTab' | 'settingsTab') {
       await testSubjects.click(tab);
     },
-    async expectUrlShouldChangeTo(tab: 'data' | 'mappings') {
+    async expectUrlShouldChangeTo(tab: 'data' | 'mappings' | 'settings') {
       expect(await browser.getCurrentUrl()).contain(`/${tab}`);
+    },
+    async expectMappingsComponentIsVisible() {
+      await testSubjects.existOrFail('indexDetailsMappingsToggleViewButton', { timeout: 2000 });
+    },
+    async expectSettingsComponentIsVisible() {
+      await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
+    },
+    async expectSelectedLanguage(language: string) {
+      await testSubjects.existOrFail('codeExampleLanguageSelect');
+      expect(
+        (await testSubjects.getVisibleText('codeExampleLanguageSelect')).toLowerCase()
+      ).contain(language);
+    },
+    async selectCodingLanguage(language: string) {
+      await testSubjects.existOrFail('codeExampleLanguageSelect');
+      await testSubjects.click('codeExampleLanguageSelect');
+      await testSubjects.existOrFail(`lang-option-${language}`);
+      await testSubjects.click(`lang-option-${language}`);
+      expect(
+        (await testSubjects.getVisibleText('codeExampleLanguageSelect')).toLowerCase()
+      ).contain(language);
+    },
+    async codeSampleContainsValue(subject: string, value: string) {
+      const tstSubjId = `${subject}-code-block`;
+      await testSubjects.existOrFail(tstSubjId);
+      expect(await testSubjects.getVisibleText(tstSubjId)).contain(value);
+    },
+    async openConsoleCodeExample() {
+      await testSubjects.existOrFail('tryInConsoleButton');
+      await testSubjects.click('tryInConsoleButton');
     },
   };
 }

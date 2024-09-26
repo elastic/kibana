@@ -37,7 +37,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { GetMlSharedImportsReturnType } from '../shared_imports';
 
 export interface AppDependencies {
   analytics: AnalyticsServiceStart;
@@ -60,7 +59,6 @@ export interface AppDependencies {
   theme: ThemeServiceStart;
   history: ScopedHistory;
   share: SharePluginStart;
-  ml: GetMlSharedImportsReturnType;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
