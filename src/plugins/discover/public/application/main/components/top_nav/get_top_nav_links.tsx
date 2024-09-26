@@ -13,7 +13,7 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { omit } from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils/constants';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { showOpenSearchPanel } from './show_open_search_panel';

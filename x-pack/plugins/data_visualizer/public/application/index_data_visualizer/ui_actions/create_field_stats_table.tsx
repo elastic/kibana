@@ -17,7 +17,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
 import { COMMON_VISUALIZATION_GROUPING } from '@kbn/visualizations-plugin/public';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils/constants';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../embeddables/field_stats/constants';
 import type { DataVisualizerStartDependencies } from '../../common/types/data_visualizer_plugin';
 import type {

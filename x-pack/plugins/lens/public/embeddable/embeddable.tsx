@@ -11,7 +11,7 @@ import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils/constants';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   DataViewBase,

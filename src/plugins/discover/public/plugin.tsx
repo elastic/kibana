@@ -19,7 +19,7 @@ import {
   ScopedHistory,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils/constants';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';

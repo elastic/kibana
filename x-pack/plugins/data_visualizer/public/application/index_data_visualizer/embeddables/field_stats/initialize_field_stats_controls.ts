@@ -16,7 +16,7 @@ import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils/constants';
 import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
 import type { FieldStatsInitialState } from '../grid_embeddable/types';
 import type { FieldStatsControlsApi } from './types';
