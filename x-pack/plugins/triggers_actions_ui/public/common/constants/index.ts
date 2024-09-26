@@ -27,7 +27,7 @@ export {
 } from '@kbn/alerts-ui-shared/src/common/constants/i18n_weekdays';
 
 // Feature flag for frontend rule specific flapping in rule flyout
-export const IS_RULE_SPECIFIC_FLAPPING_ENABLED = false;
+export const IS_RULE_SPECIFIC_FLAPPING_ENABLED = true;
 
 export const builtInComparators: { [key: string]: Comparator } = {
   [COMPARATORS.GREATER_THAN]: {

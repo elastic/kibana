@@ -13,6 +13,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleFormAdvancedOptions } from './rule_form_advanced_options';
 import { useKibana } from '../../../common/lib/kibana';
 import userEvent from '@testing-library/user-event';
+import { ApplicationStart } from '@kbn/core-application-browser';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -38,6 +39,11 @@ describe('ruleFormAdvancedOptions', () => {
       enabled: true,
     });
     useKibanaMock().services.http = http;
+    useKibanaMock().services.application.capabilities = {
+      rulesSettings: {
+        writeFlappingSettingsUI: true,
+      },
+    } as unknown as ApplicationStart['capabilities'];
   });
 
   afterEach(() => {
@@ -80,7 +86,7 @@ describe('ruleFormAdvancedOptions', () => {
 
     expect(await screen.findByText('ON')).toBeInTheDocument();
     expect(screen.getByTestId('ruleFormAdvancedOptionsOverrideSwitch')).not.toBeChecked();
-    expect(screen.queryByText('Override')).not.toBeInTheDocument();
+    expect(screen.queryByText('Custom')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleSettingsFlappingMessage')).toHaveTextContent(
       'An alert is flapping if it changes status at least 3 times in the last 10 rule runs.'
     );
@@ -111,7 +117,7 @@ describe('ruleFormAdvancedOptions', () => {
     );
 
     expect(await screen.findByTestId('ruleFormAdvancedOptionsOverrideSwitch')).toBeChecked();
-    expect(screen.getByText('Override')).toBeInTheDocument();
+    expect(screen.getByText('Custom')).toBeInTheDocument();
     expect(screen.getByTestId('lookBackWindowRangeInput')).toHaveValue('6');
     expect(screen.getByTestId('statusChangeThresholdRangeInput')).toHaveValue('4');
     expect(screen.getByTestId('ruleSettingsFlappingMessage')).toHaveTextContent(
@@ -148,7 +154,7 @@ describe('ruleFormAdvancedOptions', () => {
     );
 
     expect(await screen.findByText('OFF')).toBeInTheDocument();
-    expect(screen.queryByText('Override')).not.toBeInTheDocument();
+    expect(screen.queryByText('Custom')).not.toBeInTheDocument();
     expect(screen.queryByTestId('ruleFormAdvancedOptionsOverrideSwitch')).not.toBeInTheDocument();
     expect(screen.queryByTestId('ruleSettingsFlappingMessage')).not.toBeInTheDocument();
   });
