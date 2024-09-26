@@ -513,4 +513,16 @@ describe('Agents CRUD test', () => {
       });
     });
   });
+
+  describe(`getByIds()`, () => {
+    // FIXME:PT implement tests
+
+    it.todo('should return a list of agents');
+
+    it.todo('should omit agents that are not found if `ignoreMissing` is true');
+
+    it.todo('should error if agent is not found and `ignoreMissing` is false');
+
+    it.todo('should error if agent is not part of current space');
+  });
 });

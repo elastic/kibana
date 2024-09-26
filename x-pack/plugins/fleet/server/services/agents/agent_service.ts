@@ -27,7 +27,7 @@ import { FleetUnauthorizedError } from '../../errors';
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
-import { getAgentsByKuery, getAgentById } from './crud';
+import { getAgentsByKuery, getAgentById, getByIds } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
 import { getLatestAvailableAgentVersion } from './versions';
 
@@ -41,6 +41,11 @@ export interface AgentService {
    * Should be used for end-user requests to Kibana. APIs will return errors if user does not have appropriate access.
    */
   asScoped(req: KibanaRequest): AgentClient;
+
+  /**
+   * Scoped services to a given space
+   */
+  asInternalScopedUser(spaceId: string): AgentClient;
 
   /**
    * Only use for server-side usages (eg. telemetry), should not be used for end users unless an explicit authz check is
@@ -59,6 +64,12 @@ export interface AgentClient {
    * Get an Agent by id
    */
   getAgent(agentId: string): Promise<Agent>;
+
+  /**
+   * Get multiple agents by id
+   * @param agentIds
+   */
+  getByIds(agentIds: string[], options?: { ignoreMissing?: boolean }): Promise<Agent[]>;
 
   /**
    * Return the status by the Agent's id
@@ -128,6 +139,14 @@ class AgentClientImpl implements AgentClient {
     return getAgentById(this.internalEsClient, this.soClient, agentId);
   }
 
+  public async getByIds(
+    agentIds: string[],
+    options?: Partial<{ ignoreMissing: boolean }>
+  ): Promise<Agent[]> {
+    await this.#runPreflight();
+    return getByIds(this.internalEsClient, this.soClient, agentIds, options);
+  }
+
   public async getAgentStatusById(agentId: string) {
     await this.#runPreflight();
     return getAgentStatusById(this.internalEsClient, this.soClient, agentId);
@@ -183,6 +202,21 @@ export class AgentServiceImpl implements AgentService {
       this.internalEsClient,
       soClient,
       preflightCheck,
+      getCurrentNamespace(soClient)
+    );
+  }
+
+  public asInternalScopedUser(spaceId: string): AgentClient {
+    if (!spaceId) {
+      throw new TypeError(`spaceId argument is required!`);
+    }
+
+    const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+
+    return new AgentClientImpl(
+      this.internalEsClient,
+      soClient,
+      undefined,
       getCurrentNamespace(soClient)
     );
   }

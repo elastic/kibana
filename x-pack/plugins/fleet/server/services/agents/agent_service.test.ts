@@ -185,6 +185,12 @@ describe('AgentService', () => {
       () => new AgentServiceImpl(mockEsClient, mockSoClient).asInternalUser
     );
   });
+
+  describe('asInternalScopedUser', () => {
+    // FIXME:PT implement tests
+
+    it.todo('should throw error if no space id is passed');
+  });
 });
 
 function expectApisToCallServicesSuccessfully(
