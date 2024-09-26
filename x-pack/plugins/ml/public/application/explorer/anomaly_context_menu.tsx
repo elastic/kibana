@@ -39,6 +39,7 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables';
 import { useTableSeverity } from '../components/controls/select_severity';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../embeddables/anomaly_charts/anomaly_charts_initializer';
@@ -47,7 +48,6 @@ import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
 import type { AnomalyChartsEmbeddableState } from '../../embeddables';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
 import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';

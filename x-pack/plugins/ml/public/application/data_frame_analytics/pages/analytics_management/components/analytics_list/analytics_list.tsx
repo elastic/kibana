@@ -23,10 +23,10 @@ import {
   type DataFrameAnalyticsId,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
 import { DataFrameAnalyticsListColumn } from './common';

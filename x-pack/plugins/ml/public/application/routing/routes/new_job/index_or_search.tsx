@@ -11,7 +11,7 @@ import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ML_PAGES } from '../../../../locator';
+import { ML_PAGES } from '@kbn/ml-locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import { useMlKibana } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';

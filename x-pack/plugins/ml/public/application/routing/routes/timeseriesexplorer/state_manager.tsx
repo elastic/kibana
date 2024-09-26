@@ -14,6 +14,7 @@ import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { TimeSeriesExplorerAppState } from '@kbn/ml-locator';
 import { getViewableDetectors } from '../../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
 import { useNotifications } from '../../../contexts/kibana';
 import type { MlJobWithTimeRange } from '../../../../../common/types/anomaly_detection_jobs';
@@ -29,7 +30,6 @@ import { TimeseriesexplorerNoJobsFound } from '../../../timeseriesexplorer/compo
 import { useTableInterval } from '../../../components/controls/select_interval';
 import { useTableSeverity } from '../../../components/controls/select_severity';
 import { useTimeSeriesExplorerUrlState } from '../../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
-import type { TimeSeriesExplorerAppState } from '../../../../../common/types/locator';
 import { useJobSelectionFlyout } from '../../../contexts/ml/use_job_selection_flyout';
 import { useRefresh } from '../../use_refresh';
 import { TimeseriesexplorerNoChartData } from '../../../timeseriesexplorer/components/timeseriesexplorer_no_chart_data';

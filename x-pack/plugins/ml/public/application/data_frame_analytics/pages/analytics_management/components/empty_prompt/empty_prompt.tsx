@@ -10,10 +10,10 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_PAGES } from '@kbn/ml-locator';
 import dfaImage from './data_frame_analytics_kibana.png';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 
 export const AnalyticsEmptyPrompt: FC = () => {

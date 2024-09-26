@@ -7,9 +7,8 @@
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import type { MemoryUsageUrlState, TrainedModelsUrlState } from '../../../common/types/locator';
-import { ML_PAGES } from '../../../common/constants/locator';
-import type { AppPageState } from '../../../common/types/common';
+import type { AppPageState, MemoryUsageUrlState, TrainedModelsUrlState } from '../types';
+import { ML_PAGES } from '../constants';
 
 export function formatTrainedModelsManagementUrl(
   appBasePath: string,

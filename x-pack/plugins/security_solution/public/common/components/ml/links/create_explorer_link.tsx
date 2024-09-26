@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useMlHref } from '@kbn/ml-plugin/public';
+import { useMlHref } from '@kbn/ml-locator';
 import type { Anomaly } from '../types';
 import { useKibana } from '../../../lib/kibana';
 
@@ -25,11 +25,10 @@ export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
   linkName,
 }) => {
   const {
-    services: { ml, http },
+    services: { http },
   } = useKibana();
 
   const explorerUrl = useMlHref(
-    ml,
     http.basePath.get(),
     {
       page: 'explorer',

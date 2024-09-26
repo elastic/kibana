@@ -14,7 +14,7 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import { fireEvent, render } from '@testing-library/react';
 import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 import { mockAnomalies } from '../mock';
-import { useMlHref } from '@kbn/ml-plugin/public';
+import { useMlHref } from '@kbn/ml-locator';
 
 jest.mock('../../../containers/query_toggle');
 jest.mock('../anomaly/use_anomalies_table_data');

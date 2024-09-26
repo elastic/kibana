@@ -8,8 +8,8 @@
 import type { FC } from 'react';
 import React, { useState, useEffect, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { MlPages } from '../../../locator';
-import { ML_PAGES } from '../../../locator';
+import type { MlPages } from '@kbn/ml-locator';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { useMlKibana } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml';
 

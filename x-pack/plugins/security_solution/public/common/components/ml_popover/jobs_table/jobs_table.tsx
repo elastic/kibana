@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 
 import styled from 'styled-components';
-import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { useMlHref, ML_PAGES } from '@kbn/ml-locator';
 import { PopoverItems } from '../../popover_items';
-import { useBasePath, useKibana } from '../../../lib/kibana';
+import { useBasePath } from '../../../lib/kibana';
 import * as i18n from './translations';
 import { JobSwitch } from './job_switch';
 import type { SecurityJob } from '../types';
@@ -43,12 +43,7 @@ interface JobNameProps {
 }
 
 const JobName = ({ id, name, description, basePath }: JobNameProps) => {
-  const {
-    services: { ml },
-  } = useKibana();
-
   const jobUrl = useMlHref(
-    ml,
     basePath,
     {
       page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
@@ -190,11 +185,7 @@ export const JobsTable = React.memo(JobsTableComponent);
 JobsTable.displayName = 'JobsTable';
 
 export const NoItemsMessage = React.memo(({ basePath }: { basePath: string }) => {
-  const {
-    services: { ml },
-  } = useKibana();
-
-  const createNewAnomalyDetectionJoUrl = useMlHref(ml, basePath, {
+  const createNewAnomalyDetectionJoUrl = useMlHref(basePath, {
     page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
   });
 

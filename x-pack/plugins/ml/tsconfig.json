@@ -131,6 +131,8 @@
     "@kbn/json-schemas",
     "@kbn/ml-field-stats-flyout",
     "@kbn/ml-parse-interval",
-    "@kbn/ml-validators"
+    "@kbn/ml-validators",
+    "@kbn/ml-embeddables",
+    "@kbn/ml-locator"
   ]
 }

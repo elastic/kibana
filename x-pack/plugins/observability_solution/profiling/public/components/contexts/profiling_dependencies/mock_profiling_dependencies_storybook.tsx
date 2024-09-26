@@ -7,7 +7,7 @@
 import { CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
+import { MlLocatorDefinition } from '@kbn/ml-locator';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { createMemoryHistory } from 'history';
 import { merge } from 'lodash';

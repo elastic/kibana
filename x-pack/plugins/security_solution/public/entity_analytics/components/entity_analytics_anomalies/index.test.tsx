@@ -53,8 +53,8 @@ jest.mock('../../../common/components/ml/anomaly/use_anomalies_search', () => {
   };
 });
 
-jest.mock('@kbn/ml-plugin/public', () => {
-  const original = jest.requireActual('@kbn/ml-plugin/public');
+jest.mock('@kbn/ml-locator', () => {
+  const original = jest.requireActual('@kbn/ml-locator');
 
   return {
     ...original,

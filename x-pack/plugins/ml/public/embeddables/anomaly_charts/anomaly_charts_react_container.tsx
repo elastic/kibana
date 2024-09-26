@@ -22,6 +22,9 @@ import {
 import { TimeBuckets } from '@kbn/ml-time-buckets';
 import useObservable from 'react-use/lib/useObservable';
 import type { TimeRange } from '@kbn/es-query';
+import { ML_APP_LOCATOR } from '@kbn/ml-locator';
+import type { MlLocatorParams } from '@kbn/ml-locator';
+
 import type {
   AnomalyChartsEmbeddableOverridableState,
   AnomalyChartsEmbeddableServices,
@@ -31,10 +34,8 @@ import type {
 
 import type { AnomaliesTableData, ExplorerJob } from '../../application/explorer/explorer_utils';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
-import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
-import type { MlLocatorParams } from '../../../common/types/locator';
 import { useAnomalyChartsData } from './use_anomaly_charts_data';
 import { useDateFormatTz, loadAnomaliesTableData } from '../../application/explorer/explorer_utils';
 import { useMlJobService } from '../../application/services/job_service';

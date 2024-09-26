@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-locator';
+
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
 import { useDataSource } from '../../../../contexts/ml';
@@ -26,7 +28,6 @@ import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { LinkCard } from '../../../../components/link_card';
 import { CategorizationIcon } from './categorization_job_icon';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
 import { RareIcon } from './rare_job_icon';
 import { GeoIcon } from './geo_job_icon';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';

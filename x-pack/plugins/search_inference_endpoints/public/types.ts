@@ -8,7 +8,7 @@
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
 import { AppMountParameters } from '@kbn/core/public';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
 import type { App } from './components/app';

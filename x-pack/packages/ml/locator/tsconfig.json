@@ -1,0 +1,30 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@emotion/react/types/css-prop"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ml-url-state",
+    "@kbn/ml-is-populated-object",
+    "@kbn/share-plugin",
+    "@kbn/ml-data-frame-analytics-utils",
+    "@kbn/utility-types",
+    "@kbn/data-plugin",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/ml-query-utils",
+  ]
+}

@@ -24,8 +24,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { useMlLink } from '../../application/contexts/kibana';
-import { ML_PAGES } from '../../../common/constants/locator';
 import type { MlApi } from '../../application/services/ml_api_service';
 import { extractInfluencers } from '../../../common/util/job_utils';
 import { JobSelectorControl } from '../../alerting/job_selector';

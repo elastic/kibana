@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export * from './common';
-export * from './anomaly_detection';
-export * from './data_frame_analytics';
-export * from './settings';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/locator'],
+};

@@ -12,12 +12,12 @@ import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishin
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables';
 import type {
   AnomalySwimLaneEmbeddableApi,
   AnomalySwimlaneEmbeddableCustomInput,
   AnomalySwimLaneEmbeddableState,
 } from '../embeddables';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 
 export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInput {
   id?: string;

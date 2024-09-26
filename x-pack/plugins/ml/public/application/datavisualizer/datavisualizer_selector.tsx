@@ -24,11 +24,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { isFullLicense } from '../license';
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
-import { ML_PAGES } from '../../locator';
 
 function startTrialDescription() {
   return (

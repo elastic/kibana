@@ -16,7 +16,7 @@ import type {
   VectorLayerDescriptor,
   VectorStylePropertiesDescriptor,
 } from '@kbn/maps-plugin/common/descriptor_types';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-locator';
 import { CUSTOM_COLOR_RAMP } from './util';
 import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
 import type { AnomalySourceDescriptor } from './anomaly_source';
@@ -46,9 +46,11 @@ export class AnomalyLayerWizardFactory {
   }> {
     const [coreStart, pluginStart] = await this.getStartServices();
     const { jobsApiProvider } = await import('../application/services/ml_api_service/jobs');
+    const { MlLocatorDefinition } = await import('@kbn/ml-locator');
 
     const httpService = new HttpService(coreStart.http);
     const mlJobsService = jobsApiProvider(httpService);
+    pluginStart.share.url.locators.create(new MlLocatorDefinition());
     const mlLocator = pluginStart.share.url.locators.get(ML_APP_LOCATOR);
 
     return { mlJobsService, mlLocator };

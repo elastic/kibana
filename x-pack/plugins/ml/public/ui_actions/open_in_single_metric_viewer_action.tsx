@@ -12,9 +12,9 @@ import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-locator';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables';
 import type { SingleMetricViewerEmbeddableApi } from '../embeddables';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
 
 import type { MlCoreSetup } from '../plugin';
 import { getEmbeddableTimeRange } from './get_embeddable_time_range';

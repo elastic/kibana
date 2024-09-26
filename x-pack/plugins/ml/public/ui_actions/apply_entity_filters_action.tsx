@@ -10,10 +10,10 @@ import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
+import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from '@kbn/ml-ui-actions';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables';
 import type { MlCoreSetup } from '../plugin';
 import type { AnomalyChartsFieldSelectionContext } from '../embeddables';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
-import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from './constants';
 
 export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction';
 

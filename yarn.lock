@@ -5695,6 +5695,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-embeddables@link:x-pack/packages/ml/embeddables":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-error-utils@link:x-pack/packages/ml/error_utils":
   version "0.0.0"
   uid ""
@@ -5720,6 +5724,10 @@
   uid ""
 
 "@kbn/ml-local-storage@link:x-pack/packages/ml/local_storage":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-locator@link:x-pack/packages/ml/locator":
   version "0.0.0"
   uid ""
 

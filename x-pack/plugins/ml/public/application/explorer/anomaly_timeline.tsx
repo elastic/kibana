@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
+
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
@@ -26,6 +27,7 @@ import {
   EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -41,11 +43,12 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables';
+
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import type { AnomalySwimLaneEmbeddableState } from '../..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import type { SwimlaneType } from './explorer_constants';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { useMlKibana } from '../contexts/kibana';

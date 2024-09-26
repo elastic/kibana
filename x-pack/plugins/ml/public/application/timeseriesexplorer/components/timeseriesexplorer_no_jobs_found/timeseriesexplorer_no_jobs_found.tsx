@@ -13,8 +13,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { useMlLink } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../ml_nodes_check';
 

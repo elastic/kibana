@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderTemplate, getMedianStringLength, getGroupQueryText } from './string_utils';
+import { renderTemplate, getMedianStringLength } from './string_utils';
 
 const strings: string[] = [
   'foo',
@@ -45,21 +45,6 @@ describe('ML - string utils', () => {
     test('test median for no strings', () => {
       const result = getMedianStringLength(noStrings);
       expect(result).toBe(0);
-    });
-  });
-
-  describe('getGroupQueryText', () => {
-    const groupIdOne = 'test_group_id_1';
-    const groupIdTwo = 'test_group_id_2';
-
-    it('should get query string for selected group ids', () => {
-      const actual = getGroupQueryText([groupIdOne, groupIdTwo]);
-      expect(actual).toBe(`groups:(${groupIdOne} or ${groupIdTwo})`);
-    });
-
-    it('should get query string for selected group id', () => {
-      const actual = getGroupQueryText([groupIdOne]);
-      expect(actual).toBe(`groups:(${groupIdOne})`);
     });
   });
 });

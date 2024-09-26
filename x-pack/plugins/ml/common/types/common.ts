@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { MlPages } from '../constants/locator';
-
 export interface Dictionary<TValue> {
   [id: string]: TValue;
 }
@@ -33,10 +31,6 @@ export type DeepReadonly<T> = T extends Array<infer R>
 
 type DeepReadonlyObject<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>;
-};
-
-export type AppPageState<T> = {
-  [key in MlPages]?: Partial<T>;
 };
 
 type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };

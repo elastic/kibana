@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { ML_PAGES } from '../../../locator';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { createPath, PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
 import { getMlNodeCount } from '../../ml_nodes_check';

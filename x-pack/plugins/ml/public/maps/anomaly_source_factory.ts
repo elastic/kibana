@@ -9,9 +9,9 @@ import type { StartServicesAccessor } from '@kbn/core/public';
 import { SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { ML_APP_LOCATOR } from '@kbn/ml-locator';
 import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
-import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import type { MlApi } from '../application/services/ml_api_service';
 
 export class AnomalySourceFactory {

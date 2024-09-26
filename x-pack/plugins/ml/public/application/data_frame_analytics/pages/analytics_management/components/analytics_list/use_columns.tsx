@@ -25,6 +25,7 @@ import {
   type DataFrameAnalyticsId,
   type DataFrameAnalyticsStats,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { ML_PAGES } from '@kbn/ml-locator';
 import type { DataFrameAnalyticsListRow } from './common';
 import {
   getDataFrameAnalyticsProgressPhase,
@@ -35,7 +36,6 @@ import {
 } from './common';
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 const TRUNCATE_TEXT_LINES = 3;
 

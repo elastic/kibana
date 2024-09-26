@@ -53,6 +53,7 @@ import { useStorage } from '@kbn/ml-local-storage';
 import { dynamic } from '@kbn/shared-ux-utility';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { getModelStateColor, getModelDeploymentState } from './get_model_state';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
@@ -70,7 +71,6 @@ import type {
   TrainedModelStat,
 } from '../../../common/types/trained_models';
 import { DeleteModelsModal } from './delete_models_modal';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';

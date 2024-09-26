@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiLink } from '@elastic/eui';
 
-import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { ML_PAGES, useMlHref } from '@kbn/ml-locator';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const StyledJobEuiLInk = styled(EuiLink)`
@@ -23,10 +23,9 @@ interface MlJobLinkProps {
 
 const MlJobLinkComponent: React.FC<MlJobLinkProps> = ({ jobId, jobName }) => {
   const {
-    services: { http, ml },
+    services: { http },
   } = useKibana();
   const jobUrl = useMlHref(
-    ml,
     http.basePath.get(),
     {
       page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,

@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { timeFormatter } from '@kbn/ml-date-utils';
+import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-locator';
 
 import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
@@ -31,7 +32,6 @@ import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../../../../../common/util/job_utils';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../../common/constants/locator';
 
 const MAX_FORECASTS = 500;
 

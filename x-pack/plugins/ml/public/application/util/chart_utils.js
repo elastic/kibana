@@ -10,7 +10,7 @@ import { getAnomalyScoreExplanationImpactValue } from '@kbn/ml-anomaly-utils';
 import { calculateTextWidth } from './string_utils';
 import moment from 'moment';
 import { CHART_TYPE } from '../explorer/explorer_constants';
-import { ML_PAGES } from '../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-locator';
 
 export const LINE_CHART_ANOMALY_RADIUS = 7;
 export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;

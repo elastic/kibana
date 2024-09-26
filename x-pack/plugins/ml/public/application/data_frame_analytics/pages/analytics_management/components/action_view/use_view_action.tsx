@@ -12,6 +12,7 @@ import {
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
 
+import { ML_PAGES } from '@kbn/ml-locator';
 import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
 
 import type {
@@ -21,7 +22,6 @@ import type {
 
 import { getViewLinkStatus } from './get_view_link_status';
 import { viewActionButtonText, ViewButton } from './view_button';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 export type ViewAction = ReturnType<typeof useViewAction>;
 export const useViewAction = () => {

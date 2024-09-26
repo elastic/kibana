@@ -13,10 +13,10 @@ import { EuiButtonGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';
+import { ML_PAGES } from '@kbn/ml-locator';
 
 import type { ExplorerJob } from '../../explorer/explorer_utils';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
-import { ML_PAGES } from '../../../../common/constants/locator';
 
 interface Props {
   viewId: typeof ML_PAGES.SINGLE_METRIC_VIEWER | typeof ML_PAGES.ANOMALY_EXPLORER;

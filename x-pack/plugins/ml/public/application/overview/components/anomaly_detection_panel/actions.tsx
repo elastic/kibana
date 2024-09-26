@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import type { Group } from './anomaly_detection_panel';
 
 export function useGroupActions(): Array<Action<Group>> {

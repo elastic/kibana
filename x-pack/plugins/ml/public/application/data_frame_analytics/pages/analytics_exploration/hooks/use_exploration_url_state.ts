@@ -8,8 +8,8 @@
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
-import type { ExplorationPageUrlState } from '../../../../../../common/types/locator';
+import { ML_PAGES } from '@kbn/ml-locator';
+import type { ExplorationPageUrlState } from '@kbn/ml-locator';
 
 export function getDefaultExplorationPageUrlState(
   overrides?: Partial<ExplorationPageUrlState>

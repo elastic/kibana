@@ -8,12 +8,12 @@
 import React, { useCallback, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
 import { useUrlState } from '@kbn/ml-url-state';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
 import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { getViewLinkStatus } from '../action_view/get_view_link_status';
 
 import { mapActionButtonText, MapButton } from './map_button';

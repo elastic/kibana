@@ -13,16 +13,16 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { formatGenericMlUrl } from './common';
 import type {
+  AppPageState,
   DataFrameAnalyticsExplorationQueryState,
   DataFrameAnalyticsExplorationUrlState,
   DataFrameAnalyticsUrlState,
   ExplorationPageUrlState,
   MlGenericUrlState,
   MlCommonGlobalState,
-} from '../../../common/types/locator';
-import { ML_PAGES } from '../../../common/constants/locator';
-import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
-import type { AppPageState } from '../../../common/types/common';
+} from '../types';
+import { ML_PAGES } from '../constants';
+import { getGroupQueryText, getJobQueryText } from './string_utils';
 
 export function formatDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,

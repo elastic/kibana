@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';

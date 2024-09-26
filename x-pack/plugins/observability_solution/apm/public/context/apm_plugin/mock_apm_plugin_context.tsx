@@ -13,7 +13,7 @@ import {
   NodeLogsLocatorParams,
   TraceLogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
-import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
+import { MlLocatorDefinition } from '@kbn/ml-locator';
 import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import {
   createObservabilityRuleTypeRegistryMock,

@@ -20,12 +20,12 @@ import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { ML_PAGES } from '@kbn/ml-locator';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable, isDfaTrainedModel } from './test_models';
 import type { ModelItem } from './models_list';
 import { usePermissionCheck } from '../capabilities/check_capabilities';

@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export const CONTROLLED_BY_SWIM_LANE_FILTER = 'anomaly-swim-lane';
-export const CONTROLLED_BY_ANOMALY_CHARTS_FILTER = 'anomaly-charts';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/embeddables'],
+};
