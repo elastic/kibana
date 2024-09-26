@@ -33,6 +33,7 @@ const args: Args = {
   isUpdateAvailable: false,
   isQuickstart: false,
   isCollectionCard: false,
+  installStatus: null,
 };
 
 const argTypes = {
