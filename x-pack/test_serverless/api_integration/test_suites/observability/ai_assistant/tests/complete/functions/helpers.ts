@@ -11,6 +11,7 @@ import {
   MessageRole,
   StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common';
+import { AssistantScope } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { Readable } from 'stream';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../../shared/services';
 import { ObservabilityAIAssistantApiClient } from '../../../common/observability_ai_assistant_api_client';
@@ -35,10 +36,12 @@ export async function invokeChatCompleteWithFunctionRequest({
   functionCall,
   roleAuthc,
   internalReqHeader,
+  scope,
 }: {
   connectorId: string;
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
   functionCall: Message['message']['function_call'];
+  scope?: AssistantScope;
   roleAuthc: RoleCredentials;
   internalReqHeader: InternalRequestHeader;
 }) {
@@ -62,6 +65,7 @@ export async function invokeChatCompleteWithFunctionRequest({
           connectorId,
           persist: false,
           screenContexts: [],
+          scope: 'observability',
         },
       },
     })
