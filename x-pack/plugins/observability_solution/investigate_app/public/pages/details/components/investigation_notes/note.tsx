@@ -5,15 +5,16 @@
  * 2.0.
  */
 import {
-  EuiAvatar,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiMarkdownFormat,
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { InvestigationNoteResponse } from '@kbn/investigation-shared';
+import { UserProfile } from '@kbn/security-plugin/common';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { formatDistance } from 'date-fns';
 import React, { useState } from 'react';
@@ -27,14 +28,16 @@ const textContainerClassName = css`
 
 interface Props {
   note: InvestigationNoteResponse;
-  disabled: boolean;
+  isOwner: boolean;
+  userProfile?: UserProfile;
+  userProfileLoading: boolean;
 }
 
-export function Note({ note, disabled }: Props) {
+export function Note({ note, isOwner, userProfile, userProfileLoading }: Props) {
+  const theme = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const { deleteNote, isDeletingNote } = useInvestigation();
 
-  const theme = useTheme();
   const timelineContainerClassName = css`
     padding-bottom: 16px;
     border-bottom: 1px solid ${theme.colors.lightShade};
@@ -43,51 +46,65 @@ export function Note({ note, disabled }: Props) {
     }
   `;
 
+  const actionButtonClassname = css`
+    color: ${theme.colors.mediumShade};
+    :hover {
+      color: ${theme.colors.darkShade};
+    }
+  `;
+
+  const timestampClassName = css`
+    color: ${theme.colors.darkShade};
+  `;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s" className={timelineContainerClassName}>
-      <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexStart" gutterSize="s">
+      <EuiFlexGroup direction="row" justifyContent="spaceBetween">
+        <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiAvatar name={note.createdBy} size="s" />
+            {userProfileLoading ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              <EuiText size="s">
+                {userProfile?.user.full_name ?? userProfile?.user.username ?? note?.createdBy}
+              </EuiText>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs">
+            <EuiText size="xs" className={timestampClassName}>
               {formatDistance(new Date(note.createdAt), new Date(), { addSuffix: true })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiFlexGroup
-          direction="row"
-          alignItems="center"
-          justifyContent="flexEnd"
-          gutterSize="none"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="editInvestigationNoteButton"
-              size="s"
-              iconSize="s"
-              color="text"
-              iconType="pencil"
-              disabled={disabled || isDeletingNote}
-              onClick={() => {
-                setIsEditing(!isEditing);
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconSize="s"
-              color="text"
-              iconType="trash"
-              disabled={disabled || isDeletingNote}
-              onClick={async () => await deleteNote(note.id)}
-              data-test-subj="deleteInvestigationNoteButton"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {isOwner && (
+          <EuiFlexGroup direction="row" justifyContent="flexEnd" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="editInvestigationNoteButton"
+                size="s"
+                iconSize="s"
+                iconType="pencil"
+                disabled={isDeletingNote}
+                onClick={() => {
+                  setIsEditing(!isEditing);
+                }}
+                className={actionButtonClassname}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconSize="s"
+                iconType="trash"
+                disabled={isDeletingNote}
+                onClick={async () => await deleteNote(note.id)}
+                data-test-subj="deleteInvestigationNoteButton"
+                className={actionButtonClassname}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiFlexGroup>
       <EuiFlexItem className={textContainerClassName}>
         {isEditing ? (

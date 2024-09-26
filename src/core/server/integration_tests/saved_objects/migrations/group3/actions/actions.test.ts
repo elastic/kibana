@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
@@ -53,15 +52,13 @@ const { startES } = createTestServers({
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.resolve(__dirname, '../../archives/7.7.2_xpack_100k_obj.zip'),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
 });
 let esServer: TestElasticsearchUtils;
 
-// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
-describe.skip('migration actions', () => {
+describe('migration actions', () => {
   let client: ElasticsearchClient;
   let esCapabilities: ReturnType<typeof elasticsearchServiceMock.createCapabilities>;
 
@@ -2029,28 +2026,6 @@ describe.skip('migration actions', () => {
               "type": "target_index_had_write_block",
             },
           }
-      `);
-    });
-
-    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
-      const newDocs = new Array(10000).fill({
-        _source: {
-          title:
-            'how do I create a document thats large enoug to exceed the limits without typing long sentences',
-        },
-      }) as SavedObjectsRawDoc[];
-      const task = bulkOverwriteTransformedDocuments({
-        client,
-        index: 'existing_index_with_docs',
-        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
-      });
-      await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "request_entity_too_large_exception",
-          },
-        }
       `);
     });
   });

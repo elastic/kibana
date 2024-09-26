@@ -15,7 +15,7 @@ import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/app
 import { waitFor } from '@testing-library/react';
 import { Chance } from 'chance';
 import React, { Fragment } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { from } from 'rxjs';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { ConfigSchema } from '../../plugin';
@@ -30,6 +30,7 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
   useLocation: jest.fn(),
+  useHistory: jest.fn(),
 }));
 
 jest.mock('../../utils/kibana_react');
@@ -85,6 +86,7 @@ jest.mock('@kbn/observability-shared-plugin/public');
 const useFetchAlertDetailMock = useFetchAlertDetail as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
 const useLocationMock = useLocation as jest.Mock;
+const useHistoryMock = useHistory as jest.Mock;
 const useBreadcrumbsMock = useBreadcrumbs as jest.Mock;
 
 const chance = new Chance();
@@ -110,6 +112,7 @@ describe('Alert details', () => {
     jest.clearAllMocks();
     useParamsMock.mockReturnValue(params);
     useLocationMock.mockReturnValue({ pathname: '/alerts/uuid', search: '', state: '', hash: '' });
+    useHistoryMock.mockReturnValue({ replace: jest.fn() });
     useBreadcrumbsMock.mockReturnValue([]);
     ruleTypeRegistry.list.mockReturnValue([ruleType]);
     ruleTypeRegistry.get.mockReturnValue(ruleType);

@@ -81,7 +81,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UPDATE_API_KEY,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
         error,
       })
     );
@@ -109,7 +109,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     ruleAuditEvent({
       action: RuleAuditAction.UPDATE_API_KEY,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
 

@@ -5,8 +5,8 @@ exports[`generateSystemLogsYml should return system logs oriented yml configurat
   default:
     type: elasticsearch
     hosts:
-      - 'http://localhost:9200'
-    api_key: 'elastic:changeme'
+      - http://localhost:9200
+    api_key: elastic:changeme
 inputs:
   - id: system-logs-8df0ff52-6f3b-4b5a-a2da-f06c55d111d1
     type: logfile
