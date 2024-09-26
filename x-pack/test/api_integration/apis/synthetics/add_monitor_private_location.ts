@@ -26,7 +26,7 @@ import {
   INSTALLED_VERSION,
   PrivateLocationTestService,
 } from './services/private_location_test_service';
-import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
+import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './add_monitor';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -211,12 +211,10 @@ export default function ({ getService }: FtrProviderContext) {
       const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
-      expect(apiResponse.body).eql(
+      expect(omit(apiResponse.body, keyToOmitList)).eql(
         omitMonitorKeys({
           ...omit(httpMonitorJson, ['urls']),
           url: httpMonitorJson.urls,
-          [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-          [ConfigKey.CONFIG_ID]: apiResponse.body.id,
           updated_at: updatedAt,
           revision: 2,
         })
@@ -269,7 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await supertestAPI
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId + '?ui=true')
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId + '?internal=true')
         .set('kbn-xsrf', 'true')
         .send(httpMonitorJson)
         .expect(200);
@@ -370,15 +368,11 @@ export default function ({ getService }: FtrProviderContext) {
         const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
         expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
-        expect(apiResponse.body).eql(
+        expect(omit(apiResponse.body, keyToOmitList)).eql(
           omitMonitorKeys({
             ...monitor,
-            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
             [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
             url: apiResponse.body.url,
-            created_at: createdAt,
-            updated_at: updatedAt,
           })
         );
         monitorId = apiResponse.body.id;

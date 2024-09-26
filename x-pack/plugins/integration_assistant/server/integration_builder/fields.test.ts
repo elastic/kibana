@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as Utils from '../util';
-import * as nunjucks from 'nunjucks';
+import { createSync } from '../util';
+import { render } from 'nunjucks';
 import { createFieldMapping } from './fields';
 import { Docs } from '../../common';
 
@@ -19,7 +19,7 @@ jest.mock('../util', () => ({
 
 const mockedTemplate = 'mocked template';
 
-(nunjucks.render as jest.Mock).mockReturnValue(mockedTemplate);
+(render as jest.Mock).mockReturnValue(mockedTemplate);
 
 describe('createFieldMapping', () => {
   const dataStreamPath = 'path';
@@ -46,14 +46,11 @@ describe('createFieldMapping', () => {
   type: keyword
 `;
 
-    expect(Utils.createSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/base-fields.yml`,
+    expect(createSync).toHaveBeenCalledWith(
+      `${dataStreamPath}/fields/base-fields.yml`,
       mockedTemplate
     );
-    expect(Utils.createSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/fields/fields.yml`,
-      expectedFields
-    );
+    expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/fields/fields.yml`, expectedFields);
   });
 
   it('Should create fields files even if docs value is empty', async () => {
@@ -62,13 +59,10 @@ describe('createFieldMapping', () => {
     const expectedFields = `[]
 `;
 
-    expect(Utils.createSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/base-fields.yml`,
+    expect(createSync).toHaveBeenCalledWith(
+      `${dataStreamPath}/fields/base-fields.yml`,
       mockedTemplate
     );
-    expect(Utils.createSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/fields/fields.yml`,
-      expectedFields
-    );
+    expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/fields/fields.yml`, expectedFields);
   });
 });

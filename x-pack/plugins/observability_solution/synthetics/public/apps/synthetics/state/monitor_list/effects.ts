@@ -9,7 +9,11 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { call, put, takeEvery, select, takeLatest, debounce } from 'redux-saga/effects';
 import { quietFetchOverviewStatusAction } from '../overview_status';
 import { enableDefaultAlertingAction } from '../alert_rules';
-import { ConfigKey, EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  EncryptedSyntheticsSavedMonitor,
+  SyntheticsMonitorWithId,
+} from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { MonitorOverviewPageState } from '../overview';
 import { selectOverviewState } from '../overview/selectors';
@@ -48,7 +52,7 @@ export function* enableMonitorAlertEffect() {
     function* (action: PayloadAction<UpsertMonitorRequest>): Generator {
       try {
         const response = yield call(fetchUpsertMonitor, action.payload);
-        yield put(enableMonitorAlertAction.success(response as EncryptedSyntheticsSavedMonitor));
+        yield put(enableMonitorAlertAction.success(response as SyntheticsMonitorWithId));
         sendSuccessToast(action.payload.success);
         if (
           (response as EncryptedSyntheticsSavedMonitor)[ConfigKey.ALERT_CONFIG]?.status?.enabled
