@@ -613,7 +613,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       return body;
     },
 
-    async findRule({ roleAuthc, ruleId }: { roleAuthc: RoleCredentials; ruleId: string }) {
+    async findRuleById(roleAuthc: RoleCredentials, ruleId: string) {
       if (!ruleId) {
         throw new Error(`'ruleId' is undefined`);
       }
@@ -1089,7 +1089,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       return body;
     },
 
-    async findRuleInRules(roleAuthc: RoleCredentials, ruleId: string) {
+    async findInRules(roleAuthc: RoleCredentials, ruleId: string) {
       const response = await supertestWithoutAuth
         .get('/api/alerting/rules/_find')
         .set(roleAuthc.apiKeyHeader)
