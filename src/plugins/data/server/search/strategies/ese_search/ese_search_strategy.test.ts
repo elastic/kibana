@@ -344,6 +344,10 @@ describe('ES search strategy', () => {
             ...mockAsyncResponse.body,
             is_running: true,
           },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
+          },
         });
 
         const params = { index: 'logstash-*', body: { query: {} } };
@@ -375,6 +379,10 @@ describe('ES search strategy', () => {
           body: {
             ...mockAsyncResponse.body,
             is_running: true,
+          },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
           },
         });
 
@@ -526,6 +534,10 @@ describe('ES search strategy', () => {
           body: {
             ...mockAsyncResponse.body,
             is_running: true,
+          },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
           },
         });
 
