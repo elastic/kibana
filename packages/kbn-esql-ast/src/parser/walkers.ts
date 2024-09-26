@@ -101,6 +101,7 @@ import {
   ESQLNamedParamLiteral,
   ESQLOrderExpression,
 } from '../types';
+import { lastItem } from '../visitor/utils';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
   const fromContexts = ctx.getTypedRuleContexts(IndexPatternContext);
@@ -167,11 +168,14 @@ export function getMatchField(ctx: EnrichCommandContext) {
   const identifier = ctx.qualifiedNamePattern();
   if (identifier) {
     const fn = createOption(ctx.ON()!.getText().toLowerCase(), ctx);
+    let max: number = ctx.ON()!.symbol.stop;
     if (textExistsAndIsValid(identifier.getText())) {
-      fn.args.push(createColumn(identifier));
+      const column = createColumn(identifier);
+      fn.args.push(column);
+      max = column.location.max;
     }
-    // overwrite the location inferring the correct position
-    fn.location = getPosition(ctx.ON()!.symbol, ctx.WITH()?.symbol);
+    fn.location.min = ctx.ON()!.symbol.start;
+    fn.location.max = max;
     return [fn];
   }
   return [];
@@ -179,8 +183,9 @@ export function getMatchField(ctx: EnrichCommandContext) {
 
 export function getEnrichClauses(ctx: EnrichCommandContext) {
   const ast: ESQLCommandOption[] = [];
-  if (ctx.WITH()) {
-    const option = createOption(ctx.WITH()!.getText().toLowerCase(), ctx);
+  const withCtx = ctx.WITH();
+  if (withCtx) {
+    const option = createOption(withCtx.getText().toLowerCase(), ctx);
     ast.push(option);
     const clauses = ctx.enrichWithClause_list();
     for (const clause of clauses) {
@@ -204,8 +209,13 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
           option.args.push(fn);
         }
       }
+
+      const location = option.location;
+      const lastArg = lastItem(option.args);
+
+      location.min = withCtx.symbol.start;
+      location.max = lastArg?.location?.max ?? withCtx.symbol.stop;
     }
-    option.location = getPosition(ctx.WITH()?.symbol);
   }
 
   return ast;
@@ -436,13 +446,16 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
     .map((clause) => {
       const asToken = clause.getToken(esql_parser.AS, 0);
       if (asToken && textExistsAndIsValid(asToken.getText())) {
-        const fn = createOption(asToken.getText().toLowerCase(), clause);
+        const option = createOption(asToken.getText().toLowerCase(), clause);
         for (const arg of [clause._oldName, clause._newName]) {
           if (textExistsAndIsValid(arg.getText())) {
-            fn.args.push(createColumn(arg));
+            option.args.push(createColumn(arg));
           }
         }
-        return fn;
+        option.location.min = asToken.symbol.start;
+        const lastArg = lastItem(option.args);
+        if (lastArg) option.location.max = lastArg.location.max;
+        return option;
       } else if (textExistsAndIsValid(clause._oldName?.getText())) {
         return createColumn(clause._oldName);
       }
@@ -600,11 +613,15 @@ export function visitByOption(
   ctx: StatsCommandContext | InlinestatsCommandContext,
   expr: FieldsContext | undefined
 ) {
-  if (!ctx.BY() || !expr) {
+  const byCtx = ctx.BY();
+  if (!byCtx || !expr) {
     return [];
   }
-  const option = createOption(ctx.BY()!.getText().toLowerCase(), ctx);
+  const option = createOption(byCtx.getText().toLowerCase(), ctx);
   option.args.push(...collectAllFields(expr));
+  option.location.min = byCtx.symbol.start;
+  const lastArg = lastItem(option.args);
+  if (lastArg) option.location.max = lastArg.location.max;
   return [option];
 }
 
