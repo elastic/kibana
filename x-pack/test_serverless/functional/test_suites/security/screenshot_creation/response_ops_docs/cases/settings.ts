@@ -67,18 +67,6 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         return await testSubjects.exists('common-flyout-cancel');
       });
       await testSubjects.click('common-flyout-cancel');
-      await retry.waitFor('dropdown-connectors to exist', async () => {
-        return await testSubjects.exists('dropdown-connectors');
-      });
-      await testSubjects.click('dropdown-connectors');
-      await retry.waitFor('dropdown-connector-add-connector to exist', async () => {
-        return await testSubjects.exists('dropdown-connector-add-connector');
-      });
-      await testSubjects.click('dropdown-connector-add-connector');
-      await svlCommonScreenshots.takeScreenshot('security-cases-connectors', screenshotDirectories);
-      await retry.waitFor('euiFlyoutCloseButton exist', async () => {
-        return await testSubjects.exists('euiFlyoutCloseButton');
-      });
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });
