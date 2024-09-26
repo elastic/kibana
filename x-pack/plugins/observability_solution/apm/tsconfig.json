@@ -120,8 +120,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/security-plugin-types-common",
     "@kbn/entityManager-plugin",
-    "@kbn/react-hooks",
-    "@kbn/react-hooks",
     "@kbn/server-route-repository-utils",
     "@kbn/core-analytics-browser",
     "@kbn/apm-types",
