@@ -238,7 +238,6 @@ export const RolesGridPage: FC<Props> = ({
   };
 
   const onTableChange = ({ page, sort }: CriteriaWithPagination<Role>) => {
-    console.log(sort);
     const newState = {
       ...tableState,
       from: page?.index! * page?.size!,
@@ -375,6 +374,14 @@ export const RolesGridPage: FC<Props> = ({
     totalItemCount: visibleRoles.length,
     pageSizeOptions: [25, 50, 100],
   };
+
+  const sorting = {
+    sort: {
+      field: tableState.sort?.field ?? 'name',
+      direction: tableState.sort?.direction ?? 'asc',
+    },
+  };
+
   return permissionDenied ? (
     <PermissionDenied />
   ) : (
@@ -502,12 +509,7 @@ export const RolesGridPage: FC<Props> = ({
           }
           items={visibleRoles}
           loading={isLoading}
-          sorting={{
-            sort: {
-              field: tableState.sort?.field ?? 'name',
-              direction: tableState.sort?.direction ?? 'asc',
-            },
-          }}
+          sorting={sorting}
           rowProps={{ 'data-test-subj': 'roleRow' }}
         />
       </KibanaPageTemplate.Section>
