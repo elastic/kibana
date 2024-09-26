@@ -13,9 +13,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
+import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 
 import { useDataSource } from '../contexts/ml/data_source_context';
-import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '../components/field_stats_flyout';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';

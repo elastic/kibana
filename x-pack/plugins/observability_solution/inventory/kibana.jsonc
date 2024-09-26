@@ -11,7 +11,10 @@
       "observabilityShared",
       "entityManager",
       "inference",
-      "dataViews"
+      "dataViews",
+      "unifiedSearch",
+      "data",
+      "share"
     ],
     "requiredBundles": [
       "kibanaReact"
