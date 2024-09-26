@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
-import { useLabsService } from '../../../services';
+import { UI_SETTINGS } from '../../../../common';
+import { coreServices, presentationUtilService } from '../../../services/kibana_services';
 
 const strings = {
   getLabsButtonLabel: () =>
@@ -23,14 +24,13 @@ const strings = {
 const Flyout = withSuspense(LazyLabsFlyout, null);
 
 export const LabsControl = () => {
-  const { isLabsEnabled, getProjects } = useLabsService();
   const [isShown, setIsShown] = useState(false);
 
-  if (!isLabsEnabled()) {
+  if (!coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI)) {
     return null;
   }
 
-  const projects = getProjects(['canvas']);
+  const projects = presentationUtilService.labsService.getProjects(['canvas']);
   const overrideCount = Object.values(projects).filter(
     (project) => project.status.isOverride
   ).length;

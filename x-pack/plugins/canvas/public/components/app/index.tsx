@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { ScopedHistory } from '@kbn/core/public';
-import { useNavLinkService } from '../../services';
+import PropTypes from 'prop-types';
+import React, { FC, useEffect } from 'react';
 // @ts-expect-error
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { CanvasRouter } from '../../routes';
+import { navLinksService } from '../../services/kibana_services';
 import { Flyouts } from '../flyouts';
 
 class ShortcutManagerContextWrapper extends React.Component<React.PropsWithChildren<{}>> {
@@ -29,11 +29,9 @@ class ShortcutManagerContextWrapper extends React.Component<React.PropsWithChild
 }
 
 export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
-  const { updatePath } = useNavLinkService();
-
   useEffect(() => {
     return history.listen(({ pathname, search }) => {
-      updatePath(pathname + search);
+      navLinksService.updatePath(pathname + search);
     });
   });
 
