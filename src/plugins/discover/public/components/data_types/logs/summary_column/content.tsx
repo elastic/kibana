@@ -8,11 +8,6 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-} from '@elastic/eui';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import {
   ShouldShowFieldInTableHandler,
