@@ -127,8 +127,6 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
 
   const history = createBrowserHistory();
 
-  const esSearchQuery = { match_all: {} };
-
   const timeRangeParsed = useMemo(() => {
     if (timeRange) {
       const min = datemath.parse(timeRange.from);
@@ -161,15 +159,8 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
               >
                 <LogRateAnalysisReduxProvider>
                   <DatePickerContextProvider {...datePickerDeps}>
-                    <LogRateAnalysisDocumentCountChartData
-                      timeRange={timeRangeParsed}
-                      esSearchQuery={esSearchQuery}
-                    />
+                    <LogRateAnalysisDocumentCountChartData timeRange={timeRangeParsed} />
                     <LogRateAnalysisContent
-                      esSearchQuery={esSearchQuery}
-                      // barColorOverride={barColorOverride}
-                      // barHighlightColorOverride={barHighlightColorOverride}
-                      // onAnalysisCompleted={onAnalysisCompleted}
                       embeddingOrigin={embeddingOrigin ?? EMBEDDABLE_ORIGIN}
                     />
                   </DatePickerContextProvider>

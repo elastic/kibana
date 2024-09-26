@@ -11,7 +11,6 @@ import {
 } from '@kbn/aiops-log-rate-analysis/constants';
 import type { Reference } from '@kbn/content-management-utils';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -36,32 +35,6 @@ import type {
   LogRateAnalysisEmbeddableRuntimeState,
   LogRateAnalysisEmbeddableState,
 } from './types';
-
-export interface EmbeddableLogRateAnalysisStartServices {
-  data: DataPublicPluginStart;
-}
-
-export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
-
-export const getDependencies = async (
-  getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
-) => {
-  const [
-    { http, uiSettings, notifications, ...startServices },
-    { lens, data, usageCollection, fieldFormats },
-  ] = await getStartServices();
-
-  return {
-    http,
-    uiSettings,
-    data,
-    notifications,
-    lens,
-    usageCollection,
-    fieldFormats,
-    ...startServices,
-  };
-};
 
 export const getLogRateAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
