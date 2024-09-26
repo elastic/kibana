@@ -6,14 +6,21 @@
  */
 
 import React from 'react';
-import type { RuleUpgradeState } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
-import { RuleDiffField } from './rule_diff_field';
+import type {
+  RuleUpgradeState,
+  SetFieldResolvedValueFn,
+} from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+import { FieldUpgradeConflictsResolver } from './field_upgrade_conflicts_resolver';
 
-interface RuleDiffSectionProps {
+interface RuleUpgradeConflictsResolverProps {
   ruleUpgradeState: RuleUpgradeState;
+  setFieldResolvedValue: SetFieldResolvedValueFn;
 }
 
-export function RuleDiffSection({ ruleUpgradeState }: RuleDiffSectionProps): JSX.Element | null {
+export function RuleUpgradeConflictsResolver({
+  ruleUpgradeState,
+  setFieldResolvedValue,
+}: RuleUpgradeConflictsResolverProps): JSX.Element | null {
   const fieldDiffEntries = Object.entries(ruleUpgradeState.diff.fields) as Array<
     [
       keyof typeof ruleUpgradeState.diff.fields,
@@ -21,7 +28,7 @@ export function RuleDiffSection({ ruleUpgradeState }: RuleDiffSectionProps): JSX
     ]
   >;
   const fields = fieldDiffEntries.map(([fieldName, fieldDiff]) => (
-    <RuleDiffField
+    <FieldUpgradeConflictsResolver
       key={fieldName}
       fieldName={fieldName}
       fieldThreeWayDiff={fieldDiff}

@@ -7,10 +7,7 @@
 
 import React from 'react';
 import { EuiTitle } from '@elastic/eui';
-import type {
-  DiffableAllFields,
-  DiffableRule,
-} from '../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../common/api/detection_engine';
 import { FieldReadOnly } from '../final_readonly/field_readonly';
 import { SideHeader } from '../components/side_header';
 import { FinalSideHelpInfo } from './final_side_help_info';
@@ -32,10 +29,7 @@ export function FinalSide({ fieldName, finalDiffableRule }: FinalSideProps): JSX
           </h3>
         </EuiTitle>
       </SideHeader>
-      <FieldReadOnly
-        fieldName={fieldName as keyof DiffableAllFields}
-        finalDiffableRule={finalDiffableRule as DiffableAllFields}
-      />
+      <FieldReadOnly fieldName={fieldName} finalDiffableRule={finalDiffableRule} />
     </>
   );
 }
