@@ -83,57 +83,6 @@ describe('eql_executor', () => {
           }`,
         ]);
       });
-
-      it('warns when a sequence query is used with alert suppression', async () => {
-        // mock a sequences response
-        alertServices.scopedClusterClient.asCurrentUser.eql.search.mockReset().mockResolvedValue({
-          hits: {
-            total: { relation: 'eq', value: 10 },
-            sequences: [],
-          },
-        });
-
-        const ruleWithSequenceAndSuppression = getCompleteRuleMock<EqlRuleParams>({
-          ...params,
-          query: 'sequence [any where true] [any where true]',
-          alertSuppression: {
-            groupBy: ['event.type'],
-            duration: {
-              value: 10,
-              unit: 'm',
-            },
-            missingFieldsStrategy: 'suppress',
-          },
-        });
-
-        const { result } = await eqlExecutor({
-          inputIndex: DEFAULT_INDEX_PATTERN,
-          runtimeMappings: {},
-          completeRule: ruleWithSequenceAndSuppression,
-          tuple,
-          ruleExecutionLogger,
-          services: alertServices,
-          version,
-          bulkCreate: jest.fn(),
-          wrapHits: jest.fn(),
-          wrapSequences: jest.fn(),
-          wrapSuppressedSequences: jest.fn(),
-          primaryTimestamp: '@timestamp',
-          exceptionFilter: undefined,
-          unprocessedExceptions: [],
-          wrapSuppressedHits: jest.fn(),
-          alertTimestampOverride: undefined,
-          alertWithSuppression: jest.fn(),
-          isAlertSuppressionActive: true,
-          experimentalFeatures: mockExperimentalFeatures,
-          scheduleNotificationResponseActionsService:
-            mockScheduleNotificationResponseActionsService,
-        });
-
-        expect(result.warningMessages).toContain(
-          'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
-        );
-      });
     });
 
     it('should classify EQL verification exceptions as "user errors" when reporting to the framework', async () => {

@@ -12,16 +12,21 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { fillDefineEqlRule, selectEqlRuleType } from '../../../../tasks/create_new_rule';
 
-import { TOOLTIP } from '../../../../screens/common';
-import {
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_FIELDS_INPUT,
-} from '../../../../screens/create_new_rule';
+import { ALERT_SUPPRESSION_FIELDS_INPUT } from '../../../../screens/create_new_rule';
 
 describe(
   'Detection Rule Creation - EQL Rules - With Alert Suppression',
   {
-    tags: ['@ess', '@serverless'],
+    // skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
+    // alertSuppressionForEsqlRuleEnabled feature flag is also enabled in a global config
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    env: {
+      kbnServerArgs: [
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'alertSuppressionForSequenceEqlRuleEnabled',
+        ])}`,
+      ],
+    },
   },
   () => {
     describe('with sequence queries ', () => {
@@ -36,11 +41,8 @@ describe(
         fillDefineEqlRule(rule);
       });
 
-      it('disables the suppression fields and presents an informative tooltip', () => {
-        cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
-
-        cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
-        cy.get(TOOLTIP).contains('Suppression is not supported for EQL sequence queries.');
+      it('displays the suppression fields', () => {
+        cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
       });
     });
   }
