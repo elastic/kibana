@@ -39,6 +39,8 @@ import {
   SerializedConcreteTaskInstance,
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
+  TaskPriority,
+  TaskStatus,
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -186,7 +188,7 @@ export class TaskStore {
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
         'task',
-        taskInstanceToAttributes(validatedTaskInstance, id),
+        taskInstanceToAttributes(validatedTaskInstance, id, this.definitions),
         { id, refresh: false }
       );
       if (get(taskInstance, 'schedule.interval', null) == null) {
@@ -214,7 +216,7 @@ export class TaskStore {
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       return {
         type: 'task',
-        attributes: taskInstanceToAttributes(validatedTaskInstance, id),
+        attributes: taskInstanceToAttributes(validatedTaskInstance, id, this.definitions),
         id,
       };
     });
@@ -268,7 +270,7 @@ export class TaskStore {
     const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
       validate: options.validate,
     });
-    const attributes = taskInstanceToAttributes(taskInstance, doc.id);
+    const attributes = taskInstanceToAttributes(taskInstance, doc.id, this.definitions);
 
     let updatedSavedObject;
     try {
@@ -313,7 +315,7 @@ export class TaskStore {
       const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
         validate,
       });
-      attrsById.set(doc.id, taskInstanceToAttributes(taskInstance, doc.id));
+      attrsById.set(doc.id, taskInstanceToAttributes(taskInstance, doc.id, this.definitions));
       return attrsById;
     }, new Map());
 
@@ -759,19 +761,26 @@ export function correctVersionConflictsForContinuation(
 
 export function taskInstanceToAttributes(
   doc: TaskInstance,
-  id: string
+  id: string,
+  definitions: TaskTypeDictionary
 ): SerializedConcreteTaskInstance {
+  const taskTypeDef = definitions.get(doc.taskType);
+  const runAt = (doc.runAt || new Date()).toISOString();
+  const retryAt = (doc.retryAt && doc.retryAt.toISOString()) || null;
+  const status = (doc as ConcreteTaskInstance).status || 'idle';
   return {
     ...omit(doc, 'id', 'version'),
+    retryAt,
+    runAt,
+    status,
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
     scheduledAt: (doc.scheduledAt || new Date()).toISOString(),
     startedAt: (doc.startedAt && doc.startedAt.toISOString()) || null,
-    retryAt: (doc.retryAt && doc.retryAt.toISOString()) || null,
-    runAt: (doc.runAt || new Date()).toISOString(),
-    status: (doc as ConcreteTaskInstance).status || 'idle',
     partition: doc.partition || murmurhash.v3(id) % MAX_PARTITIONS,
+    priority: taskTypeDef?.priority || TaskPriority.Normal,
+    claimAt: [TaskStatus.Claiming, TaskStatus.Running].includes(status) ? retryAt : runAt,
   } as SerializedConcreteTaskInstance;
 }
 

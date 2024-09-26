@@ -834,7 +834,7 @@ describe('TaskStore', () => {
             id: task.id,
             type: 'task',
             version: task.version,
-            attributes: taskInstanceToAttributes(task, task.id),
+            attributes: taskInstanceToAttributes(task, task.id, taskDefinitions),
           },
         ],
         { refresh: false }
@@ -886,7 +886,7 @@ describe('TaskStore', () => {
             id: task.id,
             type: 'task',
             version: task.version,
-            attributes: taskInstanceToAttributes(task, task.id),
+            attributes: taskInstanceToAttributes(task, task.id, taskDefinitions),
           },
         ],
         { refresh: false }
