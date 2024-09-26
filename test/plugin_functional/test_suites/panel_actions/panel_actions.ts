@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const testSubjects = getService('testSubjects');
   const { dashboard } = getPageObjects(['dashboard']);
 
-  describe.only('Panel Actions', () => {
+  describe('Panel Actions', () => {
     before(async () => {
       await dashboard.loadSavedDashboard('few panels');
     });
