@@ -45,7 +45,7 @@ export const CellValue: SecurityAlertsTableProp<'renderCellValue'> = memo(functi
     tableId,
     tableType,
     header,
-    data,
+    legacyAlert,
     ecsAlert,
     linkValues,
     rowRenderers,
@@ -94,7 +94,7 @@ export const CellValue: SecurityAlertsTableProp<'renderCellValue'> = memo(functi
    */
 
   const finalData = useMemo(() => {
-    return (data as TimelineNonEcsData[]).map((field) => {
+    return (legacyAlert as TimelineNonEcsData[]).map((field) => {
       if (['_id', '_index'].includes(field.field)) {
         const newValue = field.value ?? '';
         return {
@@ -105,17 +105,17 @@ export const CellValue: SecurityAlertsTableProp<'renderCellValue'> = memo(functi
         return field;
       }
     });
-  }, [data]);
+  }, [legacyAlert]);
 
   const actualSuppressionCount = useMemo(() => {
     // We check both ecsAlert and data for the suppression count because it could be in either one,
     // depending on where RenderCellValue is being used - when used in cases, data is populated,
     // whereas in the regular security alerts table it's in ecsAlert
     const ecsSuppressionCount = ecsAlert?.kibana?.alert.suppression?.docs_count?.[0];
-    const dataSuppressionCount = find({ field: 'kibana.alert.suppression.docs_count' }, data)
+    const dataSuppressionCount = find({ field: 'kibana.alert.suppression.docs_count' }, legacyAlert)
       ?.value?.[0] as number | undefined;
     return ecsSuppressionCount ? parseInt(ecsSuppressionCount, 10) : dataSuppressionCount;
-  }, [ecsAlert, data]);
+  }, [ecsAlert, legacyAlert]);
 
   const Renderer = useMemo(() => {
     const myHeader = header ?? { id: columnId, ...browserFieldsByName[columnId] };

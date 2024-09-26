@@ -26,9 +26,7 @@ import {
   RuleEventLogListOptions,
   RuleEventLogListProps,
   RuleUiAction,
-  AlertsTableProps,
   AdditionalContext,
-  LazyLoadProps,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -101,11 +99,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         connectorServices,
       });
     },
-    getAlertsStateTable: <AC extends AdditionalContext>(
-      props: AlertsTableProps<AC> & LazyLoadProps
-    ) => {
-      return getAlertsTableStateLazy(props);
-    },
+    getAlertsStateTable: getAlertsTableStateLazy,
     getAlertsSearchBar: (props: AlertsSearchBarProps) => {
       return getAlertsSearchBarLazy(props);
     },

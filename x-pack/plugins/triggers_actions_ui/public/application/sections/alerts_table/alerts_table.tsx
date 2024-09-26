@@ -15,7 +15,6 @@ import React, {
   useImperativeHandle,
   forwardRef,
   Ref,
-  ReactElement,
   memo,
   FC,
 } from 'react';
@@ -46,6 +45,7 @@ import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import deepEqual from 'fast-deep-equal';
+import { typedForwardRef } from '../../../../common/utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGetMutedAlertsQuery } from './hooks/alert_mute/use_get_muted_alerts';
 import { AlertsDataGrid } from './alerts_data_grid';
@@ -155,12 +155,6 @@ const ErrorBoundaryFallback: FallbackComponent = ({ error }) => {
     />
   );
 };
-
-function typedForwardRef<T, P = {}>(
-  render: (props: P, ref: React.Ref<T>) => ReactElement | null
-): (props: P & React.RefAttributes<T>) => ReactElement | null {
-  return forwardRef(render) as any;
-}
 
 export const AlertsTable = memo(
   forwardRef((props, ref) => {

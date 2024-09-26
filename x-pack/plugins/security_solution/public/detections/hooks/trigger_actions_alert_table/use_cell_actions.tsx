@@ -46,18 +46,21 @@ export const useCellActionsOptions = (
     () => ({ scopeId: tableId, dataViewId }),
     [dataViewId, tableId]
   );
-  const cellActionsFields: UseDataGridColumnsSecurityCellActionsProps['fields'] =
-    viewMode === VIEW_SELECTION.eventRenderedView
-      ? undefined
-      : columns.map(
-          (column) =>
-            getFieldSpec(column.id) ?? {
-              name: '',
-              type: '', // When type is an empty string all cell actions are incompatible
-              aggregatable: false,
-              searchable: false,
-            }
-        );
+  const cellActionsFields: UseDataGridColumnsSecurityCellActionsProps['fields'] = useMemo(
+    () =>
+      viewMode === VIEW_SELECTION.eventRenderedView
+        ? undefined
+        : columns.map(
+            (column) =>
+              getFieldSpec(column.id) ?? {
+                name: '',
+                type: '', // When type is an empty string all cell actions are incompatible
+                aggregatable: false,
+                searchable: false,
+              }
+          ),
+    [columns, getFieldSpec, viewMode]
+  );
 
   /**
    * There is difference between how `triggers actions` fetched data v/s
@@ -69,18 +72,22 @@ export const useCellActionsOptions = (
    *
    */
 
-  const finalData = (data as TimelineNonEcsData[][]).map((row) =>
-    row.map((field) => {
-      let localField = field;
-      if (['_id', '_index'].includes(field.field)) {
-        const newValue = field.value ?? '';
-        localField = {
-          field: field.field,
-          value: Array.isArray(newValue) ? newValue : [newValue],
-        };
-      }
-      return localField;
-    })
+  const finalData = useMemo(
+    () =>
+      (data as TimelineNonEcsData[][]).map((row) =>
+        row.map((field) => {
+          let localField = field;
+          if (['_id', '_index'].includes(field.field)) {
+            const newValue = field.value ?? '';
+            localField = {
+              field: field.field,
+              value: Array.isArray(newValue) ? newValue : [newValue],
+            };
+          }
+          return localField;
+        })
+      ),
+    [data]
   );
 
   const getCellValue = useCallback<UseDataGridColumnsSecurityCellActionsProps['getCellValue']>(

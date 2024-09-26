@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Ref, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { AdditionalContext, AlertsTableProps, LazyLoadProps } from '../types';
+import { typedForwardRef } from '../../common/utils';
+import {
+  AdditionalContext,
+  AlertsTableImperativeApi,
+  AlertsTableProps,
+  LazyLoadProps,
+} from '../types';
 import { type AlertsTable } from '../application/sections/alerts_table/alerts_table';
 
 const AlertsTableStateLazy = lazy(
   () => import('../application/sections/alerts_table/alerts_table')
 ) as typeof AlertsTable;
 
-export const getAlertsTableStateLazy = <AC extends AdditionalContext>({
-  hideLazyLoader,
-  ...props
-}: AlertsTableProps<AC> & LazyLoadProps) => (
-  <Suspense fallback={hideLazyLoader ? null : <EuiLoadingSpinner />}>
-    <AlertsTableStateLazy {...props} />
-  </Suspense>
+export const getAlertsTableStateLazy = typedForwardRef(
+  <AC extends AdditionalContext>(
+    { hideLazyLoader, ...props }: AlertsTableProps<AC> & LazyLoadProps,
+    ref: Ref<AlertsTableImperativeApi>
+  ) => (
+    <Suspense fallback={hideLazyLoader ? null : <EuiLoadingSpinner />}>
+      <AlertsTableStateLazy ref={ref} {...props} />
+    </Suspense>
+  )
 );
