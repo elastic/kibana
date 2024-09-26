@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CloudSetup } from '@kbn/cloud-plugin/public';
+
 import { getCloudEnterpriseSearchHost } from './get_cloud_enterprise_search_host';
 
 const defaultPortCloud = {
@@ -20,7 +22,8 @@ const defaultPortCloud = {
   serverless: {
     projectId: undefined,
   },
-};
+  fetchElasticsearchConfig: jest.fn(),
+} as CloudSetup;
 // 9243
 const customPortCloud = {
   cloudId:
@@ -35,7 +38,8 @@ const customPortCloud = {
   serverless: {
     projectId: undefined,
   },
-};
+  fetchElasticsearchConfig: jest.fn(),
+} as CloudSetup;
 const missingDeploymentIdCloud = {
   cloudId:
     'dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvOjkyNDMkYWMzMWViYjkwMjQxNzczMTU3MDQzYzM0ZmQyNmZkNDYkYTRjMDYyMzBlNDhjOGZjZTdiZTg4YTA3NGEzYmIzZTA=',
@@ -46,7 +50,8 @@ const missingDeploymentIdCloud = {
   serverless: {
     projectId: undefined,
   },
-};
+  fetchElasticsearchConfig: jest.fn(),
+} as CloudSetup;
 const noCloud = {
   cloudId: undefined,
   isCloudEnabled: false,
@@ -56,7 +61,8 @@ const noCloud = {
   serverless: {
     projectId: undefined,
   },
-};
+  fetchElasticsearchConfig: jest.fn(),
+} as CloudSetup;
 
 describe('getCloudEnterpriseSearchHost', () => {
   it('uses the default port', () => {

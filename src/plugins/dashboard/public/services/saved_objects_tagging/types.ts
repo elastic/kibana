@@ -13,7 +13,6 @@ export interface DashboardSavedObjectsTaggingService {
   hasApi: boolean; // remove this once the entire service is optional
   api?: SavedObjectsTaggingApi;
   components?: SavedObjectsTaggingApi['ui']['components'];
-  hasTagDecoration?: SavedObjectsTaggingApi['ui']['hasTagDecoration'];
   parseSearchQuery?: SavedObjectsTaggingApi['ui']['parseSearchQuery'];
   getSearchBarFilter?: SavedObjectsTaggingApi['ui']['getSearchBarFilter'];
   updateTagsReferences?: SavedObjectsTaggingApi['ui']['updateTagsReferences'];

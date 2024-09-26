@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObject } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { syntheticsMonitorType } from '../../common/types/saved_objects';
 import {
   SyntheticsMonitorWithSecretsAttributes,
-  EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitor,
 } from '../../common/runtime_types';
 import { normalizeSecrets } from '../synthetics_service/utils/secrets';
@@ -18,28 +17,22 @@ import { normalizeSecrets } from '../synthetics_service/utils/secrets';
 export const getSyntheticsMonitor = async ({
   monitorId,
   encryptedSavedObjectsClient,
-  savedObjectsClient,
+  spaceId,
 }: {
   monitorId: string;
+  spaceId: string;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  savedObjectsClient: SavedObjectsClientContract;
-}): Promise<SyntheticsMonitor> => {
+}): Promise<SavedObject<SyntheticsMonitor>> => {
   try {
-    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-      syntheticsMonitorType,
-      monitorId
-    );
-
     const decryptedMonitor =
       await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
         syntheticsMonitorType,
         monitorId,
         {
-          namespace: encryptedMonitor.namespaces?.[0],
+          namespace: spaceId,
         }
       );
-    const { attributes } = normalizeSecrets(decryptedMonitor);
-    return attributes;
+    return normalizeSecrets(decryptedMonitor);
   } catch (e) {
     throw e;
   }

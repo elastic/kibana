@@ -11,9 +11,9 @@ The editor accepts the following properties:
 ```
 
 To use it on your application, you need to add the textBasedLanguages to your requiredBundles and the @kbn/esql to your tsconfig.json and use the component like that:
-import { TextBasedLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 
- <TextBasedLangEditor
+ <ESQLLangEditor
   query={query}
   onTextLangQueryChange={onTextLangQueryChange}
   errors={props.textBasedLanguageModeErrors}
@@ -23,7 +23,7 @@ import { TextBasedLangEditor } from '@kbn/esql/public';
 ```
 
 ## Usage so far
-The TextBasedLanguagesEditor is currently part of the unified search component. 
+The ESQLEditor is currently part of the unified search component. 
 If your application uses the dataview picker then it can be enabled by adding
 
 ```

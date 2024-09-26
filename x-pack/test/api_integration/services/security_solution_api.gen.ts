@@ -38,8 +38,8 @@ import {
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
 import {
-  DeleteEntityStoreRequestQueryInput,
-  DeleteEntityStoreRequestParamsInput,
+  DeleteEntityEngineRequestQueryInput,
+  DeleteEntityEngineRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/delete.gen';
 import { DeleteNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_note/delete_note_route.gen';
 import { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
@@ -80,8 +80,8 @@ import {
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
-import { GetEntityStoreEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
-import { GetEntityStoreStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stats.gen';
+import { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
+import { GetEntityEngineStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stats.gen';
 import { GetNotesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_notes/get_notes_route.gen';
 import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
 import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
@@ -98,10 +98,11 @@ import { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/com
 import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
 import { ImportTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/import_timelines/import_timelines_route.gen';
 import {
-  InitEntityStoreRequestParamsInput,
-  InitEntityStoreRequestBodyInput,
+  InitEntityEngineRequestParamsInput,
+  InitEntityEngineRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
+import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
 import {
@@ -115,13 +116,16 @@ import { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/
 import { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
-import { RulePreviewRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
+import {
+  RulePreviewRequestQueryInput,
+  RulePreviewRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
 import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
-import { StartEntityStoreRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
-import { StopEntityStoreRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
+import { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
+import { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
 import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
 import { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
@@ -225,8 +229,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-     * Bulk upsert up to 1000 asset criticality records, creating or updating them as needed.
-     */
+      * Bulk upsert up to 1000 asset criticality records.
+
+If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
+
+      */
     bulkUpsertAssetCriticalityRecords(props: BulkUpsertAssetCriticalityRecordsProps) {
       return supertest
         .post('/api/asset_criticality/bulk')
@@ -249,6 +256,16 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+     */
+    cleanUpRiskEngine() {
+      return supertest
+        .delete('/api/risk_score/engine/dangerously_delete_data')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     createAlertsIndex() {
       return supertest
         .post('/api/detection_engine/index')
@@ -270,8 +287,11 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Create or update a criticality record for a specific asset.
-     */
+      * Create or update an asset criticality record for a specific entity.
+
+If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
+
+      */
     createAssetCriticalityRecord(props: CreateAssetCriticalityRecordProps) {
       return supertest
         .post('/api/asset_criticality')
@@ -320,7 +340,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Delete the asset criticality record for a specific asset if it exists.
+     * Delete the asset criticality record for a specific entity.
      */
     deleteAssetCriticalityRecord(props: DeleteAssetCriticalityRecordProps) {
       return supertest
@@ -330,7 +350,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    deleteEntityStore(props: DeleteEntityStoreProps) {
+    deleteEntityEngine(props: DeleteEntityEngineProps) {
       return supertest
         .delete(replaceParams('/api/entity_store/engines/{entityType}', props.params))
         .set('kbn-xsrf', 'true')
@@ -661,7 +681,7 @@ finalize it.
         .query(props.query);
     },
     /**
-     * Get the criticality record for a specific asset.
+     * Get the asset criticality record for a specific entity.
      */
     getAssetCriticalityRecord(props: GetAssetCriticalityRecordProps) {
       return supertest
@@ -705,14 +725,14 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    getEntityStoreEngine(props: GetEntityStoreEngineProps) {
+    getEntityEngine(props: GetEntityEngineProps) {
       return supertest
         .get(replaceParams('/api/entity_store/engines/{entityType}', props.params))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    getEntityStoreStats(props: GetEntityStoreStatsProps) {
+    getEntityEngineStats(props: GetEntityEngineStatsProps) {
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/stats', props.params))
         .set('kbn-xsrf', 'true')
@@ -824,7 +844,7 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    initEntityStore(props: InitEntityStoreProps) {
+    initEntityEngine(props: InitEntityEngineProps) {
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/init', props.params))
         .set('kbn-xsrf', 'true')
@@ -870,7 +890,18 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    listEntityStoreEngines() {
+    /**
+     * List entities records, paging, sorting and filtering as needed.
+     */
+    listEntities(props: ListEntitiesProps) {
+      return supertest
+        .get('/api/entity_store/entities/list')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    listEntityEngines() {
       return supertest
         .get('/api/entity_store/engines')
         .set('kbn-xsrf', 'true')
@@ -1046,8 +1077,12 @@ detection engine rules.
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
+        .send(props.body as object)
+        .query(props.query);
     },
+    /**
+     * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
+     */
     scheduleRiskEngineNow() {
       return supertest
         .post('/api/risk_score/engine/schedule_now')
@@ -1105,14 +1140,14 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    startEntityStore(props: StartEntityStoreProps) {
+    startEntityEngine(props: StartEntityEngineProps) {
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/start', props.params))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    stopEntityStore(props: StopEntityStoreProps) {
+    stopEntityEngine(props: StopEntityEngineProps) {
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/stop', props.params))
         .set('kbn-xsrf', 'true')
@@ -1208,9 +1243,9 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
-export interface DeleteEntityStoreProps {
-  query: DeleteEntityStoreRequestQueryInput;
-  params: DeleteEntityStoreRequestParamsInput;
+export interface DeleteEntityEngineProps {
+  query: DeleteEntityEngineRequestQueryInput;
+  params: DeleteEntityEngineRequestParamsInput;
 }
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
@@ -1305,11 +1340,11 @@ export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
 }
-export interface GetEntityStoreEngineProps {
-  params: GetEntityStoreEngineRequestParamsInput;
+export interface GetEntityEngineProps {
+  params: GetEntityEngineRequestParamsInput;
 }
-export interface GetEntityStoreStatsProps {
-  params: GetEntityStoreStatsRequestParamsInput;
+export interface GetEntityEngineStatsProps {
+  params: GetEntityEngineStatsRequestParamsInput;
 }
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
@@ -1340,12 +1375,15 @@ export interface ImportRulesProps {
 export interface ImportTimelinesProps {
   body: ImportTimelinesRequestBodyInput;
 }
-export interface InitEntityStoreProps {
-  params: InitEntityStoreRequestParamsInput;
-  body: InitEntityStoreRequestBodyInput;
+export interface InitEntityEngineProps {
+  params: InitEntityEngineRequestParamsInput;
+  body: InitEntityEngineRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
+}
+export interface ListEntitiesProps {
+  query: ListEntitiesRequestQueryInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
@@ -1379,6 +1417,7 @@ export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
 export interface RulePreviewProps {
+  query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
 }
 export interface SearchAlertsProps {
@@ -1393,11 +1432,11 @@ export interface SetAlertsStatusProps {
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
 }
-export interface StartEntityStoreProps {
-  params: StartEntityStoreRequestParamsInput;
+export interface StartEntityEngineProps {
+  params: StartEntityEngineRequestParamsInput;
 }
-export interface StopEntityStoreProps {
-  params: StopEntityStoreRequestParamsInput;
+export interface StopEntityEngineProps {
+  params: StopEntityEngineRequestParamsInput;
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
