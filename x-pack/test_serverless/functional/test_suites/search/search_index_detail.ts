@@ -124,6 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         it('has page load error section', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectPageLoadErrorExists();
+          await pageObjects.svlSearchIndexDetailPage.expectIndexNotFoundErrorExists();
         });
         it('reload button shows details page again', async () => {
           await es.indices.create({ index: indexName });
