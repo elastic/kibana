@@ -138,42 +138,9 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_ORIGINAL,
   USER_AGENT_VERSION,
-  ATTRIBUTES_EVENT_OUTCOME,
-  ATTRIBUTES_EVENT_SUCCESS_COUNT,
-  ATTRIBUTES_HTTP_STATUS_CODE,
-  ATTRIBUTES_PEER_SERVICE,
-  ATTRIBUTES_PROCESSOR_EVENT,
-  ATTRIBUTES_SERVICE_TARGET_NAME,
-  ATTRIBUTES_SERVICE_TARGET_TYPE,
-  ATTRIBUTES_SOME_SPAN_ATTRIBUTE,
-  ATTRIBUTES_SPAN_DESTINATION_SERVICE_RESOURCE,
-  ATTRIBUTES_SPAN_DURATION_US,
-  ATTRIBUTES_SPAN_NAME,
-  ATTRIBUTES_SPAN_RESPSENTATIVE_COUNT,
-  ATTRIBUTES_SPAN_SUBTYPE,
-  ATTRIBUTES_SPAN_TYPE,
-  ATTRIBUTES_TIMESTAMP_US,
-  DROPPED_ATTRIBUTES_COUNT,
-  DROPPED_EVENTS_COUNT,
-  DROPPED_LINKS_COUNT,
-  DURATION,
-  KIND,
-  NAME,
-  OTEL_SPAN_ID,
-  OTEL_TRACE_ID,
-  PARENT_SPAN_ID,
-  RESOURCE_ATTRIBUTES_AGENT_NAME,
-  RESOURCE_ATTRIBUTES_AGENT_VERSION,
-  RESOURCE_ATTRIBUTES_SERVICE_INSTANCE_ID,
-  RESOURCE_ATTRIBUTES_SERVICE_NAME,
-  RESOURCE_ATTRIBUTES_SOME_RESOURCE_ATTRIBUTE,
-  RESOURCE_DROPPED_ATTRIBUTES_COUNT,
-  RESOURCE_SCHEMA_URL,
-  SCOPE_ATTRIBUTES_SERVICE_FRAMEWORK_NAME,
-  SCOPE_ATTRIBUTES_SERVICE_FRAMEWORK_VERSION,
-  SCOPE_DROPPED_ATTRIBUTES_COUNT,
-  SCOPE_NAME,
-  STATUS_CODE,
+  SERVICE_TARGET_NAME,
+  SERVICE_TARGET_TYPE,
+  SPAN_REPRESENTATIVE_COUNT,
 } from '@kbn/apm-types';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 import { TransactionRaw } from '../../typings/es_schemas/raw/transaction_raw';
@@ -262,9 +229,18 @@ export const spanMapping = (fields: Partial<Record<string, unknown[]>>) => {
     service: {
       name: normalizeValue<string>(fields[SERVICE_NAME]),
       environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
+      framework: {
+        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
+        version: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
+      },
+      target: {
+        name: normalizeValue<string>(fields[SERVICE_TARGET_NAME]),
+        type: normalizeValue<string>(fields[SERVICE_TARGET_TYPE]),
+      },
     },
     event: {
       outcome: normalizeValue<EventOutcome>(fields[EVENT_OUTCOME]),
+      success_count: normalizeValue<number>(fields[EVENT_SUCCESS_COUNT]),
     },
     processor: {
       name: normalizeValue<'transaction'>(fields[PROCESOR_NAME]),
@@ -286,76 +262,21 @@ export const spanMapping = (fields: Partial<Record<string, unknown[]>>) => {
       },
       id: normalizeValue<string>(fields[SPAN_ID]),
       type: normalizeValue<string>(fields[SPAN_TYPE]),
+      representative_count: normalizeValue<number>(fields[SPAN_REPRESENTATIVE_COUNT]),
     },
     timestamp: {
       us: normalizeValue<number>(fields[TIMESTAMP]),
     },
-    scope: {
-      attributes: {
-        'service.framework.name': normalizeValue<string>(
-          fields[SCOPE_ATTRIBUTES_SERVICE_FRAMEWORK_NAME]
-        ),
-        'service.framework.version': normalizeValue<string>(
-          fields[SCOPE_ATTRIBUTES_SERVICE_FRAMEWORK_VERSION]
-        ),
+    http: {
+      response: {
+        status_code: normalizeValue<number>(fields[HTTP_RESPONSE_STATUS_CODE]),
       },
-      dropped_attributes_count: normalizeValue<number>(fields[SCOPE_DROPPED_ATTRIBUTES_COUNT]),
-      name: normalizeValue<string>(fields[SCOPE_NAME]),
-    },
-    resource: {
-      attributes: {
-        'agent.name': normalizeValue<string>(fields[RESOURCE_ATTRIBUTES_AGENT_NAME]),
-        'agent.version': normalizeValue<string>(fields[RESOURCE_ATTRIBUTES_AGENT_VERSION]),
-        'service.instance.id': normalizeValue<string>(
-          fields[RESOURCE_ATTRIBUTES_SERVICE_INSTANCE_ID]
-        ),
-        'service.name': normalizeValue<string>(fields[RESOURCE_ATTRIBUTES_SERVICE_NAME]),
-        'some.resource.attribute': normalizeValue<string>(
-          fields[RESOURCE_ATTRIBUTES_SOME_RESOURCE_ATTRIBUTE]
-        ),
-      },
-      dropped_attributes_count: normalizeValue<number>(fields[RESOURCE_DROPPED_ATTRIBUTES_COUNT]),
-      schema_url: normalizeValue<string>(fields[RESOURCE_SCHEMA_URL]),
-    },
-    attributes: {
-      'event.outcome': normalizeValue<string>(fields[ATTRIBUTES_EVENT_OUTCOME]),
-      'event.success_count': normalizeValue<number>(fields[ATTRIBUTES_EVENT_SUCCESS_COUNT]),
-      'http.status_code': normalizeValue<number>(fields[ATTRIBUTES_HTTP_STATUS_CODE]),
-      'peer.service': normalizeValue<string>(fields[ATTRIBUTES_PEER_SERVICE]),
-      'processor.event': normalizeValue<string>(fields[ATTRIBUTES_PROCESSOR_EVENT]),
-      'service.target.name': normalizeValue<string>(fields[ATTRIBUTES_SERVICE_TARGET_NAME]),
-      'service.target.type': normalizeValue<string>(fields[ATTRIBUTES_SERVICE_TARGET_TYPE]),
-      'some.span.attribute': normalizeValue<string>(fields[ATTRIBUTES_SOME_SPAN_ATTRIBUTE]),
-      'span.destination.service.resource': normalizeValue<string>(
-        fields[ATTRIBUTES_SPAN_DESTINATION_SERVICE_RESOURCE]
-      ),
-      'span.duration.us': normalizeValue<number>(fields[ATTRIBUTES_SPAN_DURATION_US]),
-      'span.name': normalizeValue<string>(fields[ATTRIBUTES_SPAN_NAME]),
-      'span.representative_count': normalizeValue<number>(
-        fields[ATTRIBUTES_SPAN_RESPSENTATIVE_COUNT]
-      ),
-      'span.subtype': normalizeValue<string>(fields[ATTRIBUTES_SPAN_SUBTYPE]),
-      'span.type': normalizeValue<string>(fields[ATTRIBUTES_SPAN_TYPE]),
-      'timestamp.us': normalizeValue<number>(fields[ATTRIBUTES_TIMESTAMP_US]),
     },
     data_stream: {
       namespace: normalizeValue<string>(fields[DATA_STREAM_NAMESPACE]),
       type: normalizeValue<string>(fields[DATA_STEAM_TYPE]),
       dataset: normalizeValue<string>(fields[DATA_STREAM_DATASET]),
     },
-    dropped_attributes_count: normalizeValue<number>(fields[DROPPED_ATTRIBUTES_COUNT]),
-    dropped_events_count: normalizeValue<number>(fields[DROPPED_EVENTS_COUNT]),
-    dropped_links_count: normalizeValue<number>(fields[DROPPED_LINKS_COUNT]),
-    duration: normalizeValue<number>(fields[DURATION]),
-    kind: normalizeValue<string>(fields[KIND]),
-    // links: // todo(milosz): handle arrays, what is the format in `fields`
-    name: normalizeValue<string>(fields[NAME]),
-    parent_span_id: normalizeValue<string>(fields[PARENT_SPAN_ID]),
-    span_id: normalizeValue<string>(fields[OTEL_SPAN_ID]),
-    status: {
-      code: normalizeValue<string>(fields[STATUS_CODE]),
-    },
-    trace_id: normalizeValue<string>(fields[OTEL_TRACE_ID]),
   };
 };
 
@@ -393,17 +314,16 @@ export const spanLinksDetailsMapping = (fields: Partial<Record<string, unknown[]
   };
 };
 
+// todo: pending #192337
 export const linkedParentsOfSpanMapping = (fields: Partial<Record<string, unknown[]>>) => {
   return {
     span: {
       links: [
         {
           trace: {
-            // todo(milosz): confirm `span.links.trace.id` format
             id: normalizeValue<string>(fields[SPAN_LINKS_TRACE_ID]),
           },
           span: {
-            // todo(milosz): confirm `span.links.span.id` format
             id: normalizeValue<string>(fields[SPAN_LINKS_SPAN_ID]),
           },
         },
