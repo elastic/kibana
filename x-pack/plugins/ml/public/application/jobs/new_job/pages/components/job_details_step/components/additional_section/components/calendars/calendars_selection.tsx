@@ -84,7 +84,7 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   };
 
   const manageCalendarsHref = getUrlForApp(PLUGIN_ID, {
-    path: ML_PAGES.CALENDARS_MANAGE,
+    path: isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE,
   });
 
   const Desc = isDst ? DescriptionDst : Description;
