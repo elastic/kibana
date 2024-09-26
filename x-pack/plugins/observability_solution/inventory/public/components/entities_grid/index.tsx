@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
@@ -20,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { last } from 'lodash';
 import React, { useCallback, useState } from 'react';
+import { EntityType } from '../../../common/entities';
 import {
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
@@ -27,11 +27,14 @@ import {
 } from '../../../common/es_fields/entities';
 import { APIReturnType } from '../../api';
 import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
-import { EntityType } from '../../../common/entities';
+import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 
-type EntityColumnIds = typeof ENTITY_DISPLAY_NAME | typeof ENTITY_LAST_SEEN | typeof ENTITY_TYPE;
+export type EntityColumnIds =
+  | typeof ENTITY_DISPLAY_NAME
+  | typeof ENTITY_LAST_SEEN
+  | typeof ENTITY_TYPE;
 
 const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipContent: string }) => (
   <>
@@ -106,6 +109,7 @@ interface Props {
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
+  onFilterByType: (entityType: EntityType) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -118,6 +122,7 @@ export function EntitiesGrid({
   pageIndex,
   onChangePage,
   onChangeSort,
+  onFilterByType,
 }: Props) {
   const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
 
@@ -141,10 +146,14 @@ export function EntitiesGrid({
       const columnEntityTableId = columnId as EntityColumnIds;
       switch (columnEntityTableId) {
         case ENTITY_TYPE:
+          const entityType = entity[columnEntityTableId] as EntityType;
           return (
-            <EuiBadge color="hollow">
-              {getEntityTypeLabel(entity[columnEntityTableId] as EntityType)}
-            </EuiBadge>
+            <BadgeFilterWithPopover
+              field={ENTITY_TYPE}
+              value={entityType}
+              label={getEntityTypeLabel(entityType)}
+              onFilter={() => onFilterByType(entityType)}
+            />
           );
         case ENTITY_LAST_SEEN:
           return (
@@ -183,7 +192,7 @@ export function EntitiesGrid({
           return entity[columnId as EntityColumnIds] || '';
       }
     },
-    [entities]
+    [entities, onFilterByType]
   );
 
   if (loading) {
