@@ -36,6 +36,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
         ),
       },
       options: {
+        access: 'internal',
         tags: ['access:rac'],
       },
     },
