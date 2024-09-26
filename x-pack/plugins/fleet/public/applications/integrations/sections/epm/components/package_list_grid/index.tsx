@@ -51,6 +51,7 @@ const StickySidebar = styled(EuiFlexItem)`
 export interface PackageListGridProps {
   isLoading?: boolean;
   controls?: ReactNode | ReactNode[];
+  emptyStateStyles?: Record<string, string>;
   list: IntegrationCardItem[];
   searchTerm: string;
   setSearchTerm: (search: string) => void;
@@ -76,6 +77,7 @@ export interface PackageListGridProps {
 export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   isLoading,
   controls,
+  emptyStateStyles,
   title,
   list,
   searchTerm,
@@ -274,6 +276,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
         {spacer && <EuiSpacer size="s" />}
         <EuiFlexItem>
           <GridColumn
+            emptyStateStyles={emptyStateStyles}
             isLoading={!!isLoading}
             list={filteredPromotedList}
             showMissingIntegrationMessage={showMissingIntegrationMessage}
