@@ -19,6 +19,7 @@ export interface CustomFieldType<T extends CaseUICustomField, I = CasesConfigura
   Configure: React.FC;
   View: React.FC<{
     customField?: T;
+    configuration?: I;
   }>;
   Edit: React.FC<{
     customField?: T;
@@ -54,7 +55,7 @@ export type CustomFieldFactory<
 > = () => {
   id: string;
   label: string;
-  getEuiTableColumn: (params: { label: string }) => CustomFieldEuiTableColumn;
+  getEuiTableColumn: (params: I) => CustomFieldEuiTableColumn;
   build: () => CustomFieldType<T, I>;
   filterOptions?: CustomFieldFactoryFilterOption[];
   getDefaultValue?: () => string | boolean | null;

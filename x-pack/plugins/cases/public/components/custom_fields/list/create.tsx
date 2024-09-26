@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useMemo } from 'react';
 import type {
@@ -13,10 +14,8 @@ import type {
 } from '../../../../common/types/domain';
 import { OptionalFieldLabel } from '../../optional_field_label';
 import type { CustomFieldType } from '../types';
-import { MappedSelectField } from './components/mapped_select_field';
 import { getListFieldConfig } from './config';
 import { listCustomFieldOptionsToEuiSelectOptions } from './helpers/list_custom_field_options_to_eui_select_options';
-import { keyToOptionValue } from './helpers/key_to_option_value';
 
 const CreateComponent: CustomFieldType<
   CaseCustomFieldList,
@@ -29,24 +28,17 @@ const CreateComponent: CustomFieldType<
     [options]
   );
 
-  const defaultKeyValuePair = useMemo(() => {
-    if (defaultValue && setDefaultValue) {
-      return keyToOptionValue(defaultValue, options);
-    }
-    return null;
-  }, [defaultValue, setDefaultValue, options]);
-
   const config = getListFieldConfig({
     required: setAsOptional ? false : required,
     label,
-    ...(defaultKeyValuePair && { defaultValue: defaultKeyValuePair }),
+    ...(defaultValue && setDefaultValue && { defaultValue: String(defaultValue) }),
   });
 
   return (
     <UseField
       path={`customFields.${key}`}
       config={config}
-      component={MappedSelectField}
+      component={SelectField}
       label={label}
       componentProps={{
         labelAppend: setAsOptional ? OptionalFieldLabel : null,

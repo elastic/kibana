@@ -7,10 +7,16 @@
 
 import React from 'react';
 
-import type { CaseCustomField } from '../../../../common/types/domain';
+import type {
+  CaseCustomField,
+  ListCustomFieldConfiguration,
+} from '../../../../common/types/domain';
 import type { CustomFieldEuiTableColumn } from '../types';
 
-export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiTableColumn => ({
+export const getEuiTableColumn = ({
+  label,
+  options,
+}: ListCustomFieldConfiguration): CustomFieldEuiTableColumn => ({
   name: label,
   width: '250px',
   render: (customField: CaseCustomField) => (
@@ -18,7 +24,7 @@ export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiT
       className="eui-textTruncate"
       data-test-subj={`list-custom-field-column-view-${customField.key}`}
     >
-      {Array.isArray(customField.value) && customField.value[1]}
+      {options.find((option) => option.key === customField.value)?.label ?? null}
     </p>
   ),
   'data-test-subj': 'list-custom-field-column',

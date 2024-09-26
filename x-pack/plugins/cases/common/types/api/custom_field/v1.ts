@@ -21,12 +21,7 @@ export const CaseCustomFieldTextWithValidationValueRt = (fieldName: string) =>
  */
 
 export const CustomFieldPutRequestRt = rt.strict({
-  value: rt.union([
-    rt.boolean,
-    rt.null,
-    CaseCustomFieldTextWithValidationValueRt('value'),
-    rt.array(rt.string),
-  ]),
+  value: rt.union([rt.boolean, rt.null, CaseCustomFieldTextWithValidationValueRt('value')]),
   caseVersion: rt.string,
 });
 

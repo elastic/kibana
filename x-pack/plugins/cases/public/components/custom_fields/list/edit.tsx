@@ -18,6 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
   useForm,
   UseField,
@@ -39,18 +40,16 @@ import {
   POPULATED_WITH_DEFAULT,
 } from '../translations';
 import { getListFieldConfig } from './config';
-import { MappedSelectField } from './components/mapped_select_field';
 import { listCustomFieldOptionsToEuiSelectOptions } from './helpers/list_custom_field_options_to_eui_select_options';
-import { keyToOptionValue } from './helpers/key_to_option_value';
 
 interface FormState {
-  value: string[];
+  value: string;
   isValid: boolean | undefined;
-  submit: FormHook<{ value: string[] }>['submit'];
+  submit: FormHook<{ value: string }>['submit'];
 }
 
 interface FormWrapper {
-  initialValue: string[];
+  initialValue: string;
   isLoading: boolean;
   customFieldConfiguration: ListCustomFieldConfiguration;
   onChange: (state: FormState) => void;
@@ -62,14 +61,11 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
   isLoading,
   onChange,
 }) => {
-  const { form } = useForm<{ value: string[] }>({
+  const { form } = useForm<{ value: string }>({
     defaultValue: {
       value:
         customFieldConfiguration?.defaultValue != null && isEmpty(initialValue)
-          ? keyToOptionValue(
-              customFieldConfiguration.defaultValue,
-              customFieldConfiguration.options
-            )
+          ? customFieldConfiguration.defaultValue
           : initialValue,
     },
   });
@@ -100,7 +96,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
       <UseField
         path="value"
         config={formFieldConfig}
-        component={MappedSelectField}
+        component={SelectField}
         helpText={populatedWithDefault && POPULATED_WITH_DEFAULT}
         componentProps={{
           euiFieldProps: {
@@ -125,11 +121,11 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
   isLoading,
   canUpdate,
 }) => {
-  const initialValue = customField?.value ?? ['', ''];
+  const initialValue = customField?.value ?? '';
   const [isEdit, setIsEdit] = useState(false);
   const [formState, setFormState] = useState<FormState>({
     isValid: undefined,
-    submit: async () => ({ isValid: false, data: { value: ['', ''] } }),
+    submit: async () => ({ isValid: false, data: { value: '' } }),
     value: initialValue,
   });
 
@@ -140,8 +136,6 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
   const onCancel = () => {
     setIsEdit(false);
   };
-
-  console.log('INITIAL VALUE', initialValue);
 
   const onSubmitCustomField = async () => {
     const { isValid, data } = await formState.submit();
@@ -206,7 +200,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
         )}
         {!isEdit && isCustomFieldValueDefined && (
           <EuiFlexItem>
-            <View customField={customField} />
+            <View customField={customField} configuration={customFieldConfiguration} />
           </EuiFlexItem>
         )}
         {isEdit && canUpdate && (

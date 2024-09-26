@@ -8,18 +8,24 @@
 import React from 'react';
 
 import { EuiText } from '@elastic/eui';
-import type { CaseCustomFieldList } from '../../../../common/types/domain';
+import type {
+  CaseCustomFieldList,
+  ListCustomFieldConfiguration,
+} from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 
-const ViewComponent: CustomFieldType<CaseCustomFieldList>['View'] = ({ customField }) => {
-  const [, value] = customField?.value ?? [null, '-'];
-
+const ViewComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfiguration>['View'] = ({
+  customField,
+  configuration,
+}) => {
+  const displayValue =
+    configuration?.options.find((option) => option.key === customField?.value)?.label ?? '-';
   return (
     <EuiText
       className="eui-textBreakWord"
       data-test-subj={`list-custom-field-view-${customField?.key}`}
     >
-      {value}
+      {displayValue}
     </EuiText>
   );
 };

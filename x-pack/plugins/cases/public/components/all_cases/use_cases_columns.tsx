@@ -26,7 +26,7 @@ import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import type { ActionConnector } from '../../../common/types/domain';
-import { CaseSeverity } from '../../../common/types/domain';
+import { CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
 import { getEmptyCellValue } from '../empty_value';
@@ -333,9 +333,13 @@ export const useCasesColumns = ({
 
   // we need to extend the columnsDict with the columns of
   // the customFields
-  customFields.forEach(({ key, type, label }) => {
+  customFields.forEach((configuration) => {
+    const { key, type, label } = configuration;
     if (type in customFieldsBuilderMap) {
-      const columnDefinition = customFieldsBuilderMap[type]().getEuiTableColumn({ label });
+      const customFieldDefinition = customFieldsBuilderMap[type]();
+      const euiTableColumnProps =
+        type === CustomFieldTypes.LIST ? { label, options: configuration.options } : { label };
+      const columnDefinition = customFieldDefinition.getEuiTableColumn(euiTableColumnProps);
 
       columnsDict[key] = {
         ...columnDefinition,
