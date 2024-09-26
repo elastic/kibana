@@ -32,7 +32,7 @@ import {
   SaveDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management_service/types';
-import { dashboardContentManagementService } from '../../../services/dashboard_content_management_service';
+import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import {
   coreServices,
   dataService,
@@ -99,7 +99,7 @@ export async function runQuickSave(this: DashboardContainer) {
     stateToSave = { ...stateToSave, controlGroupInput: controlGroupSerializedState };
   }
 
-  const saveResult = await dashboardContentManagementService.saveDashboardState({
+  const saveResult = await getDashboardContentManagementService().saveDashboardState({
     controlGroupReferences,
     panelReferences: references,
     currentState: stateToSave,
@@ -123,6 +123,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
     explicitInput: currentState,
     componentState: { lastSavedId, managed },
   } = this.getState();
+  const dashboardContentManagementService = getDashboardContentManagementService();
 
   return new Promise<SaveDashboardReturn | undefined>((resolve, reject) => {
     if (interactionMode === ViewMode.EDIT && managed) {
