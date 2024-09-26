@@ -31,7 +31,7 @@ management systems:
 * {sn-itsm}
 * {sn-sir}
 * {swimlane}
-* TheHive
+* {hive}
 * {webhook-cm}
 
 NOTE: To create connectors and send cases to external systems, you must have the
