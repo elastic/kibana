@@ -21,6 +21,11 @@ export const buildHostEntityDefinition = (namespace: string): EntityDefinition =
     identityFields: ['host.name'],
     displayNameTemplate: '{{host.name}}',
     metadata: [
+      // we have to use entityFields for entity.source because entity is a reserved field and deleted later
+      {
+        source: '_index',
+        destination: 'metadata.source',
+      },
       'asset.criticality',
       'host.domain',
       'host.hostname',
@@ -49,6 +54,10 @@ export const buildUserEntityDefinition = (namespace: string): EntityDefinition =
     identityFields: ['user.name'],
     displayNameTemplate: '{{user.name}}',
     metadata: [
+      {
+        source: '_index',
+        destination: 'entityFields.source',
+      },
       'asset.criticality',
       'user.domain',
       'user.email',
