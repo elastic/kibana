@@ -11,10 +11,23 @@ components:
       required:
         - "@timestamp"
         - user
+        - entity
       properties:
         "@timestamp":
           type: string
           format: date-time
+        entity:
+          type: object
+          required:
+            - name
+            - source
+          properties:
+            name: 
+              type: string
+            source:
+              type: array
+              items:
+                type: string
         user:
           type: object
           properties:
@@ -60,10 +73,23 @@ components:
       required:
         - "@timestamp"
         - host
+        - entity
       properties:
         "@timestamp":
           type: string
           format: date-time
+        entity:
+          type: object
+          required:
+            - name
+            - source
+          properties:
+            name: 
+              type: string
+            source:
+              type: array
+              items:
+                type: string
         host:
           type: object
           properties:
