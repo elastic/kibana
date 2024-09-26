@@ -8,16 +8,34 @@
  */
 
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 import { setKibanaServices } from './kibana_services';
 
+const setDefaultPresentationUtilCapabilities = (core: CoreStart) => {
+  (core.application.capabilities as any).dashboard.show = true;
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    dashboard: {
+      show: true,
+      createNew: true,
+    },
+    visualize: {
+      save: true,
+    },
+    advancedSettings: {
+      save: true,
+    },
+  };
+};
+
 export const setStubKibanaServices = () => {
   const core = coreMock.createStart();
-  // (core.application.capabilities as any).dashboard = defaultDashboardCapabilities;
 
+  setDefaultPresentationUtilCapabilities(core);
   setKibanaServices(core, {
     contentManagement: contentManagementMock.createStartContract(),
     uiActions: uiActionsPluginMock.createStartContract(),

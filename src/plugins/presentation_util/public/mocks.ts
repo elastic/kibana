@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
 import { PresentationUtilPluginStart } from './types';
 import { ReduxToolsPackage, registerExpressionsLanguage } from '.';
 import { createReduxEmbeddableTools } from './redux_tools/redux_embeddables/create_redux_embeddable_tools';
 import { createReduxTools } from './redux_tools/create_redux_tools';
 import { setStubKibanaServices } from './services/mocks';
 
-const createStartContract = (coreStart: CoreStart): PresentationUtilPluginStart => {
+const createStartContract = (): PresentationUtilPluginStart => {
   const startContract: PresentationUtilPluginStart = {
-    labsService: {},
+    labsService: {
+      getProjects: jest.fn(),
+      getProject: jest.fn(),
+      isProjectEnabled: jest.fn(),
+      reset: jest.fn(),
+      setProjectStatus: jest.fn(),
+    },
     registerExpressionsLanguage,
   };
   return startContract;

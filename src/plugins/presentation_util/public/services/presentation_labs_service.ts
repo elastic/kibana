@@ -31,73 +31,68 @@ export interface PresentationLabsService {
 }
 
 export const getPresentationLabsService = (): PresentationLabsService => {
-  return {
-    isProjectEnabled,
-    getProject,
-    getProjects,
-    setProjectStatus,
-    reset,
+  const { uiSettings } = coreServices;
+  const localStorage = window.localStorage;
+  const sessionStorage = window.sessionStorage;
+
+  const getProjects = (solutions: SolutionName[] = []) =>
+    projectIDs.reduce((acc, id) => {
+      const project = getProject(id);
+      if (
+        solutions.length === 0 ||
+        solutions.some((solution) => project.solutions.includes(solution))
+      ) {
+        acc[id] = project;
+      }
+      return acc;
+    }, {} as { [id in ProjectID]: Project });
+
+  const getProject = (id: ProjectID) => {
+    const project = projects[id];
+
+    const status = {
+      session: isEnabledByStorageValue(project, 'session', sessionStorage.getItem(id)),
+      browser: isEnabledByStorageValue(project, 'browser', localStorage.getItem(id)),
+      kibana: isEnabledByStorageValue(project, 'kibana', uiSettings.get(id, project.isActive)),
+    };
+
+    return applyProjectStatus(project, status);
   };
-};
 
-/**
- * Service
- */
-
-const getProject = (id: ProjectID) => {
-  const project = projects[id];
-
-  const status = {
-    session: isEnabledByStorageValue(project, 'session', window.sessionStorage.getItem(id)),
-    browser: isEnabledByStorageValue(project, 'browser', window.localStorage.getItem(id)),
-    kibana: isEnabledByStorageValue(
-      project,
-      'kibana',
-      coreServices.uiSettings.get(id, project.isActive)
-    ),
-  };
-
-  return applyProjectStatus(project, status);
-};
-
-const getProjects = (solutions: SolutionName[] = []) =>
-  projectIDs.reduce((acc, id) => {
-    const project = getProject(id);
-    if (
-      solutions.length === 0 ||
-      solutions.some((solution) => project.solutions.includes(solution))
-    ) {
-      acc[id] = project;
+  const setProjectStatus = (name: ProjectID, env: EnvironmentName, status: boolean) => {
+    switch (env) {
+      case 'session':
+        setStorageStatus(sessionStorage, name, status);
+        break;
+      case 'browser':
+        setStorageStatus(localStorage, name, status);
+        break;
+      case 'kibana':
+        setUISettingsStatus(uiSettings, name, status);
+        break;
     }
-    return acc;
-  }, {} as { [id in ProjectID]: Project });
+  };
 
-const setProjectStatus = (name: ProjectID, env: EnvironmentName, status: boolean) => {
-  switch (env) {
-    case 'session':
-      setStorageStatus(window.sessionStorage, name, status);
-      break;
-    case 'browser':
-      setStorageStatus(window.localStorage, name, status);
-      break;
-    case 'kibana':
-      setUISettingsStatus(coreServices.uiSettings, name, status);
-      break;
-  }
+  const reset = () => {
+    clearLabsFromStorage(localStorage);
+    clearLabsFromStorage(sessionStorage);
+    projectIDs.forEach((id) => setProjectStatus(id, 'kibana', projects[id].isActive));
+  };
+
+  const isProjectEnabled = (id: ProjectID) => getProject(id).status.isEnabled;
+
+  return {
+    getProjects,
+    getProject,
+    isProjectEnabled,
+    reset,
+    setProjectStatus,
+  };
 };
-
-const reset = () => {
-  clearLabsFromStorage(window.localStorage);
-  clearLabsFromStorage(window.sessionStorage);
-  projectIDs.forEach((id) => setProjectStatus(id, 'kibana', projects[id].isActive));
-};
-
-const isProjectEnabled = (id: ProjectID) => getProject(id).status.isEnabled;
 
 /**
  * Helpers
  */
-
 const isEnabledByStorageValue = (
   project: ProjectConfig,
   environment: EnvironmentName,
@@ -127,7 +122,7 @@ const isEnabledByStorageValue = (
 const setStorageStatus = (storage: Storage, id: ProjectID, enabled: boolean) =>
   storage.setItem(id, enabled ? 'enabled' : 'disabled');
 
-const applyProjectStatus = (project: ProjectConfig, status: EnvironmentStatus): Project => {
+export const applyProjectStatus = (project: ProjectConfig, status: EnvironmentStatus): Project => {
   const { isActive, environments } = project;
 
   environments.forEach((name) => {

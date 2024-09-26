@@ -84,7 +84,6 @@ export function InternalDashboardTopNav({
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
-  // const PresentationUtilContextProvider = getPresentationUtilContextProvider();
 
   const [
     allDataViews,
@@ -401,10 +400,8 @@ export function InternalDashboardTopNav({
         onSavedQueryIdChange={setSavedQueryId}
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
-        // <PresentationUtilContextProvider>
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
-      ) : // </PresentationUtilContextProvider>
-      null}
+      ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>
