@@ -727,6 +727,80 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.getContentForSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "getContentForSpace",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<{ summary: ",
+              "SpaceContentTypeSummaryItem",
+              "[]; total: number; }>"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.getContentForSpace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.getRolesForSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "getRolesForSpace",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.getRolesForSpace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
