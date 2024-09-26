@@ -212,7 +212,25 @@
               },
               "[]>; }; sideNav: { getIsCollapsed$: () => ",
               "Observable",
-              "<boolean>; }; }; http: { basePath: ",
+              "<boolean>; getPanelSelectedNode$: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.PanelSelectedNode",
+                "text": "PanelSelectedNode"
+              },
+              " | null>; setPanelSelectedNode(node: string | ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.PanelSelectedNode",
+                "text": "PanelSelectedNode"
+              },
+              " | null): void; }; }; http: { basePath: ",
               "BasePathService",
               "; getLoadingCount$(): ",
               "Observable",
@@ -413,6 +431,74 @@
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.NavigationServices.selectedPanelNode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "selectedPanelNode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.PanelSelectedNode",
+                "text": "PanelSelectedNode"
+              },
+              " | null | undefined"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.NavigationServices.setSelectedPanelNode",
+            "type": "Function",
+            "tags": [],
+            "label": "setSelectedPanelNode",
+            "description": [],
+            "signature": [
+              "((node: ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.PanelSelectedNode",
+                "text": "PanelSelectedNode"
+              },
+              " | null) => void) | undefined"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+                "id": "def-public.NavigationServices.setSelectedPanelNode.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-public.PanelSelectedNode",
+                    "text": "PanelSelectedNode"
+                  },
+                  " | null"
+                ],
+                "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
