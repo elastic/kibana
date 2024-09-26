@@ -1081,6 +1081,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       // Iterate through the anomaly records, adding anomalyScore properties
       // to the chartData entries for anomalous buckets.
       const chartDataForPointSearch = getChartDataForPointSearch(chartData, records[0], chartType);
+      let shouldSortChartData = false;
       each(records, (record) => {
         // Look for a chart point with the same time as the record.
         // If none found, insert a point for anomalies due to a gap in the data.
@@ -1089,6 +1090,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         if (chartPoint === undefined) {
           chartPoint = { date: recordTime, value: null };
           chartData.push(chartPoint);
+          shouldSortChartData = true;
         }
         if (chartPoint !== undefined) {
           chartPoint.anomalyScore = record.record_score;
@@ -1126,6 +1128,12 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           chartPoint.isMultiBucketAnomaly = isMultiBucketAnomaly(record);
         }
       });
+
+      // Chart data is sorted by default, but if we added points for anomalies,
+      // we need to sort again to ensure the points are in the correct order.
+      if (shouldSortChartData) {
+        chartData.sort((a, b) => a.date - b.date);
+      }
 
       // Add a scheduledEvents property to any points in the chart data set
       // which correspond to times of scheduled events for the job.
