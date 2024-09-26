@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as Utils from '../util';
+import { ensureDirSync, createSync, copySync } from '../util';
 import { DataStream, Docs, InputType, Pipeline } from '../../common';
 import { createDataStream } from './data_stream';
-import * as nunjucks from 'nunjucks';
+import { render } from 'nunjucks';
 
 jest.mock('nunjucks');
 
@@ -59,31 +59,26 @@ describe('createDataStream', () => {
     createDataStream(packageName, dataStreamPath, firstDataStream);
 
     // pipeline
-    expect(Utils.ensureDirSync).toHaveBeenCalledWith(dataStreamPath);
-    expect(Utils.ensureDirSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/elasticsearch/ingest_pipeline`
-    );
+    expect(ensureDirSync).toHaveBeenCalledWith(dataStreamPath);
+    expect(ensureDirSync).toHaveBeenCalledWith(`${dataStreamPath}/elasticsearch/ingest_pipeline`);
 
     // dataStream files
-    expect(Utils.copySync).toHaveBeenCalledWith(expect.any(String), `${dataStreamPath}/fields`);
+    expect(copySync).toHaveBeenCalledWith(expect.any(String), `${dataStreamPath}/fields`);
 
     // test files
-    expect(Utils.ensureDirSync).toHaveBeenCalledWith(`${dataStreamPath}/_dev/test/pipeline`);
-    expect(Utils.copySync).toHaveBeenCalledWith(
+    expect(ensureDirSync).toHaveBeenCalledWith(`${dataStreamPath}/_dev/test/pipeline`);
+    expect(copySync).toHaveBeenCalledWith(
       expect.any(String),
       `${dataStreamPath}/_dev/test/pipeline/test-common-config.yml`
     );
-    expect(Utils.createSync).toHaveBeenCalledWith(
+    expect(createSync).toHaveBeenCalledWith(
       `${dataStreamPath}/_dev/test/pipeline/test-${packageName}-datastream-1.log`,
       samples
     );
 
     // // Manifest files
-    expect(Utils.createSync).toHaveBeenCalledWith(`${dataStreamPath}/manifest.yml`, undefined);
-    expect(nunjucks.render).toHaveBeenCalledWith(`filestream_manifest.yml.njk`, expect.anything());
-    expect(nunjucks.render).toHaveBeenCalledWith(
-      `azure_eventhub_manifest.yml.njk`,
-      expect.anything()
-    );
+    expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/manifest.yml`, undefined);
+    expect(render).toHaveBeenCalledWith(`filestream_manifest.yml.njk`, expect.anything());
+    expect(render).toHaveBeenCalledWith(`azure_eventhub_manifest.yml.njk`, expect.anything());
   });
 });

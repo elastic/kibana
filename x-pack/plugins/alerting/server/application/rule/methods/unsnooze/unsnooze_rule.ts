@@ -63,7 +63,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UNSNOOZE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
         error,
       })
     );
@@ -74,7 +74,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
     ruleAuditEvent({
       action: RuleAuditAction.UNSNOOZE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
 
