@@ -18737,18 +18737,18 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: >-
-                  #/components/schemas/Security_Solution_Entity_Analytics_API_TaskManagerUnavailableResponse
+                  #/components/schemas/Security_Entity_Analytics_API_TaskManagerUnavailableResponse
           description: Task manager is unavailable
         default:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: >-
-                  #/components/schemas/Security_Solution_Entity_Analytics_API_CleanUpRiskEngineErrorResponse
+                  #/components/schemas/Security_Entity_Analytics_API_CleanUpRiskEngineErrorResponse
           description: Unexpected error
       summary: Cleanup the Risk Engine
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
       operationId: ScheduleRiskEngineNow
@@ -37672,7 +37672,7 @@ components:
       required:
         - id_value
         - id_field
-    Security_Solution_Entity_Analytics_API_CleanUpRiskEngineErrorResponse:
+    Security_Entity_Analytics_API_CleanUpRiskEngineErrorResponse:
       type: object
       properties:
         cleanup_successful:
@@ -37693,7 +37693,7 @@ components:
       required:
         - cleanup_successful
         - errors
-    Security_Solution_Entity_Analytics_API_CreateAssetCriticalityRecord:
+    Security_Entity_Analytics_API_CreateAssetCriticalityRecord:
       allOf:
         - $ref: >-
             #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityRecordIdParts
