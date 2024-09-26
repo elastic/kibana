@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   RULES_SETTINGS_FEATURE_ID,
   READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
@@ -25,6 +26,7 @@ export function getRulesSettingsFeature(isServerless: boolean): KibanaFeatureCon
       defaultMessage: 'Rules Settings',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [],
     management: {
       insightsAndAlerting: ['triggersActions'],

@@ -63,7 +63,7 @@ const renderFormatSelector = (propsOverrides?: Partial<FormatSelectorProps>) => 
 // see for example the first two tests, they run the same code but expect
 // different results. With the updated userEvent code the tests no longer work
 // with this setup and should be refactored.
-describe.skip('FormatSelector', () => {
+describe('FormatSelector', () => {
   let user: UserEvent;
 
   beforeEach(() => {
@@ -83,7 +83,7 @@ describe.skip('FormatSelector', () => {
   });
   it('updates the format decimals to upper range when input exceeds the range', async () => {
     renderFormatSelector();
-    await user.type(screen.getByLabelText('Decimals'), '{backspace}10');
+    await user.type(screen.getByLabelText('Decimals'), '{backspace}20');
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 15 } });
   });
   it('updates the format decimals to lower range when input is smaller than range', async () => {

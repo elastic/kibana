@@ -63,6 +63,7 @@ export function useConversation({
   onConversationUpdate,
 }: UseConversationProps): UseConversationResult {
   const service = useObservabilityAIAssistantAppService();
+  const { scope } = service;
 
   const {
     services: {
@@ -126,6 +127,7 @@ export function useConversation({
       onConversationUpdate?.({ conversation: event.conversation });
     },
     persist: true,
+    scope,
   });
 
   const [displayedConversationId, setDisplayedConversationId] = useState(initialConversationId);

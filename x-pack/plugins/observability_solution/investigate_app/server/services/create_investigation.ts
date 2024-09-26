@@ -23,7 +23,7 @@ export async function createInvestigation(
     ...params,
     updatedAt: now,
     createdAt: now,
-    createdBy: user.username,
+    createdBy: user.profile_uid!,
     status: 'triage',
     notes: [],
     items: [],

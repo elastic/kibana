@@ -27,7 +27,6 @@ import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
-import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import {
   discoverSidebarReducer,
   getInitialState,
@@ -48,11 +47,6 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     showSidebarToggleButton: true,
     disableFieldsExistenceAutoFetching: true,
     buttonAddFieldVariant: 'toolbar',
-    buttonPropsToTriggerFlyout: {
-      contentProps: {
-        id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
-      },
-    },
     buttonAddFieldToWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
         defaultMessage: 'Add field as column',
