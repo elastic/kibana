@@ -37,15 +37,27 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   barHighlightColorOverride,
   ...docCountChartProps
 }) => {
-  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
+  const { data, uiSettings, fieldFormats, charts, embeddingOrigin } = useAiopsAppContext();
 
   const { documentStats } = useAppSelector((s) => s.logRateAnalysis);
   const { sampleProbability, totalCount, documentCountStats } = documentStats;
 
   if (documentCountStats === undefined) {
-    return totalCount !== undefined ? (
+    return totalCount !== undefined && embeddingOrigin !== 'dashboard' ? (
       <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
     ) : null;
+  }
+
+  if (embeddingOrigin === 'dashboard') {
+    return (
+      <DocumentCountChartRedux
+        dependencies={{ data, uiSettings, fieldFormats, charts }}
+        barColorOverride={barColorOverride}
+        barHighlightColorOverride={barHighlightColorOverride}
+        changePoint={documentCountStats.changePoint}
+        {...docCountChartProps}
+      />
+    );
   }
 
   return (

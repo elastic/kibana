@@ -70,12 +70,8 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
   // Component props
   dataViewId,
   timeRange,
-  onLoading,
-  onError,
-  onRenderComplete,
   embeddingOrigin,
   lastReloadRequestTime,
-  onChange,
 }) => {
   const deps = useMemo(() => {
     const { http, uiSettings, notifications, ...startServices } = coreStart;

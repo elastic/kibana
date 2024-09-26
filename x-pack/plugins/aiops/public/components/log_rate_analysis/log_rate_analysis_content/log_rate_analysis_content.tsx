@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
@@ -200,7 +200,11 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const changePointType = documentCountStats?.changePoint?.type;
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false}>
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize={embeddingOrigin === 'dashboard' ? 'none' : 'm'}
+    >
       {showDocumentCountContent && (
         <DocumentCountContent
           barColorOverride={barColorOverride}
@@ -208,7 +212,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           barStyleAccessor={barStyleAccessor}
         />
       )}
-      <EuiHorizontalRule />
+      <EuiSpacer size="m" />
       {showLogRateAnalysisResults && (
         <LogRateAnalysisResults
           onReset={clearSelectionHandler}
