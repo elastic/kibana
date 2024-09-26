@@ -17,17 +17,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { TableRow } from './table_cell_actions';
+import type { FieldRow } from './field_row';
 
 interface PinControlCellProps {
-  row: TableRow;
+  row: FieldRow;
+  onTogglePinned: (fieldName: string) => void;
 }
 
-const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row }) => {
+const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row, onTogglePinned }) => {
   const { euiTheme } = useEuiTheme();
 
-  const fieldName = row.field.field;
-  const isPinned = row.field.pinned;
+  const fieldName = row.name;
+  const isPinned = row.isPinned;
   const label = isPinned
     ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', {
         defaultMessage: 'Unpin field',
@@ -55,7 +56,7 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row }) => {
           color="text"
           aria-label={label}
           onClick={() => {
-            row.field.onTogglePinned(fieldName);
+            onTogglePinned(fieldName);
           }}
         />
       </EuiToolTip>
@@ -63,7 +64,13 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row }) => {
   );
 });
 
-export const getPinColumnControl = ({ rows }: { rows: TableRow[] }): EuiDataGridControlColumn => {
+export const getPinColumnControl = ({
+  rows,
+  onTogglePinned,
+}: {
+  rows: FieldRow[];
+  onTogglePinned: (fieldName: string) => void;
+}): EuiDataGridControlColumn => {
   return {
     id: 'pin_field',
     width: 32,
@@ -81,7 +88,9 @@ export const getPinColumnControl = ({ rows }: { rows: TableRow[] }): EuiDataGrid
       if (!row) {
         return null;
       }
-      return <PinControlCell key={`control-${row.field.field}`} row={row} />;
+      return (
+        <PinControlCell key={`control-${row.name}`} row={row} onTogglePinned={onTogglePinned} />
+      );
     },
   };
 };

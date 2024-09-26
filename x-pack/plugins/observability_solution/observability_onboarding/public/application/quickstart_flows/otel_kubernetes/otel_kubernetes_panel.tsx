@@ -23,25 +23,17 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { useFetcher } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
 
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-70c709ff-59b9-43b7-8ef4-4c34d8890bde';
 
 export const OtelKubernetesPanel: React.FC = () => {
-  const { data, error, refetch } = useFetcher(
-    (callApi) => {
-      return callApi('POST /internal/observability_onboarding/kubernetes/flow', {
-        params: { body: { pkgName: 'kubernetes_otel' } },
-      });
-    },
-    [],
-    { showToastOnError: false }
-  );
+  const { data, error, refetch } = useKubernetesFlow('kubernetes_otel');
   const [idSelected, setIdSelected] = useState('nodejs');
   const {
     services: { share },
@@ -50,7 +42,9 @@ export const OtelKubernetesPanel: React.FC = () => {
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
 
   if (error) {
-    return <EmptyPrompt error={error} onRetryClick={refetch} />;
+    return (
+      <EmptyPrompt onboardingFlowType="kubernetes_otel" error={error} onRetryClick={refetch} />
+    );
   }
 
   const addRepoCommand = `helm repo add open-telemetry 'https://open-telemetry.github.io/opentelemetry-helm-charts' --force-update`;
@@ -260,7 +254,7 @@ spec:
                 defaultMessage: 'Visualize your data',
               }
             ),
-            children: (
+            children: data ? (
               <>
                 <p>
                   {i18n.translate(
@@ -273,6 +267,10 @@ spec:
                 </p>
                 <EuiSpacer />
                 <GetStartedPanel
+                  onboardingFlowType="kubernetes_otel"
+                  onboardingId={data.onboardingId}
+                  dataset="kubernetes"
+                  integration="kubernetes_otel"
                   newTab={false}
                   isLoading={false}
                   actionLinks={[
@@ -314,7 +312,7 @@ spec:
                   ]}
                 />
               </>
-            ),
+            ) : undefined,
           },
         ]}
       />
