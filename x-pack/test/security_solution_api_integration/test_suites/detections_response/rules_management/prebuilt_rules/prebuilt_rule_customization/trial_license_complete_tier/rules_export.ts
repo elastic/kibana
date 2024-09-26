@@ -223,22 +223,51 @@ export default ({ getService }: FtrProviderContext): void => {
           ])
         );
       });
-    });
 
-    // TODO I discovered this while writing the above tests?
-    it('imports a rule if a duplicate was attempted', async () => {
-      await securitySolutionApi
-        .bulkCreateRules({
-          body: [getCustomQueryRuleParams(), getCustomQueryRuleParams()],
-        })
-        .expect(200);
+      it('exports both custom and prebuilt rules when rule_ids are specified', async () => {
+        await securitySolutionApi
+          .bulkCreateRules({
+            body: [
+              getCustomQueryRuleParams({ rule_id: 'rule-id-1' }),
+              getCustomQueryRuleParams({ rule_id: 'rule-id-2' }),
+            ],
+          })
+          .expect(200);
 
-      const { body: exportResult } = await securitySolutionApi
-        .exportRules({ query: {}, body: null })
-        .expect(200)
-        .parse(binaryToString);
+        const { body: exportResult } = await securitySolutionApi
+          .exportRules({
+            query: {},
+            body: {
+              objects: [
+                { rule_id: ruleAssets[1]['security-rule'].rule_id },
+                { rule_id: 'rule-id-2' },
+              ],
+            },
+          })
+          .expect(200)
+          .parse(binaryToString);
 
-      expect(parseNdJson(exportResult)).toHaveLength(2);
+        const exportJson = parseNdJson(exportResult);
+        expect(exportJson).toHaveLength(3); // 1 prebuilt rule + 1 custom rule + 1 stats object
+
+        expect(exportJson).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: ruleAssets[1]['security-rule'].rule_id,
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+              },
+            }),
+            expect.objectContaining({
+              rule_id: 'rule-id-2',
+              rule_source: {
+                type: 'internal',
+              },
+            }),
+          ])
+        );
+      });
     });
   });
 };
