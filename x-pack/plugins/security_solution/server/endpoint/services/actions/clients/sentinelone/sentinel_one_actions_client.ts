@@ -824,7 +824,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return actionDetails;
   }
 
-  public async runningProcesses(
+  async runningProcesses(
     actionRequest: GetProcessesRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
