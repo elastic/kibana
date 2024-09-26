@@ -1055,9 +1055,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
             // differently because of how the source data is structured.
             // For rare chart values we are only interested wether a value is either `0` or not,
             // `0` acts like a flag in the chart whether to display the dot/marker.
-            // All other charts (single metric, population) are metric based and with
+            // For single metric chart, we need to pass null values to display data gaps.
+            // All other charts are metric based and with
             // those a value of `null` acts as the flag to hide a data point.
             if (
+              chartType === CHART_TYPE.SINGLE_METRIC ||
               (chartType === CHART_TYPE.EVENT_DISTRIBUTION && value > 0) ||
               (chartType !== CHART_TYPE.EVENT_DISTRIBUTION && value !== null)
             ) {
@@ -1079,6 +1081,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       // Iterate through the anomaly records, adding anomalyScore properties
       // to the chartData entries for anomalous buckets.
       const chartDataForPointSearch = getChartDataForPointSearch(chartData, records[0], chartType);
+      let sortChartData = false;
       each(records, (record) => {
         // Look for a chart point with the same time as the record.
         // If none found, insert a point for anomalies due to a gap in the data.
@@ -1087,9 +1090,16 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         if (chartPoint === undefined) {
           chartPoint = { date: recordTime, value: null };
           chartData.push(chartPoint);
+          sortChartData = true;
         }
         if (chartPoint !== undefined) {
           chartPoint.anomalyScore = record.record_score;
+
+          // If it is an empty chart point, set the value to the actual value
+          // To properly display the anomaly marker on the chart
+          if (chartPoint.value === null) {
+            chartPoint.value = Array.isArray(record.actual) ? record.actual[0] : record.actual;
+          }
 
           if (record.actual !== undefined) {
             chartPoint.actual = record.actual;
@@ -1118,6 +1128,12 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           chartPoint.isMultiBucketAnomaly = isMultiBucketAnomaly(record);
         }
       });
+
+      // Chart data is sorted by default, but if we added points for anomalies,
+      // we need to sort again to ensure the points are in the correct order.
+      if (sortChartData) {
+        chartData.sort((a, b) => a.date - b.date);
+      }
 
       // Add a scheduledEvents property to any points in the chart data set
       // which correspond to times of scheduled events for the job.
