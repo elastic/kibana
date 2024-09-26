@@ -9,7 +9,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { ThreeWayDiffTab } from '../../../../rule_management/components/rule_details/three_way_diff/three_way_diff_tab';
+import { RuleUpgradeConflictsResolverTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_conflicts_resolver_tab';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -253,7 +253,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             ),
             content: (
               <TabContentPadding>
-                <ThreeWayDiffTab
+                <RuleUpgradeConflictsResolverTab
                   ruleUpgradeState={ruleUpgradeState}
                   setFieldResolvedValue={setFieldResolvedValue}
                 />

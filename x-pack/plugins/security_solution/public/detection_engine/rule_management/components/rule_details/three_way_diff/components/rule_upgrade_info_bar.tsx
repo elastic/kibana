@@ -19,7 +19,7 @@ interface UpgradeInfoBarProps {
   ruleUpgradeState: RuleUpgradeState;
 }
 
-export function UpgradeInfoBar({ ruleUpgradeState }: UpgradeInfoBarProps): JSX.Element {
+export function RuleUpgradeInfoBar({ ruleUpgradeState }: UpgradeInfoBarProps): JSX.Element {
   const numOfFieldsWithUpdates = ruleUpgradeState.diff.num_fields_with_updates;
   const numOfConflicts = ruleUpgradeState.diff.num_fields_with_conflicts;
 

@@ -11,24 +11,27 @@ import type {
   RuleUpgradeState,
   SetFieldResolvedValueFn,
 } from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
-import { UpgradeInfoBar } from './components/upgrade_info_bar';
-import { RuleDiffSection } from './components/rule_diff_section';
+import { RuleUpgradeInfoBar } from './components/rule_upgrade_info_bar';
+import { RuleUpgradeConflictsResolver } from './components/rule_upgrade_conflicts_resolver';
 
-interface ThreeWayDiffTabProps {
+interface RuleUpgradeConflictsResolverTabProps {
   ruleUpgradeState: RuleUpgradeState;
   setFieldResolvedValue: SetFieldResolvedValueFn;
 }
 
-export function ThreeWayDiffTab({
+export function RuleUpgradeConflictsResolverTab({
   ruleUpgradeState,
   setFieldResolvedValue,
-}: ThreeWayDiffTabProps): JSX.Element {
+}: RuleUpgradeConflictsResolverTabProps): JSX.Element {
   return (
     <>
       <EuiSpacer size="s" />
-      <UpgradeInfoBar ruleUpgradeState={ruleUpgradeState} />
+      <RuleUpgradeInfoBar ruleUpgradeState={ruleUpgradeState} />
       <EuiSpacer size="s" />
-      <RuleDiffSection ruleUpgradeState={ruleUpgradeState} />
+      <RuleUpgradeConflictsResolver
+        ruleUpgradeState={ruleUpgradeState}
+        setFieldResolvedValue={setFieldResolvedValue}
+      />
     </>
   );
 }
