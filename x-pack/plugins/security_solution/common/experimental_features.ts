@@ -188,7 +188,8 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
-   * Enabled collection Response actions telemetry
+   * Enables Response actions telemetry collection
+   * Should be enabled in 8.17.0
    */
   responseActionsTelemetryEnabled: false,
 
