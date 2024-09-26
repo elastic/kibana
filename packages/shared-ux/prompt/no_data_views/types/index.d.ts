@@ -106,4 +106,6 @@ export interface NoDataViewsPromptProps {
   onDataViewCreated: (dataView: unknown) => void;
   /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
   onESQLNavigationComplete?: () => void;
+  /** Empty prompt color **/
+  emptyPromptColor?: PanelColor;
 }
