@@ -114,6 +114,7 @@ import { isAgentlessEnabled } from './utils/agentless';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
+import { findAllOtelPoliciesForAgentPolicy } from './otel_policy';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 
@@ -220,6 +221,8 @@ class AgentPolicyService {
     const newAgentPolicy = await this.get(soClient, id, false);
 
     newAgentPolicy!.package_policies = existingAgentPolicy.package_policies;
+    // Update otel_policies
+    newAgentPolicy!.otel_policies = existingAgentPolicy.otel_policies;
 
     if (options.bumpRevision || options.removeProtection) {
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', id, {
@@ -455,6 +458,8 @@ class AgentPolicyService {
     if (withPackagePolicies) {
       agentPolicy.package_policies =
         (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
+
+      agentPolicy.otel_policies = (await findAllOtelPoliciesForAgentPolicy(soClient, id)) || [];
     }
 
     auditLoggingService.writeCustomSoAuditLog({
@@ -607,6 +612,8 @@ class AgentPolicyService {
           if (withPackagePolicies) {
             agentPolicy.package_policies =
               (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
+            agentPolicy.otel_policies =
+              (await findAllOtelPoliciesForAgentPolicy(soClient, agentPolicy.id)) || [];
           }
           if (options.withAgentCount) {
             await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
@@ -1151,6 +1158,7 @@ class AgentPolicyService {
     }
 
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
+    // TODO: should handle otel_policies as well
 
     if (packagePolicies.length) {
       const hasManagedPackagePolicies = packagePolicies.some(

@@ -53,6 +53,7 @@ import {
   DEFAULT_CLUSTER_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 import { fetchRelatedSavedObjects } from './related_saved_objects';
+import { otelPoliciesToAgentInputs } from './otel_policies_to_agent_inputs';
 
 async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
   try {
@@ -136,7 +137,7 @@ export async function getFullAgentPolicy(
   const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
-  // add data from otel policies
+
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -307,6 +308,11 @@ export async function getFullAgentPolicy(
 
   if (agentPolicy.overrides) {
     return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
+  }
+
+  const otelInputs = otelPoliciesToAgentInputs(agentPolicy);
+  if (otelInputs) {
+    return deepMerge<FullAgentPolicy>(fullAgentPolicy, otelInputs);
   }
 
   return fullAgentPolicy;

@@ -22,7 +22,7 @@ import {
   OTEL_POLICY_SAVED_OBJECT_TYPE,
   OTEL_INTEGRATION_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
-import { appContextService } from '../../services';
+import { agentPolicyService, appContextService } from '../../services';
 
 export const createOtelPolicyHandler: FleetRequestHandler<
   undefined,
@@ -30,9 +30,12 @@ export const createOtelPolicyHandler: FleetRequestHandler<
   TypeOf<typeof CreateOtelPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
+  const coreContext = await context.core;
   const logger = appContextService.getLogger();
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const soClient = fleetContext.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
   const { id, ...newPolicy } = request.body;
   const policyId = id || uuidv4();
 
@@ -51,13 +54,12 @@ export const createOtelPolicyHandler: FleetRequestHandler<
       { id: policyId }
     );
 
-    // if (options?.bumpRevision ?? true) {
-    //   for (const policyId of newPolicy.policy_ids) {
-    //     await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-    //       user: options?.user,
-    //     });
-    //   }
-    // }
+    // bump agent policy revision
+    for (const newPolicyId of newPolicy.policy_ids) {
+      await agentPolicyService.bumpRevision(soClient, esClient, newPolicyId, {
+        user,
+      });
+    }
 
     const createdPolicy = { id: newSo.id, version: newSo.version, ...newSo.attributes };
     logger.debug(`Created new otel policy with id ${newSo.id} and version ${newSo.version}`);

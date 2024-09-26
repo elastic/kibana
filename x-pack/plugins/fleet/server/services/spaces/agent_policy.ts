@@ -49,6 +49,7 @@ export async function updateAgentPolicySpaces({
     currentSpaceSoClient,
     agentPolicyId
   );
+  // TODO: should handle otel_policies as well
 
   if (deepEqual(existingPolicy?.space_ids?.sort() ?? [DEFAULT_SPACE_ID], newSpaceIds.sort())) {
     return;

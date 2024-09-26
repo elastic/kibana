@@ -12,6 +12,7 @@ import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
+import type { OtelPolicy } from './otel';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -74,6 +75,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   space_ids?: string[] | undefined;
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
+  otel_policies?: OtelPolicy[];
   is_managed: boolean; // required for created policy
   updated_at: string;
   updated_by: string;
