@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { isEmpty } from 'lodash';
 
-import { throwErrors } from '@kbn/cases-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 
 import type {
   CleanDraftTimelinesResponse,
-  TimelineErrorResponse, // todo
   TimelineType,
   PatchTimelineResponse,
   CreateTimelinesResponse,
@@ -25,8 +20,8 @@ import type {
 } from '../../../common/api/timeline';
 import {
   ImportTimelineResult,
+  TimelineErrorResponse,
   TimelineStatusEnum,
-  TimelineErrorResponseType, // todo
   PersistFavoriteRouteResponse,
   TimelineTypeEnum,
   GetTimelineResponse,
@@ -89,10 +84,7 @@ const decodeGetTimelinesResponse = (respTimeline: GetTimelinesResponse) =>
   parseOrThrow(GetTimelinesResponse)(respTimeline);
 
 const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse) =>
-  pipe(
-    TimelineErrorResponseType.decode(respTimeline),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+  parseOrThrow(TimelineErrorResponse)(respTimeline);
 
 const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResult) =>
   parseOrThrow(ImportTimelineResult)(respTimeline);

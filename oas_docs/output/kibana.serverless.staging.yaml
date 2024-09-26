@@ -16962,11 +16962,6 @@ paths:
                 required:
                   - timeline
                   - totalCount
-                  - defaultTimelineCount
-                  - templateTimelineCount
-                  - favoriteCount
-                  - elasticTemplateTimelineCount
-                  - customTemplateTimelineCount
           description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
@@ -31598,6 +31593,18 @@ components:
         updatedBy:
           nullable: true
           type: string
+    Security_Timeline_API_SavedTimelineWithSavedObjectId:
+      allOf:
+        - $ref: '#/components/schemas/Security_Timeline_API_SavedTimeline'
+        - type: object
+          properties:
+            savedObjectId:
+              type: string
+            version:
+              type: string
+          required:
+            - savedObjectId
+            - version
     Security_Timeline_API_SerializedFilterQueryResult:
       type: object
       properties:
@@ -31647,6 +31654,8 @@ components:
     Security_Timeline_API_TimelineResponse:
       allOf:
         - $ref: '#/components/schemas/Security_Timeline_API_SavedTimeline'
+        - $ref: >-
+            #/components/schemas/Security_Timeline_API_SavedTimelineWithSavedObjectId
         - type: object
           properties:
             eventIdToNoteIds:
@@ -31674,13 +31683,6 @@ components:
                 $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
               nullable: true
               type: array
-            savedObjectId:
-              type: string
-            version:
-              type: string
-          required:
-            - savedObjectId
-            - version
     Security_Timeline_API_TimelineSavedToReturnObject:
       allOf:
         - $ref: '#/components/schemas/Security_Timeline_API_SavedTimeline'
@@ -31689,22 +31691,27 @@ components:
             eventIdToNoteIds:
               items:
                 $ref: '#/components/schemas/Security_Timeline_API_Note'
+              nullable: true
               type: array
             noteIds:
               items:
                 type: string
+              nullable: true
               type: array
             notes:
               items:
                 $ref: '#/components/schemas/Security_Timeline_API_Note'
+              nullable: true
               type: array
             pinnedEventIds:
               items:
                 type: string
+              nullable: true
               type: array
             pinnedEventsSaveObject:
               items:
                 $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
+              nullable: true
               type: array
             savedObjectId:
               type: string

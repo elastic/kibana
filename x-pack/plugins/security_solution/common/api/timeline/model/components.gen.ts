@@ -215,6 +215,14 @@ export const SavedTimeline = z.object({
   updatedBy: z.string().nullable().optional(),
 });
 
+export type SavedTimelineWithSavedObjectId = z.infer<typeof SavedTimelineWithSavedObjectId>;
+export const SavedTimelineWithSavedObjectId = SavedTimeline.merge(
+  z.object({
+    savedObjectId: z.string(),
+    version: z.string(),
+  })
+);
+
 export type BareNote = z.infer<typeof BareNote>;
 export const BareNote = z.object({
   eventId: z.string().nullable().optional(),
@@ -253,15 +261,13 @@ export const PinnedEvent = BarePinnedEvent.merge(
 );
 
 export type TimelineResponse = z.infer<typeof TimelineResponse>;
-export const TimelineResponse = SavedTimeline.merge(
+export const TimelineResponse = SavedTimeline.merge(SavedTimelineWithSavedObjectId).merge(
   z.object({
     eventIdToNoteIds: z.array(Note).nullable().optional(),
     notes: z.array(Note).nullable().optional(),
     noteIds: z.array(z.string()).nullable().optional(),
     pinnedEventIds: z.array(z.string()).nullable().optional(),
     pinnedEventsSaveObject: z.array(PinnedEvent).nullable().optional(),
-    savedObjectId: z.string(),
-    version: z.string(),
   })
 );
 
@@ -270,11 +276,11 @@ export const TimelineSavedToReturnObject = SavedTimeline.merge(
   z.object({
     savedObjectId: z.string(),
     version: z.string(),
-    eventIdToNoteIds: z.array(Note).optional(),
-    notes: z.array(Note).optional(),
-    noteIds: z.array(z.string()).optional(),
-    pinnedEventIds: z.array(z.string()).optional(),
-    pinnedEventsSaveObject: z.array(PinnedEvent).optional(),
+    eventIdToNoteIds: z.array(Note).nullable().optional(),
+    notes: z.array(Note).nullable().optional(),
+    noteIds: z.array(z.string()).nullable().optional(),
+    pinnedEventIds: z.array(z.string()).nullable().optional(),
+    pinnedEventsSaveObject: z.array(PinnedEvent).nullable().optional(),
   })
 );
 
@@ -395,6 +401,18 @@ export const ImportTimelineResult = z.object({
     )
     .optional(),
 });
+
+export type TimelineErrorResponse = z.infer<typeof TimelineErrorResponse>;
+export const TimelineErrorResponse = z.union([
+  z.object({
+    message: z.string(),
+    status_code: z.number(),
+  }),
+  z.object({
+    message: z.string(),
+    statusCode: z.number(),
+  }),
+]);
 
 export type ExportedTimelines = z.infer<typeof ExportedTimelines>;
 export const ExportedTimelines = SavedTimeline.merge(

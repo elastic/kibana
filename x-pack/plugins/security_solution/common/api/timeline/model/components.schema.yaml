@@ -153,11 +153,21 @@ components:
         updatedBy:
           type: string
           nullable: true
-    TimelineResponse:
+    SavedTimelineWithSavedObjectId:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'
         - type: object
           required: [savedObjectId, version]
+          properties:
+            savedObjectId:
+              type: string
+            version:
+              type: string
+    TimelineResponse:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - $ref: '#/components/schemas/SavedTimelineWithSavedObjectId'
+        - type: object
           properties:
             eventIdToNoteIds:
               type: array
@@ -184,10 +194,6 @@ components:
               nullable: true
               items:
                 $ref: '#/components/schemas/PinnedEvent'
-            savedObjectId:
-              type: string
-            version:
-              type: string
     ResolvedTimeline:
       type: object
       required: [timeline, outcome]
@@ -662,22 +668,27 @@ components:
               type: string
             eventIdToNoteIds:
               type: array
+              nullable: true
               items:
                 $ref: '#/components/schemas/Note'
             notes:
               type: array
+              nullable: true
               items:
                 $ref: '#/components/schemas/Note'
             noteIds:
               type: array
+              nullable: true
               items:
                 type: string
             pinnedEventIds:
               type: array
+              nullable: true
               items:
                 type: string
             pinnedEventsSaveObject:
               type: array
+              nullable: true
               items:
                 $ref: '#/components/schemas/PinnedEvent'
     ImportTimelineResult:
@@ -705,6 +716,23 @@ components:
                     type: string
                   status_code:
                     type: number
+    TimelineErrorResponse:
+      oneOf:
+        - type: object
+          required: [message, status_code]
+          properties:
+            message:
+              type: string
+            status_code:
+              type: number
+        - type: object
+          required: [message, statusCode]
+          properties:
+            message:
+              type: string
+            statusCode:
+              type: number
+
     ExportedTimelines:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'

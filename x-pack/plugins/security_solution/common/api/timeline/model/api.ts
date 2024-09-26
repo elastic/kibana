@@ -27,11 +27,14 @@ import {
   RowRendererId,
   RowRendererIdEnum,
   SavedTimeline,
+  SavedTimelineWithSavedObjectId,
   SortDirection,
   SortFieldTimeline,
   SortFieldTimelineEnum,
   TemplateTimelineType,
   TemplateTimelineTypeEnum,
+  TimelineErrorResponse,
+  TimelineResponse,
   TimelineSavedToReturnObject,
   TimelineStatus,
   TimelineStatusEnum,
@@ -54,10 +57,13 @@ export {
   RowRendererId,
   RowRendererIdEnum,
   SavedTimeline,
+  SavedTimelineWithSavedObjectId,
   SortDirection,
   SortFieldTimeline,
   SortFieldTimelineEnum,
   TemplateTimelineType,
+  TimelineErrorResponse,
+  TimelineResponse,
   TemplateTimelineTypeEnum,
   TimelineSavedToReturnObject,
   TimelineStatus,
@@ -325,16 +331,6 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   savedSearchId: unionWithNullType(runtimeTypes.string),
 });
 
-export type SavedTimelineWithSavedObjectId = SavedTimeline & {
-  savedObjectId?: string | null;
-};
-
-/**
- * This type represents a timeline type stored in a saved object that does not include any fields that reference
- * other saved objects.
- */
-export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
-
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
   SavedTimelineRuntimeType,
   runtimeTypes.type({
@@ -353,26 +349,6 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
 export type TimelineSavedObject = runtimeTypes.TypeOf<
   typeof TimelineSavedToReturnObjectRuntimeType
 >;
-
-const responseTimelines = runtimeTypes.type({
-  timeline: runtimeTypes.array(TimelineSavedToReturnObjectRuntimeType),
-  totalCount: runtimeTypes.number,
-});
-
-export type ResponseTimelines = runtimeTypes.TypeOf<typeof responseTimelines>;
-
-export const TimelineErrorResponseType = runtimeTypes.union([
-  runtimeTypes.type({
-    status_code: runtimeTypes.number,
-    message: runtimeTypes.string,
-  }),
-  runtimeTypes.type({
-    statusCode: runtimeTypes.number,
-    message: runtimeTypes.string,
-  }),
-]);
-
-export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
 
 /**
  * Import/export timelines
@@ -532,13 +508,4 @@ export interface ResponseTimeline {
 export interface SortTimeline {
   sortField: SortFieldTimeline;
   sortOrder: SortDirection;
-}
-
-export interface GetAllTimelineVariables {
-  pageInfo: PageInfoTimeline;
-  search?: Maybe<string>;
-  sort?: Maybe<SortTimeline>;
-  onlyUserFavorite?: Maybe<boolean>;
-  timelineType?: Maybe<TimelineType>;
-  status?: Maybe<TimelineStatus>;
 }

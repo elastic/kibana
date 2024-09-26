@@ -892,11 +892,6 @@ paths:
                 required:
                   - timeline
                   - totalCount
-                  - defaultTimelineCount
-                  - templateTimelineCount
-                  - favoriteCount
-                  - elasticTemplateTimelineCount
-                  - customTemplateTimelineCount
           description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
@@ -1499,6 +1494,18 @@ components:
         updatedBy:
           nullable: true
           type: string
+    SavedTimelineWithSavedObjectId:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          properties:
+            savedObjectId:
+              type: string
+            version:
+              type: string
+          required:
+            - savedObjectId
+            - version
     SerializedFilterQueryResult:
       type: object
       properties:
@@ -1548,6 +1555,7 @@ components:
     TimelineResponse:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'
+        - $ref: '#/components/schemas/SavedTimelineWithSavedObjectId'
         - type: object
           properties:
             eventIdToNoteIds:
@@ -1575,13 +1583,6 @@ components:
                 $ref: '#/components/schemas/PinnedEvent'
               nullable: true
               type: array
-            savedObjectId:
-              type: string
-            version:
-              type: string
-          required:
-            - savedObjectId
-            - version
     TimelineSavedToReturnObject:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'
@@ -1590,22 +1591,27 @@ components:
             eventIdToNoteIds:
               items:
                 $ref: '#/components/schemas/Note'
+              nullable: true
               type: array
             noteIds:
               items:
                 type: string
+              nullable: true
               type: array
             notes:
               items:
                 $ref: '#/components/schemas/Note'
+              nullable: true
               type: array
             pinnedEventIds:
               items:
                 type: string
+              nullable: true
               type: array
             pinnedEventsSaveObject:
               items:
                 $ref: '#/components/schemas/PinnedEvent'
+              nullable: true
               type: array
             savedObjectId:
               type: string

@@ -78,11 +78,6 @@ paths:
                 required: [
                   timeline,
                   totalCount,
-                  defaultTimelineCount,
-                  templateTimelineCount,
-                  favoriteCount,
-                  elasticTemplateTimelineCount,
-                  customTemplateTimelineCount,
                 ]
                 properties:
                   timeline:
