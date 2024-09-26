@@ -51,7 +51,6 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
@@ -225,6 +224,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           const { capabilities } = coreStart.application;
           const mlCapabilities = capabilities.ml as MlCapabilities;
 
+          const { ENABLE_ESQL } = await import('@kbn/esql-utils/constants');
           const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 
           // register various ML plugin features which require a full license

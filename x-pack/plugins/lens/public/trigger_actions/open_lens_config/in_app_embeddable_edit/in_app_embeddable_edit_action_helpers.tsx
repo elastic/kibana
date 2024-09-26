@@ -8,7 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { ENABLE_ESQL } from '@kbn/esql-utils/constants';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
