@@ -43,19 +43,7 @@ export const controlGroupInputSchema = schema.object({
     schema.object(
       {
         type: schema.string({ meta: { description: 'The type of the control panel.' } }),
-        embeddableConfig: schema.object(
-          {
-            id: schema.maybe(
-              schema.string({
-                meta: { description: 'The id of the control panel.' },
-              })
-            ),
-          },
-          {
-            unknowns: 'allow',
-            meta: { description: 'Embeddable input for the control.' },
-          }
-        ),
+        embeddableConfig: schema.recordOf(schema.string(), schema.any()),
         order: schema.number({
           meta: {
             description: 'The order of the control panel in the control group.',
