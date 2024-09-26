@@ -79,18 +79,9 @@ export const useGeneration = ({
 
     (async () => {
       try {
-        const { pipeline, docs, samplesFormat }: GenerationResults = await runGeneration({
-          integrationSettings,
-          connector,
-          deps,
-          setProgress,
-        });
-        reportGenerationComplete({
-          connector,
-          integrationSettings,
-          durationMs: Date.now() - generationStartedAt,
-        });
-        const result = { pipeline, docs, samplesFormat };
+        const result = await runGeneration({ integrationSettings, connector, deps, setProgress });
+        const durationMs = Date.now() - generationStartedAt;
+        reportGenerationComplete({ connector, integrationSettings, durationMs });
         onComplete(result);
       } catch (e) {
         if (abortController.signal.aborted) return;
