@@ -9,16 +9,18 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip, EuiButtonIcon } from '@
 import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ENTITIES_INVENTORY_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ApmPluginStartDeps } from '../../../../plugin';
 
 interface EntitiesInventoryCalloutProps {
   onDissmiss: () => void;
 }
 
 export function EntitiesInventoryCallout({ onDissmiss }: EntitiesInventoryCalloutProps) {
-  const { share } = useApmPluginContext();
-  const entitiesInventoryLocator = share.url.locators.get(ENTITIES_INVENTORY_LOCATOR_ID);
+  const { services } = useKibana<ApmPluginStartDeps>();
+  const { observabilityShared } = services;
+
+  const entitiesInventoryLocator = observabilityShared.locators.entitiesInventory;
 
   return (
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
