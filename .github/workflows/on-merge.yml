@@ -22,7 +22,16 @@ jobs:
             || github.event.label.name == 'auto-backport'
           )
         )
-        || (github.event.action == 'unlabeled' && github.event.label.name == 'backport:skip')
+        || ( 
+            (github.event.action == 'unlabeled' && github.event.label.name == 'backport:skip') && (
+              contains(github.event.pull_request.labels.*.name, 'backport:prev-minor')
+              || contains(github.event.pull_request.labels.*.name, 'backport:prev-major')
+              || contains(github.event.pull_request.labels.*.name, 'backport:current-major')
+              || contains(github.event.pull_request.labels.*.name, 'backport:all-open')
+              || contains(github.event.pull_request.labels.*.name, 'backport:version')
+              || contains(github.event.pull_request.labels.*.name, 'auto-backport')
+            )
+          )
         || (github.event.action == 'closed')
       )
     steps:
