@@ -16,7 +16,7 @@ import React, {
 import { JourneyStep } from '../../../../../../../../common/runtime_types';
 import {
   WaterfallData,
-  WaterfallDataEntry,
+  WaterfallTooltipItem,
   WaterfallMetadata,
 } from '../../../common/network_data/types';
 import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../waterfall_flyout/use_flyout';
@@ -45,10 +45,7 @@ export interface IWaterfallContext {
   showCustomMarks: boolean;
   sidebarItems?: WaterfallNetworkItem[];
   metadata: WaterfallMetadata;
-  renderTooltipItem: (
-    item: WaterfallDataEntry['config']['tooltipProps'],
-    index?: number
-  ) => JSX.Element;
+  renderTooltipItem: (item: WaterfallTooltipItem, index?: number) => JSX.Element;
   markerItems?: MarkerItems;
   activeStep?: JourneyStep;
   activeFilters: string[];

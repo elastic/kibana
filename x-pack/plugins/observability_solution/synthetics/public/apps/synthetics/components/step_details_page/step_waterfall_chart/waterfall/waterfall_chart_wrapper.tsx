@@ -11,7 +11,11 @@ import { EuiHealth } from '@elastic/eui';
 import { JourneyStep, NetworkEvent } from '../../../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../../../hooks/use_date_format';
 import { getSeriesAndDomain, getSidebarItems } from '../../common/network_data/data_formatting';
-import { WaterfallNetworkItem, LegendItem } from '../../common/network_data/types';
+import {
+  WaterfallNetworkItem,
+  WaterfallTooltipItem,
+  LegendItem,
+} from '../../common/network_data/types';
 import { RenderItem, WaterfallDataEntry } from '../../common/network_data/types';
 import { useFlyout } from './waterfall_flyout/use_flyout';
 import { WaterfallFlyout } from './waterfall_flyout/waterfall_flyout';
@@ -127,7 +131,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
       setShowCustomMarks={setShowCustomMarks}
       query={query}
       setQuery={setQuery}
-      renderTooltipItem={useCallback((tooltipProps) => {
+      renderTooltipItem={useCallback((tooltipProps: WaterfallTooltipItem) => {
         return <EuiHealth color={String(tooltipProps?.colour)}>{tooltipProps?.value}</EuiHealth>;
       }, [])}
     >
