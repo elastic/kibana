@@ -63,9 +63,7 @@ export function EntityManagerEnablementContextProvider({
   );
 
   const isEntityCentricExperienceViewEnabled =
-    isEntityManagerEnabled &&
-    serviceInventoryViewLocalStorageSetting === ServiceInventoryView.entity &&
-    isEntityCentricExperienceSettingEnabled;
+    isEntityManagerEnabled && isEntityCentricExperienceSettingEnabled;
 
   function handleServiceInventoryViewChange(nextView: ServiceInventoryView) {
     setServiceInventoryViewLocalStorageSetting(nextView);
