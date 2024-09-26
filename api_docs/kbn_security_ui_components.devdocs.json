@@ -71,6 +71,17 @@
                 "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.FeatureTable.defaultProps.showTitle",
+                "type": "boolean",
+                "tags": [],
+                "label": "showTitle",
+                "description": [],
+                "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },

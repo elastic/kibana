@@ -11,6 +11,7 @@
     "__mocks__/**/*",
     "../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "common/**/*.json",
     "public/**/*.json",
     "server/**/*.json"
   ],
@@ -19,7 +20,9 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../../src/setup_node_env/tsconfig.json" },
+    {
+      "path": "../../../src/setup_node_env/tsconfig.json"
+    },
     // add references to other TypeScript projects the plugin depends on
     "@kbn/ace",
     "@kbn/actions-plugin",
@@ -34,7 +37,6 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/data-visualizer-plugin",
-    "@kbn/datemath",
     "@kbn/embeddable-plugin",
     "@kbn/es-query",
     "@kbn/es-types",
@@ -67,7 +69,6 @@
     "@kbn/ml-trained-models-utils",
     "@kbn/ml-url-state",
     "@kbn/monaco",
-    "@kbn/react-field",
     "@kbn/rison",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
@@ -127,6 +128,9 @@
     "@kbn/esql-utils",
     "@kbn/core-lifecycle-browser",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/json-schemas"
+    "@kbn/json-schemas",
+    "@kbn/ml-field-stats-flyout",
+    "@kbn/ml-parse-interval",
+    "@kbn/ml-validators"
   ]
 }

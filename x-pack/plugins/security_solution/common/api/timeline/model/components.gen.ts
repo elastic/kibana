@@ -217,7 +217,7 @@ export type BareNote = z.infer<typeof BareNote>;
 export const BareNote = z.object({
   eventId: z.string().nullable().optional(),
   note: z.string().nullable().optional(),
-  timelineId: z.string().nullable(),
+  timelineId: z.string(),
   created: z.number().nullable().optional(),
   createdBy: z.string().nullable().optional(),
   updated: z.number().nullable().optional(),
@@ -227,22 +227,28 @@ export const BareNote = z.object({
 export type Note = z.infer<typeof Note>;
 export const Note = BareNote.merge(
   z.object({
-    noteId: z.string().optional(),
-    version: z.string().optional(),
+    noteId: z.string(),
+    version: z.string(),
   })
 );
 
-export type PinnedEvent = z.infer<typeof PinnedEvent>;
-export const PinnedEvent = z.object({
-  pinnedEventId: z.string(),
+export type BarePinnedEvent = z.infer<typeof BarePinnedEvent>;
+export const BarePinnedEvent = z.object({
   eventId: z.string(),
   timelineId: z.string(),
   created: z.number().nullable().optional(),
   createdBy: z.string().nullable().optional(),
   updated: z.number().nullable().optional(),
   updatedBy: z.string().nullable().optional(),
-  version: z.string(),
 });
+
+export type PinnedEvent = z.infer<typeof PinnedEvent>;
+export const PinnedEvent = BarePinnedEvent.merge(
+  z.object({
+    pinnedEventId: z.string(),
+    version: z.string(),
+  })
+);
 
 export type TimelineResponse = z.infer<typeof TimelineResponse>;
 export const TimelineResponse = SavedTimeline.merge(
@@ -267,6 +273,17 @@ export const FavoriteTimelineResponse = z.object({
   templateTimelineVersion: z.number().nullable().optional(),
   timelineType: TimelineType.optional(),
   favorite: z.array(FavoriteTimelineResult).optional(),
+});
+
+export type BareNoteWithoutExternalRefs = z.infer<typeof BareNoteWithoutExternalRefs>;
+export const BareNoteWithoutExternalRefs = z.object({
+  eventId: z.string().nullable().optional(),
+  note: z.string().nullable().optional(),
+  timelineId: z.string().nullable().optional(),
+  created: z.number().nullable().optional(),
+  createdBy: z.string().nullable().optional(),
+  updated: z.number().nullable().optional(),
+  updatedBy: z.string().nullable().optional(),
 });
 
 export type GlobalNote = z.infer<typeof GlobalNote>;

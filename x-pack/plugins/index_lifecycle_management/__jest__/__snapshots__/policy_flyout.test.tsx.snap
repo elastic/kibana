@@ -1,0 +1,1027 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`View policy flyout shows all phases 1`] = `
+<div
+  data-eui="EuiFlyout"
+  role="dialog"
+>
+  <button
+    aria-label="Close this dialog"
+    data-test-subj="euiFlyoutCloseButton"
+    type="button"
+  />
+  <div
+    class="euiFlyoutHeader emotion-euiFlyoutHeader-hasBorder"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <h1
+          class="euiTitle emotion-euiTitle-m"
+          data-test-subj="policyFlyoutTitle"
+        >
+          test
+        </h1>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlyoutBody emotion-euiFlyoutBody"
+  >
+    <div
+      class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"
+      tabindex="0"
+    >
+      <div
+        class="euiFlyoutBody__overflowContent"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-column"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <div
+              class="ilmTimeline"
+              style="--ilm-timeline-hot-phase-width: 16.680244399185337%; --ilm-timeline-warm-phase-width: 16.902014030323603%; --ilm-timeline-cold-phase-width: 18.929622086444898%; --ilm-timeline-frozen-phase-width: 47.488119484046166%;"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexStart-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <div
+                    class="ilmTimeline__phasesContainer"
+                  >
+                    <div
+                      class="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
+                      data-test-subj="ilmTimelinePhase-hot"
+                    >
+                      <div
+                        class="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar"
+                      />
+                      <div
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+                      >
+                        <div
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                        >
+                          <div
+                            class="euiText emotion-euiText-s"
+                          >
+                            <strong>
+                              Hot phase
+                            </strong>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                        />
+                      </div>
+                    </div>
+                    <div
+                      class="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
+                      data-test-subj="ilmTimelinePhase-warm"
+                    >
+                      <div
+                        class="ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar"
+                      />
+                      <div
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+                      >
+                        <div
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                        >
+                          <div
+                            class="euiText emotion-euiText-s"
+                          >
+                            <strong>
+                              Warm phase
+                            </strong>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                        />
+                      </div>
+                    </div>
+                    <div
+                      class="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
+                      data-test-subj="ilmTimelinePhase-cold"
+                    >
+                      <div
+                        class="ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar"
+                      />
+                      <div
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+                      >
+                        <div
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                        >
+                          <div
+                            class="euiText emotion-euiText-s"
+                          >
+                            <strong>
+                              Cold phase
+                            </strong>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                        />
+                      </div>
+                    </div>
+                    <div
+                      class="ilmTimeline__phasesContainer__phase ilmTimeline__frozenPhase"
+                      data-test-subj="ilmTimelinePhase-frozen"
+                    >
+                      <div
+                        class="ilmTimeline__colorBar ilmTimeline__frozenPhase__colorBar"
+                      />
+                      <div
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+                      >
+                        <div
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                        >
+                          <div
+                            class="euiText emotion-euiText-s"
+                          >
+                            <strong>
+                              Frozen phase
+                            </strong>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="ilmTimeline__deleteIconContainer"
+                    data-test-subj="ilmTimelinePhase-delete"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      <span
+                        data-euiicon-type="trash"
+                        tabindex="0"
+                      >
+                        Info
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
+        />
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            />
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <h2
+              class="euiTitle emotion-euiTitle-s"
+            >
+              Hot phase
+            </h2>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <dl
+          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          data-type="row"
+        >
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Rollover
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum primary shard size: 
+              <strong>
+                50gb
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum docs in the primary shard: 
+              <strong>
+                25
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum age: 
+              <strong>
+                30d
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum documents: 
+              <strong>
+                235
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum index size: 
+              <strong>
+                2gb
+              </strong>
+               
+              <span
+                class="euiBadge emotion-euiBadge-warning"
+                title="Deprecated"
+              >
+                <span
+                  class="euiBadge__content emotion-euiBadge__content"
+                >
+                  <span
+                    class="euiBadge__text emotion-euiBadge__text"
+                  >
+                    Deprecated
+                  </span>
+                </span>
+              </span>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Force merge
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Number of segments: 
+              <strong>
+                3
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Compress stored fields: 
+              <strong>
+                Yes
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Shrink
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Number of primary shards: 
+              <strong>
+                1
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Allow writes after shrink: 
+              <strong>
+                No
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Read only
+          </dt>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Index priority
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              100
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+        </dl>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            />
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <h2
+              class="euiTitle emotion-euiTitle-s"
+            >
+              Warm phase
+            </h2>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <dl
+          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          data-type="row"
+        >
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Move data into phase when
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              3d old
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Replicas
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Number of replicas: 
+              <strong>
+                3
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Shrink
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Maximum primary shard size: 
+              <strong>
+                4gb
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Allow writes after shrink: 
+              <strong>
+                No
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Force merge
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Number of segments: 
+              <strong>
+                44
+              </strong>
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Compress stored fields: 
+              <strong>
+                Yes
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Downsample
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Downsampling interval: 
+              <strong>
+                1d
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Data allocation
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Using warm nodes 
+              <span
+                class="euiBadge emotion-euiBadge-success"
+                title="Recommended"
+              >
+                <span
+                  class="euiBadge__content emotion-euiBadge__content"
+                >
+                  <span
+                    class="euiBadge__text emotion-euiBadge__text"
+                  >
+                    Recommended
+                  </span>
+                </span>
+              </span>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Index priority
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              50
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+        </dl>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            />
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <h2
+              class="euiTitle emotion-euiTitle-s"
+            >
+              Cold phase
+            </h2>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <dl
+          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          data-type="row"
+        >
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Move data into phase when
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              55d old
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Searchable snapshot
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Snapshot repository: 
+              <code>
+                found-snapshots
+              </code>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Replicas
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Number of replicas: 
+              <strong>
+                3
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Downsample
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Downsampling interval: 
+              <strong>
+                4d
+              </strong>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Data allocation
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Using cold nodes 
+              <span
+                class="euiBadge emotion-euiBadge-success"
+                title="Recommended"
+              >
+                <span
+                  class="euiBadge__content emotion-euiBadge__content"
+                >
+                  <span
+                    class="euiBadge__text emotion-euiBadge__text"
+                  >
+                    Recommended
+                  </span>
+                </span>
+              </span>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Index priority
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              0
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+        </dl>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            />
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <h2
+              class="euiTitle emotion-euiTitle-s"
+            >
+              Frozen phase
+            </h2>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <dl
+          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          data-type="row"
+        >
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Move data into phase when
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              555d old
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Searchable snapshot
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              Snapshot repository: 
+              <code>
+                found-snapshots
+              </code>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+        </dl>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            />
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <h2
+              class="euiTitle emotion-euiTitle-s"
+            >
+              Delete phase
+            </h2>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <dl
+          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          data-type="row"
+        >
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Move data into phase when
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              7365d old
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Wait for snapshot policy
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <code>
+                cloud-snapshot-policy
+              </code>
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          >
+            Delete searchable snapshot
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              No
+            </div>
+          </dd>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+        </dl>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlyoutFooter emotion-euiFlyoutFooter"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <button
+          class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary-flush-left"
+          type="button"
+        >
+          <span
+            class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+          >
+            <span
+              color="inherit"
+              data-euiicon-type="cross"
+            />
+            <span
+              class="eui-textTruncate euiButtonEmpty__text"
+            >
+              Close
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexEnd-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-inline-block"
+          >
+            <button
+              aria-label="Manage policy"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+              data-test-subj="managePolicyButton"
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate"
+                >
+                  Manage
+                </span>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowUp"
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
