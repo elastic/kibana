@@ -9,6 +9,7 @@
 
 import * as t from 'io-ts';
 import { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { NamespaceType } from '../../common/default_namespace';
 import { DefaultUpdateCommentsArray } from '../../common/default_update_comments_array';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
@@ -40,7 +41,7 @@ export const updateExceptionListItemSchema = t.intersection([
       comments: DefaultUpdateCommentsArray, // defaults to empty array if not set during decode
       expire_time: expireTimeOrUndefined,
       id, // defaults to undefined if not set during decode
-      item_id: t.union([t.string, t.undefined]),
+      item_id: t.union([NonEmptyString, t.undefined]),
       meta, // defaults to undefined if not set during decode
       namespace_type, // defaults to 'single' if not set during decode
       os_types: osTypeArrayOrUndefined, // defaults to empty array if not set during decode
