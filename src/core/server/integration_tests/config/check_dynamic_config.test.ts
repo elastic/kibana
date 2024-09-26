@@ -57,6 +57,7 @@ describe('PUT /internal/core/_settings', () => {
     await request
       .put(root, '/internal/core/_settings')
       .set('Elastic-Api-Version', '1')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({ 'logging.loggers': [{ name: loggerName, level: 'debug', appenders: ['console'] }] })
       .expect(200);
     expect(logger.isLevelEnabled('info')).toBe(true);
@@ -68,6 +69,7 @@ describe('PUT /internal/core/_settings', () => {
     await request
       .put(root, '/internal/core/_settings')
       .set('Elastic-Api-Version', '1')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({ 'logging.loggers': null })
       .expect(200);
     expect(logger.isLevelEnabled('info')).toBe(false);
