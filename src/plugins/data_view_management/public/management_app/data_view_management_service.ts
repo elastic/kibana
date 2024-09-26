@@ -23,8 +23,7 @@ import {
   DataViewsPublicPluginStart,
   INDEX_PATTERN_TYPE,
   DataViewField,
-  // DataViewLazy,
-  DataView,
+  DataViewLazy,
 } from '@kbn/data-views-plugin/public';
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -76,8 +75,7 @@ export interface DataViewMgmtServiceConstructorArgs {
 }
 
 export interface DataViewMgmtState {
-  // dataView?: DataViewLazy;
-  dataView?: DataView;
+  dataView?: DataViewLazy;
   allowedTypes: SavedObjectManagementTypeInfo[];
   relationships: SavedObjectRelationWithTitle[];
   fields: DataViewField[];
@@ -132,16 +130,10 @@ export class DataViewMgmtService {
 
     this.state$ = this.internalState$ as BehaviorObservable<DataViewMgmtState>;
 
-    // todo look at updates
-    /*
-    uiSettings.get('defaultIndex').then((defaultIndex: string) => {
-      this.updateState({ defaultIndex });
-    });
-    */
-
     // allowed types are set once and never change
     this.allowedTypes = new Promise((resolve) => {
       savedObjectsManagement.getAllowedTypes().then((resp) => {
+        this.updateState({ allowedTypes: resp });
         resolve(resp);
       });
     });
@@ -163,7 +155,7 @@ export class DataViewMgmtService {
     this.internalState$.next({ ...this.state$.getValue(), ...newState });
   };
 
-  private getKbnUrl = (dataViewId: string) =>
+  private getConflictFieldsKbnUrl = (dataViewId: string) =>
     setStateToKbnUrl(
       APP_STATE_STORAGE_KEY,
       {
@@ -176,10 +168,9 @@ export class DataViewMgmtService {
       })
     );
 
-  // private getTags = async (dataView: DataViewLazy) => {
-  private getTags = async (dataView: DataView) => {
+  private getTags = async (dataView: DataViewLazy) => {
     if (dataView) {
-      const defaultIndex = await this.services.uiSettings.get('defaultIndex'); // todo use const
+      const defaultIndex = await this.services.uiSettings.get('defaultIndex');
       const tags = getTags(
         dataView,
         dataView.id === defaultIndex,
@@ -194,8 +185,7 @@ export class DataViewMgmtService {
   async updateScriptedFields() {
     const dataView = this.state$.getValue().dataView;
     if (dataView) {
-      // const scriptedFieldRecords = dataView.getScriptedFields({ fieldName: ['*'] });
-      const scriptedFieldRecords = dataView.getScriptedFields();
+      const scriptedFieldRecords = dataView.getScriptedFields({ fieldName: ['*'] });
       const scriptedFields = Object.values(scriptedFieldRecords);
 
       const scriptedFieldLangs = Array.from(
@@ -214,33 +204,23 @@ export class DataViewMgmtService {
     }
   }
 
-  // async setDataView(dataView: DataViewLazy) {
-  async setDataView(dataView: DataView) {
+  async setDataView(dataView: DataViewLazy) {
     this.updateState({ isRefreshing: true });
     // todo this should probably load the data view here
-    /**
     const fieldRecords = (
       await dataView.getFields({ scripted: false, fieldName: ['*'] })
     ).getFieldMapSorted();
-    */
-
-    const fieldRecords = dataView.fields
-      .filter((field) => !field.scripted)
-      .reduce((acc, field) => {
-        acc[field.name] = field;
-        return acc;
-      }, {} as Record<string, DataViewField>);
 
     const fields = Object.values(fieldRecords);
-    const indexedFieldTypes: string[] = [];
+    const indexedFieldTypes = new Set<string>();
     fields.forEach((field) => {
       // for conflicted fields, add conflict as a type
       if (field.type === 'conflict') {
-        indexedFieldTypes.push('conflict');
+        indexedFieldTypes.add('conflict');
       }
       if (field.esTypes) {
         // add all types, may be multiple
-        field.esTypes.forEach((item) => indexedFieldTypes.push(item));
+        field.esTypes.forEach((item) => indexedFieldTypes.add(item));
       }
     });
 
@@ -257,13 +237,12 @@ export class DataViewMgmtService {
     this.updateState({
       dataView,
       fields,
-      indexedFieldTypes,
+      indexedFieldTypes: Array.from(indexedFieldTypes),
       fieldConflictCount: fields.filter((field) => field.type === 'conflict').length,
       tags: await this.getTags(dataView),
       isRefreshing: false,
-      conflictFieldsUrl: this.getKbnUrl(dataView.id!),
-      // scriptedFields: Object.values(dataView.getScriptedFields({ fieldName: ['*'] })),
-      scriptedFields: dataView.getScriptedFields(),
+      conflictFieldsUrl: this.getConflictFieldsKbnUrl(dataView.id!),
+      scriptedFields: Object.values(dataView.getScriptedFields({ fieldName: ['*'] })),
     });
 
     this.updateScriptedFields();
@@ -272,7 +251,7 @@ export class DataViewMgmtService {
   async refreshFields() {
     const dataView = this.state$.getValue().dataView;
     if (dataView) {
-      await this.services.dataViews.refreshFields(dataView, undefined, true);
+      // await this.services.dataViews.refreshFields(dataView, undefined, true);
       return this.setDataView(dataView);
     }
   }
@@ -284,7 +263,7 @@ export class DataViewMgmtService {
     }
     await this.services.uiSettings.set('defaultIndex', dataView.id);
 
-    this.updateState({ tags: await this.getTags(dataView) });
+    this.updateState({ tags: await this.getTags(dataView), defaultIndex: dataView.id });
   }
 
   setScriptedFieldLangSelection(index: number) {

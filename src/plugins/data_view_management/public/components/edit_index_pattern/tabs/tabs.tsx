@@ -35,6 +35,7 @@ import {
   META_FIELDS,
   RuntimeField,
 } from '@kbn/data-views-plugin/public';
+import { AbstractDataView } from '@kbn/data-views-plugin/common';
 import {
   SavedObjectRelation,
   SavedObjectManagementTypeInfo,
@@ -54,8 +55,14 @@ import { ScriptedFieldsTable } from '../scripted_fields_table';
 import { RelationshipsTable } from '../relationships_table';
 import { getTabs, getPath, convertToEuiFilterOptions } from './utils';
 import { getFieldInfo } from '../../utils';
-import { DataViewMgmtState } from '../../../management_app/data_view_management_service';
 import { useStateSelector } from '../../../management_app/state_utils';
+
+import {
+  fieldsSelector,
+  indexedFieldTypeSelector,
+  scriptedFieldLangsSelector,
+  scriptedFieldsSelector,
+} from '../../../management_app/data_view_mgmt_selectors';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: DataView;
@@ -165,12 +172,6 @@ const SCHEMA_ITEMS: FilterItems[] = [
   },
 ];
 
-// todo reuse
-const fieldsSelector = (state: DataViewMgmtState) => state.fields;
-const indexedFieldTypeSelector = (state: DataViewMgmtState) => state.indexedFieldTypes;
-const scriptedFieldLangsSelector = (state: DataViewMgmtState) => state.scriptedFieldLangs;
-// const scriptedFieldsSelector = (state: DataViewMgmtState) => state.scriptedFields;
-
 export const Tabs: React.FC<TabsProps> = ({
   indexPattern,
   saveIndexPattern,
@@ -214,7 +215,6 @@ export const Tabs: React.FC<TabsProps> = ({
   const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string[]>([]);
   const [isSchemaFilterOpen, setIsSchemaFilterOpen] = useState(false);
   const fields = useStateSelector(dataViewMgmtService.state$, fieldsSelector);
-  // const scriptedFields = useStateSelector(dataViewMgmtService.state$, scriptedFieldsSelector);
   const indexedFieldTypes = convertToEuiFilterOptions(
     useStateSelector(dataViewMgmtService.state$, indexedFieldTypeSelector)
   );
@@ -222,14 +222,13 @@ export const Tabs: React.FC<TabsProps> = ({
     dataViewMgmtService.state$,
     scriptedFieldLangsSelector
   );
+  const scriptedFields = useStateSelector(dataViewMgmtService.state$, scriptedFieldsSelector);
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
   const filteredIndexedFieldTypeFilter = useMemo(() => {
-    return uniq(
-      indexedFieldTypeFilter.filter((fieldType) =>
-        indexedFieldTypes.some((item) => item.value === fieldType)
-      )
+    return indexedFieldTypeFilter.filter((fieldType) =>
+      indexedFieldTypes.some((item) => item.value === fieldType)
     );
   }, [indexedFieldTypeFilter, indexedFieldTypes]);
 
@@ -573,7 +572,6 @@ export const Tabs: React.FC<TabsProps> = ({
                     history.push(getPath(field, indexPattern));
                   },
                 }}
-                // todo - make something more specific to scripted fields
                 onRemoveField={() => dataViewMgmtService.refreshFields()}
                 painlessDocLink={docLinks.links.scriptedFields.painless}
                 userEditPermission={dataViews.getCanSaveSync()}
@@ -587,7 +585,10 @@ export const Tabs: React.FC<TabsProps> = ({
               {getFilterSection(type)}
               <EuiSpacer size="m" />
               <SourceFiltersTable
-                saveIndexPattern={saveIndexPattern}
+                saveIndexPattern={async (dv: AbstractDataView) => {
+                  await saveIndexPattern(dv);
+                  dataViewMgmtService.refreshFields();
+                }}
                 indexPattern={indexPattern}
                 // fields={fields}
                 filterFilter={fieldFilter}
@@ -645,7 +646,7 @@ export const Tabs: React.FC<TabsProps> = ({
     () =>
       getTabs(
         indexPattern,
-        // [...fields, ...scriptedFields],
+        [...fields, ...scriptedFields],
         fieldFilter,
         relationships.length,
         dataViews.scriptedFieldsEnabled
@@ -661,8 +662,8 @@ export const Tabs: React.FC<TabsProps> = ({
       indexPattern,
       relationships,
       dataViews.scriptedFieldsEnabled,
-      // fields,
-      // scriptedFields,
+      fields,
+      scriptedFields,
     ]
   );
 

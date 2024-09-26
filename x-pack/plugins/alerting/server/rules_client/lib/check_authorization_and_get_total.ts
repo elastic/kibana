@@ -84,7 +84,7 @@ export const checkAuthorizationAndGetTotal = async (
   await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
     pMap(
       buckets,
-      async ({ key: [ruleType, consumer, actions] }) => {
+      async ({ key: [ruleType, consumer] }) => {
         context.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
         try {
           await context.authorization.ensureAuthorized({
