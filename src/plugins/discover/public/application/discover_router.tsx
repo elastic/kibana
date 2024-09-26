@@ -9,6 +9,7 @@
 
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import React from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -46,12 +47,14 @@ export const DiscoverRouter = ({
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
-          <DiscoverRoutes
-            customizationContext={customizationContext}
-            services={services}
-            history={history}
-            {...routeProps}
-          />
+          <PerformanceContextProvider>
+            <DiscoverRoutes
+              customizationContext={customizationContext}
+              services={services}
+              history={history}
+              {...routeProps}
+            />
+          </PerformanceContextProvider>
         </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>
