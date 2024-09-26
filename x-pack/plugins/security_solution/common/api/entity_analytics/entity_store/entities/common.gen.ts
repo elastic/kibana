@@ -22,6 +22,10 @@ import { AssetCriticalityLevel } from '../../asset_criticality/common.gen';
 export type UserEntity = z.infer<typeof UserEntity>;
 export const UserEntity = z.object({
   '@timestamp': z.string().datetime(),
+  entity: z.object({
+    name: z.string(),
+    source: z.array(z.string()),
+  }),
   user: z.object({
     full_name: z.array(z.string()).optional(),
     domain: z.array(z.string()).optional(),
@@ -42,6 +46,10 @@ export const UserEntity = z.object({
 export type HostEntity = z.infer<typeof HostEntity>;
 export const HostEntity = z.object({
   '@timestamp': z.string().datetime(),
+  entity: z.object({
+    name: z.string(),
+    source: z.array(z.string()),
+  }),
   host: z.object({
     hostname: z.array(z.string()).optional(),
     domain: z.array(z.string()).optional(),
