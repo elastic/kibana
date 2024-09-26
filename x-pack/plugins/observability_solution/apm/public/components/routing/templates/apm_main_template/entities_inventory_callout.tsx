@@ -30,7 +30,7 @@ export function EntitiesInventoryCallout({ onDissmiss }: EntitiesInventoryCallou
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink
-          data-test-subj="entitiesInventoryCalloutLink"
+          data-test-subj="apmEntitiesInventoryCalloutLink"
           href={entitiesInventoryLocator?.useUrl({})}
         >
           <FormattedMessage
@@ -49,7 +49,7 @@ export function EntitiesInventoryCallout({ onDissmiss }: EntitiesInventoryCallou
           }
         >
           <EuiButtonIcon
-            data-test-subj="entitiesInventoryCalloutDismiss"
+            data-test-subj="apmEntitiesInventoryCalloutDismiss"
             iconType="cross"
             onClick={onDissmiss}
           />
