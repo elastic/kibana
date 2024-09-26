@@ -1,45 +1,151 @@
-### Create Document Entry
+### Create Document Entry [Admin] [Private]
 POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
-Authorization: Basic {{auth.username}} {{auth.password}}
+Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
 X-Kbn-Context: {{appContext.security}}
 
 {
   "type": "document",
-  "name": "Favorites",
+  "name": "Document Entry [Admin] [Private]",
   "kbResource": "user",
   "source": "api",
   "required": true,
   "text": "My favorite food is Dan Bing"
 }
 
-### Create Index Entry
+### Create Document Entry [Admin] [Global]
 POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
-Authorization: Basic {{auth.username}} {{auth.password}}
+Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
+X-Kbn-Context: {{appContext.security}}
+
+{
+  "type": "document",
+  "name": "Document Entry [Admin] [Global]",
+  "kbResource": "user",
+  "source": "api",
+  "required": true,
+  "text": "My favorite food is pizza",
+  "users": []
+}
+
+### Create Document Entry [Assistant All] [Private]
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf: "true"
+Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.assistant_all.username}} {{auth.assistant_all.password}}
+X-Kbn-Context: {{appContext.security}}
+
+{
+  "type": "document",
+  "name": "Document Entry [Assistant All] [Private]",
+  "kbResource": "user",
+  "source": "api",
+  "required": true,
+  "text": "My favorite food is popcorn"
+}
+
+### Create Document Entry [Assistant All] [Global]
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf: "true"
+Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.assistant_all.username}} {{auth.assistant_all.password}}
+X-Kbn-Context: {{appContext.security}}
+
+{
+  "type": "document",
+  "name": "Document Entry [Assistant All] [Global]",
+  "kbResource": "user",
+  "source": "api",
+  "required": true,
+  "text": "My favorite food is peaches",
+  "users": []
+}
+
+### Create Index Entry [Admin] [Private]
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf: "true"
+Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
 X-Kbn-Context: {{appContext.security}}
 
 {
   "type": "index",
-  "name": "SpongBotSlackConnector",
+  "name": "Slackbot-test Index Entry [Admin] [Private]",
   "namespace": "default",
-  "index": "spongbot-slack",
+  "index": "slackbot-test",
+  "field": "semantic_text",
+  "description": "Use this index to search for the user's Slack messages.",
+  "queryDescription":
+  "The free text search that the user wants to perform over this dataset. So if asking \"what are my slack messages from last week about failed tests\", the query would be \"A test has failed! failing test failed test\"",
+  "outputFields": ["author", "text", "timestamp"]
+}
+
+### Create Index Entry [Admin] [Global]
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf: "true"
+Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
+X-Kbn-Context: {{appContext.security}}
+
+{
+  "type": "index",
+  "name": "Slackbot-test Index Entry [Admin] [Global]",
+  "namespace": "default",
+  "index": "slackbot-test",
   "field": "semantic_text",
   "description": "Use this index to search for the user's Slack messages.",
   "queryDescription":
     "The free text search that the user wants to perform over this dataset. So if asking \"what are my slack messages from last week about failed tests\", the query would be \"A test has failed! failing test failed test\"",
-  "inputSchema": [
-    {
-      "fieldName": "author",
-      "fieldType": "string",
-      "description": "The author of the message. So if asking for recent messages from Stan, you would provide 'Stan' as the author."
-    }
-  ],
-  "outputFields": ["author", "text", "timestamp"]  
+  "outputFields": ["author", "text", "timestamp"],
+  "users": []
+}
+
+### Create Index Entry [Assistant All] [Private]
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf: "true"
+Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.assistant_all.username}} {{auth.assistant_all.password}}
+X-Kbn-Context: {{appContext.security}}
+
+{
+  "type": "index",
+  "name": "Slackbot-test Index Entry [Assistant All] [Private]",
+  "namespace": "default",
+  "index": "slackbot-test",
+  "field": "semantic_text",
+  "description": "Use this index to search for the user's Slack messages.",
+  "queryDescription": "The free text search that the user wants to perform over this dataset. So if asking \"what are my slack messages from last week about failed tests\", the query would be \"A test has failed! failing test failed test\"",
+  "outputFields": ["author", "text", "timestamp" ]
+}
+
+### Create Index Entry [Assistant All] [Global]
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf: "true"
+Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.assistant_all.username}} {{auth.assistant_all.password}}
+X-Kbn-Context: {{appContext.security}}
+
+{
+  "type": "index",
+  "name": "Slackbot-test Index Entry [Assistant All] [Global]",
+  "namespace": "default",
+  "index": "slackbot-test",
+  "field": "semantic_text",
+  "description": "Use this index to search for the user's Slack messages.",
+  "queryDescription": "The free text search that the user wants to perform over this dataset. So if asking \"what are my slack messages from last week about failed tests\", the query would be \"A test has failed! failing test failed test\"",
+  "outputFields": ["author", "text", "timestamp" ],
+  "users": []
 }
 
 

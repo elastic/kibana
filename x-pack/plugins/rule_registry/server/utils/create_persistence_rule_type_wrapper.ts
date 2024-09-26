@@ -51,7 +51,7 @@ export type BackendAlertWithSuppressionFields870<T> = Omit<
 
 export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
 
-const augmentAlerts = <T>({
+const augmentAlerts = async <T>({
   alerts,
   options,
   kibanaVersion,
@@ -65,6 +65,9 @@ const augmentAlerts = <T>({
   intendedTimestamp: Date | undefined;
 }) => {
   const commonRuleFields = getCommonAlertFields(options);
+  const maintenanceWindowIds: string[] =
+    alerts.length > 0 ? await options.services.getMaintenanceWindowIds() : [];
+
   const currentDate = new Date();
   const timestampOverrideOrCurrent = currentTimeOverride ?? currentDate;
   return alerts.map((alert) => {
@@ -78,8 +81,8 @@ const augmentAlerts = <T>({
           ? intendedTimestamp
           : timestampOverrideOrCurrent,
         [VERSION]: kibanaVersion,
-        ...(options?.maintenanceWindowIds?.length
-          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: options.maintenanceWindowIds }
+        ...(maintenanceWindowIds.length
+          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
           : {}),
         ...commonRuleFields,
         ...alert._source,
@@ -311,7 +314,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   intendedTimestamp = options.startedAt;
                 }
 
-                const augmentedAlerts = augmentAlerts({
+                const augmentedAlerts = await augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
@@ -575,7 +578,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
-                const augmentedAlerts = augmentAlerts({
+                const augmentedAlerts = await augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
