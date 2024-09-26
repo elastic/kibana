@@ -209,117 +209,121 @@ describe('<RolesGridPage />', () => {
       return updatedWrapper.find(EuiIcon).length > initialIconCount;
     });
 
-    expect(wrapper.find(EuiBasicTable).props().items).toEqual([
-      {
-        name: 'test-role-1',
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [
-          {
-            base: [],
-            spaces: [],
-            feature: {},
+    expect(wrapper.find(EuiBasicTable).props().items).toEqual(
+      expect.arrayContaining([
+        {
+          name: 'test-role-1',
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
           },
-        ],
-      },
-      {
-        name: 'test-role-with-description',
-        description: 'role-description',
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
+          kibana: [
+            {
+              base: [],
+              spaces: [],
+              feature: {},
+            },
+          ],
         },
-        kibana: [
-          {
-            base: [],
-            spaces: [],
-            feature: {},
+        {
+          name: 'test-role-with-description',
+          description: 'role-description',
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
           },
-        ],
-      },
-      {
-        name: 'reserved-role',
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
+          kibana: [
+            {
+              base: [],
+              spaces: [],
+              feature: {},
+            },
+          ],
         },
-        kibana: [
-          {
-            base: [],
-            spaces: [],
-            feature: {},
+        {
+          name: 'reserved-role',
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
           },
-        ],
-        metadata: {
-          _reserved: true,
-        },
-      },
-      {
-        name: 'disabled-role',
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [
-          {
-            base: [],
-            spaces: [],
-            feature: {},
+          kibana: [
+            {
+              base: [],
+              spaces: [],
+              feature: {},
+            },
+          ],
+          metadata: {
+            _reserved: true,
           },
-        ],
-        transient_metadata: {
-          enabled: false,
         },
-      },
-      {
-        name: 'special%chars%role',
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [
-          {
-            base: [],
-            spaces: [],
-            feature: {},
+        {
+          name: 'disabled-role',
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
           },
-        ],
-      },
-    ]);
+          kibana: [
+            {
+              base: [],
+              spaces: [],
+              feature: {},
+            },
+          ],
+          transient_metadata: {
+            enabled: false,
+          },
+        },
+        {
+          name: 'special%chars%role',
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [
+            {
+              base: [],
+              spaces: [],
+              feature: {},
+            },
+          ],
+        },
+      ])
+    );
 
     findTestSubject(wrapper, 'showReservedRolesSwitch').simulate('click');
 
-    expect(wrapper.find(EuiBasicTable).props().items).toEqual([
-      {
-        name: 'test-role-1',
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [{ base: [], spaces: [], feature: {} }],
-      },
-      {
-        name: 'test-role-with-description',
-        description: 'role-description',
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [{ base: [], spaces: [], feature: {} }],
-      },
-      {
-        name: 'disabled-role',
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [{ base: [], spaces: [], feature: {} }],
-        transient_metadata: { enabled: false },
-      },
-      {
-        name: 'special%chars%role',
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [{ base: [], spaces: [], feature: {} }],
-      },
-    ]);
+    expect(wrapper.find(EuiBasicTable).props().items).toEqual(
+      expect.arrayContaining([
+        {
+          name: 'test-role-1',
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [{ base: [], spaces: [], feature: {} }],
+        },
+        {
+          name: 'test-role-with-description',
+          description: 'role-description',
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [{ base: [], spaces: [], feature: {} }],
+        },
+        {
+          name: 'disabled-role',
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [{ base: [], spaces: [], feature: {} }],
+          transient_metadata: { enabled: false },
+        },
+        {
+          name: 'special%chars%role',
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [{ base: [], spaces: [], feature: {} }],
+        },
+      ])
+    );
   });
 
   it('hides controls when `readOnly` is enabled', async () => {
