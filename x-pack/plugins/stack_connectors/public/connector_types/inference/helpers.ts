@@ -45,42 +45,39 @@ export const generateInferenceEndpointId = (
 
 export const getValidator = (
   schemaPath: string,
-  setFieldValue: (fieldName: string, value: unknown) => void,
+  setFormFields: React.Dispatch<React.SetStateAction<ConfigEntryView[]>>,
   isSecrets: boolean = false
 ) => {
   return (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
     const [{ value, path, formData }] = args;
+    const newSchema: ConfigEntryView[] = [];
 
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
     if (formData[schemaPath]) {
-      formData[schemaPath]
-        .filter((f: ConfigEntryView) => (isSecrets ? f.sensitive : !f.sensitive))
-        .forEach((field: ConfigEntryView) => {
-          if (field.required) {
-            if (
-              !configData[field.key] ||
-              typeof configData[field.key] === 'string' ||
-              typeof configData[field.key] === 'number' ||
-              typeof configData[field.key] === 'boolean'
-            ) {
-              if (!configData[field.key] || isEmpty(configData[field.key])) {
-                field.validationErrors = [i18n.getRequiredMessage(field.label)];
-                field.isValid = false;
-                hasErrors = true;
-              } else {
-                field.validationErrors = [];
-                field.isValid = true;
-              }
+      formData[schemaPath].forEach((field: ConfigEntryView) => {
+        if (field.required && (isSecrets ? field.sensitive : !field.sensitive)) {
+          if (
+            !configData[field.key] ||
+            typeof configData[field.key] === 'string' ||
+            typeof configData[field.key] === 'number' ||
+            typeof configData[field.key] === 'boolean'
+          ) {
+            if (!configData[field.key] || isEmpty(configData[field.key])) {
+              field.validationErrors = [i18n.getRequiredMessage(field.label)];
+              field.isValid = false;
+              hasErrors = true;
+            } else {
+              field.validationErrors = [];
+              field.isValid = true;
             }
           }
-        });
+        }
+        newSchema.push(field);
+      });
 
       if (hasErrors) {
-        // setFieldValue(schemaPath, formData[schemaPath]);
-
-        console.log(value)
-        console.log(formData)
+        setFormFields(newSchema);
         return {
           code: 'ERR_FIELD_MISSING',
           path,
