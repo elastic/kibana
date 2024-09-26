@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { useEffect, useCallback, useReducer } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { APIKeyCreationResponse, APIRoutes } from '../../common/types';
+import type { APIKeyCreationResponse } from '../common/types';
+import { APIRoutes } from '../common/types';
 
 const API_KEY_STORAGE_KEY = 'searchApiKey';
 const API_KEY_MASK = '•'.repeat(60);
@@ -137,7 +141,8 @@ export const useSearchApiKey = () => {
   }, [validateApiKey, createApiKey]);
 
   return {
-    apiKey: state.status === Status.showHiddenKey ? API_KEY_MASK : state.apiKey,
+    displayedApiKey: state.status === Status.showHiddenKey ? API_KEY_MASK : state.apiKey,
+    apiKey: state.apiKey,
     showAPIKey: handleShowKeyVisibility,
     handleSaveKey,
     status: state.status,

@@ -6267,7 +6267,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-api-keys@link:x-pack/plugins/search_api_keys":
+"@kbn/search-api-keys@link:packages/kbn-search-api-keys":
   version "0.0.0"
   uid ""
 

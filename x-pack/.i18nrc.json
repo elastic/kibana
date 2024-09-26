@@ -106,7 +106,7 @@
     "xpack.screenshotting": "plugins/screenshotting",
     "xpack.searchHomepage": "plugins/search_homepage",
     "xpack.searchIndices": "plugins/search_indices",
-    "xpack.searchApiKeys": "plugins/search_api_keys",
+    "xpack.searchApiKeys": "packages/search-api-keys",
     "xpack.searchNotebooks": "plugins/search_notebooks",
     "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchInferenceEndpoints": "plugins/search_inference_endpoints",

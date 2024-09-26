@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
-import { ApiKeyForm } from '@kbn/search-api-keys/public';
+import { ApiKeyForm } from '@kbn/search-api-keys/components/api_key_form';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 import { DenseVectorSeverlessCodeExamples } from '../../code_examples/create_index';

@@ -803,10 +803,6 @@ Elastic.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_api_keys/README.md[searchApiKeys]
-|The Search API Keys plugin is a shared components and utilities to simplify managing the API Keys experience for elasticsearch users across stack and serverless search solutions.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/search_assistant/README.md[searchAssistant]
 |This holds the Search AI Assistant which targets Search users and Serverless Elasticsearch.
 

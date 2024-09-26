@@ -26,7 +26,7 @@ import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
-import { ApiKeyForm } from '@kbn/search-api-keys/public';
+import { ApiKeyForm } from '@kbn/search-api-keys/components/api_key_form';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
 import { ConnectionDetails } from '../connection_details/connection_details';

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useState } from 'react';
@@ -24,7 +26,7 @@ import { useSearchApiKey, Status } from '../hooks/use_search_api_key';
 export const ApiKeyForm = () => {
   const { euiTheme } = useEuiTheme();
   const [showFlyout, setShowFlyout] = useState(false);
-  const { apiKey, status, handleSaveKey, showAPIKey } = useSearchApiKey();
+  const { apiKey, status, handleSaveKey, showAPIKey, displayedApiKey } = useSearchApiKey();
   const handleAddToClipboard = useCallback(
     () => apiKey && navigator.clipboard.writeText(apiKey),
     [apiKey]
@@ -57,35 +59,31 @@ export const ApiKeyForm = () => {
               css={{ color: euiTheme.colors.successText }}
               data-test-subj="apiKeyFormAPIKey"
             >
-              {apiKey}
+              {displayedApiKey}
             </EuiCode>
           </EuiFlexItem>
-          {status === Status.showPreviewKey && (
-            <EuiFlexItem grow={0}>
-              <EuiButtonIcon
-                iconType="copy"
-                color="success"
-                onClick={handleAddToClipboard}
-                data-test-subj="apiKeyFormAPIKeyCopyButton"
-                aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.copyButton', {
-                  defaultMessage: 'Copy button',
-                })}
-              />
-            </EuiFlexItem>
-          )}
-          {status === Status.showHiddenKey && (
-            <EuiFlexItem grow={0}>
-              <EuiButtonIcon
-                iconType="eye"
-                color="success"
-                onClick={showAPIKey}
-                data-test-subj="showAPIKeyButton"
-                aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.showApiKey', {
-                  defaultMessage: 'Show API Key',
-                })}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={0}>
+            <EuiButtonIcon
+              iconType="eye"
+              color="success"
+              onClick={showAPIKey}
+              data-test-subj="showAPIKeyButton"
+              aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.showApiKey', {
+                defaultMessage: 'Show API Key',
+              })}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={0}>
+            <EuiButtonIcon
+              iconType="copy"
+              color="success"
+              onClick={handleAddToClipboard}
+              data-test-subj="apiKeyFormAPIKeyCopyButton"
+              aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.copyButton', {
+                defaultMessage: 'Copy button',
+              })}
+            />
+          </EuiFlexItem>
         </>
       )}
       {status === Status.showCreateButton && (
