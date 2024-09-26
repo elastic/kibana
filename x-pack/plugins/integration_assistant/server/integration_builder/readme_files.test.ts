@@ -146,4 +146,38 @@ describe('createReadme', () => {
       expect.stringContaining('{{fields "data_stream_1"}}')
     );
   });
+
+  it('Should render a formatted table per datastream with fields mapping in package readme', async () => {
+    const fields = [
+      {
+        datastream: 'data_stream_1',
+        fields: [
+          {
+            name: 'data_stream.type',
+            type: 'constant_keyword',
+            description: 'Data stream type.\n',
+          },
+          {
+            name: 'data_stream.dataset',
+            type: 'constant_keyword',
+          },
+        ],
+      },
+    ];
+
+    createReadme(integrationPath, testIntegration.name, fields);
+
+    const firstDatastreamFieldsDisplayed = `
+| Field | Description | Type |
+|---|---|---|
+| data_stream.type | Data stream type. | constant_keyword |
+| data_stream.dataset |  | constant_keyword |
+`;
+
+    expect(createSync).toHaveBeenCalledWith(
+      `${integrationPath}/docs/README.md`,
+      expect.stringContaining(firstDatastreamFieldsDisplayed)
+    );
+  });
+
 });
