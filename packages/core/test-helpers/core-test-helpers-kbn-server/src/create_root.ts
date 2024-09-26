@@ -149,6 +149,7 @@ export function createRootWithCorePlugins(
         console: { type: 'console', layout: { type: 'pattern' } },
       },
     },
+    server: { restrictInternalApis: true },
     // createRootWithSettings sets default value to "true", so undefined should be threatened as "true".
     ...(cliArgs.oss === false
       ? {

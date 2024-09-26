@@ -29,6 +29,7 @@ describe('PUT /internal/core/_settings', () => {
       logging: {
         loggers: [{ name: loggerName, level: 'error', appenders: ['console'] }],
       },
+      server: { restrictInternalApis: false },
     };
     const { startES, startKibana } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -57,7 +58,6 @@ describe('PUT /internal/core/_settings', () => {
     await request
       .put(root, '/internal/core/_settings')
       .set('Elastic-Api-Version', '1')
-      .set('x-elastic-internal-origin', 'kibana')
       .send({ 'logging.loggers': [{ name: loggerName, level: 'debug', appenders: ['console'] }] })
       .expect(200);
     expect(logger.isLevelEnabled('info')).toBe(true);
@@ -69,7 +69,6 @@ describe('PUT /internal/core/_settings', () => {
     await request
       .put(root, '/internal/core/_settings')
       .set('Elastic-Api-Version', '1')
-      .set('x-elastic-internal-origin', 'kibana')
       .send({ 'logging.loggers': null })
       .expect(200);
     expect(logger.isLevelEnabled('info')).toBe(false);
@@ -83,6 +82,9 @@ describe('checking all opted-in dynamic config settings', () => {
     const settings = {
       logging: {
         loggers: [{ name: 'root', level: 'info', appenders: ['console'] }],
+      },
+      server: {
+        restrictInternalApis: false,
       },
     };
 
