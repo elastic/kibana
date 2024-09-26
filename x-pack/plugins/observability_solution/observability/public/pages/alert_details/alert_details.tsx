@@ -23,7 +23,6 @@ import {
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_UNTRACKED,
-  ALERT_GROUP,
 } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -31,7 +30,6 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
-import type { Group } from '../../../common/typings';
 import { observabilityFeatureId } from '../../../common';
 import { RelatedAlerts } from './components/related_alerts';
 import { useKibana } from '../../utils/kibana_react';
@@ -98,6 +96,7 @@ export function AlertDetails() {
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
 
+  const [relatedAlertsKuery, setRelatedAlertsKuery] = useState<string>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
     const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
@@ -213,6 +212,7 @@ export function AlertDetails() {
               rule={rule}
               timeZone={timeZone}
               setAlertSummaryFields={setSummaryFields}
+              setRelatedAlertsKuery={setRelatedAlertsKuery}
             />
             <EuiSpacer size="l" />
             <AlertHistoryChart
@@ -258,21 +258,18 @@ export function AlertDetails() {
       'data-test-subj': 'metadataTab',
       content: metadataTab,
     },
-    {
+  ];
+
+  if (relatedAlertsKuery && alertDetail?.formatted) {
+    tabs.push({
       id: RELATED_ALERTS_TAB_ID,
       name: i18n.translate('xpack.observability.alertDetails.tab.relatedAlertsLabel', {
         defaultMessage: 'Related Alerts',
       }),
       'data-test-subj': 'relatedAlertsTab',
-      content: (
-        <RelatedAlerts
-          alert={alertDetail?.formatted}
-          tags={alertDetail?.formatted.fields.tags}
-          groups={alertDetail?.formatted.fields[ALERT_GROUP] as Group[]}
-        />
-      ),
-    },
-  ];
+      content: <RelatedAlerts alert={alertDetail.formatted} kuery={relatedAlertsKuery} />,
+    });
+  }
 
   return (
     <ObservabilityPageTemplate
