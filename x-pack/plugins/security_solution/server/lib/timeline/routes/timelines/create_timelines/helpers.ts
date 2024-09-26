@@ -21,7 +21,7 @@ interface CreateTimelineProps {
   overrideNotesOwner?: boolean;
   pinnedEventIds?: string[] | null;
   notes?: Note[];
-  existingNoteIds?: string[];
+  existingNoteIds?: string[] | null;
   isImmutable?: boolean;
 }
 
