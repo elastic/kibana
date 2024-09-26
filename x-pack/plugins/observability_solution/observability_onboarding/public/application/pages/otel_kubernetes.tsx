@@ -19,13 +19,14 @@ export const OtelKubernetesPage = () => (
         headlineCopy={i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otelKubernetes.text',
           {
-            defaultMessage: 'OpenTelemetry for Kubernetes monitoring',
+            defaultMessage: 'Unified Kubernetes Observability with OpenTelemetry',
           }
         )}
         captionCopy={i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otelKubernetes.caption.description',
           {
-            defaultMessage: 'Monitor your Kubernetes cluster using OpenTelemetry',
+            defaultMessage:
+              'Efficiently monitor Kubernetes infrastructure and applications with the OpenTelemetry Operator',
           }
         )}
       />

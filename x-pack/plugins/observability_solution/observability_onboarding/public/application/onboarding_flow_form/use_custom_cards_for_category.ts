@@ -158,8 +158,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
-        otelKubernetesCard,
-        toFeaturedCard('docker'),
+        isServerless ? toFeaturedCard('docker') : otelKubernetesCard,
         otelLogsCard,
         {
           id: 'azure-virtual',

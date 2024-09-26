@@ -26,7 +26,9 @@ export const KubernetesPanel: React.FC = () => {
   const [windowLostFocus, setWindowLostFocus] = useState(false);
   const { data, status, error, refetch } = useFetcher(
     (callApi) => {
-      return callApi('POST /internal/observability_onboarding/kubernetes/flow');
+      return callApi('POST /internal/observability_onboarding/kubernetes/flow', {
+        params: { body: { pkgName: 'kubernetes' } },
+      });
     },
     [],
     { showToastOnError: false }
