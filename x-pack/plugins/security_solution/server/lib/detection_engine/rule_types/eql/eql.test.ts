@@ -183,6 +183,7 @@ describe('eql_executor', () => {
         exceptionFilter: undefined,
         unprocessedExceptions: [],
         wrapSuppressedHits: jest.fn(),
+        wrapSuppressedSequences: jest.fn(),
         alertTimestampOverride: undefined,
         alertWithSuppression: jest.fn(),
         isAlertSuppressionActive: false,

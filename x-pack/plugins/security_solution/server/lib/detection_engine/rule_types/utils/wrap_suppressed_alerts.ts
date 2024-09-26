@@ -171,20 +171,21 @@ export const wrapSuppressedSequenceAlerts = ({
       // after creating the shell alert later on
       // since that's when the group ID is determined.
       const baseAlerts = sequence.events.map((event) =>
-        buildBulkBody(
+        transformHitToAlert({
           spaceId,
           completeRule,
-          event,
+          doc: event,
           mergeStrategy,
-          [],
-          true,
+          ignoreFields: {},
+          ignoreFieldsRegexes: [],
+          applyOverrides: true,
           buildReasonMessage,
           indicesToQuery,
           alertTimestampOverride,
           ruleExecutionLogger,
-          'placeholder-alert-uuid', // This is overriden below
-          publicBaseUrl
-        )
+          alertUuid: 'placeholder-alert-uuid', // This is overriden below,
+          publicBaseUrl,
+        })
       );
 
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
