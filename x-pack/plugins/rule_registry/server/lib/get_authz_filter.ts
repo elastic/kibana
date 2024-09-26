@@ -19,8 +19,7 @@ import {
 
 export async function getAuthzFilter(
   authorization: PublicMethodsOf<AlertingAuthorization>,
-  operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
-  ruleTypeIds?: string[]
+  operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find
 ) {
   const { filter } = await authorization.getAuthorizationFilter({
     authorizationEntity: AlertingAuthorizationEntity.Alert,
@@ -29,7 +28,6 @@ export async function getAuthzFilter(
       fieldNames: { consumer: ALERT_RULE_CONSUMER, ruleTypeId: ALERT_RULE_TYPE_ID },
     },
     operation,
-    ruleTypeIds,
   });
   return filter;
 }

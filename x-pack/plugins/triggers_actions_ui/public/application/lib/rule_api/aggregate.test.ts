@@ -324,4 +324,38 @@ describe('loadRuleAggregations', () => {
       ]
     `);
   });
+
+  test('should call aggregate API with ruleTypeIds', async () => {
+    const resolvedValue = {
+      rule_execution_status: {
+        ok: 4,
+        active: 2,
+        error: 1,
+        pending: 1,
+        unknown: 0,
+      },
+    };
+
+    http.post.mockResolvedValueOnce(resolvedValue);
+
+    const result = await loadRuleAggregations({ http, ruleTypeIds: ['foo'] });
+    expect(result).toEqual({
+      ruleExecutionStatus: {
+        ok: 4,
+        active: 2,
+        error: 1,
+        pending: 1,
+        unknown: 0,
+      },
+    });
+
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/alerting/rules/_aggregate",
+        Object {
+          "body": "{\\"default_search_operator\\":\\"AND\\",\\"rule_type_ids\\":[\\"foo\\"]}",
+        },
+      ]
+    `);
+  });
 });

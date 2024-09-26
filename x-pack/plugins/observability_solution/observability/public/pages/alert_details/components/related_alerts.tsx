@@ -8,11 +8,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import { ALERT_END, ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_END,
+  ALERT_START,
+  ALERT_UUID,
+  OBSERVABILITY_RULE_TYPE_IDS,
+} from '@kbn/rule-data-utils';
 import { BoolQuery, Filter, type Query } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
-import { observabilityAlertFeatureIds } from '../../../../common/constants';
 import { TopAlert } from '../../..';
 import {
   AlertSearchBarContainerState,
@@ -100,7 +104,7 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
       <EuiFlexItem>
         {esQuery && (
           <AlertsGrouping<AlertsByGroupingAgg>
-            featureIds={observabilityAlertFeatureIds}
+            ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
             defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS}
             from={alertSearchBarStateProps.rangeFrom}
             to={alertSearchBarStateProps.rangeTo}
@@ -124,7 +128,7 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
               return (
                 <AlertsStateTable
                   id={ALERTS_TABLE_ID}
-                  featureIds={observabilityAlertFeatureIds}
+                  ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
                   configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                   query={mergeBoolQueries(esQuery, groupQuery)}
                   showAlertStatusWithFlapping

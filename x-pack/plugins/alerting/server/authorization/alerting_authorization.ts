@@ -62,7 +62,6 @@ interface GetAuthorizationFilterParams {
   authorizationEntity: AlertingAuthorizationEntity;
   filterOpts: AlertingAuthorizationFilterOpts;
   operation: WriteOperations | ReadOperations;
-  ruleTypeIds?: string[];
 }
 
 interface GetAuthorizedRuleTypesWithAuthorizedConsumersParams {
@@ -79,7 +78,6 @@ interface GetAllAuthorizedRuleTypesFindOperationParams {
 interface GetFindAuthorizationFilterParams {
   authorizationEntity: AlertingAuthorizationEntity;
   filterOpts: AlertingAuthorizationFilterOpts;
-  ruleTypeIds?: string[];
 }
 
 interface GetAuthorizedRuleTypesParams {
@@ -271,7 +269,6 @@ export class AlertingAuthorization {
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
   }> {
     return this.getAuthorizationFilter({
-      ruleTypeIds: params.ruleTypeIds,
       operation: ReadOperations.Find,
       authorizationEntity: params.authorizationEntity,
       filterOpts: params.filterOpts,
@@ -296,7 +293,6 @@ export class AlertingAuthorization {
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
       const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers({
-        ruleTypeIds: params.ruleTypeIds,
         operations: [params.operation],
         authorizationEntity: params.authorizationEntity,
       });

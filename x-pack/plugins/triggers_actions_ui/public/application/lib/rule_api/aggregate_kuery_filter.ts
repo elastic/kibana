@@ -21,7 +21,7 @@ export async function loadRuleAggregationsWithKueryFilter({
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
-  filterConsumers,
+  ruleTypeIds,
 }: LoadRuleAggregationsProps): Promise<AggregateRulesResponse> {
   const filtersKueryNode = mapFiltersToKueryNode({
     typesFilter,
@@ -37,7 +37,7 @@ export async function loadRuleAggregationsWithKueryFilter({
     {
       body: JSON.stringify({
         ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
-        filter_consumers: filterConsumers,
+        rule_type_ids: ruleTypeIds,
         default_search_operator: 'AND',
       }),
     }

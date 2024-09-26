@@ -67,7 +67,7 @@ export interface LoadRuleAggregationsProps {
   ruleLastRunOutcomesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
   tagsFilter?: string[];
-  filterConsumers?: string[];
+  ruleTypeIds?: string[];
 }
 
 export interface LoadRuleTagsProps {

@@ -28,10 +28,12 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
     });
   };
 
-  describe('aggregate post', () => {
+  describe('aggregate', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     it('should aggregate when there are no alerts', async () => {
       const response = await supertest
@@ -148,6 +150,94 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           rule_muted_status: {
             muted: 0,
             unmuted: 7,
+          },
+          rule_snoozed_status: {
+            snoozed: 0,
+          },
+          rule_tags: ['foo'],
+        });
+      });
+    });
+
+    it('should aggregate only filtered rules', async () => {
+      const NumOkAlerts = 4;
+      const NumActiveAlerts = 1;
+      const NumErrorAlerts = 2;
+
+      const okAlertIds: string[] = [];
+      const activeAlertIds: string[] = [];
+      const errorAlertIds: string[] = [];
+
+      await Promise.all(
+        [...Array(NumOkAlerts)].map(async () => {
+          const okAlertId = await createTestAlert({
+            rule_type_id: 'test.noop',
+            schedule: { interval: '24h' },
+          });
+          okAlertIds.push(okAlertId);
+          objectRemover.add(Spaces.space1.id, okAlertId, 'rule', 'alerting');
+        })
+      );
+
+      await Promise.all(okAlertIds.map((id) => getEventLogWithRetry(id)));
+
+      await Promise.all(
+        [...Array(NumActiveAlerts)].map(async () => {
+          const activeAlertId = await createTestAlert({
+            rule_type_id: 'test.patternFiring',
+            schedule: { interval: '24h' },
+            params: {
+              pattern: { instance: new Array(100).fill(true) },
+            },
+          });
+          activeAlertIds.push(activeAlertId);
+          objectRemover.add(Spaces.space1.id, activeAlertId, 'rule', 'alerting');
+        })
+      );
+
+      await Promise.all(activeAlertIds.map((id) => getEventLogWithRetry(id)));
+
+      await Promise.all(
+        [...Array(NumErrorAlerts)].map(async () => {
+          const errorAlertId = await createTestAlert({
+            rule_type_id: 'test.throw',
+            schedule: { interval: '24h' },
+          });
+          errorAlertIds.push(errorAlertId);
+          objectRemover.add(Spaces.space1.id, errorAlertId, 'rule', 'alerting');
+        })
+      );
+
+      await Promise.all(errorAlertIds.map((id) => getEventLogWithRetry(id)));
+
+      await retry.try(async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`)
+          .set('kbn-xsrf', 'foo')
+          .send({ rule_type_ids: ['test.noop'] });
+
+        expect(response.status).to.eql(200);
+        expect(response.body).to.eql({
+          rule_enabled_status: {
+            disabled: 0,
+            enabled: 4,
+          },
+          rule_execution_status: {
+            ok: NumOkAlerts,
+            active: 0,
+            error: 0,
+            pending: 0,
+            unknown: 0,
+            warning: 0,
+          },
+          rule_last_run_outcome: {
+            succeeded: 4,
+            warning: 0,
+            failed: 0,
+          },
+          rule_muted_status: {
+            muted: 0,
+            unmuted: 4,
           },
           rule_snoozed_status: {
             snoozed: 0,

@@ -73,6 +73,7 @@ describe('useLoadRuleAggregations', () => {
       },
       enabled: true,
       refresh: undefined,
+      ruleTypeIds: [],
     };
 
     const { rerender, result, waitForNextUpdate } = renderHook(
@@ -94,6 +95,7 @@ describe('useLoadRuleAggregations', () => {
         ruleLastRunOutcomesFilter: [],
         ruleStatusesFilter: [],
         tagsFilter: [],
+        ruleTypeIds: [],
       })
     );
     expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
@@ -113,6 +115,7 @@ describe('useLoadRuleAggregations', () => {
       },
       enabled: true,
       refresh: undefined,
+      ruleTypeIds: ['foo'],
     };
 
     const { rerender, result, waitForNextUpdate } = renderHook(
@@ -134,6 +137,7 @@ describe('useLoadRuleAggregations', () => {
         ruleStatusesFilter: ['enabled', 'snoozed'] as RuleStatus[],
         tagsFilter: ['tag1', 'tag2'],
         ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
+        ruleTypeIds: ['foo'],
       })
     );
     expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
