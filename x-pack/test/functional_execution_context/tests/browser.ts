@@ -175,9 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
             await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-              predicate: checkHttpRequestId(
-                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsXY:086ac2e9-dd16-4b45-92b8-1e43ff7e3f65'
-              ),
+              predicate: checkHttpRequestId('lens:lnsXY:086ac2e9-dd16-4b45-92b8-1e43ff7e3f65'),
             });
           });
 
@@ -207,9 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
             await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-              predicate: checkHttpRequestId(
-                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'
-              ),
+              predicate: checkHttpRequestId('lens:lnsMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'),
             });
           });
 
@@ -240,7 +236,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
               predicate: checkHttpRequestId(
-                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsDatatable:fb86b32f-fb7a-45cf-9511-f366fef51bbd'
+                'lens:lnsDatatable:fb86b32f-fb7a-45cf-9511-f366fef51bbd'
               ),
             });
           });
@@ -271,9 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
             await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-              predicate: checkHttpRequestId(
-                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsPie:5d53db36-2d5a-4adc-af7b-cec4c1a294e0'
-              ),
+              predicate: checkHttpRequestId('lens:lnsPie:5d53db36-2d5a-4adc-af7b-cec4c1a294e0'),
             });
           });
 
@@ -304,9 +298,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await logContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: checkHttpRequestId(
-              'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;search:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'
-            ),
+            predicate: checkHttpRequestId('search:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'),
           });
         });
 
