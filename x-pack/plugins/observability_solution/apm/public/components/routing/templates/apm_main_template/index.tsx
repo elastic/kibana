@@ -163,13 +163,13 @@ export function ApmMainTemplate({
     </EuiFlexGroup>
   );
 
-  const [dismissedInventoryCallout, setDismissedInventoryCallout] = useLocalStorage(
-    `apm.dismissedInventoryCallout`,
+  const [dismissedEntitiesInventoryCallout, setdismissedEntitiesInventoryCallout] = useLocalStorage(
+    `apm.dismissedEntitiesInventoryCallout`,
     false
   );
 
   const showInventoryCallout =
-    !dismissedInventoryCallout &&
+    !dismissedEntitiesInventoryCallout &&
     isEntityCentricExperienceSettingEnabled &&
     selectedNavButton === 'allServices';
 
@@ -192,7 +192,7 @@ export function ApmMainTemplate({
               {showInventoryCallout ? (
                 <InventoryCallout
                   onDissmiss={() => {
-                    setDismissedInventoryCallout(true);
+                    setdismissedEntitiesInventoryCallout(true);
                   }}
                 />
               ) : null}
