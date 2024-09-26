@@ -1,5 +1,5 @@
 [[breaking-changes-summary]]
-== Upgrade Notes
+== Upgrade notes
 
 This page summarizes all breaking changes and deprecation notices introduced to {kib} version 8 since 8.0. Review these changes before upgrading Kibana to mitigate the impact to your application.
 
@@ -65,7 +65,7 @@ These functions have been removed from {esql} queries as they are not supported.
 [%collapsible]
 ====
 *Details* +
-We introduce a breaking change in the SLO features that will break any SLOs created before 8.12. These SLOs have to be manually reset through an API until we provide a UI for it. The data aggregated over time (rollup) is still available in the sli v2 index, but won't be used for summary calculation when reset.
+We introduced a breaking change in the SLO features that will break any SLOs created before 8.12. These SLOs have to be manually reset through an API until we provide a UI for it. The data aggregated over time (rollup) is still available in the SLI v2 index, but won't be used for summary calculation when reset.
 
 The previous summary transforms summarizing every SLOs won't be used anymore and can be stopped and deleted:
 
@@ -120,7 +120,6 @@ This updates all instances of vulnerability.package to the ECS standard package 
 [%collapsible]
 ====
 *Details* +
-New summary search capabilities introduce breaking changes in various places, and we have decided not to handle backward compatibility:
 
 * SLO find API body parameters have changed.
 * The index mapping used by the rollup data has changed, and we have added a summary index that becomes the new source of truth for search.
@@ -130,7 +129,7 @@ If some SLOs have been installed in a prior version at 8.10, they won't work aft
 
 *Removing SLOs before migrating to 8.10*
 
-Use the SLO UI or the SLO delete API to delete all existing SLOs. This takes care of the Saved Object, Transform and rollup data. When all SLOs have been deleted, then delete the residual rollup indices: `.slo-observability.sli-v1*`. Note that this is v1.
+Use the SLO UI or the SLO delete API to delete all existing SLOs. This takes care of the saved object, transform and rollup data. When all SLOs have been deleted, then delete the residual rollup indices: `.slo-observability.sli-v1*`. Note that this is v1.
 
 *Removing SLOs after migrating to 8.10*
 
@@ -627,7 +626,7 @@ To authenticate interactive users via a web browser, use <<kibana-authentication
 Removes the `apm_user` role. For more information, check {kibana-pull}132790[#132790].
 
 *Impact* +
-The `apm_user`role is replaced with the `viewer` and `editor` built-in roles.
+The `apm_user` role is replaced with the `viewer` and `editor` built-in roles.
 ====
 
 [discrete]
