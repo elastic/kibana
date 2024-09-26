@@ -969,8 +969,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
             break;
 
           case 'kill-process':
-            {
-              const responseDocsForKillProcess = await this.checkPendingKillProcessActions(
+            addResponsesToQueueIfAny(
+              await this.checkPendingKillProcessActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<
                     ResponseActionParametersWithProcessName,
@@ -978,11 +978,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
                     SentinelOneKillProcessRequestMeta
                   >
                 >
-              );
-              if (responseDocsForKillProcess.length) {
-                addToQueue(...responseDocsForKillProcess);
-              }
-            }
+              )
+            );
             break;
         }
       }
