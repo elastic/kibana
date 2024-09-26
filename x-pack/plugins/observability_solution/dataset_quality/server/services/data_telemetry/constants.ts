@@ -12,7 +12,7 @@ import { DatasetIndexPattern } from './types';
 export const LOGS_DATA_TELEMETRY_TASK_TYPE = 'logs-data-telemetry';
 export const LOGS_DATA_TELEMETRY_TASK_ID = 'logs-data-telemetry:collect-and-report-task';
 
-export const TELEMETRY_TASK_INTERVAL = 24 * 60; // 24 hours (in minutes)
+export const TELEMETRY_TASK_INTERVAL = 60; // Every hours
 export const TELEMETRY_TASK_TIMEOUT = 10; // 10 minutes
 
 export const BREATHE_DELAY_SHORT = 1000; // 1 seconds

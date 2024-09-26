@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import os from 'os';
+
 import {
   from,
   defer,
@@ -160,6 +162,12 @@ export class DataTelemetryService {
               const { state } = taskInstance;
               let data = state?.data ?? null;
 
+              const startTime = performance.now();
+              const startMemory = process.memoryUsage().heapUsed;
+              const startCpuUsage = process.cpuUsage();
+              const totalMemory = os.totalmem();
+              service.logger.info(`[Logs Data Telemetry] Task started with`);
+
               try {
                 data = await firstValueFrom(service.run$);
               } catch (e) {
@@ -169,6 +177,23 @@ export class DataTelemetryService {
                   service.logger.error(e);
                 }
               }
+
+              const endTime = performance.now();
+              const endMemory = process.memoryUsage().heapUsed;
+              const endCpuUsage = process.cpuUsage(startCpuUsage);
+
+              const duration = endTime - startTime;
+              const memoryUsed = startMemory - endMemory;
+              const memoryUsedPercentage = (memoryUsed / totalMemory) * 100;
+              const cpuUsedPercentage =
+                ((endCpuUsage.user + endCpuUsage.system) / (duration * 1000)) * 100;
+              const dataSize = data ? JSON.stringify(data).length : 0;
+
+              service.logger.info(
+                `[Logs Data Telemetry] Task completed in ${duration}ms, memory used: ${memoryUsed} bytes (${memoryUsedPercentage.toFixed(
+                  2
+                )}%), CPU used: ${cpuUsedPercentage.toFixed(2)}%, data size: ${dataSize} bytes`
+              );
 
               return {
                 state: { ran: true, data },
