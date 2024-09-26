@@ -1003,4 +1003,69 @@ describe('solution navigations', () => {
       expect(activeSolution).toEqual(solution1);
     }
   });
+
+  it('should set and return the nav panel selected node', async () => {
+    const { projectNavigation } = setup({ navLinkIds: ['link1', 'link2', 'link3'] });
+
+    {
+      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
+      expect(selectedNode).toBeNull();
+    }
+
+    {
+      const node: ChromeProjectNavigationNode = {
+        id: 'node1',
+        title: 'Node 1',
+        path: 'node1',
+      };
+      projectNavigation.setPanelSelectedNode(node);
+
+      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
+
+      expect(selectedNode).toBe(node);
+    }
+
+    {
+      const fooSolution: SolutionNavigationDefinition<any> = {
+        id: 'fooSolution',
+        title: 'Foo solution',
+        icon: 'logoSolution',
+        homePage: 'discover',
+        navigationTree$: of({
+          body: [
+            {
+              type: 'navGroup',
+              id: 'group1',
+              children: [
+                { link: 'link1' },
+                {
+                  id: 'group2',
+                  children: [
+                    {
+                      link: 'link2', // We'll target this node using its id
+                    },
+                  ],
+                },
+                { link: 'link3' },
+              ],
+            },
+          ],
+        }),
+      };
+
+      projectNavigation.changeActiveSolutionNavigation('foo');
+      projectNavigation.updateSolutionNavigations({ foo: fooSolution });
+
+      projectNavigation.setPanelSelectedNode('link2'); // Set the selected node using its id
+
+      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
+
+      expect(selectedNode).toMatchObject({
+        id: 'link2',
+        href: '/app/link2',
+        path: 'group1.group2.link2',
+        title: 'LINK2',
+      });
+    }
+  });
 });

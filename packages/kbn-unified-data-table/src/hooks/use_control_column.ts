@@ -16,14 +16,14 @@ export const useControlColumn = ({
   rowIndex,
   setCellProps,
 }: Pick<EuiDataGridCellValueElementProps, 'rowIndex' | 'setCellProps'>): {
-  record: DataTableRecord;
+  record?: DataTableRecord;
   rowIndex: number;
 } => {
-  const { expanded, rows } = useContext(UnifiedDataTableContext);
-  const record = useMemo(() => rows[rowIndex], [rows, rowIndex]);
+  const { expanded, getRowByIndex } = useContext(UnifiedDataTableContext);
+  const record = useMemo(() => getRowByIndex(rowIndex), [getRowByIndex, rowIndex]);
 
   useEffect(() => {
-    if (record.isAnchor) {
+    if (record?.isAnchor) {
       setCellProps({
         className: 'unifiedDataTable__cell--highlight',
       });
