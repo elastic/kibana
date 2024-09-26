@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      // await slo.deleteAllSLOs();
+      await slo.deleteAllSLOs();
     });
 
     after(async () => {
