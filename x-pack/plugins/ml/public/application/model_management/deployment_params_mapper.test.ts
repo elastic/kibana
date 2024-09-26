@@ -44,7 +44,7 @@ describe('DeploymentParamsMapper', () => {
 
       it('should get correct VCU levels', () => {
         expect(mapper.getVCURange('low')).toEqual({
-          min: 0,
+          min: 8,
           max: 16,
           static: 16,
         });
@@ -72,7 +72,7 @@ describe('DeploymentParamsMapper', () => {
           adaptive_allocations: {
             enabled: true,
             max_number_of_allocations: 1,
-            min_number_of_allocations: 0,
+            min_number_of_allocations: 1,
           },
           deployment_id: 'test-deployment',
           model_id: 'test-model',
@@ -91,7 +91,7 @@ describe('DeploymentParamsMapper', () => {
           adaptive_allocations: {
             enabled: true,
             max_number_of_allocations: 2,
-            min_number_of_allocations: 0,
+            min_number_of_allocations: 1,
           },
           deployment_id: 'test-deployment',
           model_id: 'test-model',
@@ -117,7 +117,7 @@ describe('DeploymentParamsMapper', () => {
       });
 
       it('should provide vCPU level', () => {
-        expect(mapper.getVCPURange('low')).toEqual({ min: 0, max: 2, static: 2 });
+        expect(mapper.getVCPURange('low')).toEqual({ min: 1, max: 2, static: 2 });
         expect(mapper.getVCPURange('medium')).toEqual({ min: 3, max: 16, static: 16 });
         expect(mapper.getVCPURange('high')).toEqual({ min: 17, max: 32, static: 32 });
       });
@@ -242,7 +242,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 2,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 0,
+            min_number_of_allocations: 1,
             max_number_of_allocations: 1,
           },
         });
@@ -468,7 +468,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 2,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 0,
+            min_number_of_allocations: 1,
             max_number_of_allocations: 1,
           },
         });
@@ -525,7 +525,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 1,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 0,
+            min_number_of_allocations: 1,
             max_number_of_allocations: 2,
           },
         });

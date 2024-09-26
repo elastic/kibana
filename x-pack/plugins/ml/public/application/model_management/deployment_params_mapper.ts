@@ -17,7 +17,8 @@ export type MlStartTrainedModelDeploymentRequestNew = MlStartTrainedModelDeploym
 
 const THREADS_MAX_EXPONENT = 5;
 
-const MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS = 0;
+// TODO set to 0 when https://github.com/elastic/elasticsearch/pull/113455 is merged
+const MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS = 1;
 
 type VCPUBreakpoints = Record<
   DeploymentParamsUI['vCPUUsage'],
@@ -41,7 +42,7 @@ export class DeploymentParamsMapper {
    * vCPUs level breakpoints for cloud cluster with enabled ML autoscaling
    */
   private readonly autoscalingVCPUBreakpoints: VCPUBreakpoints = {
-    low: { min: 0, max: 2, static: 2 },
+    low: { min: MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS, max: 2, static: 2 },
     medium: { min: 3, max: 32, static: 32 },
     high: { min: 33, max: 99999, static: 100 },
   };
@@ -50,7 +51,7 @@ export class DeploymentParamsMapper {
    * vCPUs level breakpoints for serverless projects
    */
   private readonly serverlessVCPUBreakpoints: VCPUBreakpoints = {
-    low: { min: 0, max: 2, static: 2 },
+    low: { min: MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS, max: 2, static: 2 },
     medium: { min: 3, max: 32, static: 32 },
     high: { min: 33, max: 500, static: 100 },
   };
@@ -82,7 +83,7 @@ export class DeploymentParamsMapper {
     const mediumValue = this.mlServerLimits!.total_ml_processors! / 2;
 
     this.hardwareVCPUBreakpoints = {
-      low: { min: 0, max: 2, static: 2 },
+      low: { min: MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS, max: 2, static: 2 },
       medium: { min: Math.min(3, mediumValue), max: mediumValue, static: mediumValue },
       high: {
         min: mediumValue + 1,
