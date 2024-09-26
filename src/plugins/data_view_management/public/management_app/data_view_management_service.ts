@@ -24,6 +24,7 @@ import {
   INDEX_PATTERN_TYPE,
   DataViewField,
   DataViewLazy,
+  DataView,
 } from '@kbn/data-views-plugin/public';
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -76,6 +77,7 @@ export interface DataViewMgmtServiceConstructorArgs {
 
 export interface DataViewMgmtState {
   dataView?: DataViewLazy;
+  dataViewExternal?: DataView;
   allowedTypes: SavedObjectManagementTypeInfo[];
   relationships: SavedObjectRelationWithTitle[];
   fields: DataViewField[];
@@ -204,9 +206,11 @@ export class DataViewMgmtService {
     }
   }
 
-  async setDataView(dataView: DataViewLazy) {
+  async setDataView(dataViewId: string) {
     this.updateState({ isRefreshing: true });
     // todo this should probably load the data view here
+    const dataView = await this.services.dataViews.getDataViewLazy(dataViewId);
+    const dataViewLegacy = await this.services.dataViews.get(dataViewId);
     const fieldRecords = (
       await dataView.getFields({ scripted: false, fieldName: ['*'] })
     ).getFieldMapSorted();
@@ -236,6 +240,7 @@ export class DataViewMgmtService {
 
     this.updateState({
       dataView,
+      dataViewExternal: dataViewLegacy,
       fields,
       indexedFieldTypes: Array.from(indexedFieldTypes),
       fieldConflictCount: fields.filter((field) => field.type === 'conflict').length,
@@ -250,9 +255,9 @@ export class DataViewMgmtService {
 
   async refreshFields() {
     const dataView = this.state$.getValue().dataView;
-    if (dataView) {
+    if (dataView?.id) {
       // await this.services.dataViews.refreshFields(dataView, undefined, true);
-      return this.setDataView(dataView);
+      return this.setDataView(dataView.id);
     }
   }
 

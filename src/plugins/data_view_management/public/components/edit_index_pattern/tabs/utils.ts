@@ -77,16 +77,13 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
 
 export function getTabs(
   indexPattern: DataView,
+  fields: DataViewField[],
   fieldFilter: string,
   relationshipCount = 0,
   scriptedFieldsEnabled: boolean
 ) {
-  const totalCount = getCounts(indexPattern.fields.getAll(), indexPattern.getSourceFiltering());
-  const filteredCount = getCounts(
-    indexPattern.fields.getAll(),
-    indexPattern.getSourceFiltering(),
-    fieldFilter
-  );
+  const totalCount = getCounts(iields, indexPattern.getSourceFiltering());
+  const filteredCount = getCounts(fields, indexPattern.getSourceFiltering(), fieldFilter);
 
   const tabs = [];
 
