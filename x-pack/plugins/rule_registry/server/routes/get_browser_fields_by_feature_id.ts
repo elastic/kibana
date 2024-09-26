@@ -27,6 +27,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         ),
       },
       options: {
+        access: 'internal',
         tags: ['access:rac'],
       },
     },
