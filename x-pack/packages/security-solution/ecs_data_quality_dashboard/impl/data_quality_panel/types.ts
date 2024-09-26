@@ -333,3 +333,8 @@ export interface StorageResult {
   indexId: string;
   error: string | null;
 }
+
+export interface HistoricalResult extends StorageResult {
+  '@timestamp': number;
+  checkedBy: string;
+}

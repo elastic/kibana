@@ -40,7 +40,7 @@ import {
   getEscapedSameFamilyFields,
 } from './utils/metadata';
 import { UseResultsRollupReturnValue } from './types';
-import { useIsMounted } from '../use_is_mounted';
+import { useIsMountedRef } from '../use_is_mounted_ref';
 import { getDocsCount, getIndexIncompatible, getSizeInBytes } from '../../utils/stats';
 import { getIlmPhase } from '../../utils/get_ilm_phase';
 
@@ -53,7 +53,7 @@ interface Props {
   isILMAvailable: boolean;
 }
 const useStoredPatternResults = (patterns: string[], toasts: IToasts, httpFetch: HttpHandler) => {
-  const { isMountedRef } = useIsMounted();
+  const { isMountedRef } = useIsMountedRef();
   const [storedPatternResults, setStoredPatternResults] = useState<
     Array<{ pattern: string; results: Record<string, DataQualityCheckResult> }>
   >([]);

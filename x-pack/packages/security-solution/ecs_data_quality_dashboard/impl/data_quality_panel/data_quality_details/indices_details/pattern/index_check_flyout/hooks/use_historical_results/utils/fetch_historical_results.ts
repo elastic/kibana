@@ -7,7 +7,7 @@
 
 import { HttpFetchQuery } from '@kbn/core-http-browser';
 
-import { StorageResult } from '../../../../../../../types';
+import { HistoricalResult } from '../../../../../../../types';
 import { INTERNAL_API_VERSION } from '../../../../../../../constants';
 import { GET_INDEX_RESULTS } from '../constants';
 import {
@@ -17,12 +17,12 @@ import {
 import { FetchHistoricalResultsOpts } from '../../../types';
 
 export interface FetchHistoricalResultsResponse {
-  data: StorageResult[];
+  data: HistoricalResult[];
   total: number;
 }
 
 export interface FetchHistoricalResultsReturnValue {
-  results: StorageResult[];
+  results: HistoricalResult[];
   total: number;
 }
 

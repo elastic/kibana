@@ -6,10 +6,10 @@
  */
 
 import { EcsFlatTyped } from '../../../../../../../../constants';
-import {
+import type {
   IncompatibleFieldMetadata,
   SameFamilyFieldMetadata,
-  StorageResult,
+  HistoricalResult,
 } from '../../../../../../../../types';
 
 interface IncompatibleAndSameFamilyFields {
@@ -19,7 +19,7 @@ interface IncompatibleAndSameFamilyFields {
 }
 
 export const getIncompatibleAndSameFamilyFieldsFromHistoricalResult = (
-  historicalResult: StorageResult
+  historicalResult: HistoricalResult
 ): IncompatibleAndSameFamilyFields => {
   const incompatibleAndSameFamilyFields: IncompatibleAndSameFamilyFields = {
     incompatibleMappingsFields: [],

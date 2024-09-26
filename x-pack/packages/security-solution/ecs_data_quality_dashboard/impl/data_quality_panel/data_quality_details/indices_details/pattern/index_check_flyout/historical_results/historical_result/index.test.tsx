@@ -4,11 +4,3 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export const getIndexPropertiesContainerId = ({
-  indexName,
-  pattern,
-}: {
-  indexName: string;
-  pattern: string;
-}): string => `index-properties-container-${pattern}${indexName}`;

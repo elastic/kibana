@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { StorageResult } from '../../../../../../types';
+import { HistoricalResult } from '../../../../../../types';
 import { FetchHistoricalResultsOpts } from '../../types';
 
 export interface UseHistoricalResultsReturnValue {
-  historicalResultsState: {
-    results: StorageResult[];
-    total: number;
-    isLoading: boolean;
-    error: Error | null;
-  };
+  historicalResultsState: FetchHistoricalResultsReducerState;
   fetchHistoricalResults: (opts: Omit<FetchHistoricalResultsOpts, 'httpFetch'>) => Promise<void>;
+}
+
+export interface FetchHistoricalResultsReducerState {
+  results: HistoricalResult[];
+  total: number;
+  isLoading: boolean;
+  error: Error | null;
 }

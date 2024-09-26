@@ -21,8 +21,9 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useRef, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
+import { useAbortControllerRef } from '../../../../hooks/use_abort_controller_ref';
 import { useIndicesCheckContext } from '../../../../contexts/indices_check_context';
 
 import { MeteringStatsIndex, PatternRollup } from '../../../../types';
@@ -78,8 +79,8 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
     prefix: 'indexCheckFlyoutTitle',
   });
   const [selectedTabId, setSelectedTabId] = useState(LATEST_CHECK);
-  const checkIndexAbortControllerRef = useRef(new AbortController());
-  const fetchHistoricalResultsAbortControllerRef = useRef(new AbortController());
+  const checkIndexAbortControllerRef = useAbortControllerRef();
+  const fetchHistoricalResultsAbortControllerRef = useAbortControllerRef();
 
   const handleCheckNow = useCallback(() => {
     checkIndex({
@@ -93,16 +94,16 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
     if (selectedTabId === HISTORY) {
       setSelectedTabId(LATEST_CHECK);
     }
-  }, [checkIndex, formatBytes, formatNumber, httpFetch, indexName, pattern, selectedTabId]);
-
-  useEffect(() => {
-    const checkIndexAbortController = checkIndexAbortControllerRef.current;
-    const fetchHistoricalResultsAbortController = fetchHistoricalResultsAbortControllerRef.current;
-    return () => {
-      checkIndexAbortController.abort();
-      fetchHistoricalResultsAbortController.abort();
-    };
-  }, []);
+  }, [
+    checkIndex,
+    checkIndexAbortControllerRef,
+    formatBytes,
+    formatNumber,
+    httpFetch,
+    indexName,
+    pattern,
+    selectedTabId,
+  ]);
 
   const renderTabs = useMemo(
     () =>
@@ -121,7 +122,7 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
           {tab.name}
         </EuiTab>
       )),
-    [fetchHistoricalResults, indexName, selectedTabId]
+    [fetchHistoricalResults, fetchHistoricalResultsAbortControllerRef, indexName, selectedTabId]
   );
 
   return (
@@ -164,7 +165,6 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
                 indexName={indexName}
                 stats={stats}
                 ilmExplain={ilmExplain}
-                pattern={pattern}
                 patternRollup={patternRollup}
               />
             ) : (

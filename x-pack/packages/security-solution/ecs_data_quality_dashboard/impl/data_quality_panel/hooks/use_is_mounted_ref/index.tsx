@@ -12,7 +12,7 @@ import { MutableRefObject, useEffect, useRef } from 'react';
  *
  * Main use case is to avoid setting state on an unmounted component.
  */
-export const useIsMounted = (): { isMountedRef: MutableRefObject<boolean> } => {
+export const useIsMountedRef = (): { isMountedRef: MutableRefObject<boolean> } => {
   const isMountedRef = useRef(true);
 
   useEffect(() => {

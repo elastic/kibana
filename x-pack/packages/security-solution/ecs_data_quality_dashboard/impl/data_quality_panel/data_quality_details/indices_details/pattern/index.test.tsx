@@ -15,7 +15,7 @@ import {
   TestExternalProviders,
 } from '../../../mock/test_providers/test_providers';
 import { Pattern } from '.';
-import { getCheckState } from '../../../stub/get_check_state';
+import { getCheckStateStub } from '../../../stub/get_check_state_stub';
 
 const indexName = 'auditbeat-custom-index-1';
 const defaultBytesFormat = '0,0.[0]b';
@@ -69,7 +69,7 @@ describe('pattern', () => {
             formatNumber,
           }}
           indicesCheckContextProps={{
-            checkState: getCheckState(indexName),
+            checkState: getCheckStateStub(indexName),
           }}
         >
           <Pattern {...defaultProps} pattern={pattern} />
@@ -92,7 +92,7 @@ describe('pattern', () => {
             formatNumber,
           }}
           indicesCheckContextProps={{
-            checkState: getCheckState(indexName),
+            checkState: getCheckStateStub(indexName),
           }}
         >
           <Pattern {...defaultProps} pattern={pattern} />

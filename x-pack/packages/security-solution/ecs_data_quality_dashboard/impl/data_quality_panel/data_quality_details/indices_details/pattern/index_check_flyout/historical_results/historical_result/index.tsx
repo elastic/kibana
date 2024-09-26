@@ -8,20 +8,27 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { StorageResult } from '../../../../../../types';
+import type { HistoricalResult as HistoricalResultType } from '../../../../../../types';
 import { IndexStatsPanel } from '../../index_stats_panel';
 import { HistoricalCheckFields } from './historical_check_fields';
 
 export interface Props {
   indexName: string;
-  historicalResult: StorageResult;
+  historicalResult: HistoricalResultType;
 }
 
 const HistoricalResultComponent: React.FC<Props> = ({ indexName, historicalResult }) => {
-  const { docsCount, sizeInBytes, ilmPhase, ecsFieldCount, totalFieldCount, customFieldCount } =
-    historicalResult;
+  const {
+    docsCount,
+    sizeInBytes,
+    ilmPhase,
+    ecsFieldCount,
+    totalFieldCount,
+    customFieldCount,
+    checkedAt,
+  } = historicalResult;
   return (
-    <div>
+    <div data-test-subj={`historicalResult-${checkedAt}`}>
       <EuiSpacer />
       <IndexStatsPanel
         docsCount={docsCount}

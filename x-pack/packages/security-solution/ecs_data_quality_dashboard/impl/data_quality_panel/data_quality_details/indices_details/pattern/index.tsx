@@ -32,6 +32,7 @@ import { getIlmExplainPhaseCounts } from './utils/ilm_explain';
 import { shouldCreateIndexNames } from './utils/should_create_index_names';
 import { shouldCreatePatternRollup } from './utils/should_create_pattern_rollup';
 import { getPageIndex } from './utils/get_page_index';
+import { useAbortControllerRef } from '../../../hooks/use_abort_controller_ref';
 
 const EMPTY_INDEX_NAMES: string[] = [];
 
@@ -60,9 +61,9 @@ const PatternComponent: React.FC<Props> = ({
   const [pageSize, setPageSize] = useState<number>(MIN_PAGE_SIZE);
   const patternComponentAccordionId = useGeneratedHtmlId({ prefix: 'patternComponentAccordion' });
   const [expandedIndexName, setExpandedIndexName] = useState<string | null>(null);
-  const flyoutIndexExpandActionAbortControllerRef = useRef(new AbortController());
-  const tableRowIndexCheckNowActionAbortControllerRef = useRef(new AbortController());
-  const flyoutIndexChartSelectedActionAbortControllerRef = useRef(new AbortController());
+  const flyoutIndexExpandActionAbortControllerRef = useAbortControllerRef();
+  const tableRowIndexCheckNowActionAbortControllerRef = useAbortControllerRef();
+  const flyoutIndexChartSelectedActionAbortControllerRef = useAbortControllerRef();
 
   const {
     error: statsError,
@@ -126,7 +127,14 @@ const PatternComponent: React.FC<Props> = ({
       });
       setExpandedIndexName(indexName);
     },
-    [checkIndex, formatBytes, formatNumber, httpFetch, pattern]
+    [
+      checkIndex,
+      flyoutIndexExpandActionAbortControllerRef,
+      formatBytes,
+      formatNumber,
+      httpFetch,
+      pattern,
+    ]
   );
 
   const handleTableRowIndexCheckNowAction = useCallback(
@@ -140,7 +148,14 @@ const PatternComponent: React.FC<Props> = ({
         formatNumber,
       });
     },
-    [checkIndex, formatBytes, formatNumber, httpFetch, pattern]
+    [
+      checkIndex,
+      formatBytes,
+      formatNumber,
+      httpFetch,
+      pattern,
+      tableRowIndexCheckNowActionAbortControllerRef,
+    ]
   );
 
   useEffect(() => {
@@ -242,21 +257,8 @@ const PatternComponent: React.FC<Props> = ({
     httpFetch,
     formatBytes,
     formatNumber,
+    flyoutIndexChartSelectedActionAbortControllerRef,
   ]);
-
-  useEffect(() => {
-    const flyoutIndexExpandActionAbortController =
-      flyoutIndexExpandActionAbortControllerRef.current;
-    const tableRowIndexCheckNowActionAbortController =
-      tableRowIndexCheckNowActionAbortControllerRef.current;
-    const flyoutIndexChartSelectedActionAbortController =
-      flyoutIndexChartSelectedActionAbortControllerRef.current;
-    return () => {
-      flyoutIndexExpandActionAbortController.abort();
-      tableRowIndexCheckNowActionAbortController.abort();
-      flyoutIndexChartSelectedActionAbortController.abort();
-    };
-  }, []);
 
   return (
     <div data-test-subj={`${pattern}PatternPanel`}>

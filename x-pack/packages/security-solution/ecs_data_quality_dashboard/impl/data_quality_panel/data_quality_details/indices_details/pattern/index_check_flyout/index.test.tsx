@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import moment from 'moment';
 import userEvent from '@testing-library/user-event';
 
 import { IndexCheckFlyout } from '.';
@@ -18,10 +17,14 @@ import {
 import { mockIlmExplain } from '../../../../mock/ilm_explain/mock_ilm_explain';
 import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { mockStats } from '../../../../mock/stats/mock_stats';
+import * as useHistoricalResults from './hooks/use_historical_results';
+import { mockHistoricalResult } from '../../../../mock/historical_results/mock_historical_results_response';
+import { getFormattedCheckTime } from './utils/get_formatted_check_time';
 
 describe('IndexCheckFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('rendering', () => {
@@ -51,8 +54,8 @@ describe('IndexCheckFlyout', () => {
         'auditbeat-custom-index-1'
       );
       expect(screen.getByTestId('latestCheckedAt')).toHaveTextContent(
-        moment(auditbeatWithAllResults.results!['auditbeat-custom-index-1'].checkedAt).format(
-          'MMM DD, YYYY @ HH:mm:ss.SSS'
+        getFormattedCheckTime(
+          auditbeatWithAllResults.results!['auditbeat-custom-index-1'].checkedAt!
         )
       );
     });
@@ -134,6 +137,62 @@ describe('IndexCheckFlyout', () => {
         indexName: 'auditbeat-custom-index-1',
         pattern: 'auditbeat-*',
       });
+    });
+  });
+
+  describe('when history tab is clicked', () => {
+    it('should call fetchHistoricalResults and switch to history tab', async () => {
+      const fetchHistoricalResults = jest.fn();
+
+      jest.spyOn(useHistoricalResults, 'useHistoricalResults').mockReturnValue({
+        historicalResultsState: {
+          results: [mockHistoricalResult],
+          total: 1,
+          isLoading: false,
+          error: null,
+        },
+        fetchHistoricalResults,
+      });
+
+      render(
+        <TestExternalProviders>
+          <TestDataQualityProviders>
+            <IndexCheckFlyout
+              ilmExplain={mockIlmExplain}
+              indexName="auditbeat-custom-index-1"
+              onClose={jest.fn()}
+              pattern="auditbeat-*"
+              patternRollup={auditbeatWithAllResults}
+              stats={mockStats}
+            />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
+      );
+
+      expect(screen.getByRole('tab', { name: 'Latest Check' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+      expect(screen.getByRole('tab', { name: 'History' })).not.toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+
+      const historyTab = screen.getByRole('tab', { name: 'History' });
+      await userEvent.click(historyTab);
+
+      expect(fetchHistoricalResults).toHaveBeenCalledWith({
+        indexName: 'auditbeat-custom-index-1',
+        abortController: expect.any(AbortController),
+      });
+
+      expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByRole('tab', { name: 'Latest Check' })).not.toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+
+      expect(screen.getByTestId('historicalResults')).toBeInTheDocument();
     });
   });
 });

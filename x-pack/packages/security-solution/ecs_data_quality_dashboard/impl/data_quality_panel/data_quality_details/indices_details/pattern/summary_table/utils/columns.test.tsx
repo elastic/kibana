@@ -26,7 +26,7 @@ import {
 } from './columns';
 import { CHECK_INDEX, VIEW_CHECK_DETAILS } from '../translations';
 import { IndexSummaryTableItem } from '../../../../../types';
-import { getCheckState } from '../../../../../stub/get_check_state';
+import { getCheckStateStub } from '../../../../../stub/get_check_state_stub';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -65,7 +65,7 @@ describe('helpers', () => {
         pattern: 'auditbeat-*',
         onCheckNowAction: jest.fn(),
         onExpandAction: jest.fn(),
-        checkState: getCheckState(indexName),
+        checkState: getCheckStateStub(indexName),
       }).map((x) => omit('render', x));
 
       expect(columns).toEqual([
@@ -127,7 +127,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const checkNowRender = (
           (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
@@ -153,7 +153,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction,
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const checkNowRender = (
           (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
@@ -180,7 +180,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName, { isChecking: true }),
+          checkState: getCheckStateStub(indexName, { isChecking: true }),
         });
 
         const checkNowRender = (
@@ -208,7 +208,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction,
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
 
         const expandActionRender = (
@@ -243,7 +243,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -267,7 +267,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -295,7 +295,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -320,7 +320,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const indexNameRender = (columns[2] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -345,7 +345,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const docsCountRender = (columns[3] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -381,7 +381,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const incompatibleRender = (
           columns[4] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -404,7 +404,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const incompatibleRender = (
           columns[4] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -462,7 +462,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -489,7 +489,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -515,7 +515,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -539,7 +539,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
 
         const sizeInBytesRender = (columns[6] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
@@ -564,7 +564,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          checkState: getCheckStateStub(indexName),
         });
 
         const sizeInBytesRender = (columns[6] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)

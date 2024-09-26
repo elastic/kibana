@@ -6,66 +6,29 @@
  */
 
 import { useReducer, useCallback } from 'react';
-import { StorageResult } from '../../../../../../types';
 
 import { GET_RESULTS_ERROR_TITLE } from '../../../../../../translations';
 import { useDataQualityContext } from '../../../../../../data_quality_context';
-import { useIsMounted } from '../../../../../../hooks/use_is_mounted';
+import { useIsMountedRef } from '../../../../../../hooks/use_is_mounted_ref';
 import { fetchHistoricalResults } from './utils/fetch_historical_results';
-import { UseHistoricalResultsReturnValue } from './types';
+import { FetchHistoricalResultsReducerState, UseHistoricalResultsReturnValue } from './types';
 import { FetchHistoricalResultsOpts } from '../../types';
+import { fetchHistoricalResultsReducer } from './reducers/fetch_historical_results_reducer';
 
-interface State {
-  results: StorageResult[];
-  total: number;
-  isLoading: boolean;
-  error: Error | null;
-}
-
-const initialState: State = {
+export const initialFetchHistoricalResultsReducerState: FetchHistoricalResultsReducerState = {
   results: [],
   total: 0,
   isLoading: true,
   error: null,
 };
 
-type Action =
-  | { type: 'FETCH_SUCCESS'; payload: { results: StorageResult[]; total: number } }
-  | { type: 'FETCH_START' }
-  | { type: 'FETCH_ERROR'; payload: Error };
-
-const reducer = (state: State, action: Action) => {
-  switch (action.type) {
-    case 'FETCH_SUCCESS':
-      return {
-        results: action.payload.results,
-        total: action.payload.total,
-        isLoading: false,
-        error: null,
-      };
-    case 'FETCH_START':
-      return {
-        results: [],
-        total: 0,
-        isLoading: true,
-        error: null,
-      };
-    case 'FETCH_ERROR':
-      return {
-        results: [],
-        total: 0,
-        isLoading: false,
-        error: action.payload,
-      };
-    default:
-      return state;
-  }
-};
-
 export const useHistoricalResults = (): UseHistoricalResultsReturnValue => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(
+    fetchHistoricalResultsReducer,
+    initialFetchHistoricalResultsReducerState
+  );
   const { httpFetch, toasts } = useDataQualityContext();
-  const { isMountedRef } = useIsMounted();
+  const { isMountedRef } = useIsMountedRef();
 
   const fetchResults = useCallback(
     async ({
