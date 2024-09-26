@@ -26,6 +26,8 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
 // `x-pack/plugins/observability_solution/apm/public/components/app/correlations/progress_controls.tsx`
 
+const analysisCompleteStyle = { display: 'none' };
+
 /**
  * Props for ProgressControlProps
  */
@@ -70,7 +72,6 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
   const { euiTheme } = useEuiTheme();
 
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
-  const analysisCompleteStyle = { display: 'none' };
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
