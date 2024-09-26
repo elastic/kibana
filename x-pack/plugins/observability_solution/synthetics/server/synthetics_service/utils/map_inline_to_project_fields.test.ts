@@ -8,7 +8,7 @@
 import { Logger } from '@kbn/logging';
 import { ConfigKey } from '../../../common/runtime_types';
 import { unzipFile } from '../../common/unzip_project_code';
-import { mapInlineToProjectFields } from './map_inline_to_project_field';
+import { mapInlineToProjectFields } from './map_inline_to_project_fields';
 import * as inlineToZip from '../../common/inline_to_zip';
 
 describe('mapInlineToProjectFields', () => {

@@ -46,7 +46,7 @@ import {
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,
 } from './formatters/public_formatters/format_configs';
-import { inlineToProjectZip } from '../common/inline_to_zip';
+import { mapInlineToProjectFields } from './utils/map_inline_to_project_fields';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -416,25 +416,18 @@ export class SyntheticsService {
           if (bucketsByLocation[location.id].length > perBucket && output) {
             const locMonitors = await Promise.all(
               bucketsByLocation[location.id].splice(0, PER_PAGE).map(async (monitorData) => {
-                // no inline script data, sync without further processing
-                if (!monitorData?.['source.inline.script']) return monitorData;
-                // project content is already truthy, this script was zipped at persist time
-                else if (!!monitorData?.[ConfigKey.SOURCE_PROJECT_CONTENT]) {
+                if (!monitorData?.[ConfigKey.SOURCE_INLINE]) {
+                  return monitorData;
+                } else if (!!monitorData?.[ConfigKey.SOURCE_PROJECT_CONTENT]) {
                   return {
                     ...monitorData,
                     [ConfigKey.SOURCE_INLINE]: undefined,
                   };
                 }
 
-                // when the inline script has not been zipped, zip it and sync
                 return {
                   ...monitorData,
-                  'source.project.content': await inlineToProjectZip(
-                    monitorData[ConfigKey.SOURCE_INLINE],
-                    monitorData[ConfigKey.CONFIG_ID],
-                    this.logger
-                  ),
-                  'source.inline.script': undefined,
+                  ...(await mapInlineToProjectFields(monitorData.type, monitorData, this.logger)),
                 };
               })
             );

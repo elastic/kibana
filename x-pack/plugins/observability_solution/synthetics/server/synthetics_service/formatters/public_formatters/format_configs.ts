@@ -17,7 +17,7 @@ import {
   SyntheticsMonitor,
   TLSFields,
 } from '../../../../common/runtime_types';
-import { mapInlineToProjectFields } from '../../utils/map_inline_to_project_field';
+import { mapInlineToProjectFields } from '../../utils/map_inline_to_project_fields';
 import { publicFormatters } from '.';
 
 const UI_KEYS_TO_SKIP = [

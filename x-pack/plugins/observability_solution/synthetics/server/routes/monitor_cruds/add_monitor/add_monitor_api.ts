@@ -41,7 +41,7 @@ import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monit
 import { formatSecrets } from '../../../synthetics_service/utils';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
-import { mapInlineToProjectFields } from '../../../synthetics_service/utils/map_inline_to_project_field';
+import { mapInlineToProjectFields } from '../../../synthetics_service/utils/map_inline_to_project_fields';
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;

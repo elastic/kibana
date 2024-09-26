@@ -35,7 +35,7 @@ import {
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
 import { SyntheticsServerSetup } from '../../types';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
-import { mapInlineToProjectFields } from '../../synthetics_service/utils/map_inline_to_project_field';
+import { mapInlineToProjectFields } from '../../synthetics_service/utils/map_inline_to_project_fields';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
