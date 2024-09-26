@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AiopsPluginStartDeps } from '../types';
 import type { ChangePointDetectionSharedComponent } from './change_point_detection';
 import type { PatternAnalysisSharedComponent } from './pattern_analysis';
+import type { LogRateAnalysisSharedComponent } from './log_rate_analysis';
 
 const ChangePointDetectionLazy = dynamic(async () => import('./change_point_detection'));
 
@@ -43,7 +44,7 @@ const LogRateAnalysisLazy = dynamic(async () => import('./log_rate_analysis'));
 export const getLogRateAnalysisComponent = (
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps
-) => {
+): LogRateAnalysisSharedComponent => {
   return React.memo((props) => {
     return <LogRateAnalysisLazy coreStart={coreStart} pluginStart={pluginStart} {...props} />;
   });
