@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   description: ''
-  title: Security Solution Entity Analytics API (Elastic Cloud and self-hosted)
+  title: Security Entity Analytics API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
   - url: 'http://{kibana_host}:{port}'
@@ -59,7 +59,7 @@ paths:
           description: Invalid request
       summary: Delete Criticality Record
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
     get:
       description: Get the criticality record for a specific asset.
       operationId: GetAssetCriticalityRecord
@@ -90,7 +90,7 @@ paths:
           description: Criticality record not found
       summary: Get Criticality Record
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
     post:
       description: Create or update a criticality record for a specific asset.
       operationId: CreateAssetCriticalityRecord
@@ -121,7 +121,7 @@ paths:
           description: Invalid request
       summary: Upsert Criticality Record
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
   /api/asset_criticality/bulk:
     post:
       description: >-
@@ -179,7 +179,7 @@ paths:
           description: File too large
       summary: Bulk Upsert Asset Criticality Records
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
   /api/asset_criticality/list:
     get:
       description: 'List asset criticality records, paging, sorting and filtering as needed.'
@@ -255,10 +255,10 @@ paths:
           description: Bulk upload successful
       summary: List Asset Criticality Records
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
   /api/entity_store/engines:
     get:
-      operationId: ListEntityStoreEngines
+      operationId: ListEntityEngines
       responses:
         '200':
           content:
@@ -273,14 +273,14 @@ paths:
                       $ref: '#/components/schemas/EngineDescriptor'
                     type: array
           description: Successful response
-      summary: List the Entity Store engines
+      summary: List the Entity Engines
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
   '/api/entity_store/engines/{entityType}':
     delete:
-      operationId: DeleteEntityStore
+      operationId: DeleteEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -302,13 +302,13 @@ paths:
                   deleted:
                     type: boolean
           description: Successful response
-      summary: Delete the Entity Store engine
+      summary: Delete the Entity Engine
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
     get:
-      operationId: GetEntityStoreEngine
+      operationId: GetEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -321,14 +321,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/EngineDescriptor'
           description: Successful response
-      summary: Get the Entity Store engine
+      summary: Get an Entity Engine
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
   '/api/entity_store/engines/{entityType}/init':
     post:
-      operationId: InitEntityStore
+      operationId: InitEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -353,14 +353,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/EngineDescriptor'
           description: Successful response
-      summary: Initialize the Entity Store
+      summary: Initialize an Entity Engine
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
   '/api/entity_store/engines/{entityType}/start':
     post:
-      operationId: StartEntityStore
+      operationId: StartEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -376,14 +376,14 @@ paths:
                   started:
                     type: boolean
           description: Successful response
-      summary: Start the Entity Store engine
+      summary: Start an Entity Engine
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
   '/api/entity_store/engines/{entityType}/stats':
     post:
-      operationId: GetEntityStoreStats
+      operationId: GetEntityEngineStats
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -411,14 +411,14 @@ paths:
                   type:
                     $ref: '#/components/schemas/EntityType'
           description: Successful response
-      summary: Get the Entity Store engine stats
+      summary: Get Entity Engine stats
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
   '/api/entity_store/engines/{entityType}/stop':
     post:
-      operationId: StopEntityStore
+      operationId: StopEntityEngine
       parameters:
-        - description: The entity type of the store (either 'user' or 'host').
+        - description: The entity type of the engine (either 'user' or 'host').
           in: path
           name: entityType
           required: true
@@ -434,9 +434,9 @@ paths:
                   stopped:
                     type: boolean
           description: Successful response
-      summary: Stop the Entity Store engine
+      summary: Stop an Entity Engine
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
   /api/entity_store/entities/list:
     get:
       description: 'List entities records, paging, sorting and filtering as needed.'
@@ -512,7 +512,7 @@ paths:
           description: Entities returned successfully
       summary: List Entity Store Entities
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
       operationId: ScheduleRiskEngineNow
@@ -540,7 +540,7 @@ paths:
           description: Unexpected error
       summary: Schedule the risk engine to run as soon as possible
       tags:
-        - Security Solution Entity Analytics API
+        - Security Entity Analytics API
 components:
   schemas:
     AssetCriticalityBulkUploadErrorItem:
@@ -836,4 +836,4 @@ security:
   - BasicAuth: []
 tags:
   - description: ''
-    name: Security Solution Entity Analytics API
+    name: Security Entity Analytics API

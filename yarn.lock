@@ -4895,7 +4895,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/entityManager-plugin@link:x-pack/plugins/observability_solution/entity_manager":
+"@kbn/entityManager-plugin@link:x-pack/plugins/entity_manager":
   version "0.0.0"
   uid ""
 
@@ -5699,6 +5699,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-field-stats-flyout@link:x-pack/packages/ml/field_stats_flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-in-memory-table@link:x-pack/packages/ml/in_memory_table":
   version "0.0.0"
   uid ""
@@ -5724,6 +5728,10 @@
   uid ""
 
 "@kbn/ml-number-utils@link:x-pack/packages/ml/number_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-parse-interval@link:x-pack/packages/ml/parse_interval":
   version "0.0.0"
   uid ""
 
@@ -5768,6 +5776,10 @@
   uid ""
 
 "@kbn/ml-url-state@link:x-pack/packages/ml/url_state":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-validators@link:x-pack/packages/ml/validators":
   version "0.0.0"
   uid ""
 

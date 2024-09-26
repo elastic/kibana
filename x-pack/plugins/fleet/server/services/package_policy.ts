@@ -105,7 +105,12 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 
 import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
-import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
+import {
+  getPackageInfo,
+  getInstallation,
+  ensureInstalledPackage,
+  getInstallationObject,
+} from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery as _normalizeKuery } from './saved_object';
@@ -1874,9 +1879,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string,
-    logger?: Logger
+    options?: { logger?: Logger; installMissingPackage?: boolean }
   ): Promise<NewPackagePolicy | undefined> {
-    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName, logger });
+    const pkgInstallObj = await getInstallationObject({
+      savedObjectsClient: soClient,
+      pkgName,
+      logger: options?.logger,
+    });
+    let pkgInstall = pkgInstallObj?.attributes;
+    if (!pkgInstall && options?.installMissingPackage) {
+      const esClient = await appContextService.getInternalUserESClient();
+      const result = await ensureInstalledPackage({
+        esClient,
+        pkgName,
+        savedObjectsClient: soClient,
+      });
+      if (result.package) {
+        pkgInstall = result.package;
+      }
+    }
     if (pkgInstall) {
       const packageInfo = await getPackageInfo({
         savedObjectsClient: soClient,
@@ -2066,7 +2087,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
   }
 
-  public async removeOutputFromAll(esClient: ElasticsearchClient, outputId: string) {
+  public async removeOutputFromAll(
+    esClient: ElasticsearchClient,
+    outputId: string,
+    options?: { force?: boolean }
+  ) {
     const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicies = (
       await appContextService
@@ -2132,7 +2157,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             soClient,
             esClient,
             packagePolicy.id,
-            getPackagePolicyUpdate(packagePolicy)
+            getPackagePolicyUpdate(packagePolicy),
+            {
+              force: options?.force,
+            }
           );
         },
         {
