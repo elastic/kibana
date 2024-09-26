@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
@@ -53,15 +52,13 @@ const { startES } = createTestServers({
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.resolve(__dirname, '../../archives/7.7.2_xpack_100k_obj.zip'),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
 });
 let esServer: TestElasticsearchUtils;
 
-// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
-describe.skip('migration actions', () => {
+describe('migration actions', () => {
   let client: ElasticsearchClient;
   let esCapabilities: ReturnType<typeof elasticsearchServiceMock.createCapabilities>;
 
