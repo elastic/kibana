@@ -15,7 +15,6 @@ import {
   EuiFlyoutBody,
   EuiForm,
   EuiFormRow,
-  EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -29,9 +28,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-
-import { DataSourceContextProvider } from '../../hooks/use_data_source';
-import { LogRateAnalysisSettings } from '../../components/log_rate_analysis/log_rate_analysis_for_embeddable/embeddable_menu';
 
 import type { LogRateAnalysisEmbeddableRuntimeState } from './types';
 
@@ -59,7 +55,11 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
   const [formInput, setFormInput] = useState<LogRateAnalysisEmbeddableRuntimeState>(
     pick(initialInput ?? {}, ['dataViewId']) as LogRateAnalysisEmbeddableRuntimeState
   );
-  const [isFormValid, setIsFormValid] = useState(true);
+
+  const isFormValid = useMemo(
+    () => isPopulatedObject(formInput, ['dataViewId']) && formInput.dataViewId !== '',
+    [formInput]
+  );
 
   const updatedProps = useMemo(() => {
     return {
@@ -87,7 +87,6 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
         ...formInput,
         dataViewId: dataViewId ?? '',
       });
-      setIsFormValid(false);
     },
     [formInput]
   );
@@ -138,15 +137,6 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
               }}
             />
           </EuiFormRow>
-          <DataSourceContextProvider dataViews={dataViews} dataViewId={formInput.dataViewId}>
-            <EuiSpacer />
-
-            <FormControls
-              formInput={formInput}
-              onChange={setFormInput}
-              onValidationChange={setIsFormValid}
-            />
-          </DataSourceContextProvider>
         </EuiForm>
       </EuiFlyoutBody>
 
@@ -187,45 +177,6 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </>
-  );
-};
-
-export const FormControls: FC<{
-  formInput: LogRateAnalysisEmbeddableRuntimeState;
-  onChange: (update: LogRateAnalysisEmbeddableRuntimeState) => void;
-  onValidationChange: (isValid: boolean) => void;
-}> = ({ formInput, onChange, onValidationChange }) => {
-  useEffect(
-    function validateForm() {
-      onValidationChange(formInput.dataViewId !== undefined);
-    },
-    [formInput, onValidationChange]
-  );
-
-  useEffect(
-    function samplerChange() {
-      onChange({
-        ...formInput,
-      });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onChange]
-  );
-
-  useEffect(
-    function samplerChange() {
-      onChange({
-        ...formInput,
-      });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onChange]
-  );
-
-  return (
-    <>
-      <LogRateAnalysisSettings compressed={true} />
     </>
   );
 };
