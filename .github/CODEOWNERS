@@ -1461,7 +1461,9 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
-/x-pack/test/functional/es_archives/auditbeat @elastic/security-solution
+/x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
+/x-pack/test/functional/es_archives/auditbeat/hosts @elastic/security-solution
+
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution OpenAPI bundles
@@ -1591,6 +1593,9 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
+
+/x-pack/test/functional/es_archives/auditbeat/overview @elastic/security-threat-hunting-explore
+/x-pack/test/functional/es_archives/auditbeat/users @elastic/security-threat-hunting-explore
 
 ## Generative AI owner connectors
 # OpenAI
