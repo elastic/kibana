@@ -25,6 +25,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
+import { getTimestamp } from '../../../../../../../utils/get_timestamp';
 import { PlaintextStacktrace } from '../../../../../error_group_details/error_sampler/plaintext_stacktrace';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
@@ -261,13 +262,15 @@ function SpanFlyoutBody({
   ];
 
   const initialTab = tabs.find(({ id }) => id === flyoutDetailTab) ?? tabs[0];
+  const timestamp = getTimestamp(span['@timestamp'], span.timestamp.us);
+
   return (
     <>
       <StickySpanProperties span={span} transaction={parentTransaction} />
       <EuiSpacer size="m" />
       <Summary
         items={[
-          <TimestampTooltip time={span.timestamp.us / 1000} />,
+          <TimestampTooltip time={timestamp / 1000} />,
           <>
             <DurationSummaryItem
               duration={span.span.duration.us}

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { getTimestamp } from '../../../utils/get_timestamp';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Summary } from '.';
 import { TimestampTooltip } from '../timestamp_tooltip';
@@ -42,8 +43,9 @@ function getTransactionResultSummaryItem(transaction: Transaction) {
 }
 
 function TransactionSummary({ transaction, totalDuration, errorCount, coldStartBadge }: Props) {
+  const timestamp = getTimestamp(transaction['@timestamp'], transaction.timestamp.us);
   const items = [
-    <TimestampTooltip time={transaction.timestamp.us / 1000} />,
+    <TimestampTooltip time={timestamp / 1000} />,
     <DurationSummaryItem
       duration={transaction.transaction.duration.us}
       totalDuration={totalDuration}

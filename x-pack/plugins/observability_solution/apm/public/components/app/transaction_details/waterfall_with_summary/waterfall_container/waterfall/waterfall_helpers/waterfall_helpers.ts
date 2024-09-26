@@ -16,6 +16,7 @@ import {
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
+import { getTimestamp } from '../../../../../../../utils/get_timestamp';
 
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 
@@ -166,18 +167,23 @@ function getErrorItem(
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ): IWaterfallError {
-  const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
+  const timestamp = getTimestamp(
+    entryWaterfallTransaction?.doc['@timestamp'],
+    entryWaterfallTransaction?.doc.timestamp.us
+  );
+  const entryTimestamp = timestamp ?? 0;
   const parent = items.find((waterfallItem) => waterfallItem.id === error.parent?.id) as
     | IWaterfallSpanOrTransaction
     | undefined;
 
+  const errorTimestamp = getTimestamp(error['@timestamp'], error.timestamp.us);
   const errorItem: IWaterfallError = {
     docType: 'error',
     doc: error,
     id: error.error.id,
     parent,
     parentId: parent?.id,
-    offset: error.timestamp.us - entryTimestamp,
+    offset: errorTimestamp - entryTimestamp,
     skew: 0,
     color: '',
   };
@@ -202,10 +208,15 @@ export function getClockSkew(
       return parentItem.skew;
     // transaction is the initial entry in a service. Calculate skew for this, and it will be propagated to all child spans
     case 'transaction': {
-      const parentStart = parentItem.doc.timestamp.us + parentItem.skew;
+      const parentTimestamp = getTimestamp(
+        parentItem.doc['@timestamp'],
+        parentItem.doc.timestamp.us
+      );
+      const parentStart = parentTimestamp + parentItem.skew;
 
       // determine if child starts before the parent
-      const offsetStart = parentStart - item.doc.timestamp.us;
+      const itemTimestamp = getTimestamp(item.doc['@timestamp'], item.doc.timestamp.us);
+      const offsetStart = parentStart - itemTimestamp;
       if (offsetStart > 0) {
         const latency = Math.max(parentItem.duration - item.duration, 0) / 2;
         return offsetStart + latency;
@@ -224,7 +235,11 @@ export function getOrderedWaterfallItems(
   if (!entryWaterfallTransaction) {
     return [];
   }
-  const entryTimestamp = entryWaterfallTransaction.doc.timestamp.us;
+  const timestamp = getTimestamp(
+    entryWaterfallTransaction.doc['@timestamp'],
+    entryWaterfallTransaction.doc.timestamp.us
+  );
+  const entryTimestamp = timestamp;
   const visitedWaterfallItemSet = new Set();
 
   function getSortedChildren(
@@ -236,11 +251,18 @@ export function getOrderedWaterfallItems(
     }
     visitedWaterfallItemSet.add(item);
 
-    const children = sortBy(childrenByParentId[item.id] || [], 'doc.timestamp.us');
+    const children = sortBy(childrenByParentId[item.id] || [], (child) => {
+      if (!child.doc.timestamp.us && child.doc['@timestamp']) {
+        return `doc['@timestamp']`;
+      }
+
+      return 'doc.timestamp.us';
+    });
 
     item.parent = parentItem;
     // get offset from the beginning of trace
-    item.offset = item.doc.timestamp.us - entryTimestamp;
+    const itemTimestamp = getTimestamp(item.doc['@timestamp'], item.doc.timestamp.us);
+    item.offset = itemTimestamp - entryTimestamp;
     // move the item to the right if it starts before its parent
     item.skew = getClockSkew(item, parentItem);
 

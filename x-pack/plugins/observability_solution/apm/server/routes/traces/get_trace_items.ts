@@ -22,6 +22,7 @@ import {
   ERROR_LOG_MESSAGE,
   EVENT_OUTCOME,
   FAAS_COLDSTART,
+  FALLBACK_TIMESTAMP,
   PARENT_ID,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -98,6 +99,7 @@ export async function getTraceItems({
       size: 1000,
       _source: [
         TIMESTAMP,
+        FALLBACK_TIMESTAMP,
         TRACE_ID,
         TRANSACTION_ID,
         PARENT_ID,
@@ -229,6 +231,7 @@ async function getTraceDocsPerPage({
     search_after: searchAfter,
     _source: [
       TIMESTAMP,
+      FALLBACK_TIMESTAMP,
       TRACE_ID,
       PARENT_ID,
       SERVICE_NAME,

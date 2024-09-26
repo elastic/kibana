@@ -16,6 +16,7 @@ import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public'
 import type { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import { getTimestamp } from '../../../utils/get_timestamp';
 import { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
@@ -68,8 +69,8 @@ export const getSections = ({
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
-
-  const time = Math.round(transaction.timestamp.us / 1000);
+  const timestamp = getTimestamp(transaction['@timestamp'], transaction.timestamp.us);
+  const time = Math.round(timestamp / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
 
   const uptimeLink = uptimeLocator?.getRedirectUrl(
