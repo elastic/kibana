@@ -16983,10 +16983,6 @@
                 "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/delete_route.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/delete_knowledge_base.ts"
-              },
-              {
                 "plugin": "logsShared",
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -17068,7 +17064,15 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/delete.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/delete.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/delete_knowledge_base.ts"
               },
               {
                 "plugin": "synthetics",

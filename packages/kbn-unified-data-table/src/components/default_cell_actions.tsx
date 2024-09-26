@@ -50,7 +50,7 @@ export const FilterInBtn = ({
 }) => {
   const context = useContext(UnifiedDataTableContext);
   const filteringDisabled =
-    isPlainRecord && Array.isArray(context.rows[rowIndex]?.flattened[columnId]);
+    isPlainRecord && Array.isArray(context.getRowByIndex(rowIndex)?.flattened[columnId]);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterForAria', {
     defaultMessage: 'Filter for this {value}',
     values: { value: columnId },
@@ -85,7 +85,7 @@ export const FilterOutBtn = ({
 }) => {
   const context = useContext(UnifiedDataTableContext);
   const filteringDisabled =
-    isPlainRecord && Array.isArray(context.rows[rowIndex]?.flattened[columnId]);
+    isPlainRecord && Array.isArray(context.getRowByIndex(rowIndex)?.flattened[columnId]);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterOutAria', {
     defaultMessage: 'Filter out this {value}',
     values: { value: columnId },
