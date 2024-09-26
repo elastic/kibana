@@ -65,6 +65,7 @@ export type {
   ISearchSessionService,
   SearchRequestHandlerContext,
   DataRequestHandlerContext,
+  AsyncSearchStatusResponse,
 } from './search';
 export {
   SearchSessionService,
@@ -73,7 +74,6 @@ export {
 } from './search';
 
 export { shimHitsTotal } from '../common/search';
-export type { AsyncSearchStatusResponse } from '../common/search';
 
 // Search namespace
 export const search = {
