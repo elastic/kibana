@@ -167,10 +167,15 @@ export function EntitiesGrid({
             assetType: type,
           });
 
-        case 'service':
+        case 'service': {
+          // For services, the format of the display name is `service.name:service.environment`.
+          // We just want the first part of the name for the locator.
+          const serviceName = entity[ENTITY_DISPLAY_NAME].split(':')[0];
+
           return serviceOverviewLocator?.getRedirectUrl({
-            serviceName: entity[ENTITY_DISPLAY_NAME],
+            serviceName,
           });
+        }
       }
     },
     [assetDetailsLocator, serviceOverviewLocator]
