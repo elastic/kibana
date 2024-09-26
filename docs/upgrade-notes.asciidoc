@@ -116,7 +116,7 @@ This updates all instances of vulnerability.package to the ECS standard package 
 ====
 
 [discrete]
-.Introduced new summary search capabilities that will cause existing SLOs to stop working. (8.10)
+.Introduced new summary search capabilities that will cause SLOs created before 8.10 to stop working. (8.10)
 [%collapsible]
 ====
 *Details* +
