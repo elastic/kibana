@@ -235,11 +235,14 @@ export default function ({ getService }: FtrProviderContext) {
           ],
         });
 
-        const alert: any = response.hits.hits?.[0]._source;
-        expect(alert).to.have.property('kibana.alert.status', 'active');
-        expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" from Dev Service is down. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.`
-        );
+        response.hits.hits.forEach((hit: any) => {
+          const alert: any = response.hits.hits?.[0]._source;
+          expect(alert).to.have.property('kibana.alert.status', 'active');
+          expect(alert['kibana.alert.reason']).to.eql(
+            `Monitor "${monitor.name}" from ${alert['location.name']} is down. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.`
+          );
+        });
+
         const downResponse = await waitForDocumentInIndex<{
           ruleType: string;
           alertDetailsUrl: string;
@@ -265,7 +268,6 @@ export default function ({ getService }: FtrProviderContext) {
             'reason',
             `Monitor "${monitor.name}" from ${hit?.locationNames} is down. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.`
           );
-          expect(hit).property('locationNames', hit?.locationNames);
           expect(hit).property(
             'linkMessage',
             `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=${hit?.locationId}`
