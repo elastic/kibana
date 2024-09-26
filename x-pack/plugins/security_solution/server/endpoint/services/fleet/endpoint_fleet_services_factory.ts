@@ -32,7 +32,7 @@ export interface EndpointInternalFleetServicesInterface extends EndpointFleetSer
 }
 
 export interface EndpointFleetServicesFactoryInterface {
-  asInternalUser(): EndpointInternalFleetServicesInterface;
+  asInternalUser(spaceId?: string): EndpointInternalFleetServicesInterface;
 }
 
 /**
@@ -44,7 +44,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     private readonly savedObjects: SavedObjectsClientFactory
   ) {}
 
-  asInternalUser(): EndpointInternalFleetServicesInterface {
+  asInternalUser(spaceId?: string): EndpointInternalFleetServicesInterface {
     const {
       agentPolicyService: agentPolicy,
       packagePolicyService: packagePolicy,
@@ -53,7 +53,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     } = this.fleetDependencies;
 
     return {
-      agent: agentService.asInternalUser,
+      agent: spaceId ? agentService.asInternalScopedUser(spaceId) : agentService.asInternalUser,
       agentPolicy,
 
       packages: packageService.asInternalUser,

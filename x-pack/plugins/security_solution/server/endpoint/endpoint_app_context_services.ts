@@ -260,17 +260,23 @@ export class EndpointAppContextService {
     return new EndpointMetadataService(
       this.startDependencies.esClient,
       this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId: spaceIdValue }),
-      this.getInternalFleetServices(),
+      this.getInternalFleetServices(spaceIdValue),
       this.createLogger('endpointMetadata')
     );
   }
 
-  public getInternalFleetServices(): EndpointInternalFleetServicesInterface {
+  /**
+   * SpaceId should be defined if wanting go get back an inernal client that is scoped to a given space id
+   * @param spaceId
+   */
+  public getInternalFleetServices(spaceId?: string): EndpointInternalFleetServicesInterface {
     if (this.fleetServicesFactory === null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.fleetServicesFactory.asInternalUser();
+    return this.fleetServicesFactory.asInternalUser(
+      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined
+    );
   }
 
   public getManifestManager(): ManifestManager | undefined {

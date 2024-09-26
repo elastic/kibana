@@ -81,7 +81,8 @@ export const getMetadataRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, request, response) => {
-    const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
+    const spaceId = (await context.securitySolution).getSpaceId();
+    const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService(spaceId);
 
     try {
       return response.ok({
