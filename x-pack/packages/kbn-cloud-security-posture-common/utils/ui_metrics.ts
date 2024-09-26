@@ -10,22 +10,23 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export const APP_NAME = 'cloud-security';
 
-export const NAV_TO_FINDINGS_FROM_ENTITY_FLUTOUT = 'nav-to-findings-from-entity-flyout';
+export const ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS =
+  'entity-flyout-misconfiguration-view-visits';
 export const NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT =
   'nav-to-findings-by-host-name-from-entity-flyout';
 export const NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT =
   'nav-to-findings-by-rule-name-from-entity-flyout';
 export const CREATE_DETECTION_RULE_FROM_FLYOUT = 'create-detection-rule-from-flyout';
 export const CREATE_DETECTION_FROM_TABLE_ROW_ACTION = 'create-detection-from-table-row-action';
-export const OPEN_VULNERABILITIES_FLYOUT = 'open-vulnerabilities-flyout';
+export const VULNERABILITIES_FLYOUT_VISITS = 'vulnerabilities-flyout-visits';
 export const OPEN_FINDINGS_FLYOUT = 'open-findings-flyout';
 export const GROUP_BY_CLICK = 'group-by-click';
 export const CHANGE_RULE_STATE = 'change-rule-state';
 
 type cloudSecurityUiCounters =
-  | typeof NAV_TO_FINDINGS_FROM_ENTITY_FLUTOUT
+  | typeof ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS
   | typeof NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
-  | typeof OPEN_VULNERABILITIES_FLYOUT
+  | typeof VULNERABILITIES_FLYOUT_VISITS
   | typeof NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
   | typeof OPEN_FINDINGS_FLYOUT
   | typeof CREATE_DETECTION_RULE_FROM_FLYOUT

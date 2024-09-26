@@ -286,7 +286,7 @@ const RuleStateSwitch = ({ rule }: { rule: CspBenchmarkRulesWithStates }) => {
   };
   const changeCspRuleStateFn = async () => {
     if (rule?.metadata.benchmark.rule_number) {
-      uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, CHANGE_RULE_STATE);
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, CHANGE_RULE_STATE);
       mutateRulesStates({
         newState: nextRuleState,
         ruleIds: [rulesObjectRequest],

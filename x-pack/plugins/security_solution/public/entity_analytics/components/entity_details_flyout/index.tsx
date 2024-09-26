@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  NAV_TO_FINDINGS_FROM_ENTITY_FLUTOUT,
+  ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -40,7 +40,7 @@ export const getInsightsInputTab = ({
   name: string;
   fieldName: 'host.name' | 'user.name';
 }) => {
-  uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, NAV_TO_FINDINGS_FROM_ENTITY_FLUTOUT);
+  uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS);
 
   return {
     id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
