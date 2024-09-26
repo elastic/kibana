@@ -29,8 +29,8 @@ const scenario: Scenario<OtelDocument> = async (runOptions) => {
           otelDocs.flatMap((oteld) => {
             return [
               oteld.metric().timestamp(timestamp),
-              oteld.transaction(traceId).timestamp(timestamp),
-              oteld.error({ spanId, traceId }).timestamp(timestamp),
+              oteld.transaction(spanId).timestamp(timestamp),
+              oteld.error(spanId).timestamp(timestamp),
             ];
           })
         );

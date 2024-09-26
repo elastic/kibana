@@ -66,7 +66,7 @@ class Otel extends Serializable<OtelDocument> {
     });
   }
 
-  error({ spanId, traceId }: { spanId: string; traceId: string }) {
+  error(spanId: string) {
     return new OtelError({
       ...this.fields,
       attributes: {
@@ -102,8 +102,6 @@ class Otel extends Serializable<OtelDocument> {
         dropped_attributes_count: 0,
         name: 'sendotlp-synth',
       },
-      trace_id: traceId,
-      trace: { id: traceId },
       span_id: spanId,
       span: { id: spanId },
       timestamp_us: 1725633628036123,
@@ -188,6 +186,7 @@ class Otel extends Serializable<OtelDocument> {
         dropped_attributes_count: 0,
         name: 'sendotlp-synth',
       },
+      transaction: { id },
       span_id: id,
       status: {
         code: 'Unset',
