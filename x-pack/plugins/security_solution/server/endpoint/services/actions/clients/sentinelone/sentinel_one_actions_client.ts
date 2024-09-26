@@ -909,9 +909,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       if (responseList.length > 0) {
         addToQueue(...responseList);
 
-        if (this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
-          this.sendActionResponseTelemetry(responseList);
-        }
+        this.sendActionResponseTelemetry(responseList);
       }
     };
 
