@@ -13,11 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
-import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsAnalyzerPanelKey,
-} from '../../shared/constants/panel_keys';
-import { LeftPanelVisualizeTab } from '..';
+import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
   VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
@@ -59,8 +55,8 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
  * Visualize view displayed in the document details expandable flyout left section
  */
 export const VisualizeTab = memo(() => {
-  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
-  const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
+  const { scopeId } = useDocumentDetailsContext();
+  const { openPreviewPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
   const [activeVisualizationId, setActiveVisualizationId] = useState(
     panels.left?.path?.subTab ?? SESSION_VIEW_ID
@@ -72,18 +68,6 @@ export const VisualizeTab = memo(() => {
       setActiveVisualizationId(optionId);
       if (optionId === ANALYZE_GRAPH_ID) {
         startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
-        openLeftPanel({
-          id: DocumentDetailsLeftPanelKey,
-          path: {
-            tab: LeftPanelVisualizeTab,
-            subTab: optionId,
-          },
-          params: {
-            id: eventId,
-            indexName,
-            scopeId,
-          },
-        });
         openPreviewPanel({
           id: DocumentDetailsAnalyzerPanelKey,
           params: {
@@ -93,7 +77,7 @@ export const VisualizeTab = memo(() => {
         });
       }
     },
-    [startTransaction, eventId, indexName, scopeId, openLeftPanel, openPreviewPanel, key]
+    [startTransaction, openPreviewPanel, key, scopeId]
   );
 
   useEffect(() => {

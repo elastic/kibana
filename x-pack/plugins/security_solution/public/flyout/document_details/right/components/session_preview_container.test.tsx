@@ -8,7 +8,6 @@
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
 import { SessionPreviewContainer } from './session_preview_container';
 import { useSessionPreview } from '../hooks/use_session_preview';
@@ -21,14 +20,15 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '@kbn/security-solution-common';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import { SESSION_VIEW_ID } from '../../left/components/session_view';
 
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../hooks/use_session_preview');
 jest.mock('../../../../common/hooks/use_license');
+
+const mockNavigateToSessionView = jest.fn();
+jest.mock('../../shared/hooks/use_navigate_to_session_view', () => {
+  return { useNavigateToSessionView: () => ({ navigateToSessionView: mockNavigateToSessionView }) };
+});
 
 const mockUseUiSetting = jest.fn().mockReturnValue([false]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -62,7 +62,6 @@ const renderSessionPreview = (context = mockContextValue) =>
 describe('SessionPreviewContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   it('should render component and link in header', () => {
@@ -190,18 +189,7 @@ describe('SessionPreviewContainer', () => {
       ).toBeInTheDocument();
       getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID)).click();
 
-      expect(mockFlyoutApi.openLeftPanel).toHaveBeenCalledWith({
-        id: DocumentDetailsLeftPanelKey,
-        path: {
-          tab: 'visualize',
-          subTab: SESSION_VIEW_ID,
-        },
-        params: {
-          id: mockContextValue.eventId,
-          indexName: mockContextValue.indexName,
-          scopeId: mockContextValue.scopeId,
-        },
-      });
+      expect(mockNavigateToSessionView).toHaveBeenCalled();
     });
 
     it('should not render link to session viewer if flyout is open in rule preview', () => {

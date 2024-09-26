@@ -13,9 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
 import { useSessionPreview } from '../hooks/use_session_preview';
@@ -26,8 +24,7 @@ import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { setActiveTabTimeline } from '../../../../timelines/store/actions';
 import { getScopedActions } from '../../../../helpers';
-import { SESSION_VIEW_ID } from '../../left/components/session_view';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
 
 const timelineId = 'timeline-1';
 
@@ -35,7 +32,6 @@ const timelineId = 'timeline-1';
  * Checks if the SessionView component is available, if so render it or else render an error message
  */
 export const SessionPreviewContainer: FC = () => {
-  const { telemetry } = useKibana().services;
   const {
     eventId,
     indexName,
@@ -83,28 +79,12 @@ export const SessionPreviewContainer: FC = () => {
     startTransaction,
   ]);
 
-  const { openLeftPanel } = useExpandableFlyoutApi();
-
-  const gotoVisualizationTab = useCallback(() => {
-    openLeftPanel({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: 'visualize',
-        subTab: SESSION_VIEW_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
-
-    telemetry.reportDetailsFlyoutTabClicked({
-      location: scopeId,
-      panel: 'left',
-      tabId: 'visualize',
-    });
-  }, [eventId, indexName, openLeftPanel, scopeId, telemetry]);
+  const { navigateToSessionView } = useNavigateToSessionView({
+    eventId,
+    indexName,
+    isFlyoutOpen: true,
+    scopeId,
+  });
 
   const { euiTheme } = useEuiTheme();
 
@@ -169,7 +149,7 @@ export const SessionPreviewContainer: FC = () => {
           !isPreview &&
           !isPreviewMode && {
             link: {
-              callback: visualizationInFlyoutEnabled ? gotoVisualizationTab : goToSessionViewTab,
+              callback: visualizationInFlyoutEnabled ? navigateToSessionView : goToSessionViewTab,
               tooltip: (
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTooltip"
