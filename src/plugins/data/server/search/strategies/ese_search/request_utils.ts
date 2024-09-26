@@ -11,7 +11,6 @@ import { IUiSettingsClient } from '@kbn/core/server';
 import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions } from '@kbn/search-types';
-import { Readable, promises } from 'stream';
 import { UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import { SearchConfigSchema } from '../../../config';
@@ -73,19 +72,3 @@ export function getDefaultAsyncGetParams(
     ...getCommonDefaultAsyncGetParams(searchConfig, options),
   };
 }
-
-export const parseJsonFromStream = async (stream: Readable) => {
-  try {
-    return JSON.parse(
-      await promises.pipeline(stream, async (source) => {
-        let data = '';
-        for await (const chunk of source) {
-          data += chunk;
-        }
-        return data;
-      })
-    );
-  } catch (e) {
-    return {};
-  }
-};

@@ -14,11 +14,12 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
+import { toAsyncKibanaSearchResponse } from './response_utils';
 import {
   getCommonDefaultAsyncSubmitParams,
   getCommonDefaultAsyncGetParams,
 } from '../common/async_utils';
-import { pollSearch, sanitizeRequestParams } from '../../../../common';
+import { pollSearch } from '../../../../common';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
@@ -103,16 +104,8 @@ export const esqlAsyncSearchStrategyProvider = (
           );
 
       const { body, headers, meta } = response;
-      return {
-        id: headers['x-elasticsearch-async-id'] as string,
-        rawResponse: body,
-        isRunning: headers['x-elasticsearch-async-is-running'] === '?1',
-        isPartial: headers['x-elasticsearch-async-is-partial'] === '?1',
-        ...(headers?.warning ? { warning: headers?.warning } : {}),
-        ...(meta?.request?.params
-          ? { requestParams: sanitizeRequestParams(meta?.request?.params) }
-          : {}),
-      };
+
+      return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params);
     };
 
     const cancel = async () => {

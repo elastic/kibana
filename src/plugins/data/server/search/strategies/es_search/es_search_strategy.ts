@@ -10,15 +10,35 @@
 import { firstValueFrom, from, Observable } from 'rxjs';
 import { tap } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
+import { ConnectionRequestParams } from '@elastic/transport';
+import { estypes } from '@elastic/elasticsearch';
+import { sanitizeRequestParams } from '../../sanitize_request_params';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
 import type { SearchUsage } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
 import {
   shimHitsTotal,
-  toKibanaSearchResponse,
+  getTotalLoaded,
 } from '../../../../common/search/strategies/es_search/response_utils';
 import { searchUsageObserver } from '../../collectors/search/usage';
+
+/**
+ * Get the Kibana representation of this response (see `IKibanaSearchResponse`).
+ * @internal
+ */
+export function toKibanaSearchResponse(
+  rawResponse: estypes.SearchResponse<unknown>,
+  requestParams?: ConnectionRequestParams
+) {
+  return {
+    rawResponse,
+    isPartial: false,
+    isRunning: false,
+    ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
+    ...getTotalLoaded(rawResponse),
+  };
+}
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,

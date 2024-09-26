@@ -24,15 +24,12 @@ import {
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
 } from './request_utils';
-import {
-  toAsyncKibanaSearchResponse,
-  toAsyncKibanaSearchStatusResponse,
-} from '../../../../common/search/strategies/ese_search/response_utils';
+import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
 import { SearchUsage, searchUsageObserver } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from '../es_search';
 import { getTotalLoaded, shimHitsTotal } from '../../../../common/search/strategies/es_search';
 import { SearchConfigSchema } from '../../../config';
-import { sanitizeRequestParams } from '../../../../common/search/sanitize_request_params';
+import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
