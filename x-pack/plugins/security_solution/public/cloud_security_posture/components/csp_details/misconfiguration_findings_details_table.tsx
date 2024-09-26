@@ -108,12 +108,16 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const navToFindings = useNavigateFindings();
 
-    const navToFindingsByHostName = (hostName: string) => {
-      navToFindings({ 'host.name': hostName }, ['rule.name']);
-    };
-
     const navToFindingsByRuleAndResourceId = (ruleId: string, resourceId: string) => {
       navToFindings({ 'rule.id': ruleId, 'resource.id': resourceId });
+    };
+
+    const navToFindingsByName = (name: string, queryField: 'host.name' | 'user.name') => {
+      uiMetricService.trackUiMetric(
+        METRIC_TYPE.CLICK,
+        NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
+      );
+      navToFindings({ [queryField]: name }, ['rule.name']);
     };
 
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
@@ -124,10 +128,6 @@ export const MisconfigurationFindingsDetailsTable = memo(
         render: (rule: CspBenchmarkRuleMetadata, finding: MisconfigurationFindingDetailFields) => (
           <EuiLink
             onClick={() => {
-              uiMetricService.trackUiMetric(
-                METRIC_TYPE.CLICK,
-                NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
-              );
               navToFindingsByRuleAndResourceId(rule?.id, finding?.resource?.id);
             }}
           >
@@ -168,13 +168,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 METRIC_TYPE.CLICK,
                 NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
               );
-              navToFindingsByHostName(queryName);
+              navToFindingsByName(queryName, fieldName);
             }}
           >
             {i18n.translate(
               'xpack.securitySolution.flyout.left.insights.misconfigurations.tableTitle',
               {
-                defaultMessage: 'Misconfigurations',
+                defaultMessage: 'Misconfigurations ',
               }
             )}
             <EuiIcon type={'popout'} />
