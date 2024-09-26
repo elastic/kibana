@@ -3,6 +3,7 @@ on:
     types:
       - closed
       - labeled
+      - unlabeled
 
 jobs:
   on-merge:
@@ -21,6 +22,7 @@ jobs:
             || github.event.label.name == 'auto-backport'
           )
         )
+        || (github.event.action == 'unlabeled' && github.event.label.name == 'backport:skip')
         || (github.event.action == 'closed')
       )
     steps:
