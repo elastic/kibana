@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             indexes: [{ index: initialIndex }, { index: 'tsdb_index', create: true, tsdb: true }],
           },
           {
-            name: 'LogsDB stream with an additional TSDB stream',
+            name: 'LogsDB stream with an additional TSDB stream downsampled',
             indexes: [
               { index: initialIndex },
               { index: 'tsdb_index_downsampled', create: true, tsdb: true, downsample: true },
