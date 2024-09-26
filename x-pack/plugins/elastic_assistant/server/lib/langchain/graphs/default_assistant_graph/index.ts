@@ -95,8 +95,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   const latestMessage = langChainMessages.slice(-1); // the last message
 
-  const modelExists = await esStore.isModelInstalled();
-
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
   const chain = RetrievalQAChain.fromLLM(createLlmInstance(), esStore.asRetriever(10));
 
@@ -114,7 +112,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
     logger,
-    modelExists,
+    modelExists: isEnabledKnowledgeBase,
     onNewReplacements,
     replacements,
     request,
