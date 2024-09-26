@@ -10,12 +10,12 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
-import { generateHistoryIndexTemplateId } from './helpers/generate_component_id';
-import { createAndInstallHistoryIngestPipeline } from './create_and_install_ingest_pipeline';
-import { createAndInstallHistoryTransform } from './create_and_install_transform';
+import { generateLatestIndexTemplateId } from './helpers/generate_component_id';
+import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
+import { createAndInstallTransforms } from './create_and_install_transform';
 import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
-import { deleteIngestPipelines } from './delete_ingest_pipeline';
+import { deleteLatestIngestPipeline } from './delete_ingest_pipeline';
 import { findEntityDefinitionById } from './find_entity_definition';
 import {
   entityDefinitionExists,
@@ -27,8 +27,8 @@ import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
 import { EntityDefinitionWithState } from './types';
-import { stopTransforms } from './stop_transforms';
-import { deleteTransforms } from './delete_transforms';
+import { stopLatestTransform, stopTransforms } from './stop_transforms';
+import { deleteLatestTransform, deleteTransforms } from './delete_transforms';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -48,31 +48,34 @@ export async function installEntityDefinition({
 }: InstallDefinitionParams): Promise<EntityDefinition> {
   validateDefinitionCanCreateValidTransformIds(definition);
 
-  try {
-    if (await entityDefinitionExists(soClient, definition.id)) {
-      throw new EntityIdConflict(
-        `Entity definition with [${definition.id}] already exists.`,
-        definition
-      );
-    }
+  if (await entityDefinitionExists(soClient, definition.id)) {
+    throw new EntityIdConflict(
+      `Entity definition with [${definition.id}] already exists.`,
+      definition
+    );
+  }
 
+  try {
     const entityDefinition = await saveEntityDefinition(soClient, {
       ...definition,
       installStatus: 'installing',
       installStartedAt: new Date().toISOString(),
+      installedComponents: [],
     });
 
     return await install({ esClient, soClient, logger, definition: entityDefinition });
   } catch (e) {
     logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
-    await stopAndDeleteTransforms(esClient, definition, logger);
 
-    await deleteIngestPipelines(esClient, definition, logger);
+    await stopLatestTransform(esClient, definition, logger);
+    await deleteLatestTransform(esClient, definition, logger);
+
+    await deleteLatestIngestPipeline(esClient, definition, logger);
 
     await deleteTemplate({
       esClient,
       logger,
-      name: generateHistoryIndexTemplateId(definition),
+      name: generateLatestIndexTemplateId(definition),
     });
 
     await deleteEntityDefinition(soClient, definition).catch((err) => {
@@ -160,10 +163,10 @@ async function install({
   const templates = await createAndInstallTemplates(esClient, definition, logger);
 
   logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
-  const pipelines = await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
+  const pipelines = await createAndInstallIngestPipelines(esClient, definition, logger);
 
   logger.debug(`Installing transforms for definition ${definition.id}`);
-  const transforms = await createAndInstallHistoryTransform(esClient, definition, logger);
+  const transforms = await createAndInstallTransforms(esClient, definition, logger);
 
   await updateEntityDefinition(soClient, definition.id, {
     installStatus: 'installed',

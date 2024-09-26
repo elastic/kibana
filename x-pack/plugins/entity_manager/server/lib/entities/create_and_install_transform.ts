@@ -8,19 +8,19 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateHistoryTransform } from './transform/generate_history_transform';
+import { generateLatestTransform } from './transform/generate_latest_transform';
 
-export async function createAndInstallHistoryTransform(
+export async function createAndInstallTransforms(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
 ): Promise<Array<{ type: 'transform'; id: string }>> {
   try {
-    const historyTransform = generateHistoryTransform(definition);
-    await retryTransientEsErrors(() => esClient.transform.putTransform(historyTransform), {
+    const latestTransform = generateLatestTransform(definition);
+    await retryTransientEsErrors(() => esClient.transform.putTransform(latestTransform), {
       logger,
     });
-    return [{ type: 'transform', id: historyTransform.transform_id }];
+    return [{ type: 'transform', id: latestTransform.transform_id }];
   } catch (e) {
     logger.error(`Cannot create entity history transform for [${definition.id}] entity definition`);
     throw e;

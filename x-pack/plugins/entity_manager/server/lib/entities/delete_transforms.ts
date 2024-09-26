@@ -8,6 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
+import { generateLatestTransformId } from './helpers/generate_component_id';
 
 export async function deleteTransforms(
   esClient: ElasticsearchClient,
@@ -30,7 +31,27 @@ export async function deleteTransforms(
         )
     );
   } catch (e) {
-    logger.error(`Cannot delete history transform [${definition.id}]: ${e}`);
+    logger.error(`Cannot delete transforms for definition [${definition.id}]: ${e}`);
+    throw e;
+  }
+}
+
+export async function deleteLatestTransform(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger
+) {
+  try {
+    await retryTransientEsErrors(
+      () =>
+        esClient.transform.deleteTransform(
+          { transform_id: generateLatestTransformId(definition), force: true },
+          { ignore: [404] }
+        ),
+      { logger }
+    );
+  } catch (e) {
+    logger.error(`Cannot delete latest transform for definition [${definition.id}]: ${e}`);
     throw e;
   }
 }

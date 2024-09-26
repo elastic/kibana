@@ -8,6 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
+import { generateLatestIngestPipelineId } from './helpers/generate_component_id';
 
 export async function deleteIngestPipelines(
   esClient: ElasticsearchClient,
@@ -23,7 +24,25 @@ export async function deleteIngestPipelines(
         )
     );
   } catch (e) {
-    logger.error(`Unable to delete history ingest pipeline [${definition.id}]: ${e}`);
+    logger.error(`Unable to delete ingest pipelines for definition [${definition.id}]: ${e}`);
+    throw e;
+  }
+}
+
+export async function deleteLatestIngestPipeline(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger
+) {
+  try {
+    await retryTransientEsErrors(() =>
+      esClient.ingest.deletePipeline(
+        { id: generateLatestIngestPipelineId(definition) },
+        { ignore: [404] }
+      )
+    );
+  } catch (e) {
+    logger.error(`Unable to delete latest ingest pipeline [${definition.id}]: ${e}`);
     throw e;
   }
 }
