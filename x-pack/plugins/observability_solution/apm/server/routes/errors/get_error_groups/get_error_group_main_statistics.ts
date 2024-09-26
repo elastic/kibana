@@ -131,16 +131,6 @@ export async function getErrorGroupMainStatistics({
             sample: {
               top_hits: {
                 size: 1,
-                _source: [
-                  TRACE_ID,
-                  ERROR_LOG_MESSAGE,
-                  ERROR_EXC_MESSAGE,
-                  ERROR_EXC_HANDLED,
-                  ERROR_EXC_TYPE,
-                  ERROR_CULPRIT,
-                  ERROR_GROUP_ID,
-                  '@timestamp',
-                ],
                 fields: [
                   TRACE_ID,
                   ERROR_LOG_MESSAGE,

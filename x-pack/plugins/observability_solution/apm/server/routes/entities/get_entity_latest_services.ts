@@ -41,7 +41,6 @@ export async function getEntityLatestServices({
       body: {
         size,
         track_total_hits: false,
-        _source: [AGENT_NAME, ENTITY, DATA_STEAM_TYPE, SERVICE_NAME, SERVICE_ENVIRONMENT],
         fields: [AGENT_NAME, ENTITY, DATA_STEAM_TYPE, SERVICE_NAME, SERVICE_ENVIRONMENT],
         query: {
           bool: {
@@ -56,7 +55,7 @@ export async function getEntityLatestServices({
         },
       },
     })
-  ).hits.hits.map((hit) => normalizeFields(hit?.fields) as unknown as EntityLatestServiceRaw);
+  ).hits.hits.map((hit) => normalizeFields(hit?.fields ?? {}) as unknown as EntityLatestServiceRaw);
 
   return latestEntityServices;
 }

@@ -39,7 +39,6 @@ export async function getDownstreamServiceResource({
     body: {
       track_total_hits: false,
       size: 1,
-      _source: ['span.destination.service'],
       query: {
         bool: {
           filter: [

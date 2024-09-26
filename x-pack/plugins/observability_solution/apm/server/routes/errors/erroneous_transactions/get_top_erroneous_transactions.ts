@@ -93,7 +93,6 @@ async function getTopErroneousTransactions({
             sample: {
               top_hits: {
                 size: 1,
-                _source: [TRANSACTION_TYPE],
                 fields: [TRANSACTION_TYPE],
               },
             },
@@ -118,7 +117,9 @@ async function getTopErroneousTransactions({
       ({ key, doc_count: docCount, sample, timeseries }) => {
         return {
           transactionName: key as string,
-          transactionType: sample.hits.hits[0].fields?.['transaction.type']?.[0],
+          transactionType: sample.hits.hits[0].fields?.['transaction.type']?.[0] as
+            | string
+            | undefined,
           occurrences: docCount,
           timeseries: timeseries.buckets.map((timeseriesBucket) => {
             return {

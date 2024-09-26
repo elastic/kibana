@@ -73,7 +73,6 @@ export async function getServiceMetadataIcons({
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME, CLOUD_SERVICE_NAME],
       query: { bool: { filter, should } },
       fields: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME, CLOUD_SERVICE_NAME],
     },

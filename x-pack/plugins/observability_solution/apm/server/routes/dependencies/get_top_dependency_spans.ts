@@ -101,18 +101,6 @@ export async function getTopDependencySpans({
             ],
           },
         },
-        _source: [
-          SPAN_ID,
-          TRACE_ID,
-          TRANSACTION_ID,
-          SPAN_NAME,
-          SERVICE_NAME,
-          SERVICE_ENVIRONMENT,
-          AGENT_NAME,
-          SPAN_DURATION,
-          EVENT_OUTCOME,
-          '@timestamp',
-        ],
         fields: [
           SPAN_ID,
           TRACE_ID,
@@ -144,7 +132,6 @@ export async function getTopDependencySpans({
             filter: [...termsQuery(TRANSACTION_ID, ...transactionIds)],
           },
         },
-        _source: [TRANSACTION_ID, TRANSACTION_TYPE, TRANSACTION_NAME],
         fields: [TRANSACTION_ID, TRANSACTION_TYPE, TRANSACTION_NAME],
         sort: {
           '@timestamp': 'desc',

@@ -97,17 +97,6 @@ export async function getTraceItems({
     body: {
       track_total_hits: false,
       size: 1000,
-      _source: [
-        TIMESTAMP,
-        TRACE_ID,
-        TRANSACTION_ID,
-        PARENT_ID,
-        SERVICE_NAME,
-        ERROR_ID,
-        ERROR_LOG_MESSAGE,
-        ERROR_EXCEPTION,
-        ERROR_GROUP_ID,
-      ],
       query: {
         bool: {
           filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
@@ -244,34 +233,6 @@ async function getTraceDocsPerPage({
     track_total_hits: true,
     size,
     search_after: searchAfter,
-    _source: [
-      TIMESTAMP,
-      TRACE_ID,
-      PARENT_ID,
-      SERVICE_NAME,
-      SERVICE_ENVIRONMENT,
-      AGENT_NAME,
-      EVENT_OUTCOME,
-      PROCESSOR_EVENT,
-      TRANSACTION_DURATION,
-      TRANSACTION_ID,
-      TRANSACTION_NAME,
-      TRANSACTION_TYPE,
-      TRANSACTION_RESULT,
-      FAAS_COLDSTART,
-      SPAN_ID,
-      SPAN_TYPE,
-      SPAN_SUBTYPE,
-      SPAN_ACTION,
-      SPAN_NAME,
-      SPAN_DURATION,
-      SPAN_LINKS,
-      SPAN_COMPOSITE_COUNT,
-      SPAN_COMPOSITE_COMPRESSION_STRATEGY,
-      SPAN_COMPOSITE_SUM,
-      SPAN_SYNC,
-      CHILD_ID,
-    ],
     query: {
       bool: {
         filter: [

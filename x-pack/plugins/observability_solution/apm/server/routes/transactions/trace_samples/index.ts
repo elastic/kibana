@@ -81,7 +81,6 @@ export async function getTraceSamples({
       apm: {
         events: [ProcessorEvent.transaction],
       },
-      _source: [TRANSACTION_ID, TRACE_ID, '@timestamp'],
       body: {
         track_total_hits: false,
         query: {
@@ -112,9 +111,9 @@ export async function getTraceSamples({
 
     const traceSamples = response.hits.hits.map((hit) => ({
       score: hit._score,
-      timestamp: hit.fields['@timestamp']?.[0],
-      transactionId: hit.fields[TRANSACTION_ID]?.[0],
-      traceId: hit.fields[TRACE_ID]?.[0],
+      timestamp: hit.fields['@timestamp']?.[0] as string,
+      transactionId: hit.fields[TRANSACTION_ID]?.[0] as string,
+      traceId: hit.fields[TRACE_ID]?.[0] as string,
     }));
 
     return { traceSamples };
