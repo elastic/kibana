@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react';
-import React, { useMemo, useState } from 'react';
 import { orderBy } from 'lodash';
+import React, { useMemo, useState } from 'react';
 import { EntitiesGrid } from '.';
-import { ENTITY_LAST_SEEN } from '../../../common/es_fields/entities';
+import { EntityType } from '../../../common/entities';
+import { ENTITY_LAST_SEEN, ENTITY_TYPE } from '../../../common/es_fields/entities';
 import { entitiesMock } from './mock/entities_mock';
 
 const stories: Meta<{}> = {
@@ -25,22 +26,44 @@ export const Example: Story<{}> = () => {
     id: ENTITY_LAST_SEEN,
     direction: 'desc',
   });
-
-  const sortedItems = useMemo(
-    () => orderBy(entitiesMock, sort.id, sort.direction),
-    [sort.direction, sort.id]
+  const [selectedEntityType, setSelectedEntityType] = useState<EntityType | undefined>();
+  const filteredAndSortedItems = useMemo(
+    () =>
+      orderBy(
+        selectedEntityType
+          ? entitiesMock.filter((mock) => mock[ENTITY_TYPE] === selectedEntityType)
+          : entitiesMock,
+        sort.id,
+        sort.direction
+      ),
+    [selectedEntityType, sort.direction, sort.id]
   );
 
   return (
-    <EntitiesGrid
-      entities={sortedItems}
-      loading={false}
-      sortDirection={sort.direction}
-      sortField={sort.id}
-      onChangePage={setPageIndex}
-      onChangeSort={setSort}
-      pageIndex={pageIndex}
-    />
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        {`Entity filter: ${selectedEntityType || 'N/A'}`}
+        <EuiLink
+          disabled={!selectedEntityType}
+          data-test-subj="inventoryExampleClearFilterButton"
+          onClick={() => setSelectedEntityType(undefined)}
+        >
+          Clear filter
+        </EuiLink>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EntitiesGrid
+          entities={filteredAndSortedItems}
+          loading={false}
+          sortDirection={sort.direction}
+          sortField={sort.id}
+          onChangePage={setPageIndex}
+          onChangeSort={setSort}
+          pageIndex={pageIndex}
+          onFilterByType={setSelectedEntityType}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -60,6 +83,7 @@ export const EmptyGridExample: Story<{}> = () => {
       onChangePage={setPageIndex}
       onChangeSort={setSort}
       pageIndex={pageIndex}
+      onFilterByType={() => {}}
     />
   );
 };
