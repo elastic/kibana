@@ -29834,11 +29834,9 @@ components:
       type: string
     Security_Entity_Analytics_API_Entity:
       oneOf:
-        - $ref: >-
-            #/components/schemas/Security_Solution_Entity_Analytics_API_UserEntity
-        - $ref: >-
-            #/components/schemas/Security_Solution_Entity_Analytics_API_HostEntity
-    Security_Solution_Entity_Analytics_API_EntityRiskLevels:
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
+    Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
         - Low
@@ -29846,7 +29844,7 @@ components:
         - High
         - Critical
       type: string
-    Security_Solution_Entity_Analytics_API_EntityRiskScoreRecord:
+    Security_Entity_Analytics_API_EntityRiskScoreRecord:
       type: object
       properties:
         '@timestamp':
@@ -29855,8 +29853,7 @@ components:
           format: date-time
           type: string
         calculated_level:
-          $ref: >-
-            #/components/schemas/Security_Solution_Entity_Analytics_API_EntityRiskLevels
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskLevels'
           description: Lexical description of the entity's risk.
           example: Critical
         calculated_score:
@@ -29891,7 +29888,7 @@ components:
           type: number
         criticality_level:
           $ref: >-
-            #/components/schemas/Security_Solution_Entity_Analytics_API_AssetCriticalityLevel
+            #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
         criticality_modifier:
           format: double
           type: number
@@ -29912,8 +29909,7 @@ components:
             A list of the highest-risk documents contributing to this risk
             score. Useful for investigative purposes.
           items:
-            $ref: >-
-              #/components/schemas/Security_Solution_Entity_Analytics_API_RiskScoreInput
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreInput'
           type: array
         notes:
           items:
@@ -29930,7 +29926,7 @@ components:
         - category_1_count
         - inputs
         - notes
-    Security_Solution_Entity_Analytics_API_EntityType:
+    Security_Entity_Analytics_API_EntityType:
       enum:
         - user
         - host
@@ -29943,7 +29939,7 @@ components:
           properties:
             criticality:
               $ref: >-
-                #/components/schemas/Security_Solution_Entity_Analytics_API_AssetCriticalityLevel
+                #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
           required:
             - criticality
         entity:
@@ -30016,7 +30012,7 @@ components:
               type: string
             risk:
               $ref: >-
-                #/components/schemas/Security_Solution_Entity_Analytics_API_EntityRiskScoreRecord
+                #/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord
             type:
               items:
                 type: string
@@ -30059,7 +30055,7 @@ components:
       properties:
         success:
           type: boolean
-    Security_Solution_Entity_Analytics_API_RiskScoreInput:
+    Security_Entity_Analytics_API_RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
       type: object
       properties:
@@ -30097,7 +30093,7 @@ components:
         - index
         - description
         - category
-    Security_Solution_Entity_Analytics_API_TaskManagerUnavailableResponse:
+    Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
       properties:
@@ -30117,7 +30113,7 @@ components:
           properties:
             criticality:
               $ref: >-
-                #/components/schemas/Security_Solution_Entity_Analytics_API_AssetCriticalityLevel
+                #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
           required:
             - criticality
         entity:
@@ -30187,7 +30183,7 @@ components:
               type: string
             risk:
               $ref: >-
-                #/components/schemas/Security_Solution_Entity_Analytics_API_EntityRiskScoreRecord
+                #/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord
             roles:
               items:
                 type: string
