@@ -17,7 +17,7 @@ export function getLogDocumentOverview(
 ): LogDocumentOverview {
   const formatField = <T extends keyof LogDocumentOverview>(field: T) => {
     return (
-      field in doc.flattened
+      doc.flattened[field] !== undefined && doc.flattened[field] !== null
         ? formatFieldValue(
             doc.flattened[field],
             doc.raw,
