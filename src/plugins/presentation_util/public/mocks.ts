@@ -13,7 +13,6 @@ import { ReduxToolsPackage, registerExpressionsLanguage } from '.';
 import { createReduxEmbeddableTools } from './redux_tools/redux_embeddables/create_redux_embeddable_tools';
 import { createReduxTools } from './redux_tools/create_redux_tools';
 import { setStubKibanaServices } from './services/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
 
 const createStartContract = (coreStart: CoreStart): PresentationUtilPluginStart => {
   const startContract: PresentationUtilPluginStart = {
