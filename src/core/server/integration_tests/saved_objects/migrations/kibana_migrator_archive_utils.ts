@@ -18,7 +18,6 @@ const execPromise = promisify(exec);
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
-  currentVersion,
   defaultKibanaIndex,
   getKibanaMigratorTestKit,
   startElasticsearch,
@@ -26,7 +25,7 @@ import {
 import { delay } from './test_utils';
 import { baselineTypes, getBaselineDocuments } from './kibana_migrator_test_kit.fixtures';
 
-export const BASELINE_ELASTICSEARCH_VERSION = currentVersion;
+export const BASELINE_ELASTICSEARCH_VERSION = '9.0.0';
 export const BASELINE_DOCUMENTS_PER_TYPE_1K = 200;
 export const BASELINE_DOCUMENTS_PER_TYPE_500K = 100_000;
 // we discard the second half with exclude on upgrade (firstHalf !== true)
