@@ -9,7 +9,6 @@ import React from 'react';
 import { useToggle } from 'react-use';
 import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../../../common/lib/kibana';
 
 /**
  * Theme doesn't expose width variables. Using provided size variables will require
@@ -22,7 +21,6 @@ const POPOVER_WIDTH = 320;
 
 export function FinalSideHelpInfo(): JSX.Element {
   const [isPopoverOpen, togglePopover] = useToggle(false);
-  const { docLinks } = useKibana().services;
 
   const button = (
     <EuiButtonIcon
@@ -38,24 +36,6 @@ export function FinalSideHelpInfo(): JSX.Element {
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText"
           defaultMessage="Choose field values used in the upgraded rule. "
-          // values={{
-          //   integrationsDocLink: (
-          //     <EuiLink href={docLinks.links.securitySolution.createDetectionRules} target="_blank">
-          //       <FormattedMessage
-          //         id="xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.integrationsLink"
-          //         defaultMessage="integrations"
-          //       />
-          //     </EuiLink>
-          //   ),
-          //   semverLink: (
-          //     <EuiLink href="https://semver.org/" target="_blank">
-          //       <FormattedMessage
-          //         id="xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.semanticVersionLink"
-          //         defaultMessage="semantic version"
-          //       />
-          //     </EuiLink>
-          //   ),
-          // }}
         />
       </EuiText>
     </EuiPopover>
