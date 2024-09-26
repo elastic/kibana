@@ -5,31 +5,34 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTextAlign,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { IndicesStatusResponse, UserStartPrivilegesResponse } from '../../../common';
+import { docLinks } from '../../../common/doc_links';
 
 import { AnalyticsEvents } from '../../analytics/constants';
+import { AvailableLanguages } from '../../code_examples';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-
 import { generateRandomIndexName } from '../../utils/indices';
 import { getDefaultCodingLanguage } from '../../utils/language';
+
 import { CreateIndexForm } from './create_index';
 import { CreateIndexCodeView } from './create_index_code';
 import { CreateIndexFormState } from './types';
-import { AvailableLanguages } from '../../code_examples';
+import { useKibana } from '../../hooks/use_kibana';
 
 function initCreateIndexState(): CreateIndexFormState {
   return {
@@ -50,11 +53,13 @@ export interface ElasticsearchStartProps {
 }
 
 export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) => {
+  const { cloud, http } = useKibana().services;
   const [createIndexView, setCreateIndexView] = useState<CreateIndexView>(
     userPrivileges?.privileges.canCreateIndex === false ? CreateIndexView.Code : CreateIndexView.UI
   );
   const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState);
   const usageTracker = useUsageTracker();
+
   useEffect(() => {
     usageTracker.load(AnalyticsEvents.startPageOpened);
   }, [usageTracker]);
@@ -64,6 +69,16 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
       setCreateIndexView(CreateIndexView.Code);
     }
   }, [userPrivileges]);
+
+  const o11yTrialLink = useMemo(() => {
+    if (cloud && cloud.isServerlessEnabled) {
+      return `${
+        cloud?.projectsUrl ?? 'https://cloud.elastic.co/projects/'
+      }create/observability/start`;
+    }
+    return http.basePath.prepend('/app/observability/onboarding');
+  }, [cloud, http]);
+
   const onChangeView = useCallback(
     (id) => {
       switch (id) {
@@ -123,71 +138,140 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiPanel>
-        <EuiForm component="form" fullWidth>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h4>
-                    {i18n.translate('xpack.searchIndices.startPage.createIndex.title', {
-                      defaultMessage: 'Create your first index',
-                    })}
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  legend={i18n.translate(
-                    'xpack.searchIndices.startPage.createIndex.viewSelec.legend',
-                    { defaultMessage: 'Create index view selection' }
-                  )}
-                  options={[
-                    {
-                      id: CreateIndexView.UI,
-                      label: i18n.translate(
-                        'xpack.searchIndices.startPage.createIndex.viewSelect.ui',
-                        { defaultMessage: 'UI' }
-                      ),
-                      'data-test-subj': 'createIndexUIViewBtn',
-                    },
-                    {
-                      id: CreateIndexView.Code,
-                      label: i18n.translate(
-                        'xpack.searchIndices.startPage.createIndex.viewSelect.code',
-                        { defaultMessage: 'Code' }
-                      ),
-                      'data-test-subj': 'createIndexCodeViewBtn',
-                    },
-                  ]}
-                  buttonSize="compressed"
-                  idSelected={createIndexView}
-                  onChange={onChangeView}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiText color="subdued">
-              <p>
-                {i18n.translate('xpack.searchIndices.startPage.createIndex.description', {
-                  defaultMessage:
-                    'An index stores your data and defines the schema, or field mappings, for your searches',
-                })}
-              </p>
-            </EuiText>
-            {createIndexView === CreateIndexView.UI && (
-              <CreateIndexForm
-                userPrivileges={userPrivileges}
-                formState={formState}
-                setFormState={setFormState}
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h4>
+                  {i18n.translate('xpack.searchIndices.startPage.createIndex.title', {
+                    defaultMessage: 'Create your first index',
+                  })}
+                </h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend={i18n.translate(
+                  'xpack.searchIndices.startPage.createIndex.viewSelec.legend',
+                  { defaultMessage: 'Create index view selection' }
+                )}
+                options={[
+                  {
+                    id: CreateIndexView.UI,
+                    label: i18n.translate(
+                      'xpack.searchIndices.startPage.createIndex.viewSelect.ui',
+                      { defaultMessage: 'UI' }
+                    ),
+                    'data-test-subj': 'createIndexUIViewBtn',
+                  },
+                  {
+                    id: CreateIndexView.Code,
+                    label: i18n.translate(
+                      'xpack.searchIndices.startPage.createIndex.viewSelect.code',
+                      { defaultMessage: 'Code' }
+                    ),
+                    'data-test-subj': 'createIndexCodeViewBtn',
+                  },
+                ]}
+                buttonSize="compressed"
+                idSelected={createIndexView}
+                onChange={onChangeView}
               />
-            )}
-            {createIndexView === CreateIndexView.Code && (
-              <CreateIndexCodeView
-                createIndexForm={formState}
-                changeCodingLanguage={onChangeCodingLanguage}
-              />
-            )}
+            </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiForm>
+          <EuiText color="subdued">
+            <p>
+              {i18n.translate('xpack.searchIndices.startPage.createIndex.description', {
+                defaultMessage:
+                  'An index stores your data and defines the schema, or field mappings, for your searches',
+              })}
+            </p>
+          </EuiText>
+          {createIndexView === CreateIndexView.UI && (
+            <CreateIndexForm
+              userPrivileges={userPrivileges}
+              formState={formState}
+              setFormState={setFormState}
+            />
+          )}
+          {createIndexView === CreateIndexView.Code && (
+            <CreateIndexCodeView
+              createIndexForm={formState}
+              changeCodingLanguage={onChangeCodingLanguage}
+            />
+          )}
+        </EuiFlexGroup>
+      </EuiPanel>
+      <EuiSpacer />
+      <EuiPanel color="transparent">
+        <EuiTextAlign textAlign="center">
+          <EuiTitle size="xs">
+            <h5>
+              {i18n.translate('xpack.searchIndices.startPage.observabilityCallout.title', {
+                defaultMessage: 'Looking to store your logs or metrics data?',
+              })}
+            </h5>
+          </EuiTitle>
+        </EuiTextAlign>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="text"
+              iconSide="right"
+              iconType="popout"
+              data-test-subj="logstashDocsBtn"
+              data-telemetry-id="searchIndicesStartCollectLogsLink"
+              href={docLinks.analyzeLogs}
+              target="_blank"
+            >
+              {i18n.translate('xpack.searchIndices.startPage.observabilityCallout.logs.button', {
+                defaultMessage: 'Collect and analyze logs',
+              })}
+            </EuiButtonEmpty>
+            <EuiText color="subdued" size="s" textAlign="center">
+              <small>
+                {i18n.translate(
+                  'xpack.searchIndices.startPage.observabilityCallout.logs.subTitle',
+                  {
+                    defaultMessage: 'Explore Logstash and Beats',
+                  }
+                )}
+              </small>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText>or</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="text"
+              iconSide="right"
+              iconType="popout"
+              data-test-subj="startO11yTrialBtn"
+              data-telemetry-id="searchIndicesStartO11yTrialLink"
+              href={o11yTrialLink}
+              target="_blank"
+            >
+              {i18n.translate(
+                'xpack.searchIndices.startPage.observabilityCallout.o11yTrial.button',
+                {
+                  defaultMessage: 'Start an Observability trial',
+                }
+              )}
+            </EuiButtonEmpty>
+            <EuiText color="subdued" size="s" textAlign="center">
+              <small>
+                {i18n.translate(
+                  'xpack.searchIndices.startPage.observabilityCallout.o11yTrial.subTitle',
+                  {
+                    defaultMessage: 'Powerful performance monitoring',
+                  }
+                )}
+              </small>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </EuiPanel>
   );
