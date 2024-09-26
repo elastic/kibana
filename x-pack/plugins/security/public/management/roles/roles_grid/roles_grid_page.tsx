@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiSwitchEvent, EuiTableSortingType, Query } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -54,13 +54,6 @@ export interface Props extends StartServices {
   cloudOrgUrl?: string;
 }
 
-interface RolesTableState {
-  query: Query;
-  from: number;
-  size: number;
-  sort: EuiTableSortingType<Role>['sort'];
-}
-
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
   return `/${action}${roleName ? `/${encodeURIComponent(roleName)}` : ''}`;
 };
@@ -73,17 +66,6 @@ const getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: bo
       normalized.indexOf(normalizedQuery) !== -1 && (includeReservedRoles || !isRoleReserved(role))
     );
   });
-};
-
-const DEFAULT_TABLE_STATE = {
-  query: EuiSearchBar.Query.MATCH_ALL,
-  sort: {
-    field: 'name' as const,
-    direction: 'asc' as const,
-  },
-  from: 0,
-  size: 25,
-  filters: {},
 };
 
 export const RolesGridPage: FC<Props> = ({
@@ -105,7 +87,6 @@ export const RolesGridPage: FC<Props> = ({
   const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
   const [includeReservedRoles, setIncludeReservedRoles] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [tableState, setTableState] = useState<RolesTableState>(DEFAULT_TABLE_STATE);
 
   useEffect(() => {
     loadRoles();
@@ -352,13 +333,6 @@ export const RolesGridPage: FC<Props> = ({
     setShowDeleteConfirmation(false);
   };
 
-  const sorting = {
-    sort: {
-      field: tableState.sort?.field ?? 'name',
-      direction: tableState.sort?.direction ?? 'asc',
-    },
-  };
-
   return permissionDenied ? (
     <PermissionDenied />
   ) : (
@@ -488,7 +462,12 @@ export const RolesGridPage: FC<Props> = ({
           }
           items={visibleRoles}
           loading={isLoading}
-          sorting={sorting}
+          sorting={{
+            sort: {
+              field: 'name',
+              direction: 'asc',
+            },
+          }}
           rowProps={{ 'data-test-subj': 'roleRow' }}
         />
       </KibanaPageTemplate.Section>
