@@ -66,7 +66,7 @@ describe('schemas', () => {
       expect(result.data).toEqual({
         source: 'host.name',
         destination: 'hostName',
-        aggregation: { type: 'terms', limit: 1000 },
+        aggregation: { type: 'terms', limit: 10, lookbackPeriod: '1h' },
       });
     });
 
