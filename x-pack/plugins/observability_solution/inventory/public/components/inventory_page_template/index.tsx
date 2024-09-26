@@ -6,14 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiEmptyPrompt,
-  EuiLoadingLogo,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import {} from '@elastic/eui';
+import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchBar } from '../search_bar';
 import { getEntityManagerEnablement } from './no_data_config';
@@ -30,19 +25,7 @@ const pageTitle = (
       })}
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiBetaBadge
-        iconType="beaker"
-        label={i18n.translate('xpack.inventory.techPreviewBadge.label', {
-          defaultMessage: 'Technical preview',
-        })}
-        size="m"
-        color="hollow"
-        tooltipContent={i18n.translate('xpack.inventory.techPreviewBadge.tooltip', {
-          defaultMessage:
-            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-        })}
-        tooltipPosition={'right'}
-      />
+      <TechnicalPreviewBadge />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
