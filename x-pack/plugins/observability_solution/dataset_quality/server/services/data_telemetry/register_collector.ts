@@ -91,19 +91,19 @@ export function registerLogsDataUsageCollector(
             },
           },
           index_count: {
-            type: 'integer',
+            type: 'long',
             _meta: {
               description: 'Total number of indices in the stream of logs',
             },
           },
           namespace_count: {
-            type: 'integer',
+            type: 'long',
             _meta: {
               description: 'Total number of namespaces in the stream of logs',
             },
           },
           field_count: {
-            type: 'integer',
+            type: 'long',
             _meta: {
               description: 'Total number of fields in mappings of indices of the stream of logs',
             },
