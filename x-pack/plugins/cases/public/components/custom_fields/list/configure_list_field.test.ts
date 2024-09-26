@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { configureTextCustomFieldFactory } from './configure_text_field';
+import { configureListCustomFieldFactory } from './configure_list_field';
 
-describe('configureTextCustomFieldFactory ', () => {
-  const builder = configureTextCustomFieldFactory();
+describe('configureListCustomFieldFactory ', () => {
+  const builder = configureListCustomFieldFactory();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -16,11 +16,12 @@ describe('configureTextCustomFieldFactory ', () => {
 
   it('renders correctly', async () => {
     expect(builder).toEqual({
-      id: 'text',
-      label: 'Text',
+      id: 'list',
+      label: 'List',
       getEuiTableColumn: expect.any(Function),
       build: expect.any(Function),
       convertNullToEmpty: expect.any(Function),
+      getFilterOptions: expect.any(Function),
     });
   });
 });
