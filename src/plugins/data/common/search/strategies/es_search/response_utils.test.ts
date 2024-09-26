@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTotalLoaded, toKibanaSearchResponse, shimHitsTotal } from './response_utils';
+import { getTotalLoaded, shimHitsTotal } from './response_utils';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('response utils', () => {
@@ -23,34 +23,6 @@ describe('response utils', () => {
       } as unknown as estypes.SearchResponse<unknown>);
 
       expect(result).toEqual({
-        total: 100,
-        loaded: 15,
-      });
-    });
-  });
-
-  describe('toKibanaSearchResponse', () => {
-    it('returns rawResponse, isPartial, isRunning, total, and loaded', () => {
-      const result = toKibanaSearchResponse({
-        _shards: {
-          successful: 10,
-          failed: 5,
-          skipped: 5,
-          total: 100,
-        },
-      } as unknown as estypes.SearchResponse<unknown>);
-
-      expect(result).toEqual({
-        rawResponse: {
-          _shards: {
-            successful: 10,
-            failed: 5,
-            skipped: 5,
-            total: 100,
-          },
-        },
-        isRunning: false,
-        isPartial: false,
         total: 100,
         loaded: 15,
       });
