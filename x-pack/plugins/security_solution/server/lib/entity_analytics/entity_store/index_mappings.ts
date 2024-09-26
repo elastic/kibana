@@ -25,6 +25,9 @@ const BASE_ES_MAPPING: MappingTypeMapping['properties'] = {
       },
     },
   },
+  'entity.source': {
+    type: 'keyword',
+  },
 };
 
 const HOST_ES_MAPPING: MappingTypeMapping['properties'] = {

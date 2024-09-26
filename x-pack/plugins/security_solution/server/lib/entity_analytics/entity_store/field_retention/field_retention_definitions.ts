@@ -12,6 +12,11 @@ const DEFAULT_FIELD_RETENTION_COUNT = 10;
 
 const getBaseFields = (entityType: EntityType): FieldRetentionDefinition['fields'] => [
   {
+    field: 'entityFields.source',
+    operation: 'collect_values',
+    maxLength: DEFAULT_FIELD_RETENTION_COUNT,
+  },
+  {
     field: 'asset.criticality',
     operation: 'prefer_newest_value',
   },

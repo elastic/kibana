@@ -48,15 +48,27 @@ export const buildFieldRetentionIngestPipeline = ({
       field: 'entity',
     },
   },
+  ...getDotExpanderProcessors(allEntityFields),
+  ...getFieldProcessors(fieldRetentionDefinition),
+  ...getRemoveEmptyFieldProcessors(allEntityFields),
   {
     set: {
       field: 'entity.name',
       value: `{{${getIdentityFieldForEntityType(fieldRetentionDefinition.entityType)}}}`,
     },
   },
-  ...getDotExpanderProcessors(allEntityFields),
-  ...getFieldProcessors(fieldRetentionDefinition),
-  ...getRemoveEmptyFieldProcessors(allEntityFields),
+  {
+    set: {
+      field: 'entity.source',
+      copy_from: 'entityFields.source',
+    },
+  },
+  {
+    remove: {
+      ignore_failure: true,
+      field: 'entityFields',
+    },
+  },
   arrayToSingleValueProcessor({
     field: `${fieldRetentionDefinition.entityType}.risk.calculated_level`,
   }),
@@ -222,20 +234,19 @@ const collectValuesProcessor = ({ field, maxLength }: CollectValues) => {
     script: {
       lang: 'painless',
       source: `
-  if (${fieldBrackets} == null) {
-    ${fieldBrackets} = new ArrayList();
-  }
+if (${fieldBrackets} == null) {
+  ${fieldBrackets} = new ArrayList();
+}
 
-  List combinedItems = new ArrayList();
+Set uniqueRoles = new HashSet(${fieldBrackets});
 
-  combinedItems.addAll(${fieldBrackets});
+if (uniqueRoles.size() < params.max_length && ctx.historical != null && ${enrichFieldBrackets} != null) {
+  int remaining = params.max_length - uniqueRoles.size();
+  List historicalRoles = ${enrichFieldBrackets}.subList(0, (int) Math.min(remaining, ${enrichFieldBrackets}.size()));
+  uniqueRoles.addAll(historicalRoles);
+}
 
-  if (combinedItems.size() < params.max_length && ctx.${ENRICH_FIELD} != null && ${enrichFieldBrackets} != null) {
-    int remaining = params.max_length - combinedItems.size();
-    combinedItems.addAll(${enrichFieldBrackets}.subList(0, (int) Math.min(remaining, ${enrichFieldBrackets}.size())));
-  }
-
-  ${fieldBrackets} = combinedItems.subList(0, (int) Math.min(params.max_length, combinedItems.size()));
+${fieldBrackets} = new ArrayList(uniqueRoles).subList(0, (int) Math.min(params.max_length, uniqueRoles.size()));
 `,
       params: {
         max_length: maxLength,
