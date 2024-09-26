@@ -18,7 +18,6 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const metadataService = this.options.endpointService.getEndpointMetadataService();
     const esClient = this.options.esClient;
-    const soClient = this.options.soClient;
 
     try {
       const agentIdsKql = agentIds.map((agentId) => `agent.id: ${agentId}`).join(' or ');
