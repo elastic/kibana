@@ -35,6 +35,7 @@ export async function getLatestEntities({
   sloClient,
   sortField,
   sortOrder,
+  postFilter,
 }: {
   esClient: ObservabilityElasticsearchClient;
   kuery: string;
@@ -48,6 +49,7 @@ export async function getLatestEntities({
   sloClient: SloClient;
   sortField: EntitySortField;
   sortOrder: 'asc' | 'desc';
+  postFilter?: string;
 }): Promise<EntityWithSignalCounts[]> {
   return withInventorySpan(
     'get_latest_entities',
@@ -82,6 +84,7 @@ export async function getLatestEntities({
         signals,
         sortOrder,
         sortField,
+        postFilter,
       });
 
       if (response.length || !fromSourceIfEmpty) {

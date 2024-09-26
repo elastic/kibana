@@ -61,6 +61,10 @@ type CompositeBucketOf<
   CompositeResultOf<TSourceFieldMap, TAggregationMap>
 >['aggregations']['groups']['buckets'][number];
 
+export type CompositeKeysOf<TSourceFieldMap extends CompositeSourceFieldMap> = Required<
+  Required<CompositeResultOf<TSourceFieldMap, undefined>>['aggregations']['groups']
+>['after_key'];
+
 const PAGE_SIZE = 10_000;
 
 export type CompositePaginateCallback<

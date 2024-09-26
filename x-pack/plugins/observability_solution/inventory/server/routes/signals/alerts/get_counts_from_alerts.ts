@@ -69,6 +69,7 @@ export async function getSignalCountsFromAlerts({
                         },
                       },
                     },
+                    fields: {},
                   },
                   (request) =>
                     alertsClient.find({

@@ -18,6 +18,7 @@ export async function lookupEntitiesById({
   signals,
   sortOrder,
   sortField,
+  postFilter,
 }: {
   esClient: ObservabilityElasticsearchClient;
   entities: Array<{ type: string; displayName: string }>;
@@ -26,6 +27,7 @@ export async function lookupEntitiesById({
   signals: Array<Pick<EntityWithSignalCounts, 'type' | 'displayName' | 'alerts' | 'slos'>>;
   sortOrder: 'asc' | 'desc';
   sortField: EntitySortField;
+  postFilter?: string;
 }): Promise<EntityWithSignalCounts[]> {
   if (!entities.length) {
     return [];

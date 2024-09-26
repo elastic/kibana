@@ -34,6 +34,7 @@ export async function searchLatestEntitiesIndex({
   signals,
   sortOrder,
   sortField,
+  postFilter,
 }: {
   esClient: ObservabilityElasticsearchClient;
   start: number;
@@ -43,6 +44,7 @@ export async function searchLatestEntitiesIndex({
   signals: Array<Pick<EntityWithSignalCounts, 'type' | 'displayName' | 'slos' | 'alerts'>>;
   sortOrder: 'asc' | 'desc';
   sortField: EntitySortField;
+  postFilter?: string;
 }): Promise<EntityWithSignalCounts[]> {
   const tables: ESQLLookupTables = {};
 
@@ -77,7 +79,12 @@ export async function searchLatestEntitiesIndex({
 
   if (signals.length) {
     commands.push(`LOOKUP signal_count ON entity.type, entity.displayName`);
+    // workaround for LOOKUP bug
     commands.push('LIMIT 10000000');
+  }
+
+  if (postFilter) {
+    commands.push(postFilter);
   }
 
   const sortOrderUC = sortOrder.toUpperCase();

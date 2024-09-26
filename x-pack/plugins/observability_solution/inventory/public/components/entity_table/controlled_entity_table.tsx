@@ -22,6 +22,8 @@ import React, { useMemo } from 'react';
 import { EntitySortField, EntityWithSignalCounts } from '../../../common/entities';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { InventorySearchBar } from '../inventory_search_bar';
+import { EntityTableViewSelection } from './entity_table_view_selection';
+import { ViewType } from '.';
 
 export function ControlledEntityTable({
   rows,
@@ -42,6 +44,8 @@ export function ControlledEntityTable({
   onSelectedTypeChange,
   sort,
   onSortChange,
+  viewType,
+  onViewTypeChange,
 }: {
   rows: EntityWithSignalCounts[];
   columns: Array<EuiBasicTableColumn<EntityWithSignalCounts>>;
@@ -61,6 +65,8 @@ export function ControlledEntityTable({
   availableTypes?: Array<{ label: string; value: string }>;
   sort?: { field: EntitySortField; order: 'asc' | 'desc' };
   onSortChange?: (nextSort: { field: EntitySortField; order: 'asc' | 'desc' }) => void;
+  viewType: ViewType;
+  onViewTypeChange: (next: ViewType) => void;
 }) {
   const router = useInventoryRouter();
 
@@ -225,6 +231,7 @@ export function ControlledEntityTable({
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
+      <EntityTableViewSelection viewType={viewType} onViewTypeChange={onViewTypeChange} />
       <EuiBasicTable<EntityWithSignalCounts>
         columns={displayedColumns}
         items={displayedRows}

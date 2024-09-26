@@ -14,6 +14,8 @@ import { useKibana } from '../../hooks/use_kibana';
 import { ControlledEntityTable } from './controlled_entity_table';
 import { EntitySortField, LATEST_ENTITIES_INDEX } from '../../../common/entities';
 
+export type ViewType = 'default' | 'unhealthy';
+
 export function EntityTable({
   type,
   dslFilter,
@@ -46,6 +48,8 @@ export function EntityTable({
     return commands.join(' | ');
   }, [type]);
 
+  const [viewType, setViewType] = useState<ViewType>('default');
+
   const [displayedKqlFilter, setDisplayedKqlFilter] = useState('');
   const [persistedKqlFilter, setPersistedKqlFilter] = useState('');
 
@@ -70,6 +74,10 @@ export function EntityTable({
             dslFilter,
             sortField: sort.field,
             sortOrder: sort.order,
+            postFilter:
+              viewType === 'default'
+                ? undefined
+                : 'WHERE alerts.active > 0 OR slos.violated > 0 OR slos.degraded > 0',
           },
         },
       });
@@ -83,6 +91,7 @@ export function EntityTable({
       dslFilter,
       sort.field,
       sort.order,
+      viewType,
     ]
   );
 
@@ -224,6 +233,10 @@ export function EntityTable({
         setSort(nextSort);
       }}
       sort={sort}
+      viewType={viewType}
+      onViewTypeChange={(nextViewType) => {
+        setViewType(nextViewType);
+      }}
     />
   );
 }

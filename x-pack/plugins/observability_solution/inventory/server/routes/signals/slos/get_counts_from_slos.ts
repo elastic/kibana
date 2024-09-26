@@ -66,6 +66,7 @@ export async function getSignalCountsFromSlos({
                     getFieldAlias: (field) => `slo.groupings.${field}`,
                     logger,
                     aggs: getSloFilterAggregations(),
+                    fields: {},
                   },
                   (request) =>
                     sloClient.searchSloSummaryIndex({

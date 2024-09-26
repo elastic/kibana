@@ -112,6 +112,7 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
       t.partial({
         fromSourceIfEmpty: t.boolean,
         dslFilter: t.array(t.record(t.string, t.any)),
+        postFilter: t.string,
       }),
     ]),
   }),
@@ -132,7 +133,17 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
     });
 
     const {
-      body: { start, end, kuery, type, fromSourceIfEmpty, dslFilter, sortOrder, sortField },
+      body: {
+        start,
+        end,
+        kuery,
+        type,
+        fromSourceIfEmpty,
+        dslFilter,
+        sortOrder,
+        sortField,
+        postFilter,
+      },
     } = params;
 
     const [alertsClient, sloClient, { definitions }] = await Promise.all([
@@ -158,6 +169,7 @@ const listInventoryEntitiesRoute = createInventoryServerRoute({
         sloClient,
         sortField,
         sortOrder,
+        postFilter,
       }),
     };
   },

@@ -11,6 +11,7 @@ import { unflattenObject } from '@kbn/observability-utils-common/object/unflatte
 import { parse, render } from 'mustache';
 import { EntityDefinition } from '../../../common/entities';
 import {
+  CompositeKeysOf,
   CompositePaginateCallback,
   CompositeSourceFieldMap,
   GroupsCompositeSubAggregationMap,
@@ -18,6 +19,7 @@ import {
 } from './composite_paginate';
 
 export async function compositePaginateThroughEntities<
+  TCompositeSourceFieldMap extends CompositeSourceFieldMap,
   TAggregationMap extends GroupsCompositeSubAggregationMap | undefined = undefined
 >(
   {
@@ -25,31 +27,43 @@ export async function compositePaginateThroughEntities<
     logger,
     aggs,
     getFieldAlias,
+    fields,
   }: {
     definition: EntityDefinition;
     logger: Logger;
     aggs?: TAggregationMap;
     getFieldAlias?: (field: string) => string;
+    fields: TCompositeSourceFieldMap;
   },
-  callback: CompositePaginateCallback<CompositeSourceFieldMap, TAggregationMap>
+  callback: CompositePaginateCallback<
+    CompositeSourceFieldMap & TCompositeSourceFieldMap,
+    TAggregationMap
+  >
 ): Promise<
   Array<{
     type: string;
     displayName: string;
     properties: Record<string, string | number | null>;
     doc_count: number;
+    keys: CompositeKeysOf<TCompositeSourceFieldMap>;
     aggregations: AggregateOfMap<TAggregationMap, any>;
   }>
 > {
-  const { groups } = await compositePaginate<CompositeSourceFieldMap, TAggregationMap>(
+  const { groups } = await compositePaginate<
+    CompositeSourceFieldMap & TCompositeSourceFieldMap,
+    TAggregationMap
+  >(
     {
       logger,
       aggs,
-      fields: Object.fromEntries(
-        definition.identityFields.map(({ field, optional }) => {
-          return [field, { missing_bucket: optional, alias: getFieldAlias?.(field) }];
-        })
-      ),
+      fields: {
+        ...Object.fromEntries(
+          definition.identityFields.map(({ field, optional }) => {
+            return [field, { missing_bucket: optional, alias: getFieldAlias?.(field) }];
+          })
+        ),
+        ...fields,
+      },
     },
     callback
   );
@@ -68,6 +82,12 @@ export async function compositePaginateThroughEntities<
       })
     );
 
+    const keys = Object.fromEntries(
+      Object.entries(fields).map(([fieldName]) => {
+        return [fieldName, group.key[fieldName]];
+      })
+    ) as CompositeKeysOf<TCompositeSourceFieldMap>;
+
     const displayName = render(definition.displayNameTemplate, unflattenObject(properties, {}));
 
     return {
@@ -76,6 +96,7 @@ export async function compositePaginateThroughEntities<
       type,
       properties,
       displayName,
+      keys,
     };
   });
 
