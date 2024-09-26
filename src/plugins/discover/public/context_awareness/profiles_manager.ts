@@ -25,6 +25,7 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
+import { DiscoverEBTContextManager } from '../services/discover_ebt_context_manager';
 
 interface SerializedRootProfileParams {
   solutionNavId: RootProfileProviderParams['solutionNavId'];
@@ -52,6 +53,7 @@ export interface GetProfilesOptions {
 export class ProfilesManager {
   private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
+  private readonly ebtContextManager: DiscoverEBTContextManager;
 
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
@@ -61,10 +63,12 @@ export class ProfilesManager {
   constructor(
     private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
-    private readonly documentProfileService: DocumentProfileService
+    private readonly documentProfileService: DocumentProfileService,
+    ebtContextManager: DiscoverEBTContextManager
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
+    this.ebtContextManager = ebtContextManager;
   }
 
   /**
@@ -130,6 +134,7 @@ export class ProfilesManager {
       return;
     }
 
+    this.trackActiveProfiles(this.rootContext$.getValue().profileId, context.profileId);
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;
   }
@@ -193,6 +198,15 @@ export class ProfilesManager {
     return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
       map(() => this.getProfiles(options))
     );
+  }
+
+  /**
+   * Tracks the active profiles in the EBT context
+   */
+  private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
+    const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
+
+    this.ebtContextManager.updateProfilesContextWith(dscProfiles);
   }
 }
 

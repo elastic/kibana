@@ -14,7 +14,7 @@ import {
   RuleExecutorOptions,
   AlertsClientError,
 } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
@@ -33,7 +33,6 @@ import {
 import {
   setRecoveredAlertsContext,
   updateState,
-  getAlertDetailsUrl,
   getViewInAppUrl,
   getRelativeViewInAppUrl,
   getFullViewInAppMessage,
