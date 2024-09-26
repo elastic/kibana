@@ -9,8 +9,8 @@
 
 import type { Logger } from '@kbn/logging';
 import { getFips } from 'crypto';
+import { CriticalError } from '@kbn/core-base-server-internal';
 import { PKCS12ConfigType, SecurityServiceConfigType } from '../utils';
-
 export function isFipsEnabled(config: SecurityServiceConfigType): boolean {
   return config?.experimental?.fipsMode?.enabled ?? false;
 }
@@ -32,21 +32,21 @@ export function checkFipsConfig(
     );
     // FIPS must be enabled on both, or, log/error an exit Kibana
     if (isFipsConfigEnabled !== isNodeRunningWithFipsEnabled) {
-      logger.error(
+      throw new CriticalError(
         `Configuration mismatch error. xpack.security.experimental.fipsMode.enabled is set to ${isFipsConfigEnabled} and the configured Node.js environment has FIPS ${
           isNodeRunningWithFipsEnabled ? 'enabled' : 'disabled'
-        }`
+        }`,
+        'invalidConfig',
+        78
       );
-
-      process.exit(78);
     } else if (definedPKCS12ConfigOptions.length > 0) {
-      definedPKCS12ConfigOptions.forEach((option) => {
-        logger.error(
-          `Configuration mismatch error: ${option} is set, PKCS12 configurations are not allowed while running in FIPS mode.`
-        );
-      });
-
-      process.exit(78);
+      throw new CriticalError(
+        `Configuration mismatch error: ${definedPKCS12ConfigOptions.join(', ')} ${
+          definedPKCS12ConfigOptions.length > 1 ? 'are' : 'is'
+        } set, PKCS12 configurations are not allowed while running in FIPS mode.`,
+        'invalidConfig',
+        78
+      );
     } else {
       logger.info('Kibana is running in FIPS mode.');
     }
