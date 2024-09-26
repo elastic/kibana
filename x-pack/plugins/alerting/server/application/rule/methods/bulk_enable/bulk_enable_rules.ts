@@ -204,6 +204,8 @@ const bulkEnableRulesWithOCC = async (
       await pMap(
         rulesFinderRules,
         async (rule) => {
+          const ruleName = rule.attributes.name;
+
           try {
             if (scheduleValidationError) {
               throw Error(scheduleValidationError);
@@ -215,8 +217,8 @@ const bulkEnableRulesWithOCC = async (
                 throw Error(`Rule not authorized for bulk enable - ${error.message}`);
               }
             }
-            if (rule.attributes.name) {
-              ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+            if (ruleName) {
+              ruleNameToRuleIdMapping[rule.id] = ruleName;
             }
 
             // TODO (http-versioning) Remove RawRuleAction and RawRule casts
@@ -232,7 +234,7 @@ const bulkEnableRulesWithOCC = async (
               ...(!rule.attributes.apiKey &&
                 (await createNewAPIKeySet(context, {
                   id: rule.attributes.alertTypeId,
-                  ruleName: rule.attributes.name,
+                  ruleName,
                   username,
                   shouldUpdateApiKey: true,
                 }))),
@@ -293,7 +295,11 @@ const bulkEnableRulesWithOCC = async (
               ruleAuditEvent({
                 action: RuleAuditAction.ENABLE,
                 outcome: 'unknown',
-                savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
+                savedObject: {
+                  type: RULE_SAVED_OBJECT_TYPE,
+                  id: rule.id,
+                  name: ruleName,
+                },
               })
             );
           } catch (error) {
@@ -307,6 +313,11 @@ const bulkEnableRulesWithOCC = async (
             context.auditLogger?.log(
               ruleAuditEvent({
                 action: RuleAuditAction.ENABLE,
+                savedObject: {
+                  type: RULE_SAVED_OBJECT_TYPE,
+                  id: rule.id,
+                  name: ruleName,
+                },
                 error,
               })
             );
