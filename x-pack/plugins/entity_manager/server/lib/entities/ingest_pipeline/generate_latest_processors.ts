@@ -15,7 +15,7 @@ import { isBuiltinDefinition } from '../helpers/is_builtin_definition';
 
 function getMetadataSourceField({ aggregation, destination, source }: MetadataField) {
   if (aggregation.type === 'terms') {
-    return `ctx.entity.metadata.${destination}.keySet()`;
+    return `ctx.entity.metadata.${destination}.data.keySet()`;
   } else if (aggregation.type === 'top_value') {
     return `ctx.entity.metadata.${destination}.top_value["${source}"]`;
   }
@@ -40,7 +40,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
 
     if (metadata.aggregation.type === 'terms') {
       const next = `
-        if (ctx.entity?.metadata?.${optionalFieldPath} != null) {
+        if (ctx.entity?.metadata?.${optionalFieldPath}?.data != null) {
           ${mapDestinationToPainless(metadata)}
         }
       `;

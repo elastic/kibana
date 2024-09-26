@@ -14,7 +14,6 @@ import {
   durationSchema,
   identityFieldsSchema,
   semVerSchema,
-  historySettingsSchema,
   durationSchemaWithMinimum,
 } from './common';
 
@@ -32,22 +31,17 @@ export const entityDefinitionSchema = z.object({
   metrics: z.optional(z.array(keyMetricSchema)),
   staticFields: z.optional(z.record(z.string(), z.string())),
   managed: z.optional(z.boolean()).default(false),
-  history: z.object({
+  latest: z.object({
     timestampField: z.string(),
     interval: durationSchemaWithMinimum(1),
-    settings: historySettingsSchema,
+    settings: z.optional(
+      z.object({
+        syncField: z.optional(z.string()),
+        syncDelay: z.optional(durationSchema),
+        frequency: z.optional(durationSchema),
+      })
+    ),
   }),
-  latest: z.optional(
-    z.object({
-      settings: z.optional(
-        z.object({
-          syncField: z.optional(z.string()),
-          syncDelay: z.optional(durationSchema),
-          frequency: z.optional(durationSchema),
-        })
-      ),
-    })
-  ),
   installStatus: z.optional(
     z.union([
       z.literal('installing'),
@@ -81,7 +75,7 @@ export const entityDefinitionUpdateSchema = entityDefinitionSchema
   .partial()
   .merge(
     z.object({
-      history: z.optional(entityDefinitionSchema.shape.history.partial()),
+      latest: z.optional(entityDefinitionSchema.shape.latest.partial()),
       version: semVerSchema,
     })
   );

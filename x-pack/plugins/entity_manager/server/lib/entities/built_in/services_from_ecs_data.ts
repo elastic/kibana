@@ -33,7 +33,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
       'remote_cluster:metrics-apm.service_transaction.1m*',
       'remote_cluster:metrics-apm.service_summary.1m*',
     ],
-    history: {
+    latest: {
       timestampField: '@timestamp',
       interval: '1m',
       settings: {

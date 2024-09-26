@@ -11,17 +11,17 @@ import {
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { getElasticsearchQueryOrThrow } from '../helpers/get_elasticsearch_query_or_throw';
-import { generateHistoryMetricAggregations } from './generate_metric_aggregations';
+import { generateLatestMetricAggregations } from './generate_metric_aggregations';
 import {
-  ENTITY_DEFAULT_HISTORY_FREQUENCY,
-  ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
+  ENTITY_DEFAULT_LATEST_FREQUENCY,
+  ENTITY_DEFAULT_LATEST_SYNC_DELAY,
 } from '../../../../common/constants_entities';
-import { generateHistoryMetadataAggregations } from './generate_metadata_aggregations';
 import {
   generateLatestTransformId,
   generateLatestIngestPipelineId,
   generateLatestIndexName,
 } from '../helpers/generate_component_id';
+import { generateLatestMetadataAggregations } from './generate_metadata_aggregations';
 
 export function generateLatestTransform(
   definition: EntityDefinition
@@ -40,20 +40,12 @@ export function generateLatestTransform(
       });
   }
 
-  filter.push({
-    range: {
-      [definition.history.timestampField]: {
-        gte: `now-${definition.history.settings.lookbackPeriod}`,
-      },
-    },
-  });
-
   return generateTransformPutRequest({
     definition,
     filter,
     transformId: generateLatestTransformId(definition),
-    frequency: definition.history.settings.frequency,
-    syncDelay: definition.history.settings.syncDelay,
+    frequency: definition.latest.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
+    syncDelay: definition.latest.settings?.syncDelay ?? ENTITY_DEFAULT_LATEST_SYNC_DELAY,
   });
 }
 
@@ -67,8 +59,8 @@ const generateTransformPutRequest = ({
   definition: EntityDefinition;
   transformId: string;
   filter: QueryDslQueryContainer[];
-  frequency?: string;
-  syncDelay?: string;
+  frequency: string;
+  syncDelay: string;
 }) => {
   return {
     transform_id: transformId,
@@ -91,11 +83,11 @@ const generateTransformPutRequest = ({
       index: `${generateLatestIndexName({ id: 'noop' } as EntityDefinition)}`,
       pipeline: generateLatestIngestPipelineId(definition),
     },
-    frequency: frequency || ENTITY_DEFAULT_HISTORY_FREQUENCY,
+    frequency,
     sync: {
       time: {
-        field: definition.history.settings.syncField || definition.history.timestampField,
-        delay: syncDelay || ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
+        field: definition.latest.settings?.syncField || definition.latest.timestampField,
+        delay: syncDelay,
       },
     },
     settings: {
@@ -115,11 +107,11 @@ const generateTransformPutRequest = ({
         ),
       },
       aggs: {
-        ...generateHistoryMetricAggregations(definition),
-        ...generateHistoryMetadataAggregations(definition),
+        ...generateLatestMetricAggregations(definition),
+        ...generateLatestMetadataAggregations(definition),
         'entity.lastSeenTimestamp': {
           max: {
-            field: definition.history.timestampField,
+            field: definition.latest.timestampField,
           },
         },
       },

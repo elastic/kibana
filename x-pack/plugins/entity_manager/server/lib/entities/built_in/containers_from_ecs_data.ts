@@ -20,7 +20,7 @@ export const builtInContainersFromEcsEntityDefinition: EntityDefinition =
     indexPatterns: ['filebeat-*', 'logs-*', 'metrics-*', 'metricbeat-*'],
     identityFields: ['container.id'],
     displayNameTemplate: '{{container.id}}',
-    history: {
+    latest: {
       timestampField: '@timestamp',
       interval: '5m',
       settings: {
