@@ -18,7 +18,7 @@ export interface PackageSpecManifest {
   source?: {
     license: string;
   };
-  type?: 'integration' | 'input';
+  type?: PackageSpecPackageType;
   release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;
   conditions?: PackageSpecConditions;
@@ -42,7 +42,7 @@ export interface PackageSpecTags {
   asset_ids?: string[];
 }
 
-export type PackageSpecPackageType = 'integration' | 'input';
+export type PackageSpecPackageType = 'integration' | 'input' | 'content';
 
 export type PackageSpecCategory =
   | 'advanced_analytics_ueba'

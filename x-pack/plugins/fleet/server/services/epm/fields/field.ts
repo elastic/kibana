@@ -47,6 +47,9 @@ export interface Field {
   metrics?: string[];
   default_metric?: string;
 
+  // Fields specific to the semantic_text type
+  inference_id?: string;
+
   // Meta fields
   metric_type?: string;
   unit?: string;
@@ -296,6 +299,12 @@ export const filterForTransformAssets = (transformName: string) => {
   };
 };
 
+export const filterForKnowledgeBaseEntryAssets = (knowledgeBaseEntryName: string) => {
+  return function isTransformAssets(path: string) {
+    return path.includes(`/knowledge_base_entry/${knowledgeBaseEntryName}`);
+  };
+};
+
 function combineFilter(...filters: Array<(path: string) => boolean>) {
   return function filterAsset(path: string) {
     return filters.every((filter) => filter(path));
@@ -341,6 +350,29 @@ export const loadTransformFieldsFromYaml = (
     packageInstallContext.packageInfo,
     packageInstallContext.assetsMap,
     combineFilter(isFields, filterForTransformAssets(transformName))
+  );
+  return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
+    // Make sure it is defined as it is optional. Should never happen.
+    if (file.buffer) {
+      const tmpFields = load(file.buffer.toString());
+      // load() returns undefined for empty files, we don't want that
+      if (tmpFields) {
+        acc = acc.concat(tmpFields);
+      }
+    }
+    return acc;
+  }, []);
+};
+
+export const loadKnowledgeBaseEntryFieldsFromYaml = (
+  packageInstallContext: PackageInstallContext,
+  knowledgeBaseEntryName: string
+): Field[] => {
+  // Fetch all field definition files
+  const fieldDefinitionFiles = getAssetsDataFromAssetsMap(
+    packageInstallContext.packageInfo,
+    packageInstallContext.assetsMap,
+    combineFilter(isFields, filterForKnowledgeBaseEntryAssets(knowledgeBaseEntryName))
   );
   return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
     // Make sure it is defined as it is optional. Should never happen.

@@ -543,6 +543,13 @@ function _generateMappings(
               fieldProps.fields = generateMultiFields(field.multi_fields);
             }
             break;
+          case 'semantic_text':
+            fieldProps.type = 'semantic_text';
+            if (field.inference_id) {
+              fieldProps.inference_id = field.inference_id;
+            }
+            fieldProps.path = field.path;
+            break;
           case 'object':
             fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
             break;

@@ -50,6 +50,7 @@ export type {
   AssetReference,
   EsAssetReference,
   KibanaAssetReference,
+  MiscAssetReference,
   RegistryPackage,
   BundledPackage,
   InstallablePackage,
@@ -102,7 +103,12 @@ export type {
   TemplateAgentPolicyInput,
   NewPackagePolicyInput,
 } from '../../common/types';
-export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
+export {
+  ElasticsearchAssetType,
+  KibanaAssetType,
+  KibanaSavedObjectType,
+  KibanaMiscAssetTypes,
+} from '../../common/types';
 export { dataTypes } from '../../common/constants';
 
 export type AgentPolicyUpdateHandler = (

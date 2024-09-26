@@ -99,6 +99,13 @@ export function getPathParts(path: string): AssetParts {
     [pkgkey, service, type, file] = path.replace(`data_stream/${dataset}/`, '').split('/');
   }
 
+  // if it's a knowledge base entry
+  if (type === 'kb_entry') {
+    // there is an additional depth level
+    dataset = file;
+    file = path.split('/')[4];
+  }
+
   // To support the NOTICE asset at the root level
   if (service === 'NOTICE.txt') {
     file = service;

@@ -44,9 +44,17 @@ export type AgentAssetType = typeof agentAssetTypes;
 export type DocAssetType = 'doc' | 'notice' | 'license';
 export type AssetType =
   | KibanaAssetType
+  | KibanaMiscAssetTypes
   | ElasticsearchAssetType
   | ValueOf<AgentAssetType>
   | DocAssetType;
+
+/*
+  Enum mapping of asset types living under the Kibana service/folder and that are not saved objects.
+*/
+export enum KibanaMiscAssetTypes {
+  knowledgeBaseEntry = 'knowledge_base_entry',
+}
 
 /*
   Enum mapping of a saved object asset type to how it would appear in a package file path (snake cased)
@@ -566,6 +574,7 @@ export interface InstallFailedAttempt {
 export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
+  INSTALL_KNOWLEDGE_BASE_ASSETS = 'install_knowledge_base_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
   INSTALL_ML_MODEL = 'install_ml_model',
   INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
@@ -597,6 +606,7 @@ export interface Installation {
   installed_kibana: KibanaAssetReference[];
   additional_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
   installed_es: EsAssetReference[];
+  installed_misc?: MiscAssetReference[];
   package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
@@ -652,7 +662,7 @@ export type InstallFailed<T = {}> = T & {
   status: InstallationStatus['InstallFailed'];
 };
 
-export type AssetReference = KibanaAssetReference | EsAssetReference;
+export type AssetReference = KibanaAssetReference | EsAssetReference | MiscAssetReference;
 
 export interface KibanaAssetReference {
   id: string;
@@ -663,6 +673,11 @@ export interface EsAssetReference {
   id: string;
   type: ElasticsearchAssetType;
   deferred?: boolean;
+}
+
+export interface MiscAssetReference {
+  id: string;
+  type: KibanaMiscAssetTypes;
 }
 
 export interface PackageAssetReference {

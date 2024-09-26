@@ -26,6 +26,7 @@ import type {
   PackageVerificationResult,
   EsAssetReference,
   KibanaAssetReference,
+  MiscAssetReference,
   IndexTemplateEntry,
   AssetReference,
 } from '../../../../types';
@@ -35,6 +36,7 @@ import { appContextService } from '../../..';
 import {
   stepCreateRestartInstallation,
   stepInstallKibanaAssets,
+  stepInstallKnowledgeBaseAssets,
   stepInstallILMPolicies,
   stepInstallMlModel,
   stepInstallIndexTemplatePipelines,
@@ -48,6 +50,7 @@ import {
   updateLatestExecutedState,
   cleanupLatestExecutedState,
   cleanUpKibanaAssetsStep,
+  cleanUpKnowledgeBaseAssetsStep,
   cleanupILMPoliciesStep,
   cleanUpMlModelStep,
   cleanupIndexTemplatePipelinesStep,
@@ -77,6 +80,7 @@ export interface InstallContext extends StateContext<StateNames> {
   indexTemplates?: IndexTemplateEntry[];
   packageAssetRefs?: PackageAssetReference[];
   // output values
+  miscReferences?: MiscAssetReference[];
   esReferences?: EsAssetReference[];
   kibanaAssetPromise?: Promise<KibanaAssetReference[]>;
 }
@@ -92,6 +96,12 @@ const statesDefinition: StateMachineStates<StateNames> = {
   install_kibana_assets: {
     onPreTransition: cleanUpKibanaAssetsStep,
     onTransition: stepInstallKibanaAssets,
+    nextState: INSTALL_STATES.INSTALL_KNOWLEDGE_BASE_ASSETS,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_knowledge_base_assets: {
+    onPreTransition: cleanUpKnowledgeBaseAssetsStep,
+    onTransition: stepInstallKnowledgeBaseAssets,
     nextState: INSTALL_STATES.INSTALL_ILM_POLICIES,
     onPostTransition: updateLatestExecutedState,
   },
