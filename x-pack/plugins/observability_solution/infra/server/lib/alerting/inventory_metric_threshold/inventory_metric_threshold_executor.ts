@@ -21,7 +21,7 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { convertToBuiltInComparators, getAlertUrl } from '@kbn/observability-plugin/common';
+import { convertToBuiltInComparators, getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
@@ -140,13 +140,7 @@ export const createInventoryMetricThresholdExecutor =
             [ALERT_REASON]: reason,
           },
           context: {
-            alertDetailsUrl: await getAlertUrl(
-              uuid,
-              spaceId,
-              indexedStartedAt,
-              alertsLocator,
-              libs.basePath.publicBaseUrl
-            ),
+            alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, uuid),
             alertState: stateToAlertMessage[AlertStates.ERROR],
             group: UNGROUPED_FACTORY_KEY,
             metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -292,13 +286,7 @@ export const createInventoryMetricThresholdExecutor =
         scheduledActionsCount++;
 
         const context = {
-          alertDetailsUrl: await getAlertUrl(
-            uuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            libs.basePath.publicBaseUrl
-          ),
+          alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, uuid),
           alertState: stateToAlertMessage[nextState],
           group,
           reason,
@@ -346,13 +334,7 @@ export const createInventoryMetricThresholdExecutor =
       const originalActionGroup = getOriginalActionGroup(alertHits);
 
       const recoveredContext = {
-        alertDetailsUrl: await getAlertUrl(
-          alertUuid,
-          spaceId,
-          indexedStartedAt,
-          alertsLocator,
-          libs.basePath.publicBaseUrl
-        ),
+        alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
