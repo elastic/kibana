@@ -3056,7 +3056,7 @@
           "MapExtent",
           " | undefined; mapSettings?: Partial<",
           "MapSettings",
-          "> | undefined; hiddenLayers?: string[] | undefined; hideFilterActions?: boolean | undefined; timeRange?: ",
+          "> | undefined; hiddenLayers?: string[] | undefined; timeRange?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -3064,9 +3064,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; isSharable?: boolean | undefined; tooltipRenderer?: ",
-          "RenderToolTipContent",
-          " | undefined; }"
+          " | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/maps/public/react_embeddable/types.ts",
         "deprecated": false,

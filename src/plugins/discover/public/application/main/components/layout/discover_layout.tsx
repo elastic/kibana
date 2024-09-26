@@ -213,6 +213,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         getOperator(fieldName, values, operation),
         fieldType
       );
+      if (!updatedQuery) {
+        return;
+      }
       data.query.queryString.setQuery({
         esql: updatedQuery,
       });
