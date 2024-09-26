@@ -13,6 +13,7 @@ import { SplitAccordion } from '../../../../../../common/components/split_accord
 import type {
   DiffableAllFields,
   DiffableRule,
+  RuleFieldsDiff,
   ThreeWayDiff,
 } from '../../../../../../../common/api/detection_engine';
 import { ThreeWayDiffConflict } from '../../../../../../../common/api/detection_engine';
@@ -20,18 +21,16 @@ import { ComparisonSide } from '../comparison_side/comparison_side';
 import { FinalSide } from '../final_side/final_side';
 import { fieldToDisplayNameMap } from '../../diff_components/translations';
 
-interface RuleDiffFieldProps<FieldName extends keyof DiffableAllFields> {
+interface RuleDiffFieldProps<FieldName extends keyof RuleFieldsDiff> {
   fieldName: FieldName;
-  fieldThreeWayDiff: ThreeWayDiff<DiffableAllFields[FieldName]>;
+  fieldThreeWayDiff: RuleFieldsDiff[FieldName];
   finalDiffableRule: DiffableRule;
-  resolvedValue?: DiffableAllFields[FieldName];
 }
 
-export function RuleDiffField<FieldName extends keyof DiffableAllFields>({
+export function RuleDiffField<FieldName extends keyof RuleFieldsDiff>({
   fieldName,
   fieldThreeWayDiff,
   finalDiffableRule,
-  resolvedValue,
 }: RuleDiffFieldProps<FieldName>): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const hasConflict = fieldThreeWayDiff.conflict !== ThreeWayDiffConflict.NONE;
@@ -51,8 +50,8 @@ export function RuleDiffField<FieldName extends keyof DiffableAllFields>({
           <EuiFlexItem grow={1}>
             <ComparisonSide
               fieldName={fieldName}
-              fieldThreeWayDiff={fieldThreeWayDiff}
-              resolvedValue={resolvedValue}
+              fieldThreeWayDiff={fieldThreeWayDiff as ThreeWayDiff<DiffableAllFields[FieldName]>}
+              resolvedValue={finalDiffableRule[fieldName]}
             />
           </EuiFlexItem>
           <EuiFlexItem
