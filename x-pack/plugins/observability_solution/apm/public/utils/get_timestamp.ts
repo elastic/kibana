@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export function getTimestamp(timestamp?: string, fallbackTimestamp?: number): number {
-  if (!fallbackTimestamp && timestamp) {
+export function getTimestamp(timestamp?: string, timestampUs?: number): number {
+  if (!timestampUs && timestamp) {
     const date = new Date(timestamp);
     const milliseconds = date.getTime() * 1000;
 
@@ -16,5 +16,5 @@ export function getTimestamp(timestamp?: string, fallbackTimestamp?: number): nu
     return milliseconds + microseconds;
   }
 
-  return fallbackTimestamp || 0;
+  return timestampUs || 0;
 }

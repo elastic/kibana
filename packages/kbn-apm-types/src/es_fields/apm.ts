@@ -8,7 +8,7 @@
  */
 
 export const TIMESTAMP = '@timestamp';
-export const FALLBACK_TIMESTAMP = 'timestamp.us';
+export const TIMESTAMP_US = 'timestamp.us';
 export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
 export const AGENT_VERSION = 'agent.version';
