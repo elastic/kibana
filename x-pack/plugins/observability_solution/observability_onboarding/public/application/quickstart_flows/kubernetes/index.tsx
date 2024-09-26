@@ -73,7 +73,9 @@ export const KubernetesPanel: React.FC = () => {
         }
       ),
       status: (isMonitoringStepActive ? 'current' : 'incomplete') as EuiStepStatus,
-      children: isMonitoringStepActive && <DataIngestStatus onboardingId={data.onboardingId} />,
+      children: isMonitoringStepActive && data && (
+        <DataIngestStatus onboardingId={data.onboardingId} />
+      ),
     },
   ];
 
