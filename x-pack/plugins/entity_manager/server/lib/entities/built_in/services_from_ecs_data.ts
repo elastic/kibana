@@ -28,10 +28,10 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
     type: 'service',
     managed: true,
     indexPatterns: [
-      'remote_cluster:logs-*',
-      'remote_cluster:filebeat*',
-      'remote_cluster:metrics-apm.service_transaction.1m*',
-      'remote_cluster:metrics-apm.service_summary.1m*',
+      'logs-*',
+      'filebeat*',
+      'metrics-apm.service_transaction.1m*',
+      'metrics-apm.service_summary.1m*',
     ],
     latest: {
       timestampField: '@timestamp',
