@@ -23,6 +23,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('SyntheticsCustomStatusRule', () => {
+    const SYNTHETICS_RULE_ALERT_INDEX = '.alerts-observability.uptime.alerts-default';
+
     before(async () => {
       await server.savedObjects.cleanStandardList();
       await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
@@ -36,6 +38,10 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await server.savedObjects.cleanStandardList();
       await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
+      await esClient.deleteByQuery({
+        index: SYNTHETICS_RULE_ALERT_INDEX,
+        query: { match_all: {} },
+      });
     });
 
     /* 1. create a monitor
@@ -811,7 +817,179 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // TimeWindow - Location threshold = 1 - grouped by location - 2 down locations
+    describe('TimeWindow - Location threshold = 1 - grouped by location - 2 down location', () => {
+      let ruleId = '';
+      let monitor: any;
+
+      it('creates a monitor', async () => {
+        monitor = await ruleHelper.addMonitor(
+          `Monitor time based at ${moment().format('LT')} grouped 2 locations`
+        );
+        expect(monitor).to.have.property('id');
+      });
+
+      it('creates a custom rule with time based window', async () => {
+        const params: StatusRuleParams = {
+          condition: {
+            window: {
+              time: {
+                unit: 'm',
+                size: 5,
+              },
+            },
+            groupBy: 'locationId',
+            locationsThreshold: 2,
+            downThreshold: 5,
+          },
+          monitorIds: [monitor.id],
+        };
+        const rule = await ruleHelper.createCustomStatusRule({
+          params,
+          name: 'Status based on checks in a time window when down from 2 locations',
+        });
+        expect(rule).to.have.property('id');
+        ruleId = rule.id;
+        expect(rule.params).to.eql(params);
+      });
+
+      it('should trigger down alert', async function () {
+        // Generate data for 2 locations
+        await ruleHelper.makeSummaries({
+          monitor,
+          downChecks: 5,
+          location: monitor.locations[0],
+        });
+        await ruleHelper.makeSummaries({
+          monitor,
+          downChecks: 5,
+          location: monitor.locations[1],
+        });
+
+        const response = await ruleHelper.waitForStatusAlert({
+          ruleId,
+          filters: [{ term: { 'monitor.id': monitor.id } }],
+        });
+
+        const alert: any = response.hits.hits?.[0]._source;
+        expect(alert).to.have.property('kibana.alert.status', 'active');
+        expect(alert['kibana.alert.reason']).to.eql(
+          `Monitor "${monitor.name}" is down 5 times from Dev Service | 5 times from Dev Service 2. Alert when down 5 times within the last 5 minutes from at least 2 locations.`
+        );
+        const downResponse = await waitForDocumentInIndex<{
+          ruleType: string;
+          alertDetailsUrl: string;
+          reason: string;
+        }>({
+          esClient,
+          indexName: SYNTHETICS_ALERT_ACTION_INDEX,
+          retryService,
+          logger,
+          filters: [
+            {
+              term: { 'monitor.id': monitor.id },
+            },
+          ],
+        });
+
+        expect(downResponse.hits.hits[0]._source).property(
+          'reason',
+          `Monitor "${monitor.name}" is down 5 times from Dev Service | 5 times from Dev Service 2. Alert when down 5 times within the last 5 minutes from at least 2 locations.`
+        );
+        expect(downResponse.hits.hits[0]._source).property(
+          'locationNames',
+          'Dev Service | Dev Service 2'
+        );
+        expect(downResponse.hits.hits[0]._source).property(
+          'linkMessage',
+          `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+        );
+        expect(downResponse.hits.hits[0]._source).property('locationId', 'dev | dev2');
+      });
+
+      it('should trigger alert action', async function () {
+        const alertAction = await waitForDocumentInIndex<{
+          ruleType: string;
+          alertDetailsUrl: string;
+          reason: string;
+        }>({
+          esClient,
+          indexName: SYNTHETICS_ALERT_ACTION_INDEX,
+          retryService,
+          logger,
+          filters: [
+            {
+              term: { 'monitor.id': monitor.id },
+            },
+          ],
+          docCountTarget: 1,
+        });
+
+        expect(alertAction.hits.hits[0]._source).property(
+          'reason',
+          `Monitor "${monitor.name}" is down 5 times from Dev Service | 5 times from Dev Service 2. Alert when down 5 times within the last 5 minutes from at least 2 locations.`
+        );
+        expect(alertAction.hits.hits[0]._source).property(
+          'locationNames',
+          'Dev Service | Dev Service 2'
+        );
+        expect(alertAction.hits.hits[0]._source).property(
+          'linkMessage',
+          `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+        );
+        expect(alertAction.hits.hits[0]._source).property('locationId', 'dev | dev2');
+      });
+
+      it('should trigger recovered alert', async function () {
+        // wait 30 secs for at least 1 down check to fall out of the time window
+        await new Promise((resolve) => setTimeout(resolve, 30_000));
+
+        const response = await ruleHelper.waitForStatusAlert({
+          ruleId,
+          filters: [
+            { term: { 'kibana.alert.status': 'recovered' } },
+            { term: { 'monitor.id': monitor.id } },
+          ],
+        });
+
+        const alert = response.hits.hits?.[0]._source;
+        expect(alert).to.have.property('kibana.alert.status', 'recovered');
+        const recoveryAction = await waitForDocumentInIndex<{
+          ruleType: string;
+          alertDetailsUrl: string;
+          reason: string;
+        }>({
+          esClient,
+          indexName: SYNTHETICS_ALERT_ACTION_INDEX,
+          retryService,
+          logger,
+          filters: [
+            {
+              term: { 'monitor.id': monitor.id },
+            },
+          ],
+          docCountTarget: 2,
+        });
+
+        expect(recoveryAction.hits.hits[1]._source).property(
+          'reason',
+          `Monitor "${monitor.name}" from Dev Service | Dev Service 2 is recovered. Alert when 5 checks are down within the last 5 minutes from at least 2 locations.`
+        );
+        expect(recoveryAction.hits.hits[1]._source).property(
+          'recoveryReason',
+          'the alert condition is no longer met'
+        );
+        expect(recoveryAction.hits.hits[1]._source).property('recoveryStatus', 'has recovered');
+        expect(recoveryAction.hits.hits[1]._source).property(
+          'locationNames',
+          'Dev Service | Dev Service 2'
+        );
+        expect(recoveryAction.hits.hits[1]._source).property(
+          'linkMessage',
+          `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+        );
+        expect(recoveryAction.hits.hits[1]._source).property('locationId', 'dev | dev2');
+      });
+    });
 
     // TimeWindow - Location threshold = 1 - ungrouped - 1 down location
 

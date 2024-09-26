@@ -16,7 +16,7 @@ import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_mo
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import { SyntheticsServerSetup } from '../../types';
-import { AlertStatusMetaData } from './queries/query_monitor_status_alert';
+import { AlertStatusMetaData } from '../../../common/runtime_types/alert_rules/common';
 
 describe('StatusRuleExecutor', () => {
   // @ts-ignore

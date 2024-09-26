@@ -43,13 +43,16 @@
   .euiDataGridHeaderCell {
     align-items: start;
 
-    &:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__button {
-      height: 100%;
-      align-items: flex-start;
+    .euiPopover[class*='euiDataGridHeaderCell__popover'] {
+      align-self: center;
     }
   }
 
-  .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+  .euiDataGrid--bordersHorizontal .euiDataGridHeader {
+    border-top: none;
+  }
+
+  .euiDataGrid--headerUnderline .euiDataGridHeader {
     border-bottom: $euiBorderThin;
   }
 
@@ -93,7 +96,8 @@
   }
 
   .euiDataGridRowCell__content--autoHeight,
-  .euiDataGridRowCell__content--lineCountHeight {
+  .euiDataGridRowCell__content--lineCountHeight,
+  .euiDataGridHeaderCell__content {
     white-space: pre-wrap;
   }
 }
@@ -102,25 +106,6 @@
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
-}
-
-// We only truncate if the cell is not a control column.
-.euiDataGridHeader {
-
-  .euiDataGridHeaderCell__content {
-    white-space: pre-wrap;
-  }
-
-  .euiDataGridHeaderCell__popover {
-    flex-grow: 0;
-    flex-basis: auto;
-    width: auto;
-    padding-left: $euiSizeXS;
-  }
-}
-
-.euiDataGridRowCell--numeric {
-  text-align: right;
 }
 
 .euiDataGrid__loading,

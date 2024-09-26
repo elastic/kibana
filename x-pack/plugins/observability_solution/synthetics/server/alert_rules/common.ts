@@ -14,6 +14,7 @@ import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/server';
+import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
@@ -34,12 +35,12 @@ import { OverviewPing, StatusCheckFilters } from '../../common/runtime_types';
 import { SyntheticsEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
 import {
+  AlertOverviewStatus,
   SyntheticsCommonState,
   SyntheticsCommonStateCodec,
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
-import { AlertOverviewStatus } from './status_rule/status_rule_executor';
 import type { MonitorSummaryStatusRule, MonitorStatusAlertDocument } from './status_rule/types';
 import { StatusRuleParams } from '../../common/rules/status_rule';
 import { SyntheticsMonitorStatusAlertState } from '../../common/runtime_types/alert_rules/common';
@@ -117,12 +118,6 @@ export const getViewInAppUrl = (
   spaceId: string,
   relativeViewInAppUrl: string
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
-
-export const getAlertDetailsUrl = (
-  basePath: IBasePath,
-  spaceId: string,
-  alertUuid: string | null
-) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
 export const getRelativeViewInAppUrl = ({
   configId,

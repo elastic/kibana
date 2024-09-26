@@ -21,6 +21,7 @@ describe('ProfilesManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mocks = createContextAwarenessMocks();
+    jest.spyOn(mocks.ebtContextManagerMock, 'updateProfilesContextWith');
   });
 
   it('should return default profiles', () => {
@@ -59,6 +60,11 @@ describe('ProfilesManager', () => {
       mocks.rootProfileProviderMock.profile,
       mocks.dataSourceProfileProviderMock.profile,
       mocks.documentProfileProviderMock.profile,
+    ]);
+
+    expect(mocks.ebtContextManagerMock.updateProfilesContextWith).toHaveBeenCalledWith([
+      'root-profile',
+      'data-source-profile',
     ]);
   });
 

@@ -116,6 +116,7 @@ const mockCommonAlertDocumentFields = (monitorInfo: GetMonitorStatusResult['moni
   'observer.geo.name': monitorInfo.observer?.geo?.name
     ? [monitorInfo.observer.geo.name]
     : undefined,
+  'observer.name': [],
 });
 
 const mockStatusAlertDocument = (

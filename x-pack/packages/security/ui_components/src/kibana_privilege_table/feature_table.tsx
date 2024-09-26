@@ -48,6 +48,10 @@ interface Props {
   canCustomizeSubFeaturePrivileges: boolean;
   allSpacesSelected: boolean;
   disabled?: boolean;
+  /**
+   * default is true, to remain backwards compatible
+   */
+  showTitle?: boolean;
 }
 
 interface State {
@@ -58,6 +62,7 @@ export class FeatureTable extends Component<Props, State> {
   public static defaultProps = {
     privilegeIndex: -1,
     showLocks: true,
+    showTitle: true,
   };
 
   private featureCategories: Map<string, SecuredFeature[]> = new Map();
@@ -148,6 +153,7 @@ export class FeatureTable extends Component<Props, State> {
           arrowDisplay={canExpandCategory ? 'left' : 'none'}
           forceState={canExpandCategory ? undefined : 'closed'}
           buttonContent={buttonContent}
+          buttonProps={{ 'data-test-subj': `featureCategory_${category.id}_accordionToggle` }}
           extraAction={canExpandCategory ? extraAction : undefined}
         >
           <div>
@@ -162,7 +168,10 @@ export class FeatureTable extends Component<Props, State> {
             )}
             <EuiFlexGroup direction="column" gutterSize="s">
               {featuresInCategory.map((feature) => (
-                <EuiFlexItem key={feature.id}>
+                <EuiFlexItem
+                  key={feature.id}
+                  data-test-subj={`featureCategory_${category.id}_${feature.id}`}
+                >
                   {this.renderPrivilegeControlsForFeature(feature)}
                 </EuiFlexItem>
               ))}
@@ -183,16 +192,18 @@ export class FeatureTable extends Component<Props, State> {
       <div>
         <EuiFlexGroup alignItems={'flexEnd'}>
           <EuiFlexItem>
-            <EuiText size="xs">
-              <b>
-                {i18n.translate(
-                  'xpack.security.management.editRole.featureTable.featureVisibilityTitle',
-                  {
-                    defaultMessage: 'Customize feature privileges',
-                  }
-                )}
-              </b>
-            </EuiText>
+            {this.props.showTitle && (
+              <EuiText size="xs">
+                <b>
+                  {i18n.translate(
+                    'xpack.security.management.editRole.featureTable.featureVisibilityTitle',
+                    {
+                      defaultMessage: 'Customize feature privileges',
+                    }
+                  )}
+                </b>
+              </EuiText>
+            )}
           </EuiFlexItem>
           {!this.props.disabled && (
             <EuiFlexItem grow={false}>
@@ -229,6 +240,9 @@ export class FeatureTable extends Component<Props, State> {
               data-test-subj="featurePrivilegeControls"
               buttonContent={buttonContent}
               buttonClassName="euiAccordionWithDescription"
+              buttonProps={{
+                'data-test-subj': `featurePrivilegeControls_${feature.category.id}_${feature.id}_accordionToggle`,
+              }}
               extraAction={extraAction}
               forceState={hasSubFeaturePrivileges ? undefined : 'closed'}
               arrowDisplay={hasSubFeaturePrivileges ? 'left' : 'none'}

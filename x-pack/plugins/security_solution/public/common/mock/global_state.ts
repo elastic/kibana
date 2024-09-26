@@ -445,7 +445,7 @@ export const mockGlobalState: State = {
     [TableId.test]: EMPTY_RESOLVER,
     [TimelineId.test]: EMPTY_RESOLVER,
     [TimelineId.active]: EMPTY_RESOLVER,
-    flyout: EMPTY_RESOLVER,
+    [`securitySolution-${TableId.test}`]: EMPTY_RESOLVER,
   },
   sourcerer: {
     ...mockSourcererState,

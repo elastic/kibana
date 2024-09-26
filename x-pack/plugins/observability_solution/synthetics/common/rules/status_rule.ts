@@ -50,6 +50,7 @@ export const StatusRuleConditionSchema = schema.object({
     }),
     NumberOfChecksSchema,
   ]),
+  includeRetests: schema.maybe(schema.boolean()),
 });
 
 export const StatusRulePramsSchema = schema.object({

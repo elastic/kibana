@@ -34,7 +34,7 @@ const ALL_OPTION = {
   label: i18n.translate('xpack.synthetics.filter.alert.allLabel', {
     defaultMessage: 'All',
   }),
-  value: 'All',
+  value: ALL_VALUE,
 };
 
 export function FieldSelector({

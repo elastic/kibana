@@ -9,9 +9,11 @@ import pMap from 'p-map';
 import times from 'lodash/times';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { intersection } from 'lodash';
+import { AlertStatusMetaData } from '../../../../common/runtime_types/alert_rules/common';
 import {
   FINAL_SUMMARY_FILTER,
   getTimespanFilter,
+  SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
 import { OverviewPing } from '../../../../common/runtime_types';
 import { createEsParams, SyntheticsEsClient } from '../../../lib';
@@ -30,21 +32,7 @@ const fields = [
   'state',
   'tags',
 ];
-
-export interface AlertStatusMetaData {
-  monitorQueryId: string;
-  configId: string;
-  status?: string;
-  locationId: string;
-  timestamp: string;
-  ping: OverviewPing;
-  checks?: {
-    downWithinXChecks: number;
-    down: number;
-  };
-}
-
-export type StatusConfigs = Record<string, AlertStatusMetaData>;
+type StatusConfigs = Record<string, AlertStatusMetaData>;
 
 export interface AlertStatusResponse {
   upConfigs: StatusConfigs;
@@ -52,14 +40,23 @@ export interface AlertStatusResponse {
   enabledMonitorQueryIds: string[];
 }
 
-export async function queryMonitorStatusAlert(
-  esClient: SyntheticsEsClient,
-  monitorLocationIds: string[],
-  range: { from: string; to: string },
-  monitorQueryIds: string[],
-  monitorLocationsMap: Record<string, string[]>,
-  numberOfChecks: number
-): Promise<AlertStatusResponse> {
+export async function queryMonitorStatusAlert({
+  esClient,
+  monitorLocationIds,
+  range,
+  monitorQueryIds,
+  monitorLocationsMap,
+  numberOfChecks,
+  includeRetests = true,
+}: {
+  esClient: SyntheticsEsClient;
+  monitorLocationIds: string[];
+  range: { from: string; to: string };
+  monitorQueryIds: string[];
+  monitorLocationsMap: Record<string, string[]>;
+  numberOfChecks: number;
+  includeRetests?: boolean;
+}): Promise<AlertStatusResponse> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
   const upConfigs: StatusConfigs = {};
@@ -75,7 +72,7 @@ export async function queryMonitorStatusAlert(
           query: {
             bool: {
               filter: [
-                FINAL_SUMMARY_FILTER,
+                ...(includeRetests ? [SUMMARY_FILTER] : [FINAL_SUMMARY_FILTER]),
                 getTimespanFilter({ from: range.from, to: range.to }),
                 {
                   terms: {
@@ -177,6 +174,7 @@ export async function queryMonitorStatusAlert(
                 ),
                 down: downCount,
               },
+              status: 'up',
             };
 
             if (downCount > 0) {

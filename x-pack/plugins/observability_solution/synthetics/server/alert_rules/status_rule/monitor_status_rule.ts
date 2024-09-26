@@ -10,8 +10,8 @@ import { isEmpty } from 'lodash';
 import { GetViewInAppRelativeUrlFnOpts, AlertsClientError } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import apm from 'elastic-apm-node';
+import { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
 import { StatusRuleExecutorOptions } from './types';
-import { StatusConfigs } from './queries/query_monitor_status_alert';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { StatusRuleExecutor } from './status_rule_executor';
@@ -75,7 +75,7 @@ export const registerSyntheticsStatusCheckRule = (
       const statusRule = new StatusRuleExecutor(server, syntheticsMonitorClient, options);
 
       const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
-        ruleState.meta?.downConfigs as StatusConfigs
+        ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']
       );
 
       statusRule.handleDownMonitorThresholdAlert({
@@ -86,12 +86,12 @@ export const registerSyntheticsStatusCheckRule = (
         alertsClient,
         basePath,
         spaceId,
-        staleDownConfigs,
-        upConfigs,
         dateFormat,
         tz,
         params,
         groupByLocation,
+        staleDownConfigs,
+        upConfigs,
       });
 
       return {

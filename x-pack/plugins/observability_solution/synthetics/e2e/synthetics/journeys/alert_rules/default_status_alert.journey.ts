@@ -82,7 +82,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   step('Disable default alert for monitor', async () => {
     await page.click('text=Disable status alert');
     await page.waitForSelector(`text=Alerts are now disabled for the monitor "Test Monitor".`);
-    await page.hover('text=Test Monitor');
+    await page.getByTestId('Test Monitor-us_central-metric-item').hover();
     await page.click('[aria-label="Open actions menu"]');
     await page.click('text=Enable status alert');
   });

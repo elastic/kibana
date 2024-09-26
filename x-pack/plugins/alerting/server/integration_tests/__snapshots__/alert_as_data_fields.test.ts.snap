@@ -9887,6 +9887,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "observer.name": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "tls.server.hash.sha256": Object {
       "required": false,
       "type": "keyword",
@@ -10010,6 +10015,11 @@ Object {
       "type": "keyword",
     },
     "observer.geo.name": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "observer.name": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -10141,6 +10151,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "observer.name": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "tls.server.hash.sha256": Object {
       "required": false,
       "type": "keyword",
@@ -10264,6 +10279,11 @@ Object {
       "type": "keyword",
     },
     "observer.geo.name": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "observer.name": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -10397,6 +10417,11 @@ Object {
       "type": "keyword",
     },
     "observer.geo.name": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "observer.name": Object {
       "array": true,
       "required": false,
       "type": "keyword",
