@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import fileSaver from 'file-saver';
 import { i18n } from '@kbn/i18n';
+import fileSaver from 'file-saver';
+import { useCallback } from 'react';
 import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../../../../common/lib/constants';
 import { ZIP } from '../../../../../../i18n/constants';
 
-import { usePlatformService, useNotifyService, useWorkpadService } from '../../../../../services';
 import type { CanvasRenderedWorkpad } from '../../../../../../shareable_runtime/types';
+import { useNotifyService, usePlatformService, useWorkpadService } from '../../../../../services';
+import { coreServices } from '../../../../../services/kibana_services';
 
 const strings = {
   getDownloadRuntimeFailureErrorMessage: () =>
@@ -35,18 +36,17 @@ const strings = {
 };
 
 export const useDownloadRuntime = () => {
-  const platformService = usePlatformService();
   const notifyService = useNotifyService();
 
   const downloadRuntime = useCallback(() => {
     try {
-      const path = `${platformService.getBasePath()}${API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD}`;
+      const path = `${coreServices.http.basePath.get}${API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD}`;
       window.open(path);
       return;
     } catch (err) {
       notifyService.error(err, { title: strings.getDownloadRuntimeFailureErrorMessage() });
     }
-  }, [platformService, notifyService]);
+  }, [notifyService]);
 
   return downloadRuntime;
 };

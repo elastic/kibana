@@ -14,6 +14,7 @@ import { getPages, getWorkpad } from '../../../state/selectors/workpad';
 import { useDownloadWorkpad } from '../../hooks';
 import { ShareMenu as ShareMenuComponent } from './share_menu.component';
 import { getPdfJobParams } from './utils';
+import { kibanaVersion } from '../../../services/kibana_services';
 
 const strings = {
   getUnknownExportErrorMessage: (type: string) =>
@@ -46,7 +47,7 @@ export const ShareMenu = () => {
     ReportingPanelPDFComponent !== null
       ? ({ onClose }: { onClose: () => void }) => (
           <ReportingPanelPDFComponent
-            getJobParams={() => getPdfJobParams(sharingData, platformService.getKibanaVersion())}
+            getJobParams={() => getPdfJobParams(sharingData, kibanaVersion)}
             layoutOption="canvas"
             onClose={onClose}
             objectId={workpad.id}

@@ -6,7 +6,7 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { pluginServices } from '../../services';
+import { coreServices } from '../../services/kibana_services';
 import { getDefaultWorkpad } from '../defaults';
 import {
   setWorkpad,
@@ -24,13 +24,11 @@ import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
 export const workpadReducer = handleActions(
   {
     [setWorkpad]: (workpadState, { payload }) => {
-      pluginServices
-        .getServices()
-        .platform.setRecentlyAccessed(
-          `${APP_ROUTE_WORKPAD}/${payload.id}`,
-          payload.name,
-          payload.id
-        );
+      coreServices.chrome.recentlyAccessed.add(
+        `${APP_ROUTE_WORKPAD}/${payload.id}`,
+        payload.name,
+        payload.id
+      );
       return payload;
     },
 
@@ -43,13 +41,11 @@ export const workpadReducer = handleActions(
     },
 
     [setName]: (workpadState, { payload }) => {
-      pluginServices
-        .getServices()
-        .platform.setRecentlyAccessed(
-          `${APP_ROUTE_WORKPAD}/${workpadState.id}`,
-          payload,
-          workpadState.id
-        );
+      coreServices.chrome.recentlyAccessed.add(
+        `${APP_ROUTE_WORKPAD}/${workpadState.id}`,
+        payload,
+        workpadState.id
+      );
       return { ...workpadState, name: payload };
     },
 

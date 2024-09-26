@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
-import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { FC, useCallback, useMemo } from 'react';
 
-import { SavedObjectFinder, SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
-import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
+import { coreServices } from '@kbn/controls-plugin/public/services/kibana_services';
 import { EmbeddableFactory, ReactEmbeddableSavedObject } from '@kbn/embeddable-plugin/public';
-import { useEmbeddablesService, usePlatformService } from '../../services';
+import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
+import { SavedObjectFinder, SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
+import { contentManagementService, embeddableService } from '../../services/kibana_services';
 
 const strings = {
   getNoItemsText: () =>
@@ -45,13 +46,8 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   onClose,
   isByValueEnabled,
 }) => {
-  const embeddablesService = useEmbeddablesService();
-  const platformService = usePlatformService();
-  const { getEmbeddableFactories, getReactEmbeddableSavedObjects } = embeddablesService;
-  const { getContentManagement, getUISettings } = platformService;
-
   const legacyFactoriesBySavedObjectType: LegacyFactoryMap = useMemo(() => {
-    return [...getEmbeddableFactories()]
+    return [...embeddableService.getEmbeddableFactories()]
       .filter(
         (embeddableFactory) =>
           Boolean(embeddableFactory.savedObjectMetaData?.type) && !embeddableFactory.isContainerType
@@ -60,10 +56,10 @@ export const AddEmbeddableFlyout: FC<Props> = ({
         acc[factory.savedObjectMetaData!.type] = factory;
         return acc;
       }, {} as LegacyFactoryMap);
-  }, [getEmbeddableFactories]);
+  }, []);
 
   const factoriesBySavedObjectType: FactoryMap = useMemo(() => {
-    return [...getReactEmbeddableSavedObjects()]
+    return [...embeddableService.getReactEmbeddableSavedObjects()]
       .filter(([type, embeddableFactory]) => {
         return Boolean(embeddableFactory.savedObjectMetaData?.type);
       })
@@ -74,7 +70,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
         };
         return acc;
       }, {} as FactoryMap);
-  }, [getReactEmbeddableSavedObjects]);
+  }, []);
 
   const metaData = useMemo(
     () =>
@@ -111,7 +107,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
         onSelect(id, type, isByValueEnabled);
         return;
       }
-      const embeddableFactories = getEmbeddableFactories();
+      const embeddableFactories = embeddableService.getEmbeddableFactories();
       // Find the embeddable type from the saved object type
       const found = Array.from(embeddableFactories).find((embeddableFactory) => {
         return Boolean(
@@ -124,7 +120,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
 
       onSelect(id, foundEmbeddableType, isByValueEnabled);
     },
-    [isByValueEnabled, getEmbeddableFactories, onSelect, factoriesBySavedObjectType]
+    [isByValueEnabled, onSelect, factoriesBySavedObjectType]
   );
 
   return (
@@ -141,8 +137,8 @@ export const AddEmbeddableFlyout: FC<Props> = ({
           showFilter={true}
           noItemsMessage={strings.getNoItemsText()}
           services={{
-            contentClient: getContentManagement().client,
-            uiSettings: getUISettings(),
+            contentClient: contentManagementService.client,
+            uiSettings: coreServices.uiSettings,
           }}
         />
       </EuiFlyoutBody>

@@ -8,7 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { AppUpdater, CoreStart } from '@kbn/core/public';
+import type { AppUpdater, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 // import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public/plugin';
@@ -25,6 +25,8 @@ import { CanvasStartDeps } from '../plugin';
 export interface CanvasNavLinkService {
   updatePath: (path: string) => void;
 }
+
+export let kibanaVersion: string;
 
 export let coreServices: CoreStart;
 export let contentManagementService: ContentManagementPublicStart;
@@ -44,8 +46,11 @@ const servicesReady$ = new BehaviorSubject(false);
 export const setKibanaServices = (
   kibanaCore: CoreStart,
   deps: CanvasStartDeps,
+  initContext: PluginInitializerContext,
   appUpdater?: BehaviorSubject<AppUpdater>
 ) => {
+  kibanaVersion = initContext.env.packageInfo.version;
+
   coreServices = kibanaCore;
   contentManagementService = deps.contentManagement;
   dataService = deps.data;

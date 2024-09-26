@@ -16,7 +16,8 @@ import { setAssets } from '../../../state/actions/assets';
 // @ts-expect-error
 import { setZoomScale } from '../../../state/actions/transient';
 import { CanvasWorkpad } from '../../../../types';
-import type { ResolveWorkpadResponse } from '../../../services/workpad';
+import { ResolveWorkpadResponse } from '../../../services/canvas_workpad_service';
+import { spacesService } from '../../../services/kibana_services';
 
 const getWorkpadLabel = () =>
   i18n.translate('xpack.canvas.workpadResolve.redirectLabel', {
@@ -75,9 +76,9 @@ export const useWorkpad = (
       if (!resolveInfo) return;
 
       const { aliasId, outcome, aliasPurpose } = resolveInfo;
-      if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
+      if (outcome === 'aliasMatch' && spacesService && aliasId) {
         const redirectPath = getRedirectPath(aliasId);
-        await platformService.redirectLegacyUrl({
+        await spacesService?.ui.redirectLegacyUrl({
           path: `#${redirectPath}`,
           aliasPurpose,
           objectNoun: getWorkpadLabel(),

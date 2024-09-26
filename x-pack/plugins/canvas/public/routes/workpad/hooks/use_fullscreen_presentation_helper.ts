@@ -4,16 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useContext, useEffect } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { usePlatformService } from '../../../services';
 import { WorkpadRoutingContext } from '..';
+import { coreServices } from '../../../services/kibana_services';
 
 const fullscreenClass = 'canvas-isFullscreen';
 
 export const useFullscreenPresentationHelper = () => {
   const { isFullscreen } = useContext(WorkpadRoutingContext);
-  const { setFullscreen } = usePlatformService();
+
+  const setFullscreen = useCallback(
+    (fullscreen: boolean) => coreServices.chrome.setIsVisible(fullscreen),
+    []
+  );
 
   useEffect(() => {
     const body = document.querySelector('body');
@@ -27,7 +31,7 @@ export const useFullscreenPresentationHelper = () => {
       bodyClassList.remove(fullscreenClass);
       setFullscreen(true);
     }
-  }, [isFullscreen, setFullscreen]);
+  }, [setFullscreen, isFullscreen]);
 
   // Remove fullscreen when component unmounts
   useEffectOnce(() => () => {
