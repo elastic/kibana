@@ -456,6 +456,7 @@ function setupMocks() {
     debug: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
+    info: jest.fn(),
   } as unknown as jest.Mocked<Logger>;
 
   const mockUsageCollectionSetup = createUsageCollectionSetupMock();

@@ -166,7 +166,7 @@ export class DataTelemetryService {
               const startMemory = process.memoryUsage().heapUsed;
               const startCpuUsage = process.cpuUsage();
               const totalMemory = os.totalmem();
-              service.logger.info(`[Logs Data Telemetry] Task started with`);
+              service.logger.info(`[Logs Data Telemetry] Task started.`);
 
               try {
                 data = await firstValueFrom(service.run$);
