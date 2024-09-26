@@ -9,13 +9,13 @@
 
 import {
   EuiButton,
+  EuiCopy,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiFlexItem,
-  EuiCopy,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -24,6 +24,7 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessState } from '../../../../common';
 
 import { type IShareContext } from '../../context';
+import { makeIframeTag } from './make_iframe_tag';
 
 type EmbedProps = Pick<
   IShareContext,
@@ -156,14 +157,6 @@ export const EmbedContent = ({
     },
     [anonymousAccessParameters, usePublicUrl]
   );
-
-  const makeIframeTag = (tempUrl: string) => {
-    if (!tempUrl) {
-      return;
-    }
-
-    return `<iframe src="${tempUrl}" height="600" width="800"></iframe>`;
-  };
 
   const setUrlHelper = useCallback(() => {
     let tempUrl: string | undefined;
