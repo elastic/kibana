@@ -46,15 +46,13 @@ export const getPackagePolicyDeleteCallback =
                   packSavedObjectType,
                   pack.id,
                   {
-                    shards: filter(
-                      pack.attributes.shards,
-                      (shard) => policyIds.indexOf(shard.key) > -1
+                    shards: filter(pack.attributes.shards, (shard) =>
+                      policyIds.includes(shard.key)
                     ),
                   },
                   {
-                    references: filter(
-                      pack.references,
-                      (reference) => policyIds.indexOf(reference.id) > -1
+                    references: filter(pack.references, (reference) =>
+                      policyIds.includes(reference.id)
                     ),
                   }
                 )

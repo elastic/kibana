@@ -194,8 +194,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
             await Promise.all(
               policyIds.map((agentPolicyId) => {
-                const packagePolicy = packagePolicies.find(
-                  (policy) => policy.policy_ids.indexOf(agentPolicyId) > -1
+                const packagePolicy = packagePolicies.find((policy) =>
+                  policy.policy_ids.includes(agentPolicyId)
                 );
                 if (packagePolicy) {
                   return packagePolicyService?.update(
@@ -225,8 +225,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           } else {
             await Promise.all(
               currentAgentPolicyIds.map((agentPolicyId) => {
-                const packagePolicy = currentPackagePolicies.find(
-                  (policy) => policy.policy_ids.indexOf(agentPolicyId) > -1
+                const packagePolicy = currentPackagePolicies.find((policy) =>
+                  policy.policy_ids.includes(agentPolicyId)
                 );
                 if (!packagePolicy) return;
 
@@ -257,8 +257,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
           await Promise.all(
             agentPolicyIdsToRemove.map((agentPolicyId) => {
-              const packagePolicy = currentPackagePolicies.find(
-                (policy) => policy.policy_ids.indexOf(agentPolicyId) > -1
+              const packagePolicy = currentPackagePolicies.find((policy) =>
+                policy.policy_ids.includes(agentPolicyId)
               );
               if (packagePolicy) {
                 return packagePolicyService?.update(
@@ -281,8 +281,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
           await Promise.all(
             agentPolicyIdsToUpdate.map((agentPolicyId) => {
-              const packagePolicy = packagePolicies.find(
-                (policy) => policy.policy_ids.indexOf(agentPolicyId) > -1
+              const packagePolicy = packagePolicies.find((policy) =>
+                policy.policy_ids.includes(agentPolicyId)
               );
               if (packagePolicy) {
                 return packagePolicyService?.update(
@@ -302,7 +302,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
-                        shard: policyShards[agentPolicyId] ? policyShards[agentPolicyId] : 100,
+                        shard: policyShards[agentPolicyId] ?? 100,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }
                     );
@@ -316,8 +316,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
           await Promise.all(
             agentPolicyIdsToAdd.map((agentPolicyId) => {
-              const packagePolicy = packagePolicies.find(
-                (policy) => policy.policy_ids.indexOf(agentPolicyId) > -1
+              const packagePolicy = packagePolicies.find((policy) =>
+                policy.policy_ids.includes(agentPolicyId)
               );
 
               if (packagePolicy) {
@@ -335,7 +335,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
-                        shard: policyShards[agentPolicyId] ? policyShards[agentPolicyId] : 100,
+                        shard: policyShards[agentPolicyId] ?? 100,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }
                     );
