@@ -448,22 +448,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/public/application/lib/fetch_fields.ts"
               }
@@ -497,6 +481,14 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
@@ -8344,22 +8336,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/public/application/lib/fetch_fields.ts"
               }
@@ -8393,6 +8369,14 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
@@ -16948,22 +16932,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/public/application/lib/fetch_fields.ts"
               }
@@ -16997,6 +16965,14 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
