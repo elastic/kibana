@@ -19,7 +19,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { buildResponse } from '../../lib/build_response';
@@ -31,6 +30,7 @@ import {
 } from '../helpers';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { isOpenSourceModel } from '../utils';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
@@ -102,12 +102,7 @@ export const chatCompleteRoute = (
           const connectors = await actionsClient.getBulk({ ids: [connectorId] });
           const connector = connectors.length > 0 ? connectors[0] : undefined;
           actionTypeId = connector?.actionTypeId ?? '.gen-ai';
-          const connectorApiUrl = connector?.config?.apiUrl
-            ? (connector.config.apiUrl as string)
-            : undefined;
-          const connectorApiProvider = connector?.config?.apiProvider
-            ? (connector?.config?.apiProvider as OpenAiProviderType)
-            : undefined;
+          const isOssModel = isOpenSourceModel(connector);
 
           // replacements
           const anonymizationFieldsRes =
@@ -200,8 +195,7 @@ export const chatCompleteRoute = (
             actionsClient,
             actionTypeId,
             connectorId,
-            connectorApiUrl,
-            connectorApiProvider,
+            isOssModel,
             conversationId: conversationId ?? newConversation?.id,
             context: ctx,
             getElser,

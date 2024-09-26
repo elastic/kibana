@@ -11,7 +11,7 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { APP_UI_ID } from '../../../../common';
-import { getExtraPromptForOssModel } from './common';
+import { getPromptSuffixForOssModel } from './common';
 
 export type ESQLToolParams = AssistantToolParams;
 
@@ -65,7 +65,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
     return new DynamicStructuredTool({
       name: toolDetails.name,
       description:
-        toolDetails.description + (isOssModel ? getExtraPromptForOssModel(TOOL_NAME) : ''),
+        toolDetails.description + (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
       schema: z.object({
         question: z.string().describe(`The user's exact question about ESQL`),
       }),

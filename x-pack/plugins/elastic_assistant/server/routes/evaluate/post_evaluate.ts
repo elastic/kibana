@@ -30,10 +30,6 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
-import {
-  OPENAI_CHAT_URL,
-  OpenAiProviderType,
-} from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
@@ -53,7 +49,7 @@ import {
   openAIFunctionAgentPrompt,
   structuredChatAgentPrompt,
 } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
-import { getLlmClass, getLlmType } from '../utils';
+import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -200,19 +196,8 @@ export const postEvaluateRoute = (
           }> = await Promise.all(
             connectors.map(async (connector) => {
               const llmType = getLlmType(connector.actionTypeId);
-              const connectorApiUrl = connector?.config?.apiUrl
-                ? (connector.config.apiUrl as string)
-                : undefined;
-              const connectorApiProvider = connector?.config?.apiProvider
-                ? (connector?.config?.apiProvider as OpenAiProviderType)
-                : undefined;
-              const isOpeAIType = llmType === 'openai';
-              const isOpenAI =
-                isOpeAIType &&
-                (!connectorApiUrl ||
-                  connectorApiUrl === OPENAI_CHAT_URL ||
-                  connectorApiProvider === OpenAiProviderType.AzureAi);
-              const isOssModel = isOpeAIType && !isOpenAI;
+              const isOssModel = isOpenSourceModel(connector);
+              const isOpenAI = llmType === 'openai' && !isOssModel;
               const llmClass = getLlmClass(llmType, true);
               const createLlmInstance = () =>
                 new llmClass({

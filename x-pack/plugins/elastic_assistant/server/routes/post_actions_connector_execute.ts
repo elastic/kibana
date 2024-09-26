@@ -17,7 +17,6 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
@@ -30,6 +29,7 @@ import {
   getSystemPromptFromUserConversation,
   langChainExecute,
 } from './helpers';
+import { isOpenSourceModel } from './utils';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -97,12 +97,7 @@ export const postActionsConnectorExecuteRoute = (
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const connectors = await actionsClient.getBulk({ ids: [connectorId] });
           const connector = connectors.length > 0 ? connectors[0] : undefined;
-          const connectorApiUrl = connector?.config?.apiUrl
-            ? (connector.config.apiUrl as string)
-            : undefined;
-          const connectorApiProvider = connector?.config?.apiProvider
-            ? (connector?.config?.apiProvider as OpenAiProviderType)
-            : undefined;
+          const isOssModel = isOpenSourceModel(connector);
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
@@ -138,8 +133,7 @@ export const postActionsConnectorExecuteRoute = (
             actionsClient,
             actionTypeId,
             connectorId,
-            connectorApiUrl,
-            connectorApiProvider,
+            isOssModel,
             conversationId,
             context: ctx,
             getElser,

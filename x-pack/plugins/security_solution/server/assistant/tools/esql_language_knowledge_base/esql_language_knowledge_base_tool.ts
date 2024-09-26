@@ -9,7 +9,7 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
-import { getExtraPromptForOssModel } from './common';
+import { getPromptSuffixForOssModel } from './common';
 
 export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
@@ -37,7 +37,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     return new DynamicStructuredTool({
       name: toolDetails.name,
       description:
-        toolDetails.description + (isOssModel ? getExtraPromptForOssModel(TOOL_NAME) : ''),
+        toolDetails.description + (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
       schema: z.object({
         question: z.string().describe(`The user's exact question about ESQL`),
       }),

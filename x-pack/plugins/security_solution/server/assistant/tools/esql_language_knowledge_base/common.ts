@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const getExtraPromptForOssModel = (toolName: string) => `
+export const getPromptSuffixForOssModel = (toolName: string) => `
   When using ${toolName} tool ALWAYS pass the user's questions directly as input into the tool.
 
   Always return value from ${toolName} tool as is.
