@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
    * This test suite is skipped in Serverless MKI environments due to reliance on the
    * feature flag for prebuilt rule customization.
    */
-  describe.only('@ess @serverless @skipInServerlessMKI Exporting Rules with Prebuilt Rule Customization', () => {
+  describe('@ess @serverless @skipInServerlessMKI Exporting Rules with Prebuilt Rule Customization', () => {
     beforeEach(async () => {
       await deleteAllPrebuiltRuleAssets(es, log);
       await deleteAllRules(supertest, log);
@@ -104,7 +104,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        expect(parseNdJson(exportResult)).toEqual(
+        const parsedExportResult = parseNdJson(exportResult);
+
+        expect(parsedExportResult).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
               rule_id: ruleAssets[0]['security-rule'].rule_id,
@@ -123,11 +125,16 @@ export default ({ getService }: FtrProviderContext): void => {
           ])
         );
 
+        const [firstExportedRule, secondExportedRule] = parsedExportResult as Array<{
+          id: string;
+          rule_id: string;
+        }>;
+
         const { body: bulkEditResult } = await securitySolutionApi
           .performRulesBulkAction({
             query: {},
             body: {
-              ids: [ruleAssets[0]['security-rule'].rule_id],
+              ids: [firstExportedRule.id],
               action: BulkActionTypeEnum.edit,
               [BulkActionTypeEnum.edit]: [
                 {
@@ -157,14 +164,14 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(parseNdJson(secondExportResult)).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              rule_id: ruleAssets[0]['security-rule'].rule_id,
+              rule_id: firstExportedRule.rule_id,
               rule_source: {
                 type: 'external',
                 is_customized: true,
               },
             }),
             expect.objectContaining({
-              rule_id: ruleAssets[1]['security-rule'].rule_id,
+              rule_id: secondExportedRule.rule_id,
               rule_source: {
                 type: 'external',
                 is_customized: false,

@@ -106,7 +106,8 @@ export const exportRulesRoute = (
                   exceptionsClient,
                   actionsExporter,
                   request,
-                  actionsClient
+                  actionsClient,
+                  prebuiltRulesCustomizationEnabled
                 );
 
           const responseBody = request.query.exclude_export_details
