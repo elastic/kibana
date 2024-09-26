@@ -6,6 +6,7 @@
  */
 
 export interface OtelPolicy {
+  id: string;
   name: string;
   description?: string;
   namespace?: string;
@@ -31,5 +32,12 @@ export interface OtelInputReceivers {
       pipelines?: string[];
       parameters?: Record<string, string | string[]>;
     };
+  };
+}
+
+export interface OtelInputExtensions {
+  extensions?: {
+    config_integrations?: { integrations?: string };
+    file_integrations?: { path?: string };
   };
 }

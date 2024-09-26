@@ -121,13 +121,16 @@ export async function getFullAgentPolicy(
     })
   );
 
-  const inputs = await storedPackagePoliciesToAgentInputs(
+  const packagePolicyInputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
     getOutputIdForAgentPolicy(dataOutput),
     agentPolicy.namespace,
     agentPolicy.global_data_tags
   );
+  const otelInputs = await otelPoliciesToAgentInputs(soClient, agentPolicy);
+  const inputs = [...packagePolicyInputs, ...(otelInputs ? otelInputs : [])];
+
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
     return acc;
@@ -308,11 +311,6 @@ export async function getFullAgentPolicy(
 
   if (agentPolicy.overrides) {
     return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
-  }
-
-  const otelInputs = otelPoliciesToAgentInputs(agentPolicy);
-  if (otelInputs) {
-    return deepMerge<FullAgentPolicy>(fullAgentPolicy, otelInputs);
   }
 
   return fullAgentPolicy;
