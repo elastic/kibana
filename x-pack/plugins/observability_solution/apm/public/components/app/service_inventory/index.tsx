@@ -7,19 +7,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 import { ApmServiceInventory } from './apm_signal_inventory';
-import { MultiSignalInventory } from './multi_signal_inventory';
-import { useApmParams } from '../../../hooks/use_apm_params';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 
 export function ServiceInventory() {
-  const { isEnablementPending, isEntityCentricExperienceViewEnabled } =
-    useEntityManagerEnablementContext();
-
-  const {
-    query: { serviceGroup },
-  } = useApmParams('/services');
+  const { isEnablementPending } = useEntityManagerEnablementContext();
 
   if (isEnablementPending) {
     return (
@@ -36,9 +28,5 @@ export function ServiceInventory() {
     );
   }
 
-  return isEntityCentricExperienceViewEnabled && isEmpty(serviceGroup) ? (
-    <MultiSignalInventory />
-  ) : (
-    <ApmServiceInventory />
-  );
+  return <ApmServiceInventory />;
 }
