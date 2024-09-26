@@ -9,15 +9,16 @@ import { EntityType } from '@kbn/security-solution-plugin/common/api/entity_anal
 
 import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 
-export const EntityStoreUtils = (getService: FtrProviderContext['getService']) => {
+export const EntityStoreUtils = (
+  getService: FtrProviderContext['getService'],
+  namespace?: string
+) => {
   const api = getService('securitySolutionApi');
   const es = getService('es');
   const log = getService('log');
 
   const cleanEngines = async () => {
-    // const api = getService('securitySolutionApi');
-
-    const { body } = await api.listEntityEngines().expect(200);
+    const { body } = await api.listEntityEngines(namespace).expect(200);
 
     // @ts-expect-error body is any
     const engineTypes = body.engines.map((engine) => engine.type);
@@ -36,10 +37,13 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
 
   const initEntityEngineForEntityType = async (entityType: EntityType) => {
     return api
-      .initEntityEngine({
-        params: { entityType },
-        body: {},
-      })
+      .initEntityEngine(
+        {
+          params: { entityType },
+          body: {},
+        },
+        namespace
+      )
       .expect(200);
   };
 
