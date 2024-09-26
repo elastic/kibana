@@ -23,7 +23,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
   return {
     type: taskType,
     title: 'Security Solution Telemetry Indices Metadata task',
-    interval: '1m', // TODO: update!!!
+    interval: '24h',
     timeout: '1m',
     version: '1.0.0',
     getLastExecutionTime: getPreviousDailyTaskTimestamp,
@@ -31,7 +31,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
       taskId: string,
       logger: Logger,
       receiver: ITelemetryReceiver,
-      _sender: ITelemetryEventsSender,
+      sender: ITelemetryEventsSender,
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
@@ -79,22 +79,22 @@ export function createTelemetryIndicesMetadataTaskConfig() {
 
         // 3. Send events
         policies.forEach((p) => {
-          _sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT.eventType, p);
+          sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT.eventType, p);
         });
 
         ilmsStats.forEach((i) => {
-          _sender.reportEBT(TELEMETRY_ILM_STATS_EVENT.eventType, i);
+          sender.reportEBT(TELEMETRY_ILM_STATS_EVENT.eventType, i);
         });
 
         dataStreams.forEach((ds) => {
-          _sender.reportEBT(TELEMETRY_DATA_STREAM_EVENT.eventType, ds);
+          sender.reportEBT(TELEMETRY_DATA_STREAM_EVENT.eventType, ds);
         });
 
         indicesStats.forEach((is) => {
-          _sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT.eventType, is);
+          sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT.eventType, is);
         });
 
-        return 0;
+        return dataStreams.length;
       } catch (err) {
         log.warn(`Error running indices metadata task`, {
           error: JSON.stringify(err),

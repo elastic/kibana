@@ -61,6 +61,7 @@ import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/s
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
+import { getTriggerIndicesMetadataTaskRoute } from '../lib/telemetry/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -147,4 +148,7 @@ export const initRoutes = (
   registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
+
+  // TODO: just to test the POC, remove
+  getTriggerIndicesMetadataTaskRoute(router, logger, previewTelemetryReceiver, telemetrySender);
 };
