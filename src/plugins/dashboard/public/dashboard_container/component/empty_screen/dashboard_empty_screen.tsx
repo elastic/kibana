@@ -50,13 +50,6 @@ export function DashboardEmptyScreen() {
   const isEditMode = useMemo(() => {
     return viewMode === 'edit';
   }, [viewMode]);
-  const { originatingPath, originatingApp } = useMemo(() => {
-    const appContext = dashboardApi.getAppContext();
-    return {
-      originatingApp: appContext?.currentAppId,
-      originatingPath: appContext?.getCurrentPath?.() ?? '',
-    };
-  }, [dashboardApi]);
 
   const goToLens = useCallback(() => {
     if (!lensAlias || !lensAlias.alias) return;
@@ -68,15 +61,16 @@ export function DashboardEmptyScreen() {
     if (trackUiMetric) {
       trackUiMetric(METRIC_TYPE.CLICK, `${lensAlias.name}:create`);
     }
+    const appContext = dashboardApi.getAppContext();
     embeddableService.getStateTransfer().navigateToEditor(lensAlias.alias.app, {
       path: lensAlias.alias.path,
       state: {
-        originatingApp,
-        originatingPath,
+        originatingApp: appContext?.currentAppId,
+        originatingPath: appContext?.getCurrentPath?.() ?? '',
         searchSessionId: dataService.search.session.getSessionId(),
       },
     });
-  }, [lensAlias, originatingApp, originatingPath]);
+  }, [lensAlias, dashboardApi]);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = coreServices.http.basePath.prepend(
