@@ -209,7 +209,7 @@ function sumFirstNValues(n: number, bars: Array<{ y: number }> | undefined): num
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, dashboard } = getPageObjects(['common', 'lens', 'dashboard']);
+  const { common, lens } = getPageObjects(['common', 'lens', 'dashboard']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
