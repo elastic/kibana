@@ -28,6 +28,7 @@ import { ConstructorOptions, RulesClient } from '../../../../rules_client';
 import { ScheduleBackfillParam } from './types';
 import { adHocRunStatus } from '../../../../../common/constants';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { Subject } from 'rxjs';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -71,6 +72,9 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isSystemAction: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  onRuleCreate$: new Subject(),
+  onRuleDelete$: new Subject(),
+  onRuleUpdate$: new Subject(),
 };
 
 const existingRule = {

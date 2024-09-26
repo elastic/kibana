@@ -12,7 +12,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import moment, { Moment } from 'moment';
-import { EntityManagerServerSetup } from '../../../types';
+import { EntityManagerServer } from '../../../types';
 import { getClientsFromAPIKey } from '../../utils';
 import { readEntityDiscoveryAPIKey } from '../../auth';
 import { EntityDiscoveryAPIKey } from '../../auth/api_key/api_key';
@@ -35,9 +35,9 @@ export class EntityMergeTask {
   private abortController = new AbortController();
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
-  private server: EntityManagerServerSetup;
+  private server: EntityManagerServer;
 
-  constructor(taskManager: TaskManagerSetupContract, server: EntityManagerServerSetup) {
+  constructor(taskManager: TaskManagerSetupContract, server: EntityManagerServer) {
     this.logger = server.logger;
     this.server = server;
 
@@ -128,7 +128,7 @@ export class EntityMergeTask {
 
   public async start(
     definition: EntityDefinition,
-    server: EntityManagerServerSetup,
+    server: EntityManagerServer,
     isRetry = false
   ): Promise<string> {
     if (!server.taskManager) {

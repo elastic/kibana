@@ -25,6 +25,7 @@ import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import { RuleDomain } from '../../types';
 import { ConstructorOptions, RulesClient } from '../../../../rules_client/rules_client';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { Subject } from 'rxjs';
 
 describe('clone', () => {
   const taskManager = taskManagerMock.createStart();
@@ -69,6 +70,9 @@ describe('clone', () => {
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    onRuleCreate$: new Subject(),
+    onRuleDelete$: new Subject(),
+    onRuleUpdate$: new Subject(),
   };
 
   let rulesClient: RulesClient;

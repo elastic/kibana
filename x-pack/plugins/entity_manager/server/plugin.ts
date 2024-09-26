@@ -16,7 +16,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { Subject, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { builtInDefinitions } from './lib/entities/built_in';
@@ -125,7 +125,6 @@ export class EntityManagerServerPlugin
       this.server.security = plugins.security;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.taskManager = plugins.taskManager;
-      this.server.onApiKeyChange$ = new Subject();
     }
 
     const esClient = core.elasticsearch.client.asInternalUser;

@@ -8,11 +8,11 @@
 import { KibanaRequest } from '@kbn/core-http-server';
 import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { EntityClient } from '../lib/entity_client';
-import { EntityManagerServerSetup } from '../types';
+import { EntityManagerServer } from '../types';
 import { EntityMergeTask } from '../lib/entities/tasks/entity_merge_task';
 
 export interface EntityManagerRouteDependencies {
-  server: EntityManagerServerSetup;
+  server: EntityManagerServer;
   getScopedClient: ({ request }: { request: KibanaRequest }) => Promise<EntityClient>;
   tasks: {
     entityMergeTask: EntityMergeTask;

@@ -65,6 +65,4 @@ export async function setupApiKeys(
   }
 
   await saveEntityDiscoveryAPIKey(soClient, apiKey, apiKeyId);
-
-  server.onApiKeyChange$.next();
 }

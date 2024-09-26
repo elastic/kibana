@@ -13,6 +13,7 @@ import {
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/server';
+import { Observable } from 'rxjs';
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
@@ -65,6 +66,17 @@ const createStartMock = () => {
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),
+    events: {
+      onRuleCreate$: {
+        subscribe: jest.fn(),
+      } as unknown as jest.Mocked<Observable<{ id: string; type: string }>>,
+      onRuleUpdate$: {
+        subscribe: jest.fn(),
+      } as unknown as jest.Mocked<Observable<{ id: string; type: string }>>,
+      onRuleDelete$: {
+        subscribe: jest.fn(),
+      } as unknown as jest.Mocked<Observable<{ id: string; type: string }>>,
+    },
   };
   return mock;
 };

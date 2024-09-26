@@ -24,6 +24,7 @@ import { createNewAPIKeySet } from './create_new_api_key_set';
 import { RulesClientContext } from '../types';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { Subject } from 'rxjs';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -61,6 +62,9 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  onRuleCreate$: new Subject(),
+  onRuleDelete$: new Subject(),
+  onRuleUpdate$: new Subject(),
 };
 
 const username = 'test';

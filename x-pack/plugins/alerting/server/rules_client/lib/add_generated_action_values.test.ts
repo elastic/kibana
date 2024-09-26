@@ -23,6 +23,7 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ConstructorOptions } from '../rules_client';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { Subject } from 'rxjs';
 
 jest.mock('uuid', () => ({
   v4: () => '111-222',
@@ -69,6 +70,9 @@ describe('addGeneratedActionValues()', () => {
     uiSettings,
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     isSystemAction: jest.fn(),
+    onRuleCreate$: new Subject(),
+    onRuleDelete$: new Subject(),
+    onRuleUpdate$: new Subject(),
   };
 
   const mockAction: RuleAction = {

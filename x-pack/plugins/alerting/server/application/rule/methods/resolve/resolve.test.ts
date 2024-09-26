@@ -24,6 +24,7 @@ import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connect
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { Subject } from 'rxjs';
 
 describe('resolve', () => {
   const taskManager = taskManagerMock.createStart();
@@ -68,6 +69,9 @@ describe('resolve', () => {
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    onRuleCreate$: new Subject(),
+    onRuleDelete$: new Subject(),
+    onRuleUpdate$: new Subject(),
   };
 
   let rulesClient: RulesClient;

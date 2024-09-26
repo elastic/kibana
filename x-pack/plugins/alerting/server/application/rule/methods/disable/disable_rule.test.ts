@@ -29,6 +29,7 @@ import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_lega
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { Subject } from 'rxjs';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -55,6 +56,7 @@ const eventLogger = eventLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
+
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
@@ -83,6 +85,9 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  onRuleCreate$: new Subject(),
+  onRuleDelete$: new Subject(),
+  onRuleUpdate$: new Subject(),
 };
 
 beforeEach(() => {

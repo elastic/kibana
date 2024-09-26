@@ -8,7 +8,7 @@
 import { EntityDefinition } from '@kbn/entities-schema';
 import { installBuiltInEntityDefinitions } from './install_entity_definition';
 import { startTransforms } from './start_transforms';
-import { EntityManagerServerSetup } from '../../types';
+import { EntityManagerServer } from '../../types';
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../auth';
 import { getClientsFromAPIKey } from '../utils';
 import { ERROR_API_KEY_NOT_FOUND } from '../../../common/errors';
@@ -18,7 +18,7 @@ export async function upgradeBuiltInEntityDefinitions({
   server,
 }: {
   definitions: EntityDefinition[];
-  server: EntityManagerServerSetup;
+  server: EntityManagerServer;
 }): Promise<
   { success: true; definitions: EntityDefinition[] } | { success: false; reason: string }
 > {

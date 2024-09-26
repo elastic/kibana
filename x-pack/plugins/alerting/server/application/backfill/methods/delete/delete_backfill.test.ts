@@ -28,6 +28,7 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { Subject } from 'rxjs';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -68,6 +69,9 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isSystemAction: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  onRuleCreate$: new Subject(),
+  onRuleDelete$: new Subject(),
+  onRuleUpdate$: new Subject(),
 };
 
 const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
