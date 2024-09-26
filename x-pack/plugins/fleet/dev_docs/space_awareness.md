@@ -22,11 +22,13 @@ curl -u elastic:changeme -XPOST "http://localhost:5601/internal/fleet/enable_spa
 
 Some Fleet entities are space-aware while some are global accross all spaces.
 
+`.fleet-*` indices are space aware, for this we added a `namespaces` property, and we added the filtering in our different queries.
+
 Space aware saved object:
 
 - Package policies, `fleet-package-policies`
 - Agent policies, `fleet-agent-policies`
-- Space settings
+- Space settings `fleet-space-settings` (That is used to restrict allowed namespace prefix for policies)
 
 As the feature is opt-in we will have to make sure that both non space-aware and space-aware saved object work, and dynamically use the right object type based on opt-in. Agent policy example:
 
@@ -43,8 +45,6 @@ Special one:
 - Uninstall tokens are space aware, but we still use a space agnostic saved object and we do the filtering using query and application logic, to avoid those documents to be accidentally deleted during a space deletion.
 
 Other saved object like output, settings, fleet server hosts are space agnostic.
-
-`.fleet-*` indices are space aware, for this we added a `namespaces` property, and we added the filtering in our different queries.
 
 ## Querying space aware saved object
 
@@ -74,3 +74,7 @@ appContextService.getInternalUserSOClientWithoutSpaceExtension().find({
   namespaces: ['*'],
 });
 ```
+
+## Testing
+
+As we need the feature flag enabled there is a special test config for space awareness in `x-pack/test/fleet_api_integration/apis/space_awareness` it's important to have test coverage that entities that should only be accessible in a space are not accessible in a other one.
