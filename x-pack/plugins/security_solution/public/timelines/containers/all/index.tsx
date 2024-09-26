@@ -21,7 +21,7 @@ import type {
   TimelineType,
   TimelineStatus,
   PageInfoTimeline,
-  TimelineResult,
+  TimelineResponse,
   SortTimeline,
   GetTimelinesRequestQuery,
 } from '../../../../common/api/timeline';
@@ -59,7 +59,7 @@ export interface AllTimelinesVariables {
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
 
 export const getAllTimeline = memoizeOne(
-  (_variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
+  (_variables: string, timelines: TimelineResponse[]): OpenTimelineResult[] =>
     timelines.map((timeline) => ({
       created: timeline.created,
       description: timeline.description,
@@ -165,7 +165,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
             setAllTimelines({
               loading: false,
               totalCount,
-              timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResult[]),
+              timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResponse[]),
               customTemplateTimelineCount,
               defaultTimelineCount,
               elasticTemplateTimelineCount,

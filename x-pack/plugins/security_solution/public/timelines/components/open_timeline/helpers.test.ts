@@ -20,7 +20,7 @@ import {
   isUntitled,
   omitTypenameInTimeline,
   useQueryTimelineById,
-  formatTimelineResultToModel,
+  formatTimelineResponseToModel,
 } from './helpers';
 import type { OpenTimelineResult } from './types';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -695,7 +695,7 @@ describe('helpers', () => {
       });
 
       test('Do not override daterange if TimelineStatus is active', () => {
-        const { timeline } = formatTimelineResultToModel(
+        const { timeline } = formatTimelineResponseToModel(
           omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
           args.duplicate,
           args.timelineType
@@ -748,7 +748,7 @@ describe('helpers', () => {
       });
 
       test('should not override daterange if TimelineStatus is active', () => {
-        const { timeline } = formatTimelineResultToModel(
+        const { timeline } = formatTimelineResponseToModel(
           omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
           args.duplicate,
           args.timelineType
@@ -822,7 +822,7 @@ describe('helpers', () => {
       });
 
       test('override daterange if TimelineStatus is immutable', () => {
-        const { timeline } = formatTimelineResultToModel(
+        const { timeline } = formatTimelineResponseToModel(
           omitTypenameInTimeline(getOr({}, 'data.timeline', template)),
           args.duplicate,
           args.timelineType

@@ -732,21 +732,3 @@ components:
               type: string
             statusCode:
               type: number
-
-    ExportedTimelines:
-      allOf:
-        - $ref: '#/components/schemas/SavedTimeline'
-        - type: object
-          properties:
-            globalNotes:
-              type: array
-              items:
-                $ref: '#/components/schemas/Note'
-            eventNotes:
-              type: array
-              items:
-                $ref: '#/components/schemas/Note'
-            pinnedEventIds:
-              type: array
-              items:
-                type: string

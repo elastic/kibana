@@ -377,7 +377,7 @@ export const persistFavorite = async (
   }
 };
 
-interface InternalTimelineResponse {
+export interface InternalTimelineResponse {
   code: number;
   message: string;
   timeline: TimelineResponse;

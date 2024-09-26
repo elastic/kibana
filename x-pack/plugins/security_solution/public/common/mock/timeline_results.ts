@@ -9,8 +9,8 @@ import { FilterStateStore } from '@kbn/es-query';
 
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
-import type { TimelineResult } from '../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
+import type { TimelineResponse } from '../../../common/api/timeline';
 import {
   type ColumnHeaderResult,
   RowRendererIdEnum,
@@ -1987,7 +1987,7 @@ export const mockDataTableModel: DataTableModel = {
   },
 };
 
-export const mockGetOneTimelineResult: TimelineResult = {
+export const mockGetOneTimelineResult: TimelineResponse = {
   savedObjectId: 'ef579e40-jibber-jabber',
   columns: timelineDefaults.columns.filter(
     (column) => column.id !== 'event.action'

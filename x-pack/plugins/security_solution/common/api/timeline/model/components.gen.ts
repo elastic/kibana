@@ -413,12 +413,3 @@ export const TimelineErrorResponse = z.union([
     statusCode: z.number(),
   }),
 ]);
-
-export type ExportedTimelines = z.infer<typeof ExportedTimelines>;
-export const ExportedTimelines = SavedTimeline.merge(
-  z.object({
-    globalNotes: z.array(Note).optional(),
-    eventNotes: z.array(Note).optional(),
-    pinnedEventIds: z.array(z.string()).optional(),
-  })
-);
