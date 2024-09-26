@@ -30,7 +30,7 @@ import type { ErrorCode } from '../../../../../../common/constants';
 import type { AIConnector, IntegrationSettings } from '../../types';
 
 export type OnComplete = (result: State['result']) => void;
-export const ProgressOrder = ['ecs', 'categorization', 'related'];
+export const ProgressOrder = ['analyzeLogs', 'ecs', 'categorization', 'related'] as const;
 export type ProgressItem = (typeof ProgressOrder)[number];
 
 interface UseGenerationProps {
@@ -152,9 +152,6 @@ async function runGeneration({
 
     setProgress('analyzeLogs');
     const analyzeLogsResult = await runAnalyzeLogsGraph(analyzeLogsRequest, deps);
-    if (deps.abortSignal.aborted) {
-      throw new Error('Aborted');
-    }
     if (isEmpty(analyzeLogsResult?.results)) {
       throw new Error('No results from Analyze Logs Graph');
     }
@@ -175,9 +172,6 @@ async function runGeneration({
 
   setProgress('ecs');
   const ecsGraphResult = await runEcsGraph(ecsRequest, deps);
-  if (deps.abortSignal.aborted) {
-    throw new Error('Aborted');
-  }
   if (isEmpty(ecsGraphResult?.results)) {
     throw new Error('No results from ECS graph');
   }
@@ -190,9 +184,6 @@ async function runGeneration({
 
   setProgress('categorization');
   const categorizationResult = await runCategorizationGraph(categorizationRequest, deps);
-  if (deps.abortSignal.aborted) {
-    throw new Error('Aborted');
-  }
   const relatedRequest: RelatedRequestBody = {
     ...categorizationRequest,
     currentPipeline: categorizationResult.results.pipeline,
@@ -200,9 +191,6 @@ async function runGeneration({
 
   setProgress('related');
   const relatedGraphResult = await runRelatedGraph(relatedRequest, deps);
-  if (deps.abortSignal.aborted) {
-    throw new Error('Aborted');
-  }
   if (isEmpty(relatedGraphResult?.results)) {
     throw new Error('Results not found in response');
   }
