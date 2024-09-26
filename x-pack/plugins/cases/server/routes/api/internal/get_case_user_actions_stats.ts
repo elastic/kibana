@@ -18,6 +18,9 @@ export const getCaseUserActionStatsRoute = createCasesRoute({
       case_id: schema.string(),
     }),
   },
+  routerOptions: {
+    access: 'internal',
+  },
   handler: async ({ context, request, response }) => {
     try {
       const casesContext = await context.cases;
