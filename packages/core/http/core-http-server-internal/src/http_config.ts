@@ -205,10 +205,10 @@ const configSchema = schema.object(
         },
       }
     ),
-    // allow access to internal routes by default to prevent breaking changes in current offerings
+    // disable access to internal routes by default
     restrictInternalApis: offeringBasedSchema({
-      serverless: schema.boolean({ defaultValue: false }),
-      traditional: schema.boolean({ defaultValue: false }),
+      serverless: schema.boolean({ defaultValue: true }),
+      traditional: schema.boolean({ defaultValue: true }),
     }),
 
     versioned: schema.object({
@@ -385,8 +385,8 @@ export class HttpConfig implements IHttpConfig {
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
 
-    // default to `true` to restrict internal APIs if not set through config.
-    this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? true;
+    // defaults to `true` if not set through config.
+    this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
     this.oas = rawHttpConfig.oas;
