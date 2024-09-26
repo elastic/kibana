@@ -34,6 +34,7 @@ export interface LogRateAnalysisState {
   autoRunAnalysis: boolean;
   initialAnalysisStart: InitialAnalysisStart;
   isBrushCleared: boolean;
+  groupResults: boolean;
   stickyHistogram: boolean;
   chartWindowParameters?: WindowParameters;
   earliest?: number;
@@ -48,6 +49,7 @@ function getDefaultState(): LogRateAnalysisState {
     autoRunAnalysis: true,
     initialAnalysisStart: undefined,
     isBrushCleared: true,
+    groupResults: false,
     documentStats: {
       sampleProbability: 1,
       totalCount: 0,
@@ -98,6 +100,9 @@ export const logRateAnalysisSlice = createSlice({
       state.intervalMs = action.payload.intervalMs;
       state.documentStats = action.payload.documentStats;
     },
+    setGroupResults: (state: LogRateAnalysisState, action: PayloadAction<boolean>) => {
+      state.groupResults = action.payload;
+    },
     setInitialAnalysisStart: (
       state: LogRateAnalysisState,
       action: PayloadAction<InitialAnalysisStart>
@@ -127,6 +132,7 @@ export const {
   setAnalysisType,
   setAutoRunAnalysis,
   setDocumentCountChartData,
+  setGroupResults,
   setInitialAnalysisStart,
   setIsBrushCleared,
   setStickyHistogram,
