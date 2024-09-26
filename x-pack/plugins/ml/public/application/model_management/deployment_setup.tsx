@@ -596,7 +596,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               <FormattedMessage
                 id={'xpack.ml.trainedModels.modelsList.startDeployment.adaptiveResourcesHelp'}
                 defaultMessage={
-                  'Adjust resources to optimize for load and savings. If disabled, ELSER will not auto-scale.'
+                  'Adjust resources to optimize for load and savings. If disabled, the deployments will not auto-scale.'
                 }
               />
             </EuiFormHelpText>
