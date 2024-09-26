@@ -11734,11 +11734,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/Fleet_package_policy'
-                  sucess:
-                    type: boolean
                 required:
                   - item
-                  - sucess
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
