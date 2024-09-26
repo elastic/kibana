@@ -6,8 +6,8 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
-import moment from 'moment';
+import React, { useCallback } from 'react';
+import moment from 'moment-timezone';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { EuiButton, EuiButtonEmpty, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
@@ -48,6 +48,7 @@ interface Props {
   showSearchBar?: boolean;
   loading?: boolean;
   saving?: boolean;
+  timezone?: string;
 }
 
 export const EventsTable: FC<Props> = ({
@@ -58,6 +59,7 @@ export const EventsTable: FC<Props> = ({
   showNewEventModal,
   loading,
   saving,
+  timezone,
 }) => {
   const [canCreateCalendar, canDeleteCalendar] = usePermissionCheck([
     'canCreateCalendar',
@@ -68,6 +70,19 @@ export const EventsTable: FC<Props> = ({
     initialPageSize: 5,
     pageSizeOptions: [5, 10],
   };
+
+  const formatEventDate = useCallback(
+    (timeMs: number) => {
+      if (timezone === undefined) {
+        const time = moment(timeMs);
+        return time.format(TIME_FORMAT);
+      }
+
+      const time = moment.tz(timeMs, timezone);
+      return time.toLocaleString();
+    },
+    [timezone]
+  );
 
   const columns = [
     {
@@ -85,10 +100,7 @@ export const EventsTable: FC<Props> = ({
         defaultMessage: 'Start',
       }),
       sortable: true,
-      render: (timeMs: number) => {
-        const time = moment(timeMs);
-        return time.format(TIME_FORMAT);
-      },
+      render: formatEventDate,
     },
     {
       field: 'end_time',
@@ -96,10 +108,7 @@ export const EventsTable: FC<Props> = ({
         defaultMessage: 'End',
       }),
       sortable: true,
-      render: (timeMs: number) => {
-        const time = moment(timeMs);
-        return time.format(TIME_FORMAT);
-      },
+      render: formatEventDate,
     },
     {
       field: '',

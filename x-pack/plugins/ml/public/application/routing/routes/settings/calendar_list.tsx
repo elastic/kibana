@@ -53,7 +53,7 @@ export const calendarDstListRouteFactory = (
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB'),
+    getBreadcrumbWithUrlForApp('CALENDAR_DST_MANAGEMENT_BREADCRUMB'),
   ],
 });
 

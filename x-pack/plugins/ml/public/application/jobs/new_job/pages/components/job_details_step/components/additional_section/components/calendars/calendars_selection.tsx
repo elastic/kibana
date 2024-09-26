@@ -20,6 +20,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { separateCalendarsByType } from '../../../../../../../../../settings/calendars/dst_utils';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
@@ -27,8 +28,13 @@ import type { MlCalendar } from '../../../../../../../../../../../common/types/c
 import { useMlApi, useMlKibana } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
+import { DescriptionDst } from './description_dst';
 
-export const CalendarsSelection: FC = () => {
+interface Props {
+  isDst?: boolean;
+}
+
+export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   const {
     services: {
       application: { getUrlForApp },
@@ -46,10 +52,11 @@ export const CalendarsSelection: FC = () => {
 
   async function loadCalendars() {
     setIsLoading(true);
-    const calendars = (await mlApi.calendars()).filter(
+    const { calendars, calendarsDst } = separateCalendarsByType(await mlApi.calendars());
+    const filteredCalendars = (isDst ? calendarsDst : calendars).filter(
       (c) => c.job_ids.includes(GLOBAL_CALENDAR) === false
     );
-    setOptions(calendars.map((c) => ({ label: c.calendar_id, value: c })));
+    setOptions(filteredCalendars.map((c) => ({ label: c.calendar_id, value: c })));
     setSelectedOptions(selectedCalendars.map((c) => ({ label: c.calendar_id, value: c })));
     setIsLoading(false);
   }
@@ -80,8 +87,10 @@ export const CalendarsSelection: FC = () => {
     path: ML_PAGES.CALENDARS_MANAGE,
   });
 
+  const Desc = isDst ? DescriptionDst : Description;
+
   return (
-    <Description>
+    <Desc>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem>
           <EuiComboBox {...comboBoxProps} data-test-subj="mlJobWizardComboBoxCalendars" />
@@ -119,6 +128,6 @@ export const CalendarsSelection: FC = () => {
           />
         </EuiLink>
       </EuiText>
-    </Description>
+    </Desc>
   );
 };

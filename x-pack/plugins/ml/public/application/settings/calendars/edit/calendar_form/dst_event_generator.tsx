@@ -10,15 +10,16 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButton, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import { createDstEvents } from '../../dst_utils';
 
 interface Props {
   addEvents: (events: estypes.MlCalendarEvent[]) => void;
+  setTimezone: (timezone: string) => void;
 }
 
-export const DstEventGenerator: FC<Props> = ({ addEvents }) => {
+export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone }) => {
   const generateEvents = () => {
     //
     // const dates = createDstEvents('Europe/London');
@@ -31,6 +32,12 @@ export const DstEventGenerator: FC<Props> = ({ addEvents }) => {
   const [selectedTimeZones, setSelectedTimeZones] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
+
+  useEffect(() => {
+    if (selectedTimeZones.length > 0) {
+      setTimezone(selectedTimeZones[0].value!);
+    }
+  }, [selectedTimeZones, setTimezone]);
 
   const timeZoneOptions = useMemo(() => {
     return moment.tz.names().map((tz) => {

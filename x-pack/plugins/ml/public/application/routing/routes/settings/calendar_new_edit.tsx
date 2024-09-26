@@ -88,7 +88,7 @@ export const newCalendarDstRouteFactory = (
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('CALENDAR_DST_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
         defaultMessage: 'Create',
@@ -109,7 +109,7 @@ export const editCalendarDstRouteFactory = (
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('CALENDAR_DST_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
         defaultMessage: 'Edit',

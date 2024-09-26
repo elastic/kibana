@@ -14,7 +14,6 @@ import { EuiPageBody } from '@elastic/eui';
 
 import { getCalendarSettingsData, validateCalendarId } from './utils';
 import { CalendarForm } from './calendar_form/calendar_form';
-import { CalendarFormDst } from './calendar_form/calendar_form_dst';
 import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
@@ -365,13 +364,11 @@ class NewCalendarUI extends Component {
       );
     }
 
-    const Form = this.props.isDst ? CalendarFormDst : CalendarForm;
-
     return (
       <Fragment>
         <div data-test-subj="mlPageCalendarEdit">
           <EuiPageBody>
-            <Form
+            <CalendarForm
               calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
               description={selectedCalendar ? selectedCalendar.description : description}
               eventsList={events}
@@ -398,6 +395,7 @@ class NewCalendarUI extends Component {
               isGlobalCalendar={isGlobalCalendar}
               onGlobalCalendarChange={this.onGlobalCalendarChange}
               addEvents={this.addEvents}
+              isDst={this.props.isDst}
             />
             {modal}
           </EuiPageBody>

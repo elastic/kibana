@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiSwitchEvent, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -26,10 +26,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
-import { EventsTable } from '../events_table';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
+import { DstEventGenerator } from './dst_event_generator';
+import { EventsTable } from '../events_table';
 
 const EditHeader: FC<{ calendarId: string; description: string }> = ({
   calendarId,
@@ -83,6 +84,7 @@ interface Props {
   isGlobalCalendar: boolean;
   onGlobalCalendarChange: (e: EuiSwitchEvent) => void;
   addEvents: (events: estypes.MlCalendarEvent[]) => void;
+  isDst: boolean;
 }
 
 export const CalendarForm: FC<Props> = ({
@@ -109,8 +111,11 @@ export const CalendarForm: FC<Props> = ({
   showNewEventModal,
   isGlobalCalendar,
   onGlobalCalendarChange,
+  addEvents,
+  isDst,
 }) => {
   const [canCreateCalendar] = usePermissionCheck(['canCreateCalendar']);
+  const [timezone, setTimezone] = useState<string | undefined>(undefined);
   const msg = i18n.translate('xpack.ml.calendarsEdit.calendarForm.allowedCharactersDescription', {
     defaultMessage:
       'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; ' +
@@ -124,7 +129,9 @@ export const CalendarForm: FC<Props> = ({
     !isNewCalendarIdValid ||
     calendarId === '' ||
     loading === true;
-  const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
+  const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(
+    isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE
+  );
 
   return (
     <EuiForm data-test-subj={`mlCalendarForm${isEdit === true ? 'Edit' : 'New'}`}>
@@ -133,10 +140,17 @@ export const CalendarForm: FC<Props> = ({
       ) : (
         <>
           <MlPageHeader>
-            <FormattedMessage
-              id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
-              defaultMessage="Create new calendar"
-            />
+            {isDst ? (
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.createCalendarDstTitle"
+                defaultMessage="Create new DST calendar"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+                defaultMessage="Create new calendar"
+              />
+            )}
           </MlPageHeader>
           <EuiFormRow
             label={
@@ -158,42 +172,46 @@ export const CalendarForm: FC<Props> = ({
             />
           </EuiFormRow>
 
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
-                defaultMessage="Description"
+          {isDst === false ? (
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
+                  defaultMessage="Description"
+                />
+              }
+            >
+              <EuiFieldText
+                name="description"
+                value={description}
+                onChange={onDescriptionChange}
+                disabled={saving === true || loading === true}
+                data-test-subj="mlCalendarDescriptionInput"
               />
-            }
-          >
-            <EuiFieldText
-              name="description"
-              value={description}
-              onChange={onDescriptionChange}
-              disabled={saving === true || loading === true}
-              data-test-subj="mlCalendarDescriptionInput"
-            />
-          </EuiFormRow>
+            </EuiFormRow>
+          ) : null}
 
           <EuiSpacer size="m" />
         </>
       )}
 
-      <EuiSwitch
-        name="switch"
-        label={
-          <FormattedMessage
-            id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
-            defaultMessage="Apply calendar to all jobs"
-          />
-        }
-        checked={isGlobalCalendar}
-        onChange={onGlobalCalendarChange}
-        disabled={saving === true || canCreateCalendar === false || loading === true}
-        data-test-subj="mlCalendarApplyToAllJobsSwitch"
-      />
+      {isDst === false ? (
+        <EuiSwitch
+          name="switch"
+          label={
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
+              defaultMessage="Apply calendar to all jobs"
+            />
+          }
+          checked={isGlobalCalendar}
+          onChange={onGlobalCalendarChange}
+          disabled={saving === true || canCreateCalendar === false || loading === true}
+          data-test-subj="mlCalendarApplyToAllJobsSwitch"
+        />
+      ) : null}
 
-      {isGlobalCalendar === false && (
+      {isGlobalCalendar === false ? (
         <>
           <EuiSpacer size="m" />
 
@@ -232,28 +250,53 @@ export const CalendarForm: FC<Props> = ({
             />
           </EuiFormRow>
         </>
-      )}
+      ) : null}
 
       <EuiSpacer size="xl" />
 
       <EuiFormRow
         label={
-          <FormattedMessage
-            id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
-            defaultMessage="Events"
-          />
+          isDst ? (
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.calendarForm.dstEventsLabel"
+              defaultMessage="Time zone of data"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
+              defaultMessage="Events"
+            />
+          )
         }
         fullWidth
       >
-        <EventsTable
-          eventsList={eventsList}
-          onDeleteClick={onEventDelete}
-          showImportModal={showImportModal}
-          showNewEventModal={showNewEventModal}
-          loading={loading}
-          saving={saving}
-          showSearchBar
-        />
+        <>
+          {isDst ? (
+            <>
+              <EuiFormRow
+                fullWidth
+                helpText={
+                  <FormattedMessage
+                    id="xpack.ml.calendarsEdit.calendarForm.dstEventsHelpText"
+                    defaultMessage="The selected time zone should match the time zone of the data."
+                  />
+                }
+              >
+                <DstEventGenerator addEvents={addEvents} setTimezone={setTimezone} />
+              </EuiFormRow>
+            </>
+          ) : null}
+          <EventsTable
+            eventsList={eventsList}
+            onDeleteClick={onEventDelete}
+            showImportModal={showImportModal}
+            showNewEventModal={showNewEventModal}
+            loading={loading}
+            saving={saving}
+            showSearchBar={isDst === false}
+            timezone={timezone}
+          />
+        </>
       </EuiFormRow>
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexEnd">
