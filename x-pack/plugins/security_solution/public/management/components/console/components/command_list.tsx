@@ -149,7 +149,6 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
 
     // We only show commands that are no hidden
     const allowedCommands = commands.filter((command) => command.helpHidden !== true);
-
     for (const allowedCommand of allowedCommands) {
       const { helpGroupLabel = otherCommandsGroupLabel, helpGroupPosition = Infinity } =
         allowedCommand;

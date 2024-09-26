@@ -213,6 +213,52 @@ export const CONSOLE_COMMANDS = {
       },
     },
   },
+  init: {
+    title: i18n.translate('xpack.securitySolution.endpointConsoleCommands.init.title', {
+      defaultMessage: 'Init',
+    }),
+    about: (agentType: string) => {
+      switch (agentType) {
+        case 'crowdstrike':
+          return i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.init.about.crowdstrike',
+            {
+              defaultMessage: 'Initialize Real-Time-Response for CrowdStrike',
+            }
+          );
+        default:
+          return i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.init.about.default',
+            {
+              defaultMessage: 'Initialize session on the host',
+            }
+          );
+      }
+    },
+  },
+  shell: {
+    title: i18n.translate('xpack.securitySolution.endpointConsoleCommands.shell.title', {
+      defaultMessage: 'Execute shell command',
+    }),
+    about: (agentType: string) => {
+      switch (agentType) {
+        case 'crowdstrike':
+          return i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.shell.about.crowdstrike',
+            {
+              defaultMessage: 'Execute Real-Time-Response shell command for CrowdStrike',
+            }
+          );
+        default:
+          return i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.shell.about.default',
+            {
+              defaultMessage: 'Execute shell command on the host',
+            }
+          );
+      }
+    },
+  },
 };
 
 export const CONFIRM_WARNING_MODAL_LABELS = (entryType: string) => {

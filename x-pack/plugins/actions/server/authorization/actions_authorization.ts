@@ -73,6 +73,7 @@ export class ActionsAuthorization {
           ? operationAlias[operation](authorization)
           : [authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)];
 
+        console.log({ actionTypeId });
         const { hasAllRequested } = await checkPrivileges({
           kibana: [
             ...privileges,

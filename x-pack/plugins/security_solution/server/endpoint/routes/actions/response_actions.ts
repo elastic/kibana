@@ -33,16 +33,20 @@ import {
   UnisolateRouteRequestSchema,
   type UploadActionApiRequestBody,
   UploadActionRequestSchema,
+  InitActionRequestSchema,
+  ShellActionRequestSchema,
 } from '../../../../common/api/endpoint';
 
 import {
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
+  INIT_ROUTE,
   ISOLATE_HOST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
   SCAN_ROUTE,
+  SHELL_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
@@ -305,6 +309,45 @@ export function registerResponseActionRoutes(
         responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
       )
     );
+
+  router.versioned
+    .post({
+      access: 'public',
+      path: INIT_ROUTE,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: InitActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        {},
+        logger,
+        responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'init')
+      )
+    );
+  router.versioned
+    .post({
+      access: 'public',
+      path: SHELL_ROUTE,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ShellActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        {},
+        logger,
+        responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'shell')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -397,6 +440,13 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
           action = await responseActionsClient.scan(req.body as ScanActionRequestBody);
           break;
 
+        case 'init':
+          action = await responseActionsClient.init(req.body);
+          break;
+        case 'shell':
+          action = await responseActionsClient.shell(req.body);
+          break;
+
         default:
           throw new CustomHttpRequestError(
             `No handler found for response action command: [${command}]`,
@@ -413,6 +463,9 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
           }
         : {};
 
+      console.log({
+        action,
+      });
       return res.ok({
         body: {
           ...legacyResponseData,
@@ -420,6 +473,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         },
       });
     } catch (err) {
+      console.log({ err111: err });
       return errorHandler(logger, res, err);
     }
   };

@@ -776,6 +776,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     throw new ResponseActionsNotSupportedError('scan');
   }
 
+  public async init(
+    actionRequest: ScanActionRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>> {
+    throw new ResponseActionsNotSupportedError('init');
+  }
+
+  public async shell(
+    actionRequest: ScanActionRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>> {
+    throw new ResponseActionsNotSupportedError('shell');
+  }
+
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
     this.log.debug(`#processPendingActions() method is not implemented for ${this.agentType}!`);
   }

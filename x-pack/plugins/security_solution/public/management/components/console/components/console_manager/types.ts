@@ -25,7 +25,7 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
   /**
    * An optional component that will be rendered in the Responder page overlay, above the Console area
    */
-  PageBodyComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
+  x?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
 
   /**
    * An array of Action components (likely buttons) that will be rendered into the Responder page

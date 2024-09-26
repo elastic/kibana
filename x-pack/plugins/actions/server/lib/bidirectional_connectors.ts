@@ -7,6 +7,7 @@
 
 const BIDIRECTIONAL_CONNECTOR_TYPES = ['.sentinelone', '.crowdstrike'];
 export const isBidirectionalConnectorType = (type: string | undefined) => {
+  console.log({ type });
   if (!type) {
     return false;
   }

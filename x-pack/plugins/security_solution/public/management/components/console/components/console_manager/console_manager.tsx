@@ -264,6 +264,10 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     }
   }, [consoleManagerClient, visibleConsole]);
 
+  const agent = {
+    agentType: visibleConsoleMeta.agentType,
+    agentId: visibleConsoleMeta.agentId,
+  };
   return (
     <ConsoleManagerContext.Provider value={consoleManageContextClients}>
       {children}
@@ -273,6 +277,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
           onHide={handleOnHide}
           console={
             <Console
+              agent={agent}
               {...visibleConsole.consoleProps}
               managedKey={visibleConsole.key}
               key={visibleConsole.client.id}

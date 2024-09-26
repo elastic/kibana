@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ScriptsCommand } from '../components/builtin_commands/scripts_command';
 import { ClearCommand } from '../components/builtin_commands/clear_command';
 import { HelpCommand } from '../components/builtin_commands/help_command';
 import type { CommandDefinition } from '../types';
@@ -52,6 +53,15 @@ export const getBuiltinCommands = (): CommandDefinition[] => {
       RenderComponent: ClearCommand,
       helpGroupLabel: HELP_GROUPS.supporting.label,
       helpCommandPosition: 0,
+    },
+    {
+      name: 'scripts',
+      about: i18n.translate('xpack.securitySolution.console.builtInCommands.scriptsAbout', {
+        defaultMessage: 'Get available scripts',
+      }),
+      RenderComponent: ScriptsCommand,
+      helpGroupLabel: HELP_GROUPS.supporting.label,
+      helpCommandPosition: 2,
     },
   ];
 };

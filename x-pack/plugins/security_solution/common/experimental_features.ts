@@ -192,10 +192,15 @@ export const allowedExperimentalValues = Object.freeze({
    */
   jamfDataInAnalyzerEnabled: true,
 
-  /*
-   * Disables discover esql tab within timeline
+  /**
+   Enables executing given text input in endpoint response console
    *
    */
+  responseConsoleExecuteEnabled: true,
+  /**
+   * Disables discover esql tab within timeline
+   */
+
   timelineEsqlTabDisabled: false,
   /*
    * Disables experimental Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.

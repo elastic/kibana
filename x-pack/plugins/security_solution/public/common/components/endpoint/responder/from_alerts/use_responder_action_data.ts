@@ -233,6 +233,7 @@ export const useResponderActionData = ({
 
   // TODO:PT add support for other agent types once we add the `Respond` button to the Host details page in SIEM
 
+  console.log('0987');
   const handleResponseActionsClick = useCallback(() => {
     if (!isDisabled) {
       showResponseActionsConsole({

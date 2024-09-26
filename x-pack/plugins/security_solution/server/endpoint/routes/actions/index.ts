@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerSavedScriptsRoutes } from './saved_scripts';
 import { registerActionFileInfoRoute } from './file_info_handler';
 import { registerActionFileDownloadRoutes } from './file_download_handler';
 import { registerActionDetailsRoutes } from './details';
@@ -31,4 +32,5 @@ export function registerActionRoutes(
   registerResponseActionRoutes(router, endpointContext);
   registerActionFileDownloadRoutes(router, endpointContext);
   registerActionFileInfoRoute(router, endpointContext);
+  registerSavedScriptsRoutes(router, endpointContext);
 }

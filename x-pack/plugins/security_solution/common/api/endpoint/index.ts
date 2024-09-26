@@ -24,6 +24,8 @@ export * from './actions/response_actions/get_file';
 export * from './actions/response_actions/execute';
 export * from './actions/response_actions/upload';
 export * from './actions/response_actions/scan';
+export * from './actions/response_actions/init';
+export * from './actions/response_actions/shell';
 
 export * from './metadata';
 

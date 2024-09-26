@@ -121,3 +121,17 @@ export const getExecuteCommandArgAboutInfo = (): React.ReactNode => {
     </>
   );
 };
+export const getShellCommandArgAboutInfo = (): React.ReactNode => {
+  return (
+    <>
+      <FormattedMessage
+        id="xpack.securitySolution.endpointConsoleCommands.shell.args.command.about"
+        defaultMessage="The interactive shell command to execute."
+      />
+      <br />
+      {`${ABOUT_ESCAPE_DASHES} shell --command "/opt/directory\\-\\-\\-directory/myBinary \\-\\-version"`}
+      <br />
+      {`${ABOUT_ESCAPE_QUOTES} shell --command "cd "C:\\Program Files\\directory""`}
+    </>
+  );
+};

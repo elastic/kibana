@@ -15,100 +15,16 @@ import {
   EuiTextColor,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import {
+  ACCORDION_BUTTON_TEXT,
+  emptyValue,
+  EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE,
+  SHELL_INFO,
+} from './utils';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { ResponseActionExecuteOutputContent } from '../../../../common/endpoint/types';
-import { getEmptyValue } from '../../../common/components/empty_value';
-
-const emptyValue = getEmptyValue();
-
-const ACCORDION_BUTTON_TEXT = Object.freeze({
-  context: i18n.translate(
-    'xpack.securitySolution.responseActionExecuteAccordion.executionContext',
-    {
-      defaultMessage: 'Execution context',
-    }
-  ),
-  output: {
-    regular: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.outputButtonTextRegular',
-      {
-        defaultMessage: 'Execution output',
-      }
-    ),
-    truncated: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.outputButtonTextTruncated',
-      {
-        defaultMessage: 'Execution output (truncated)',
-      }
-    ),
-  },
-  error: {
-    regular: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.errorButtonTextRegular',
-      {
-        defaultMessage: 'Execution error',
-      }
-    ),
-    truncated: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.errorButtonTextTruncated',
-      {
-        defaultMessage: 'Execution error (truncated)',
-      }
-    ),
-  },
-});
-
-const SHELL_INFO = Object.freeze({
-  shell: i18n.translate('xpack.securitySolution.responseActionExecuteAccordion.shellInformation', {
-    defaultMessage: 'Shell',
-  }),
-
-  returnCode: i18n.translate(
-    'xpack.securitySolution.responseActionExecuteAccordion.shellReturnCode',
-    {
-      defaultMessage: 'Return code',
-    }
-  ),
-  currentDir: i18n.translate(
-    'xpack.securitySolution.responseActionExecuteAccordion.currentWorkingDirectory',
-    {
-      defaultMessage: 'Executed from',
-    }
-  ),
-});
-
-export const EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE = i18n.translate(
-  'xpack.securitySolution.responseActionFileDownloadLink.fileTruncated',
-  {
-    defaultMessage:
-      'Output data in the provided zip file is truncated due to file size limitations.',
-  }
-);
-
-const StyledEuiText = euiStyled(EuiText)`
-  white-space: pre-wrap;
-  line-break: anywhere;
-`;
-
-interface ShellInfoContentProps {
-  content: string | number;
-  textSize?: 's' | 'xs';
-  title: string;
-}
-const ShellInfoContent = memo<ShellInfoContentProps>(({ content, textSize, title }) => (
-  <StyledEuiText size={textSize}>
-    <strong>
-      {title}
-      {': '}
-    </strong>
-    {content}
-  </StyledEuiText>
-));
-
-ShellInfoContent.displayName = 'ShellInfoContent';
+import { ShellInfoContent, StyledEuiText } from './shell_info_content';
 
 interface ExecuteActionOutputProps {
   content?: string | React.ReactNode;
@@ -225,11 +141,11 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          {outputContent.stderr.length > 0 && (
+          {outputContent.stderr?.length > 0 && (
             <>
               <EuiSpacer size="m" />
               <ExecutionActionOutputAccordion
-                content={outputContent.stderr.length ? outputContent.stderr : undefined}
+                content={outputContent.stderr?.length ? outputContent.stderr : undefined}
                 data-test-subj={`${dataTestSubj}-error`}
                 isTruncated={outputContent.stderr_truncated}
                 isFileTruncated={outputContent.output_file_stderr_truncated}
@@ -241,7 +157,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
           )}
           <EuiSpacer size="m" />
           <ExecutionActionOutputAccordion
-            content={outputContent.stdout.length ? outputContent.stdout : undefined}
+            content={outputContent.stdout?.length ? outputContent.stdout : undefined}
             data-test-subj={`${dataTestSubj}-output`}
             isTruncated={outputContent.stdout_truncated}
             isFileTruncated={outputContent.output_file_stdout_truncated}

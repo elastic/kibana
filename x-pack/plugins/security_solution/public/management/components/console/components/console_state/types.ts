@@ -134,6 +134,10 @@ export interface CommandExecutionState {
 
 export interface ExecuteCommandPayload {
   input: string;
+  agentMeta: {
+    agentId: string;
+    agentType: string;
+  };
   parsedInput: ParsedCommandInterface;
   enteredCommand: ConsoleDataState['input']['enteredCommand'];
 }
