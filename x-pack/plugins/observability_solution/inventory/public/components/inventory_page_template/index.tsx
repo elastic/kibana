@@ -84,6 +84,12 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
                   defaultMessage: 'Definitions',
                 })}
               />
+              <EntityTypeListItem
+                icon="analyzeEvent"
+                count={0}
+                href={router.link('/management_overview')}
+                label="Management"
+              />
               {/* <EntityTypeListItem
                 icon="sparkles"
                 count={0}

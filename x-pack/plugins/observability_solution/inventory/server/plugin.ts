@@ -7,7 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { mapValues } from 'lodash';
+import { get, mapValues } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { registerServerRoutes } from './routes/register_routes';
@@ -19,6 +19,7 @@ import type {
   InventorySetupDependencies,
   InventoryStartDependencies,
 } from './types';
+import { fetchEntityDefinitions } from './routes/entities/route';
 
 export class InventoryPlugin
   implements
@@ -293,12 +294,91 @@ export class InventoryPlugin
           console.log(e);
         }
 
+        function deepSortKeys(obj: any): any {
+          if (Array.isArray(obj)) {
+            return obj.map(deepSortKeys);
+          } else if (obj !== null && typeof obj === 'object') {
+            const sortedObj: { [key: string]: any } = {};
+            Object.keys(obj)
+              .sort()
+              .forEach((key) => {
+                sortedObj[key] = deepSortKeys(obj[key]);
+              });
+            return sortedObj;
+          }
+          return obj;
+        }
+
+        const fullSet = new Set<string>();
+        try {
+          const start = await startServicesPromise;
+          const { definitions } = await fetchEntityDefinitions({
+            plugins: { entityManager: { start: () => Promise.resolve(start.entityManager) } },
+            request,
+          });
+          simulatedRun.docs.forEach((after, i) => {
+            const before = docs[i];
+            if (after.error) return;
+            const hasChanges = Object.keys(after.doc._source).some((key) => {
+              const beforeJson = JSON.stringify(deepSortKeys(before._source[key]));
+              const afterJson = JSON.stringify(deepSortKeys(after.doc._source[key]));
+              return beforeJson !== afterJson;
+            });
+            console.log('hasChanges', hasChanges);
+            if (!hasChanges) return;
+            console.log(definitions);
+            // find all entity definitions that match the current doc after the change
+            definitions.filter((definition) => {
+              // check whether the "identifyingFields" are present in the document: { field: string; optional: boolean; }
+              const identifyingFields = definition.identityFields;
+              const matches = identifyingFields.every((field) => {
+                if (field.optional) {
+                  return true;
+                }
+                if (field.field === 'data_stream.type') {
+                  // for the sample data
+                  return true;
+                }
+                const hasAsDottedFieldName = field.field in after.doc._source;
+                const splitFieldName = field.field.split('.');
+                let obj = after.doc._source;
+                splitFieldName.forEach((part) => {
+                  if (obj && obj[part]) {
+                    obj = obj[part];
+                  } else {
+                    obj = null;
+                  }
+                });
+                const hasAsNestedFieldName = obj !== null;
+
+                return hasAsDottedFieldName || hasAsNestedFieldName;
+              });
+              if (matches) {
+                // concat all identifying fields to a string
+                const id = identifyingFields
+                  .map(
+                    (field) =>
+                      after.doc._source[field.field] ||
+                      get(after.doc._source, field.field) ||
+                      'logs'
+                  )
+                  .join('-');
+                fullSet.add(`${id} (${definition.type})`);
+              }
+            });
+          });
+        } catch (e) {
+          console.log(e);
+          throw e;
+        }
+
         return response.ok({
           body: {
             success: true,
             plan,
             docs,
             simulatedRun,
+            affectedEntities: Array.from(fullSet),
           },
         });
       }
@@ -385,11 +465,9 @@ export class InventoryPlugin
 
     router.get(
       {
-        path: '/api/processing_overview/{datastream}',
+        path: '/api/processing_overview',
         validate: {
-          params: schema.object({
-            datastream: schema.string(),
-          }),
+          params: schema.object({}),
         },
       },
       async (context, request, response) => {
@@ -425,14 +503,16 @@ export class InventoryPlugin
           });
           const pipelineMap = new Map<string, any>();
           Object.entries(pipelines).forEach(([id, pipeline]: any) => {
-            pipelineMap.set(id, pipeline);
+            pipelineMap.set(id, { ...pipeline, name: `p:${id}` });
           });
-          const nodes = Array.from(datastreamMap.values());
+          let nodes = [...Array.from(datastreamMap.values()), ...Array.from(pipelineMap.values())];
           const edges = [];
 
-          let fullyResolvedPipeline = null;
-
           nodes.forEach((node: any) => {
+            if (node.processors) {
+              // only handle datastreams here
+              return;
+            }
             // draw the edges between the datastreams. This works like this:
             // * for the current datastream, resolve the template
             // * check whether the template has a default pipeline by checking the index settings and all the referenced component templates
@@ -450,15 +530,25 @@ export class InventoryPlugin
             if (!defaultPipeline) {
               // search through all component templates
               for (const componentTemplate of componentTemplates) {
-                defaultPipeline = componentTemplate.template?.settings?.index?.default_pipeline;
+                defaultPipeline = componentTemplate?.template?.settings?.index?.default_pipeline;
                 if (defaultPipeline) {
                   break;
                 }
               }
             }
             console.log('default pipeline', defaultPipeline);
-            // get default pipeline
-            const defaultPipelineObj = pipelineMap.get(defaultPipeline);
+            if (defaultPipeline) {
+              edges.push({ source: `p:${defaultPipeline}`, target: node.name });
+            }
+          });
+
+          nodes.forEach((node: any) => {
+            if (!node.processors) {
+              // only handle pipelines here
+              return;
+            }
+            console.log('taking care of pipeline node', node.name);
+            const defaultPipelineObj = node;
             // recursively resolve pipelines called via "pipeline" processors
             const resolvePipeline = (pipeline: any) => {
               const processors = pipeline?.processors || [];
@@ -477,20 +567,50 @@ export class InventoryPlugin
                       return parts[1] === processor.reroute.dataset;
                     })
                     .forEach((datastream: any) => {
-                      edges.push({ source: node.name, target: datastream.name });
+                      // for that data stream, find the default pipeline
+                      const template = templateMap.get(datastream.template);
+                      // resolve all component templates
+                      const componentTemplates = (template.composed_of || []).map(
+                        (component: any) => {
+                          return componentTemplateMap.get(component);
+                        }
+                      );
+                      // search for the default pipeline
+                      let defaultPipeline = template.template?.settings?.index?.default_pipeline;
+                      if (!defaultPipeline) {
+                        // search through all component templates
+                        for (const componentTemplate of componentTemplates) {
+                          defaultPipeline =
+                            componentTemplate?.template?.settings?.index?.default_pipeline;
+                          if (defaultPipeline) {
+                            break;
+                          }
+                        }
+                      }
+
+                      if (defaultPipeline) {
+                        edges.push({ source: node.name, target: `p:${defaultPipeline}` });
+                      }
                     });
                 }
               });
               return processors;
             };
-            const resolvedProcessors = resolvePipeline(defaultPipelineObj);
-            if (node.name === request.params.datastream) {
-              fullyResolvedPipeline = resolvedProcessors;
-            }
+            resolvePipeline(defaultPipelineObj);
+          });
+
+          // trim out all nodes that don't have any edges
+          const nodeNames = new Set<string>();
+          edges.forEach((edge) => {
+            nodeNames.add(edge.source);
+            nodeNames.add(edge.target);
+          });
+          nodes = nodes.filter((node) => {
+            return nodeNames.has(node.name);
           });
 
           return response.ok({
-            body: { nodes, edges, fullyResolvedPipeline },
+            body: { nodes, edges },
           });
         } catch (e) {
           console.log(e);

@@ -9,15 +9,13 @@ import { createRouter, Outlet, RouteMap } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { AllInventoryView } from '../components/all_inventory_view';
-import { DatasetManagementParseView } from '../components/dataset_management_parse_view';
-import { DatasetManagementSplitView } from '../components/dataset_management_split_view';
 import { DefinitionsView } from '../components/definitions_view';
 import { EntityDetailView } from '../components/entity_detail_view';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
 import { InventoryRouterBreadcrumb } from '../components/inventory_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
 import { TypeInventoryView } from '../components/type_inventory_view';
-import { DataStreamDetailView } from '../components/data_stream_detail_view';
+import { ManagementOverviewView } from '../components/management_overview_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -43,6 +41,9 @@ const inventoryRoutes = {
       },
       '/definitions': {
         element: <DefinitionsView />,
+      },
+      '/management_overview': {
+        element: <ManagementOverviewView />,
       },
       '/all': {
         element: (

@@ -100,8 +100,12 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
           isService(el) ? el.data(SERVICE_NAME) : el.data('label') || 'Label',
         'min-zoomed-font-size': parseInt(theme.eui.euiSizeS, 10),
         'overlay-opacity': 0,
-        shape: (el: cytoscape.NodeSingular) =>
-          isService(el) ? (isIE11 ? 'rectangle' : 'ellipse') : 'diamond',
+        shape: (el: cytoscape.NodeSingular) => {
+          if (el.data('pipeline')) {
+            return 'rectangle';
+          }
+          return isService(el) ? 'ellipse' : 'diamond';
+        },
         'text-background-color': theme.eui.euiColorPrimary,
         'text-background-opacity': (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected() ? 0.1 : 0,

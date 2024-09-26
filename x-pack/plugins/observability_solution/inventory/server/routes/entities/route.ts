@@ -23,7 +23,7 @@ import { getDataStreamsForFilter } from './get_data_streams_for_filter';
 import { getEntitiesFromSource } from './get_entities_from_source';
 import { getLatestEntities } from './get_latest_entities';
 
-async function fetchEntityDefinitions({
+export async function fetchEntityDefinitions({
   plugins,
   request,
 }: Pick<InventoryRouteHandlerResources, 'plugins' | 'request'>) {

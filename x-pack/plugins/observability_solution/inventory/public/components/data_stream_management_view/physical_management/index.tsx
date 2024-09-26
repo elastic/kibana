@@ -337,7 +337,7 @@ export function StorageDetails(props: { details: any }) {
   );
 }
 
-function RoutingDetails(props: { id: string }) {
+export function RoutingDetails(props: { id?: string; height?: number }) {
   const {
     core: {
       http,
@@ -345,8 +345,8 @@ function RoutingDetails(props: { id: string }) {
     },
   } = useKibana();
   const processingOverviewInfo = useAsync(() => {
-    return http.get(`/api/processing_overview/${props.id}`);
-  }, [http, props.id]);
+    return http.get(`/api/processing_overview`);
+  }, [http]);
 
   console.log(processingOverviewInfo);
 
@@ -387,6 +387,7 @@ function RoutingDetails(props: { id: string }) {
                     data: {
                       id: node.name,
                       'service.name': node.name === props.id ? node.name : undefined,
+                      pipeline: Boolean(node.processors),
                       label: node.name,
                     },
                   })),
@@ -398,7 +399,7 @@ function RoutingDetails(props: { id: string }) {
                   })),
                 ]}
                 onSelect={onSelect}
-                height={300}
+                height={props.height || 300}
                 serviceName=""
                 style={{}}
               />

@@ -16,6 +16,13 @@ const processors = [
       value: '{{{_ingest.timestamp}}}',
     },
   },
+  {
+    json: {
+      field: 'message',
+      add_to_root: true,
+      ignore_failure: true,
+    },
+  },
 ];
 
 export async function installDefaultIngestPipeline(

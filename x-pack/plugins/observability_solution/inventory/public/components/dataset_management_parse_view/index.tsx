@@ -20,6 +20,7 @@ import {
   EuiDataGrid,
   EuiCallOut,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
@@ -306,28 +307,36 @@ function ResultPanel(props: { result: any; code: string }) {
     core: { http },
   } = useKibana();
 
+  const [showUnchanged, setShowUnchanged] = useState(false);
+
   // result.simulatedRun.docs is an array of docs after the change
   // result.docs is an array of docs before the change
   // for each doc, we calculate the diff between the before and after by comparing the value of all the keys.
-  const diffs = props.result.simulatedRun.docs.map((after, i) => {
-    const before = props.result.docs[i];
-    if (after.error) return [{ key: 'error', after: JSON.stringify(after.error) }];
-    return Object.keys(after.doc._source)
-      .map((key) => {
-        if (
-          JSON.stringify(deepSortKeys(before._source[key])) ===
-          JSON.stringify(deepSortKeys(after.doc._source[key]))
-        ) {
-          return null;
-        }
-        return {
-          key,
-          before: before._source[key],
-          after: after.doc._source[key],
-        };
-      })
-      .filter((change) => change !== null);
-  });
+  const diffs = useMemo(
+    () =>
+      props.result.simulatedRun.docs.map((after, i) => {
+        const before = props.result.docs[i];
+        if (after.error) return [{ key: 'error', after: JSON.stringify(after.error) }];
+        return Object.keys(after.doc._source)
+          .map((key) => {
+            const beforeJson = JSON.stringify(deepSortKeys(before._source[key]));
+            const afterJson = JSON.stringify(deepSortKeys(after.doc._source[key]));
+            if (
+              (showUnchanged && beforeJson !== afterJson) ||
+              (!showUnchanged && beforeJson === afterJson)
+            ) {
+              return null;
+            }
+            return {
+              key,
+              before: before._source[key],
+              after: after.doc._source[key],
+            };
+          })
+          .filter((change) => change !== null);
+      }),
+    [props.result.docs, props.result.simulatedRun.docs, showUnchanged]
+  );
 
   const relevantColumns = useMemo(() => {
     try {
@@ -392,17 +401,40 @@ function ResultPanel(props: { result: any; code: string }) {
           </h3>
         </EuiTitle>
         <EuiCallOut>
-          {i18n.translate('xpack.inventory.resultPanel.outOfCallOutLabel', {
-            defaultMessage: 'Out of ',
-          })}
-          {props.result.simulatedRun.docs.length}{' '}
-          {i18n.translate('xpack.inventory.resultPanel.documentsCallOutLabel', {
-            defaultMessage: 'documents, ',
-          })}
-          {gridRows.length}{' '}
-          {i18n.translate('xpack.inventory.resultPanel.haveChangesCallOutLabel', {
-            defaultMessage: 'have changes',
-          })}
+          {showUnchanged ? (
+            <EuiButton
+              data-test-subj="inventoryResultPanelShowUnchangedButton"
+              onClick={() => setShowUnchanged(false)}
+            >
+              {i18n.translate('xpack.inventory.resultPanel.showChangedButtonLabel', {
+                defaultMessage: 'Show changed',
+              })}
+            </EuiButton>
+          ) : (
+            <>
+              {i18n.translate('xpack.inventory.resultPanel.outOfCallOutLabel', {
+                defaultMessage: 'Out of ',
+              })}
+              {props.result.simulatedRun.docs.length}{' '}
+              {i18n.translate('xpack.inventory.resultPanel.documentsCallOutLabel', {
+                defaultMessage: 'documents, ',
+              })}
+              {gridRows.length}{' '}
+              {i18n.translate('xpack.inventory.resultPanel.haveChangesCallOutLabel', {
+                defaultMessage: 'have changes',
+              })}
+              {gridRows.length !== props.result.simulatedRun.docs.length && (
+                <EuiButton
+                  data-test-subj="inventoryResultPanelShowUnchangedButton"
+                  onClick={() => setShowUnchanged((prev) => !prev)}
+                >
+                  {i18n.translate('xpack.inventory.resultPanel.showUnchangedButtonLabel', {
+                    defaultMessage: 'Show unchanged',
+                  })}
+                </EuiButton>
+              )}
+            </>
+          )}
         </EuiCallOut>
         <EuiDataGrid
           aria-label={i18n.translate('xpack.inventory.resultPanel.euiDataGrid.previewLabel', {
@@ -427,6 +459,27 @@ function ResultPanel(props: { result: any; code: string }) {
             return JSON.stringify(value) || '';
           }}
         />
+        <EuiText>
+          <h4>
+            {i18n.translate('xpack.inventory.resultPanel.h4.affectedEntitiesLabel', {
+              defaultMessage: 'Affected entities',
+            })}
+          </h4>
+        </EuiText>
+        <ul>
+          {props.result.affectedEntities.map((entity: any) => (
+            <li key={entity}>
+              <EuiLink
+                data-test-subj="inventoryResultPanelLink"
+                href={`/app/entities/${/\((.+)\)/.exec(entity)?.[1]}/${
+                  /(\S+)\s/.exec(entity)?.[1]
+                }/management`}
+              >
+                {entity}
+              </EuiLink>
+            </li>
+          ))}
+        </ul>
       </EuiPanel>
     </>
   );
