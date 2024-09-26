@@ -24,7 +24,7 @@ export async function createInvestigationNote(
   const investigationNote = {
     id: v4(),
     content: params.content,
-    createdBy: user.username,
+    createdBy: user.profile_uid!,
     updatedAt: now,
     createdAt: now,
   };

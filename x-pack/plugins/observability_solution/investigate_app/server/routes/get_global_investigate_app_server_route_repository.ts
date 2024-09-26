@@ -13,6 +13,7 @@ import {
   deleteInvestigationNoteParamsSchema,
   deleteInvestigationParamsSchema,
   findInvestigationsParamsSchema,
+  getAllInvestigationStatsParamsSchema,
   getAllInvestigationTagsParamsSchema,
   getInvestigationItemsParamsSchema,
   getInvestigationNotesParamsSchema,
@@ -20,7 +21,10 @@ import {
   updateInvestigationItemParamsSchema,
   updateInvestigationNoteParamsSchema,
   updateInvestigationParamsSchema,
+  getEventsParamsSchema,
+  GetEventsResponse,
 } from '@kbn/investigation-shared';
+import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { createInvestigation } from '../services/create_investigation';
 import { createInvestigationItem } from '../services/create_investigation_item';
 import { createInvestigationNote } from '../services/create_investigation_note';
@@ -34,9 +38,12 @@ import { getInvestigationItems } from '../services/get_investigation_items';
 import { getInvestigationNotes } from '../services/get_investigation_notes';
 import { investigationRepositoryFactory } from '../services/investigation_repository';
 import { updateInvestigation } from '../services/update_investigation';
+import { getAlertEvents, getAnnotationEvents } from '../services/get_events';
+import { AlertsClient, getAlertsClient } from '../services/get_alerts_client';
 import { updateInvestigationItem } from '../services/update_investigation_item';
 import { updateInvestigationNote } from '../services/update_investigation_note';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
+import { getAllInvestigationStats } from '../services/get_all_investigation_stats';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -151,6 +158,20 @@ const getAllInvestigationTagsRoute = createInvestigateAppServerRoute({
     const repository = investigationRepositoryFactory({ soClient, logger });
 
     return await getAllInvestigationTags(repository);
+  },
+});
+
+const getAllInvestigationStatsRoute = createInvestigateAppServerRoute({
+  endpoint: 'GET /api/observability/investigations/_stats 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: getAllInvestigationStatsParamsSchema,
+  handler: async ({ params, context, request, logger }) => {
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
+
+    return await getAllInvestigationStats(repository);
   },
 });
 
@@ -297,6 +318,32 @@ const deleteInvestigationItemRoute = createInvestigateAppServerRoute({
   },
 });
 
+const getEventsRoute = createInvestigateAppServerRoute({
+  endpoint: 'GET /api/observability/events 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: getEventsParamsSchema,
+  handler: async ({ params, context, request, plugins }) => {
+    const annotationsClient: ScopedAnnotationsClient | undefined =
+      await plugins.observability.setup.getScopedAnnotationsClient(context, request);
+    const alertsClient: AlertsClient = await getAlertsClient({ plugins, request });
+    const events: GetEventsResponse = [];
+
+    if (annotationsClient) {
+      const annotationEvents = await getAnnotationEvents(params?.query ?? {}, annotationsClient);
+      events.push(...annotationEvents);
+    }
+
+    if (alertsClient) {
+      const alertEvents = await getAlertEvents(params?.query ?? {}, alertsClient);
+      events.push(...alertEvents);
+    }
+
+    return events;
+  },
+});
+
 export function getGlobalInvestigateAppServerRouteRepository() {
   return {
     ...createInvestigationRoute,
@@ -312,6 +359,8 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...deleteInvestigationItemRoute,
     ...updateInvestigationItemRoute,
     ...getInvestigationItemsRoute,
+    ...getEventsRoute,
+    ...getAllInvestigationStatsRoute,
     ...getAllInvestigationTagsRoute,
   };
 }

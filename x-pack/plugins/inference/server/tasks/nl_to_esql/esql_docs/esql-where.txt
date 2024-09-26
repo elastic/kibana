@@ -21,6 +21,7 @@ WHERE supports the following types of functions:
 - Type conversation functions
 - Conditional functions and expressions
 - Multi-value functions
+- Operators
 
 Aggregation functions are WHERE supported for EVAL.
 

@@ -32,8 +32,8 @@ import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { should } from './get_service_metadata_icons';
-import { isOpenTelemetryAgentName } from '../../../common/agent_name';
 import { normalizeFields } from '../../utils/normalize_fields';
+import { isOpenTelemetryAgentName, hasOpenTelemetryPrefix } from '../../../common/agent_name';
 
 type ServiceMetadataDetailsRaw = Pick<
   TransactionRaw,
@@ -195,11 +195,9 @@ export async function getServiceMetadataDetails({
   };
 
   const otelDetails =
-    !!agent?.name && isOpenTelemetryAgentName(agent.name)
+    Boolean(agent?.name) && isOpenTelemetryAgentName(agent.name)
       ? {
-          language: agent.name.startsWith('opentelemetry')
-            ? agent.name.replace(/^opentelemetry\//, '')
-            : undefined,
+          language: hasOpenTelemetryPrefix(agent.name) ? agent.name.split('/')[1] : undefined,
           sdkVersion: agent?.version,
           autoVersion: labels?.telemetry_auto_version as string,
         }

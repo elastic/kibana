@@ -103,6 +103,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.dataView!,
     state.isDataViewLoading,
   ]);
+  const customFilters = useInternalStateSelector((state) => state.customFilters);
+
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
 
@@ -211,6 +213,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         getOperator(fieldName, values, operation),
         fieldType
       );
+      if (!updatedQuery) {
+        return;
+      }
       data.query.queryString.setQuery({
         esql: updatedQuery,
       });
@@ -401,6 +406,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 onFieldEdited={onFieldEdited}
                 onDataViewCreated={stateContainer.actions.onDataViewCreated}
                 sidebarToggleState$={sidebarToggleState$}
+                additionalFilters={customFilters}
               />
             }
             mainPanel={
