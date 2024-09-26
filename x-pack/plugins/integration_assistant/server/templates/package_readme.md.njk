@@ -12,6 +12,6 @@ Please refer to the following [document](https://www.elastic.co/guide/en/ecs/cur
 
 | Field | Description | Type |
 |---|---|---|
-{% for field in data_stream.fields %}| {{ field.name }} | {{ field.description }} | {{ field.type }} |
+{% for field in data_stream.fields %}| {{ field.name }} | {{ field.description or '' | replace('\n', ' ') | trim }} | {{ field.type }} |
 {% endfor %}
 {% endfor %}

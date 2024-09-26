@@ -17,6 +17,7 @@ import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
 import { createReadme } from './readme_files';
+import { Field, flattenObjectsList } from '../util/samples';
 
 const initialVersion = '1.0.0';
 
@@ -38,7 +39,7 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   const packageDir = createDirectories(workingDir, integration, packageDirectoryName);
 
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
-  const dataStreamFields = integration.dataStreams.map(dataStream => {
+  const fieldsPerDatastream = integration.dataStreams.map((dataStream) => {
     const dataStreamName = dataStream.name;
     const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
 
@@ -54,11 +55,11 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
 
     return {
       datastream: dataStreamName,
-      fields: [...fields, ...dataStreamFields],
+      fields: mergeAndSortFields(fields, dataStreamFields),
     };
   });
 
-  createReadme(packageDir, integration.name, dataStreamFields);
+  createReadme(packageDir, integration.name, fieldsPerDatastream);
   const zipBuffer = await createZipArchive(workingDir, packageDirectoryName);
 
   removeDirSync(workingDir);
@@ -118,6 +119,12 @@ async function createZipArchive(workingDir: string, packageDirectoryName: string
   zip.addLocalFolder(tmpPackageDir, packageDirectoryName);
   const buffer = zip.toBuffer();
   return buffer;
+}
+
+function mergeAndSortFields(fields: Field[], dataStreamFields: Field[]): Field[] {
+  const mergedFields = [...fields, ...dataStreamFields];
+
+  return flattenObjectsList(mergedFields);
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */

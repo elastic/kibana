@@ -7,9 +7,10 @@
 
 import nunjucks from 'nunjucks';
 import { join as joinPath } from 'path';
+import { load } from 'js-yaml';
 import type { DataStream } from '../../common';
 import { copySync, createSync, ensureDirSync, listDirSync, readSync } from '../util';
-import { load } from 'js-yaml';
+import { Field } from '../util/samples';
 
 export function createDataStream(
   packageName: string,
@@ -25,7 +26,6 @@ export function createDataStream(
 
   ensureDirSync(specificDataStreamDir);
   const fields = createDataStreamFolders(specificDataStreamDir, pipelineDir);
-  console.log(fields)
   createPipelineTests(specificDataStreamDir, dataStream.rawSamples, packageName, dataStreamName);
 
   const dataStreams: string[] = [];
@@ -54,28 +54,34 @@ export function createDataStream(
 
   createSync(joinPath(specificDataStreamDir, 'manifest.yml'), finalManifest);
 
-  return fields
+  return fields;
 }
 
 function createDataStreamFolders(specificDataStreamDir: string, pipelineDir: string): Field[] {
+  ensureDirSync(pipelineDir);
+  return copyFilesFromTemplateDir(specificDataStreamDir);
+}
+
+function copyFilesFromTemplateDir(specificDataStreamDir: string): Field[] {
   const dataStreamTemplatesDir = joinPath(__dirname, '../templates/data_stream');
   const items = listDirSync(dataStreamTemplatesDir);
-  ensureDirSync(pipelineDir);
-
-  return items.flatMap(item => {
+  return items.flatMap((item) => {
     const sourcePath = joinPath(dataStreamTemplatesDir, item);
     const destinationPath = joinPath(specificDataStreamDir, item);
     copySync(sourcePath, destinationPath);
     const files = listDirSync(sourcePath);
 
-    return files.flatMap(file => {
-      const filePath = joinPath(sourcePath, file);
-      const content = readSync(filePath);
-      return load(content) as Field[];
-    })
-  })
+    return loadFieldsFromFiles(sourcePath, files);
+  });
 }
 
+function loadFieldsFromFiles(sourcePath: string, files: string[]): Field[] {
+  return files.flatMap((file) => {
+    const filePath = joinPath(sourcePath, file);
+    const content = readSync(filePath);
+    return load(content) as Field[];
+  });
+}
 
 function createPipelineTests(
   specificDataStreamDir: string,

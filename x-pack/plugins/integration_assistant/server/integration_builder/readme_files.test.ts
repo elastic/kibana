@@ -109,7 +109,7 @@ describe('createReadme', () => {
 | Field | Description | Type |
 |---|---|---|
 | data_stream.type | Data stream type. | constant_keyword |
-| data_stream.dataset | Insert a description | constant_keyword |
+| data_stream.dataset |  | constant_keyword |
 | event.dataset | Event dataset | constant_keyword |
 | @timestamp | Event timestamp. | date |
 `;

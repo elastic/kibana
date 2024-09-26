@@ -26,6 +26,9 @@ jest.mock('./agent');
 jest.mock('./pipeline');
 jest.mock('./readme_files');
 
+(createFieldMapping as jest.Mock).mockReturnValue([]);
+(createDataStream as jest.Mock).mockReturnValue([]);
+
 (generateUniqueId as jest.Mock).mockReturnValue(mockedId);
 
 jest.mock('@kbn/utils', () => ({
@@ -180,26 +183,49 @@ describe('buildPackage', () => {
     );
   });
 
-  it('Should call createReadme once', async () => {
+  it('Should call createReadme once with sorted fields', async () => {
     jest.clearAllMocks();
 
+    const firstDSFieldsMapping = [{ name: 'name a', description: 'description 1', type: 'type 1' }];
+
     const firstDataStreamFields = [
-      { name: 'name 1', description: 'description 1', type: 'type 1' },
+      { name: 'name b', description: 'description 1', type: 'type 1' },
+    ];
+
+    const secondDSFieldsMapping = [
+      { name: 'name c', description: 'description 2', type: 'type 2' },
+      { name: 'name e', description: 'description 3', type: 'type 3' },
     ];
 
     const secondDataStreamFields = [
-      { name: 'name 2', description: 'description 2', type: 'type 2' },
-      { name: 'name 3', description: 'description 3', type: 'type 3' },
+      { name: 'name d', description: 'description 2', type: 'type 2' },
     ];
 
-    (createFieldMapping as jest.Mock).mockReturnValueOnce(firstDataStreamFields);
-    (createFieldMapping as jest.Mock).mockReturnValueOnce(secondDataStreamFields);
+    (createFieldMapping as jest.Mock).mockReturnValueOnce(firstDSFieldsMapping);
+    (createDataStream as jest.Mock).mockReturnValueOnce(firstDataStreamFields);
+
+    (createFieldMapping as jest.Mock).mockReturnValueOnce(secondDSFieldsMapping);
+    (createDataStream as jest.Mock).mockReturnValueOnce(secondDataStreamFields);
 
     await buildPackage(testIntegration);
 
     expect(createReadme).toHaveBeenCalledWith(integrationPath, testIntegration.name, [
-      { datastream: firstDatastreamName, fields: firstDataStreamFields },
-      { datastream: secondDatastreamName, fields: secondDataStreamFields },
+      {
+        datastream: firstDatastreamName,
+        fields: [
+          { name: 'name a', description: 'description 1', type: 'type 1' },
+
+          { name: 'name b', description: 'description 1', type: 'type 1' },
+        ],
+      },
+      {
+        datastream: secondDatastreamName,
+        fields: [
+          { name: 'name c', description: 'description 2', type: 'type 2' },
+          { name: 'name d', description: 'description 2', type: 'type 2' },
+          { name: 'name e', description: 'description 3', type: 'type 3' },
+        ],
+      },
     ]);
   });
 });

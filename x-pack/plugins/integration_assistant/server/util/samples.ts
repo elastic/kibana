@@ -238,24 +238,24 @@ export function mergeSamples(objects: any[]): string {
 export function flattenObjectsList(
   obj: Field[]
 ): Array<{ name: string; type: string; description?: string }> {
-  const result = flattenObject(obj);
+  const result: Array<{ name: string; type: string; description?: string }> = [];
+  flattenObject(obj, '', '.', result);
 
-  return sortListOfObjects(result);
+  return sortArrayOfObjects(result);
 }
 
 function flattenObject(
   obj: Field[],
   parentKey: string = '',
-  separator: string = '.'
-): Array<{ name: string; type: string; description?: string }> {
-  let result: Array<{ name: string; type: string; description?: string }> = [];
-
+  separator: string = '.',
+  result: Array<{ name: string; type: string; description?: string }>
+): void {
   obj.forEach((element) => {
     if (element.name) {
       const newKey = parentKey ? `${parentKey}${separator}${element.name}` : element.name;
 
       if (element.fields && Array.isArray(element.fields)) {
-        result = result.concat(flattenObject(element.fields, newKey, separator));
+        flattenObject(element.fields, newKey, separator, result);
       } else {
         result.push({
           name: newKey,
@@ -265,14 +265,12 @@ function flattenObject(
       }
     }
   });
-
-  return result;
 }
 
-function sortListOfObjects(
-  objectsList: Array<{ name: string; type: string; description?: string }>
+function sortArrayOfObjects(
+  objectsArray: Array<{ name: string; type: string; description?: string }>
 ): Array<{ name: string; type: string; description?: string }> {
-  return objectsList.sort((a, b) => {
+  return objectsArray.sort((a, b) => {
     return a.name.localeCompare(b.name);
   });
 }

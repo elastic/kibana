@@ -7,18 +7,19 @@
 
 import nunjucks from 'nunjucks';
 import { load } from 'js-yaml';
-import { Field, flattenObjectsList } from '../util/samples';
+import { Field } from '../util/samples';
 import { createSync, generateFields, mergeSamples } from '../util';
+
 export function createFieldMapping(
   packageName: string,
   dataStreamName: string,
   specificDataStreamDir: string,
   docs: object[]
-): object[] {
+): Field[] {
   const baseFields = createBaseFields(specificDataStreamDir, packageName, dataStreamName);
   const customFields = createCustomFields(specificDataStreamDir, docs);
 
-  return mergeFields(baseFields, customFields);
+  return [...baseFields, ...customFields];
 }
 
 function createBaseFields(
@@ -42,10 +43,4 @@ function createCustomFields(specificDataStreamDir: string, pipelineResults: obje
   createSync(`${specificDataStreamDir}/fields/fields.yml`, fieldKeys);
 
   return load(fieldKeys) as Field[];
-}
-
-function mergeFields(baseFields: Field[], customFields: Field[]): Field[] {
-  const fields = [...baseFields, ...customFields];
-
-  return flattenObjectsList(fields);
 }

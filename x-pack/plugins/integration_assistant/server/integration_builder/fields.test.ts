@@ -82,27 +82,15 @@ describe('createFieldMapping', () => {
     const fieldsResult = createFieldMapping(packageName, dataStreamName, dataStreamPath, docs);
 
     expect(fieldsResult).toEqual([
-      { name: '@timestamp', type: 'date', description: 'Event timestamp.' },
       {
-        description: undefined,
-        name: 'anotherKey',
-        type: 'keyword',
-      },
-      {
-        description: undefined,
-        name: 'data_stream.dataset',
-        type: 'constant_keyword',
-      },
-      {
-        description: 'Data stream type.',
         name: 'data_stream.type',
         type: 'constant_keyword',
+        description: 'Data stream type.',
       },
-      {
-        description: undefined,
-        name: 'key',
-        type: 'keyword',
-      },
+      { name: 'data_stream.dataset', type: 'constant_keyword' },
+      { name: '@timestamp', type: 'date', description: 'Event timestamp.' },
+      { name: 'key', type: 'keyword' },
+      { name: 'anotherKey', type: 'keyword' },
     ]);
   });
 });
