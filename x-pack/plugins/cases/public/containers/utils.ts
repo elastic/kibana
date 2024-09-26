@@ -36,12 +36,13 @@ import type {
   Cases,
   Configuration,
   Configurations,
+  CustomFieldsConfiguration,
   User,
   UserActions,
 } from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import { throwErrors } from '../../common/api';
-import type { CaseUI, FilterOptions, UpdateByKey } from './types';
+import type { CaseUI, CaseUICustomField, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 import type { CustomFieldFactoryFilterOption } from '../components/custom_fields/types';
 
@@ -173,20 +174,25 @@ export const constructReportersFilter = (reporters: User[]) => {
 };
 
 export const constructCustomFieldsFilter = (
-  optionKeysByCustomFieldKey: FilterOptions['customFields']
+  optionKeysByCustomFieldKey: FilterOptions['customFields'],
+  customFieldsConfiguration?: CustomFieldsConfiguration
 ) => {
   if (!optionKeysByCustomFieldKey || Object.keys(optionKeysByCustomFieldKey).length === 0) {
     return {};
   }
 
   const valuesByCustomFieldKey: {
-    [key in string]: Array<CustomFieldFactoryFilterOption['value']>;
+    [key in string]: Array<CustomFieldFactoryFilterOption<CaseUICustomField>['value']>;
   } = {};
 
   for (const [customFieldKey, customField] of Object.entries(optionKeysByCustomFieldKey)) {
     const { type, options: selectedOptions } = customField;
-    if (customFieldsBuilder[type]) {
-      const { filterOptions: customFieldFilterOptionsConfig = [] } = customFieldsBuilder[type]();
+    const configuration = customFieldsConfiguration?.find(
+      (config) => config.key === customFieldKey
+    );
+    if (customFieldsBuilder[type] && configuration) {
+      const { getFilterOptions } = customFieldsBuilder[type]();
+      const customFieldFilterOptionsConfig = getFilterOptions?.(configuration) ?? [];
       const values = selectedOptions
         .map((selectedOption) => {
           const filterOptionConfig = customFieldFilterOptionsConfig.find(
@@ -194,7 +200,9 @@ export const constructCustomFieldsFilter = (
           );
           return filterOptionConfig ? filterOptionConfig.value : undefined;
         })
-        .filter((option) => option !== undefined) as Array<CustomFieldFactoryFilterOption['value']>;
+        .filter((option) => option !== undefined) as Array<
+        CustomFieldFactoryFilterOption<CaseUICustomField>['value']
+      >;
 
       if (values.length > 0) {
         valuesByCustomFieldKey[customFieldKey] = values;

@@ -32,4 +32,5 @@ export const configureListCustomFieldFactory: CustomFieldFactory<
     Create,
   }),
   convertNullToEmpty: (value: string | boolean | null) => (value == null ? '' : String(value)),
+  getFilterOptions: ({ options }) => options.map((option) => ({ ...option, value: option.key })),
 });

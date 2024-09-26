@@ -16,6 +16,7 @@ import type { ServerError } from '../types';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../components/app/use_available_owners';
 import { getAllPermissionsExceptFrom } from '../utils/permissions';
+import { useGetCaseConfiguration } from './configure/use_get_case_configuration';
 
 export const initialData: CasesFindResponseUI = {
   cases: [],
@@ -35,6 +36,9 @@ export const useGetCases = (
 ): UseQueryResult<CasesFindResponseUI> => {
   const toasts = useToasts();
   const { owner } = useCasesContext();
+  const {
+    data: { customFields },
+  } = useGetCaseConfiguration();
   const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
 
   const hasOwner = !!owner.length;
@@ -59,6 +63,7 @@ export const useGetCases = (
           ...(params.queryParams ?? {}),
         },
         signal,
+        customFieldsConfiguration: customFields,
       });
     },
     {

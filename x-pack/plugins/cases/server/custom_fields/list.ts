@@ -12,17 +12,11 @@ import type { FilteringValues } from './types';
 export const getCasesListCustomField = () => ({
   isFilterable: true,
   isSortable: false,
-  savedObjectMappingType: 'list',
+  savedObjectMappingType: 'string',
   validateFilteringValues: (values: FilteringValues) => {
     values.forEach((value) => {
-      if (value !== null && !Array.isArray(value)) {
+      if (value !== null && !isString(value)) {
         throw Boom.badRequest(`Unsupported filtering value for custom field of type list.`);
-      } else if (Array.isArray(value)) {
-        value.forEach((v) => {
-          if (!isString(v)) {
-            throw Boom.badRequest(`Unsupported filtering value for custom field of type list.`);
-          }
-        });
       }
     });
   },

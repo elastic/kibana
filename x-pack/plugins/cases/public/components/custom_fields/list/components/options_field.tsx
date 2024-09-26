@@ -46,8 +46,7 @@ export const INITIAL_OPTIONS = [
   },
 ];
 
-// eslint-disable-next-line react/display-name
-export const OptionsField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
+const OptionsFieldComponent = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const currentOptions: ListCustomFieldOption[] = useMemo(() => {
@@ -155,10 +154,18 @@ export const OptionsField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pro
             ))}
           </EuiDroppable>
         </EuiDragDropContext>
-        <EuiButtonEmpty iconType={'plusInCircle'} onClick={onAddOption}>
-          {i18n.ADD_LIST_OPTION}
-        </EuiButtonEmpty>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiButtonEmpty iconType={'plusInCircle'} onClick={onAddOption}>
+              {i18n.ADD_LIST_OPTION}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </EuiFormRow>
   );
 };
+
+OptionsFieldComponent.displayName = 'OptionsField';
+
+export const OptionsField = React.memo(OptionsFieldComponent);
