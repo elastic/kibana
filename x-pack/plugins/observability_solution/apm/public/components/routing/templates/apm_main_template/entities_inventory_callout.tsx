@@ -10,7 +10,6 @@ import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ENTITIES_INVENTORY_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface EntitiesInventoryCalloutProps {
@@ -19,9 +18,7 @@ interface EntitiesInventoryCalloutProps {
 
 export function EntitiesInventoryCallout({ onDissmiss }: EntitiesInventoryCalloutProps) {
   const { share } = useApmPluginContext();
-  const entitiesInventoryLocator = share.url.locators.get<SerializableRecord>(
-    ENTITIES_INVENTORY_LOCATOR_ID
-  );
+  const entitiesInventoryLocator = share.url.locators.get(ENTITIES_INVENTORY_LOCATOR_ID);
 
   return (
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
