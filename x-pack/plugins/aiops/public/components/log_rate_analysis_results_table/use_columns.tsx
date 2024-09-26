@@ -22,6 +22,11 @@ import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_q
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 import {
+  commonColumns,
+  significantItemColumns,
+  type LogRateAnalysisResultsTableColumnNames,
+} from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_table_slice';
+import {
   getBaselineAndDeviationRates,
   getLogRateChange,
   LOG_RATE_ANALYSIS_TYPE,
@@ -40,63 +45,12 @@ const TRUNCATE_TEXT_LINES = 3;
 const UNIQUE_COLUMN_WIDTH = '40px';
 const NOT_AVAILABLE = '--';
 
-export const commonColumns = {
-  ['Log rate']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.logRateColumnTitle', {
-    defaultMessage: 'Log rate',
-  }),
-  ['Doc count']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.docCountColumnTitle', {
-    defaultMessage: 'Doc count',
-  }),
-  ['p-value']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.pValueColumnTitle', {
-    defaultMessage: 'p-value',
-  }),
-  ['Impact']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.impactColumnTitle', {
-    defaultMessage: 'Impact',
-  }),
-  ['Baseline rate']: i18n.translate(
-    'xpack.aiops.logRateAnalysis.resultsTable.baselineRateColumnTitle',
-    {
-      defaultMessage: 'Baseline rate',
-    }
-  ),
-  ['Deviation rate']: i18n.translate(
-    'xpack.aiops.logRateAnalysis.resultsTable.deviationRateColumnTitle',
-    {
-      defaultMessage: 'Deviation rate',
-    }
-  ),
-  ['Log rate change']: i18n.translate(
-    'xpack.aiops.logRateAnalysis.resultsTable.logRateChangeColumnTitle',
-    {
-      defaultMessage: 'Log rate change',
-    }
-  ),
-  ['Actions']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnTitle', {
-    defaultMessage: 'Actions',
-  }),
-};
-
-export const significantItemColumns = {
-  ['Field name']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldNameColumnTitle', {
-    defaultMessage: 'Field name',
-  }),
-  ['Field value']: i18n.translate(
-    'xpack.aiops.logRateAnalysis.resultsTable.fieldValueColumnTitle',
-    {
-      defaultMessage: 'Field value',
-    }
-  ),
-  ...commonColumns,
-} as const;
-
 export const LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE = {
   GROUPS: 'groups',
   SIGNIFICANT_ITEMS: 'significantItems',
 } as const;
 export type LogRateAnalysisResultsTableType =
   (typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE)[keyof typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE];
-
-export type ColumnNames = keyof typeof significantItemColumns | 'unique';
 
 const logRateHelpMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.logRateColumnTooltip',
@@ -271,7 +225,10 @@ export const useColumns = (
     [currentAnalysisType, buckets]
   );
 
-  const columnsMap: Record<ColumnNames, EuiBasicTableColumn<SignificantItem>> = useMemo(
+  const columnsMap: Record<
+    LogRateAnalysisResultsTableColumnNames,
+    EuiBasicTableColumn<SignificantItem>
+  > = useMemo(
     () => ({
       ['Field name']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnFieldName',
@@ -615,20 +572,21 @@ export const useColumns = (
   );
 
   const columns = useMemo(() => {
-    const columnNamesToReturn: Partial<Record<ColumnNames, string>> = isGroupsTable
-      ? commonColumns
-      : significantItemColumns;
+    const columnNamesToReturn: Partial<Record<LogRateAnalysisResultsTableColumnNames, string>> =
+      isGroupsTable ? commonColumns : significantItemColumns;
     const columnsToReturn = [];
 
     for (const columnName in columnNamesToReturn) {
       if (
         Object.hasOwn(columnNamesToReturn, columnName) === false ||
-        skippedColumns.includes(columnNamesToReturn[columnName as ColumnNames] as string) ||
+        skippedColumns.includes(
+          columnNamesToReturn[columnName as LogRateAnalysisResultsTableColumnNames] as string
+        ) ||
         ((columnName === 'p-value' || columnName === 'Impact') && zeroDocsFallback)
       )
         continue;
 
-      columnsToReturn.push(columnsMap[columnName as ColumnNames]);
+      columnsToReturn.push(columnsMap[columnName as LogRateAnalysisResultsTableColumnNames]);
     }
 
     if (isExpandedRow === true) {
