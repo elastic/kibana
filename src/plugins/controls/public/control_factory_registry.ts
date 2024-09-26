@@ -12,7 +12,7 @@ import { ControlFactory, DefaultControlApi } from './controls/types';
 
 const registry: { [key: string]: () => Promise<ControlFactory<any, any>> } = {};
 
-export const registerControlFactory = async <
+export const registerControlFactory = <
   State extends object = object,
   ApiType extends DefaultControlApi = DefaultControlApi
 >(
