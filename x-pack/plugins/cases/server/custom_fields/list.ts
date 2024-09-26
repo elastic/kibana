@@ -20,5 +20,5 @@ export const getCasesListCustomField = () => ({
       }
     });
   },
-  getDefaultValue: () => [] as string[],
+  getDefaultValue: () => null,
 });
