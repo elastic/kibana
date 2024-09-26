@@ -32,8 +32,6 @@ export interface Props {
   onSave?: () => void;
 }
 
-export const maxWidth = 775;
-
 export function SloEditFormFooter({ slo, onSave }: Props) {
   const {
     application: { navigateToUrl },
@@ -45,7 +43,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
 
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
   const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
-  const { mutateAsync: createBurnRateRule, isLoading: isCreateBurnRateRuleLoading } =
+  const { mutate: createBurnRateRule, isLoading: isCreateBurnRateRuleLoading } =
     useCreateRule<BurnRateRuleParams>();
 
   const navigate = useCallback(
@@ -72,8 +70,6 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
       const resp = await createSlo({ slo: processedValues });
       createBurnRateRule({
         rule: createBurnRateRuleRequestBody({ ...processedValues, id: resp.id }),
-      }).catch((e) => {
-        // we handle error in hook
       });
       if (onSave) {
         onSave();

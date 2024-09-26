@@ -67,9 +67,6 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
     },
     {
       onError: (_err) => {
-        if (loadingToastId) {
-          toasts.remove(loadingToastId);
-        }
         toasts.addDanger(
           i18n.translate('xpack.slo.rules.createRule.errorNotification.descriptionText', {
             defaultMessage: 'Failed to create burn rate rule.',
@@ -78,14 +75,16 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
       },
 
       onSuccess: () => {
-        if (loadingToastId) {
-          toasts.remove(loadingToastId);
-        }
         toasts.addSuccess(
           i18n.translate('xpack.slo.rules.createRule.successNotification.descriptionText', {
             defaultMessage: 'Burn rate rule created successfully.',
           })
         );
+      },
+      onSettled: () => {
+        if (loadingToastId) {
+          toasts.remove(loadingToastId);
+        }
       },
     }
   );
