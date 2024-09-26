@@ -74,30 +74,6 @@ export {
 
 export type BarePinnedEventWithoutExternalRefs = Omit<BarePinnedEvent, 'timelineId'>;
 
-/**
- * Outcome is a property of the saved object resolve api
- * will tell us info about the rule after 8.0 migrations
- */
-export type SavedObjectResolveOutcome = runtimeTypes.TypeOf<typeof SavedObjectResolveOutcome>;
-export const SavedObjectResolveOutcome = runtimeTypes.union([
-  runtimeTypes.literal('exactMatch'),
-  runtimeTypes.literal('aliasMatch'),
-  runtimeTypes.literal('conflict'),
-]);
-
-export type SavedObjectResolveAliasTargetId = runtimeTypes.TypeOf<
-  typeof SavedObjectResolveAliasTargetId
->;
-export const SavedObjectResolveAliasTargetId = runtimeTypes.string;
-
-export type SavedObjectResolveAliasPurpose = runtimeTypes.TypeOf<
-  typeof SavedObjectResolveAliasPurpose
->;
-export const SavedObjectResolveAliasPurpose = runtimeTypes.union([
-  runtimeTypes.literal('savedObjectConversion'),
-  runtimeTypes.literal('savedObjectImport'),
-]);
-
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
     timelineId: runtimeTypes.string,
