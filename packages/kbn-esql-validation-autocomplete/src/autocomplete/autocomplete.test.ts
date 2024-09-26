@@ -30,6 +30,7 @@ import {
   PartialSuggestionWithText,
   TIME_PICKER_SUGGESTION,
   setup,
+  attachTriggerCommand,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
@@ -287,7 +288,10 @@ describe('autocomplete', () => {
       'from a | grok key/',
       getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
     );
-    testSuggestions('from a | grok keywordField/', []);
+    testSuggestions(
+      'from a | grok keywordField/',
+      ['keywordField ', 'textField '].map(attachTriggerCommand)
+    );
   });
 
   describe('dissect', () => {
@@ -327,23 +331,10 @@ describe('autocomplete', () => {
       'from a | dissect key/',
       getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
     );
-    testSuggestions('from a | dissect keywordField/', []);
-  });
-
-  describe('sort', () => {
-    testSuggestions('from a | sort /', [
-      ...getFieldNamesByType('any').map((name) => `${name} `),
-      ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-    ]);
-    testSuggestions('from a | sort keywordField /', ['ASC ', 'DESC ', ',', '| ']);
-    testSuggestions('from a | sort keywordField desc /', [
-      'NULLS FIRST ',
-      'NULLS LAST ',
-      ',',
-      '| ',
-    ]);
-    // @TODO: improve here
-    // testSuggestions('from a | sort keywordField desc ', ['first', 'last']);
+    testSuggestions(
+      'from a | dissect keywordField/',
+      ['keywordField ', 'textField '].map(attachTriggerCommand)
+    );
   });
 
   describe('limit', () => {
@@ -672,23 +663,6 @@ describe('autocomplete', () => {
     // RENAME field AS var0
     testSuggestions('FROM index1 | RENAME field AS v/', ['var0']);
 
-    // SORT field
-    testSuggestions('FROM index1 | SORT f/', [
-      ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-      ...getFieldNamesByType('any').map((field) => `${field} `),
-    ]);
-
-    // SORT field order
-    testSuggestions('FROM index1 | SORT keywordField a/', ['ASC ', 'DESC ', ',', '| ']);
-
-    // SORT field order nulls
-    testSuggestions('FROM index1 | SORT keywordField ASC n/', [
-      'NULLS FIRST ',
-      'NULLS LAST ',
-      ',',
-      '| ',
-    ]);
-
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
       'var0 = ',
@@ -731,16 +705,6 @@ describe('autocomplete', () => {
     /**
      * NOTE: Monaco uses an Invoke trigger kind when the show suggestions action is triggered (e.g. accepting the "FROM" suggestion)
      */
-
-    const attachTriggerCommand = (
-      s: string | PartialSuggestionWithText
-    ): PartialSuggestionWithText =>
-      typeof s === 'string'
-        ? {
-            text: s,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          }
-        : { ...s, command: TRIGGER_SUGGESTION_COMMAND };
 
     const attachAsSnippet = (s: PartialSuggestionWithText): PartialSuggestionWithText => ({
       ...s,
@@ -1015,27 +979,6 @@ describe('autocomplete', () => {
     // LIMIT number
     testSuggestions('FROM a | LIMIT /', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
 
-    // SORT field
-    testSuggestions(
-      'FROM a | SORT /',
-      [
-        ...getFieldNamesByType('any').map((field) => `${field} `),
-        ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-      ].map(attachTriggerCommand)
-    );
-
-    // SORT field order
-    testSuggestions('FROM a | SORT field /', [
-      ',',
-      ...['ASC ', 'DESC ', '| '].map(attachTriggerCommand),
-    ]);
-
-    // SORT field order nulls
-    testSuggestions('FROM a | SORT field ASC /', [
-      ',',
-      ...['NULLS FIRST ', 'NULLS LAST ', '| '].map(attachTriggerCommand),
-    ]);
-
     // STATS argument
     testSuggestions(
       'FROM a | STATS /',
@@ -1251,22 +1194,6 @@ describe('autocomplete', () => {
       'IN $0',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
-      'IS NULL',
-      '% $0',
-      '* $0',
-      '+ $0',
-      '- $0',
-      '/ $0',
-      '!= $0',
-      '< $0',
-      '<= $0',
-      '== $0',
-      '> $0',
-      '>= $0',
-      'IN $0',
-    ]);
-    testSuggestions('FROM a | SORT doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
       'IS NULL',
       '% $0',

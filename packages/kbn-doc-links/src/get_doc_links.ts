@@ -436,7 +436,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       migrationApiDeprecation: `${ELASTICSEARCH_DOCS}migration-api-deprecation.html`,
       nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
       releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
-      latestReleaseHighlights: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/elastic-stack-highlights.html`,
+      latestReleaseHighlights: `${ELASTIC_WEBSITE_URL}guide/en/starting-with-the-elasticsearch-platform-and-its-solutions/current/new.html`,
       remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
       remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
       remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
@@ -879,6 +879,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       roleAndPrivileges: `${FLEET_DOCS}fleet-roles-and-privileges.html`,
       proxiesSettings: `${FLEET_DOCS}fleet-agent-proxy-support.html`,
       unprivilegedMode: `${FLEET_DOCS}elastic-agent-unprivileged.html#unprivileged-change-mode`,
+      httpMonitoring: `${FLEET_DOCS}agent-policy.html#change-policy-enable-agent-monitoring`,
     },
     integrationDeveloper: {
       upload: `${INTEGRATIONS_DEV_DOCS}upload-a-new-integration.html`,

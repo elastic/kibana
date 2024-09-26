@@ -12,7 +12,7 @@ import { render } from '@testing-library/react';
 import { TestProvider } from './test/provider';
 import { UrlSynchronizer } from './provider';
 import * as actions from './store/actions';
-import { State } from './store/state';
+import { initialUiState, State } from './store/state';
 import { of } from 'rxjs';
 
 const mockGet = jest.fn();
@@ -38,6 +38,7 @@ describe('UrlSynchronizer', () => {
         },
         needsSync: true,
       },
+      ui: initialUiState,
     };
 
     render(
@@ -61,6 +62,7 @@ describe('UrlSynchronizer', () => {
         byId: {},
         needsSync: true,
       },
+      ui: initialUiState,
     };
 
     render(
@@ -95,6 +97,7 @@ describe('UrlSynchronizer', () => {
         },
         needsSync: true,
       },
+      ui: initialUiState,
     };
 
     render(

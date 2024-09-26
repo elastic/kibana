@@ -12,6 +12,8 @@ import {
   tryAddingDisabledResponseAction,
   validateAvailableCommands,
   visitRuleActions,
+  selectIsolateAndSaveWithoutEnabling,
+  fillUpNewEsqlRule,
 } from '../../tasks/response_actions';
 import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
@@ -199,6 +201,23 @@ describe(
           expect(request.body.response_actions.length).to.be.equal(2);
         });
         cy.contains(`${ruleName} was saved`).should('exist');
+      });
+    });
+
+    describe('User should be able to add response action to ESQL rule', () => {
+      const [ruleName, ruleDescription] = generateRandomStringName(2);
+
+      beforeEach(() => {
+        login(ROLE.soc_manager);
+      });
+
+      it('create and save endpoint response action inside of a rule', () => {
+        const query = 'FROM * METADATA _index, _id';
+        fillUpNewEsqlRule(ruleName, ruleDescription, query);
+        addEndpointResponseAction();
+        focusAndOpenCommandDropdown();
+        validateAvailableCommands();
+        selectIsolateAndSaveWithoutEnabling(ruleName);
       });
     });
 
