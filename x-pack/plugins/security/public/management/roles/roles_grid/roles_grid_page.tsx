@@ -9,6 +9,7 @@ import type {
   CriteriaWithPagination,
   EuiBasicTableColumn,
   EuiSwitchEvent,
+  EuiTableSortingType,
   Query,
 } from '@elastic/eui';
 import {
@@ -63,6 +64,7 @@ interface RolesTableState {
   query: Query;
   from: number;
   size: number;
+  sort: EuiTableSortingType<Role>['sort'];
 }
 
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
@@ -82,8 +84,8 @@ const getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: bo
 const DEFAULT_TABLE_STATE = {
   query: EuiSearchBar.Query.MATCH_ALL,
   sort: {
-    field: 'creation' as const,
-    direction: 'desc' as const,
+    field: 'name' as const,
+    direction: 'asc' as const,
   },
   from: 0,
   size: 25,
@@ -236,10 +238,12 @@ export const RolesGridPage: FC<Props> = ({
   };
 
   const onTableChange = ({ page, sort }: CriteriaWithPagination<Role>) => {
+    console.log(sort);
     const newState = {
       ...tableState,
       from: page?.index! * page?.size!,
       size: page?.size!,
+      ...(sort ? { sort } : {}),
     };
     setTableState(newState);
   };
@@ -500,8 +504,8 @@ export const RolesGridPage: FC<Props> = ({
           loading={isLoading}
           sorting={{
             sort: {
-              field: 'name',
-              direction: 'asc',
+              field: tableState.sort?.field ?? 'name',
+              direction: tableState.sort?.direction ?? 'asc',
             },
           }}
           rowProps={{ 'data-test-subj': 'roleRow' }}
