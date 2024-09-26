@@ -331,7 +331,7 @@ export class AlertingAuthorization {
     hasAllRequested: boolean;
     authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
-    const fIds = featuresIds ?? (await this.featuresIds);
+    const fIds = new Set(featuresIds ?? (await this.featuresIds));
 
     /**
      * Temporary hack to fix issues with the discover consumer.
