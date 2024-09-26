@@ -99,7 +99,7 @@ export const AnomalyDetectionSettings: FC = () => {
       <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem grow={5}>
+        <EuiFlexItem>
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
@@ -165,72 +165,8 @@ export const AnomalyDetectionSettings: FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={5}>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.ml.settings.anomalyDetection.filterListsTitle"
-                defaultMessage="Filter Lists"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s">
-            <EuiTextColor color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.settings.anomalyDetection.filterListsText"
-                  defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis."
-                />
-              </p>
-            </EuiTextColor>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup alignItems="center">
-            {canGetFilters && (
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <FormattedMessage
-                    id="xpack.ml.settings.anomalyDetection.filterListsSummaryCount"
-                    defaultMessage="You have {filterListsCountBadge} {filterListsCount, plural, one {filter list} other {filter lists}}"
-                    values={{
-                      filterListsCountBadge: <EuiBadge>{filterListsCount}</EuiBadge>,
-                      filterListsCount,
-                    }}
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="mlFilterListsMngButton"
-                flush="left"
-                color="primary"
-                onClick={redirectToFilterLists}
-                isDisabled={canGetFilters === false}
-              >
-                <FormattedMessage
-                  id="xpack.ml.settings.anomalyDetection.manageFilterListsLink"
-                  defaultMessage="Manage"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="mlFilterListsCreateButton"
-                color="primary"
-                onClick={redirectToNewFilterListPage}
-                isDisabled={canCreateFilter === false}
-              >
-                <FormattedMessage
-                  id="xpack.ml.settings.anomalyDetection.createFilterListsLink"
-                  defaultMessage="Create"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={5}>
+
+        <EuiFlexItem>
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
@@ -296,6 +232,77 @@ export const AnomalyDetectionSettings: FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="xl" />
+
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.ml.settings.anomalyDetection.filterListsTitle"
+                defaultMessage="Filter Lists"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <EuiTextColor color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.filterListsText"
+                  defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis."
+                />
+              </p>
+            </EuiTextColor>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center">
+            {canGetFilters && (
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <FormattedMessage
+                    id="xpack.ml.settings.anomalyDetection.filterListsSummaryCount"
+                    defaultMessage="You have {filterListsCountBadge} {filterListsCount, plural, one {filter list} other {filter lists}}"
+                    values={{
+                      filterListsCountBadge: <EuiBadge>{filterListsCount}</EuiBadge>,
+                      filterListsCount,
+                    }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="mlFilterListsMngButton"
+                flush="left"
+                color="primary"
+                onClick={redirectToFilterLists}
+                isDisabled={canGetFilters === false}
+              >
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.manageFilterListsLink"
+                  defaultMessage="Manage"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="mlFilterListsCreateButton"
+                color="primary"
+                onClick={redirectToNewFilterListPage}
+                isDisabled={canCreateFilter === false}
+              >
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.createFilterListsLink"
+                  defaultMessage="Create"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem />
       </EuiFlexGroup>
     </Fragment>
   );
