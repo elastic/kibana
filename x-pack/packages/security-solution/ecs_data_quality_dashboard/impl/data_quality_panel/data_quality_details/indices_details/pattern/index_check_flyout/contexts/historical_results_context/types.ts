@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { StorageResult } from '../../../../../../types';
+import { HistoricalResult } from '../../../../../../types';
 import { FetchHistoricalResultsOpts } from '../../types';
 
 export interface HistoricalResultsValue {
   historicalResultsState: {
-    results: StorageResult[];
+    results: HistoricalResult[];
     total: number;
     isLoading: boolean;
     error: Error | null;

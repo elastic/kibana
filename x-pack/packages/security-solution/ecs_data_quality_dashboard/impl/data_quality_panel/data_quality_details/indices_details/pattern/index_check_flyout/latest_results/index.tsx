@@ -18,7 +18,6 @@ import { useIndicesCheckContext } from '../../../../../contexts/indices_check_co
 import { LatestCheckFields } from './latest_check_fields';
 import { IndexStatsPanel } from '../index_stats_panel';
 import { useDataQualityContext } from '../../../../../data_quality_context';
-import { getIndexPropertiesContainerId } from './utils/get_index_properties_container_id';
 import {
   CHECKING_INDEX,
   ERROR_GENERIC_CHECK_TITLE,
@@ -31,14 +30,12 @@ import {
 export interface Props {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   indexName: string;
-  pattern: string;
   patternRollup: PatternRollup | undefined;
   stats: Record<string, MeteringStatsIndex> | null;
 }
 
 const LatestResultsComponent: React.FC<Props> = ({
   indexName,
-  pattern,
   patternRollup,
   stats,
   ilmExplain,
@@ -79,7 +76,7 @@ const LatestResultsComponent: React.FC<Props> = ({
   }
 
   return isCheckComplete ? (
-    <div data-index-properties-container={getIndexPropertiesContainerId({ indexName, pattern })}>
+    <div data-test-subj="latestResults">
       <IndexStatsPanel docsCount={docsCount} sizeInBytes={sizeInBytes ?? 0} ilmPhase={ilmPhase} />
       <EuiSpacer />
       <LatestCheckFields

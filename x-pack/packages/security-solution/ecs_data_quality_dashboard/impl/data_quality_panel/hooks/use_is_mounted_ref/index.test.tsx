@@ -7,11 +7,11 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { useIsMounted } from '.';
+import { useIsMountedRef } from '.';
 
-describe('useIsMounted', () => {
+describe('useIsMountedRef', () => {
   it('should return a ref that is true when mounted and false when unmounted', () => {
-    const { result, unmount } = renderHook(() => useIsMounted());
+    const { result, unmount } = renderHook(() => useIsMountedRef());
 
     expect(result.current.isMountedRef.current).toBe(true);
 

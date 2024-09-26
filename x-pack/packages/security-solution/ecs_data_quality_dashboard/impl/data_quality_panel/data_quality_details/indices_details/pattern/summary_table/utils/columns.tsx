@@ -135,12 +135,21 @@ export const getSummaryTableColumns = ({
         name: i18n.CHECK_INDEX,
         render: (item) => {
           const isChecking = checkState[item.indexName]?.isChecking ?? false;
-          return (
+          // this is a workaround to prevent the tooltip from being stuck
+          // more details here:
+          // https://github.com/elastic/eui/issues/8014#issuecomment-2356394493
+          return isChecking ? (
+            <EuiButtonIcon
+              iconType="refresh"
+              aria-label={i18n.CHECK_INDEX}
+              isLoading={true}
+              onClick={() => onCheckNowAction(item.indexName)}
+            />
+          ) : (
             <EuiToolTip content={i18n.CHECK_INDEX}>
               <EuiButtonIcon
                 iconType="refresh"
                 aria-label={i18n.CHECK_INDEX}
-                isLoading={isChecking}
                 onClick={() => onCheckNowAction(item.indexName)}
               />
             </EuiToolTip>

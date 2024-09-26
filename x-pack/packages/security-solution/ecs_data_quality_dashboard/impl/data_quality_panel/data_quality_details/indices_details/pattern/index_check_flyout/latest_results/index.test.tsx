@@ -16,7 +16,7 @@ import {
   TestExternalProviders,
 } from '../../../../../mock/test_providers/test_providers';
 import { LatestResults, Props } from '.';
-import { getCheckState } from '../../../../../stub/get_check_state';
+import { getCheckStateStub } from '../../../../../stub/get_check_state_stub';
 import { LOADING_MAPPINGS, LOADING_UNALLOWED_VALUES } from '../translations';
 
 const indexName = 'auditbeat-custom-index-1';
@@ -28,14 +28,12 @@ const defaultNumberFormat = '0,0.[000]';
 const formatNumber = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
-const pattern = 'auditbeat-*';
 const patternRollup = auditbeatWithAllResults;
 
 const defaultProps: Props = {
   stats: auditbeatWithAllResults.stats,
   ilmExplain: auditbeatWithAllResults.ilmExplain,
   indexName: 'auditbeat-custom-index-1',
-  pattern,
   patternRollup,
 };
 
@@ -50,7 +48,7 @@ describe('LatestResults', () => {
           }}
           indicesCheckContextProps={{
             checkState: {
-              ...getCheckState(indexName),
+              ...getCheckStateStub(indexName),
             },
           }}
         >
@@ -84,7 +82,7 @@ describe('LatestResults', () => {
             }}
             indicesCheckContextProps={{
               checkState: {
-                ...getCheckState(indexName, {
+                ...getCheckStateStub(indexName, {
                   mappingsError: new Error(error),
                 }),
               },
@@ -125,7 +123,7 @@ describe('LatestResults', () => {
             }}
             indicesCheckContextProps={{
               checkState: {
-                ...getCheckState(indexName, {
+                ...getCheckStateStub(indexName, {
                   unallowedValuesError: new Error(error),
                 }),
               },
@@ -161,7 +159,7 @@ describe('LatestResults', () => {
             }}
             indicesCheckContextProps={{
               checkState: {
-                ...getCheckState(indexName, {
+                ...getCheckStateStub(indexName, {
                   isLoadingMappings: true,
                 }),
               },
@@ -195,7 +193,7 @@ describe('LatestResults', () => {
             }}
             indicesCheckContextProps={{
               checkState: {
-                ...getCheckState(indexName, {
+                ...getCheckStateStub(indexName, {
                   isLoadingUnallowedValues: true,
                 }),
               },

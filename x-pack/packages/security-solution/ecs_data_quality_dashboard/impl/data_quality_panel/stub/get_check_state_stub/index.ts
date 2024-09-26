@@ -16,7 +16,7 @@ import { mockUnallowedValuesResponse } from '../../mock/unallowed_values/mock_un
 import { UnallowedValueSearchResult } from '../../types';
 import { getMappingsProperties, getSortedPartitionedFieldMetadata } from '../../utils/metadata';
 
-export const getCheckState = (
+export const getCheckStateStub = (
   indexName: string,
   indexCheckState?: Partial<UseIndicesCheckCheckState['string']>
 ) => {

@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { FC, Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 
-import { useIsMounted } from '../../../../../hooks/use_is_mounted';
+import { useIsMountedRef } from '../../../../../hooks/use_is_mounted_ref';
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import { useHistoricalResultsContext } from '../contexts/historical_results_context';
 import { FAIL, PASS } from '../../translations';
@@ -39,7 +39,6 @@ import { PaginationReducerState } from './types';
 import { LoadingEmptyPrompt } from '../../loading_empty_prompt';
 import { ErrorEmptyPrompt } from '../../error_empty_prompt';
 import { StyledAccordion, StyledFilterGroupFlexItem, StyledText } from './styles';
-import { useFetchHistoricalResultsAbortControllers } from './hooks/use_fetch_historical_results_abort_controllers';
 import {
   ALL,
   COUNTED_INCOMPATIBLE_FIELDS,
@@ -50,6 +49,7 @@ import {
   TOTAL_CHECKS,
 } from './translations';
 import { HistoricalResult } from './historical_result';
+import { useAbortControllerRef } from '../../../../../hooks/use_abort_controller_ref';
 
 export interface Props {
   indexName: string;
@@ -57,7 +57,7 @@ export interface Props {
 
 const DEFAULT_HISTORICAL_RESULTS_PAGE_SIZE = 10;
 
-export const fetchHistoricalResultsInitialState: FetchHistoricalResultsQueryState = {
+export const initialFetchHistoricalResultsQueryState: FetchHistoricalResultsQueryState = {
   startDate: DEFAULT_HISTORICAL_RESULTS_START_DATE,
   endDate: DEFAULT_HISTORICAL_RESULTS_END_DATE,
   size: DEFAULT_HISTORICAL_RESULTS_PAGE_SIZE,
@@ -74,15 +74,13 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
   const [accordionState, setAccordionState] = useState<Record<number, boolean>>(() => ({}));
   const { historicalResultsState, fetchHistoricalResults } = useHistoricalResultsContext();
 
-  const {
-    fetchHistoricalResultsFromDateAbortControllerRef,
-    fetchHistoricalResultsFromOutcomeAbortControllerRef,
-    fetchHistoricalResultsFromSetPageAbortControllerRef,
-    fetchHistoricalResultsFromSetSizeAbortControllerRef,
-  } = useFetchHistoricalResultsAbortControllers();
+  const fetchHistoricalResultsFromDateAbortControllerRef = useAbortControllerRef();
+  const fetchHistoricalResultsFromOutcomeAbortControllerRef = useAbortControllerRef();
+  const fetchHistoricalResultsFromSetPageAbortControllerRef = useAbortControllerRef();
+  const fetchHistoricalResultsFromSetSizeAbortControllerRef = useAbortControllerRef();
 
   const { isILMAvailable, formatNumber } = useDataQualityContext();
-  const { isMountedRef } = useIsMounted();
+  const { isMountedRef } = useIsMountedRef();
   const historicalResultsAccordionId = useGeneratedHtmlId({ prefix: 'historicalResultsAccordion' });
 
   const totalResultsFormatted = useMemo(
@@ -95,7 +93,7 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
   // that is passed to the fetchHistoricalResults function
   const [fetchHistoricalResultsQueryState, fetchHistoricalResultsQueryDispatch] = useReducer(
     fetchHistoricalResultsQueryReducer,
-    fetchHistoricalResultsInitialState
+    initialFetchHistoricalResultsQueryState
   );
 
   const [paginationState, paginationDispatch] = useReducer(
@@ -320,7 +318,7 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
       {results.length > 0 ? (
         results.map((result) => (
           <Fragment key={result.checkedAt}>
-            <EuiSpacer />
+            <EuiSpacer size="m" />
             <StyledAccordion
               id={historicalResultsAccordionId}
               buttonElement="div"
@@ -360,7 +358,7 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
           {NO_HISTORICAL_RESULTS_BODY}
         </EuiEmptyPrompt>
       )}
-      {results.length > 0 && (
+      {paginationState.pageCount > 1 && (
         <>
           <EuiSpacer />
           <EuiTablePagination
