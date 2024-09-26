@@ -1,10 +1,10 @@
 # Space Awareness
 
-Fleet is in the process to become space aware.
+Fleet is in the process to become space aware. This means that different Fleet objects will belong to different spaces and can only be viewed in the spaces that they belong to. Today, all Fleet objects are global and can be viewed from any space.
 
 ## How to enable the feature
 
-The feature is behind a feature flag `useSpaceAwareness`, (if you are testing space awareness you could also be interested in testing `subfeaturePrivileges` at the same time)
+The feature is behind a feature flag `useSpaceAwareness`. If you are testing space awareness you could also be interested in testing `subfeaturePrivileges` at the same time which enables granular privileges to different parts of Fleet.
 
 In your `kibana.yml` config
 
@@ -28,7 +28,7 @@ Space aware saved object:
 - Agent policies, `fleet-agent-policies`
 - Space settings
 
-As the feature is opt-in we will have to make sure that both non space-aware and space-aware saved object work, and use dynamicaly the right object type for example for agent policy
+As the feature is opt-in we will have to make sure that both non space-aware and space-aware saved object work, and dynamically use the right object type based on opt-in. Agent policy example:
 
 ```typescript
 export async function getAgentPolicySavedObjectType() {
