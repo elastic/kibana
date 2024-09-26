@@ -11,7 +11,7 @@ import { MockedLogger } from '@kbn/logging-mocks';
 import { sloDefinitionSchema } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { SLODefinition, StoredSLODefinition } from '../domain/models';
-import { SLOIdConflict, SLONotFound } from '../errors';
+import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 import { aStoredSLO, createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
@@ -82,13 +82,13 @@ describe('KibanaSavedObjectsSLORepository', () => {
   });
 
   describe('saving an SLO', () => {
-    it('finding existing id for slo', async () => {
+    it('checking existing id for slo', async () => {
       const slo = createSLO({ id: 'my-id' });
       soClientMock.find.mockResolvedValueOnce(soFindResponse([]));
       soClientMock.create.mockResolvedValueOnce(aStoredSLO(slo));
       const repository = new KibanaSavedObjectsSLORepository(soClientMock, loggerMock);
 
-      await repository.getExistingSavedObjectId(slo);
+      await repository.checkIfSLOExists(slo);
 
       expect(soClientMock.find).toHaveBeenCalledWith({
         type: SO_SLO_TYPE,
@@ -103,27 +103,21 @@ describe('KibanaSavedObjectsSLORepository', () => {
       soClientMock.create.mockResolvedValueOnce(aStoredSLO(slo));
       const repository = new KibanaSavedObjectsSLORepository(soClientMock, loggerMock);
 
-      const savedSLO = await repository.save(slo);
+      const savedSLO = await repository.create(slo);
 
       expect(savedSLO).toEqual(slo);
       expect(soClientMock.create).toHaveBeenCalledWith(
         SO_SLO_TYPE,
-        sloDefinitionSchema.encode(slo),
-        {
-          id: undefined,
-          overwrite: true,
-        }
+        sloDefinitionSchema.encode(slo)
       );
     });
 
-    it('throws when the SLO id already exists and "throwOnConflict" is true', async () => {
+    it('checks when the SLO id already exists', async () => {
       const slo = createSLO({ id: 'my-id' });
       soClientMock.find.mockResolvedValueOnce(soFindResponse([slo]));
       const repository = new KibanaSavedObjectsSLORepository(soClientMock, loggerMock);
 
-      await expect(
-        repository.getExistingSavedObjectId(slo, { throwOnConflict: true })
-      ).rejects.toThrowError(new SLOIdConflict(`SLO [my-id] already exists`));
+      await expect(await repository.checkIfSLOExists(slo)).toEqual(true);
       expect(soClientMock.find).toHaveBeenCalledWith({
         type: SO_SLO_TYPE,
         perPage: 0,
@@ -137,7 +131,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
       soClientMock.create.mockResolvedValueOnce(aStoredSLO(slo));
       const repository = new KibanaSavedObjectsSLORepository(soClientMock, loggerMock);
 
-      const savedSLO = await repository.save(slo, { existingSavedObjectId: 'my-id' });
+      const savedSLO = await repository.update(slo);
 
       expect(savedSLO).toEqual(slo);
 

@@ -65,7 +65,7 @@ describe('CreateSLO', () => {
 
       const response = await createSLO.execute(sloParams);
 
-      expect(mockRepository.save).toHaveBeenCalledWith(
+      expect(mockRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ...sloParams,
           id: 'unique-id',
@@ -80,8 +80,7 @@ describe('CreateSLO', () => {
           version: 2,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
-        }),
-        { existingSavedObjectId: undefined }
+        })
       );
 
       expect(mockTransformManager.install).toHaveBeenCalled();
@@ -106,7 +105,7 @@ describe('CreateSLO', () => {
 
       await createSLO.execute(sloParams);
 
-      expect(mockRepository.save).toHaveBeenCalledWith(
+      expect(mockRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ...sloParams,
           id: expect.any(String),
@@ -120,8 +119,7 @@ describe('CreateSLO', () => {
           enabled: true,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
-        }),
-        { existingSavedObjectId: undefined }
+        })
       );
     });
 
@@ -139,7 +137,7 @@ describe('CreateSLO', () => {
 
       await createSLO.execute(sloParams);
 
-      expect(mockRepository.save).toHaveBeenCalledWith(
+      expect(mockRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ...sloParams,
           id: expect.any(String),
@@ -153,8 +151,7 @@ describe('CreateSLO', () => {
           enabled: true,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
-        }),
-        { existingSavedObjectId: undefined }
+        })
       );
     });
   });

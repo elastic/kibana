@@ -11,15 +11,13 @@ import { ALL_VALUE, Paginated, Pagination, sloDefinitionSchema } from '@kbn/slo-
 import { isLeft } from 'fp-ts/lib/Either';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { SLODefinition, StoredSLODefinition } from '../domain/models';
-import { SLOIdConflict, SLONotFound } from '../errors';
+import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
 export interface SLORepository {
-  getExistingSavedObjectId(
-    slo: SLODefinition,
-    options?: { throwOnConflict: boolean }
-  ): Promise<string | undefined>;
-  save(slo: SLODefinition, options?: { existingSavedObjectId?: string }): Promise<SLODefinition>;
+  checkIfSLOExists(slo: SLODefinition): Promise<boolean>;
+  create(slo: SLODefinition): Promise<SLODefinition>;
+  update(slo: SLODefinition, options?: { existingSavedObjectId?: string }): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
   deleteById(id: string, ignoreNotFound?: boolean): Promise<void>;
@@ -33,26 +31,35 @@ export interface SLORepository {
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
 
-  async getExistingSavedObjectId(slo: SLODefinition, options = { throwOnConflict: false }) {
+  async checkIfSLOExists(slo: SLODefinition) {
     const findResponse = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       perPage: 0,
       filter: `slo.attributes.id:(${slo.id})`,
     });
-    if (findResponse.total === 1) {
-      if (options.throwOnConflict) {
-        throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
-      }
-      return findResponse.saved_objects[0].id;
-    }
+
+    return findResponse.total > 0;
   }
 
-  async save(
-    slo: SLODefinition,
-    options?: { existingSavedObjectId: string }
-  ): Promise<SLODefinition> {
+  async create(slo: SLODefinition): Promise<SLODefinition> {
+    await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, toStoredSLO(slo));
+    return slo;
+  }
+
+  async update(slo: SLODefinition): Promise<SLODefinition> {
+    let existingSavedObjectId: string | undefined;
+
+    const findResponse = await this.soClient.find<StoredSLODefinition>({
+      type: SO_SLO_TYPE,
+      perPage: 1,
+      filter: `slo.attributes.id:(${slo.id})`,
+    });
+    if (findResponse.total === 1) {
+      existingSavedObjectId = findResponse.saved_objects[0].id;
+    }
+
     await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, toStoredSLO(slo), {
-      id: options?.existingSavedObjectId,
+      id: existingSavedObjectId,
       overwrite: true,
     });
 

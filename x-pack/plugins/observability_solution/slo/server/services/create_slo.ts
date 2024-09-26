@@ -23,7 +23,7 @@ import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
 import { Duration, DurationUnit, SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
-import { SecurityException } from '../errors';
+import { SecurityException, SLOIdConflict } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
@@ -48,12 +48,13 @@ export class CreateSLO {
 
     const rollbackOperations = [];
 
-    const existingSavedObjectId = await this.repository.getExistingSavedObjectId(slo, {
-      throwOnConflict: true,
-    });
+    const sloAlreadyExists = await this.repository.checkIfSLOExists(slo);
 
-    // can be done async as we are not using the result
-    void this.repository.save(slo, { existingSavedObjectId });
+    if (sloAlreadyExists) {
+      throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
+    }
+
+    const createPromise = this.repository.create(slo);
 
     rollbackOperations.push(() => this.repository.deleteById(slo.id, true));
 
@@ -84,6 +85,7 @@ export class CreateSLO {
       rollbackOperations.push(() => this.deleteTempSummaryDocument(slo));
 
       await Promise.all([
+        createPromise,
         sloPipelinePromise,
         rollupTransformPromise,
         summaryPipelinePromise,
