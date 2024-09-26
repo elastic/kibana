@@ -434,6 +434,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 connectorId,
                 persist: true,
                 screenContexts: [],
+                scope: 'observability',
               },
             },
           })
@@ -480,6 +481,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 persist: true,
                 screenContexts: [],
                 conversationId,
+                scope: 'observability',
               },
             },
           })
