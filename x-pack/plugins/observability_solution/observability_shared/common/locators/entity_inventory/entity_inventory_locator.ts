@@ -7,12 +7,12 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 
-export type EntityInventoryLocator = LocatorPublic<SerializableRecord>;
+export type EntitiesInventoryLocator = LocatorPublic<SerializableRecord>;
 
-export const ENTITY_INVENTORY_LOCATOR_ID = 'ENTITY_INVENTORY_LOCATOR';
+export const ENTITIES_INVENTORY_LOCATOR_ID = 'ENTITY_INVENTORY_LOCATOR';
 
-export class EntityInventoryLocatorDefinition implements LocatorDefinition<SerializableRecord> {
-  public readonly id = ENTITY_INVENTORY_LOCATOR_ID;
+export class EntitiesInventoryLocatorDefinition implements LocatorDefinition<SerializableRecord> {
+  public readonly id = ENTITIES_INVENTORY_LOCATOR_ID;
 
   public readonly getLocation = async () => {
     return {

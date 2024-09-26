@@ -27,7 +27,7 @@ import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { getNoDataConfig } from '../no_data_config';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ServiceInventoryView } from '../../../../context/entity_manager_context/entity_manager_context';
-import { InventoryCallout } from './inventory_callout';
+import { EntitiesInventoryCallout } from './entities_inventory_callout';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
@@ -168,7 +168,7 @@ export function ApmMainTemplate({
     false
   );
 
-  const showInventoryCallout =
+  const showEntitiesInventoryCallout =
     !dismissedEntitiesInventoryCallout &&
     isEntityCentricExperienceSettingEnabled &&
     selectedNavButton === 'allServices';
@@ -189,8 +189,8 @@ export function ApmMainTemplate({
           pageTitle: pageHeaderTitle,
           children: (
             <EuiFlexGroup direction="column">
-              {showInventoryCallout ? (
-                <InventoryCallout
+              {showEntitiesInventoryCallout ? (
+                <EntitiesInventoryCallout
                   onDissmiss={() => {
                     setdismissedEntitiesInventoryCallout(true);
                   }}

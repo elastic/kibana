@@ -9,17 +9,19 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip, EuiButtonIcon } from '@
 import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ENTITY_INVENTORY_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import { ENTITIES_INVENTORY_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-export interface InventoryCalloutProps {
+interface EntitiesInventoryCalloutProps {
   onDissmiss: () => void;
 }
 
-export function InventoryCallout({ onDissmiss }: InventoryCalloutProps) {
+export function EntitiesInventoryCallout({ onDissmiss }: EntitiesInventoryCalloutProps) {
   const { share } = useApmPluginContext();
-  const inventoryLocator = share.url.locators.get<SerializableRecord>(ENTITY_INVENTORY_LOCATOR_ID);
+  const entitiesInventoryLocator = share.url.locators.get<SerializableRecord>(
+    ENTITIES_INVENTORY_LOCATOR_ID
+  );
 
   return (
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
@@ -27,9 +29,12 @@ export function InventoryCallout({ onDissmiss }: InventoryCalloutProps) {
         <TechnicalPreviewBadge icon="beaker" style={{ verticalAlign: 'middle' }} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink data-test-subj="inventoryCalloutLink" href={inventoryLocator?.useUrl({})}>
+        <EuiLink
+          data-test-subj="entitiesInventoryCalloutLink"
+          href={entitiesInventoryLocator?.useUrl({})}
+        >
           <FormattedMessage
-            id="xpack.apm.inventoryCallout.linklabel"
+            id="xpack.apm.entitiesInventoryCallout.linklabel"
             defaultMessage="Try our new Inventory!"
           />
         </EuiLink>
@@ -38,13 +43,13 @@ export function InventoryCallout({ onDissmiss }: InventoryCalloutProps) {
         <EuiToolTip
           content={
             <FormattedMessage
-              id="xpack.apm.inventoryCallout.linkTooltip"
+              id="xpack.apm.entitiesInventoryCallout.linkTooltip"
               defaultMessage="Hide this"
             />
           }
         >
           <EuiButtonIcon
-            data-test-subj="inventoryCalloutDismiss"
+            data-test-subj="entitiesInventoryCalloutDismiss"
             iconType="cross"
             onClick={onDissmiss}
           />
