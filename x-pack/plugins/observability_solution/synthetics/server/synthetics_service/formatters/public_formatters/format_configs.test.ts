@@ -326,7 +326,6 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
-      [ConfigKey.SOURCE_INLINE]: '',
       fields_under_root: true,
     });
     const projectContent = (actual as BrowserSensitiveSimpleFields)[
@@ -370,7 +369,6 @@ describe('formatHeartbeatRequest', () => {
         },
       },
       fields_under_root: true,
-      [ConfigKey.SOURCE_INLINE]: '',
       params: '{"key":"value"}',
     });
 
@@ -414,7 +412,6 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
-      [ConfigKey.SOURCE_INLINE]: '',
       fields_under_root: true,
     });
     const projectContent = (actual as BrowserSensitiveSimpleFields)[
@@ -459,7 +456,6 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
-      [ConfigKey.SOURCE_INLINE]: '',
       fields_under_root: true,
     });
     const projectContent = (actual as BrowserSensitiveSimpleFields)[
@@ -504,7 +500,6 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
-      [ConfigKey.SOURCE_INLINE]: '',
       fields_under_root: true,
     });
     const projectContent = (actual as BrowserSensitiveSimpleFields)[
@@ -550,7 +545,6 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
-      [ConfigKey.SOURCE_INLINE]: '',
       fields_under_root: true,
     });
     const projectContent = (actual as BrowserSensitiveSimpleFields)[
@@ -597,7 +591,6 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
-      [ConfigKey.SOURCE_INLINE]: '',
       fields_under_root: true,
     });
     const projectContent = (actual as BrowserSensitiveSimpleFields)[

@@ -427,7 +427,12 @@ export class SyntheticsService {
 
                 return {
                   ...monitorData,
-                  ...(await mapInlineToProjectFields(monitorData.type, monitorData, this.logger)),
+                  ...(await mapInlineToProjectFields(
+                    monitorData.type,
+                    monitorData,
+                    this.logger,
+                    false
+                  )),
                 };
               })
             );

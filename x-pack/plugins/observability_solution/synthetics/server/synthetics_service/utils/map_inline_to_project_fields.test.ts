@@ -40,23 +40,31 @@ describe('mapInlineToProjectFields', () => {
     expect(result).toEqual({});
   });
 
-  it('should zip the source inline and return it as project content', async () => {
-    const result = await mapInlineToProjectFields(
-      'browser',
-      {
-        [ConfigKey.SOURCE_INLINE]: `step('goto', () => page.goto('https://elastic.co'))`,
-      },
-      logger as any
-    );
-    expect(result[ConfigKey.SOURCE_INLINE]).toEqual('');
-    expect(await unzipFile(result[ConfigKey.SOURCE_PROJECT_CONTENT] ?? '')).toMatchInlineSnapshot(`
+  it.each([true, false])(
+    'should zip the source inline and return it as project content',
+    async (shouldReturnScript) => {
+      const expectedInlineScript = `step('goto', () => page.goto('https://elastic.co'))`;
+      const result = await mapInlineToProjectFields(
+        'browser',
+        {
+          [ConfigKey.SOURCE_INLINE]: expectedInlineScript,
+        },
+        logger as any,
+        shouldReturnScript
+      );
+      expect(result[ConfigKey.SOURCE_INLINE]).toEqual(
+        shouldReturnScript ? expectedInlineScript : undefined
+      );
+      expect(await unzipFile(result[ConfigKey.SOURCE_PROJECT_CONTENT] ?? ''))
+        .toMatchInlineSnapshot(`
       "import { journey, step, expect } from '@elastic/synthetics';
 
       journey('inline', ({ page, context, browser, params, request }) => {
       step('goto', () => page.goto('https://elastic.co'))
       });"
     `);
-  });
+    }
+  );
 
   it('should return the inline script if the zipping fails', async () => {
     jest.spyOn(inlineToZip, 'inlineToProjectZip').mockImplementationOnce(async () => {

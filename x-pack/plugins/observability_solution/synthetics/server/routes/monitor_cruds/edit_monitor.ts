@@ -37,7 +37,6 @@ import { SyntheticsServerSetup } from '../../types';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { mapInlineToProjectFields } from '../../synthetics_service/utils/map_inline_to_project_fields';
 
-// Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',

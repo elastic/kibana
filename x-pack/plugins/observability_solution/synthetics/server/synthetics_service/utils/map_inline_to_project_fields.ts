@@ -12,9 +12,10 @@ import { inlineToProjectZip } from '../../common/inline_to_zip';
 export async function mapInlineToProjectFields(
   monitorType: string,
   monitor: unknown,
-  logger: Logger
+  logger: Logger,
+  includeInlineScript = true
 ) {
-  if (monitorType !== 'browser') return {};
+  if (monitorType !== 'browser' || !monitor) return {};
   const asBrowserMonitor = monitor as BrowserSimpleFields;
   const inlineScript = asBrowserMonitor?.[ConfigKey.SOURCE_INLINE];
   if (!inlineScript) return {};
@@ -24,8 +25,12 @@ export async function mapInlineToProjectFields(
       asBrowserMonitor?.[ConfigKey.CONFIG_ID],
       logger
     );
+    if (includeInlineScript)
+      return {
+        [ConfigKey.SOURCE_INLINE]: inlineScript,
+        [ConfigKey.SOURCE_PROJECT_CONTENT]: projectZip,
+      };
     return {
-      [ConfigKey.SOURCE_INLINE]: '',
       [ConfigKey.SOURCE_PROJECT_CONTENT]: projectZip,
     };
   } catch (e) {
