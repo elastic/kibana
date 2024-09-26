@@ -7,7 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { serviceMetadataIcons } from '../../utils/es_fields_mappings';
+import { serviceMetadataIconsMapping } from '../../utils/es_fields_mappings';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
@@ -86,7 +86,7 @@ export async function getServiceMetadataIcons({
     };
   }
 
-  const { kubernetes, cloud, container, agent } = serviceMetadataIcons(
+  const { kubernetes, cloud, container, agent } = serviceMetadataIconsMapping(
     response.hits.hits[0].fields
   );
 

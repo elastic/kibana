@@ -14,7 +14,7 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { getTransaction } from '../../transactions/get_transaction';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-import { errorSampleDetails } from '../../../utils/es_fields_mappings';
+import { errorSampleDetailsMapping } from '../../../utils/es_fields_mappings';
 
 export interface ErrorSampleDetailsResponse {
   transaction: Transaction | undefined;
@@ -67,7 +67,7 @@ export async function getErrorSampleDetails({
 
   const resp = await apmEventClient.search('get_error_sample_details', params);
 
-  const errorNorm = errorSampleDetails(resp.hits.hits[0]?.fields);
+  const errorNorm = errorSampleDetailsMapping(resp.hits.hits[0]?.fields);
   const transactionId = errorNorm?.transaction?.id;
   const traceId = errorNorm?.trace?.id;
 

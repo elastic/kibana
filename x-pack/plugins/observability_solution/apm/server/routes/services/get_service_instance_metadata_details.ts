@@ -10,7 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   metadataAppMetricMapping,
   metadataAppTransactionEventMapping,
-  metaDataAppTransactionMetric,
+  metaDataAppTransactionMetricMapping,
 } from '../../utils/es_fields_mappings';
 import { METRICSET_NAME, SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import { maybe } from '../../../common/utils/maybe';
@@ -119,7 +119,7 @@ export async function getServiceInstanceMetadataDetails({
         },
       }
     );
-    return maybe(metaDataAppTransactionMetric(response.hits.hits[0]?.fields));
+    return maybe(metaDataAppTransactionMetricMapping(response.hits.hits[0]?.fields));
   }
 
   // we can expect the most detail of application metrics,

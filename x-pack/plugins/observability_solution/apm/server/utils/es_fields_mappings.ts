@@ -509,7 +509,7 @@ export const errorGroupMainStatisticsMapping = (fields: Partial<Record<string, u
   };
 };
 
-export const errorSampleDetails = (fields: Partial<Record<string, unknown[]>>): APMError => {
+export const errorSampleDetailsMapping = (fields: Partial<Record<string, unknown[]>>): APMError => {
   return {
     observer: {
       type: normalizeValue<string>(fields[OBSERVER_TYPE]),
@@ -559,7 +559,7 @@ export const errorSampleDetails = (fields: Partial<Record<string, unknown[]>>): 
   };
 };
 
-export const serviceMetadataIcons = (
+export const serviceMetadataIconsMapping = (
   fields: Partial<Record<string, unknown[]>>
 ): ServiceMetadataIconsRaw => {
   return {
@@ -888,7 +888,7 @@ export const metadataAppTransactionEventMapping = (fields: Partial<Record<string
   };
 };
 
-export const metaDataAppTransactionMetric = (fields: Partial<Record<string, unknown[]>>) => {
+export const metaDataAppTransactionMetricMapping = (fields: Partial<Record<string, unknown[]>>) => {
   return {
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
     _doc_count: normalizeValue<number>(fields[DOC_COUNT]),
@@ -963,7 +963,7 @@ export const metaDataAppTransactionMetric = (fields: Partial<Record<string, unkn
   };
 };
 
-export const serviceAgentName = (fields: Partial<Record<string, unknown[]>>) => {
+export const serviceAgentNameMapping = (fields: Partial<Record<string, unknown[]>>) => {
   return {
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),

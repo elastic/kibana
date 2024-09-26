@@ -7,7 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { serviceAgentName } from '../../utils/es_fields_mappings';
+import { serviceAgentNameMapping } from '../../utils/es_fields_mappings';
 import {
   AGENT_NAME,
   SERVICE_NAME,
@@ -102,7 +102,9 @@ export async function getServiceAgent({
     return {};
   }
 
-  const { agent, service, cloud } = serviceAgentName(response.hits.hits[0].fields) as ServiceAgent;
+  const { agent, service, cloud } = serviceAgentNameMapping(
+    response.hits.hits[0].fields
+  ) as ServiceAgent;
   const serverlessType = getServerlessTypeFromCloudData(cloud?.provider, cloud?.service?.name);
 
   return {
