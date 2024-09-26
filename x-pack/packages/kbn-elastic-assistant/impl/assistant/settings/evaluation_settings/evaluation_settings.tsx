@@ -96,7 +96,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     [setSelectedDatasetOptions]
   );
   const onDatasetCreateOption = useCallback(
-    (searchValue = []) => {
+    (searchValue: string) => {
       const normalizedSearchValue = searchValue.trim().toLowerCase();
       if (!normalizedSearchValue) {
         return;
