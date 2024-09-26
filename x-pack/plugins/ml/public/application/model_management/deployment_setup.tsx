@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { Fragment, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -141,71 +141,81 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const customTicks = Object.values(vCpuLevelMap).map((v) => {
-    return {
-      label: v.label,
-      value: v.value,
-    };
-  });
+  const customTicks = useMemo(
+    () =>
+      Object.values(vCpuLevelMap).map((v) => {
+        return {
+          label: v.label,
+          value: v.value,
+        };
+      }),
+    []
+  );
 
-  const customColorsLevels = [
-    {
-      min: 0.5,
-      max: 1.1,
-      color: vCpuLevelMap.low.color,
-    },
-    {
-      min: 1.1,
-      max: 1.9,
-      color: vCpuLevelMap.medium.color,
-    },
-    {
-      min: 1.9,
-      max: 2.5,
-      color: vCpuLevelMap.high.color,
-    },
-  ];
+  const customColorsLevels = useMemo(
+    () => [
+      {
+        min: 0.5,
+        max: 1.1,
+        color: vCpuLevelMap.low.color,
+      },
+      {
+        min: 1.1,
+        max: 1.9,
+        color: vCpuLevelMap.medium.color,
+      },
+      {
+        min: 1.9,
+        max: 2.5,
+        color: vCpuLevelMap.high.color,
+      },
+    ],
+    []
+  );
 
-  const optimizedOptions = [
-    {
-      id: 'optimizedForIngest',
-      value: 'optimizedForIngest' as const,
-      label: (
-        <EuiText size={'s'}>
-          <strong>
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForIngestLabel"
-              defaultMessage="Ingest"
-            />
-          </strong>
-        </EuiText>
-      ),
-      description: (
-        <FormattedMessage
-          id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForIngestDescription"
-          defaultMessage="Optimized for higher throughput during ingest"
-        />
-      ),
-      'data-test-subj': `mlModelsStartDeploymentModalOptimizedForIngest`,
-    },
-    {
-      id: 'optimizedForSearch',
-      value: 'optimizedForSearch' as const,
-      label: (
-        <FormattedMessage
-          id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForSearchLabel"
-          defaultMessage="Search"
-        />
-      ),
-      description: (
-        <FormattedMessage
-          id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForSearchDescription"
-          defaultMessage="Optimized for lower latency during search"
-        />
-      ),
-      'data-test-subj': `mlModelsStartDeploymentModalOptimizedForSearch`,
-    },
-  ];
+  const optimizedOptions = useMemo(
+    () => [
+      {
+        id: 'optimizedForIngest',
+        value: 'optimizedForIngest' as const,
+        label: (
+          <EuiText size={'s'}>
+            <strong>
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForIngestLabel"
+                defaultMessage="Ingest"
+              />
+            </strong>
+          </EuiText>
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForIngestDescription"
+            defaultMessage="Optimized for higher throughput during ingest"
+          />
+        ),
+        'data-test-subj': `mlModelsStartDeploymentModalOptimizedForIngest`,
+      },
+      {
+        id: 'optimizedForSearch',
+        value: 'optimizedForSearch' as const,
+        label: (
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForSearchLabel"
+            defaultMessage="Search"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForSearchDescription"
+            defaultMessage="Optimized for lower latency during search"
+          />
+        ),
+        'data-test-subj': `mlModelsStartDeploymentModalOptimizedForSearch`,
+      },
+    ],
+    []
+  );
 
   const helperText = useMemo<string | undefined>(() => {
     const vcpuRange = deploymentParamsMapper.getVCPURange(config.vCPUUsage);
@@ -474,6 +484,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                       ...(deploymentIdUpdated.current
                         ? {}
                         : {
+                            // rename deployment ID based on the optimized value
                             deploymentId: config.deploymentId?.replace(
                               /_[a-zA-Z]+$/,
                               v.value === 'optimizedForIngest' ? '_ingest' : '_search'
@@ -637,7 +648,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 }) => {
   const isUpdate = !!initialParams;
 
-  const getDefaultParams = (): DeploymentParamsUI => {
+  const getDefaultParams = useCallback((): DeploymentParamsUI => {
     const uiParams = model.stats?.deployment_stats.map((v) =>
       deploymentParamsMapper.mapApiToUiDeploymentParams(v)
     );
@@ -655,7 +666,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           vCPUUsage: 'medium',
           adaptiveResources: true,
         };
-  };
+  }, [deploymentParamsMapper, model.model_id, model.stats?.deployment_stats]);
 
   const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
 
