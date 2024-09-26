@@ -62,6 +62,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
   isNewPanel,
 }) => {
   const {
+    data: { dataViews },
     unifiedSearch: {
       ui: { IndexPatternSelect },
     },
@@ -166,7 +167,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
               }}
             />
           </EuiFormRow>
-          <DataSourceContextProvider dataViewId={formInput.dataViewId}>
+          <DataSourceContextProvider dataViews={dataViews} dataViewId={formInput.dataViewId}>
             <EuiSpacer />
 
             <FormControls

@@ -58,6 +58,7 @@ export async function resolveEmbeddableLogRateAnalysisUserInput(
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
           <LogRateAnalysisEmbeddableInitializer
+            dataViews={pluginStart.data.dataViews}
             IndexPatternSelect={pluginStart.unifiedSearch.ui.IndexPatternSelect}
             initialInput={initialState}
             onCreate={update}

@@ -143,7 +143,10 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
         <AiopsAppContext.Provider value={aiopsAppContextValue}>
           <DatePickerContextProvider {...datePickerDeps}>
             <ReloadContextProvider reload$={resultObservable$}>
-              <DataSourceContextProvider dataViewId={dataViewId}>
+              <DataSourceContextProvider
+                dataViews={pluginStart.data.dataViews}
+                dataViewId={dataViewId}
+              >
                 <FilterQueryContextProvider timeRange={timeRange}>
                   <PatternAnalysisEmbeddableWrapper
                     dataViewId={dataViewId}

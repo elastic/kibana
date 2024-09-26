@@ -28,6 +28,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { LogRateAnalysisSettings } from '../../components/log_rate_analysis/log_rate_analysis_for_embeddable/embeddable_menu';
@@ -35,6 +36,7 @@ import { LogRateAnalysisSettings } from '../../components/log_rate_analysis/log_
 import type { LogRateAnalysisEmbeddableRuntimeState } from './types';
 
 export interface LogRateAnalysisEmbeddableInitializerProps {
+  dataViews: DataViewsPublicPluginStart;
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   initialInput?: Partial<LogRateAnalysisEmbeddableRuntimeState>;
   onCreate: (props: LogRateAnalysisEmbeddableRuntimeState) => void;
@@ -45,7 +47,15 @@ export interface LogRateAnalysisEmbeddableInitializerProps {
 
 export const LogRateAnalysisEmbeddableInitializer: FC<
   LogRateAnalysisEmbeddableInitializerProps
-> = ({ IndexPatternSelect, initialInput, onCreate, onCancel, onPreview, isNewPanel }) => {
+> = ({
+  dataViews,
+  IndexPatternSelect,
+  initialInput,
+  onCreate,
+  onCancel,
+  onPreview,
+  isNewPanel,
+}) => {
   const [formInput, setFormInput] = useState<LogRateAnalysisEmbeddableRuntimeState>(
     pick(initialInput ?? {}, ['dataViewId']) as LogRateAnalysisEmbeddableRuntimeState
   );
@@ -128,7 +138,7 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
               }}
             />
           </EuiFormRow>
-          <DataSourceContextProvider dataViewId={formInput.dataViewId}>
+          <DataSourceContextProvider dataViews={dataViews} dataViewId={formInput.dataViewId}>
             <EuiSpacer />
 
             <FormControls
