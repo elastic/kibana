@@ -30,6 +30,7 @@ import {
   PartialSuggestionWithText,
   TIME_PICKER_SUGGESTION,
   setup,
+  attachTriggerCommand,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
@@ -287,7 +288,10 @@ describe('autocomplete', () => {
       'from a | grok key/',
       getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
     );
-    testSuggestions('from a | grok keywordField/', []);
+    testSuggestions(
+      'from a | grok keywordField/',
+      ['keywordField ', 'textField '].map(attachTriggerCommand)
+    );
   });
 
   describe('dissect', () => {
@@ -327,7 +331,10 @@ describe('autocomplete', () => {
       'from a | dissect key/',
       getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
     );
-    testSuggestions('from a | dissect keywordField/', []);
+    testSuggestions(
+      'from a | dissect keywordField/',
+      ['keywordField ', 'textField '].map(attachTriggerCommand)
+    );
   });
 
   describe('limit', () => {
@@ -698,16 +705,6 @@ describe('autocomplete', () => {
     /**
      * NOTE: Monaco uses an Invoke trigger kind when the show suggestions action is triggered (e.g. accepting the "FROM" suggestion)
      */
-
-    const attachTriggerCommand = (
-      s: string | PartialSuggestionWithText
-    ): PartialSuggestionWithText =>
-      typeof s === 'string'
-        ? {
-            text: s,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          }
-        : { ...s, command: TRIGGER_SUGGESTION_COMMAND };
 
     const attachAsSnippet = (s: PartialSuggestionWithText): PartialSuggestionWithText => ({
       ...s,
