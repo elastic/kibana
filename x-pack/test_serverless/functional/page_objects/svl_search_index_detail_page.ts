@@ -103,8 +103,10 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail('loadingErrorBackToIndicesButton');
       await testSubjects.existOrFail('reloadButton');
     },
-    async expectIndexNotFoundErrorExists(){
-      const pageLoadErrorElement = await (await testSubjects.find('pageLoadError')).findByClassName('euiTitle')
+    async expectIndexNotFoundErrorExists() {
+      const pageLoadErrorElement = await (
+        await testSubjects.find('pageLoadError')
+      ).findByClassName('euiTitle');
       expect(await pageLoadErrorElement.getVisibleText()).to.contain('Not Found');
     },
     async clickPageReload() {
