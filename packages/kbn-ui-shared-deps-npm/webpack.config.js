@@ -101,8 +101,6 @@ module.exports = (_, argv) => {
         'tslib',
         'uuid',
       ],
-      'kbn-ui-shared-deps-npm.v8.dark': [],
-      'kbn-ui-shared-deps-npm.v8.light': [],
     },
     context: __dirname,
     devtool: 'cheap-source-map',
