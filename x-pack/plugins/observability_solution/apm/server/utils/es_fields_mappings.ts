@@ -63,11 +63,9 @@ import {
   ERROR_ID,
   ERROR_LOG_MESSAGE,
   HOST_NAME,
-  Container,
-  Kubernetes,
+  CONTAINER_ID,
+  CONTAINER_IMAGE,
   CLOUD_PROVIDER,
-  CONTAINER,
-  KUBERNETES,
   AGENT_ACTIVATION_METHOD,
   HOST_ARCHITECTURE,
   HOST_HOSTNAME,
@@ -87,6 +85,12 @@ import {
   SERVICE_TARGET_TYPE,
   SPAN_REPRESENTATIVE_COUNT,
 } from '@kbn/apm-types';
+import {
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
+  KUBERNETES_REPLICASET_NAME,
+  KUBERNETES_CONTAINER_ID,
+} from '../../common/es_fields/infra_metrics';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 import { TransactionRaw } from '../../typings/es_schemas/raw/transaction_raw';
 import {
@@ -545,8 +549,27 @@ export const serviceMetadataIconsMapping = (
         name: normalizeValue<string>(fields[CLOUD_PROVIDER]),
       },
     },
-    container: normalizeValue<Container>(fields[CONTAINER]),
-    kubernetes: normalizeValue<Kubernetes>(fields[KUBERNETES]),
+    container: {
+      id: normalizeValue<string>(fields[CONTAINER_ID]),
+      image: normalizeValue<string>(fields[CONTAINER_IMAGE]),
+    },
+    kubernetes: {
+      pod: {
+        name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
+        id: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
+      },
+      namespace: normalizeValue<string>(fields[KUBERNETES_NAMESPACE]),
+      replicaset: {
+        name: normalizeValue<string>(fields[KUBERNETES_REPLICASET_NAME]),
+      },
+      deployment: {
+        name: normalizeValue<string>(fields[KUBERNETES_DEPLOYMENT_NAME]),
+      },
+      container: {
+        id: normalizeValue<string>(fields[KUBERNETES_CONTAINER_ID]),
+        name: normalizeValue<string>(fields[KUBERNETES_CONTAINER_NAME]),
+      },
+    },
   };
 };
 
