@@ -155,7 +155,10 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
         <ReloadContextProvider reload$={resultObservable$}>
           <AiopsAppContext.Provider value={aiopsAppContextValue}>
             <UrlStateProvider>
-              <DataSourceContextProvider dataViewId={dataViewId}>
+              <DataSourceContextProvider
+                dataViews={pluginStart.data.dataViews}
+                dataViewId={dataViewId}
+              >
                 <LogRateAnalysisReduxProvider>
                   <DatePickerContextProvider {...datePickerDeps}>
                     <LogRateAnalysisDocumentCountChartData
