@@ -263,6 +263,64 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           filterOperation: '-',
         });
       });
+
+      it('should track field usage on surrounding documents page', async () => {
+        await dataViews.switchToAndValidate('my-example-logs');
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        await dataGrid.clickRowToggle({ rowIndex: 1 });
+        await discover.isShowingDocViewer();
+
+        const [, surroundingActionEl] = await dataGrid.getRowActions();
+        await surroundingActionEl.click();
+        await header.waitUntilLoadingHasFinished();
+        await ebtUIHelper.setOptIn(true);
+
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+        await discover.isShowingDocViewer();
+
+        // event 1
+        await dataGrid.clickFieldActionInFlyout('service.name', 'toggleColumnButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        // event 2
+        await dataGrid.clickFieldActionInFlyout('log.level', 'toggleColumnButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        // event 3
+        await dataGrid.clickFieldActionInFlyout('log.level', 'addFilterOutValueButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const [event1, event2, event3] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_field_usage'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event1.properties).to.eql({
+          eventName: 'dataTableSelection',
+          fieldName: 'service.name',
+        });
+
+        expect(event2.properties).to.eql({
+          eventName: 'dataTableRemoval',
+          fieldName: 'log.level',
+        });
+
+        expect(event3.properties).to.eql({
+          eventName: 'filterAddition',
+          fieldName: 'log.level',
+          filterOperation: '-',
+        });
+
+        expect(event3.context.discoverProfiles).to.eql([
+          'example-root-profile',
+          'example-data-source-profile',
+        ]);
+      });
     });
   });
 }
