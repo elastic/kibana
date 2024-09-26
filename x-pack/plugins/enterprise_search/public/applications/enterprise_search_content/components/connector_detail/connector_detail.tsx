@@ -7,9 +7,10 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import type { EuiTabProps } from '@elastic/eui';
 
 import { useActions, useValues } from 'kea';
+
+import type { EuiTabProps } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
