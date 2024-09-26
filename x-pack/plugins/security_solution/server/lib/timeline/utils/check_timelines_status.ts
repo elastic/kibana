@@ -7,7 +7,7 @@
 
 import path, { join, resolve } from 'path';
 import type {
-  TimelineSavedObject,
+  TimelineResponse,
   ImportTimelines,
   InstallPrepackedTimelinesRequestBody,
 } from '../../../../common/api/timeline';
@@ -20,7 +20,7 @@ import { loadData, getReadables } from './common';
 
 export const getTimelinesToUpdate = (
   timelinesFromFileSystem: ImportTimelines[],
-  installedTimelines: TimelineSavedObject[]
+  installedTimelines: TimelineResponse[]
 ): ImportTimelines[] => {
   return timelinesFromFileSystem.filter((timeline) =>
     installedTimelines.some((installedTimeline) => {
@@ -35,7 +35,7 @@ export const getTimelinesToUpdate = (
 
 export const getTimelinesToInstall = (
   timelinesFromFileSystem: ImportTimelines[],
-  installedTimelines: TimelineSavedObject[]
+  installedTimelines: TimelineResponse[]
 ): ImportTimelines[] => {
   return timelinesFromFileSystem.filter(
     (timeline) =>
@@ -53,7 +53,7 @@ export const checkTimelinesStatus = async (
   let readStream;
   let timeline: {
     totalCount: number;
-    timeline: TimelineSavedObject[];
+    timeline: TimelineResponse[];
   };
   const dir = resolve(
     join(

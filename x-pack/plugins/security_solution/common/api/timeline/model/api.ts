@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import * as runtimeTypes from 'io-ts';
-
-import { stringEnum, unionWithNullType } from '../../../utility_types';
-
 import type { Maybe } from '../../../search_strategy';
-import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
 import type { DataProviderType } from './components.gen';
 import {
   BareNote,
@@ -28,6 +23,7 @@ import {
   RowRendererIdEnum,
   SavedTimeline,
   SavedTimelineWithSavedObjectId,
+  Sort,
   SortDirection,
   SortFieldTimeline,
   SortFieldTimelineEnum,
@@ -58,6 +54,7 @@ export {
   RowRendererIdEnum,
   SavedTimeline,
   SavedTimelineWithSavedObjectId,
+  Sort,
   SortDirection,
   SortFieldTimeline,
   SortFieldTimelineEnum,
@@ -74,257 +71,14 @@ export {
 
 export type BarePinnedEventWithoutExternalRefs = Omit<BarePinnedEvent, 'timelineId'>;
 
-export const BareNoteSchema = runtimeTypes.intersection([
-  runtimeTypes.type({
-    timelineId: runtimeTypes.string,
-  }),
-  runtimeTypes.partial({
-    eventId: unionWithNullType(runtimeTypes.string),
-    note: unionWithNullType(runtimeTypes.string),
-    created: unionWithNullType(runtimeTypes.number),
-    createdBy: unionWithNullType(runtimeTypes.string),
-    updated: unionWithNullType(runtimeTypes.number),
-    updatedBy: unionWithNullType(runtimeTypes.string),
-  }),
-]);
-
 /**
  * This type represents a note type stored in a saved object that does not include any fields that reference
  * other saved objects.
  */
 export type BareNoteWithoutExternalRefs = Omit<BareNote, 'timelineId'>;
 
-export const NoteRuntimeType = runtimeTypes.intersection([
-  BareNoteSchema,
-  runtimeTypes.type({
-    noteId: runtimeTypes.string,
-    version: runtimeTypes.string,
-  }),
-]);
-
-/*
- *  ColumnHeader Types
- */
-const SavedColumnHeaderRuntimeType = runtimeTypes.partial({
-  aggregatable: unionWithNullType(runtimeTypes.boolean),
-  category: unionWithNullType(runtimeTypes.string),
-  columnHeaderType: unionWithNullType(runtimeTypes.string),
-  description: unionWithNullType(runtimeTypes.string),
-  example: unionWithNullType(runtimeTypes.string),
-  indexes: unionWithNullType(runtimeTypes.array(runtimeTypes.string)),
-  id: unionWithNullType(runtimeTypes.string),
-  name: unionWithNullType(runtimeTypes.string),
-  placeholder: unionWithNullType(runtimeTypes.string),
-  searchable: unionWithNullType(runtimeTypes.boolean),
-  type: unionWithNullType(runtimeTypes.string),
-});
-
-/*
- *  DataProvider Types
- */
-const SavedDataProviderQueryMatchBasicRuntimeType = runtimeTypes.partial({
-  field: unionWithNullType(runtimeTypes.string),
-  displayField: unionWithNullType(runtimeTypes.string),
-  value: runtimeTypes.union([
-    runtimeTypes.null,
-    runtimeTypes.string,
-    runtimeTypes.array(runtimeTypes.string),
-  ]),
-  displayValue: unionWithNullType(runtimeTypes.string),
-  operator: unionWithNullType(runtimeTypes.string),
-});
-
-const SavedDataProviderQueryMatchRuntimeType = runtimeTypes.partial({
-  id: unionWithNullType(runtimeTypes.string),
-  name: unionWithNullType(runtimeTypes.string),
-  enabled: unionWithNullType(runtimeTypes.boolean),
-  excluded: unionWithNullType(runtimeTypes.boolean),
-  kqlQuery: unionWithNullType(runtimeTypes.string),
-  queryMatch: unionWithNullType(SavedDataProviderQueryMatchBasicRuntimeType),
-});
-
-export const DataProviderTypeLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(DataProviderTypeEnum.default),
-  runtimeTypes.literal(DataProviderTypeEnum.template),
-]);
-
-const SavedDataProviderRuntimeType = runtimeTypes.partial({
-  id: unionWithNullType(runtimeTypes.string),
-  name: unionWithNullType(runtimeTypes.string),
-  enabled: unionWithNullType(runtimeTypes.boolean),
-  excluded: unionWithNullType(runtimeTypes.boolean),
-  kqlQuery: unionWithNullType(runtimeTypes.string),
-  queryMatch: unionWithNullType(SavedDataProviderQueryMatchBasicRuntimeType),
-  and: unionWithNullType(runtimeTypes.array(SavedDataProviderQueryMatchRuntimeType)),
-  type: unionWithNullType(DataProviderTypeLiteralRt),
-});
-
-/*
- *  Filters Types
- */
-const SavedFilterMetaRuntimeType = runtimeTypes.partial({
-  alias: unionWithNullType(runtimeTypes.string),
-  controlledBy: unionWithNullType(runtimeTypes.string),
-  disabled: unionWithNullType(runtimeTypes.boolean),
-  field: unionWithNullType(runtimeTypes.string),
-  formattedValue: unionWithNullType(runtimeTypes.string),
-  index: unionWithNullType(runtimeTypes.string),
-  key: unionWithNullType(runtimeTypes.string),
-  negate: unionWithNullType(runtimeTypes.boolean),
-  params: unionWithNullType(runtimeTypes.string),
-  type: unionWithNullType(runtimeTypes.string),
-  value: unionWithNullType(runtimeTypes.string),
-});
-
-const SavedFilterRuntimeType = runtimeTypes.partial({
-  exists: unionWithNullType(runtimeTypes.string),
-  meta: unionWithNullType(SavedFilterMetaRuntimeType),
-  match_all: unionWithNullType(runtimeTypes.string),
-  missing: unionWithNullType(runtimeTypes.string),
-  query: unionWithNullType(runtimeTypes.string),
-  range: unionWithNullType(runtimeTypes.string),
-  script: unionWithNullType(runtimeTypes.string),
-});
-
-/*
- *  eqlOptionsQuery -> filterQuery Types
- */
-const EqlOptionsRuntimeType = runtimeTypes.partial({
-  eventCategoryField: unionWithNullType(runtimeTypes.string),
-  query: unionWithNullType(runtimeTypes.string),
-  tiebreakerField: unionWithNullType(runtimeTypes.string),
-  timestampField: unionWithNullType(runtimeTypes.string),
-  size: unionWithNullType(runtimeTypes.union([runtimeTypes.string, runtimeTypes.number])),
-});
-
-/*
- *  kqlQuery -> filterQuery Types
- */
-const SavedKueryFilterQueryRuntimeType = runtimeTypes.partial({
-  kind: unionWithNullType(runtimeTypes.string),
-  expression: unionWithNullType(runtimeTypes.string),
-});
-
-const SavedSerializedFilterQueryQueryRuntimeType = runtimeTypes.partial({
-  kuery: unionWithNullType(SavedKueryFilterQueryRuntimeType),
-  serializedQuery: unionWithNullType(runtimeTypes.string),
-});
-
-const SavedFilterQueryQueryRuntimeType = runtimeTypes.partial({
-  filterQuery: unionWithNullType(SavedSerializedFilterQueryQueryRuntimeType),
-});
-
-/*
- *  DatePicker Range Types
- */
-const SavedDateRangePickerRuntimeType = runtimeTypes.partial({
-  /* Before the change of all timestamp to ISO string the values of start and from
-   * attributes where a number. Specifically UNIX timestamps.
-   * To support old timeline's saved object we need to add the number io-ts type
-   */
-  start: unionWithNullType(runtimeTypes.union([runtimeTypes.string, runtimeTypes.number])),
-  end: unionWithNullType(runtimeTypes.union([runtimeTypes.string, runtimeTypes.number])),
-});
-
-/*
- *  Favorite Types
- */
-const SavedFavoriteRuntimeType = runtimeTypes.partial({
-  keySearch: unionWithNullType(runtimeTypes.string),
-  favoriteDate: unionWithNullType(runtimeTypes.number),
-  fullName: unionWithNullType(runtimeTypes.string),
-  userName: unionWithNullType(runtimeTypes.string),
-});
-
-/*
- *  Sort Types
- */
-
-const SavedSortObject = runtimeTypes.partial({
-  columnId: unionWithNullType(runtimeTypes.string),
-  columnType: unionWithNullType(runtimeTypes.string),
-  sortDirection: unionWithNullType(runtimeTypes.string),
-});
-const SavedSortRuntimeType = runtimeTypes.union([
-  runtimeTypes.array(SavedSortObject),
-  SavedSortObject,
-]);
-
-export type Sort = runtimeTypes.TypeOf<typeof SavedSortRuntimeType>;
-
-/*
- *  Timeline Statuses
- */
-
-export const TimelineStatusLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TimelineStatusEnum.active),
-  runtimeTypes.literal(TimelineStatusEnum.draft),
-  runtimeTypes.literal(TimelineStatusEnum.immutable),
-]);
-
 export const RowRendererCount = Object.keys(RowRendererIdEnum).length;
 export const RowRendererValues = Object.values(RowRendererId.Values);
-
-const RowRendererIdRuntimeType = stringEnum(RowRendererIdEnum, 'RowRendererId');
-
-/**
- * Timeline types
- */
-
-export const TimelineTypeLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TimelineTypeEnum.template),
-  runtimeTypes.literal(TimelineTypeEnum.default),
-]);
-
-/**
- * This is the response type
- */
-export const SavedTimelineRuntimeType = runtimeTypes.partial({
-  columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
-  dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
-  dataViewId: unionWithNullType(runtimeTypes.string),
-  description: unionWithNullType(runtimeTypes.string),
-  eqlOptions: unionWithNullType(EqlOptionsRuntimeType),
-  eventType: unionWithNullType(runtimeTypes.string),
-  excludedRowRendererIds: unionWithNullType(runtimeTypes.array(RowRendererIdRuntimeType)),
-  favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
-  filters: unionWithNullType(runtimeTypes.array(SavedFilterRuntimeType)),
-  indexNames: unionWithNullType(runtimeTypes.array(runtimeTypes.string)),
-  kqlMode: unionWithNullType(runtimeTypes.string),
-  kqlQuery: unionWithNullType(SavedFilterQueryQueryRuntimeType),
-  title: unionWithNullType(runtimeTypes.string),
-  templateTimelineId: unionWithNullType(runtimeTypes.string),
-  templateTimelineVersion: unionWithNullType(runtimeTypes.number),
-  timelineType: unionWithNullType(TimelineTypeLiteralRt),
-  dateRange: unionWithNullType(SavedDateRangePickerRuntimeType),
-  savedQueryId: unionWithNullType(runtimeTypes.string),
-  sort: unionWithNullType(SavedSortRuntimeType),
-  status: unionWithNullType(TimelineStatusLiteralRt),
-  created: unionWithNullType(runtimeTypes.number),
-  createdBy: unionWithNullType(runtimeTypes.string),
-  updated: unionWithNullType(runtimeTypes.number),
-  updatedBy: unionWithNullType(runtimeTypes.string),
-  savedSearchId: unionWithNullType(runtimeTypes.string),
-});
-
-export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
-  SavedTimelineRuntimeType,
-  runtimeTypes.type({
-    savedObjectId: runtimeTypes.string,
-    version: runtimeTypes.string,
-  }),
-  runtimeTypes.partial({
-    eventIdToNoteIds: runtimeTypes.array(NoteRuntimeType),
-    noteIds: runtimeTypes.array(runtimeTypes.string),
-    notes: runtimeTypes.array(NoteRuntimeType),
-    pinnedEventIds: runtimeTypes.array(runtimeTypes.string),
-    pinnedEventsSaveObject: runtimeTypes.array(PinnedEventRuntimeType),
-  }),
-]);
-
-export type TimelineSavedObject = runtimeTypes.TypeOf<
-  typeof TimelineSavedToReturnObjectRuntimeType
->;
 
 /**
  * Import/export timelines

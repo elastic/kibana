@@ -20,7 +20,7 @@ import {
   type GetTimelineResponse,
 } from '../../../../../../common/api/timeline';
 import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_object/timelines';
-import type { TimelineSavedObject, ResolvedTimeline } from '../../../../../../common/api/timeline';
+import type { ResolvedTimeline, TimelineResponse } from '../../../../../../common/api/timeline';
 
 export const getTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -44,7 +44,7 @@ export const getTimelineRoute = (router: SecuritySolutionPluginRouter) => {
           const query = request.query ?? {};
           const { template_timeline_id: templateTimelineId, id } = query;
 
-          let res: TimelineSavedObject | ResolvedTimeline | null = null;
+          let res: TimelineResponse | ResolvedTimeline | null = null;
 
           if (templateTimelineId != null && id == null) {
             res = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);
