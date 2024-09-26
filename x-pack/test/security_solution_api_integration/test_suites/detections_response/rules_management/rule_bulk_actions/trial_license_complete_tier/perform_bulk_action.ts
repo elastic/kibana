@@ -255,22 +255,22 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should disable rules', async () => {
+    it('should delete rules', async () => {
       const ruleId = 'ruleId';
-      await createRule(supertest, log, getSimpleRule(ruleId, true));
+      const testRule = getSimpleRule(ruleId);
+      await createRule(supertest, log, testRule);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionTypeEnum.disable })
+        .send({ query: '', action: BulkActionTypeEnum.delete })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
-      // Check that the updated rule is returned with the response
-      expect(body.attributes.results.updated[0].enabled).toEqual(false);
+      // Check that the deleted rule is returned with the response
+      expect(body.attributes.results.deleted[0].name).toEqual(testRule.name);
 
       // Check that the updates have been persisted
-      const { body: ruleBody } = await fetchRule(ruleId).expect(200);
-      expect(ruleBody.enabled).toEqual(false);
+      await fetchRule(ruleId).expect(404);
     });
 
     it('should duplicate rules', async () => {
