@@ -6,277 +6,35 @@
  */
 
 import expect from '@kbn/expect';
-import { partition } from 'lodash';
 import moment from 'moment';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-const TEST_DOC_COUNT = 100;
-const TIME_PICKER_FORMAT = 'MMM D, YYYY [@] HH:mm:ss.SSS';
-
-type TestDoc = Record<string, string | string[] | number | null | Record<string, unknown>>;
-
-const testDocTemplate: TestDoc = {
-  agent: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
-  bytes: 6219,
-  clientip: '223.87.60.27',
-  extension: 'deb',
-  geo: {
-    srcdest: 'US:US',
-    src: 'US',
-    dest: 'US',
-    coordinates: { lat: 39.41042861, lon: -88.8454325 },
-  },
-  host: {
-    name: 'artifacts.elastic.co',
-  },
-  index: 'kibana_sample_data_logs',
-  ip: '223.87.60.27',
-  machine: { ram: 8589934592, os: 'win 8' },
-  memory: null,
-  message:
-    '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /elasticsearch/elasticsearch-6.3.2.deb_1 HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-  phpmemory: null,
-  referer: 'http://twitter.com/success/wendy-lawrence',
-  request: '/elasticsearch/elasticsearch-6.3.2.deb',
-  response: 200,
-  tags: ['success', 'info'],
-  '@timestamp': '2018-07-22T00:39:02.912Z',
-  url: 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.2.deb_1',
-  utc_time: '2018-07-22T00:39:02.912Z',
-  event: { dataset: 'sample_web_logs' },
-  bytes_gauge: 0,
-  bytes_counter: 0,
-};
-
-function getDataMapping(): Record<string, MappingProperty> {
-  const dataStreamMapping: Record<string, MappingProperty> = {
-    '@timestamp': {
-      type: 'date',
-    },
-    agent: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    bytes: {
-      type: 'long',
-    },
-    bytes_counter: {
-      type: 'long',
-    },
-    bytes_gauge: {
-      type: 'long',
-    },
-    clientip: {
-      type: 'ip',
-    },
-    event: {
-      properties: {
-        dataset: {
-          type: 'keyword',
-        },
-      },
-    },
-    extension: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    geo: {
-      properties: {
-        coordinates: {
-          type: 'geo_point',
-        },
-        dest: {
-          type: 'keyword',
-        },
-        src: {
-          type: 'keyword',
-        },
-        srcdest: {
-          type: 'keyword',
-        },
-      },
-    },
-    host: {
-      properties: {
-        name: {
-          type: 'keyword',
-        },
-      },
-    },
-    index: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    ip: {
-      type: 'ip',
-    },
-    machine: {
-      properties: {
-        os: {
-          fields: {
-            keyword: {
-              ignore_above: 256,
-              type: 'keyword',
-            },
-          },
-          type: 'text',
-        },
-        ram: {
-          type: 'long',
-        },
-      },
-    },
-    memory: {
-      type: 'double',
-    },
-    message: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    phpmemory: {
-      type: 'long',
-    },
-    referer: {
-      type: 'keyword',
-    },
-    request: {
-      type: 'keyword',
-    },
-    response: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    tags: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    timestamp: {
-      path: '@timestamp',
-      type: 'alias',
-    },
-    url: {
-      type: 'keyword',
-    },
-    utc_time: {
-      type: 'date',
-    },
-  };
-  return dataStreamMapping;
-}
-
-function sumFirstNValues(n: number, bars: Array<{ y: number }> | undefined): number {
-  const indexes = Array(n)
-    .fill(1)
-    .map((_, i) => i);
-  let countSum = 0;
-  for (const index of indexes) {
-    if (bars?.[index]) {
-      countSum += bars[index].y;
-    }
-  }
-  return countSum;
-}
+import {
+  type ScenarioIndexes,
+  getDataMapping,
+  getDocsGenerator,
+  setupScenarioRunner,
+  TIME_PICKER_FORMAT,
+} from './tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens } = getPageObjects(['common', 'lens', 'dashboard']);
+  const { common, lens, discover, header } = getPageObjects([
+    'common',
+    'lens',
+    'discover',
+    'header',
+  ]);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const log = getService('log');
   const dataStreams = getService('dataStreams');
-  const elasticChart = getService('elasticChart');
   const indexPatterns = getService('indexPatterns');
   const esArchiver = getService('esArchiver');
-  const comboBox = getService('comboBox');
+  const monacoEditor = getService('monacoEditor');
+  const retry = getService('retry');
 
-  const createDocs = async (
-    esIndex: string,
-    { isStream }: { isStream: boolean },
-    startTime: string
-  ) => {
-    log.info(
-      `Adding ${TEST_DOC_COUNT} to ${esIndex} with starting time from ${moment
-        .utc(startTime, TIME_PICKER_FORMAT)
-        .format(TIME_PICKER_FORMAT)} to ${moment
-        .utc(startTime, TIME_PICKER_FORMAT)
-        .add(2 * TEST_DOC_COUNT, 'seconds')
-        .format(TIME_PICKER_FORMAT)}`
-    );
-    const docs = Array<TestDoc>(TEST_DOC_COUNT)
-      .fill(testDocTemplate)
-      .map((templateDoc, i) => {
-        const timestamp = moment
-          .utc(startTime, TIME_PICKER_FORMAT)
-          .add(TEST_DOC_COUNT + i, 'seconds')
-          .format();
-        const doc: TestDoc = {
-          ...templateDoc,
-          '@timestamp': timestamp,
-          utc_time: timestamp,
-          bytes_gauge: Math.floor(Math.random() * 10000 * i),
-          bytes_counter: 5000,
-        };
-
-        return doc;
-      });
-
-    const result = await es.bulk(
-      {
-        index: esIndex,
-        body: docs.map((d) => `{"${isStream ? 'create' : 'index'}": {}}\n${JSON.stringify(d)}\n`),
-      },
-      { meta: true }
-    );
-
-    const res = result.body;
-
-    if (res.errors) {
-      const resultsWithErrors = res.items
-        .filter(({ index }) => index?.error)
-        .map(({ index }) => index?.error);
-      for (const error of resultsWithErrors) {
-        log.error(`Error: ${JSON.stringify(error)}`);
-      }
-      const [indexExists, dataStreamExists] = await Promise.all([
-        es.indices.exists({ index: esIndex }),
-        es.indices.getDataStream({ name: esIndex }),
-      ]);
-      log.debug(`Index exists: ${indexExists} - Data stream exists: ${dataStreamExists}`);
-    }
-    log.info(`Indexed ${res.items.length} test data docs.`);
-  };
+  const createDocs = getDocsGenerator(log, es);
 
   describe('lens logsdb', function () {
     const logsdbIndex = 'kibana_sample_data_logslogsdb';
@@ -310,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await es.indices.delete({ index: [logsdbIndex] });
     });
 
-    describe('time series special field types support', () => {
+    describe('smoke testing functions support', () => {
       before(async () => {
         await common.navigateToApp('lens');
         await lens.switchDataPanelIndexPattern(logsdbDataView);
@@ -333,503 +91,474 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'standard_deviation',
         'sum',
         'unique_count',
+        'min',
+        'max',
+        'counter_rate',
+        'last_value',
       ];
-      const counterFieldsSupportedOps = ['min', 'max', 'counter_rate', 'last_value'];
-      const gaugeFieldsSupportedOps = allOperations;
 
-      const operationsByFieldSupport = allOperations.map((name) => ({
-        name,
-        // Quick way to make it match the UI name
-        label: `${name[0].toUpperCase()}${name.slice(1).replace('_', ' ')}`,
-        counter: counterFieldsSupportedOps.includes(name),
-        gauge: gaugeFieldsSupportedOps.includes(name),
-      }));
-
-      for (const fieldType of ['counter', 'gauge'] as const) {
-        const [supportedOperations, unsupportedOperatons] = partition(
-          operationsByFieldSupport,
-          (op) => op[fieldType]
-        );
-        if (supportedOperations.length) {
-          it(`should allow operations when supported by ${fieldType} field type`, async () => {
-            // Counter rate requires a date histogram dimension configured to work
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-
-            // minimum supports all logsdb field types
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'min',
-              field: `bytes_${fieldType}`,
-              keepOpen: true,
-            });
-
-            // now check if the provided function has no incompatibility tooltip
-            for (const supportedOp of supportedOperations) {
-              expect(
-                testSubjects.exists(`lns-indexPatternDimension-${supportedOp.name} incompatible`, {
-                  timeout: 500,
-                })
-              ).to.eql(supportedOp[fieldType]);
-            }
-
-            for (const supportedOp of supportedOperations) {
-              // try to change to the provided function and check all is ok
-              await lens.selectOperation(supportedOp.name);
-
-              expect(
-                await find.existsByCssSelector(
-                  '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText'
-                )
-              ).to.be(false);
-
-              // return in a clean state before checking the next operation
-              await lens.selectOperation('min');
-            }
-            await lens.closeDimensionEditor();
-          });
-        }
-        if (unsupportedOperatons.length) {
-          it(`should notify the incompatibility of unsupported operations for the ${fieldType} field type`, async () => {
-            // Counter rate requires a date histogram dimension configured to work
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-
-            // minimum supports all logsdb field types
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'min',
-              field: `bytes_${fieldType}`,
-              keepOpen: true,
-            });
-
-            // now check if the provided function has the incompatibility tooltip
-            for (const unsupportedOp of unsupportedOperatons) {
-              expect(
-                testSubjects.exists(
-                  `lns-indexPatternDimension-${unsupportedOp.name} incompatible`,
-                  {
-                    timeout: 500,
-                  }
-                )
-              ).to.eql(!unsupportedOp[fieldType]);
-            }
-
-            for (const unsupportedOp of unsupportedOperatons) {
-              // try to change to the provided function and check if it's in an incompatibility state
-              await lens.selectOperation(unsupportedOp.name, true);
-
-              const fieldSelectErrorEl = await find.byCssSelector(
-                '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText'
-              );
-
-              expect(await fieldSelectErrorEl.getVisibleText()).to.be(
-                'This field does not work with the selected function.'
-              );
-
-              // return in a clean state before checking the next operation
-              await lens.selectOperation('min');
-            }
-            await lens.closeDimensionEditor();
-          });
-        }
-      }
-
-      describe('show time series dimension groups within breakdown', () => {
-        it('should show the time series dimension group on field picker when configuring a breakdown', async () => {
-          await lens.configureDimension({
-            dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-            operation: 'date_histogram',
-            field: '@timestamp',
-          });
-
-          await lens.configureDimension({
-            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-            operation: 'min',
-            field: 'bytes_counter',
-          });
-
-          await lens.configureDimension({
-            dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
-            operation: 'terms',
-            keepOpen: true,
-          });
-
-          const list = await comboBox.getOptionsList('indexPattern-dimension-field');
-          expect(list).to.contain('Time series dimensions');
-          await lens.closeDimensionEditor();
+      it(`should work with all operations`, async () => {
+        // start from a count() over a date histogram
+        await lens.configureDimension({
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
         });
 
-        it("should not show the time series dimension group on field picker if it's not a breakdown", async () => {
-          await lens.configureDimension({
-            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-            operation: 'min',
-            field: 'bytes_counter',
-          });
-
-          await lens.configureDimension({
-            dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-            operation: 'date_histogram',
-            keepOpen: true,
-          });
-          const list = await comboBox.getOptionsList('indexPattern-dimension-field');
-          expect(list).to.not.contain('Time series dimensions');
-          await lens.closeDimensionEditor();
+        // minimum supports all logsdb field types
+        await lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'count',
+          field: 'bytes',
+          keepOpen: true,
         });
+
+        // now check that operations won't show the incompatibility tooltip
+        for (const operation of allOperations) {
+          expect(
+            testSubjects.exists(`lns-indexPatternDimension-${operation} incompatible`, {
+              timeout: 500,
+            })
+          ).to.eql(false);
+        }
+
+        for (const operation of allOperations) {
+          // try to change to the provided function and check all is ok
+          await lens.selectOperation(operation);
+
+          expect(
+            await find.existsByCssSelector(
+              '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText'
+            )
+          ).to.be(false);
+        }
+        await lens.closeDimensionEditor();
       });
-    });
 
-    describe('Scenarios with changing stream type', () => {
-      const now = moment().utc();
-      const fromMoment = now.clone().subtract(1, 'hour');
-      const toMoment = now.clone();
-      const fromTimeForScenarios = fromMoment.format(TIME_PICKER_FORMAT);
-      const toTimeForScenarios = toMoment.format(TIME_PICKER_FORMAT);
+      describe('Scenarios with changing stream type', () => {
+        const getScenarios = (
+          initialIndex: string
+        ): Array<{
+          name: string;
+          indexes: ScenarioIndexes[];
+        }> => [
+          {
+            name: 'LogsDB stream with no additional stream/index',
+            indexes: [{ index: initialIndex }],
+          },
+          {
+            name: 'LogsDB stream with no additional stream/index and no host.name field',
+            indexes: [{ index: `${initialIndex}_no_host`, removeLogsDBFields: true, create: true }],
+          },
+          {
+            name: 'LogsDB stream with an additional regular index',
+            indexes: [{ index: initialIndex }, { index: 'regular_index', create: true }],
+          },
+          {
+            name: 'LogsDB stream with an additional LogsDB stream',
+            indexes: [
+              { index: initialIndex },
+              { index: 'logsdb_index_2', create: true, logsdb: true },
+            ],
+          },
+          {
+            name: 'LogsDB stream with an additional TSDB stream',
+            indexes: [{ index: initialIndex }, { index: 'tsdb_index', create: true, tsdb: true }],
+          },
+          {
+            name: 'LogsDB stream with an additional TSDB stream',
+            indexes: [
+              { index: initialIndex },
+              { index: 'tsdb_index_downsampled', create: true, tsdb: true, downsample: true },
+            ],
+          },
+        ];
 
-      const getScenarios = (
-        initialIndex: string
-      ): Array<{
-        name: string;
-        indexes: Array<{
-          index: string;
-          create?: boolean;
-          logsdb?: boolean;
-        }>;
-      }> => [
-        {
-          name: 'Dataview with no additional stream/index',
-          indexes: [{ index: initialIndex }],
-        },
-        {
-          name: 'Dataview with an additional regular index',
-          indexes: [{ index: initialIndex }, { index: 'regular_index', create: true }],
-        },
-        {
-          name: 'Dataview with an additional LogsDB stream',
-          indexes: [
-            { index: initialIndex },
-            { index: 'logsdb_index_2', create: true, logsdb: true },
-          ],
-        },
-      ];
+        const { runTestsForEachScenario, toTimeForScenarios, fromTimeForScenarios } =
+          setupScenarioRunner(getService, getPageObjects, getScenarios);
 
-      function runTestsForEachScenario(
-        initialIndex: string,
-        testingFn: (
-          indexes: Array<{
-            index: string;
-            create?: boolean;
-            logsdb?: boolean;
-          }>
-        ) => void
-      ): void {
-        for (const { name, indexes } of getScenarios(initialIndex)) {
-          describe(name, () => {
-            let dataViewName: string;
+        describe('Data-stream upgraded to LogsDB scenarios', () => {
+          const streamIndex = 'data_stream';
+          // rollover does not allow to change name, it will just change backing index underneath
+          const streamConvertedToLogsDBIndex = streamIndex;
 
-            before(async () => {
-              for (const { index, create, logsdb } of indexes) {
-                if (create) {
-                  if (logsdb) {
-                    await dataStreams.createDataStream(index, getDataMapping(), 'logsdb');
-                  } else {
-                    log.info(`creating a index "${index}" with mapping...`);
-                    await es.indices.create({
-                      index,
-                      mappings: {
-                        properties: getDataMapping(),
-                      },
-                    });
-                  }
-                  // add data to the newly created index
-                  await createDocs(index, { isStream: Boolean(logsdb) }, fromTimeForScenarios);
-                }
-              }
-              dataViewName = indexes.map(({ index }) => index).join(',');
-              log.info(`creating a data view for "${dataViewName}"...`);
-              await indexPatterns.create(
-                {
-                  title: dataViewName,
-                  timeFieldName: '@timestamp',
-                },
-                { override: true }
+          before(async () => {
+            log.info(`Creating "${streamIndex}" data stream...`);
+            await dataStreams.createDataStream(streamIndex, getDataMapping(), undefined);
+
+            // add some data to the stream
+            await createDocs(streamIndex, { isStream: true }, fromTimeForScenarios);
+
+            log.info(`Update settings for "${streamIndex}" dataView...`);
+            await kibanaServer.uiSettings.update({
+              'dateFormat:tz': 'UTC',
+              'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
+            });
+            log.info(`Upgrade "${streamIndex}" stream to LogsDB...`);
+
+            const logsdbMapping = getDataMapping();
+            await dataStreams.upgradeStream(streamIndex, logsdbMapping, 'logsdb');
+            log.info(
+              `Add more data to new "${streamConvertedToLogsDBIndex}" dataView (now with LogsDB backing index)...`
+            );
+            // add some more data when upgraded
+            await createDocs(streamConvertedToLogsDBIndex, { isStream: true }, toTimeForScenarios);
+          });
+
+          after(async () => {
+            await dataStreams.deleteDataStream(streamIndex);
+          });
+
+          runTestsForEachScenario(streamConvertedToLogsDBIndex, (indexes) => {
+            it(`should visualize a date histogram chart`, async () => {
+              await lens.configureDimension({
+                dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+                operation: 'date_histogram',
+                field: '@timestamp',
+              });
+
+              // check that a basic agg on a field works
+              await lens.configureDimension({
+                dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+                operation: 'min',
+                field: `bytes`,
+              });
+
+              await lens.waitForVisualization('xyVisChart');
+              const data = await lens.getCurrentChartDebugState('xyVisChart');
+              const bars = data?.bars![0].bars;
+
+              log.info('Check counter data before the upgrade');
+              // check there's some data before the upgrade
+              expect(bars?.[0].y).to.be.above(0);
+              log.info('Check counter data after the upgrade');
+              // check there's some data after the upgrade
+              expect(bars?.[bars.length - 1].y).to.be.above(0);
+            });
+
+            it(`should visualize a date histogram chart using a different date field`, async () => {
+              await lens.configureDimension({
+                dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+                operation: 'date_histogram',
+                field: 'utc_time',
+              });
+
+              // check the counter field works
+              await lens.configureDimension({
+                dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+                operation: 'min',
+                field: `bytes`,
+              });
+
+              await lens.waitForVisualization('xyVisChart');
+              const data = await lens.getCurrentChartDebugState('xyVisChart');
+              const bars = data?.bars![0].bars;
+
+              log.info('Check counter data before the upgrade');
+              // check there's some data before the upgrade
+              expect(bars?.[0].y).to.be.above(0);
+              log.info('Check counter data after the upgrade');
+              // check there's some data after the upgrade
+              expect(bars?.[bars.length - 1].y).to.be.above(0);
+            });
+
+            it('should visualize an annotation layer from a logsDB stream', async () => {
+              await lens.configureDimension({
+                dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+                operation: 'date_histogram',
+                field: 'utc_time',
+              });
+
+              // check the counter field works
+              await lens.configureDimension({
+                dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+                operation: 'min',
+                field: `bytes`,
+              });
+              await lens.createLayer('annotations');
+
+              expect(
+                (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length
+              ).to.eql(2);
+              expect(
+                await (
+                  await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
+                ).getVisibleText()
+              ).to.eql('Event');
+              await testSubjects.click('lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
+              await testSubjects.click('lnsXY_annotation_query');
+              await lens.configureQueryAnnotation({
+                queryString: 'host.name: *',
+                timeField: '@timestamp',
+                textDecoration: { type: 'name' },
+                extraFields: ['host.name', 'utc_time'],
+              });
+              await lens.closeDimensionEditor();
+
+              await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
+              await lens.removeLayer(1);
+            });
+
+            it('should visualize an annotation layer from a logsDB stream using another time field', async () => {
+              await lens.configureDimension({
+                dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+                operation: 'date_histogram',
+                field: 'utc_time',
+              });
+
+              // check the counter field works
+              await lens.configureDimension({
+                dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+                operation: 'min',
+                field: `bytes`,
+              });
+              await lens.createLayer('annotations');
+
+              expect(
+                (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length
+              ).to.eql(2);
+              expect(
+                await (
+                  await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
+                ).getVisibleText()
+              ).to.eql('Event');
+              await testSubjects.click('lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
+              await testSubjects.click('lnsXY_annotation_query');
+              await lens.configureQueryAnnotation({
+                queryString: 'host.name: *',
+                timeField: 'utc_time',
+                textDecoration: { type: 'name' },
+                extraFields: ['host.name', '@timestamp'],
+              });
+              await lens.closeDimensionEditor();
+
+              await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
+              await lens.removeLayer(1);
+            });
+
+            it('should visualize correctly ES|QL queries based on a LogsDB stream', async () => {
+              await common.navigateToApp('discover');
+              await discover.selectTextBaseLang();
+              await header.waitUntilLoadingHasFinished();
+              await monacoEditor.setCodeEditorValue(
+                `from ${indexes
+                  .map(({ index }) => index)
+                  .join(', ')} | stats averageB = avg(bytes) by extension`
               );
+              await testSubjects.click('querySubmitButton');
+              await header.waitUntilLoadingHasFinished();
+              await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+
+              await header.waitUntilLoadingHasFinished();
+
+              await retry.waitFor('lens flyout', async () => {
+                const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
+                return (
+                  dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'averageB'
+                );
+              });
+
+              // go back to Lens to not break the wrapping function
               await common.navigateToApp('lens');
-              await elasticChart.setNewChartUiDebugFlag(true);
-              // go to the
+            });
+          });
+        });
+
+        describe('LogsDB downgraded to regular data stream scenarios', () => {
+          const logsdbStream = 'logsdb_stream_dowgradable';
+          // rollover does not allow to change name, it will just change backing index underneath
+          const logsdbConvertedToStream = logsdbStream;
+
+          before(async () => {
+            log.info(`Creating "${logsdbStream}" data stream...`);
+            await dataStreams.createDataStream(logsdbStream, getDataMapping(), 'logsdb');
+
+            // add some data to the stream
+            await createDocs(logsdbStream, { isStream: true }, fromTimeForScenarios);
+
+            log.info(`Update settings for "${logsdbStream}" dataView...`);
+            await kibanaServer.uiSettings.update({
+              'dateFormat:tz': 'UTC',
+              'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
+            });
+            log.info(
+              `Dowgrade "${logsdbStream}" stream into regular stream "${logsdbConvertedToStream}"...`
+            );
+
+            await dataStreams.downgradeStream(logsdbStream, getDataMapping(), 'logsdb');
+            log.info(
+              `Add more data to new "${logsdbConvertedToStream}" dataView (no longer LogsDB)...`
+            );
+            // add some more data when upgraded
+            await createDocs(logsdbConvertedToStream, { isStream: true }, toTimeForScenarios);
+          });
+
+          after(async () => {
+            await dataStreams.deleteDataStream(logsdbConvertedToStream);
+          });
+
+          runTestsForEachScenario(logsdbConvertedToStream, (indexes) => {
+            it(`should visualize a date histogram chart`, async () => {
+              await lens.configureDimension({
+                dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+                operation: 'date_histogram',
+                field: '@timestamp',
+              });
+
+              // check that a basic agg on a field works
+              await lens.configureDimension({
+                dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+                operation: 'min',
+                field: `bytes`,
+              });
+
+              await lens.waitForVisualization('xyVisChart');
+              const data = await lens.getCurrentChartDebugState('xyVisChart');
+              const bars = data?.bars![0].bars;
+
+              log.info('Check counter data before the upgrade');
+              // check there's some data before the upgrade
+              expect(bars?.[0].y).to.be.above(0);
+              log.info('Check counter data after the upgrade');
+              // check there's some data after the upgrade
+              expect(bars?.[bars.length - 1].y).to.be.above(0);
+            });
+
+            it(`should visualize a date histogram chart using a different date field`, async () => {
+              await lens.configureDimension({
+                dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+                operation: 'date_histogram',
+                field: 'utc_time',
+              });
+
+              // check the counter field works
+              await lens.configureDimension({
+                dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+                operation: 'min',
+                field: `bytes`,
+              });
+
+              await lens.waitForVisualization('xyVisChart');
+              const data = await lens.getCurrentChartDebugState('xyVisChart');
+              const bars = data?.bars![0].bars;
+
+              log.info('Check counter data before the upgrade');
+              // check there's some data before the upgrade
+              expect(bars?.[0].y).to.be.above(0);
+              log.info('Check counter data after the upgrade');
+              // check there's some data after the upgrade
+              expect(bars?.[bars.length - 1].y).to.be.above(0);
+            });
+
+            it('should visualize an annotation layer from a logsDB stream', async () => {
+              await lens.configureDimension({
+                dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+                operation: 'date_histogram',
+                field: 'utc_time',
+              });
+
+              // check the counter field works
+              await lens.configureDimension({
+                dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+                operation: 'min',
+                field: `bytes`,
+              });
+              await lens.createLayer('annotations');
+
+              expect(
+                (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length
+              ).to.eql(2);
+              expect(
+                await (
+                  await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
+                ).getVisibleText()
+              ).to.eql('Event');
+              await testSubjects.click('lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
+              await testSubjects.click('lnsXY_annotation_query');
+              await lens.configureQueryAnnotation({
+                queryString: 'host.name: *',
+                timeField: '@timestamp',
+                textDecoration: { type: 'name' },
+                extraFields: ['host.name', 'utc_time'],
+              });
+              await lens.closeDimensionEditor();
+
+              await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
+              await lens.removeLayer(1);
+            });
+
+            it('should visualize an annotation layer from a logsDB stream using another time field', async () => {
+              await lens.configureDimension({
+                dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+                operation: 'date_histogram',
+                field: 'utc_time',
+              });
+
+              // check the counter field works
+              await lens.configureDimension({
+                dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+                operation: 'min',
+                field: `bytes`,
+              });
+              await lens.createLayer('annotations');
+
+              expect(
+                (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length
+              ).to.eql(2);
+              expect(
+                await (
+                  await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
+                ).getVisibleText()
+              ).to.eql('Event');
+              await testSubjects.click('lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
+              await testSubjects.click('lnsXY_annotation_query');
+              await lens.configureQueryAnnotation({
+                queryString: 'host.name: *',
+                timeField: 'utc_time',
+                textDecoration: { type: 'name' },
+                extraFields: ['host.name', '@timestamp'],
+              });
+              await lens.closeDimensionEditor();
+
+              await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
+              await lens.removeLayer(1);
+            });
+
+            it('should visualize correctly ES|QL queries based on a LogsDB stream', async () => {
+              await common.navigateToApp('discover');
+              await discover.selectTextBaseLang();
+
+              // Use the lens page object here also for discover: both use the same timePicker object
               await lens.goToTimeRange(
                 fromTimeForScenarios,
                 moment
                   .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
                   .add(2, 'hour')
-                  .format(TIME_PICKER_FORMAT) // consider also new documents
+                  .format(TIME_PICKER_FORMAT)
               );
+
+              await header.waitUntilLoadingHasFinished();
+              await monacoEditor.setCodeEditorValue(
+                `from ${indexes
+                  .map(({ index }) => index)
+                  .join(', ')} | stats averageB = avg(bytes) by extension`
+              );
+              await testSubjects.click('querySubmitButton');
+              await header.waitUntilLoadingHasFinished();
+              await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+
+              await header.waitUntilLoadingHasFinished();
+
+              await retry.waitFor('lens flyout', async () => {
+                const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
+                return (
+                  dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'averageB'
+                );
+              });
+
+              // go back to Lens to not break the wrapping function
+              await common.navigateToApp('lens');
             });
-
-            after(async () => {
-              for (const { index, create, logsdb } of indexes) {
-                if (create) {
-                  if (logsdb) {
-                    await dataStreams.deleteDataStream(index);
-                  } else {
-                    log.info(`deleting the index "${index}"...`);
-                    await es.indices.delete({
-                      index,
-                    });
-                  }
-                }
-              }
-            });
-
-            beforeEach(async () => {
-              await lens.switchDataPanelIndexPattern(dataViewName);
-              await lens.removeLayer();
-            });
-
-            testingFn(indexes);
-          });
-        }
-      }
-
-      describe('Data-stream upgraded to LogsDB scenarios', () => {
-        const streamIndex = 'data_stream';
-        // rollover does not allow to change name, it will just change backing index underneath
-        const streamConvertedToLogsDBIndex = streamIndex;
-
-        before(async () => {
-          log.info(`Creating "${streamIndex}" data stream...`);
-          await dataStreams.createDataStream(streamIndex, getDataMapping(), undefined);
-
-          // add some data to the stream
-          await createDocs(streamIndex, { isStream: true }, fromTimeForScenarios);
-
-          log.info(`Update settings for "${streamIndex}" dataView...`);
-          await kibanaServer.uiSettings.update({
-            'dateFormat:tz': 'UTC',
-            'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
-          });
-          log.info(`Upgrade "${streamIndex}" stream to LogsDB...`);
-
-          const logsdbMapping = getDataMapping();
-          await dataStreams.upgradeStream(streamIndex, logsdbMapping, 'logsdb');
-          log.info(
-            `Add more data to new "${streamConvertedToLogsDBIndex}" dataView (now with LogsDB backing index)...`
-          );
-          // add some more data when upgraded
-          await createDocs(streamConvertedToLogsDBIndex, { isStream: true }, toTimeForScenarios);
-        });
-
-        after(async () => {
-          await dataStreams.deleteDataStream(streamIndex);
-        });
-
-        runTestsForEachScenario(streamConvertedToLogsDBIndex, (indexes) => {
-          it('should detect the data stream has now been upgraded to LogsDB', async () => {
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'min',
-              field: `bytes_counter`,
-              keepOpen: true,
-            });
-
-            expect(
-              testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
-                timeout: 500,
-              })
-            ).to.eql(false);
-            await lens.closeDimensionEditor();
-          });
-
-          it(`should visualize a date histogram chart for counter field`, async () => {
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-
-            // check the counter field works
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'min',
-              field: `bytes_counter`,
-            });
-            // and also that the count of documents should be "indexes.length" times overall
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'count',
-            });
-
-            await lens.waitForVisualization('xyVisChart');
-            const data = await lens.getCurrentChartDebugState('xyVisChart');
-            const counterBars = data?.bars![0].bars;
-            const countBars = data?.bars![1].bars;
-
-            log.info('Check counter data before the upgrade');
-            // check there's some data before the upgrade
-            expect(counterBars?.[0].y).to.eql(5000);
-            log.info('Check counter data after the upgrade');
-            // check there's some data after the upgrade
-            expect(counterBars?.[counterBars.length - 1].y).to.eql(5000);
-
-            // due to the flaky nature of exact check here, we're going to relax it
-            // as long as there's data before and after it is ok
-            log.info('Check count before the upgrade');
-            const columnsToCheck = countBars ? countBars.length / 2 : 0;
-            // Before the upgrade the count is N times the indexes
-            expect(sumFirstNValues(columnsToCheck, countBars)).to.be.greaterThan(
-              indexes.length * TEST_DOC_COUNT - 1
-            );
-            log.info('Check count after the upgrade');
-            // later there are only documents for the upgraded stream
-            expect(
-              sumFirstNValues(columnsToCheck, [...(countBars ?? [])].reverse())
-            ).to.be.greaterThan(TEST_DOC_COUNT - 1);
-          });
-        });
-      });
-
-      describe('LogsDB downgraded to regular data stream scenarios', () => {
-        const logsdbStream = 'logsdb_stream_dowgradable';
-        // rollover does not allow to change name, it will just change backing index underneath
-        const logsdbConvertedToStream = logsdbStream;
-
-        before(async () => {
-          log.info(`Creating "${logsdbStream}" data stream...`);
-          await dataStreams.createDataStream(logsdbStream, getDataMapping(), 'logsdb');
-
-          // add some data to the stream
-          await createDocs(logsdbStream, { isStream: true }, fromTimeForScenarios);
-
-          log.info(`Update settings for "${logsdbStream}" dataView...`);
-          await kibanaServer.uiSettings.update({
-            'dateFormat:tz': 'UTC',
-            'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
-          });
-          log.info(
-            `Dowgrade "${logsdbStream}" stream into regular stream "${logsdbConvertedToStream}"...`
-          );
-
-          await dataStreams.downgradeStream(logsdbStream, getDataMapping(), 'logsdb');
-          log.info(
-            `Add more data to new "${logsdbConvertedToStream}" dataView (no longer LogsDB)...`
-          );
-          // add some more data when upgraded
-          await createDocs(logsdbConvertedToStream, { isStream: true }, toTimeForScenarios);
-        });
-
-        after(async () => {
-          await dataStreams.deleteDataStream(logsdbConvertedToStream);
-        });
-
-        runTestsForEachScenario(logsdbConvertedToStream, (indexes) => {
-          it('should keep LogsDB restrictions only if a logsDB stream is in the dataView mix', async () => {
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'min',
-              field: `bytes_counter`,
-              keepOpen: true,
-            });
-
-            expect(
-              testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
-                timeout: 500,
-              })
-            ).to.eql(indexes.some(({ logsdb }) => logsdb));
-            await lens.closeDimensionEditor();
-          });
-
-          it(`should visualize a date histogram chart for counter field`, async () => {
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-            // just check the data is shown
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'count',
-            });
-
-            await lens.waitForVisualization('xyVisChart');
-            const data = await lens.getCurrentChartDebugState('xyVisChart');
-            const bars = data?.bars![0].bars;
-            const columnsToCheck = bars ? bars.length / 2 : 0;
-            // due to the flaky nature of exact check here, we're going to relax it
-            // as long as there's data before and after it is ok
-            log.info('Check count before the downgrade');
-            // Before the upgrade the count is N times the indexes
-            expect(sumFirstNValues(columnsToCheck, bars)).to.be.greaterThan(
-              indexes.length * TEST_DOC_COUNT - 1
-            );
-            log.info('Check count after the downgrade');
-            // later there are only documents for the upgraded stream
-            expect(sumFirstNValues(columnsToCheck, [...(bars ?? [])].reverse())).to.be.greaterThan(
-              TEST_DOC_COUNT - 1
-            );
-          });
-
-          it('should visualize data when moving the time window around the downgrade moment', async () => {
-            // check after the downgrade
-            await lens.goToTimeRange(
-              moment
-                .utc(fromTimeForScenarios, TIME_PICKER_FORMAT)
-                .subtract(1, 'hour')
-                .format(TIME_PICKER_FORMAT),
-              moment
-                .utc(fromTimeForScenarios, TIME_PICKER_FORMAT)
-                .add(1, 'hour')
-                .format(TIME_PICKER_FORMAT) // consider only new documents
-            );
-
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'count',
-            });
-
-            await lens.waitForVisualization('xyVisChart');
-            const dataBefore = await lens.getCurrentChartDebugState('xyVisChart');
-            const barsBefore = dataBefore?.bars![0].bars;
-            expect(barsBefore?.some(({ y }) => y)).to.eql(true);
-
-            // check after the downgrade
-            await lens.goToTimeRange(
-              moment
-                .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
-                .add(1, 'second')
-                .format(TIME_PICKER_FORMAT),
-              moment
-                .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
-                .add(2, 'hour')
-                .format(TIME_PICKER_FORMAT) // consider also new documents
-            );
-
-            await lens.waitForVisualization('xyVisChart');
-            const dataAfter = await lens.getCurrentChartDebugState('xyVisChart');
-            const barsAfter = dataAfter?.bars![0].bars;
-            expect(barsAfter?.some(({ y }) => y)).to.eql(true);
           });
         });
       });
