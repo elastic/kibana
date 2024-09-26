@@ -30,7 +30,7 @@ export const turnOffAgentPolicyFeatures = async (
   );
 
   const { agentPolicy: agentPolicyService, savedObjects } = fleetServices;
-  const internalSoClient = savedObjects.createInternalScopedSoClient(undefined, false);
+  const internalSoClient = savedObjects.createInternalScopedSoClient({ readonly: false });
   const { updatedPolicies, failedPolicies } =
     await agentPolicyService.turnOffAgentTamperProtections(internalSoClient);
 

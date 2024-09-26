@@ -45,7 +45,7 @@ export const createEndpointMetadataServiceTestContextMock =
     }).service.asInternalUser();
     const endpointMetadataService = new EndpointMetadataService(
       esClient,
-      savedObjectsServiceFactory.createInternalScopedSoClient(undefined, false),
+      savedObjectsServiceFactory.createInternalScopedSoClient({ readonly: false }),
       fleetServices,
       logger
     );

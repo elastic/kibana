@@ -76,10 +76,10 @@ export class SavedObjectsClientFactory {
   /**
    * Creates a SavedObjects client that is scoped to a space (default: `Default`)
    */
-  createInternalScopedSoClient(
-    spaceId: string = DEFAULT_SPACE_ID,
-    readonly: boolean = true
-  ): SavedObjectsClientContract {
+  createInternalScopedSoClient({
+    spaceId = DEFAULT_SPACE_ID,
+    readonly = true,
+  }: Partial<{ spaceId: string; readonly: boolean }> = {}): SavedObjectsClientContract {
     const soClient = this.savedObjectsServiceStart.getScopedClient(
       this.createFakeHttpRequest(spaceId),
       { excludedExtensions: [SECURITY_EXTENSION_ID] }

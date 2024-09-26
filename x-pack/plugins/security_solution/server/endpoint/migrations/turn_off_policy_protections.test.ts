@@ -142,7 +142,7 @@ describe('Turn Off Policy Protections Migration', () => {
 
       expect(fleetServices.packagePolicy.list as jest.Mock).toHaveBeenCalledTimes(2);
       expect(fleetServices.packagePolicy.bulkUpdate as jest.Mock).toHaveBeenCalledWith(
-        fleetServices.savedObjects.createInternalScopedSoClient(undefined, false),
+        fleetServices.savedObjects.createInternalScopedSoClient({ readonly: false }),
         esClient,
         [
           expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![0].id }),
@@ -213,7 +213,7 @@ describe('Turn Off Policy Protections Migration', () => {
 
       expect(fleetServices.packagePolicy.list as jest.Mock).toHaveBeenCalledTimes(2);
       expect(fleetServices.packagePolicy.bulkUpdate as jest.Mock).toHaveBeenCalledWith(
-        fleetServices.savedObjects.createInternalScopedSoClient(undefined, false),
+        fleetServices.savedObjects.createInternalScopedSoClient({ readonly: false }),
         esClient,
         [
           expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![0].id }),

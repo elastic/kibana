@@ -63,7 +63,7 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
   }
 
   const { packagePolicy, savedObjects, endpointPolicyKuery } = fleetServices;
-  const internalSoClient = savedObjects.createInternalScopedSoClient(undefined, false);
+  const internalSoClient = savedObjects.createInternalScopedSoClient({ readonly: false });
   const updates: UpdatePackagePolicy[] = [];
   const messages: string[] = [];
   const perPage = 1000;

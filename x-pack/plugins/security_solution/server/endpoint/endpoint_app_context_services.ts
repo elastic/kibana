@@ -155,7 +155,7 @@ export class EndpointAppContextService {
       productFeaturesService,
     } = this.startDependencies;
     const endpointMetadataService = this.getEndpointMetadataService();
-    const soClient = this.savedObjects.createInternalScopedSoClient(undefined, false);
+    const soClient = this.savedObjects.createInternalScopedSoClient({ readonly: false });
     const logger = this.createLogger('endpointFleetExtension');
 
     registerFleetCallback(
@@ -253,7 +253,7 @@ export class EndpointAppContextService {
 
     return new EndpointMetadataService(
       this.startDependencies.esClient,
-      this.savedObjects.createInternalScopedSoClient(spaceId, false),
+      this.savedObjects.createInternalScopedSoClient({ readonly: false }),
       this.getInternalFleetServices(),
       this.createLogger('endpointMetadata')
     );
