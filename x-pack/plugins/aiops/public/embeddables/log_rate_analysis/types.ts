@@ -14,12 +14,6 @@ import type {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type { FC } from 'react';
-
-export type ViewComponent = FC<{
-  interval: string;
-  onRenderComplete?: () => void;
-}>;
 
 export interface LogRateAnalysisComponentApi {
   dataViewId: PublishingSubject<LogRateAnalysisEmbeddableState['dataViewId']>;
