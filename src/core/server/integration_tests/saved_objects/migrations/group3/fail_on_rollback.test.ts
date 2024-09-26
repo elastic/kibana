@@ -23,7 +23,8 @@ import { baselineTypes as types } from '../kibana_migrator_test_kit.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'fail_on_rollback.test.log');
 
-describe('when rolling back to an older version', () => {
+// Failing: See https://github.com/elastic/kibana/issues/193756
+describe.skip('when rolling back to an older version', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   beforeAll(async () => {

@@ -42,12 +42,11 @@ export const replaceAnonymizedValuesWithOriginalValues = ({
   messageContent: string;
   replacements: Replacements;
 }): string =>
-  replacements != null
-    ? Object.keys(replacements).reduce((acc, key) => {
-        const value = replacements[key];
-        return acc.replaceAll(key, value);
-      }, messageContent)
-    : messageContent;
+  Object.keys(replacements).reduce((acc, key) => {
+    const value = replacements[key];
+
+    return acc.replaceAll(key, value);
+  }, messageContent);
 
 export const replaceOriginalValuesWithUuidValues = ({
   messageContent,
