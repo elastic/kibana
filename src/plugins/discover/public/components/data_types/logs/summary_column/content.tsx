@@ -27,12 +27,10 @@ const LogMessage = ({
   field,
   value,
   className,
-  isCompressed,
 }: {
   field: string;
   value: string;
   className: string;
-  isCompressed: boolean;
 }) => {
   const shouldRenderFieldName = field !== constants.MESSAGE_FIELD;
 
@@ -74,12 +72,7 @@ export const Content = ({
   const shouldRenderContent = !!field && !!value;
 
   return shouldRenderContent ? (
-    <LogMessage
-      field={field}
-      value={value}
-      isCompressed={isCompressed}
-      className={isSingleLine ? 'eui-textTruncate' : ''}
-    />
+    <LogMessage field={field} value={value} className={isSingleLine ? 'eui-textTruncate' : ''} />
   ) : (
     <FormattedSourceDocument
       columnId={columnId}
