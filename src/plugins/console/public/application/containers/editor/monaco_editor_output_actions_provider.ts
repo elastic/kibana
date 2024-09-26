@@ -59,7 +59,14 @@ export class MonacoEditorOutputActionsProvider {
       await debouncedHighlightRequests();
     });
 
-    editor.onDidBlurEditorText(() => this.clearEditorDecorations());
+    editor.onDidBlurEditorText(() => {
+      // Since the actions buttons are placed outside of the editor, we need to delay
+      // the clearing of the editor decorations to ensure that the actions buttons
+      // are not hidden.
+      setTimeout(() => {
+        this.clearEditorDecorations();
+      }, 100);
+    });
   }
 
   private clearEditorDecorations() {
