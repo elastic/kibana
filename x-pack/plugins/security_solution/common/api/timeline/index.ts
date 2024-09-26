@@ -7,5 +7,3 @@
 
 export * from './model/api';
 export * from './routes';
-
-export * from './pinned_events/pinned_events_route';
