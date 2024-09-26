@@ -140,7 +140,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     filterOptions,
     rules: ruleUpgradeInfos,
   });
-  const { rulesUpgradeState, setFieldResolvedValue } =
+  const { rulesUpgradeState, setRuleFieldResolvedValue } =
     usePrebuiltRulesUpgradeState(filteredRuleUpgradeInfos);
 
   // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
@@ -255,7 +255,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
               <TabContentPadding>
                 <RuleUpgradeConflictsResolverTab
                   ruleUpgradeState={ruleUpgradeState}
-                  setFieldResolvedValue={setFieldResolvedValue}
+                  setRuleFieldResolvedValue={setRuleFieldResolvedValue}
                 />
               </TabContentPadding>
             ),
@@ -281,7 +281,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         jsonViewUpdates,
       ];
     },
-    [rulesUpgradeState, setFieldResolvedValue, isPrebuiltRulesCustomizationEnabled]
+    [rulesUpgradeState, setRuleFieldResolvedValue, isPrebuiltRulesCustomizationEnabled]
   );
   const filteredRules = useMemo(
     () => filteredRuleUpgradeInfos.map((rule) => rule.target_rule),

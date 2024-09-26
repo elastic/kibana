@@ -8,19 +8,19 @@
 import React from 'react';
 import type {
   RuleUpgradeState,
-  SetFieldResolvedValueFn,
+  SetRuleFieldResolvedValueFn,
 } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { FieldUpgradeConflictsResolver } from './field_upgrade_conflicts_resolver';
 
 interface RuleUpgradeConflictsResolverProps {
   ruleUpgradeState: RuleUpgradeState;
-  setFieldResolvedValue: SetFieldResolvedValueFn;
+  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function RuleUpgradeConflictsResolver({
   ruleUpgradeState,
-  setFieldResolvedValue,
-}: RuleUpgradeConflictsResolverProps): JSX.Element | null {
+  setRuleFieldResolvedValue,
+}: RuleUpgradeConflictsResolverProps): JSX.Element {
   const fieldDiffEntries = Object.entries(ruleUpgradeState.diff.fields) as Array<
     [
       keyof typeof ruleUpgradeState.diff.fields,

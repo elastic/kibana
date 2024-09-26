@@ -9,19 +9,19 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type {
   RuleUpgradeState,
-  SetFieldResolvedValueFn,
+  SetRuleFieldResolvedValueFn,
 } from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { RuleUpgradeInfoBar } from './components/rule_upgrade_info_bar';
 import { RuleUpgradeConflictsResolver } from './components/rule_upgrade_conflicts_resolver';
 
 interface RuleUpgradeConflictsResolverTabProps {
   ruleUpgradeState: RuleUpgradeState;
-  setFieldResolvedValue: SetFieldResolvedValueFn;
+  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function RuleUpgradeConflictsResolverTab({
   ruleUpgradeState,
-  setFieldResolvedValue,
+  setRuleFieldResolvedValue,
 }: RuleUpgradeConflictsResolverTabProps): JSX.Element {
   return (
     <>
@@ -30,7 +30,7 @@ export function RuleUpgradeConflictsResolverTab({
       <EuiSpacer size="s" />
       <RuleUpgradeConflictsResolver
         ruleUpgradeState={ruleUpgradeState}
-        setFieldResolvedValue={setFieldResolvedValue}
+        setRuleFieldResolvedValue={setRuleFieldResolvedValue}
       />
     </>
   );
