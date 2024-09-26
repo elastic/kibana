@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Client } from '@elastic/elasticsearch';
@@ -54,23 +55,14 @@ export function getRoutingTransform() {
         case 'transaction':
         case 'span':
           index = `traces-generic.otel-${namespace}-synth`;
-          // document._index = `.ds-traces-generic.otel-${namespace}-synth`;
           break;
 
         case 'error':
-          index = `.logs-otel.error-${namespace}-synth`;
-          // document._index = `logs-otel.error-${namespace}-synth`;
+          index = `.logs-generic-otel-${namespace}-synth`;
           break;
 
         case 'metric':
           const metricsetName = document.attributes['metricset.name'];
-          document._index = `metrics-otel.service_summary.${document.attributes[
-            'metricset.interval'
-          ]!}-${namespace}-synth`;
-
-          // if (metricsetName === 'app') {
-          //   index = `metrics-otel.app.${document?.attributes?.['service.name']}-${namespace}`;
-          // } else
           if (
             metricsetName === 'transaction' ||
             metricsetName === 'service_transaction' ||

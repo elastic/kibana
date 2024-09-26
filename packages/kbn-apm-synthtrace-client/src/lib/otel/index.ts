@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Fields } from '../entity';
@@ -49,10 +50,13 @@ export interface OtelDocument extends Fields {
   };
   name?: string;
   trace_id?: string;
+  trace?: { id: string }; // / I saw in fields this two representacion of trace id
   span_id?: string;
+  span?: { id: string }; // / I saw in fields this two representacion of span id
   dropped_attributes_count?: number;
   dropped_events_count?: number;
   dropped_links_count?: number;
+  timestamp_us?: number;
 }
 
 class Otel extends Serializable<OtelDocument> {
@@ -62,7 +66,7 @@ class Otel extends Serializable<OtelDocument> {
     });
   }
 
-  error(id: string) {
+  error({ spanId, traceId }: { spanId: string; traceId: string }) {
     return new OtelError({
       ...this.fields,
       attributes: {
@@ -70,23 +74,22 @@ class Otel extends Serializable<OtelDocument> {
         'exception.type': '*errors.errorString',
         'processor.event': 'error',
         'timestamp.us': 1725633628036123,
+        'event.name': 'exception',
       },
       data_stream: {
         dataset: 'generic.otel',
         namespace: 'default',
         type: 'logs',
       },
+      'event.name': 'exception',
       dropped_attributes_count: 0,
-      name: 'exception',
       resource: {
         attributes: {
           'agent.name': 'opentelemetry/go',
           'agent.version': '1.28.0',
           'service.name': 'sendotlp-synth',
+          'service.instance.id': '89117ac1-0dbf-4488-9e17-4c2c3b76943a',
           'some.resource.attribute': 'resource.attr',
-          'telemetry.sdk.language': 'go',
-          'telemetry.sdk.name': 'opentelemetry',
-          'telemetry.sdk.version': '1.28.0',
         },
         dropped_attributes_count: 0,
         schema_url: 'https://opentelemetry.io/schemas/1.26.0',
@@ -99,7 +102,11 @@ class Otel extends Serializable<OtelDocument> {
         dropped_attributes_count: 0,
         name: 'sendotlp-synth',
       },
-      span_id: '96d91c11a4e393fb',
+      trace_id: traceId,
+      trace: { id: traceId },
+      span_id: spanId,
+      span: { id: spanId },
+      timestamp_us: 1725633628036123,
     });
   }
 
