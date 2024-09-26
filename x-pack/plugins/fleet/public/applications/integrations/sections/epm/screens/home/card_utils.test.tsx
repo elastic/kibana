@@ -111,6 +111,29 @@ describe('Card utils', () => {
         installStatus: 'install_failed',
       });
     });
+
+    it('should return null installStatus if the item is not an integration', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'test',
+          version: '2.0.0-preview-1',
+          type: 'xxx',
+          installationInfo: {
+            version: '1.0.0',
+            install_status: 'install_failed',
+          },
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        release: 'ga',
+        version: '1.0.0',
+        isUpdateAvailable: true,
+        installStatus: null,
+      });
+    });
   });
   describe('getIntegrationLabels', () => {
     it('should return an empty list for an integration without errors', () => {
