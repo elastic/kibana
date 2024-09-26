@@ -221,6 +221,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [controlFactory, setControlFactory] = useState<DataControlFactory | undefined>(undefined);
   useEffect(() => {
     if (!selectedControlType) {
+      setControlFactory(undefined);
       return;
     }
 
@@ -228,7 +229,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     getControlFactory(selectedControlType)
       .then((nextControlFactory) => {
         if (!cancelled) {
-          setControlFactory(nextControlFactory);
+          setControlFactory(nextControlFactory as unknown as DataControlFactory);
         }
       })
       .catch(() => {

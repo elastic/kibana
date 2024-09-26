@@ -148,7 +148,7 @@ describe('Data control editor', () => {
 
     test('CompatibleControlTypesComponent respects ordering', async () => {
       const tempRegistry: {
-        [key: string]: ControlFactory<DefaultDataControlState, DataControlApi>;
+        [key: string]: () => Promise<ControlFactory<DefaultDataControlState, DataControlApi>>;
       } = {
         ...mockRegistry,
         alphabeticalFirstControl: async () =>
