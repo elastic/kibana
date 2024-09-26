@@ -954,8 +954,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
             );
             break;
 
-          // FIXME:PT refactor kill-process entry here when that PR is merged
-
           case 'get-file':
             addResponsesToQueueIfAny(
               await this.checkPendingGetFileActions(
