@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const createDocs = getDocsGenerator(log, es);
 
   describe('lens tsdb', function () {
-    const tsdbIndex = 'kibana_sample_data_logstsdb';
+    const tsdbIndex = 'kibana_sample_data_logslogsdb';
     const tsdbDataView = tsdbIndex;
     const tsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb';
     const fromTime = 'Apr 16, 2023 @ 00:00:00.000';
