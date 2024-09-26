@@ -26,7 +26,7 @@ jobs:
               contains(github.event.pull_request.labels.*.name, 'backport:current-major') ||
               contains(github.event.pull_request.labels.*.name, 'backport:all-open') ||
               contains(github.event.pull_request.labels.*.name, 'backport:version') ||
-              contains(github.event.pull_request.labels.*.name, 'auto-backport'))));
+              contains(github.event.pull_request.labels.*.name, 'auto-backport'))))
     steps:
       - name: Checkout Actions
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
