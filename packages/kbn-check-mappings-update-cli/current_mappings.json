@@ -3556,6 +3556,9 @@
       "attempts": {
         "type": "integer"
       },
+      "claimAt": {
+        "type": "date"
+      },
       "enabled": {
         "type": "boolean"
       },
@@ -3563,6 +3566,9 @@
         "type": "keyword"
       },
       "partition": {
+        "type": "integer"
+      },
+      "priority": {
         "type": "integer"
       },
       "retryAt": {
