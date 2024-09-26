@@ -20,14 +20,36 @@ import {
   projectIDs,
   projects,
 } from '../../common';
-import { coreServices } from '../services/kibana_services';
+import { coreServices } from './kibana_services';
 
-export const getProject = (id: ProjectID) => {
+export interface PresentationLabsService {
+  isProjectEnabled: (id: ProjectID) => boolean;
+  getProject: (id: ProjectID) => Project;
+  getProjects: (solutions?: SolutionName[]) => Record<ProjectID, Project>;
+  setProjectStatus: (id: ProjectID, env: EnvironmentName, status: boolean) => void;
+  reset: () => void;
+}
+
+export const getPresentationLabsService = (): PresentationLabsService => {
+  return {
+    isProjectEnabled,
+    getProject,
+    getProjects,
+    setProjectStatus,
+    reset,
+  };
+};
+
+/**
+ * Service
+ */
+
+const getProject = (id: ProjectID) => {
   const project = projects[id];
 
   const status = {
-    session: isEnabledByStorageValue(project, 'session', sessionStorage.getItem(id)),
-    browser: isEnabledByStorageValue(project, 'browser', localStorage.getItem(id)),
+    session: isEnabledByStorageValue(project, 'session', window.sessionStorage.getItem(id)),
+    browser: isEnabledByStorageValue(project, 'browser', window.localStorage.getItem(id)),
     kibana: isEnabledByStorageValue(
       project,
       'kibana',
@@ -38,7 +60,7 @@ export const getProject = (id: ProjectID) => {
   return applyProjectStatus(project, status);
 };
 
-export const getProjects = (solutions: SolutionName[] = []) =>
+const getProjects = (solutions: SolutionName[] = []) =>
   projectIDs.reduce((acc, id) => {
     const project = getProject(id);
     if (
@@ -50,7 +72,7 @@ export const getProjects = (solutions: SolutionName[] = []) =>
     return acc;
   }, {} as { [id in ProjectID]: Project });
 
-export const setProjectStatus = (name: ProjectID, env: EnvironmentName, status: boolean) => {
+const setProjectStatus = (name: ProjectID, env: EnvironmentName, status: boolean) => {
   switch (env) {
     case 'session':
       setStorageStatus(window.sessionStorage, name, status);
@@ -63,6 +85,18 @@ export const setProjectStatus = (name: ProjectID, env: EnvironmentName, status: 
       break;
   }
 };
+
+const reset = () => {
+  clearLabsFromStorage(window.localStorage);
+  clearLabsFromStorage(window.sessionStorage);
+  projectIDs.forEach((id) => setProjectStatus(id, 'kibana', projects[id].isActive));
+};
+
+const isProjectEnabled = (id: ProjectID) => getProject(id).status.isEnabled;
+
+/**
+ * Helpers
+ */
 
 const isEnabledByStorageValue = (
   project: ProjectConfig,
@@ -89,18 +123,6 @@ const isEnabledByStorageValue = (
 
   return defaultValue;
 };
-
-export const reset = () => {
-  clearLabsFromStorage(window.localStorage);
-  clearLabsFromStorage(window.sessionStorage);
-  projectIDs.forEach((id) => setProjectStatus(id, 'kibana', projects[id].isActive));
-};
-
-export const isProjectEnabled = (id: ProjectID) => getProject(id).status.isEnabled;
-
-/**
- * Helpers
- */
 
 const setStorageStatus = (storage: Storage, id: ProjectID, enabled: boolean) =>
   storage.setItem(id, enabled ? 'enabled' : 'disabled');

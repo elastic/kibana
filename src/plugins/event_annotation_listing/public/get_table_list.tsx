@@ -25,7 +25,6 @@ export interface EventAnnotationListingPageServices {
   core: CoreStart;
   savedObjectsTagging: SavedObjectsTaggingApi;
   eventAnnotationService: EventAnnotationServiceType;
-  PresentationUtilContextProvider: FC;
   dataViews: DataView[];
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
   queryInputServices: QueryInputServices;

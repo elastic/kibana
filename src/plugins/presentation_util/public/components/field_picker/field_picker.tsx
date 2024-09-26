@@ -9,7 +9,7 @@
 
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
-import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { comboBoxFieldOptionMatcher, getFieldIconType, isKnownFieldType } from '@kbn/field-utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -72,7 +72,7 @@ export const FieldPicker = ({
         'data-test-subj': `field-picker-select-${field.name}`,
         prepend: (
           <FieldIcon
-            type={field.type}
+            type={getFieldIconType(field)}
             label={field.name}
             scripted={field.scripted}
             className="eui-alignMiddle"
@@ -89,7 +89,8 @@ export const FieldPicker = ({
         ? uniq(
             dataView.fields
               .filter((f) => (filterPredicate ? filterPredicate(f) : true))
-              .map((f) => f.type as string)
+              .map((f) => getFieldIconType(f))
+              .filter((type) => isKnownFieldType(type))
           )
         : [],
     [dataView, filterPredicate]

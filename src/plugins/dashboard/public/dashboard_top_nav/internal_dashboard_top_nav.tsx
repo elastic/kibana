@@ -10,11 +10,7 @@
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  withSuspense,
-  LazyLabsFlyout,
-  getContextProvider as getPresentationUtilContextProvider,
-} from '@kbn/presentation-util-plugin/public';
+import { withSuspense, LazyLabsFlyout } from '@kbn/presentation-util-plugin/public';
 import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
   EuiBreadcrumb,
@@ -99,7 +95,7 @@ export function InternalDashboardTopNav({
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
-  const PresentationUtilContextProvider = getPresentationUtilContextProvider();
+  // const PresentationUtilContextProvider = getPresentationUtilContextProvider();
 
   const [
     allDataViews,
@@ -436,10 +432,10 @@ export function InternalDashboardTopNav({
         onSavedQueryIdChange={setSavedQueryId}
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
-        <PresentationUtilContextProvider>
-          <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
-        </PresentationUtilContextProvider>
-      ) : null}
+        // <PresentationUtilContextProvider>
+        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+      ) : // </PresentationUtilContextProvider>
+      null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>

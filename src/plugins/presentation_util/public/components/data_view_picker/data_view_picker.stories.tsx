@@ -11,7 +11,6 @@ import React, { useState } from 'react';
 
 import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import useMount from 'react-use/lib/useMount';
-import { StorybookParams } from '../../services/plugin_services.story';
 import { DataViewPicker } from './data_view_picker';
 import { dataViewsService } from '../../services/kibana_services';
 
@@ -21,7 +20,7 @@ export default {
   argTypes: {},
 };
 
-export function Example({}: {} & StorybookParams) {
+export function Example() {
   const [dataViews, setDataViews] = useState<DataViewListItem[]>();
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);
 

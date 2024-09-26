@@ -9,9 +9,8 @@
 
 import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { PresentationUtilPlugin } from './plugin';
-import { pluginServices } from './services';
 
-export type { PresentationLabsService } from './services';
+export type { PresentationLabsService } from './services/presentation_labs_service';
 
 export type {
   KibanaPluginServiceFactory,
@@ -70,7 +69,3 @@ export const registerExpressionsLanguage = async (expressionFunctions: Expressio
 export function plugin() {
   return new PresentationUtilPlugin();
 }
-
-export const useLabs = () => (() => pluginServices.getHooks().labs.useService())();
-
-export const getContextProvider = () => pluginServices.getContextProvider();

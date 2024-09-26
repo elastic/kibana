@@ -28,12 +28,13 @@ export const servicesContextDecorator = (): DecoratorFn => {
       storybook.args.useStaticData = true;
     }
 
-    pluginServices.setRegistry(pluginServiceRegistry.start(storybook.args));
-    const ContextProvider = pluginServices.getContextProvider();
+    // pluginServices.setRegistry(pluginServiceRegistry.start(storybook.args));
+    // const ContextProvider = pluginServices.getContextProvider();
 
     return (
       <I18nProvider>
-        <ContextProvider>{story()}</ContextProvider>
+        {story()}
+        {/* <ContextProvider>{story()}</ContextProvider> */}
       </I18nProvider>
     );
   };
