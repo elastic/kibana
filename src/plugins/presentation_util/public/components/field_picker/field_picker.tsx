@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
-import type { GetCustomFieldType } from '@kbn/field-utils';
 import { FieldTypeFilter } from './field_type_filter';
 
 import './field_picker.scss';
@@ -31,7 +30,6 @@ import './field_picker.scss';
 export interface FieldPickerProps {
   dataView?: DataView;
   selectedFieldName?: string;
-  getCustomFieldType?: GetCustomFieldType<DataViewField>;
   filterPredicate?: (f: DataViewField) => boolean;
   onSelectField?: (selectedField: DataViewField) => void;
   selectableProps?: Partial<EuiSelectableProps>;
@@ -40,7 +38,6 @@ export interface FieldPickerProps {
 export const FieldPicker = ({
   dataView,
   onSelectField,
-  getCustomFieldType,
   filterPredicate,
   selectedFieldName,
   selectableProps,
@@ -75,7 +72,7 @@ export const FieldPicker = ({
         'data-test-subj': `field-picker-select-${field.name}`,
         prepend: (
           <FieldIcon
-            type={getFieldIconType(field, getCustomFieldType)}
+            type={getFieldIconType(field)}
             label={field.name}
             scripted={field.scripted}
             className="eui-alignMiddle"
@@ -84,14 +81,7 @@ export const FieldPicker = ({
       };
     });
     setFieldSelectableOptions(options);
-  }, [
-    availableFields,
-    dataView,
-    filterPredicate,
-    selectedFieldName,
-    typesFilter,
-    getCustomFieldType,
-  ]);
+  }, [availableFields, dataView, filterPredicate, selectedFieldName, typesFilter]);
 
   const uniqueTypes = useMemo(
     () =>
@@ -99,11 +89,11 @@ export const FieldPicker = ({
         ? uniq(
             dataView.fields
               .filter((f) => (filterPredicate ? filterPredicate(f) : true))
-              .map((f) => getFieldIconType(f, getCustomFieldType))
+              .map((f) => getFieldIconType(f))
               .filter((type) => isKnownFieldType(type))
           )
         : [],
-    [dataView, filterPredicate, getCustomFieldType]
+    [dataView, filterPredicate]
   );
 
   const setFocusToSearch = useCallback(() => {
