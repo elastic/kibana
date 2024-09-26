@@ -26,8 +26,6 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
 // `x-pack/plugins/observability_solution/apm/public/components/app/correlations/progress_controls.tsx`
 
-const analysisCompleteStyle = { display: 'none' };
-
 /**
  * Props for ProgressControlProps
  */
@@ -145,32 +143,30 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          css={progress === 1 ? analysisCompleteStyle : undefined}
-        >
-          <EuiFlexItem data-test-subj="aiopProgressTitle">
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                data-test-subj="aiopsProgressTitleMessage"
-                id="xpack.aiops.progressTitle"
-                defaultMessage="Progress: {progress}% — {progressMessage}"
-                values={{ progress: progressOutput, progressMessage }}
+        {progress !== 1 ? (
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem data-test-subj="aiopProgressTitle">
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  data-test-subj="aiopsProgressTitleMessage"
+                  id="xpack.aiops.progressTitle"
+                  defaultMessage="Progress: {progress}% — {progressMessage}"
+                  values={{ progress: progressOutput, progressMessage }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem css={isRunning ? runningProgressBarStyles : undefined}>
+              <EuiProgress
+                aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
+                  defaultMessage: 'Progress',
+                })}
+                value={progressOutput}
+                max={100}
+                size="m"
               />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem css={isRunning ? runningProgressBarStyles : undefined}>
-            <EuiProgress
-              aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
-                defaultMessage: 'Progress',
-              })}
-              value={progressOutput}
-              max={100}
-              size="m"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
       </EuiFlexItem>
       {children}
     </EuiFlexGroup>
