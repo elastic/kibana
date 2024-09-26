@@ -12,7 +12,7 @@ import { EntityStoreUtils } from '../../utils';
 export default ({ getService }: FtrProviderContextWithSpaces) => {
   const api = getService('securitySolutionApi');
   const spaces = getService('spaces');
-  const namespace = uuidv4();
+  const namespace = uuidv4().substring(0, 8);
 
   const utils = EntityStoreUtils(getService, namespace);
 

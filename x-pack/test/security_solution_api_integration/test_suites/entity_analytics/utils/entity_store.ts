@@ -27,7 +27,7 @@ export const EntityStoreUtils = (
     try {
       await Promise.all(
         engineTypes.map((entityType: 'user' | 'host') =>
-          api.deleteEntityEngine({ params: { entityType }, query: { data: true } })
+          api.deleteEntityEngine({ params: { entityType }, query: { data: true } }, namespace)
         )
       );
     } catch (e) {
@@ -36,6 +36,7 @@ export const EntityStoreUtils = (
   };
 
   const initEntityEngineForEntityType = async (entityType: EntityType) => {
+    log.info(`Initializing engine for entity type ${entityType} in namespace ${namespace}`);
     return api
       .initEntityEngine(
         {
