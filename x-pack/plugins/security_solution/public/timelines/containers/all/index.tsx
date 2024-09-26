@@ -139,7 +139,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
             search,
             sort_field: sort.sortField,
             sort_order: sort.sortOrder,
-            status,
+            status: status || undefined,
             timeline_type: timelineType,
           };
           const getAllTimelineResponse = await getAllTimelines(variables, abortCtrl.signal);
