@@ -21,9 +21,7 @@ interface Props extends FieldDataRowProps {
 export const DistinctValues = ({ showIcon, config }: Props) => {
   const { stats, type } = config;
   const {
-    services: {
-      data: { fieldFormats },
-    },
+    services: { fieldFormats },
   } = useDataVisualizerKibana();
 
   const cardinality = stats?.cardinality;

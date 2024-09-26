@@ -9,6 +9,7 @@
     "browser": true,
     "requiredPlugins": [
       "data",
+      "fieldFormats",
       "dataViews",
       "dataViewEditor",
       "embeddable",

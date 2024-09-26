@@ -83,7 +83,7 @@ export const useESQLDataVisualizerData = (
 ) => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, executionContext, data } = services;
+  const { uiSettings, executionContext, fieldFormats } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
@@ -430,7 +430,7 @@ export const useESQLDataVisualizerData = (
           ...field,
           ...fieldData,
           loading: fieldData?.existsInDocs ?? true,
-          fieldFormat: data.fieldFormats.deserialize({ id: field.secondaryType }),
+          fieldFormat: fieldFormats.deserialize({ id: field.secondaryType }),
           aggregatable: true,
           deletable: false,
           type: getFieldType(field) as SupportedFieldType,
@@ -503,7 +503,7 @@ export const useESQLDataVisualizerData = (
           secondaryType: getFieldType(field) as SupportedFieldType,
           loading: fieldData?.existsInDocs ?? true,
           deletable: false,
-          fieldFormat: data.fieldFormats.deserialize({ id: field.secondaryType }),
+          fieldFormat: fieldFormats.deserialize({ id: field.secondaryType }),
         };
 
         // Map the field type from the Kibana index pattern to the field type

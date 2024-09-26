@@ -23,9 +23,7 @@ interface Props extends FieldDataRowProps {
 export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
   const { stats, type } = config;
   const {
-    services: {
-      data: { fieldFormats },
-    },
+    services: { fieldFormats },
   } = useDataVisualizerKibana();
 
   if (stats === undefined) return null;

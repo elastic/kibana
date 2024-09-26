@@ -67,9 +67,7 @@ export const TopValues: FC<Props> = ({
   showSampledValues = false,
 }) => {
   const {
-    services: {
-      data: { fieldFormats },
-    },
+    services: { fieldFormats },
   } = useDataVisualizerKibana();
   const euiTheme = useEuiTheme();
 

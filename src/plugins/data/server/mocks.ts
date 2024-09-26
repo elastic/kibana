@@ -9,10 +9,6 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import {
-  createFieldFormatsSetupMock,
-  createFieldFormatsStartMock,
-} from '@kbn/field-formats-plugin/server/mocks';
-import {
   createSearchSetupMock,
   createSearchStartMock,
   createSearchRequestHandlerContext,
@@ -23,20 +19,12 @@ import { createDatatableUtilitiesMock } from './datatable_utilities/mock';
 function createSetupContract() {
   return {
     search: createSearchSetupMock(),
-    /**
-     * @deprecated - use directly from "fieldFormats" plugin instead
-     */
-    fieldFormats: createFieldFormatsSetupMock(),
   };
 }
 
 function createStartContract() {
   return {
     search: createSearchStartMock(),
-    /**
-     * @deprecated - use directly from "fieldFormats" plugin instead
-     */
-    fieldFormats: createFieldFormatsStartMock(),
     indexPatterns: createIndexPatternsStartMock(),
     datatableUtilities: createDatatableUtilitiesMock(),
   };

@@ -20,9 +20,7 @@ export const getFieldFormatType = (type: string) => {
 };
 export const useFieldFormatter = (fieldType: FIELD_FORMAT_IDS) => {
   const {
-    services: {
-      data: { fieldFormats },
-    },
+    services: { fieldFormats },
   } = useDataVisualizerKibana();
 
   const fieldFormatter = useMemo(() => {
