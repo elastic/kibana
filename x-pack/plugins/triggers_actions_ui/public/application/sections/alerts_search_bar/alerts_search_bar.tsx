@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { compareFilters, Query, TimeRange } from '@kbn/es-query';
+import { compareFilters, Filter, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
@@ -169,6 +169,13 @@ export function AlertsSearchBar({
     }
   }, [filters, onFiltersUpdated, quickFilters, showFilterBar]);
 
+  const mapFilters = (filtersToMap: Filter[]): Filter[] => {
+    return filtersToMap.map((filter) => {
+      const meta = { ...filter.meta };
+      return { ...filter, meta };
+    });
+  };
+
   return (
     <SearchBar
       appName={appName}
@@ -185,9 +192,11 @@ export function AlertsSearchBar({
       showFilterBar={showFilterBar}
       onQuerySubmit={onSearchQuerySubmit}
       onFiltersUpdated={(newFilters) => {
+        const mappedFilters = mapFilters(newFilters);
+
         // filterManager.setFilters populates filter.meta so filter pill has pretty title
-        dataService.query.filterManager.setFilters(newFilters);
-        onFiltersUpdated?.(newFilters);
+        dataService.query.filterManager.setFilters(mappedFilters);
+        onFiltersUpdated?.(mappedFilters);
       }}
       onRefresh={onRefresh}
       showDatePicker={showDatePicker}
