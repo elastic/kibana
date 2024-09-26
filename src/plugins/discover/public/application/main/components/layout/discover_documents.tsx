@@ -29,9 +29,11 @@ import {
   type DataTableColumnsMeta,
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
-  type DataGridDensity,
+  DataGridDensity,
   UnifiedDataTableProps,
   UseColumnsProps,
+  getDataGridDensity,
+  getRowHeight,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -307,14 +309,20 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
+  const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
       actions: { addFilter: onAddFilter },
       dataView,
-      density,
-      rowHeight,
+      density: density ?? getDataGridDensity(services.storage, 'discover'),
+      rowHeight: getRowHeight({
+        storage: services.storage,
+        consumer: 'discover',
+        rowHeightState: rowHeight,
+        configRowHeight,
+      }),
     }),
-    [onAddFilter, dataView, density, rowHeight]
+    [onAddFilter, dataView, density, services.storage, rowHeight, configRowHeight]
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
@@ -469,7 +477,7 @@ function DiscoverDocumentsComponent({
                 sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
                 onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
                 onFieldEdited={onFieldEdited}
-                configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
+                configRowHeight={configRowHeight}
                 showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
                 maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
                 renderDocumentView={renderDocumentView}

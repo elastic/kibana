@@ -29,10 +29,10 @@ import {
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
 import {
-  DataGridDensity,
   DataLoadingState,
-  ROWS_HEIGHT_OPTIONS,
   UnifiedDataTableProps,
+  getDataGridDensity,
+  getRowHeight,
 } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
@@ -175,16 +175,21 @@ export function ContextAppContent({
     [grid, setAppState]
   );
 
+  const configRowHeight = services.uiSettings.get(ROW_HEIGHT_OPTION);
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
     return getCellRenderers({
       actions: { addFilter },
       dataView,
-      density: DataGridDensity.COMPACT,
-      rowHeight: ROWS_HEIGHT_OPTIONS.single,
+      density: getDataGridDensity(services.storage, 'discover'),
+      rowHeight: getRowHeight({
+        storage: services.storage,
+        consumer: 'discover',
+        configRowHeight,
+      }),
     });
-  }, [addFilter, dataView, getCellRenderersAccessor]);
+  }, [addFilter, configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
 
   const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
   const { filters } = useQuerySubscriber({ data: services.data });
@@ -259,7 +264,7 @@ export function ContextAppContent({
               setExpandedDoc={setExpandedDoc}
               onFilter={addFilter}
               onSetColumns={onSetColumns}
-              configRowHeight={services.uiSettings.get(ROW_HEIGHT_OPTION)}
+              configRowHeight={configRowHeight}
               showMultiFields={services.uiSettings.get(SHOW_MULTIFIELDS)}
               maxDocFieldsDisplayed={services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
               renderDocumentView={renderDocumentView}
