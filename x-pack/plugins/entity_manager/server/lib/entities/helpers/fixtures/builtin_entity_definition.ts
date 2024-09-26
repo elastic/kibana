@@ -13,7 +13,7 @@ export const builtInEntityDefinition = entityDefinitionSchema.parse({
   type: 'service',
   indexPatterns: ['kbn-data-forge-fake_stack.*'],
   managed: true,
-  history: {
+  latest: {
     timestampField: '@timestamp',
     interval: '1m',
   },

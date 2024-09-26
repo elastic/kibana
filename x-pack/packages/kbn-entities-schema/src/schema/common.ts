@@ -103,13 +103,13 @@ export const metadataSchema = z
     destination: z.optional(z.string()),
     aggregation: z
       .optional(metadataAggregation)
-      .default({ type: z.literal('terms').value, limit: 10, lookbackPeriod: '1h' }),
+      .default({ type: z.literal('terms').value, limit: 10, lookbackPeriod: undefined }),
   })
   .or(
     z.string().transform((value) => ({
       source: value,
       destination: value,
-      aggregation: { type: z.literal('terms').value, limit: 10, lookbackPeriod: '1h' },
+      aggregation: { type: z.literal('terms').value, limit: 10, lookbackPeriod: undefined },
     }))
   )
   .transform((metadata) => ({
