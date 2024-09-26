@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import type { EuiTabProps } from '@elastic/eui';
 
 import { useActions, useValues } from 'kea';
 
@@ -251,7 +252,7 @@ export const ConnectorDetail: React.FC = () => {
           wrap: false,
         },
         rightSideItems: getHeaderActions(index, connector),
-        tabs,
+        tabs: tabs as Array<EuiTabProps & { label: React.ReactNode }>,
       }}
     >
       {selectedTab?.content || null}
