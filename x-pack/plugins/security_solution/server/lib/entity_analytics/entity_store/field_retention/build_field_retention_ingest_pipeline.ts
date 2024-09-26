@@ -61,6 +61,7 @@ export const buildFieldRetentionIngestPipeline = ({
     set: {
       field: 'entity.source',
       copy_from: 'entityFields.source',
+      ignore_failure: true,
     },
   },
   {
@@ -72,9 +73,9 @@ export const buildFieldRetentionIngestPipeline = ({
   arrayToSingleValueProcessor({
     field: `${fieldRetentionDefinition.entityType}.risk.calculated_level`,
   }),
-  arrayToSingleValueProcessor({
-    field: 'asset.criticality',
-  }),
+  // arrayToSingleValueProcessor({
+  //   field: 'asset.criticality',
+  // }),
   {
     remove: {
       ignore_failure: true,
