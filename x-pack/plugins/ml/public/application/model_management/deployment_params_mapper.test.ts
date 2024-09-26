@@ -72,7 +72,7 @@ describe('DeploymentParamsMapper', () => {
           adaptive_allocations: {
             enabled: true,
             max_number_of_allocations: 1,
-            min_number_of_allocations: 1,
+            min_number_of_allocations: 0,
           },
           deployment_id: 'test-deployment',
           model_id: 'test-model',
@@ -91,7 +91,7 @@ describe('DeploymentParamsMapper', () => {
           adaptive_allocations: {
             enabled: true,
             max_number_of_allocations: 2,
-            min_number_of_allocations: 1,
+            min_number_of_allocations: 0,
           },
           deployment_id: 'test-deployment',
           model_id: 'test-model',
@@ -261,7 +261,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 8,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 0,
+            min_number_of_allocations: 1,
             max_number_of_allocations: 1,
           },
         });
@@ -280,7 +280,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 8,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 0,
+            min_number_of_allocations: 1,
             max_number_of_allocations: 1,
           },
         });
@@ -468,7 +468,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 2,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 1,
+            min_number_of_allocations: 0,
             max_number_of_allocations: 1,
           },
         });
@@ -525,7 +525,7 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 1,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 1,
+            min_number_of_allocations: 0,
             max_number_of_allocations: 2,
           },
         });

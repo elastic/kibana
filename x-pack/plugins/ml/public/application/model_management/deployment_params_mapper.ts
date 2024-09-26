@@ -123,7 +123,9 @@ export class DeploymentParamsMapper {
     return {
       number_of_allocations: maxValue,
       min_number_of_allocations:
-        Math.floor(levelValues.min / threadsPerAllocation) || MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS,
+        Math.floor(levelValues.min / threadsPerAllocation) ||
+        // in any env, allow scale down to 0 only for "low" vCPU usage
+        (params.vCPUUsage === 'low' ? MIN_SUPPORTED_NUMBER_OF_ALLOCATIONS : 1),
       max_number_of_allocations: maxValue,
     };
   }
