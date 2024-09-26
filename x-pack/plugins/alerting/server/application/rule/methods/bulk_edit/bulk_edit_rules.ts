@@ -259,6 +259,10 @@ export async function bulkEditRules<Params extends RuleParams>(
     return transformRuleDomainToRule<Params>(rule);
   }) as Array<SanitizedRule<Params>>;
 
+  publicRules.forEach((rule) => {
+    context.onRuleUpdate$.next({ id: rule.id, type: rule.alertTypeId });
+  });
+
   await bulkUpdateSchedules(context, options.operations, updatedRules);
 
   return { rules: publicRules, skipped, errors, total };

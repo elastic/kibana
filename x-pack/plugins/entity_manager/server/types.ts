@@ -16,9 +16,14 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type {
+  PluginStartContract as AlertingServerStart,
+  PluginSetupContract as AlertingServerSetup,
+} from '@kbn/alerting-plugin/server';
+import { Subject } from 'rxjs';
 import { EntityManagerConfig } from '../common/config';
 
-export interface EntityManagerServerSetup {
+export interface EntityManagerServer {
   core: CoreStart;
   config: EntityManagerConfig;
   logger: Logger;
@@ -26,6 +31,7 @@ export interface EntityManagerServerSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  onApiKeyChange$: Subject<void>;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -35,6 +41,7 @@ export interface ElasticsearchAccessorOptions {
 export interface EntityManagerPluginSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
+  alerting: AlertingServerSetup;
 }
 
 export interface EntityManagerPluginStartDependencies {
@@ -42,4 +49,5 @@ export interface EntityManagerPluginStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
+  alerting: AlertingServerStart;
 }

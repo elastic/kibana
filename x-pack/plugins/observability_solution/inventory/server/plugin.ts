@@ -17,6 +17,7 @@ import type {
   InventorySetupDependencies,
   InventoryStartDependencies,
 } from './types';
+import { startAssociateRulesWithEntities } from './lib/rules/associate_rules_with_entities';
 
 export class InventoryPlugin
   implements
@@ -59,6 +60,11 @@ export class InventoryPlugin
   }
 
   start(core: CoreStart, pluginsStart: InventoryStartDependencies): InventoryServerStart {
+    startAssociateRulesWithEntities({
+      coreStart: core,
+      logger: this.logger,
+      plugins: pluginsStart,
+    });
     return {};
   }
 }

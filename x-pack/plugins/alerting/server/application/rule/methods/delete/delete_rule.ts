@@ -128,5 +128,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
       : null,
   ]);
 
+  context.onRuleDelete$.next({ id });
+
   return removeResult;
 }

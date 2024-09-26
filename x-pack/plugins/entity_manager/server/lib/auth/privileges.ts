@@ -72,7 +72,18 @@ export const entityDefinitionRuntimePrivileges = {
   application: [
     {
       application: 'kibana-.kibana',
-      privileges: [`saved_object:${SO_ENTITY_DEFINITION_TYPE}/*`],
+      privileges: [
+        `saved_object:${SO_ENTITY_DEFINITION_TYPE}/*`,
+        'feature_stackAlerts.all',
+        'feature_rulesSettings.all',
+        'feature_logs.all',
+        'feature_infrastructure.all',
+        'feature_apm.all',
+        'feature_uptime.all',
+        'feature_observabilityCases.all',
+        'feature_slo.all',
+        'feature_observabilityAIAssistant.all',
+      ],
       resources: ['*'],
     },
   ],

@@ -182,6 +182,11 @@ export interface PluginStartContract {
   ): PublicMethodsOf<AlertingAuthorization>;
 
   getFrameworkHealth: () => Promise<AlertsHealth>;
+  events: {
+    onRuleUpdate$: Observable<{ id: string; type: string }>;
+    onRuleCreate$: Observable<{ id: string; type: string }>;
+    onRuleDelete$: Observable<{ id: string }>;
+  };
 }
 
 export interface AlertingPluginsSetup {
@@ -653,6 +658,9 @@ export class AlertingPlugin {
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>
         await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
+      get events() {
+        return rulesClientFactory.events;
+      },
     };
   }
 

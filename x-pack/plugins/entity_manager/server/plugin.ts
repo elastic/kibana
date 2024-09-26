@@ -6,6 +6,7 @@
  */
 
 import {
+  CoreKibanaRequest,
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -15,7 +16,8 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { firstValueFrom } from 'rxjs';
+import { Subject, firstValueFrom } from 'rxjs';
+import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { builtInDefinitions } from './lib/entities/built_in';
 import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
@@ -27,14 +29,16 @@ import { EntityDiscoveryApiKeyType, entityDefinition } from './saved_objects';
 import {
   EntityManagerPluginSetupDependencies,
   EntityManagerPluginStartDependencies,
-  EntityManagerServerSetup,
+  EntityManagerServer,
 } from './types';
 import { EntityMergeTask } from './lib/entities/tasks/entity_merge_task';
+import { readEntityDiscoveryAPIKey } from './lib/auth';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
 export interface EntityManagerServerPluginStart {
   getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
+  getFakeRequestForBackgroundUser: () => Promise<CoreKibanaRequest | undefined>;
 }
 
 export const config: PluginConfigDescriptor<EntityManagerConfig> = {
@@ -53,7 +57,7 @@ export class EntityManagerServerPlugin
 {
   public config: EntityManagerConfig;
   public logger: Logger;
-  public server?: EntityManagerServerSetup;
+  public server?: EntityManagerServer;
 
   constructor(context: PluginInitializerContext<EntityManagerConfig>) {
     this.config = context.config.get();
@@ -76,7 +80,7 @@ export class EntityManagerServerPlugin
     this.server = {
       config: this.config,
       logger: this.logger,
-    } as EntityManagerServerSetup;
+    } as EntityManagerServer;
 
     const entityMergeTask = new EntityMergeTask(plugins.taskManager, this.server);
 
@@ -121,6 +125,7 @@ export class EntityManagerServerPlugin
       this.server.security = plugins.security;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.taskManager = plugins.taskManager;
+      this.server.onApiKeyChange$ = new Subject();
     }
 
     const esClient = core.elasticsearch.client.asInternalUser;
@@ -144,6 +149,15 @@ export class EntityManagerServerPlugin
     return {
       getScopedClient: async ({ request }: { request: KibanaRequest }) => {
         return this.getScopedClient({ request, coreStart: core });
+      },
+      getFakeRequestForBackgroundUser: async () => {
+        const apiKey = await readEntityDiscoveryAPIKey(this.server!);
+        return apiKey
+          ? getFakeKibanaRequest({
+              id: apiKey.id,
+              api_key: apiKey.apiKey,
+            })
+          : undefined;
       },
     };
   }

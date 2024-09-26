@@ -23,6 +23,7 @@ import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { DistributiveOmit } from '@elastic/eui';
+import type { Subject } from 'rxjs';
 import { RegistryRuleType } from '../rule_type_registry';
 import {
   RuleTypeRegistry,
@@ -86,6 +87,9 @@ export interface RulesClientContext {
   readonly backfillClient: BackfillClient;
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
+  readonly onRuleCreate$: Subject<{ id: string; type: string }>;
+  readonly onRuleUpdate$: Subject<{ id: string; type: string }>;
+  readonly onRuleDelete$: Subject<{ id: string }>;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

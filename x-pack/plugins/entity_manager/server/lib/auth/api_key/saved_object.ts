@@ -7,19 +7,19 @@
 
 import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDiscoveryApiKeyType } from '../../../saved_objects';
-import { EntityManagerServerSetup } from '../../../types';
+import { EntityManagerServer } from '../../../types';
 import { EntityDiscoveryAPIKey } from './api_key';
 
 export const ENTITY_DISCOVERY_API_KEY_SO_ID = '19540C97-E35C-485B-8566-FB86EC8455E4';
 
-const getEncryptedSOClient = (server: EntityManagerServerSetup) => {
+const getEncryptedSOClient = (server: EntityManagerServer) => {
   return server.encryptedSavedObjects.getClient({
     includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
   });
 };
 
 export const readEntityDiscoveryAPIKey = async (
-  server: EntityManagerServerSetup,
+  server: EntityManagerServer,
   id = ENTITY_DISCOVERY_API_KEY_SO_ID
 ) => {
   try {

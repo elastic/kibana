@@ -39,6 +39,7 @@ export const entityLatestSchema = z
       z.object({
         lastSeenTimestamp: z.string(),
         firstSeenTimestamp: z.string(),
+        links: z.array(z.string()).optional(),
       })
     ),
   })

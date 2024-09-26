@@ -70,6 +70,8 @@ export async function findEntities(
     sort,
   };
 
+  console.log(JSON.stringify(params));
+
   if (searchAfter) {
     params.search_after = searchAfter;
   }

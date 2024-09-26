@@ -127,6 +127,10 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
     return transformRuleDomainToRule<Params>(rule);
   }) as Array<SanitizedRule<Params>>;
 
+  deletedPublicRules.forEach((rule) => {
+    context.onRuleDelete$.next({ id: rule.id });
+  });
+
   if (result.status === 'fulfilled') {
     return { errors, total, rules: deletedPublicRules, taskIdsFailedToBeDeleted: result.value };
   } else {

@@ -7,7 +7,7 @@
 
 import { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
-import { EntityManagerServerSetup } from '../../types';
+import { EntityManagerServer } from '../../types';
 import {
   checkIfAPIKeysAreEnabled,
   checkIfEntityDiscoveryAPIKeyIsValid,
@@ -25,7 +25,7 @@ import { EntityPermissionDenied } from '../entities/errors/entity_permission_den
 export async function setupApiKeys(
   context: RequestHandlerContext,
   request: KibanaRequest,
-  server: EntityManagerServerSetup,
+  server: EntityManagerServer,
   definitionId: string,
   apiKeyId: string
 ) {
@@ -65,4 +65,6 @@ export async function setupApiKeys(
   }
 
   await saveEntityDiscoveryAPIKey(soClient, apiKey, apiKeyId);
+
+  server.onApiKeyChange$.next();
 }

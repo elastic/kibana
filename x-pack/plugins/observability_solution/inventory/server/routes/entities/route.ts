@@ -573,11 +573,20 @@ const getEntityLinksRoute = createInventoryServerRoute({
         );
       }),
       new Map(
-        await Promise.all(
-          ruleIds.map((id) =>
-            rulesClient.get({ id }).then((rule) => {
-              return [id, { id, type: 'rule' as const, displayName: rule.name }] as const;
-            })
+        compact(
+          await Promise.all(
+            ruleIds.map((id) =>
+              rulesClient
+                .get({ id })
+                .then((rule) => {
+                  return [id, { id, type: 'rule' as const, displayName: rule.name }] as const;
+                })
+                .catch((err) => {
+                  resources.logger.error(`Could not find rule for id ${id}`);
+                  resources.logger.error(err);
+                  return [id, { id, type: 'rule' as const, displayName: 'NOT FOUND' }] as const;
+                })
+            )
           )
         )
       ),

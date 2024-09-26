@@ -7,9 +7,9 @@
 
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from './auth';
 import { getClientsFromAPIKey } from './utils';
-import { EntityManagerServerSetup } from '../types';
+import { EntityManagerServer } from '../types';
 
-export async function getScopedClients(server: EntityManagerServerSetup) {
+export async function getScopedClients(server: EntityManagerServer) {
   const apiKey = await readEntityDiscoveryAPIKey(server);
   if (!apiKey) {
     throw new Error('Missing API key');

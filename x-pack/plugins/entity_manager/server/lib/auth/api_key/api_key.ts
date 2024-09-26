@@ -7,7 +7,7 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
-import { EntityManagerServerSetup } from '../../../types';
+import { EntityManagerServer } from '../../../types';
 import { canManageEntityDefinition, entityDefinitionRuntimePrivileges } from '../privileges';
 
 export interface EntityDiscoveryAPIKey {
@@ -16,14 +16,12 @@ export interface EntityDiscoveryAPIKey {
   apiKey: string;
 }
 
-export const checkIfAPIKeysAreEnabled = async (
-  server: EntityManagerServerSetup
-): Promise<boolean> => {
+export const checkIfAPIKeysAreEnabled = async (server: EntityManagerServer): Promise<boolean> => {
   return await server.security.authc.apiKeys.areAPIKeysEnabled();
 };
 
 export const checkIfEntityDiscoveryAPIKeyIsValid = async (
-  server: EntityManagerServerSetup,
+  server: EntityManagerServer,
   apiKey: EntityDiscoveryAPIKey
 ): Promise<boolean> => {
   server.logger.debug('validating API key against authentication service');
@@ -49,7 +47,7 @@ export const checkIfEntityDiscoveryAPIKeyIsValid = async (
 };
 
 export const generateEntityDiscoveryAPIKey = async (
-  server: EntityManagerServerSetup,
+  server: EntityManagerServer,
   req: KibanaRequest,
   definitionId = 'built-in definitions'
 ): Promise<EntityDiscoveryAPIKey | undefined> => {
@@ -57,6 +55,17 @@ export const generateEntityDiscoveryAPIKey = async (
     name: `Entity discovery API key for ${definitionId}`,
     role_descriptors: {
       entity_discovery_admin: entityDefinitionRuntimePrivileges,
+    },
+    kibana_role_descriptors: {
+      entity_discovery_admin: {
+        kibana: [
+          {
+            spaces: ['*'],
+            feature: {},
+          },
+        ],
+        elasticsearch: {},
+      },
     },
     metadata: {
       description:

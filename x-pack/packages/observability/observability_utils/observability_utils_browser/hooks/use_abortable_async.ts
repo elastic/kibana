@@ -46,6 +46,12 @@ export function useAbortableAsync<T>(
       setError(undefined);
     }
 
+    function handleError(err: Error) {
+      setError(err);
+      // setValue(undefined);
+      setLoading(false);
+    }
+
     try {
       const response = fn({ signal: controller.signal });
       if (isPromise(response)) {
@@ -55,10 +61,7 @@ export function useAbortableAsync<T>(
             setError(undefined);
             setValue(nextValue);
           })
-          .catch((err) => {
-            setValue(undefined);
-            setError(err);
-          })
+          .catch(handleError)
           .finally(() => setLoading(false));
       } else {
         setError(undefined);
@@ -66,9 +69,7 @@ export function useAbortableAsync<T>(
         setLoading(false);
       }
     } catch (err) {
-      setValue(undefined);
-      setError(err);
-      setLoading(false);
+      handleError(err);
     }
 
     return () => {
