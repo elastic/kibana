@@ -40,6 +40,7 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers,
   isPlainRecord,
   isCompressed = true,
+  onRenderComplete,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -51,6 +52,7 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
   isCompressed?: boolean;
+  onRenderComplete?: () => void;
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -64,6 +66,10 @@ export const getRenderCellValueFn = ({
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
+
+    useEffect(() => {
+      onRenderComplete?.();
+    }, []);
 
     useEffect(() => {
       if (row?.isAnchor) {

@@ -47,14 +47,12 @@ export const DiscoverRouter = ({
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
-          <PerformanceContextProvider>
-            <DiscoverRoutes
-              customizationContext={customizationContext}
-              services={services}
-              history={history}
-              {...routeProps}
-            />
-          </PerformanceContextProvider>
+          <DiscoverRoutes
+            customizationContext={customizationContext}
+            services={services}
+            history={history}
+            {...routeProps}
+          />
         </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>
@@ -93,10 +91,14 @@ export const DiscoverRoutes = ({
         <ViewAlertRoute />
       </Route>
       <Route path="/view/:id">
-        <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
+        <PerformanceContextProvider>
+          <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
+        </PerformanceContextProvider>
       </Route>
       <Route path="/" exact>
-        <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
+        <PerformanceContextProvider>
+          <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
+        </PerformanceContextProvider>
       </Route>
       <NotFoundRoute />
     </Routes>

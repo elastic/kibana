@@ -416,6 +416,10 @@ export interface UnifiedDataTableProps {
    * @param row
    */
   getRowIndicator?: ColorIndicatorControlColumnParams['getRowIndicator'];
+  /**
+   * Optional callback to be called when the initial render of the data grid is complete
+   */
+  onInitialRenderComplete?: () => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -488,7 +492,9 @@ export const UnifiedDataTable = ({
   getRowIndicator,
   dataGridDensityState,
   onUpdateDataGridDensity,
+  onInitialRenderComplete,
 }: UnifiedDataTableProps) => {
+  const isInitialRenderCompleteRef = useRef<boolean>(false);
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
   const { darkMode } = useObservable(services.theme?.theme$ ?? of(THEME_DEFAULT), THEME_DEFAULT);
@@ -704,6 +710,15 @@ export const UnifiedDataTable = ({
         externalCustomRenderers,
         isPlainRecord,
         isCompressed: dataGridDensity === DataGridDensity.COMPACT,
+        onRenderComplete: onInitialRenderComplete
+          ? () => {
+              if (!isInitialRenderCompleteRef.current) {
+                isInitialRenderCompleteRef.current = true;
+                onInitialRenderComplete?.();
+                // console.log('report onPageReady');
+              }
+            }
+          : undefined,
       }),
     [
       dataView,
@@ -715,6 +730,7 @@ export const UnifiedDataTable = ({
       externalCustomRenderers,
       isPlainRecord,
       dataGridDensity,
+      onInitialRenderComplete,
     ]
   );
 
