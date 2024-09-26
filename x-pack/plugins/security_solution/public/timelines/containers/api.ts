@@ -16,12 +16,12 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type {
   CleanDraftTimelinesResponse,
   TimelineErrorResponse, // todo
-  GetAllTimelineVariables,
   TimelineType,
   PatchTimelineResponse,
   CreateTimelinesResponse,
   CopyTimelineResponse,
   GetDraftTimelinesResponse,
+  GetTimelinesRequestQuery,
 } from '../../../common/api/timeline';
 import {
   ImportTimelineResult,
@@ -420,19 +420,13 @@ export const getTimelineTemplate = async (templateTimelineId: string) => {
   return decodeSingleTimelineResponse(response);
 };
 
-export const getAllTimelines = async (args: GetAllTimelineVariables, abortSignal: AbortSignal) => {
+export const getAllTimelines = async (
+  query: GetTimelinesRequestQuery,
+  abortSignal: AbortSignal
+) => {
   const response = await KibanaServices.get().http.fetch<GetTimelinesResponse>(TIMELINES_URL, {
     method: 'GET',
-    query: {
-      ...(args.onlyUserFavorite ? { only_user_favorite: args.onlyUserFavorite } : {}),
-      ...(args?.pageInfo?.pageSize ? { page_size: args.pageInfo.pageSize } : {}),
-      ...(args?.pageInfo?.pageIndex ? { page_index: args.pageInfo.pageIndex } : {}),
-      ...(args.search ? { search: args.search } : {}),
-      ...(args?.sort?.sortField ? { sort_field: args?.sort?.sortField } : {}),
-      ...(args?.sort?.sortOrder ? { sort_order: args?.sort?.sortOrder } : {}),
-      ...(args.status ? { status: args.status } : {}),
-      ...(args.timelineType ? { timeline_type: args.timelineType } : {}),
-    },
+    query,
     signal: abortSignal,
     version: '2023-10-31',
   });

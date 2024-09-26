@@ -23,7 +23,7 @@ import type {
   PageInfoTimeline,
   TimelineResult,
   SortTimeline,
-  GetAllTimelineVariables,
+  GetTimelinesRequestQuery,
 } from '../../../../common/api/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { getAllTimelines } from '../api';
@@ -132,13 +132,15 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
             loading: true,
           }));
 
-          const variables: GetAllTimelineVariables = {
-            onlyUserFavorite,
-            pageInfo,
+          const variables: GetTimelinesRequestQuery = {
+            only_user_favorite: onlyUserFavorite ? 'true' : 'false',
+            page_size: pageInfo.pageSize.toString(),
+            page_index: pageInfo.pageIndex.toString(),
             search,
-            sort,
+            sort_field: sort.sortField,
+            sort_order: sort.sortOrder,
             status,
-            timelineType,
+            timeline_type: timelineType,
           };
           const getAllTimelineResponse = await getAllTimelines(variables, abortCtrl.signal);
           const totalCount = getAllTimelineResponse?.totalCount ?? 0;
