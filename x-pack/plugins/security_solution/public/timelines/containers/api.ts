@@ -69,10 +69,6 @@ const parseOrThrow = parseOrThrowErrorFactory(createToasterPlainError);
 
 const decodeTimelineResponse = (respTimeline?: PersistTimelineResponse | TimelineErrorResponse) =>
   parseOrThrow(PersistTimelineResponse)(respTimeline);
-// - migrate over all decode functions
-// - make that where theyre used, the correct new types are used and none of the legacy types
-// - Check what can be done about TimelineErrorResponse
-// - check in timeline/api.ts if more types can be removed
 
 const decodeSingleTimelineResponse = (respTimeline?: GetTimelineResponse) =>
   parseOrThrow(GetTimelineResponse)(respTimeline);
