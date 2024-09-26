@@ -8,14 +8,12 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { catchError, mergeMap, tap } from 'rxjs';
+import { catchError, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
-import { Readable } from 'stream';
-import { parseJsonFromStream } from '../ese_search/request_utils';
 import {
   getCommonDefaultAsyncSubmitParams,
   getCommonDefaultAsyncGetParams,
@@ -82,7 +80,12 @@ export const esqlAsyncSearchStrategyProvider = (
               path: `/_query/async/${id}`,
               querystring: { ...params, drop_null_columns: dropNullColumns },
             },
-            { ...options.transport, signal: options.abortSignal, meta: true, asStream: true }
+            {
+              ...options.transport,
+              signal: options.abortSignal,
+              meta: true,
+              asStream: options.stream,
+            }
           )
         : await client.transport.request<SqlGetAsyncResponse>(
             {
@@ -91,7 +94,12 @@ export const esqlAsyncSearchStrategyProvider = (
               body: params,
               querystring: dropNullColumns ? 'drop_null_columns' : '',
             },
-            { ...options.transport, signal: options.abortSignal, meta: true, asStream: true }
+            {
+              ...options.transport,
+              signal: options.abortSignal,
+              meta: true,
+              asStream: options.stream,
+            }
           );
 
       const { body, headers, meta } = response;
@@ -99,6 +107,7 @@ export const esqlAsyncSearchStrategyProvider = (
         id: headers['x-elasticsearch-async-id'] as string,
         rawResponse: body,
         isRunning: headers['x-elasticsearch-async-is-running'] === '?1',
+        isPartial: headers['x-elasticsearch-async-is-partial'] === '?1',
         ...(headers?.warning ? { warning: headers?.warning } : {}),
         ...(meta?.request?.params
           ? { requestParams: sanitizeRequestParams(meta?.request?.params) }
@@ -123,28 +132,6 @@ export const esqlAsyncSearchStrategyProvider = (
       pollInterval: searchConfig.asyncSearch.pollInterval,
       ...options,
     }).pipe(
-      mergeMap(async (response) => {
-        if (!options.stream) {
-          const raw = await parseJsonFromStream(response.rawResponse as unknown as Readable);
-          if (raw.error) {
-            // eslint-disable-next-line no-throw-literal
-            throw {
-              message: raw.error.reason,
-              statusCode: raw.status,
-              attributes: {
-                error: raw.error,
-                requestParams: response.requestParams,
-              },
-            };
-          }
-          const data = {
-            ...response,
-            rawResponse: raw,
-          };
-          return data;
-        }
-        return response;
-      }),
       tap((response) => (id = response.id)),
       catchError((e) => {
         throw getKbnSearchError(e);

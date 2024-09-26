@@ -12,12 +12,7 @@ import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithB
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions } from '@kbn/search-types';
 import { Readable, promises } from 'stream';
-import {
-  AsyncSearchResponse,
-  getTotalLoaded,
-  shimHitsTotal,
-  UI_SETTINGS,
-} from '../../../../common';
+import { UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import { SearchConfigSchema } from '../../../config';
 import {
@@ -78,41 +73,6 @@ export function getDefaultAsyncGetParams(
     ...getCommonDefaultAsyncGetParams(searchConfig, options),
   };
 }
-
-export const toKibanaResponse = async (
-  resp: Record<string, unknown>,
-  shimTotals: boolean = true
-) => {
-  let result = { ...resp };
-  if ((resp.rawResponse as unknown as Readable).pipe) {
-    result = await parseJsonFromStream(resp.rawResponse as unknown as Readable);
-
-    if (result.error) {
-      // eslint-disable-next-line no-throw-literal
-      throw {
-        message: result.error.reason,
-        statusCode: result.status,
-        attributes: {
-          error: result.error,
-          requestParams: resp.requestParams,
-        },
-      };
-    }
-  }
-  if (!result.rawResponse) {
-    const typedResult = result as unknown as AsyncSearchResponse;
-
-    result = {
-      id: typedResult.id,
-      isRunning: typedResult.is_running,
-      isPartial: typedResult.is_partial,
-      rawResponse: { ...(shimTotals ? shimHitsTotal(typedResult.response) : typedResult.response) },
-      ...(shimTotals ? getTotalLoaded(typedResult.response) : {}),
-    };
-  }
-
-  return result;
-};
 
 export const parseJsonFromStream = async (stream: Readable) => {
   try {
