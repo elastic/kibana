@@ -7,7 +7,13 @@
 
 export function getTimestamp(timestamp?: string, fallbackTimestamp?: number): number {
   if (!fallbackTimestamp && timestamp) {
-    return new Date(timestamp).getTime() * 1000;
+    const date = new Date(timestamp);
+    const milliseconds = date.getTime() * 1000;
+
+    const microsecondsMatch = timestamp.match(/\.(\d{3})(\d{3})?Z$/);
+    const microseconds = microsecondsMatch ? parseInt(microsecondsMatch[2] || '000', 10) : 0;
+
+    return milliseconds + microseconds;
   }
 
   return fallbackTimestamp || 0;
