@@ -72,9 +72,8 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
 
   const o11yTrialLink = useMemo(() => {
     if (cloud && cloud.isServerlessEnabled) {
-      return `${
-        cloud?.projectsUrl ?? 'https://cloud.elastic.co/projects/'
-      }create/observability/start`;
+      const baseUrl = cloud?.projectsUrl ?? 'https://cloud.elastic.co/projects/';
+      return `${baseUrl}create/observability/start`;
     }
     return http.basePath.prepend('/app/observability/onboarding');
   }, [cloud, http]);
@@ -220,7 +219,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
               color="text"
               iconSide="right"
               iconType="popout"
-              data-test-subj="logstashDocsBtn"
+              data-test-subj="analyzeLogsBtn"
               data-telemetry-id="searchIndicesStartCollectLogsLink"
               href={docLinks.analyzeLogs}
               target="_blank"

@@ -195,7 +195,6 @@ export const CreateIndexForm = ({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
     </>
   );
 };
