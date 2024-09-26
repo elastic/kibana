@@ -462,6 +462,18 @@ type MergeProps<T, AP> = T extends (args: infer Props) => unknown
   ? ComponentClass<Props & AP>
   : never;
 
+interface SelectedAlertWithLegacyFormats {
+  alert: Alert;
+  /**
+   * @deprecated
+   */
+  legacyAlert: LegacyField[];
+  /**
+   * @deprecated
+   */
+  ecsAlert: any;
+}
+
 // TODO(@umbopepato) rename columns to initialColumns?
 export interface AlertsTableProps<AC extends AdditionalContext = AdditionalContext>
   extends PublicAlertsDataGridProps {
@@ -495,17 +507,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderCellValue?: MergeProps<
     EuiDataGridProps['renderCellValue'],
-    RenderContext<AC> & {
-      alert: Alert;
-      /**
-       * @deprecated
-       */
-      legacyAlert: LegacyField[];
-      /**
-       * @deprecated
-       */
-      ecsAlert: any;
-    }
+    RenderContext<AC> & SelectedAlertWithLegacyFormats
   >;
   renderCellPopover?: MergeProps<
     EuiDataGridProps['renderCellPopover'],
@@ -513,7 +515,8 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   >;
   renderActionsCell?: MergeProps<
     EuiDataGridControlColumn['rowCellRender'],
-    RenderContext<AC> & { alert: Alert; setIsActionLoading?: (isLoading: boolean) => void }
+    RenderContext<AC> &
+      SelectedAlertWithLegacyFormats & { setIsActionLoading?: (isLoading: boolean) => void }
   >;
   renderAdditionalToolbarControls?: ComponentRenderer<AC>;
   renderFlyoutHeader?: FlyoutSectionRenderer<AC>;

@@ -8,7 +8,7 @@
 import { CoreSetup, CoreStart, Plugin as CorePlugin } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
-import { ReactElement } from 'react';
+import { ReactElement, RefAttributes } from 'react';
 import { PluginInitializerContext } from '@kbn/core/public';
 import { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { KibanaFeature } from '@kbn/features-plugin/common';
@@ -34,7 +34,13 @@ import { RuleAction } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
-import type { AdditionalContext, AlertActionsProps, AlertsTableProps, RuleUiAction } from './types';
+import type {
+  AdditionalContext,
+  AlertActionsProps,
+  AlertsTableImperativeApi,
+  AlertsTableProps,
+  RuleUiAction,
+} from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
@@ -136,7 +142,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: P
   ) => ReactElement<AlertActionsProps>;
   getAlertsStateTable: <AC extends AdditionalContext>(
-    props: AlertsTableProps<AC> & LazyLoadProps
+    props: AlertsTableProps<AC> & LazyLoadProps & RefAttributes<AlertsTableImperativeApi>
   ) => ReactElement<AlertsTableProps<AC>>;
   getAlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
   getFieldBrowser: (props: FieldBrowserProps) => ReactElement<FieldBrowserProps>;
@@ -489,11 +495,7 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getAlertsStateTable: <AC extends AdditionalContext>(
-        props: AlertsTableProps<AC> & LazyLoadProps
-      ) => {
-        return getAlertsTableStateLazy(props);
-      },
+      getAlertsStateTable: getAlertsTableStateLazy,
       getAlertsSearchBar: (props: AlertsSearchBarProps) => {
         return getAlertsSearchBarLazy(props);
       },

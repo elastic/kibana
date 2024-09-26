@@ -6,12 +6,13 @@
  */
 import { useCallback, useMemo } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
+import { noop } from 'lodash';
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 
 export const useAlertsTableFieldsBrowserOptions = (
   scopeId: SourcererScopeName,
-  toggleColumn: (columnId: string) => void = () => undefined
+  toggleColumn: (columnId: string) => void = noop
 ) => {
   const upsertColumn = useCallback(
     (column: EuiDataGridColumn) => {

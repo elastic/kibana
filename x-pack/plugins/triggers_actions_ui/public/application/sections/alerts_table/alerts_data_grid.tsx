@@ -406,7 +406,10 @@ export const AlertsDataGrid = typedMemo(
     const customActionsColumn: EuiDataGridControlColumn | undefined = useMemo(() => {
       if (ActionsCell) {
         const RowCellRender: EuiDataGridControlColumn['rowCellRender'] = (_props) => {
-          const alert = _props.alerts[_props.rowIndex - _props.pageSize * _props.pageIndex];
+          const idx = _props.rowIndex - _props.pageSize * _props.pageIndex;
+          const alert = _props.alerts[idx];
+          const legacyAlert = _props.oldAlertsData[idx];
+          const ecsAlert = _props.ecsAlertsData[idx];
           const setIsActionLoading = useCallback(
             (_isLoading: boolean = true) => {
               updateBulkActionsState({
@@ -417,6 +420,11 @@ export const AlertsDataGrid = typedMemo(
             },
             [_props.visibleRowIndex]
           );
+
+          if (!alert) {
+            return null;
+          }
+
           return (
             <CustomCellWrapper>
               <ActionsCell
@@ -425,6 +433,8 @@ export const AlertsDataGrid = typedMemo(
                   typeof ActionsCell
                 >)}
                 alert={alert}
+                legacyAlert={legacyAlert}
+                ecsAlert={ecsAlert}
                 setIsActionLoading={setIsActionLoading}
               />
             </CustomCellWrapper>
@@ -563,16 +573,16 @@ export const AlertsDataGrid = typedMemo(
       ({ visibleColumns: _visibleColumns, Cell, headerRow, footerRow }) => (
         <>
           {headerRow}
-        <CustomGridBody
-          visibleColumns={_visibleColumns}
-          Cell={Cell}
-          actualGridStyle={actualGridStyle}
-          alertsData={oldAlertsData}
-          pageIndex={pageIndex}
-          pageSize={pageSize}
-          isLoading={isLoadingAlerts}
-          stripes={props.gridStyle?.stripes}
-        />
+          <CustomGridBody
+            visibleColumns={_visibleColumns}
+            Cell={Cell}
+            actualGridStyle={actualGridStyle}
+            alertsData={oldAlertsData}
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            isLoading={isLoadingAlerts}
+            stripes={props.gridStyle?.stripes}
+          />
           {footerRow}
         </>
       ),

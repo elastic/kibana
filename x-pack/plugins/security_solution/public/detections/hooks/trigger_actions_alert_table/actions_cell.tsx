@@ -21,12 +21,16 @@ import type { SecurityAlertsTableProp } from '../../components/alerts_table/type
 export const ActionsCellComponent: SecurityAlertsTableProp<'renderActionsCell'> = ({
   tableType = TableId.alertsOnAlertsPage,
   rowIndex,
-  cveProps,
+  isDetails,
+  isExpanded,
+  isExpandable,
+  colIndex,
+  setCellProps,
+  ecsAlert: alert,
+  legacyAlert,
   setIsActionLoading,
   refresh: alertsTableRefresh,
   clearSelection,
-  ecsAlert: alert,
-  nonEcsData,
   leadingControlColumn,
 }) => {
   const license = useLicense();
@@ -44,7 +48,7 @@ export const ActionsCellComponent: SecurityAlertsTableProp<'renderActionsCell'> 
     _id: (alert as Ecs)._id,
     _index: (alert as Ecs)._index,
     ecs: alert as Ecs,
-    data: nonEcsData,
+    data: legacyAlert,
   };
 
   return (
@@ -55,17 +59,17 @@ export const ActionsCellComponent: SecurityAlertsTableProp<'renderActionsCell'> 
       data={timelineItem}
       disabled={false}
       index={rowIndex}
-      isDetails={cveProps.isDetails}
-      isExpanded={cveProps.isExpanded}
+      isDetails={isDetails}
+      isExpanded={isExpanded}
       isEventViewer={false}
-      isExpandable={cveProps.isExpandable}
+      isExpandable={isExpandable}
       loadingEventIds={loadingEventIds}
       onRowSelected={() => {}}
-      rowIndex={cveProps.rowIndex}
-      colIndex={cveProps.colIndex}
+      rowIndex={rowIndex}
+      colIndex={colIndex}
       pageRowIndex={rowIndex}
       selectedEventIds={selectedEventIds}
-      setCellProps={cveProps.setCellProps}
+      setCellProps={setCellProps}
       showCheckboxes={showCheckboxes}
       onRuleChange={eventContext?.onRuleChange}
       tabType={'query'}
