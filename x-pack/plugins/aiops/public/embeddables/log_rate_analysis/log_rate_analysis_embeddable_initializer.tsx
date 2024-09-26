@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { pick } from 'lodash';
+
 import {
   EuiFlyoutHeader,
   EuiTitle,
@@ -18,19 +22,20 @@ import {
   EuiFlexItem,
   EuiFlyoutFooter,
 } from '@elastic/eui';
+
+import type { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { pick } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
-import type { LogRateAnalysisEmbeddableRuntimeState } from './types';
 import { LogRateAnalysisSettings } from '../../components/log_rate_analysis/log_rate_analysis_for_embeddable/embeddable_menu';
 
-export interface LogRateAnalysisInitializerProps {
+import type { LogRateAnalysisEmbeddableRuntimeState } from './types';
+
+export interface LogRateAnalysisEmbeddableInitializerProps {
+  IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   initialInput?: Partial<LogRateAnalysisEmbeddableRuntimeState>;
   onCreate: (props: LogRateAnalysisEmbeddableRuntimeState) => void;
   onCancel: () => void;
@@ -38,19 +43,9 @@ export interface LogRateAnalysisInitializerProps {
   isNewPanel: boolean;
 }
 
-export const LogRateAnalysisEmbeddableInitializer: FC<LogRateAnalysisInitializerProps> = ({
-  initialInput,
-  onCreate,
-  onCancel,
-  onPreview,
-  isNewPanel,
-}) => {
-  const {
-    unifiedSearch: {
-      ui: { IndexPatternSelect },
-    },
-  } = useAiopsAppContext();
-
+export const LogRateAnalysisEmbeddableInitializer: FC<
+  LogRateAnalysisEmbeddableInitializerProps
+> = ({ IndexPatternSelect, initialInput, onCreate, onCancel, onPreview, isNewPanel }) => {
   const [formInput, setFormInput] = useState<LogRateAnalysisEmbeddableRuntimeState>(
     pick(initialInput ?? {}, ['dataViewId']) as LogRateAnalysisEmbeddableRuntimeState
   );

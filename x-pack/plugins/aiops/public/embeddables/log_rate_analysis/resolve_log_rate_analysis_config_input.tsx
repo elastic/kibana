@@ -9,10 +9,8 @@ import type { CoreStart } from '@kbn/core/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import type { AiopsAppDependencies } from '../..';
-import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { AiopsPluginStartDeps } from '../../types';
-import { LogRateAnalysisEmbeddableInitializer } from './log_rate_analysis_initializer';
+import { LogRateAnalysisEmbeddableInitializer } from './log_rate_analysis_embeddable_initializer';
 import type { LogRateAnalysisComponentApi, LogRateAnalysisEmbeddableState } from './types';
 
 export async function resolveEmbeddableLogRateAnalysisUserInput(
@@ -59,22 +57,14 @@ export async function resolveEmbeddableLogRateAnalysisUserInput(
 
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
-          <AiopsAppContext.Provider
-            value={
-              {
-                ...coreStart,
-                ...pluginStart,
-              } as unknown as AiopsAppDependencies
-            }
-          >
-            <LogRateAnalysisEmbeddableInitializer
-              initialInput={initialState}
-              onCreate={update}
-              onCancel={cancelChanges}
-              onPreview={preview}
-              isNewPanel={isNewPanel}
-            />
-          </AiopsAppContext.Provider>,
+          <LogRateAnalysisEmbeddableInitializer
+            IndexPatternSelect={pluginStart.unifiedSearch.ui.IndexPatternSelect}
+            initialInput={initialState}
+            onCreate={update}
+            onCancel={cancelChanges}
+            onPreview={preview}
+            isNewPanel={isNewPanel}
+          />,
           coreStart
         ),
         {

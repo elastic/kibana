@@ -4,23 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { UI_SETTINGS } from '@kbn/data-service';
-import type { TimeRange } from '@kbn/es-query';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+
 import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { createBrowserHistory } from 'history';
+
+import datemath from '@elastic/datemath';
+
+import { UrlStateProvider } from '@kbn/ml-url-state';
+import { Router } from '@kbn/shared-ux-router';
+import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { UI_SETTINGS } from '@kbn/data-service';
+import { LogRateAnalysisReduxProvider } from '@kbn/aiops-log-rate-analysis/state';
+import type { TimeRange } from '@kbn/es-query';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-import { LogRateAnalysisEmbeddableWrapper } from '../embeddables/log_rate_analysis/log_rate_analysis_component_wrapper';
+
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
-import { FilterQueryContextProvider } from '../hooks/use_filters_query';
 import { ReloadContextProvider } from '../hooks/use_reload';
 import type { AiopsPluginStartDeps } from '../types';
+
+import { LogRateAnalysisDocumentCountChartData } from '../components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_document_count_chart_data';
+import { LogRateAnalysisContent } from '../components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content';
 
 /**
  * Only used to initialize internally
@@ -36,11 +45,11 @@ export interface LogRateAnalysisProps {
   dataViewId: string;
   timeRange: TimeRange;
   /**
-   * Component to render if there are no patterns found
+   * Component to render if there are no significant items found
    */
   emptyState?: React.ReactElement;
   /**
-   * Outputs the most recent patterns data
+   * Outputs the most recent significant items
    */
   onChange?: (significantItems: SignificantItem[]) => void;
   /**
@@ -116,37 +125,57 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
     );
   }, [manualReload$]);
 
+  const history = createBrowserHistory();
+
+  const esSearchQuery = { match_all: {} };
+
+  const timeRangeParsed = useMemo(() => {
+    if (timeRange) {
+      const min = datemath.parse(timeRange.from);
+      const max = datemath.parse(timeRange.to);
+      if (min && max) {
+        return { min, max };
+      }
+    }
+  }, [timeRange]);
+
   // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
     <div
       data-shared-item=""
-      data-test-subj="aiopsEmbeddablePatternAnalysis"
+      data-test-subj="aiopsEmbeddableLogRateAnalysis"
       css={{
         width: '100%',
+        height: '100%',
+        overflowY: 'auto',
         padding: '10px',
       }}
     >
-      <KibanaRenderContextProvider {...coreStart}>
-        <AiopsAppContext.Provider value={aiopsAppContextValue}>
-          <DatePickerContextProvider {...datePickerDeps}>
-            <ReloadContextProvider reload$={resultObservable$}>
+      <Router history={history}>
+        <ReloadContextProvider reload$={resultObservable$}>
+          <AiopsAppContext.Provider value={aiopsAppContextValue}>
+            <UrlStateProvider>
               <DataSourceContextProvider dataViewId={dataViewId}>
-                <FilterQueryContextProvider timeRange={timeRange}>
-                  <LogRateAnalysisEmbeddableWrapper
-                    dataViewId={dataViewId}
-                    timeRange={timeRange}
-                    lastReloadRequestTime={lastReloadRequestTime}
-                    onLoading={onLoading}
-                    onRenderComplete={onRenderComplete}
-                    onError={onError}
-                    onChange={onChange}
-                  />
-                </FilterQueryContextProvider>
+                <LogRateAnalysisReduxProvider>
+                  <DatePickerContextProvider {...datePickerDeps}>
+                    <LogRateAnalysisDocumentCountChartData
+                      timeRange={timeRangeParsed}
+                      esSearchQuery={esSearchQuery}
+                    />
+                    <LogRateAnalysisContent
+                      esSearchQuery={esSearchQuery}
+                      // barColorOverride={barColorOverride}
+                      // barHighlightColorOverride={barHighlightColorOverride}
+                      // onAnalysisCompleted={onAnalysisCompleted}
+                      embeddingOrigin={embeddingOrigin ?? EMBEDDABLE_ORIGIN}
+                    />
+                  </DatePickerContextProvider>
+                </LogRateAnalysisReduxProvider>
               </DataSourceContextProvider>
-            </ReloadContextProvider>
-          </DatePickerContextProvider>
-        </AiopsAppContext.Provider>
-      </KibanaRenderContextProvider>
+            </UrlStateProvider>
+          </AiopsAppContext.Provider>
+        </ReloadContextProvider>
+      </Router>
     </div>
   );
 };
