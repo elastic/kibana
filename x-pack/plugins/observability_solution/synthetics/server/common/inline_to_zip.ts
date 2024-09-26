@@ -24,7 +24,7 @@ export async function inlineToProjectZip(
 ): Promise<string> {
   const mWriter = new MemWritable();
   try {
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       const archive = archiver('zip', {
         zlib: { level: 9 },
       });
@@ -32,14 +32,13 @@ export async function inlineToProjectZip(
       mWriter.on('close', resolve);
       archive.pipe(mWriter);
       archive.append(wrapInlineInProject(inlineJourney), {
-        name: 'inline.journey.ts',
+        name: `${monitorId}.journey.ts`,
       });
       archive.finalize();
     });
-
-    return mWriter.buffer.toString('base64');
   } catch (e) {
     logger.error(`Failed to create zip for inline monitor ${monitorId}`);
     throw e;
   }
+  return mWriter.buffer.toString('base64');
 }
