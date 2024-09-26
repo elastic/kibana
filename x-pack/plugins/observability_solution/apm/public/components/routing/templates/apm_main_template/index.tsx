@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
@@ -26,7 +26,6 @@ import { ServiceGroupsButtonGroup } from '../../../app/service_groups/service_gr
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { getNoDataConfig } from '../no_data_config';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { ServiceInventoryView } from '../../../../context/entity_manager_context/entity_manager_context';
 import { EntitiesInventoryCallout } from './entities_inventory_callout';
 
 // Paths that must skip the no data screen
@@ -78,17 +77,7 @@ export function ApmMainTemplate({
     true
   );
 
-  const {
-    isEntityCentricExperienceViewEnabled,
-    serviceInventoryViewLocalStorageSetting,
-    setServiceInventoryViewLocalStorageSetting,
-  } = useEntityManagerEnablementContext();
-
-  useEffect(() => {
-    if (serviceInventoryViewLocalStorageSetting === ServiceInventoryView.entity) {
-      setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.classic);
-    }
-  }, [serviceInventoryViewLocalStorageSetting, setServiceInventoryViewLocalStorageSetting]);
+  const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -187,12 +176,7 @@ export function ApmMainTemplate({
   return (
     <EnvironmentsContextProvider>
       <ObservabilityPageTemplate
-        noDataConfig={
-          shouldBypassNoDataScreen ||
-          serviceInventoryViewLocalStorageSetting === ServiceInventoryView.entity
-            ? undefined
-            : noDataConfig
-        }
+        noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
         isPageDataLoaded={isLoading === false}
         pageHeader={{
           rightSideItems,
