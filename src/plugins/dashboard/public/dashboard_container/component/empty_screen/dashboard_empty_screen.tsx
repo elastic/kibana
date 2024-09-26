@@ -22,9 +22,10 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
 
 export function DashboardEmptyScreen() {
@@ -45,13 +46,12 @@ export function DashboardEmptyScreen() {
     [getVisTypeAliases]
   );
 
-  const dashboardContainer = useDashboardContainer();
+  const dashboardApi = useDashboardApi();
   const isDarkTheme = useObservable(theme$)?.darkMode;
-  const isEditMode =
-    dashboardContainer.select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
-  const embeddableAppContext = dashboardContainer.getAppContext();
-  const originatingPath = embeddableAppContext?.getCurrentPath?.() ?? '';
-  const originatingApp = embeddableAppContext?.currentAppId;
+  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode);
+  const isEditMode = useMemo(() => {
+    return viewMode === 'edit';
+  }, [viewMode]);
 
   const goToLens = useCallback(() => {
     if (!lensAlias || !lensAlias.alias) return;
@@ -63,22 +63,16 @@ export function DashboardEmptyScreen() {
     if (trackUiMetric) {
       trackUiMetric(METRIC_TYPE.CLICK, `${lensAlias.name}:create`);
     }
+    const appContext = dashboardApi.getAppContext();
     getStateTransfer().navigateToEditor(lensAlias.alias.app, {
       path: lensAlias.alias.path,
       state: {
-        originatingApp,
-        originatingPath,
+        originatingApp: appContext?.currentAppId,
+        originatingPath: appContext?.getCurrentPath?.() ?? '',
         searchSessionId: search.session.getSessionId(),
       },
     });
-  }, [
-    getStateTransfer,
-    lensAlias,
-    originatingApp,
-    originatingPath,
-    search.session,
-    usageCollection,
-  ]);
+  }, [getStateTransfer, lensAlias, dashboardApi, search.session, usageCollection]);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = basePath.prepend(
@@ -128,7 +122,7 @@ export function DashboardEmptyScreen() {
             <EuiButtonEmpty
               flush="left"
               iconType="folderOpen"
-              onClick={() => dashboardContainer.addFromLibrary()}
+              onClick={() => dashboardApi.addFromLibrary()}
             >
               {emptyScreenStrings.getAddFromLibraryButtonTitle()}
             </EuiButtonEmpty>
@@ -138,10 +132,7 @@ export function DashboardEmptyScreen() {
     }
     if (showWriteControls) {
       return (
-        <EuiButton
-          iconType="pencil"
-          onClick={() => dashboardContainer.dispatch.setViewMode(ViewMode.EDIT)}
-        >
+        <EuiButton iconType="pencil" onClick={() => dashboardApi.setViewMode(ViewMode.EDIT)}>
           {emptyScreenStrings.getEditLinkTitle()}
         </EuiButton>
       );
