@@ -179,5 +179,4 @@ describe('createReadme', () => {
       expect.stringContaining(firstDatastreamFieldsDisplayed)
     );
   });
-
 });
