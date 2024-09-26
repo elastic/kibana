@@ -68,11 +68,9 @@ export type OnboardingCardComponent = React.ComponentType<{
 export type OnboardingCardCheckComplete = ({
   http,
   data,
-  navigateToApp,
 }: {
   http: HttpSetup;
   data: DataPublicPluginStart;
-  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
 }) => Promise<CheckCompleteResponse>;
 
 export interface OnboardingCardConfig {

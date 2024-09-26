@@ -16,7 +16,6 @@ import { LinkAnchor } from '../../../../../common/components/links';
 import { useKibana } from '../../../../../common/lib/kibana';
 
 export const IntegrationsCard: OnboardingCardComponent = ({
-  setComplete,
   checkCompleteMetadata, // this is undefined before the first checkComplete call finishes
 }) => {
   const integrationsInstalled: number | undefined = checkCompleteMetadata?.integrationsInstalled as
@@ -77,7 +76,7 @@ export const IntegrationsCard: OnboardingCardComponent = ({
           <EuiSpacer size="m" />
         </>
       )}
-      <AvailablePackages setComplete={setComplete} />
+      <AvailablePackages />
     </OnboardingCardContentPanel>
   );
 };

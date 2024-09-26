@@ -14,6 +14,7 @@ export const SEARCH_FILTER_CATEGORIES: CategoryFacet[] = [];
 export const SCROLL_ELEMENT_ID = 'integrations-scroll-container';
 export const WITH_SEARCH_BOX_HEIGHT = '517px';
 export const WITHOUT_SEARCH_BOX_HEIGHT = '462px';
+export const MAX_CARD_HEIGHT = 127; // px
 export const LOADING_SKELETON_HEIGHT = 10; // 10 lines of text
 export const INTEGRATION_TABS: Tab[] = [
   {

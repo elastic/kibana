@@ -60,11 +60,7 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async 
 
   return {
     isComplete,
-    completeBadgeText: getCompleteBadgeWithTooltip({
-      agentStillRequired,
-      navigateToApp,
-      completeBadgeText,
-    }),
+    completeBadgeText,
     metadata: {
       integrationsInstalled: installed.length,
       agentStillRequired,

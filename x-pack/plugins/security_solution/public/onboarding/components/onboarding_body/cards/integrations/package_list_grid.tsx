@@ -32,6 +32,8 @@ import {
 interface WrapperProps {
   useAvailablePackages: AvailablePackagesHookType;
 }
+
+const emptyStateStyles = { paddingTop: '16px' };
 export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProps) => {
   const { spaceId } = useOnboardingContext();
   const scrollElement = useRef<HTMLDivElement>(null);
@@ -76,7 +78,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
     setCategory(selectedCategory);
     setSelectedSubCategory(selectedSubCategory);
     if (!showSearchTools) {
-      // If search tools are not shown, clear the search term to avoid unexpected filtering
+      // If search box are not shown, clear the search term to avoid unexpected filtering
       onSearchTermChanged('');
     }
   }, [
@@ -132,6 +134,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
         <Suspense fallback={<EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_HEIGHT} />}>
           <PackageList
             categories={SEARCH_FILTER_CATEGORIES} // We do not want to show categories and subcategories as the search bar filter
+            emptyStateStyles={emptyStateStyles}
             list={list}
             scrollElementId={SCROLL_ELEMENT_ID}
             searchTerm={searchTerm}

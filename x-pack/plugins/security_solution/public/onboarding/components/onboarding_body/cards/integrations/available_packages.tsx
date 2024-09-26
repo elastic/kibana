@@ -15,54 +15,52 @@ import { fetchAvailablePackagesHook } from './utils';
 import { PackageListGrid } from './package_list_grid';
 import { LOADING_SKELETON_HEIGHT } from './const';
 
-export const AvailablePackages = React.memo(
-  ({ setComplete }: { setComplete: (complete: boolean) => void }) => {
-    const ref = useRef<AvailablePackagesHookType | null>(null);
+export const AvailablePackages = React.memo(() => {
+  const ref = useRef<AvailablePackagesHookType | null>(null);
 
-    const {
-      error: errorLoading,
-      retry: retryAsyncLoad,
-      loading: asyncLoading,
-    } = useAsyncRetry(async () => {
-      ref.current = await fetchAvailablePackagesHook();
-    });
+  const {
+    error: errorLoading,
+    retry: retryAsyncLoad,
+    loading: asyncLoading,
+  } = useAsyncRetry(async () => {
+    ref.current = await fetchAvailablePackagesHook();
+  });
 
-    if (errorLoading)
-      return (
-        <EuiCallOut
-          title={i18n.translate('xpack.securitySolution.onboarding.asyncLoadFailureCallout.title', {
-            defaultMessage: 'Loading failure',
-          })}
+  if (errorLoading)
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.securitySolution.onboarding.asyncLoadFailureCallout.title', {
+          defaultMessage: 'Loading failure',
+        })}
+        color="warning"
+        iconType="cross"
+        size="m"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.onboarding.asyncLoadFailureCallout.copy"
+            defaultMessage="Some required elements failed to load."
+          />
+        </p>
+        <EuiButton
           color="warning"
-          iconType="cross"
-          size="m"
+          data-test-subj="xpack.securitySolution.onboarding.asyncLoadFailureCallout.button"
+          onClick={() => {
+            if (!asyncLoading) retryAsyncLoad();
+          }}
         >
-          <p>
-            <FormattedMessage
-              id="xpack.securitySolution.onboarding.asyncLoadFailureCallout.copy"
-              defaultMessage="Some required elements failed to load."
-            />
-          </p>
-          <EuiButton
-            color="warning"
-            data-test-subj="xpack.securitySolution.onboarding.asyncLoadFailureCallout.button"
-            onClick={() => {
-              if (!asyncLoading) retryAsyncLoad();
-            }}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.onboarding.asyncLoadFailureCallout.buttonContent"
-              defaultMessage="Retry"
-            />
-          </EuiButton>
-        </EuiCallOut>
-      );
+          <FormattedMessage
+            id="xpack.securitySolution.onboarding.asyncLoadFailureCallout.buttonContent"
+            defaultMessage="Retry"
+          />
+        </EuiButton>
+      </EuiCallOut>
+    );
 
-    if (asyncLoading || ref.current === null)
-      return <EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_HEIGHT} />;
+  if (asyncLoading || ref.current === null)
+    return <EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_HEIGHT} />;
 
-    return <PackageListGrid useAvailablePackages={ref.current} />;
-  }
-);
+  return <PackageListGrid useAvailablePackages={ref.current} />;
+});
 
 AvailablePackages.displayName = 'AvailablePackages';
