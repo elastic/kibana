@@ -12,7 +12,7 @@ import {
   RuleAction,
   RuleNotifyWhenTypeValues,
   ThrottledActions,
-} from '../../../common';
+} from '../../../../common';
 
 export const isSummaryAction = (action?: RuleAction) => {
   return action?.frequency?.summary ?? false;

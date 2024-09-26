@@ -20,7 +20,7 @@ import {
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { RawRule } from '../types';
+import { AlertHit, RawRule } from '../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 interface GeneratorParams {
@@ -342,9 +342,10 @@ export const generateAlertOpts = ({
   };
 };
 
-export const generateActionOpts = ({ id, alertGroup, alertId }: GeneratorParams = {}) => ({
+export const generateActionOpts = ({ id, alertGroup, alertId, uuid }: GeneratorParams = {}) => ({
   id: id ?? '1',
   typeId: 'action',
+  uuid: uuid ?? '111-111',
   alertId: alertId ?? '1',
   alertGroup: alertGroup ?? 'default',
 });
@@ -396,11 +397,13 @@ export const generateRunnerResult = ({
 
 export const generateEnqueueFunctionInput = ({
   id = '1',
+  uuid = '111-111',
   isBulk = false,
   isResolved,
   foo,
   actionTypeId,
 }: {
+  uuid?: string;
   id: string;
   isBulk?: boolean;
   isResolved?: boolean;
@@ -412,6 +415,7 @@ export const generateEnqueueFunctionInput = ({
     apiKey: 'MTIzOmFiYw==',
     executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
     id,
+    uuid,
     params: {
       ...(isResolved !== undefined ? { isResolved } : {}),
       ...(foo !== undefined ? { foo } : {}),
@@ -497,4 +501,4 @@ export const mockAAD = {
       },
     },
   },
-};
+} as unknown as AlertHit;

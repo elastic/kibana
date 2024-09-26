@@ -78,6 +78,7 @@ interface AlertOpts {
 
 export interface ActionOpts {
   id: string;
+  uuid?: string;
   typeId: string;
   alertId?: string;
   alertGroup?: string;

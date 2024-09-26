@@ -7,13 +7,19 @@
 
 import { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
 import { RuleSystemAction, RuleTypeParams } from '@kbn/alerting-types';
+import { CombinedSummarizedAlerts } from '../../../types';
 import { RuleTypeState, RuleAlertData } from '../../../../common';
 import { GetSummarizedAlertsParams } from '../../../alerts_client/types';
-import { getSummarizedAlerts } from '../get_summarized_alerts';
+import {
+  buildRuleUrl,
+  formatActionToEnqueue,
+  getSummarizedAlerts,
+  shouldScheduleAction,
+} from '../lib';
 import {
   ActionSchedulerOptions,
-  Executable,
-  GenerateExecutablesOpts,
+  ActionsToSchedule,
+  GetActionsToScheduleOpts,
   IActionScheduler,
 } from '../types';
 
@@ -53,14 +59,19 @@ export class SystemActionScheduler<
     return 1;
   }
 
-  public async generateExecutables(
-    _: GenerateExecutablesOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
-  ): Promise<Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>> {
-    const executables = [];
+  public async getActionsToSchedule(
+    _: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
+  ): Promise<ActionsToSchedule[]> {
+    const executables: Array<{
+      action: RuleSystemAction;
+      summarizedAlerts: CombinedSummarizedAlerts;
+    }> = [];
+    const results: ActionsToSchedule[] = [];
+
     for (const action of this.actions) {
       const options: GetSummarizedAlertsParams = {
         spaceId: this.context.taskInstance.params.spaceId,
-        ruleId: this.context.taskInstance.params.alertId,
+        ruleId: this.context.rule.id,
         excludedAlertInstanceIds: this.context.rule.mutedInstanceIds,
         executionUuid: this.context.executionId,
       };
@@ -75,6 +86,95 @@ export class SystemActionScheduler<
       }
     }
 
-    return executables;
+    if (executables.length === 0) return [];
+
+    this.context.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
+
+    const ruleUrl = buildRuleUrl({
+      getViewInAppRelativeUrl: this.context.ruleType.getViewInAppRelativeUrl,
+      kibanaBaseUrl: this.context.taskRunnerContext.kibanaBaseUrl,
+      logger: this.context.logger,
+      rule: this.context.rule,
+      spaceId: this.context.taskInstance.params.spaceId,
+    });
+
+    for (const { action, summarizedAlerts } of executables) {
+      const { actionTypeId } = action;
+
+      if (
+        !shouldScheduleAction({
+          action,
+          actionsConfigMap: this.context.taskRunnerContext.actionsConfigMap,
+          isActionExecutable: this.context.taskRunnerContext.actionsPlugin.isActionExecutable,
+          logger: this.context.logger,
+          ruleId: this.context.rule.id,
+          ruleRunMetricsStore: this.context.ruleRunMetricsStore,
+        })
+      ) {
+        continue;
+      }
+
+      const hasConnectorAdapter = this.context.taskRunnerContext.connectorAdapterRegistry.has(
+        action.actionTypeId
+      );
+
+      // System actions without an adapter cannot be executed
+      if (!hasConnectorAdapter) {
+        this.context.logger.warn(
+          `Rule "${this.context.rule.id}" skipped scheduling system action "${action.id}" because no connector adapter is configured`
+        );
+
+        continue;
+      }
+
+      this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+      this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(
+        actionTypeId
+      );
+
+      const connectorAdapter = this.context.taskRunnerContext.connectorAdapterRegistry.get(
+        action.actionTypeId
+      );
+
+      const connectorAdapterActionParams = connectorAdapter.buildActionParams({
+        alerts: summarizedAlerts,
+        rule: {
+          id: this.context.rule.id,
+          tags: this.context.rule.tags,
+          name: this.context.rule.name,
+          consumer: this.context.rule.consumer,
+          producer: this.context.ruleType.producer,
+        },
+        ruleUrl: ruleUrl?.absoluteUrl,
+        spaceId: this.context.taskInstance.params.spaceId,
+        params: action.params,
+      });
+
+      const actionToRun = Object.assign(action, { params: connectorAdapterActionParams });
+
+      results.push({
+        actionToEnqueue: formatActionToEnqueue({
+          action: actionToRun,
+          apiKey: this.context.apiKey,
+          executionId: this.context.executionId,
+          ruleConsumer: this.context.ruleConsumer,
+          ruleId: this.context.rule.id,
+          ruleTypeId: this.context.ruleType.id,
+          spaceId: this.context.taskInstance.params.spaceId,
+        }),
+        actionToLog: {
+          id: action.id,
+          uuid: action.uuid,
+          typeId: action.actionTypeId,
+          alertSummary: {
+            new: summarizedAlerts.new.count,
+            ongoing: summarizedAlerts.ongoing.count,
+            recovered: summarizedAlerts.recovered.count,
+          },
+        },
+      });
+    }
+
+    return results;
   }
 }

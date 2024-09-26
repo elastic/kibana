@@ -60,7 +60,9 @@ const defaultSchedulerContext = getDefaultSchedulerContext(
 
 const defaultExecutionResponse = {
   errors: false,
-  items: [{ actionTypeId: 'test', id: '1', response: ExecutionResponseType.SUCCESS }],
+  items: [
+    { actionTypeId: 'test', id: '1', uuid: '111-111', response: ExecutionResponseType.SUCCESS },
+  ],
 };
 
 let ruleRunMetricsStore: RuleRunMetricsStore;
@@ -99,7 +101,7 @@ describe('Action Scheduler', () => {
   });
   afterAll(() => clock.restore());
 
-  test('enqueues execution per selected action', async () => {
+  test('schedules execution per selected action', async () => {
     const alerts = generateAlert({ id: 1 });
     const actionScheduler = new ActionScheduler(getSchedulerContext());
     await actionScheduler.run(alerts);
@@ -138,6 +140,7 @@ describe('Action Scheduler', () => {
               "type": "SAVED_OBJECT",
             },
             "spaceId": "test1",
+            "uuid": "111-111",
           },
         ],
       ]
@@ -146,6 +149,7 @@ describe('Action Scheduler', () => {
     expect(alertingEventLogger.logAction).toHaveBeenCalledTimes(1);
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, {
       id: '1',
+      uuid: '111-111',
       typeId: 'test',
       alertId: '1',
       alertGroup: 'default',
@@ -368,6 +372,7 @@ describe('Action Scheduler', () => {
               "type": "SAVED_OBJECT",
             },
             "spaceId": "test1",
+            "uuid": "111-111",
           },
         ],
       ]
@@ -409,6 +414,7 @@ describe('Action Scheduler', () => {
               "type": "SAVED_OBJECT",
             },
             "spaceId": "test1",
+            "uuid": "111-111",
           },
         ],
       ]
@@ -437,11 +443,13 @@ describe('Action Scheduler', () => {
         {
           actionTypeId: 'test2',
           id: '1',
+          uuid: '111-111',
           response: ExecutionResponseType.SUCCESS,
         },
         {
           actionTypeId: 'test2',
           id: '2',
+          uuid: '222-222',
           response: ExecutionResponseType.SUCCESS,
         },
       ],
@@ -508,20 +516,23 @@ describe('Action Scheduler', () => {
     actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
       errors: false,
       items: [
-        { actionTypeId: 'test', id: '1', response: ExecutionResponseType.SUCCESS },
+        { actionTypeId: 'test', id: '1', uuid: '222-222', response: ExecutionResponseType.SUCCESS },
         {
           actionTypeId: 'test-action-type-id',
           id: '2',
+          uuid: '222-222',
           response: ExecutionResponseType.SUCCESS,
         },
         {
           actionTypeId: 'another-action-type-id',
           id: '4',
+          uuid: '444-444',
           response: ExecutionResponseType.SUCCESS,
         },
         {
           actionTypeId: 'another-action-type-id',
           id: '5',
+          uuid: '555-555',
           response: ExecutionResponseType.SUCCESS,
         },
       ],
@@ -537,6 +548,7 @@ describe('Action Scheduler', () => {
           contextVal: 'My other {{context.value}} goes here',
           stateVal: 'My other {{state.value}} goes here',
         },
+        uuid: '222-222',
       },
       {
         id: '3',
@@ -547,6 +559,7 @@ describe('Action Scheduler', () => {
           contextVal: '{{context.value}} goes here',
           stateVal: '{{state.value}} goes here',
         },
+        uuid: '333-333',
       },
       {
         id: '4',
@@ -557,6 +570,7 @@ describe('Action Scheduler', () => {
           contextVal: '{{context.value}} goes here',
           stateVal: '{{state.value}} goes here',
         },
+        uuid: '444-444',
       },
       {
         id: '5',
@@ -567,6 +581,7 @@ describe('Action Scheduler', () => {
           contextVal: '{{context.value}} goes here',
           stateVal: '{{state.value}} goes here',
         },
+        uuid: '555-555',
       },
     ];
     const actionScheduler = new ActionScheduler(
@@ -612,16 +627,19 @@ describe('Action Scheduler', () => {
         {
           actionTypeId: 'test',
           id: '1',
+          uuid: '111-111',
           response: ExecutionResponseType.SUCCESS,
         },
         {
           actionTypeId: 'test',
           id: '2',
+          uuid: '222-222',
           response: ExecutionResponseType.SUCCESS,
         },
         {
           actionTypeId: 'test',
           id: '3',
+          uuid: '333-333',
           response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
         },
       ],
@@ -636,6 +654,7 @@ describe('Action Scheduler', () => {
           contextVal: 'My other {{context.value}} goes here',
           stateVal: 'My other {{state.value}} goes here',
         },
+        uuid: '111-111',
       },
       {
         id: '2',
@@ -646,6 +665,7 @@ describe('Action Scheduler', () => {
           contextVal: 'My other {{context.value}} goes here',
           stateVal: 'My other {{state.value}} goes here',
         },
+        uuid: '222-222',
       },
       {
         id: '3',
@@ -656,6 +676,7 @@ describe('Action Scheduler', () => {
           contextVal: '{{context.value}} goes here',
           stateVal: '{{state.value}} goes here',
         },
+        uuid: '333-333',
       },
     ];
     const actionScheduler = new ActionScheduler(
@@ -679,7 +700,7 @@ describe('Action Scheduler', () => {
   test('schedules alerts with recovered actions', async () => {
     const actions = [
       {
-        id: '1',
+        id: 'action-2',
         group: 'recovered',
         actionTypeId: 'test',
         params: {
@@ -689,6 +710,7 @@ describe('Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
+        uuid: '222-222',
       },
     ];
     const actionScheduler = new ActionScheduler(
@@ -711,7 +733,7 @@ describe('Action Scheduler', () => {
             "apiKey": "MTIzOmFiYw==",
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-            "id": "1",
+            "id": "action-2",
             "params": Object {
               "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
               "contextVal": "My  goes here",
@@ -734,6 +756,7 @@ describe('Action Scheduler', () => {
               "type": "SAVED_OBJECT",
             },
             "spaceId": "test1",
+            "uuid": "222-222",
           },
         ],
       ]
@@ -883,6 +906,7 @@ describe('Action Scheduler', () => {
         {
           actionTypeId: 'testActionTypeId',
           id: '1',
+          uuid: '111-111',
           response: ExecutionResponseType.SUCCESS,
         },
       ],
@@ -914,6 +938,7 @@ describe('Action Scheduler', () => {
                 message:
                   'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
               },
+              uuid: '111-111',
             },
           ],
         },
@@ -957,6 +982,7 @@ describe('Action Scheduler', () => {
               "type": "SAVED_OBJECT",
             },
             "spaceId": "test1",
+            "uuid": "111-111",
           },
         ],
       ]
@@ -964,6 +990,7 @@ describe('Action Scheduler', () => {
     expect(alertingEventLogger.logAction).toBeCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
+      uuid: '111-111',
       typeId: 'testActionTypeId',
     });
   });
@@ -1012,6 +1039,7 @@ describe('Action Scheduler', () => {
         {
           actionTypeId: 'testActionTypeId',
           id: '1',
+          uuid: '111-111',
           response: ExecutionResponseType.SUCCESS,
         },
       ],
@@ -1095,6 +1123,7 @@ describe('Action Scheduler', () => {
               "type": "SAVED_OBJECT",
             },
             "spaceId": "test1",
+            "uuid": "111-111",
           },
         ],
       ]
@@ -1102,6 +1131,7 @@ describe('Action Scheduler', () => {
     expect(alertingEventLogger.logAction).toBeCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
+      uuid: '111-111',
       typeId: 'testActionTypeId',
     });
   });
@@ -1256,10 +1286,11 @@ describe('Action Scheduler', () => {
     actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
       errors: false,
       items: [
-        { actionTypeId: 'test', id: '1', response: ExecutionResponseType.SUCCESS },
+        { actionTypeId: 'test', id: '1', uuid: '111-111', response: ExecutionResponseType.SUCCESS },
         {
           actionTypeId: 'test',
           id: '2',
+          uuid: '222-222',
           response: ExecutionResponseType.SUCCESS,
         },
       ],
@@ -1276,6 +1307,7 @@ describe('Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
+        uuid: '111-111',
       },
       {
         id: '2',
@@ -1288,6 +1320,7 @@ describe('Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
+        uuid: '222-222',
       },
     ];
     const actionScheduler = new ActionScheduler(
@@ -1333,6 +1366,7 @@ describe('Action Scheduler', () => {
               "type": "SAVED_OBJECT",
             },
             "spaceId": "test1",
+            "uuid": "111-111",
           },
           Object {
             "actionTypeId": "test",
@@ -1362,6 +1396,7 @@ describe('Action Scheduler', () => {
               "type": "SAVED_OBJECT",
             },
             "spaceId": "test1",
+            "uuid": "222-222",
           },
         ],
       ]
@@ -1448,6 +1483,7 @@ describe('Action Scheduler', () => {
         {
           actionTypeId: 'testActionTypeId',
           id: '1',
+          uuid: '111-111',
           response: ExecutionResponseType.SUCCESS,
         },
       ],
@@ -1518,6 +1554,7 @@ describe('Action Scheduler', () => {
         {
           actionTypeId: 'testActionTypeId',
           id: '1',
+          uuid: '111-111',
           response: ExecutionResponseType.SUCCESS,
         },
       ],
@@ -1541,7 +1578,7 @@ describe('Action Scheduler', () => {
           actions: [
             {
               id: '1',
-              uuid: '111',
+              uuid: '111-111',
               group: 'default',
               actionTypeId: 'testActionTypeId',
               frequency: {
@@ -1587,17 +1624,19 @@ describe('Action Scheduler', () => {
         ],
         source: { source: { id: '1', type: RULE_SAVED_OBJECT_TYPE }, type: 'SAVED_OBJECT' },
         spaceId: 'test1',
+        uuid: '111-111',
       },
     ]);
     expect(alertingEventLogger.logAction).toHaveBeenCalledWith({
       alertGroup: 'default',
       alertId: '1',
       id: '1',
+      uuid: '111-111',
       typeId: 'testActionTypeId',
     });
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
-      '(2) alerts have been filtered out for: testActionTypeId:111'
+      '(2) alerts have been filtered out for: testActionTypeId:111-111'
     );
   });
 
@@ -1840,6 +1879,7 @@ describe('Action Scheduler', () => {
               "type": "SAVED_OBJECT",
             },
             "spaceId": "test1",
+            "uuid": "111-111",
           },
           Object {
             "actionTypeId": "test",
@@ -1869,6 +1909,7 @@ describe('Action Scheduler', () => {
               "type": "SAVED_OBJECT",
             },
             "spaceId": "test1",
+            "uuid": "111-111",
           },
           Object {
             "actionTypeId": "test",
@@ -1898,6 +1939,7 @@ describe('Action Scheduler', () => {
               "type": "SAVED_OBJECT",
             },
             "spaceId": "test1",
+            "uuid": "111-111",
           },
         ],
       ]
@@ -2261,12 +2303,13 @@ describe('Action Scheduler', () => {
       const executorParams = getSchedulerContext({
         rule: {
           ...defaultSchedulerContext.rule,
+          actions: [],
           systemActions: [
             {
               id: '1',
               actionTypeId: '.test-system-action',
               params: actionsParams,
-              uui: 'test',
+              uuid: 'test',
             },
           ],
         },
@@ -2360,6 +2403,7 @@ describe('Action Scheduler', () => {
                 "type": "SAVED_OBJECT",
               },
               "spaceId": "test1",
+              "uuid": "test",
             },
           ],
         ]
@@ -2368,6 +2412,7 @@ describe('Action Scheduler', () => {
       expect(alertingEventLogger.logAction).toBeCalledWith({
         alertSummary: { new: 1, ongoing: 0, recovered: 0 },
         id: '1',
+        uuid: 'test',
         typeId: '.test-system-action',
       });
     });
@@ -2387,6 +2432,7 @@ describe('Action Scheduler', () => {
       const executorParams = getSchedulerContext({
         rule: {
           ...defaultSchedulerContext.rule,
+          actions: [],
           systemActions: [
             {
               id: 'action-id',
@@ -2443,6 +2489,7 @@ describe('Action Scheduler', () => {
         },
         rule: {
           ...defaultSchedulerContext.rule,
+          actions: [],
           systemActions: [
             {
               id: 'action-id',
@@ -2477,6 +2524,7 @@ describe('Action Scheduler', () => {
       const executorParams = getSchedulerContext({
         rule: {
           ...defaultSchedulerContext.rule,
+          actions: [],
           systemActions: [
             {
               id: '1',
