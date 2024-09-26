@@ -82,7 +82,7 @@ export function getTabs(
   relationshipCount = 0,
   scriptedFieldsEnabled: boolean
 ) {
-  const totalCount = getCounts(iields, indexPattern.getSourceFiltering());
+  const totalCount = getCounts(fields, indexPattern.getSourceFiltering());
   const filteredCount = getCounts(fields, indexPattern.getSourceFiltering(), fieldFilter);
 
   const tabs = [];
