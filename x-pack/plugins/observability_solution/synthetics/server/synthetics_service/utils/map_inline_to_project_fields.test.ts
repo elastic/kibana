@@ -26,34 +26,38 @@ describe('mapInlineToProjectFields', () => {
   it.each(['http', 'tcp', 'icmp'])(
     'should return an empty object if the monitor type is not browser',
     async (monitorType) => {
-      const result = await mapInlineToProjectFields(monitorType, {}, logger as any);
+      const result = await mapInlineToProjectFields({
+        monitorType,
+        monitor: {},
+        logger: logger as any,
+      });
       expect(result).toEqual({});
     }
   );
 
   it('should return an empty object if the inline script is empty', async () => {
-    const result = await mapInlineToProjectFields(
-      'browser',
-      { [ConfigKey.SOURCE_PROJECT_CONTENT]: 'foo' },
-      logger as any
-    );
+    const result = await mapInlineToProjectFields({
+      monitorType: 'browser',
+      monitor: { [ConfigKey.SOURCE_PROJECT_CONTENT]: 'foo' },
+      logger: logger as any,
+    });
     expect(result).toEqual({});
   });
 
   it.each([true, false])(
     'should zip the source inline and return it as project content',
-    async (shouldReturnScript) => {
+    async (includeInlineScript) => {
       const expectedInlineScript = `step('goto', () => page.goto('https://elastic.co'))`;
-      const result = await mapInlineToProjectFields(
-        'browser',
-        {
+      const result = await mapInlineToProjectFields({
+        monitorType: 'browser',
+        monitor: {
           [ConfigKey.SOURCE_INLINE]: expectedInlineScript,
         },
-        logger as any,
-        shouldReturnScript
-      );
+        logger: logger as any,
+        includeInlineScript,
+      });
       expect(result[ConfigKey.SOURCE_INLINE]).toEqual(
-        shouldReturnScript ? expectedInlineScript : undefined
+        includeInlineScript ? expectedInlineScript : undefined
       );
       expect(await unzipFile(result[ConfigKey.SOURCE_PROJECT_CONTENT] ?? ''))
         .toMatchInlineSnapshot(`
@@ -71,13 +75,13 @@ describe('mapInlineToProjectFields', () => {
       throw new Error('Failed to zip');
     });
 
-    const result = await mapInlineToProjectFields(
-      'browser',
-      {
+    const result = await mapInlineToProjectFields({
+      monitorType: 'browser',
+      monitor: {
         [ConfigKey.SOURCE_INLINE]: 'foo',
       },
-      logger as any
-    );
+      logger: logger as any,
+    });
     expect(result[ConfigKey.SOURCE_INLINE]).toEqual('foo');
   });
 });

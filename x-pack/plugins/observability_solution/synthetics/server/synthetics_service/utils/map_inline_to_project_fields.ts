@@ -9,12 +9,19 @@ import { Logger } from '@kbn/logging';
 import { BrowserSimpleFields, ConfigKey } from '../../../common/runtime_types';
 import { inlineToProjectZip } from '../../common/inline_to_zip';
 
-export async function mapInlineToProjectFields(
-  monitorType: string,
-  monitor: unknown,
-  logger: Logger,
-  includeInlineScript = true
-) {
+interface MapInlineToProjectFieldsArgs {
+  monitorType: string;
+  monitor: unknown;
+  logger: Logger;
+  includeInlineScript?: boolean;
+}
+
+export async function mapInlineToProjectFields({
+  monitorType,
+  monitor,
+  logger,
+  includeInlineScript = true,
+}: MapInlineToProjectFieldsArgs) {
   if (monitorType !== 'browser' || !monitor) return {};
   const asBrowserMonitor = monitor as BrowserSimpleFields;
   const inlineScript = asBrowserMonitor?.[ConfigKey.SOURCE_INLINE];

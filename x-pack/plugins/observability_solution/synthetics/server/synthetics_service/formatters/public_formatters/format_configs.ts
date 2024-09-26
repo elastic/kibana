@@ -118,7 +118,7 @@ export const formatHeartbeatRequest = async (
     },
     fields_under_root: true,
     params: monitor.type === 'browser' ? paramsString : '',
-    ...(await mapInlineToProjectFields(monitor.type, monitor, logger)),
+    ...(await mapInlineToProjectFields({ monitorType: monitor.type, monitor, logger })),
   };
 };
 

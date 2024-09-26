@@ -316,7 +316,11 @@ export class AddEditMonitorAPI {
       [ConfigKey.NAMESPACE]: preserveNamespace
         ? normalizedMonitor[ConfigKey.NAMESPACE]
         : this.getMonitorNamespace(normalizedMonitor[ConfigKey.NAMESPACE]),
-      ...(await mapInlineToProjectFields(normalizedMonitor.type, normalizedMonitor, this.logger)),
+      ...(await mapInlineToProjectFields({
+        monitorType: normalizedMonitor.type,
+        monitor: normalizedMonitor,
+        logger: this.logger,
+      })),
     };
   }
 

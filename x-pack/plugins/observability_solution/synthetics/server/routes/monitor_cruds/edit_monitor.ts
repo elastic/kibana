@@ -230,11 +230,11 @@ export const refreshInlineZip = async (
     [ConfigKey.MONITOR_QUERY_ID]:
       normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
     [ConfigKey.CONFIG_ID]: previousMonitor.id,
-    ...(await mapInlineToProjectFields(
-      normalizedMonitor[ConfigKey.MONITOR_TYPE],
-      normalizedMonitor,
-      server.logger
-    )),
+    ...(await mapInlineToProjectFields({
+      monitorType: normalizedMonitor[ConfigKey.MONITOR_TYPE],
+      monitor: normalizedMonitor,
+      logger: server.logger,
+    })),
   };
 };
 
