@@ -60,7 +60,6 @@ interface State {
   features: KibanaFeature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
-  showVisibleFeaturesPicker: boolean;
   haveDisabledFeaturesChanged: boolean;
   hasSolutionViewChanged: boolean;
   isLoading: boolean;
@@ -80,7 +79,6 @@ export class CreateSpacePage extends Component<Props, State> {
     this.state = {
       isLoading: true,
       showAlteringActiveSpaceDialog: false,
-      showVisibleFeaturesPicker: !!props.allowFeatureVisibility,
       saveInProgress: false,
       space: {
         color: getSpaceColor({}),
@@ -203,8 +201,9 @@ export class CreateSpacePage extends Component<Props, State> {
           </>
         )}
 
-        {this.state.showVisibleFeaturesPicker &&
-          this.state.space.solution === SOLUTION_VIEW_CLASSIC && (
+        {this.props.allowFeatureVisibility &&
+          (this.state.space.solution == null ||
+            this.state.space.solution === SOLUTION_VIEW_CLASSIC) && (
             <>
               <EuiSpacer />
               <EnabledFeatures
@@ -312,13 +311,7 @@ export class CreateSpacePage extends Component<Props, State> {
   };
 
   private onSolutionViewChange = (space: Partial<Space>) => {
-    if (this.props.allowFeatureVisibility) {
-      let showVisibleFeaturesPicker = false;
-      if (space.solution === 'classic' || space.solution == null) {
-        showVisibleFeaturesPicker = true;
-      }
-      this.setState((state) => ({ ...state, showVisibleFeaturesPicker }));
-    }
+    this.setState((state) => ({ ...state, solution: space.solution }));
     this.onSpaceChange(space);
   };
 
