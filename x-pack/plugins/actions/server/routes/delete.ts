@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
-
-const paramSchema = schema.object({
-  id: schema.string({
-    meta: { description: 'An identifier for the connector.' },
-  }),
-});
+import { deleteConnectorRequestParamsSchemaV1 } from '../../common/routes/connector/apis/delete';
 
 export const deleteActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -33,7 +27,7 @@ export const deleteActionRoute = (
       },
       validate: {
         request: {
-          params: paramSchema,
+          params: deleteConnectorRequestParamsSchemaV1,
         },
         response: {
           204: {
