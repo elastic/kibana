@@ -4895,6 +4895,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/entity-manager-ui-plugin@link:x-pack/plugins/entity_manager_ui":
+  version "0.0.0"
+  uid ""
+
 "@kbn/entityManager-plugin@link:x-pack/plugins/entity_manager":
   version "0.0.0"
   uid ""

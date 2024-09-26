@@ -17,7 +17,7 @@ import { isEmpty, isEqual, pick } from 'lodash';
 import type { FilterControlConfig } from './types';
 
 export const getPanelsInOrderFromControlsState = (controlState: ControlGroupRuntimeState) => {
-  const panels = controlState.initialChildControlState;
+  const panels = controlState.initialChildControlState ?? {};
   return Object.values(panels).sort((a, b) => a.order - b.order);
 };
 

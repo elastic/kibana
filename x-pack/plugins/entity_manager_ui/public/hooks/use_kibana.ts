@@ -8,10 +8,10 @@
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { EntityManagerPluginStart } from '../types';
+import { EntityManagerUIPluginStartDependencies } from '../types';
 
 export type StartServices<AdditionalServices extends object = {}> = CoreStart &
-  EntityManagerPluginStart &
+  EntityManagerUIPluginStartDependencies &
   AdditionalServices & {
     storage: Storage;
     kibanaVersion: string;

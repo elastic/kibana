@@ -20,7 +20,7 @@ import ReactDOM from 'react-dom';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { PluginContext } from './context/plugin_context';
-import { EntityManagerPluginStart } from './types';
+import { EntityManagerUIPluginStartDependencies } from './types';
 import { getRoutes } from './routes';
 
 function App() {
@@ -49,7 +49,7 @@ export function renderApp({
   isServerless,
 }: {
   core: CoreStart;
-  plugins: EntityManagerPluginStart;
+  plugins: EntityManagerUIPluginStartDependencies;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   usageCollection: UsageCollectionSetup;

@@ -812,6 +812,8 @@
       "@kbn/entities-schema/*": ["x-pack/packages/kbn-entities-schema/*"],
       "@kbn/entity-manager-fixture-plugin": ["x-pack/test/api_integration/apis/entity_manager/fixture_plugin"],
       "@kbn/entity-manager-fixture-plugin/*": ["x-pack/test/api_integration/apis/entity_manager/fixture_plugin/*"],
+      "@kbn/entity-manager-ui-plugin": ["x-pack/plugins/entity_manager_ui"],
+      "@kbn/entity-manager-ui-plugin/*": ["x-pack/plugins/entity_manager_ui/*"],
       "@kbn/entityManager-plugin": ["x-pack/plugins/entity_manager"],
       "@kbn/entityManager-plugin/*": ["x-pack/plugins/entity_manager/*"],
       "@kbn/error-boundary-example-plugin": ["examples/error_boundary"],

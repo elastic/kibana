@@ -1,0 +1,37 @@
+{
+  "type": "plugin",
+  "id": "@kbn/entity-manager-ui-plugin",
+  "owner": "@elastic/obs-entities",
+  "description": "Entity manager UI plugin",
+  "plugin": {
+    "id": "entityManagerUI",
+    "configPath": ["xpack", "entityManagerUI"],
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "dataViewEditor",
+      "dataViewFieldEditor",
+      "security",
+      "encryptedSavedObjects",
+      "lens",
+      "observabilityShared",
+      "embeddable",
+      "presentationUtil",
+      "usageCollection",
+      "licensing",
+      "transform",
+      "taskManager",
+      "entityManager"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "serverless"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  }
+}

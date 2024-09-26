@@ -27,7 +27,8 @@
       "expressions",
       "lens",
       "controls",
-      "embeddable"
+      "embeddable",
+      "entityManager"
     ],
     "optionalPlugins": [
       "cloud",

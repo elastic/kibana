@@ -10,18 +10,10 @@
     "server": true,
     "requiredPlugins": [
       "data",
-      "dataViews",
-      "dataViewEditor",
-      "dataViewFieldEditor",
       "security",
       "encryptedSavedObjects",
-      "lens",
-      "observabilityShared",
-      "embeddable",
-      "presentationUtil",
       "usageCollection",
       "licensing",
-      "transform",
       "taskManager"
     ],
     "optionalPlugins": [
@@ -29,8 +21,6 @@
       "serverless"
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "kibanaUtils"
     ]
   }
 }

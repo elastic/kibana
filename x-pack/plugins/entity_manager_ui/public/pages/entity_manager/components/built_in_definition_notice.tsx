@@ -7,9 +7,10 @@
 import React from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ERROR_API_KEY_NOT_FOUND } from '@kbn/entityManager-plugin/public';
 import { useFetchEnablementStatus } from '../../../hooks/use_fetch_enablement_status';
-import { ERROR_API_KEY_NOT_FOUND } from '../../../../common/errors';
 import { useEnableEnablement } from '../../../hooks/use_enable_enablement';
+
 export function BuiltInDefinitionNotice() {
   const { isLoading, data } = useFetchEnablementStatus();
   const { isLoading: isEnablementLoading, mutate } = useEnableEnablement();

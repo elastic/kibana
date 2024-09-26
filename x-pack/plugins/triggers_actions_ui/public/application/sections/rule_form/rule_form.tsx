@@ -102,6 +102,7 @@ import { RuleFormConsumerSelection, VALID_CONSUMERS } from './rule_form_consumer
 import { getInitialInterval } from './get_initial_interval';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 import { RuleFormAdvancedOptions } from './rule_form_advanced_options';
+// import { RuleLinkOptions } from './rule_link_options';
 
 const ENTER_KEY = 13;
 
@@ -1047,6 +1048,7 @@ export const RuleForm = ({
             />
           </EuiFormRow>
         </EuiFlexItem>
+        {/* rule link options */}
       </EuiFlexGrid>
       <EuiSpacer size="m" />
       <div data-test-subj="ruleGroupTypeSelectContainer">
