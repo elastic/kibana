@@ -8,19 +8,16 @@
  */
 
 import { firstValueFrom, from, Observable } from 'rxjs';
+import type { ConnectionRequestParams } from '@elastic/transport';
 import { tap } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { ConnectionRequestParams } from '@elastic/transport';
 import { estypes } from '@elastic/elasticsearch';
+import { shimHitsTotal, getTotalLoaded } from '../../../../common';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
 import type { SearchUsage } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
-import {
-  shimHitsTotal,
-  getTotalLoaded,
-} from '../../../../common/search/strategies/es_search/response_utils';
 import { searchUsageObserver } from '../../collectors/search/usage';
 
 /**
