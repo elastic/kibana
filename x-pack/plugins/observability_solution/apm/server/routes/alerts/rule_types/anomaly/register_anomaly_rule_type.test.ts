@@ -217,7 +217,7 @@ describe('Transaction duration anomaly alert', () => {
 
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         context: {
-          alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+          alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
           environment: 'development',
           reason:
             'critical latency anomaly with a score of 80, was detected in the last 5 mins for foo.',

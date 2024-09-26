@@ -3,7 +3,7 @@ POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_b
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
-Authorization: Basic {{auth.username}} {{auth.password}}
+Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
 X-Kbn-Context: {{appContext.security}}
 
 {
