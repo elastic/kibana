@@ -66,7 +66,6 @@ export class CreateSLO {
 
       const rollupTransformPromise = this.transformManager.install(slo);
       rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
-      rollbackOperations.push(() => this.transformManager.stop(rollupTransformId));
 
       const summaryPipelinePromise = this.createPipeline(
         getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
@@ -78,7 +77,6 @@ export class CreateSLO {
 
       const summaryTransformPromise = this.summaryTransformManager.install(slo);
       rollbackOperations.push(() => this.summaryTransformManager.uninstall(summaryTransformId));
-      rollbackOperations.push(() => this.summaryTransformManager.stop(summaryTransformId));
 
       const tempDocPromise = this.createTempSummaryDocument(slo);
 
@@ -92,6 +90,9 @@ export class CreateSLO {
         summaryTransformPromise,
         tempDocPromise,
       ]);
+
+      rollbackOperations.push(() => this.transformManager.stop(rollupTransformId));
+      rollbackOperations.push(() => this.summaryTransformManager.stop(summaryTransformId));
 
       // transforms can only be started after the pipeline is created
 

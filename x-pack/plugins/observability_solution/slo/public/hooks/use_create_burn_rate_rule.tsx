@@ -26,29 +26,8 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
     theme,
   } = useKibana().services;
 
-  let loadingToastId = '';
-
-  const showLoadingToast = () => {
-    const loadingToast = toasts.addInfo({
-      title: toMountPoint(
-        <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.slo.rules.createRule.loadingNotification.descriptionText', {
-              defaultMessage: 'Creating burn rate rule ...',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="s" />
-          </EuiFlexItem>
-        </EuiFlexGroup>,
-        { i18n: i18nStart, theme }
-      ),
-    });
-    loadingToastId = loadingToast.id;
-  };
-
-  const createRule = useMutation<
-    CreateRuleResponse<Params>,
+  return useMutation<
+    CreateRuleResponse<Params> & { loadingToastId?: string },
     Error,
     { rule: CreateRuleRequestBody<Params> }
   >(
@@ -57,7 +36,6 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
       try {
         const ruleId = v4();
         const body = JSON.stringify(rule);
-        showLoadingToast();
         return http.post(`${BASE_ALERTING_API_PATH}/rule/${ruleId}`, {
           body,
         });
@@ -66,6 +44,24 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
       }
     },
     {
+      onMutate: async ({ rule }) => {
+        const loadingToast = toasts.addInfo({
+          title: toMountPoint(
+            <EuiFlexGroup justifyContent="center" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.slo.rules.createRule.loadingNotification.descriptionText', {
+                  defaultMessage: 'Creating burn rate rule ...',
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="s" />
+              </EuiFlexItem>
+            </EuiFlexGroup>,
+            { i18n: i18nStart, theme }
+          ),
+        });
+        return { loadingToastId: loadingToast.id };
+      },
       onError: (_err) => {
         toasts.addDanger(
           i18n.translate('xpack.slo.rules.createRule.errorNotification.descriptionText', {
@@ -81,13 +77,11 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
           })
         );
       },
-      onSettled: () => {
-        if (loadingToastId) {
-          toasts.remove(loadingToastId);
+      onSettled: (data) => {
+        if (data?.loadingToastId) {
+          toasts.remove(data?.loadingToastId);
         }
       },
     }
   );
-
-  return createRule;
 }

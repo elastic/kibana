@@ -17,7 +17,7 @@ import { SO_SLO_TYPE } from '../saved_objects';
 export interface SLORepository {
   checkIfSLOExists(slo: SLODefinition): Promise<boolean>;
   create(slo: SLODefinition): Promise<SLODefinition>;
-  update(slo: SLODefinition, options?: { existingSavedObjectId?: string }): Promise<SLODefinition>;
+  update(slo: SLODefinition): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
   deleteById(id: string, ignoreNotFound?: boolean): Promise<void>;
