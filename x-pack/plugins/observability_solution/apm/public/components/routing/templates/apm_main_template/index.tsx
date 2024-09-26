@@ -10,9 +10,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { SERVICE_INVENTORY_STORAGE_KEY } from '../../../../analytics/register_service_inventory_view_type_context';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
@@ -77,8 +78,18 @@ export function ApmMainTemplate({
     entityCentricExperience,
     true
   );
-  const { isEntityCentricExperienceViewEnabled, serviceInventoryViewLocalStorageSetting } =
-    useEntityManagerEnablementContext();
+
+  const {
+    isEntityCentricExperienceViewEnabled,
+    serviceInventoryViewLocalStorageSetting,
+    setServiceInventoryViewLocalStorageSetting,
+  } = useEntityManagerEnablementContext();
+
+  useEffect(() => {
+    if (serviceInventoryViewLocalStorageSetting === ServiceInventoryView.entity) {
+      setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.classic);
+    }
+  }, [serviceInventoryViewLocalStorageSetting, setServiceInventoryViewLocalStorageSetting]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
