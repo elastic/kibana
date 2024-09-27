@@ -113,4 +113,15 @@ const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>>
     title: 'Stack',
     children: [{ link: 'management:license_management' }, { link: 'management:upgrade_assistant' }],
   },
+  {
+    title: 'Security Solution',
+    children: [
+      { link: `${SECURITY_UI_APP_ID}:${SecurityPageName.entityAnalyticsManagement}` },
+      { link: `${SECURITY_UI_APP_ID}:${SecurityPageName.entityAnalyticsAssetClassification}` },
+      { link: 'maps' },
+      { link: 'visualize' },
+      { link: 'graph' },
+      { link: 'canvas' },
+    ],
+  },
 ];

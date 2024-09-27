@@ -6,15 +6,27 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    Title:
-      type: string
-      minLength: 1
-      description: The Splunk rule name.
-    Search:
-      type: string
-      minLength: 1
-      description: The Splunk rule search query.
-    Description:
-      type: string
-      minLength: 1
-      description: The Splunk rule description.
+    SplunkRule:
+      type: object
+      required:
+        - title
+        - description
+        - search
+      properties:
+        title:
+          type: string
+          minLength: 1
+          description: The Splunk rule name.
+        search:
+          type: string
+          minLength: 1
+          description: The Splunk rule search query.
+        description:
+          type: string
+          minLength: 1
+          description: The Splunk rule description.
+        mitreAttackIds:
+          type: array
+          items:
+            type: string
+          description: String array containing the rule Mitre Attack technique IDs.

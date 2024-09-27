@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const INTERNAL_SIEM_MIGRATIONS_PATH = '/internal/migrations' as const;
+export const INTERNAL_SIEM_MIGRATIONS_PATH = '/internal/siem_migrations' as const;

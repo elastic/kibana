@@ -18,22 +18,11 @@ paths:
             schema:
               type: object
               required:
-                - rule
+                - splunkRule
                 - connectorId
               properties:
-                rule: 
-                  type: object
-                  required:
-                    - title
-                    - description
-                    - search
-                  properties:
-                    title:
-                      $ref: './splunk_rule.schema.yaml#/components/schemas/Title'
-                    description:
-                      $ref: './splunk_rule.schema.yaml#/components/schemas/Description'
-                    search:
-                      $ref: './splunk_rule.schema.yaml#/components/schemas/Search'
+                splunkRule: 
+                  $ref: './splunk_rule.schema.yaml#/components/schemas/SplunkRule'
                 connectorId:
                   $ref: '../../common.schema.yaml#/components/schemas/ConnectorId'
                 langSmithOptions:
@@ -46,19 +35,13 @@ paths:
               schema:
                 type: object
                 required:
-                  - id
-                  - name
-                  - installed
+                  - rule
+                  - isInstalled
                 properties:
-                  id:
-                    type: string
-                    minLength: 1
-                    description: The Elastic prebuilt rule id.
-                  name:
-                    type: string
-                    minLength: 1
-                    description: The Elastic prebuilt rule name.
-                  installed: 
+                  rule:
+                    type: object
+                    description: The Elastic prebuilt rule information.
+                  isInstalled: 
                     type: boolean
                     description: Flag indicating if the rule is already installed.
         204:

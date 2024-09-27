@@ -16,18 +16,14 @@
 
 import { z } from '@kbn/zod';
 
-import { Title, Description, Search } from './splunk_rule.gen';
+import { SplunkRule } from './splunk_rule.gen';
 import { ConnectorId, LangSmithOptions } from '../../common.gen';
 
 export type SplunkRuleMigrationMatchPrebuiltRuleRequestBody = z.infer<
   typeof SplunkRuleMigrationMatchPrebuiltRuleRequestBody
 >;
 export const SplunkRuleMigrationMatchPrebuiltRuleRequestBody = z.object({
-  rule: z.object({
-    title: Title,
-    description: Description,
-    search: Search,
-  }),
+  splunkRule: SplunkRule,
   connectorId: ConnectorId,
   langSmithOptions: LangSmithOptions.optional(),
 });
@@ -40,15 +36,11 @@ export type SplunkRuleMigrationMatchPrebuiltRuleResponse = z.infer<
 >;
 export const SplunkRuleMigrationMatchPrebuiltRuleResponse = z.object({
   /**
-   * The Elastic prebuilt rule id.
+   * The Elastic prebuilt rule information.
    */
-  id: z.string().min(1),
-  /**
-   * The Elastic prebuilt rule name.
-   */
-  name: z.string().min(1),
+  rule: z.object({}),
   /**
    * Flag indicating if the rule is already installed.
    */
-  installed: z.boolean(),
+  isInstalled: z.boolean(),
 });

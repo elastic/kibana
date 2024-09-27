@@ -16,20 +16,22 @@
 
 import { z } from '@kbn/zod';
 
-/**
- * The Splunk rule name.
- */
-export type Title = z.infer<typeof Title>;
-export const Title = z.string().min(1);
-
-/**
- * The Splunk rule search query.
- */
-export type Search = z.infer<typeof Search>;
-export const Search = z.string().min(1);
-
-/**
- * The Splunk rule description.
- */
-export type Description = z.infer<typeof Description>;
-export const Description = z.string().min(1);
+export type SplunkRule = z.infer<typeof SplunkRule>;
+export const SplunkRule = z.object({
+  /**
+   * The Splunk rule name.
+   */
+  title: z.string().min(1),
+  /**
+   * The Splunk rule search query.
+   */
+  search: z.string().min(1),
+  /**
+   * The Splunk rule description.
+   */
+  description: z.string().min(1),
+  /**
+   * String array containing the rule Mitre Attack technique IDs.
+   */
+  mitreAttackIds: z.array(z.string()).optional(),
+});
