@@ -329,7 +329,7 @@ export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) =
     },
     processor: {
       event: normalizeValue<'transaction'>(fields[PROCESSOR_EVENT]),
-      name: normalizeValue<'transaction'>(fields[PROCESSOR_EVENT]),
+      name: normalizeValue<'transaction'>(fields[PROCESSOR_NAME]),
     },
     data_stream: {
       namespace: normalizeValue<string>(fields[DATA_STREAM_NAMESPACE]),
