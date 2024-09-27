@@ -20,21 +20,26 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { InvestigationResponse } from '@kbn/investigation-shared';
 import { pick } from 'lodash';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
-import { v4 as uuidv4 } from 'uuid';
+import { paths } from '../../../common/paths';
 import { useCreateInvestigation } from '../../hooks/use_create_investigation';
 import { useFetchInvestigation } from '../../hooks/use_fetch_investigation';
+import { useKibana } from '../../hooks/use_kibana';
 import { useUpdateInvestigation } from '../../hooks/use_update_investigation';
 import { InvestigationNotFound } from '../investigation_not_found/investigation_not_found';
+import { ExternalIncidentField } from './fields/external_incident_field';
 import { StatusField } from './fields/status_field';
-import { useKibana } from '../../hooks/use_kibana';
-import { paths } from '../../../common/paths';
+import { TagsField } from './fields/tags_field';
+import { toCreateInvestigationParams, toUpdateInvestigationParams } from './form_helper';
 
 export interface InvestigationForm {
   title: string;
-  status: 'ongoing' | 'closed';
+  status: InvestigationResponse['status'];
+  tags: string[];
+  externalIncidentUrl: string | null;
 }
 
 interface Props {
@@ -55,15 +60,23 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
     data: investigation,
     isLoading,
     isError,
-    refetch,
   } = useFetchInvestigation({ id: investigationId });
 
   const { mutateAsync: updateInvestigation } = useUpdateInvestigation();
   const { mutateAsync: createInvestigation } = useCreateInvestigation();
 
   const methods = useForm<InvestigationForm>({
-    defaultValues: { title: 'New investigation', status: 'ongoing' },
-    values: investigation ? pick(investigation, ['title', 'status']) : undefined,
+    defaultValues: {
+      title: i18n.translate('xpack.investigateApp.investigationDetailsPage.newInvestigationLabel', {
+        defaultMessage: 'New investigation',
+      }),
+      status: 'triage',
+      tags: [],
+      externalIncidentUrl: null,
+    },
+    values: investigation
+      ? pick(investigation, ['title', 'status', 'tags', 'externalIncidentUrl'])
+      : undefined,
     mode: 'all',
   });
 
@@ -79,24 +92,11 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
     if (isEditing) {
       await updateInvestigation({
         investigationId: investigationId!,
-        payload: { title: data.title, status: data.status },
+        payload: toUpdateInvestigationParams(data),
       });
-      refetch();
       onClose();
     } else {
-      const resp = await createInvestigation({
-        id: uuidv4(),
-        title: data.title,
-        params: {
-          timeRange: {
-            from: new Date(new Date().getTime() - 30 * 60 * 1000).getTime(),
-            to: new Date().getTime(),
-          },
-        },
-        origin: {
-          type: 'blank',
-        },
-      });
+      const resp = await createInvestigation(toCreateInvestigationParams(data));
       navigateToUrl(basePath.prepend(paths.investigationDetails(resp.id)));
     }
   };
@@ -147,8 +147,16 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
                   />
                 </EuiFormRow>
               </EuiFlexItem>
+              {isEditing && (
+                <EuiFlexItem grow>
+                  <StatusField />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow>
-                <StatusField />
+                <TagsField />
+              </EuiFlexItem>
+              <EuiFlexItem grow>
+                <ExternalIncidentField />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>

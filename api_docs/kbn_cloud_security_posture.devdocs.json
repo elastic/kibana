@@ -604,6 +604,37 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.FindingsAggs",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindingsAggs",
+        "description": [],
+        "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.FindingsAggs.count",
+            "type": "Object",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "signature": [
+              "AggregationsMultiBucketAggregateBase",
+              "<",
+              "AggregationsStringRareTermsBucketKeys",
+              ">"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.FindingsBaseEsQuery",
         "type": "Interface",
         "tags": [],
@@ -637,10 +668,185 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.MisconfigurationBaseEsQuery",
+        "type": "Interface",
+        "tags": [],
+        "label": "MisconfigurationBaseEsQuery",
+        "description": [],
+        "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.MisconfigurationBaseEsQuery.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ bool: { filter: ",
+              "QueryDslQueryContainer",
+              "[]; }; } | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.UseMisconfigurationOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseMisconfigurationOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/cloud-security-posture",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPosturePluginApi",
+            "section": "def-public.UseMisconfigurationOptions",
+            "text": "UseMisconfigurationOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/cloud-security-posture",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPosturePluginApi",
+            "section": "def-public.MisconfigurationBaseEsQuery",
+            "text": "MisconfigurationBaseEsQuery"
+          }
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.UseMisconfigurationOptions.sort",
+            "type": "Array",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "string[][]"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.UseMisconfigurationOptions.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.UseMisconfigurationOptions.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [],
+            "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.UseMisconfigurationOptions.ignore_unavailable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_unavailable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.LatestFindingsRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "LatestFindingsRequest",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IKibanaSearchRequest",
+            "text": "IKibanaSearchRequest"
+          },
+          "<",
+          "SearchRequest",
+          ">"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.LatestFindingsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "LatestFindingsResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<",
+          "SearchResponse",
+          "<",
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.CspFinding",
+            "text": "CspFinding"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/cloud-security-posture",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPosturePluginApi",
+            "section": "def-public.FindingsAggs",
+            "text": "FindingsAggs"
+          },
+          ">>"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.NavFilter",

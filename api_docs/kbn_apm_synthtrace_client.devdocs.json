@@ -2627,7 +2627,7 @@
             "section": "def-common.ApmFields",
             "text": "ApmFields"
           },
-          ", \"@timestamp\" | \"processor.event\" | \"ecs.version\" | \"event.ingested\" | \"observer.type\" | \"observer.version\" | \"observer.version_major\" | \"metricset.name\" | \"processor.name\"> & Partial<{ 'labels.etag': string; agent_config_applied: number; 'event.agent_id_status': string; }>"
+          ", \"@timestamp\" | \"processor.event\" | \"ecs.version\" | \"event.ingested\" | \"observer.type\" | \"observer.version\" | \"metricset.name\" | \"observer.version_major\" | \"processor.name\"> & Partial<{ 'labels.etag': string; agent_config_applied: number; 'event.agent_id_status': string; }>"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/agent_config/agent_config_fields.ts",
         "deprecated": false,

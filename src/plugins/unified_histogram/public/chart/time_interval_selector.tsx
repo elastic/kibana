@@ -23,7 +23,7 @@ export const TimeIntervalSelector: React.FC<TimeIntervalSelectorProps> = ({
   chart,
   onTimeIntervalChange,
 }) => {
-  const onChange: ToolbarSelectorProps['onChange'] = useCallback(
+  const onChange = useCallback<NonNullable<ToolbarSelectorProps['onChange']>>(
     (chosenOption) => {
       const selectedOption = chosenOption?.value;
       if (selectedOption) {

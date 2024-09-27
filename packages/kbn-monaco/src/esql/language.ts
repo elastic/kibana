@@ -21,6 +21,9 @@ import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
 import { wrapAsMonacoCodeActions } from './lib/converters/actions';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();
+const removeKeywordSuffix = (name: string) => {
+  return name.endsWith('.keyword') ? name.slice(0, -8) : name;
+};
 
 export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   ID: ESQL_LANG_ID,
@@ -106,6 +109,42 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
           // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
           suggestions: wrapAsMonacoSuggestions(suggestions),
         };
+      },
+      async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
+        if (!callbacks?.getFieldsMetadata) return item;
+        const fieldsMetadataClient = await callbacks?.getFieldsMetadata;
+
+        const fullEcsMetadataList = await fieldsMetadataClient?.find({
+          attributes: ['type'],
+        });
+        if (!fullEcsMetadataList || !fieldsMetadataClient || typeof item.label !== 'string')
+          return item;
+
+        const strippedFieldName = removeKeywordSuffix(item.label);
+        if (
+          // If item is not a field, no need to fetch metadata
+          item.kind === monaco.languages.CompletionItemKind.Variable &&
+          // If not ECS, no need to fetch description
+          Object.hasOwn(fullEcsMetadataList?.fields, strippedFieldName)
+        ) {
+          const ecsMetadata = await fieldsMetadataClient.find({
+            fieldNames: [strippedFieldName],
+            attributes: ['description'],
+          });
+
+          const fieldMetadata = ecsMetadata.fields[strippedFieldName];
+          if (fieldMetadata && fieldMetadata.description) {
+            const completionItem: monaco.languages.CompletionItem = {
+              ...item,
+              documentation: {
+                value: fieldMetadata.description,
+              },
+            };
+            return completionItem;
+          }
+        }
+
+        return item;
       },
     };
   },

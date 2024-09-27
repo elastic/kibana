@@ -6,9 +6,9 @@
  */
 
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { AggFieldBucket, VulnerableResourceStat } from '../../../common/types_old';
-import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
 
 interface ResourceBucket {
   key: string | undefined;

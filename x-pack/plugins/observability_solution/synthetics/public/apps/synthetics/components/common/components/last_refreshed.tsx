@@ -9,15 +9,11 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
 import { useSyntheticsRefreshContext } from '../../../contexts';
-import { selectRefreshPaused } from '../../../state';
 
 export function LastRefreshed() {
-  const { lastRefresh: lastRefreshed } = useSyntheticsRefreshContext();
+  const { lastRefresh: lastRefreshed, refreshPaused } = useSyntheticsRefreshContext();
   const [refresh, setRefresh] = useState(() => Date.now());
-
-  const refreshPaused = useSelector(selectRefreshPaused);
 
   useEffect(() => {
     const interVal = setInterval(() => {

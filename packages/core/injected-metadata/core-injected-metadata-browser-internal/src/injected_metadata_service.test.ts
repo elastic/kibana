@@ -9,6 +9,7 @@
 
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { InjectedMetadataService } from './injected_metadata_service';
+import type { InjectedMetadataParams } from '..';
 
 describe('setup.getElasticsearchInfo()', () => {
   it('returns elasticsearch info from injectedMetadata', () => {
@@ -158,5 +159,31 @@ describe('setup.getLegacyMetadata()', () => {
       // @ts-expect-error TS knows this shouldn't be possible
       legacyMetadata.foo = false;
     }).toThrowError();
+  });
+});
+
+describe('setup.getFeatureFlags()', () => {
+  it('returns injectedMetadata.featureFlags', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        featureFlags: {
+          overrides: {
+            'my-overridden-flag': 1234,
+          },
+        },
+      },
+    } as unknown as InjectedMetadataParams);
+
+    const contract = injectedMetadata.setup();
+    expect(contract.getFeatureFlags()).toStrictEqual({ overrides: { 'my-overridden-flag': 1234 } });
+  });
+
+  it('returns empty injectedMetadata.featureFlags', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {},
+    } as unknown as InjectedMetadataParams);
+
+    const contract = injectedMetadata.setup();
+    expect(contract.getFeatureFlags()).toBeUndefined();
   });
 });
