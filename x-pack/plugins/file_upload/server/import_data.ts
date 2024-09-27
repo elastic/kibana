@@ -24,16 +24,20 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     ingestPipeline: IngestPipelineWrapper | undefined,
     data: InputData
   ): Promise<ImportResponse> {
+    let createdIndex;
+    let createdPipelineId;
     const docCount = data.length;
-    const pipelineId = ingestPipeline?.id;
-    const pipeline = ingestPipeline?.pipeline;
 
     try {
+      const pipelineId = ingestPipeline?.id;
+      const pipeline = ingestPipeline?.pipeline;
+
       if (id === undefined) {
         // first chunk of data, create the index and id to return
         id = generateId();
 
         await createIndex(index, settings, mappings);
+        createdIndex = index;
 
         // create the pipeline if one has been supplied
         if (pipelineId !== undefined) {
@@ -42,11 +46,15 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
             throw resp;
           }
         }
+        createdPipelineId = pipelineId;
+      } else {
+        createdIndex = index;
+        createdPipelineId = pipelineId;
       }
 
       let failures: ImportFailure[] = [];
       if (data.length) {
-        const resp = await indexData(index, pipelineId, data);
+        const resp = await indexData(index, createdPipelineId, data);
         if (resp.success === false) {
           if (resp.ingestError) {
             // all docs failed, abort
@@ -62,8 +70,8 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
       return {
         success: true,
         id,
-        index,
-        pipelineId,
+        index: createdIndex,
+        pipelineId: createdPipelineId,
         docCount,
         failures,
       };
@@ -71,8 +79,8 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
       return {
         success: false,
         id: id!,
-        index,
-        pipelineId,
+        index: createdIndex,
+        pipelineId: createdPipelineId,
         error: error.body !== undefined ? error.body : error,
         docCount,
         ingestError: error.ingestError,
