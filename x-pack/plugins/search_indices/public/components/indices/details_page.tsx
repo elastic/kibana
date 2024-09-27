@@ -47,7 +47,6 @@ export const SearchIndexDetailsPage = () => {
     isInitialLoading,
     error: indexLoadingError,
   } = useIndex(indexName);
-
   const {
     data: mappings,
     isError: isMappingsError,
@@ -59,14 +58,27 @@ export const SearchIndexDetailsPage = () => {
       pageSize: DEFAULT_PAGE_SIZE,
       pageIndex: 0,
     });
-  const docs = indexDocuments?.results?.data ?? [];
 
-  const playgroundOnClick = useCallback(async () => {
+  const [playgroundUrl, setPlaygroundUrl] = useState<string | undefined>(undefined);
+  const getPlaygroundUrl = useCallback(async () => {
     const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
     if (playgroundLocator && index) {
-      playgroundLocator.navigate({ 'default-index': index.name });
+      const url = await playgroundLocator.getUrl({ 'default-index': index.name });
+      setPlaygroundUrl(url);
     }
   }, [share, index]);
+
+  useEffect(() => {
+    getPlaygroundUrl();
+  }, [getPlaygroundUrl]);
+
+  const [isDocumentsExists, setDocumentsExists] = useState<boolean>(false);
+  const [isDocumentsLoading, setDocumentsLoading] = useState<boolean>(true);
+  useEffect(() => {
+    setDocumentsLoading(isInitialLoading);
+    setDocumentsExists(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
+  }, [indexDocuments, isInitialLoading, setDocumentsExists, setDocumentsLoading]);
+
   const detailsPageTabs: EuiTabbedContentTab[] = useMemo(() => {
     return [
       {
@@ -190,34 +202,30 @@ export const SearchIndexDetailsPage = () => {
             rightSideItems={[
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem>
-                  {!indexDocumentsIsInitialLoading && docs.length === 0 ? (
-                    <EuiButtonEmpty
-                      href={docLinks.links.apiReference}
-                      target="_blank"
-                      iconType="documentation"
-                      data-test-subj="ApiReferenceDoc"
-                    >
-                      {i18n.translate('xpack.searchIndices.indexActionsMenu.apiReference.docLink', {
-                        defaultMessage: 'API Reference',
-                      })}
-                    </EuiButtonEmpty>
-                  ) : (
-                    <EuiButtonEmpty
-                      onClick={playgroundOnClick}
-                      target="_blank"
-                      iconType="launch"
-                      data-test-subj="useInPlaygroundLink"
-                    >
-                      {i18n.translate('xpack.searchIndices.moreOptions.playgroundLabel', {
-                        defaultMessage: 'Use in Playground',
-                      })}
-                    </EuiButtonEmpty>
-                  )}
+                  <EuiButtonEmpty
+                    href={!isDocumentsExists ? docLinks.links.apiReference : playgroundUrl}
+                    target={!isDocumentsExists ? '_blank' : undefined}
+                    isLoading={isDocumentsLoading}
+                    iconType={!isDocumentsExists ? 'documentation' : 'launch'}
+                    data-test-subj={!isDocumentsExists ? 'ApiReferenceDoc' : 'useInPlaygroundLink'}
+                  >
+                    <FormattedMessage
+                      id="xpack.searchIndices.indexAction.buttonLabel"
+                      defaultMessage="{buttonLabel}"
+                      values={{
+                        buttonLabel: isDocumentsLoading
+                          ? 'Loading'
+                          : !isDocumentsExists
+                          ? 'API Reference'
+                          : 'Use in Playground',
+                      }}
+                    />
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <SearchIndexDetailsPageMenuItemPopover
                     handleDeleteIndexModal={handleDeleteIndexModal}
-                    playgroundOnClick={playgroundOnClick}
+                    playgroundUrl={playgroundUrl}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>,

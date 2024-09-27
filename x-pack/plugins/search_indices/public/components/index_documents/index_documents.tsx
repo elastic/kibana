@@ -8,10 +8,9 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiSpacer } from '@elastic/eui';
-import { IndexDocuments as IndexDocumentsType } from '../../hooks/api/use_document_search';
 import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 import { AddDocumentsCodeExample } from './add_documents_code_example';
-
+import { IndexDocuments as IndexDocumentsType } from '../../hooks/api/use_document_search';
 import { DocumentList } from './document_list';
 
 interface IndexDocumentsProps {
@@ -22,11 +21,10 @@ interface IndexDocumentsProps {
 
 export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
   indexName,
-  isInitialLoading,
   indexDocuments,
+  isInitialLoading,
 }) => {
   const { data: mappingData } = useIndexMapping(indexName);
-
   const docs = indexDocuments?.results?.data ?? [];
   const mappingProperties = mappingData?.mappings?.properties ?? {};
 

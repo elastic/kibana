@@ -147,11 +147,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should have link to API reference doc link', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExistsInMoreOptions();
         });
-        it('should have link to playground and should redirect to playground', async () => {
+        it('should have link to playground', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectPlaygroundButtonExistsInMoreOptions();
-          // await pageObjects.svlSearchIndexDetailPage.expectToNavigateToPlayground(indexName);
         });
-
         it('should delete index', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
           await pageObjects.svlSearchIndexDetailPage.clickDeleteIndexButton();
