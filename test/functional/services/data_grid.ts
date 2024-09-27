@@ -700,12 +700,21 @@ export class DataGridService extends FtrService {
     await this.checkCurrentRowsPerPageToBe(newValue);
   }
 
-  public async selectRow(rowIndex: number) {
+  public async selectRow(rowIndex: number, { pressShiftKey }: { pressShiftKey?: boolean } = {}) {
     const checkbox = await this.find.byCssSelector(
       `.euiDataGridRow[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="select"] .euiCheckbox__input`
     );
 
-    await checkbox.click();
+    if (pressShiftKey) {
+      await this.browser
+        .getActions()
+        .keyDown(Key.SHIFT)
+        .click(checkbox._webElement)
+        .keyUp(Key.SHIFT)
+        .perform();
+    } else {
+      await checkbox.click();
+    }
   }
 
   public async getNumberOfSelectedRows() {
