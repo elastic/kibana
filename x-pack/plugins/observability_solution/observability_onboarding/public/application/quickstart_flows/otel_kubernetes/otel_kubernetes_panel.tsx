@@ -97,7 +97,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
               <>
                 <p>
                   <FormattedMessage
-                    id="xpack.observability_onboarding.otelKubernetesPanel.p.injectAutoinstrumentationLibrariesForLabel"
+                    id="xpack.observability_onboarding.otelKubernetesPanel.injectAutoinstrumentationLibrariesForLabel"
                     defaultMessage="Upgrade the kube-stack Helm chart using the values file. For automatic certificate renewal, we recommend installing {link}."
                     values={{
                       link: (
@@ -169,7 +169,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
               <>
                 <p>
                   {i18n.translate(
-                    'xpack.observability_onboarding.otelKubernetesPanel.p.injectAutoinstrumentationLibrariesForLabel',
+                    'xpack.observability_onboarding.otelKubernetesPanel.theOperatorAutomatesTheLabel',
                     {
                       defaultMessage:
                         'The operator automates the injection of auto-instrumentation libraries for pods annotated as follows:',
@@ -226,7 +226,7 @@ spec:
                 <EuiSpacer />
                 <p>
                   <FormattedMessage
-                    id="xpack.observability_onboarding.otelKubernetesPanel.p.forOtherLanguagesThatLabel"
+                    id="xpack.observability_onboarding.otelKubernetesPanel.forOtherLanguagesThatLabel"
                     defaultMessage="For other languages where auto-instrumentation is not available, {link}"
                     values={{
                       link: (
@@ -258,7 +258,7 @@ spec:
               <>
                 <p>
                   {i18n.translate(
-                    'xpack.observability_onboarding.otelKubernetesPanel.p.onceYourKubernetesInfrastructureLabel',
+                    'xpack.observability_onboarding.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel',
                     {
                       defaultMessage:
                         'Once your Kubernetes infrastructure and application data is collected, you can start analyzing it.',
@@ -277,13 +277,13 @@ spec:
                     {
                       id: CLUSTER_OVERVIEW_DASHBOARD_ID,
                       title: i18n.translate(
-                        'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
+                        'xpack.observability_onboarding.otelKubernetesPanel.monitoringCluster',
                         {
                           defaultMessage: 'Check your Kubernetes cluster health:',
                         }
                       ),
                       label: i18n.translate(
-                        'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
+                        'xpack.observability_onboarding.otelKubernetesPanel.exploreDashboard',
                         {
                           defaultMessage: 'Explore Kubernetes Cluster Dashboard',
                         }
