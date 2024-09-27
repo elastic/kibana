@@ -1,6 +1,6 @@
 [xpack]
 [[playground-query]]
-== View and modify queries
+=== View and modify queries
 
 :x:                    Playground
 
@@ -12,7 +12,6 @@ The {x} UI enables you to view and modify these queries.
 
 * Click *View query* to open the visual query editor.
 * Modify the query by selecting fields to query per index.
-* Click *Save changes*.
 
 [TIP]
 ====
@@ -31,7 +30,7 @@ Learn more about <<playground-hidden-fields, hidden fields>>.
 
 [float]
 [[playground-query-relevance]]
-=== Improving relevance
+==== Improving relevance
 
 The fields you select in the query editor determine the relevance of the retrieved documents.
 
@@ -50,7 +49,7 @@ Refer to {ref}/retrievers-overview.html[documentation] for a high level overview
 
 [float]
 [[playground-hidden-fields]]
-=== Hidden fields
+==== Hidden fields
 
 The query editor shows fields which make sense for the user to search on, but not all fields in your documents are visible from the editor.
 
