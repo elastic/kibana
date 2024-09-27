@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import { EuiSpacer } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { Connector, SyncJobsTable } from '@kbn/search-connectors';
 
 import { KibanaLogic } from '../../../../shared/kibana';
@@ -83,12 +84,40 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
           <AccessControlIndexSelector
             onChange={setSelectedIndexType}
             valueOfSelected={selectedIndexType}
-            contentIndexTitle={'Content syncs'}
-            contentIndexDescription={'Browse content syncs'}
-            accessControlIndexTitle={'Access control syncs'}
-            accessControlIndexDescription={'Browse document level security syncs'}
-            contentSyncError={errorOnContentSync ? true : false}
-            accessSyncError={errorOnAccessSync ? true : false}
+            indexSelectorOptions={[
+              {
+                description: i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.description',
+                  {
+                    defaultMessage: 'Browse content syncs',
+                  }
+                ),
+                error: errorOnContentSync ? true : false,
+                title: i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.title',
+                  {
+                    defaultMessage: 'Content syncs',
+                  }
+                ),
+                value: 'content-index',
+              },
+              {
+                description: i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.description',
+                  {
+                    defaultMessage: 'Browse document level security syncs',
+                  }
+                ),
+                error: errorOnAccessSync ? true : false,
+                title: i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.title',
+                  {
+                    defaultMessage: 'Access control syncs',
+                  }
+                ),
+                value: 'access-control-index',
+              },
+            ]}
           />
           <EuiSpacer size="m" />
         </>

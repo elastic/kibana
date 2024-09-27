@@ -19,75 +19,67 @@ import { i18n } from '@kbn/i18n';
 
 export interface AccessControlSelectorOption {
   description: string;
-  error: boolean;
+  error?: boolean;
   title: string;
   value: 'content-index' | 'access-control-index';
 }
 
 interface IndexSelectorProps {
-  accessControlIndexDescription?: string;
-  accessControlIndexTitle?: string;
-  accessSyncError?: boolean;
-  contentIndexDescription?: string;
-  contentIndexTitle?: string;
-  contentSyncError?: boolean;
   fullWidth?: boolean;
+  indexSelectorOptions?: AccessControlSelectorOption[];
   onChange(value: AccessControlSelectorOption['value']): void;
   valueOfSelected?: AccessControlSelectorOption['value'];
 }
 
+export const DEFAULT_INDEX_SELECTOR_OPTIONS: AccessControlSelectorOption[] = [
+  {
+    description: i18n.translate(
+      'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.description',
+      {
+        defaultMessage: 'Browse content fields',
+      }
+    ),
+    title: i18n.translate(
+      'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.title',
+      {
+        defaultMessage: 'Content index',
+      }
+    ),
+    value: 'content-index',
+  },
+  {
+    description: i18n.translate(
+      'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.description',
+      {
+        defaultMessage: 'Browse document level security fields',
+      }
+    ),
+    title: i18n.translate(
+      'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.title',
+      {
+        defaultMessage: 'Access control index',
+      }
+    ),
+    value: 'access-control-index',
+  },
+];
+
 export const AccessControlIndexSelector: React.FC<IndexSelectorProps> = ({
-  accessControlIndexDescription,
-  accessControlIndexTitle,
-  accessSyncError,
-  contentIndexDescription,
-  contentIndexTitle,
-  contentSyncError,
+  indexSelectorOptions = DEFAULT_INDEX_SELECTOR_OPTIONS,
   onChange,
   valueOfSelected,
   fullWidth,
 }) => {
-  const indexSelectorOptions: AccessControlSelectorOption[] = [
-    {
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.description',
-        {
-          defaultMessage: contentIndexDescription || 'Browse content fields',
-        }
-      ),
-      error: Boolean(contentSyncError),
-      title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.title',
-        {
-          defaultMessage: contentIndexTitle || 'Content index',
-        }
-      ),
-      value: 'content-index',
-    },
-    {
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.description',
-        {
-          defaultMessage: accessControlIndexDescription || 'Browse document level security fields',
-        }
-      ),
-      error: Boolean(accessSyncError),
-      title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.title',
-        {
-          defaultMessage: accessControlIndexTitle || 'Access control index',
-        }
-      ),
-      value: 'access-control-index',
-    },
-  ];
-
   return (
     <EuiSuperSelect
       fullWidth={fullWidth}
       valueOfSelected={valueOfSelected}
       onChange={onChange}
-      prepend={contentSyncError || accessSyncError ? <EuiIcon type={'warning'} /> : undefined}
+      prepend={
+        indexSelectorOptions.some((option) => option.error) ? (
+          <EuiIcon type={'warning'} />
+        ) : undefined
+      }
       options={indexSelectorOptions.map((option) => {
         return {
           dropdownDisplay: (
@@ -97,7 +89,6 @@ export const AccessControlIndexSelector: React.FC<IndexSelectorProps> = ({
                   <EuiIcon type={'warning'} />{' '}
                 </EuiFlexItem>
               ) : null}
-
               <EuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem>
                   <EuiTitle size="xs">
