@@ -153,9 +153,9 @@ describe('DatatableComponent', () => {
     expect(screen.getByLabelText('My fanci metric chart')).toBeInTheDocument();
     expect(screen.getByRole('row')).toBeInTheDocument();
     expect(screen.queryAllByRole('gridcell').map((cell) => cell.textContent)).toEqual([
-      'shoes- a, column 1, row 1',
-      '1588024800000- b, column 2, row 1',
-      '3- c, column 3, row 1',
+      'shoes',
+      '1588024800000',
+      '3',
     ]);
   });
 
@@ -364,8 +364,8 @@ describe('DatatableComponent', () => {
       },
     });
     expect(screen.queryAllByRole('gridcell').map((cell) => cell.textContent)).toEqual([
-      '1588024800000- b, column 1, row 1',
-      '3- c, column 2, row 1',
+      '1588024800000',
+      '3',
     ]);
   });
 
@@ -736,9 +736,9 @@ describe('DatatableComponent', () => {
           .map((cell) => [cell.textContent, cell.style.backgroundColor]);
 
         expect(cellColors).toEqual([
-          ['shoes- a, column 1, row 1', 'red'],
-          ['1588024800000- b, column 2, row 1', ''],
-          ['3- c, column 3, row 1', ''],
+          ['shoes', 'red'],
+          ['1588024800000', ''],
+          ['3', ''],
         ]);
       });
 
@@ -755,9 +755,9 @@ describe('DatatableComponent', () => {
           .map((cell) => [cell.textContent, cell.style.backgroundColor]);
 
         expect(cellColors).toEqual([
-          ['shoes- a, column 1, row 1', ''],
-          ['1588024800000- b, column 2, row 1', ''],
-          ['3- c, column 3, row 1', 'red'],
+          ['shoes', ''],
+          ['1588024800000', ''],
+          ['3', 'red'],
         ]);
       });
     });
