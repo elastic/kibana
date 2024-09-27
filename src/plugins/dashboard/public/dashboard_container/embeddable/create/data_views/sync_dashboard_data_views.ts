@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniqBy } from 'lodash';
+import { combineLatest, Observable, of, switchMap } from 'rxjs';
+
 import { DataView } from '@kbn/data-views-plugin/common';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, PublishesDataViews } from '@kbn/presentation-publishing';
-import { uniqBy } from 'lodash';
-import { combineLatest, Observable, of, switchMap } from 'rxjs';
-import { pluginServices } from '../../../../services/plugin_services';
+
+import { dataService } from '../../../../services/kibana_services';
 import { DashboardContainer } from '../../dashboard_container';
 
 export function startSyncingDashboardDataViews(this: DashboardContainer) {
-  const {
-    data: { dataViews },
-  } = pluginServices.getServices();
-
   const controlGroupDataViewsPipe: Observable<DataView[] | undefined> = this.controlGroupApi$.pipe(
     switchMap((controlGroupApi) => {
       return controlGroupApi ? controlGroupApi.dataViews : of([]);
@@ -42,8 +40,8 @@ export function startSyncingDashboardDataViews(this: DashboardContainer) {
         ];
         if (allDataViews.length === 0) {
           return (async () => {
-            const defaultDataViewId = await dataViews.getDefaultId();
-            return [await dataViews.get(defaultDataViewId!)];
+            const defaultDataViewId = await dataService.dataViews.getDefaultId();
+            return [await dataService.dataViews.get(defaultDataViewId!)];
           })();
         }
         return of(uniqBy(allDataViews, 'id'));
