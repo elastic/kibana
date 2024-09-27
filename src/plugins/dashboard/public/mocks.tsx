@@ -93,7 +93,13 @@ export function buildMockDashboard({
     undefined,
     undefined,
     undefined,
-    { lastSavedInput: initialInput, lastSavedId: savedObjectId }
+    {
+      anyMigrationRun: false,
+      isEmbeddedExternally: false,
+      lastSavedInput: initialInput,
+      lastSavedId: savedObjectId,
+      managed: false,
+    }
   );
   dashboardContainer?.setControlGroupApi(mockControlGroupApi);
   return dashboardContainer;
