@@ -59,11 +59,10 @@ export const ResultList: React.FC<ResultListArgs> = ({
           totalItemCount: searchResults.length,
         }}
         onPaginate={onPaginationChange}
-        setDocsPerPage={() => {}}
         showScore
         compactCard={false}
         defaultVisibleFields={0}
-        onDocumentClick={(id) => setFlyoutDocId(id)}
+        onDocumentClick={(searchHit: SearchHit) => setFlyoutDocId(searchHit._id)}
       />
 
       {flyoutDocId && dataView && hit && (

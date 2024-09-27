@@ -35,7 +35,7 @@ interface ResultProps {
   defaultVisibleFields?: number;
   showScore?: boolean;
   compactCard?: boolean;
-  expandAction?: () => void;
+  onDocumentClick?: () => void;
 }
 
 export const Result: React.FC<ResultProps> = ({
@@ -44,7 +44,7 @@ export const Result: React.FC<ResultProps> = ({
   defaultVisibleFields = DEFAULT_VISIBLE_FIELDS,
   compactCard = true,
   showScore = false,
-  expandAction,
+  onDocumentClick,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const tooltipText =
@@ -77,7 +77,7 @@ export const Result: React.FC<ResultProps> = ({
             responsive={false}
             justifyContent="spaceAround"
           >
-            <EuiFlexItem grow={false} alignItems="center">
+            <EuiFlexItem grow={false}>
               {compactCard && (
                 <ResultHeader
                   title={
@@ -100,6 +100,7 @@ export const Result: React.FC<ResultProps> = ({
                       values: { id: metaData.id },
                     })
                   }
+                  onTitleClick={onDocumentClick}
                   metaData={metaData}
                   rightSideActions={
                     <EuiFlexItem grow={false}>
@@ -107,9 +108,10 @@ export const Result: React.FC<ResultProps> = ({
                         <EuiButtonIcon
                           iconType={isExpanded ? 'fold' : 'unfold'}
                           color={isExpanded ? 'danger' : 'primary'}
-                          onClick={() =>
-                            expandAction ? expandAction() : setIsExpanded(!isExpanded)
-                          }
+                          onClick={(e: React.MouseEvent<HTMLElement>) => {
+                            e.stopPropagation();
+                            setIsExpanded(!isExpanded);
+                          }}
                           aria-label={tooltipText}
                         />
                       </EuiToolTip>
@@ -138,7 +140,10 @@ export const Result: React.FC<ResultProps> = ({
                 <EuiButtonIcon
                   iconType={isExpanded ? 'fold' : 'unfold'}
                   color="text"
-                  onClick={() => setIsExpanded(!isExpanded)}
+                  onClick={(e: React.MouseEvent<HTMLElement>) => {
+                    e.stopPropagation();
+                    setIsExpanded(!isExpanded);
+                  }}
                   aria-label={tooltipText}
                 />
               </EuiToolTip>

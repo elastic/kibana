@@ -41,11 +41,11 @@ interface DocumentListProps {
   mappings: IndicesGetMappingResponse | undefined;
   meta: Pagination;
   onPaginate: (newPageIndex: number) => void;
-  setDocsPerPage: (docsPerPage: number) => void;
+  setDocsPerPage?: (docsPerPage: number) => void;
   defaultVisibleFields?: number;
   compactCard?: boolean;
   showScore?: boolean;
-  expandAction?: (doc: SearchHit) => void;
+  onDocumentClick?: (doc: SearchHit) => void;
 }
 
 export const DocumentList: React.FC<DocumentListProps> = ({
@@ -60,7 +60,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   defaultVisibleFields = 3,
   compactCard = true,
   showScore = false,
-  expandAction,
+  onDocumentClick,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -113,7 +113,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
               defaultVisibleFields={defaultVisibleFields}
               showScore={showScore}
               compactCard={compactCard}
-              expandAction={expandAction ? () => expandAction(doc) : undefined}
+              onDocumentClick={onDocumentClick ? () => onDocumentClick(doc) : undefined}
             />
             <EuiSpacer size="s" />
           </React.Fragment>
@@ -131,81 +131,83 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             onPageClick={onPaginate}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            aria-label={i18n.translate('searchIndexDocuments.documentList.docsPerPage', {
-              defaultMessage: 'Document count per page dropdown',
-            })}
-            button={
-              <EuiButtonEmpty
-                data-telemetry-id={`${dataTelemetryIdPrefix}-documents-docsPerPage`}
+        {setDocsPerPage && (
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              aria-label={i18n.translate('searchIndexDocuments.documentList.docsPerPage', {
+                defaultMessage: 'Document count per page dropdown',
+              })}
+              button={
+                <EuiButtonEmpty
+                  data-telemetry-id={`${dataTelemetryIdPrefix}-documents-docsPerPage`}
+                  size="s"
+                  iconType="arrowDown"
+                  iconSide="right"
+                  onClick={() => {
+                    setIsPopoverOpen(true);
+                  }}
+                >
+                  {i18n.translate('searchIndexDocuments.documentList.pagination.itemsPerPage', {
+                    defaultMessage: 'Documents per page: {docPerPage}',
+                    values: { docPerPage: docsPerPage },
+                  })}
+                </EuiButtonEmpty>
+              }
+              isOpen={isPopoverOpen}
+              closePopover={() => {
+                setIsPopoverOpen(false);
+              }}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenuPanel
                 size="s"
-                iconType="arrowDown"
-                iconSide="right"
-                onClick={() => {
-                  setIsPopoverOpen(true);
-                }}
-              >
-                {i18n.translate('searchIndexDocuments.documentList.pagination.itemsPerPage', {
-                  defaultMessage: 'Documents per page: {docPerPage}',
-                  values: { docPerPage: docsPerPage },
-                })}
-              </EuiButtonEmpty>
-            }
-            isOpen={isPopoverOpen}
-            closePopover={() => {
-              setIsPopoverOpen(false);
-            }}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel
-              size="s"
-              items={[
-                <EuiContextMenuItem
-                  key="10 rows"
-                  icon={getIconType(10)}
-                  onClick={() => {
-                    setIsPopoverOpen(false);
-                    setDocsPerPage(10);
-                  }}
-                >
-                  {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
-                    defaultMessage: '{docCount} documents',
-                    values: { docCount: 10 },
-                  })}
-                </EuiContextMenuItem>,
+                items={[
+                  <EuiContextMenuItem
+                    key="10 rows"
+                    icon={getIconType(10)}
+                    onClick={() => {
+                      setIsPopoverOpen(false);
+                      setDocsPerPage(10);
+                    }}
+                  >
+                    {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
+                      defaultMessage: '{docCount} documents',
+                      values: { docCount: 10 },
+                    })}
+                  </EuiContextMenuItem>,
 
-                <EuiContextMenuItem
-                  key="25 rows"
-                  icon={getIconType(25)}
-                  onClick={() => {
-                    setIsPopoverOpen(false);
-                    setDocsPerPage(25);
-                  }}
-                >
-                  {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
-                    defaultMessage: '{docCount} documents',
-                    values: { docCount: 25 },
-                  })}
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  key="50 rows"
-                  icon={getIconType(50)}
-                  onClick={() => {
-                    setIsPopoverOpen(false);
-                    setDocsPerPage(50);
-                  }}
-                >
-                  {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
-                    defaultMessage: '{docCount} documents',
-                    values: { docCount: 50 },
-                  })}
-                </EuiContextMenuItem>,
-              ]}
-            />
-          </EuiPopover>
-        </EuiFlexItem>
+                  <EuiContextMenuItem
+                    key="25 rows"
+                    icon={getIconType(25)}
+                    onClick={() => {
+                      setIsPopoverOpen(false);
+                      setDocsPerPage(25);
+                    }}
+                  >
+                    {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
+                      defaultMessage: '{docCount} documents',
+                      values: { docCount: 25 },
+                    })}
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    key="50 rows"
+                    icon={getIconType(50)}
+                    onClick={() => {
+                      setIsPopoverOpen(false);
+                      setDocsPerPage(50);
+                    }}
+                  >
+                    {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
+                      defaultMessage: '{docCount} documents',
+                      values: { docCount: 50 },
+                    })}
+                  </EuiContextMenuItem>,
+                ]}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiSpacer />

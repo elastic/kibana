@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
@@ -34,6 +35,7 @@ interface Props {
   title: string;
   rightSideActions?: React.ReactNode;
   showScore?: boolean;
+  onTitleClick?: () => void;
 }
 
 interface TermDef {
@@ -68,7 +70,10 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
       size="xs"
       iconType="iInCircle"
       color="primary"
-      onClick={() => setPopoverIsOpen(!popoverIsOpen)}
+      onClick={(e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        setPopoverIsOpen(!popoverIsOpen);
+      }}
       aria-label={i18n.translate('searchIndexDocuments.result.header.metadata.icon.ariaLabel', {
         defaultMessage: 'Metadata for document: {id}',
         values: { id },
@@ -106,7 +111,16 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
       </EuiFlexGroup>
       {onDocumentDelete && (
         <EuiPopoverFooter>
-          <EuiButton iconType="trash" color="danger" size="s" onClick={closePopover} fullWidth>
+          <EuiButton
+            iconType="trash"
+            color="danger"
+            size="s"
+            onClick={(e: React.MouseEvent<HTMLElement>) => {
+              e.stopPropagation();
+              closePopover();
+            }}
+            fullWidth
+          >
             {i18n.translate('searchIndexDocuments.result.header.metadata.deleteDocument', {
               defaultMessage: 'Delete document',
             })}
@@ -166,6 +180,7 @@ export const RichResultHeader: React.FC<Props> = ({
   metaData,
   rightSideActions = null,
   showScore = false,
+  onTitleClick,
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -188,9 +203,17 @@ export const RichResultHeader: React.FC<Props> = ({
               <EuiText>
                 <EuiFlexGroup alignItems="center" gutterSize="l">
                   <EuiFlexItem>
-                    <EuiTitle size="xs">
-                      <h4>{title}</h4>
-                    </EuiTitle>
+                    {onTitleClick ? (
+                      <EuiLink onClick={onTitleClick} color="text">
+                        <EuiTitle size="xs">
+                          <h4>{title}</h4>
+                        </EuiTitle>
+                      </EuiLink>
+                    ) : (
+                      <EuiTitle size="xs">
+                        <h4>{title}</h4>
+                      </EuiTitle>
+                    )}
                   </EuiFlexItem>
                   {!!metaData && (
                     <EuiFlexItem grow={false}>
