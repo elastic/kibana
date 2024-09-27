@@ -10,7 +10,16 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiButton,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
@@ -130,6 +139,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   //   AiOpsKey,
   //   AiOpsStorageMapped<typeof AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS>
   // >(AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS, ['p-value', 'Baseline rate', 'Deviation rate']);
+  const [embeddableOptionsVisible, setEmbeddableOptionsVisible] = useState(false);
+
+  const onEmbeddableOptionsClickHandler = () => {
+    setEmbeddableOptionsVisible((s) => !s);
+  };
 
   const onFieldsFilterChange = (skippedFieldsUpdate: string[]) => {
     dispatch(resetResults());
@@ -326,8 +340,30 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
               onFieldsFilterChange={onFieldsFilterChange}
             />
           )}
+          {embeddingOrigin === 'dashboard' && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                data-test-subj="aiopsLogRateAnalysisOptionsButton"
+                iconType="gear"
+                onClick={onEmbeddableOptionsClickHandler}
+              />
+            </EuiFlexItem>
+          )}
         </>
       </ProgressControls>
+
+      {embeddingOrigin === 'dashboard' && embeddableOptionsVisible && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <LogRateAnalysisOptions
+              foundGroups={foundGroups}
+              growFirstItem={true}
+              onFieldsFilterChange={onFieldsFilterChange}
+            />
+          </EuiFlexGroup>
+        </>
+      )}
 
       {errors.length > 0 ? (
         <>
