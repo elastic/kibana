@@ -1941,4 +1941,37 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.events.file.max_hash_size_mb',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.file.max_hash_size_mb',
+      {
+        defaultMessage:
+          "Attempt to include file.hash.sha256 in file events.  Hashing is asynchronous, best-effort, and is not guaranteed to succeed, especially on network drives.  WARNING: File hashing is a very CPU- and I/O-intensive process.  WARNING: This feature will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness, especially during I/O-intensive activity such as directory copies and compilation.  WARNING: Event processing will be delayed due to the time spent hashing, causing Endpoint's Behavioral and Ransomware protections to fire later than normal, potentially allowing threats to inflect additional damage.  Set to 'off' to disable this feature.  Set to '0' to hash all files up to 1 GiB.  Otherwise, this sets the maximum to-be-hashed file size in MiB.  Default: off",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.file.max_hash_size_mb',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.file.max_hash_size_mb',
+      {
+        defaultMessage:
+          "Attempt to include file.hash.sha256 in file events.  Hashing is asynchronous, best-effort, and is not guaranteed to succeed, especially on network drives.  WARNING: File hashing is a very CPU- and I/O-intensive process.  WARNING: This feature will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness, especially during I/O-intensive activity such as directory copies and compilation.  WARNING: Event processing will be delayed due to the time spent hashing, causing Endpoint's Behavioral and Ransomware protections to fire later than normal, potentially allowing threats to inflect additional damage.  Set to 'off' to disable this feature.  Set to '0' to hash all files up to 1 GiB.  Otherwise, this sets the maximum to-be-hashed file size in MiB.  Default: off",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.file.max_hash_size_mb',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.file.max_hash_size_mb',
+      {
+        defaultMessage:
+          "Attempt to include file.hash.sha256 in file events.  Hashing is asynchronous, best-effort, and is not guaranteed to succeed, especially on network drives.  WARNING: File hashing is a very CPU- and I/O-intensive process.  WARNING: This feature will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness, especially during I/O-intensive activity such as directory copies and compilation.  WARNING: Event processing will be delayed due to the time spent hashing, causing Endpoint's Behavioral and Ransomware protections to fire later than normal, potentially allowing threats to inflect additional damage.  Set to 'off' to disable this feature.  Set to '0' to hash all files up to 1 GiB.  Otherwise, this sets the maximum to-be-hashed file size in MiB.  Default: off",
+      }
+    ),
+  },
 ];

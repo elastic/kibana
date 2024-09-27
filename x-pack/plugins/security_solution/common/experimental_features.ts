@@ -53,11 +53,6 @@ export const allowedExperimentalValues = Object.freeze({
   automatedProcessActionsEnabled: true,
 
   /**
-   * Temporary feature flag to enable the Response Actions in Rules UI - intermediate release
-   */
-  automatedResponseActionsForMoreRulesEnabled: false,
-
-  /**
    * Enables the ability to send Response actions to SentinelOne and persist the results
    * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
    * response actions in Response Console.
@@ -87,6 +82,16 @@ export const allowedExperimentalValues = Object.freeze({
    * in ES.
    */
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+
+  /**
+   * Space awareness for Elastic Defend management.
+   * Feature depends on Fleet's corresponding features also being enabled:
+   * - `subfeaturePrivileges`
+   * - `useSpaceAwareness`
+   * and Fleet must set it runtime mode to spaces by calling the following API:
+   * - `POST /internal/fleet/enable_space_awareness`
+   */
+  endpointManagementSpaceAwarenessEnabled: false,
 
   /**
    * Enables new notes
@@ -176,6 +181,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
   crowdstrikeDataInAnalyzerEnabled: true,
+
+  /**
+   * Enables Response actions telemetry collection
+   * Should be enabled in 8.17.0
+   */
+  responseActionsTelemetryEnabled: false,
 
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
