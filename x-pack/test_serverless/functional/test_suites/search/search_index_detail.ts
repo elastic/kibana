@@ -66,24 +66,55 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should show code examples for adding documents', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
-      });
-
-      it('should have index documents', async () => {
-        await es.index({
-          index: indexName,
-          body: {
-            my_field: [1, 0, 1],
-          },
-        });
-
-        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-        await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
+        await pageObjects.svlSearchIndexDetailPage.expectSelectedLanguage('python');
+        await pageObjects.svlSearchIndexDetailPage.codeSampleContainsValue(
+          'installCodeExample',
+          'pip install'
+        );
+        await pageObjects.svlSearchIndexDetailPage.selectCodingLanguage('javascript');
+        await pageObjects.svlSearchIndexDetailPage.codeSampleContainsValue(
+          'installCodeExample',
+          'npm install'
+        );
+        await pageObjects.svlSearchIndexDetailPage.selectCodingLanguage('curl');
+        await pageObjects.svlSearchIndexDetailPage.openConsoleCodeExample();
+        await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+        await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
       });
 
       it('back to indices button should redirect to list page', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonExists();
         await pageObjects.svlSearchIndexDetailPage.clickBackToIndicesButton();
         await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonRedirectsToListPage();
+      });
+      describe('With data', () => {
+        before(async () => {
+          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+          await es.index({
+            index: indexName,
+            body: {
+              my_field: [1, 0, 1],
+            },
+          });
+        });
+        it('should have index documents', async () => {
+          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+          await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
+        });
+        it('should have with data tabs', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectWithDataTabsExists();
+          await pageObjects.svlSearchIndexDetailPage.expectShouldDefaultToDataTab();
+        });
+        it('should be able to change tabs to mappings and mappings is shown', async () => {
+          await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('mappingsTab');
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings');
+          await pageObjects.svlSearchIndexDetailPage.expectMappingsComponentIsVisible();
+        });
+        it('should be able to change tabs to settings and settings is shown', async () => {
+          await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('settingsTab');
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('settings');
+          await pageObjects.svlSearchIndexDetailPage.expectSettingsComponentIsVisible();
+        });
       });
 
       describe('page loading error', () => {
@@ -93,6 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         it('has page load error section', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectPageLoadErrorExists();
+          await pageObjects.svlSearchIndexDetailPage.expectIndexNotFoundErrorExists();
         });
         it('reload button shows details page again', async () => {
           await es.indices.create({ index: indexName });
