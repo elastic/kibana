@@ -42,25 +42,31 @@ export const IntegrationsCard: OnboardingCardComponent = ({
                 values={{
                   desc1: checkCompleteMetadata?.agentStillRequired ? (
                     <FormattedMessage
+                      data-test-subj="agentRequiredText"
                       id="xpack.securitySolution.onboarding.integrationsCard.agent.text"
                       defaultMessage="Elastic Agent is required for one or more of your integrations. Add Elastic Agent"
                     />
                   ) : (
                     <FormattedMessage
+                      data-test-subj="integrationsCompleteText"
                       id="xpack.securitySolution.onboarding.integrationsCard.callout.completeText"
                       defaultMessage="{count} {count, plural, one {integration has} other {integrations have}} been added"
                       values={{ count: integrationsInstalled }}
                     />
                   ),
                   desc2: checkCompleteMetadata?.agentStillRequired ? (
-                    <LinkAnchor onClick={onAddAgentClick}>
+                    <LinkAnchor onClick={onAddAgentClick} data-test-subj="agentLink">
                       <FormattedMessage
                         id="xpack.securitySolution.onboarding.integrationsCard.agent.link"
                         defaultMessage="here"
                       />
                     </LinkAnchor>
                   ) : (
-                    <LinkAnchor onClick={onClick} href={href}>
+                    <LinkAnchor
+                      onClick={onClick}
+                      href={href}
+                      data-test-subj="manageIntegrationsLink"
+                    >
                       <FormattedMessage
                         id="xpack.securitySolution.onboarding.integrationsCard.button.completeLink"
                         defaultMessage="Manage integrations"
@@ -72,7 +78,6 @@ export const IntegrationsCard: OnboardingCardComponent = ({
               />
             }
           />
-
           <EuiSpacer size="m" />
         </>
       )}

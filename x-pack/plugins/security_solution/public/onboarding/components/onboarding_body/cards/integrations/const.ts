@@ -15,50 +15,53 @@ export const SCROLL_ELEMENT_ID = 'integrations-scroll-container';
 export const WITH_SEARCH_BOX_HEIGHT = '517px';
 export const WITHOUT_SEARCH_BOX_HEIGHT = '462px';
 export const MAX_CARD_HEIGHT = 127; // px
+export const CARD_TITLE_LINE_CLAMP = 1; // 1 line of text
+export const CARD_DESCRIPTION_LINE_CLAMP = 3; // 3 lines of text
 export const LOADING_SKELETON_HEIGHT = 10; // 10 lines of text
+export const AGENT_INDEX = `logs-elastic_agent*`;
 export const INTEGRATION_TABS: Tab[] = [
   {
-    id: 'recommended',
-    label: 'Recommended',
     category: 'security',
     iconType: 'starFilled',
-    showSearchTools: false,
+    id: 'recommended',
+    label: 'Recommended',
     overflow: 'hidden',
+    showSearchTools: false,
   },
   {
+    category: 'security',
     id: 'network',
     label: 'Network',
-    category: 'security',
     subCategory: 'network_security',
   },
   {
+    category: 'security',
     id: 'user',
     label: 'User',
-    category: 'security',
     subCategory: 'iam',
   },
   {
+    category: 'security',
     id: 'endpoint',
     label: 'Endpoint',
-    category: 'security',
     subCategory: 'edr_xdr',
   },
   {
+    category: 'security',
     id: 'cloud',
     label: 'Cloud',
-    category: 'security',
     subCategory: 'cloudsecurity_cdr',
   },
   {
+    category: 'security',
     id: 'threatIntel',
     label: 'Threat Intel',
-    category: 'security',
     subCategory: 'threat_intel',
   },
   {
+    category: '',
     id: 'all',
     label: 'All',
-    category: '',
   },
 ];
 export const DEFAULT_TAB = INTEGRATION_TABS[0];

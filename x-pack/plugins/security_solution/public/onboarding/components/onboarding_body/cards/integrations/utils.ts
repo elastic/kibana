@@ -15,7 +15,13 @@ import {
   APP_UI_ID,
   ONBOARDING_PATH,
 } from '../../../../../../common/constants';
-import { MAX_CARD_HEIGHT, ONBOARDING_APP_ID, ONBOARDING_LINK } from './const';
+import {
+  CARD_DESCRIPTION_LINE_CLAMP,
+  CARD_TITLE_LINE_CLAMP,
+  MAX_CARD_HEIGHT,
+  ONBOARDING_APP_ID,
+  ONBOARDING_LINK,
+} from './const';
 
 export const PackageList = lazy(async () => ({
   default: await import('@kbn/fleet-plugin/public')
@@ -87,8 +93,8 @@ const addSecuritySpecificProps = ({
   const onboardingLink = getOnboardingPath(basePath);
   return {
     ...card,
-    titleLineClamp: 1,
-    descriptionLineClamp: 3,
+    titleLineClamp: CARD_TITLE_LINE_CLAMP,
+    descriptionLineClamp: CARD_DESCRIPTION_LINE_CLAMP,
     maxCardHeight: MAX_CARD_HEIGHT,
     showInstallationStatus: true,
     url:

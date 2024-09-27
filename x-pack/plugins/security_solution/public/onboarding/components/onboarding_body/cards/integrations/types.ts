@@ -10,7 +10,7 @@ export interface Tab {
   iconType?: string;
   id: string;
   label: string;
+  overflow?: 'hidden' | 'scroll';
   showSearchTools?: boolean;
   subCategory?: string;
-  overflow?: 'hidden' | 'scroll';
 }

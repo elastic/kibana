@@ -7,29 +7,27 @@
 
 import type { GetPackagesResponse } from '@kbn/fleet-plugin/public';
 import { EPM_PACKAGES_MANY, installationStatuses } from '@kbn/fleet-plugin/public';
-import type { HttpSetup, NavigateToAppOptions } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import type { OnboardingCardCheckComplete } from '../../../../types';
-import { getCompleteBadgeWithTooltip } from './integrations_header_badges';
+import { AGENT_INDEX } from './const';
 
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async ({
   data,
   http,
-  navigateToApp,
 }: {
   data: DataPublicPluginStart;
   http: HttpSetup;
-  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
 }) => {
   const packageData = await http.get<GetPackagesResponse>(EPM_PACKAGES_MANY, {
     version: '2023-10-31',
   });
 
-  const agentsAvailable = await lastValueFrom(
+  const agentsData = await lastValueFrom(
     data.search.search({
-      params: { index: `logs-elastic_agent*`, body: { size: 1 } },
+      params: { index: AGENT_INDEX, body: { size: 1 } },
     })
   );
 
@@ -39,10 +37,8 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async 
       pkg.status === installationStatuses.InstallFailed
   );
   const isComplete = installed && installed.length > 0;
-  const agentStillRequired =
-    isComplete &&
-    agentsAvailable?.rawResponse?.hits?.total != null &&
-    agentsAvailable?.rawResponse?.hits?.total === 0;
+  const agentsDataAvailable = !!agentsData?.rawResponse?.hits?.total;
+  const agentStillRequired = isComplete && !agentsDataAvailable;
 
   const completeBadgeText = i18n.translate(
     'xpack.securitySolution.onboarding.integrationsCard.badge.completeText',

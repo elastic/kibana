@@ -45,7 +45,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
   const [toggleIdSelected, setToggleIdSelected] = useState<string>(selectedTabId);
   const onTabChange = useCallback(
     (id: string) => {
-      scrollElement.current?.scrollTo(0, 0);
+      scrollElement.current?.scrollTo?.(0, 0);
       setToggleIdSelected(id);
       setSelectedTabIdToStorage(id);
     },
@@ -81,6 +81,10 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
       // If search box are not shown, clear the search term to avoid unexpected filtering
       onSearchTermChanged('');
     }
+
+    if (showSearchTools && searchTermFromStorage) {
+      setSearchTerm(searchTermFromStorage);
+    }
   }, [
     onSearchTermChanged,
     searchTermFromStorage,
@@ -99,7 +103,13 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
   });
 
   if (isLoading) {
-    return <EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_HEIGHT} />;
+    return (
+      <EuiSkeletonText
+        data-test-subj="loadingPackages"
+        isLoading={true}
+        lines={LOADING_SKELETON_HEIGHT}
+      />
+    );
   }
 
   return (

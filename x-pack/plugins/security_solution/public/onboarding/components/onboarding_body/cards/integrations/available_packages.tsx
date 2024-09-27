@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import type { AvailablePackagesHookType } from '@kbn/fleet-plugin/public';
@@ -16,17 +16,25 @@ import { PackageListGrid } from './package_list_grid';
 import { LOADING_SKELETON_HEIGHT } from './const';
 
 export const AvailablePackages = React.memo(() => {
-  const ref = useRef<AvailablePackagesHookType | null>(null);
+  const [fetchAvailablePackages, setFetchAvailablePackages] = useState<AvailablePackagesHookType>();
 
-  const {
-    error: errorLoading,
-    retry: retryAsyncLoad,
-    loading: asyncLoading,
-  } = useAsyncRetry(async () => {
-    ref.current = await fetchAvailablePackagesHook();
+  const { error, retry, loading } = useAsyncRetry(async () => {
+    if (fetchAvailablePackages) {
+      return;
+    }
+    const loadedHook = await fetchAvailablePackagesHook();
+    setFetchAvailablePackages(() => {
+      return loadedHook;
+    });
   });
 
-  if (errorLoading)
+  const onRetry = useCallback(() => {
+    if (!loading) {
+      retry();
+    }
+  }, [loading, retry]);
+
+  if (error) {
     return (
       <EuiCallOut
         title={i18n.translate('xpack.securitySolution.onboarding.asyncLoadFailureCallout.title', {
@@ -42,13 +50,7 @@ export const AvailablePackages = React.memo(() => {
             defaultMessage="Some required elements failed to load."
           />
         </p>
-        <EuiButton
-          color="warning"
-          data-test-subj="xpack.securitySolution.onboarding.asyncLoadFailureCallout.button"
-          onClick={() => {
-            if (!asyncLoading) retryAsyncLoad();
-          }}
-        >
+        <EuiButton color="warning" data-test-subj="retryButton" onClick={onRetry}>
           <FormattedMessage
             id="xpack.securitySolution.onboarding.asyncLoadFailureCallout.buttonContent"
             defaultMessage="Retry"
@@ -56,11 +58,17 @@ export const AvailablePackages = React.memo(() => {
         </EuiButton>
       </EuiCallOut>
     );
-
-  if (asyncLoading || ref.current === null)
-    return <EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_HEIGHT} />;
-
-  return <PackageListGrid useAvailablePackages={ref.current} />;
+  }
+  if (loading || !fetchAvailablePackages) {
+    return (
+      <EuiSkeletonText
+        data-test-subj="loadingPackages"
+        isLoading={true}
+        lines={LOADING_SKELETON_HEIGHT}
+      />
+    );
+  }
+  return <PackageListGrid useAvailablePackages={fetchAvailablePackages} />;
 });
 
 AvailablePackages.displayName = 'AvailablePackages';
