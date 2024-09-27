@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { ValidatedRuleToImport } from '../../../../../../../common/api/detection_engine';
+import type {
+  RuleToImport,
+  ValidatedRuleToImport,
+} from '../../../../../../../common/api/detection_engine';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
-import type { RuleFromImportStream } from '../utils';
 import { configMock, createMockConfig, requestContextMock } from '../../../../routes/__mocks__';
 import { getPrebuiltRuleMock } from '../../../../prebuilt_rules/mocks';
 import { createRuleSourceImporter } from './rule_source_importer';
@@ -17,7 +19,7 @@ describe('ruleSourceImporter', () => {
   let ruleAssetsClientMock: ReturnType<typeof createPrebuiltRuleAssetsClientMock>;
   let config: ReturnType<typeof createMockConfig>;
   let context: ReturnType<typeof requestContextMock.create>['securitySolution'];
-  let ruleToImport: RuleFromImportStream;
+  let ruleToImport: RuleToImport;
   let subject: ReturnType<typeof createRuleSourceImporter>;
 
   beforeEach(() => {
@@ -27,7 +29,8 @@ describe('ruleSourceImporter', () => {
     context = requestContextMock.create().securitySolution;
     ruleAssetsClientMock = createPrebuiltRuleAssetsClientMock();
     ruleAssetsClientMock.fetchLatestAssets.mockResolvedValue([{}]);
-    ruleToImport = { rule_id: 'rule-1', version: 1 } as RuleFromImportStream;
+    ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([]);
+    ruleToImport = { rule_id: 'rule-1', version: 1 } as RuleToImport;
 
     subject = createRuleSourceImporter({
       context,
@@ -45,17 +48,6 @@ describe('ruleSourceImporter', () => {
   });
 
   describe('#setup()', () => {
-    it('does nothing if feature flag is disabled', async () => {
-      const disabledSubject = createRuleSourceImporter({
-        config: createMockConfig(),
-        context,
-        prebuiltRuleAssetsClient: ruleAssetsClientMock,
-      });
-      await disabledSubject.setup({ rules: [ruleToImport] });
-
-      expect(ruleAssetsClientMock.fetchLatestAssets).toHaveBeenCalledTimes(0);
-    });
-
     it('fetches the rules package on the initial call', async () => {
       await subject.setup({ rules: [] });
 
@@ -68,6 +60,14 @@ describe('ruleSourceImporter', () => {
       await subject.setup({ rules: [] });
 
       expect(ruleAssetsClientMock.fetchLatestAssets).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws an error if the ruleAsstClient does', () => {
+      ruleAssetsClientMock.fetchLatestAssets.mockReset().mockRejectedValue(new Error('failed'));
+
+      expect(() => subject.setup({ rules: [] })).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"failed"`
+      );
     });
   });
 
@@ -93,7 +93,7 @@ describe('ruleSourceImporter', () => {
       await subject.setup({ rules: [ruleToImport] });
 
       expect(() =>
-        subject.isPrebuiltRule({ rule_id: 'other-rule' } as RuleFromImportStream)
+        subject.isPrebuiltRule({ rule_id: 'other-rule' } as RuleToImport)
       ).toThrowErrorMatchingInlineSnapshot(`"Rule other-rule was not registered during setup."`);
     });
 

@@ -7,9 +7,9 @@
 
 import type {
   RuleSource,
+  RuleToImport,
   ValidatedRuleToImport,
 } from '../../../../../../../common/api/detection_engine';
-import type { RuleFromImportStream } from '../utils';
 
 export interface RuleSpecifier {
   rule_id: string;
@@ -22,7 +22,7 @@ export interface CalculatedRuleSource {
 }
 
 export interface IRuleSourceImporter {
-  setup: ({ rules }: { rules: RuleFromImportStream[] }) => Promise<void>;
-  isPrebuiltRule: (rule: RuleFromImportStream) => boolean;
+  setup: ({ rules }: { rules: RuleToImport[] }) => Promise<void>;
+  isPrebuiltRule: (rule: RuleToImport) => boolean;
   calculateRuleSource: (rule: ValidatedRuleToImport) => CalculatedRuleSource;
 }

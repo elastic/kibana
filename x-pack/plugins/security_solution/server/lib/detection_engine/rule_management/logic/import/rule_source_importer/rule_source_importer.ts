@@ -22,7 +22,6 @@ import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { ensureLatestRulesPackageInstalled } from '../../../../prebuilt_rules/logic/ensure_latest_rules_package_installed';
 import { calculateRuleSourceForImport } from '../calculate_rule_source_for_import';
-import { isRuleToImport, type RuleFromImportStream } from '../utils';
 import type { CalculatedRuleSource, IRuleSourceImporter, RuleSpecifier } from './types';
 import { fetchAvailableRuleAssetIds, fetchMatchingAssets } from './utils';
 
@@ -37,7 +36,6 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private context: SecuritySolutionApiRequestHandlerContext;
   private config: ConfigType;
   private ruleAssetsClient: IPrebuiltRuleAssetsClient;
-  private enabled: boolean;
   private latestPackagesInstalled: boolean = false;
   private matchingAssets: PrebuiltRuleAsset[] = [];
   private knownRules: RuleSpecifier[] = [];
@@ -55,7 +53,6 @@ export class RuleSourceImporter implements IRuleSourceImporter {
     this.ruleAssetsClient = prebuiltRuleAssetsClient;
     this.context = context;
     this.config = config;
-    this.enabled = config.experimentalFeatures.prebuiltRulesCustomizationEnabled;
   }
 
   /**
@@ -63,34 +60,18 @@ export class RuleSourceImporter implements IRuleSourceImporter {
    * Prepares the importing of rules by ensuring the latest rules
    * package is installed and fetching the associated prebuilt rule assets.
    */
-  public async setup({ rules }: { rules: RuleFromImportStream[] }): Promise<void> {
-    if (!this.enabled) {
-      return;
-    }
-
+  public async setup({ rules }: { rules: RuleToImport[] }): Promise<void> {
     if (!this.latestPackagesInstalled) {
       await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.config, this.context);
       this.latestPackagesInstalled = true;
     }
 
-    this.knownRules = rules
-      .filter(isRuleToImport)
-      .map((rule) => ({ rule_id: rule.rule_id, version: rule.version }));
-
-    try {
-      this.validateSetupState();
-
-      this.matchingAssets = await this.fetchMatchingAssets();
-      this.availableRuleAssetIds = await this.fetchAvailableRuleAssetIds();
-    } catch (e) {
-      // If all incoming rules were errors, there's nothing to calculate
-    }
+    this.knownRules = rules.map((rule) => ({ rule_id: rule.rule_id, version: rule.version }));
+    this.matchingAssets = await this.fetchMatchingAssets();
+    this.availableRuleAssetIds = await this.fetchAvailableRuleAssetIds();
   }
 
-  public isPrebuiltRule(rule: RuleFromImportStream): boolean {
-    if (!isRuleToImport(rule)) {
-      return false;
-    }
+  public isPrebuiltRule(rule: RuleToImport): boolean {
     this.validateRuleInput(rule);
 
     return this.availableRuleAssetIds.includes(rule.rule_id);
@@ -130,12 +111,6 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private validateSetupState() {
     if (!this.latestPackagesInstalled) {
       throw new Error('Expected rules package to be installed');
-    }
-
-    if (this.knownRules.length === 0) {
-      throw new Error(
-        'Expected rules to have been registered, but none were. Please call the setup() method with the relevant incoming rules.'
-      );
     }
   }
 
