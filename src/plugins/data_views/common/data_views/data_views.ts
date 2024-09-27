@@ -723,7 +723,7 @@ export class DataViewsService {
     id: string,
     title: string,
     options: GetFieldsOptions,
-    fieldAttrs: Record<string, FieldAttrSet> = {},
+    fieldAttrs: FieldAttrsAsObject = {},
     displayErrors: boolean = true
   ) => {
     const fieldsAsArr = Object.values(fields);
