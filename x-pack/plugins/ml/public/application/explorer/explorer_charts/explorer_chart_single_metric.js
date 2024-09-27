@@ -412,7 +412,9 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr('cx', (d) => lineChartXScale(d.date))
         // Fallback with domain's min value if value is null
         // To ensure event markers are rendered properly at the bottom of the chart
-        .attr('cy', (d) => lineChartYScale(d.value ? d.value : lineChartYScale.domain()[0]))
+        .attr('cy', (d) =>
+          lineChartYScale(d.value !== null ? d.value : lineChartYScale.domain()[0])
+        )
         .attr('class', (d) => {
           let markerClass = 'metric-value';
           if (isAnomalyVisible(d)) {
@@ -480,7 +482,7 @@ export class ExplorerChartSingleMetric extends React.Component {
           (d) =>
             // Fallback with domain's min value if value is null
             // To ensure event markers are rendered properly at the bottom of the chart
-            lineChartYScale(d.value ? d.value : lineChartYScale.domain()[0]) -
+            lineChartYScale(d.value !== null ? d.value : lineChartYScale.domain()[0]) -
             SCHEDULED_EVENT_SYMBOL_HEIGHT / 2
         );
     }
