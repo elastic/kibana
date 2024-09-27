@@ -168,10 +168,9 @@ export function ApmMainTemplate({
   );
 
   const showEntitiesInventoryCallout =
-    (!dismissedEntitiesInventoryCallout &&
-      isEntityCentricExperienceSettingEnabled &&
-      selectedNavButton === 'allServices') ||
-    selectedNavButton === 'serviceGroups';
+    !dismissedEntitiesInventoryCallout &&
+    isEntityCentricExperienceSettingEnabled &&
+    selectedNavButton !== undefined;
 
   return (
     <EnvironmentsContextProvider>
