@@ -16,7 +16,7 @@ import type { CustomFieldEuiTableColumn } from '../types';
 export const getEuiTableColumn = ({
   label,
   options,
-}: ListCustomFieldConfiguration): CustomFieldEuiTableColumn => ({
+}: Pick<ListCustomFieldConfiguration, 'label' | 'options'>): CustomFieldEuiTableColumn => ({
   name: label,
   width: '250px',
   render: (customField: CaseCustomField) => (
