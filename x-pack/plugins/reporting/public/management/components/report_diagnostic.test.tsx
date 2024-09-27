@@ -11,11 +11,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ReportDiagnostic } from './report_diagnostic';
 
-const mockedApiClient: jest.Mocked<ComponentProps<typeof ReportDiagnostic>['apiClient']> = {
+const mockedApiClient: jest.Mocked<
+  Pick<ComponentProps<typeof ReportDiagnostic>['apiClient'], 'verifyBrowser'>
+> = {
   verifyBrowser: jest.fn(),
 };
 
 const defaultProps: Pick<ComponentProps<typeof ReportDiagnostic>, 'apiClient'> = {
+  // @ts-expect-error we don't need to provide the full apiClient for the test
   apiClient: mockedApiClient,
 };
 
