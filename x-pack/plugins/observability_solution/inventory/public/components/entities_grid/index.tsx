@@ -35,6 +35,7 @@ import {
 } from '../../../common/es_fields/entities';
 import { APIReturnType } from '../../api';
 import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
+import { parseServiceParams } from '../../utils/parse_service_params';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
@@ -60,21 +61,6 @@ const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipCon
     </EuiToolTip>
   </>
 );
-
-// TODO: Replace this with a better approach for handling service names. See https://github.com/elastic/kibana/issues/194131
-const parseServiceParams = (entityName: string) => {
-  const separatorIndex = entityName.indexOf(':');
-
-  const serviceName = entityName.slice(0, separatorIndex);
-  // Exclude the separator from the sliced string for the environment name.
-  // If the string is empty however, then we default to undefined.
-  const environment = entityName.slice(separatorIndex + 1) || undefined;
-
-  return {
-    serviceName,
-    environment,
-  };
-};
 
 const entityNameLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.entityNameLabel', {
   defaultMessage: 'Entity name',
