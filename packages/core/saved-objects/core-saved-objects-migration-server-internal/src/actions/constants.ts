@@ -21,6 +21,6 @@ export const DEFAULT_TIMEOUT = '300s';
 /** Allocate 1 replica if there are enough data nodes, otherwise continue with 0 */
 export const INDEX_AUTO_EXPAND_REPLICAS = '0-1';
 /** ES rule of thumb: shards should be several GB to 10's of GB, so Kibana is unlikely to cross that limit */
-export const INDEX_NUMBER_OF_SHARDS = 1;
+export const INDEX_NUMBER_OF_SHARDS = 3;
 /** Wait for all shards to be active before starting an operation */
 export const WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE = 'all';
