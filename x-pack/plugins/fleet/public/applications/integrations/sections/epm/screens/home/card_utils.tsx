@@ -39,30 +39,30 @@ import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
 import type { PackageListItem } from '../../../../types';
 
 export interface IntegrationCardItem {
-  url: string;
-  release?: IntegrationCardReleaseLabel;
-  description: string;
-  name: string;
-  title: string;
-  version: string;
-  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
-  integration: string;
-  id: string;
   categories: string[];
+  description: string;
+  descriptionLineClamp?: number;
+  extraLabelsBadges?: React.ReactNode[];
   fromIntegrations?: string;
+  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
+  id: string;
+  installStatus?: EpmPackageInstallStatus;
+  integration: string;
+  isCollectionCard?: boolean;
+  isQuickstart?: boolean;
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
-  isQuickstart?: boolean;
-  showLabels?: boolean;
-  extraLabelsBadges?: React.ReactNode[];
-  onCardClick?: () => void;
-  isCollectionCard?: boolean;
-  showInstallationStatus?: boolean;
-  installStatus: EpmPackageInstallStatus | null | undefined;
-  titleLineClamp?: number;
-  descriptionLineClamp?: number;
   maxCardHeight?: number;
+  name: string;
+  onCardClick?: () => void;
+  release?: IntegrationCardReleaseLabel;
+  showInstallationStatus?: boolean;
+  showLabels?: boolean;
+  title: string;
+  titleLineClamp?: number;
+  url: string;
+  version: string;
 }
 
 export const mapToCard = ({
@@ -116,7 +116,7 @@ export const mapToCard = ({
     extraLabelsBadges = getIntegrationLabels(item);
   }
 
-  return {
+  const cardResult: IntegrationCardItem = {
     id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}:${item.id}`,
     description: item.description,
     icons: !item.icons || !item.icons.length ? [] : item.icons,
@@ -132,8 +132,13 @@ export const mapToCard = ({
     isUnverified,
     isUpdateAvailable,
     extraLabelsBadges,
-    installStatus: item.type === 'integration' ? item.installationInfo?.install_status : null,
   };
+
+  if (item.type === 'integration') {
+    cardResult.installStatus = item.installationInfo?.install_status;
+  }
+
+  return cardResult;
 };
 
 export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
