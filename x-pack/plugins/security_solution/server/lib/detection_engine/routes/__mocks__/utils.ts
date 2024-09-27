@@ -81,7 +81,7 @@ export const getOutputRuleAlertForRest = (): RuleResponse => ({
     },
   ],
   meta: {
-    some_meta: 'someField',
+    someMeta: 'someField',
   },
   timeline_id: 'some-timeline-id',
   timeline_title: 'some-timeline-title',

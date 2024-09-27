@@ -6,24 +6,25 @@
  */
 
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RequiredOptional } from '@kbn/zod-helpers';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   transformAlertToRuleAction,
   transformAlertToRuleSystemAction,
 } from '../../../../../../../common/detection_engine/transform_actions';
 import { createRuleExecutionSummary } from '../../../../rule_monitoring';
-import { type RuleParams } from '../../../../rule_schema';
+import type { RuleParams } from '../../../../rule_schema';
 import {
   transformFromAlertThrottle,
   transformToActionFrequency,
 } from '../../../normalization/rule_actions';
 import { typeSpecificCamelToSnake } from './type_specific_camel_to_snake';
+import { commonParamsCamelToSnake } from './common_params_camel_to_snake';
 import { normalizeRuleParams } from './normalize_rule_params';
-import { convertObjectKeysToSnakeCase } from '../../../../../../utils/object_case_converters';
 
 export const internalRuleToAPIResponse = (
   rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
-): RuleResponse => {
+): RequiredOptional<RuleResponse> => {
   const executionSummary = createRuleExecutionSummary(rule);
 
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> => {
@@ -39,8 +40,6 @@ export const internalRuleToAPIResponse = (
     return transformedAction;
   });
   const normalizedRuleParams = normalizeRuleParams(rule.params);
-  const commonRuleParams = convertObjectKeysToSnakeCase(normalizedRuleParams);
-  const typeSpecificRuleParams = typeSpecificCamelToSnake(rule.params);
 
   return {
     // saved object properties
@@ -58,8 +57,10 @@ export const internalRuleToAPIResponse = (
     interval: rule.schedule.interval,
     enabled: rule.enabled,
     revision: rule.revision,
-    ...commonRuleParams,
-    ...typeSpecificRuleParams,
+    // Security solution shared rule params
+    ...commonParamsCamelToSnake(normalizedRuleParams),
+    // Type specific security solution rule params
+    ...typeSpecificCamelToSnake(rule.params),
     // Actions
     throttle: undefined,
     actions: [...actions, ...(systemActions ?? [])],
