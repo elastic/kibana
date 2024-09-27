@@ -5,36 +5,27 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import React, { useEffect, useState, ReactNode } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { createOptionsFromFields, Option } from '../../helpers/create_options';
+import { i18n } from '@kbn/i18n';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import React, { useEffect, useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
+import { Option, createOptionsFromFields } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
+import { OptionalText } from './optional_text';
 
 interface Props {
   indexFields: FieldSpec[];
-  name: 'groupBy' | 'indicator.params.timestampField';
-  label: ReactNode | string;
-  placeholder: string;
   isDisabled: boolean;
   isLoading: boolean;
-  isRequired?: boolean;
-  defaultValue?: string;
-  labelAppend?: ReactNode;
 }
 
-export function IndexFieldSelector({
-  indexFields,
-  name,
-  label,
-  labelAppend,
-  placeholder,
-  isDisabled,
-  isLoading,
-  isRequired = false,
-  defaultValue = '',
-}: Props) {
+const placeholder = i18n.translate('xpack.slo.sloEdit.groupBy.placeholder', {
+  defaultMessage: 'Select an optional field to group by',
+});
+
+export function GroupByFieldSelector({ indexFields, isDisabled, isLoading }: Props) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const [options, setOptions] = useState<Option[]>(createOptionsFromFields(indexFields));
 
@@ -42,10 +33,10 @@ export function IndexFieldSelector({
     setOptions(createOptionsFromFields(indexFields));
   }, [indexFields]);
 
-  const getSelectedItems = (value: string | string[], fields: FieldSpec[]) => {
+  const getSelectedItems = (value: string | string[]) => {
     const values = [value].flat();
     const selectedItems: Array<EuiComboBoxOptionOption<string>> = [];
-    fields.forEach((field) => {
+    indexFields.forEach((field) => {
       if (values.includes(field.name)) {
         selectedItems.push({ value: field.name, label: field.name });
       }
@@ -54,12 +45,27 @@ export function IndexFieldSelector({
   };
 
   return (
-    <EuiFormRow label={label} isInvalid={getFieldState(name).invalid} labelAppend={labelAppend}>
+    <EuiFormRow
+      label={
+        <span>
+          {i18n.translate('xpack.slo.sloEdit.groupBy.label', {
+            defaultMessage: 'Group by',
+          })}{' '}
+          <EuiIconTip
+            content={i18n.translate('xpack.slo.sloEdit.groupBy.tooltip', {
+              defaultMessage: 'Create individual SLOs for each value of the selected field.',
+            })}
+            position="top"
+          />
+        </span>
+      }
+      isInvalid={getFieldState('groupBy').invalid}
+      labelAppend={<OptionalText />}
+    >
       <Controller
-        defaultValue={[defaultValue].flat()}
-        name={name}
+        defaultValue={[ALL_VALUE]}
+        name={'groupBy'}
         control={control}
-        rules={{ required: isRequired && !isDisabled }}
         render={({ field, fieldState }) => {
           return (
             <EuiComboBox<string>
@@ -76,7 +82,7 @@ export function IndexFieldSelector({
                   return field.onChange(selected.map((selection) => selection.value));
                 }
 
-                field.onChange(defaultValue);
+                field.onChange([ALL_VALUE]);
               }}
               options={options}
               onSearchChange={(searchValue: string) => {
@@ -84,9 +90,7 @@ export function IndexFieldSelector({
                   createOptionsFromFields(indexFields, ({ value }) => value.includes(searchValue))
                 );
               }}
-              selectedOptions={
-                !!indexFields && !!field.value ? getSelectedItems(field.value, indexFields) : []
-              }
+              selectedOptions={!!indexFields && !!field.value ? getSelectedItems(field.value) : []}
             />
           );
         }}
