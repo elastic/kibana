@@ -240,11 +240,10 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           },
         });
 
-        stateFromSaveModal.lastSavedId = saveResult.id;
-
         if (saveResult.id) {
           batch(() => {
             this.dispatch.setStateFromSaveModal(stateFromSaveModal);
+            this.setSavedObjectId(saveResult.id);
             this.setLastSavedInput(dashboardStateToSave);
           });
         }
