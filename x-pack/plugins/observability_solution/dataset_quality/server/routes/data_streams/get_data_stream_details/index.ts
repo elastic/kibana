@@ -6,7 +6,7 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import {
   findInventoryFields,
   InventoryItemType,
@@ -52,7 +52,7 @@ export async function getDataStreamDetails({
   end,
   isServerless,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: IScopedClusterClient;
   dataStream: string;
   start: number;
   end: number;
@@ -60,14 +60,22 @@ export async function getDataStreamDetails({
 }): Promise<DataStreamDetails> {
   throwIfInvalidDataStreamParams(dataStream);
 
+  // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+  const esClientAsCurrentUser = esClient.asCurrentUser;
+  const esClientAsSecondaryAuthUser = esClient.asSecondaryAuthUser;
+
   const hasAccessToDataStream = (
-    await datasetQualityPrivileges.getHasIndexPrivileges(esClient, [dataStream], ['monitor'])
+    await datasetQualityPrivileges.getHasIndexPrivileges(
+      esClientAsCurrentUser,
+      [dataStream],
+      ['monitor']
+    )
   )[dataStream];
 
   const esDataStream = hasAccessToDataStream
     ? (
         await getDataStreams({
-          esClient,
+          esClient: esClientAsCurrentUser,
           datasetQuery: dataStream,
         })
       ).dataStreams[0]
@@ -75,7 +83,7 @@ export async function getDataStreamDetails({
 
   try {
     const dataStreamSummaryStats = await getDataStreamSummaryStats(
-      esClient,
+      esClientAsCurrentUser,
       dataStream,
       start,
       end
@@ -84,8 +92,8 @@ export async function getDataStreamDetails({
     const avgDocSizeInBytes =
       hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
         ? isServerless
-          ? await getMeteringAvgDocSizeInBytes(esClient, dataStream)
-          : await getAvgDocSizeInBytes(esClient, dataStream)
+          ? await getMeteringAvgDocSizeInBytes(esClientAsSecondaryAuthUser, dataStream)
+          : await getAvgDocSizeInBytes(esClientAsCurrentUser, dataStream)
         : 0;
 
     const sizeBytes = Math.ceil(avgDocSizeInBytes * dataStreamSummaryStats.docsCount);

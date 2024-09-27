@@ -276,8 +276,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     const { start, end } = params.query;
     const coreContext = await context.core;
 
-    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const esClient = coreContext.elasticsearch.client;
 
     const isServerless = (await getEsCapabilities()).serverless;
     const dataStreamDetails = await getDataStreamDetails({
