@@ -251,14 +251,44 @@ export const ENTRY_FIELD_INPUT_LABEL = i18n.translate(
 export const ENTRY_DESCRIPTION_INPUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionInputLabel',
   {
-    defaultMessage: 'Description',
+    defaultMessage: 'Data Description',
+  }
+);
+
+export const ENTRY_DESCRIPTION_HELP_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionHelpLabel',
+  {
+    defaultMessage:
+      'A description of the type of data in this index and/or when the assistant should look for data here.',
   }
 );
 
 export const ENTRY_QUERY_DESCRIPTION_INPUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionInputLabel',
   {
-    defaultMessage: 'Query Description',
+    defaultMessage: 'Query Instruction',
+  }
+);
+
+export const ENTRY_QUERY_DESCRIPTION_HELP_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionHelpLabel',
+  {
+    defaultMessage: 'Any instructions for extracting the search query from the user request.',
+  }
+);
+
+export const ENTRY_OUTPUT_FIELDS_INPUT_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryOutputFieldsInputLabel',
+  {
+    defaultMessage: 'Output Fields',
+  }
+);
+
+export const ENTRY_OUTPUT_FIELDS_HELP_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryOutputFieldsHelpLabel',
+  {
+    defaultMessage:
+      'What fields should be sent to the LLM. Leave empty to send the entire document.',
   }
 );
 
@@ -266,6 +296,13 @@ export const ENTRY_INPUT_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryInputPlaceholder',
   {
     defaultMessage: 'Input',
+  }
+);
+
+export const ENTRY_FIELD_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryFieldPlaceholder',
+  {
+    defaultMessage: 'semantic_text',
   }
 );
 

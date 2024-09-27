@@ -416,7 +416,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
       this.options.logger.debug(
         () =>
-          `getKnowledgeBaseDocuments() - Similarity Search Results:\n ${JSON.stringify(results)}`
+          `getKnowledgeBaseDocuments() - Similarity Search returned [${JSON.stringify(
+            results.length
+          )}] results`
       );
 
       return results;

@@ -71,6 +71,10 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         {
           refresh: 'wait_for',
           body: await this.buildBulkOperations(params),
+          // TODO: Plumb pipeline for update operations so that embeddings are regenerated on update
+          // Changing to `final_pipeline` should work as well according to the docs, see `pipeline` param:
+          // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#docs-update-by-query-api-query-params
+          pipeline: '.kibana-elastic-ai-assistant-ingest-pipeline-knowledge-base',
         },
         {
           // Increasing timout to 2min as KB docs were failing to load after 30s

@@ -6,8 +6,12 @@
  */
 
 import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSearchBarProps,
   EuiSpacer,
@@ -23,6 +27,8 @@ import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
+import { css } from '@emotion/react';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { AlertsSettingsManagement } from '../../alerts/settings/alerts_settings_management';
 import { useKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_knowledge_base_entries';
 import { useAssistantContext } from '../../assistant_context';
@@ -40,7 +46,7 @@ import { useFlyoutModalVisibility } from '../../assistant/common/components/assi
 import { IndexEntryEditor } from './index_entry_editor';
 import { DocumentEntryEditor } from './document_entry_editor';
 import { KnowledgeBaseSettings } from '../knowledge_base_settings';
-import { SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
+import { ESQL_RESOURCE, SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
 import { useDeleteKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries';
 import {
   isEsqlSystemEntry,
@@ -50,14 +56,24 @@ import {
 import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
 import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries';
 import { SETTINGS_UPDATED_TOAST_TITLE } from '../../assistant/settings/translations';
+import {
+  isKnowledgeBaseSetup,
+  useKnowledgeBaseStatus,
+} from '../../assistant/api/knowledge_base/use_knowledge_base_status';
 
-export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
+interface Params {
+  dataViews: DataViewsContract;
+}
+
+export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
   const {
     assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
     http,
     toasts,
   } = useAssistantContext();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
+  const { data: kbStatus, isFetched } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
+  const isKbSetup = isKnowledgeBaseSetup(kbStatus);
 
   // Only needed for legacy settings management
   const { knowledgeBase, setUpdatedKnowledgeBaseSettings, resetSettings, saveSettings } =
@@ -120,11 +136,11 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
 
   // Flyout Save/Cancel Actions
   const onSaveConfirmed = useCallback(() => {
-    if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
-      createEntry(selectedEntry);
-      closeFlyout();
-    } else if (isKnowledgeBaseEntryResponse(selectedEntry)) {
+    if (isKnowledgeBaseEntryResponse(selectedEntry)) {
       updateEntries([selectedEntry]);
+      closeFlyout();
+    } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
+      createEntry(selectedEntry);
       closeFlyout();
     }
   }, [closeFlyout, selectedEntry, createEntry, updateEntries]);
@@ -134,7 +150,11 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     closeFlyout();
   }, [closeFlyout]);
 
-  const { data: entries } = useKnowledgeBaseEntries({
+  const {
+    data: entries,
+    isFetching: isFetchingEntries,
+    refetch: refetchEntries,
+  } = useKnowledgeBaseEntries({
     http,
     toasts,
     enabled: enableKnowledgeBaseByDefault,
@@ -146,9 +166,6 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
         onEntryNameClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           const entry = entries.data.find((e) => e.id === id);
           setSelectedEntry(entry);
-          openFlyout();
-        },
-        onSpaceNameClicked: ({ namespace }: KnowledgeBaseEntryResponse) => {
           openFlyout();
         },
         isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
@@ -169,6 +186,9 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     [deleteEntry, entries.data, getColumns, openFlyout]
   );
 
+  // Refresh button
+  const handleRefreshTable = useCallback(() => refetchEntries(), [refetchEntries]);
+
   const onDocumentClicked = useCallback(() => {
     setSelectedEntry({ type: DocumentEntryType.value, kbResource: 'user', source: 'user' });
     openFlyout();
@@ -182,7 +202,30 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
   const search: EuiSearchBarProps = useMemo(
     () => ({
       toolsRight: (
-        <AddEntryButton onDocumentClicked={onDocumentClicked} onIndexClicked={onIndexClicked} />
+        <EuiFlexGroup
+          gutterSize={'m'}
+          css={css`
+            margin-left: -5px;
+          `}
+        >
+          <EuiFlexItem>
+            <EuiButton
+              color={'text'}
+              isDisabled={isFetchingEntries}
+              onClick={handleRefreshTable}
+              iconType={'refresh'}
+              isLoading={isFetchingEntries}
+            >
+              <FormattedMessage
+                id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.refreshButton"
+                defaultMessage="Refresh"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AddEntryButton onDocumentClicked={onDocumentClicked} onIndexClicked={onIndexClicked} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
       box: {
         incremental: true,
@@ -190,7 +233,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
       },
       filters: [],
     }),
-    [onDocumentClicked, onIndexClicked]
+    [isFetchingEntries, handleRefreshTable, onDocumentClicked, onIndexClicked]
   );
 
   const flyoutTitle = useMemo(() => {
@@ -247,15 +290,40 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
               ),
             }}
           />
-          <SetupKnowledgeBaseButton display={'mini'} />
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiInMemoryTable
-          columns={columns}
-          items={entries.data ?? []}
-          search={search}
-          sorting={sorting}
-        />
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            {!isFetched ? (
+              <EuiLoadingSpinner size="l" />
+            ) : isKbSetup ? (
+              <EuiInMemoryTable
+                columns={columns}
+                items={entries.data ?? []}
+                search={search}
+                sorting={sorting}
+              />
+            ) : (
+              <>
+                <EuiSpacer size="l" />
+                <EuiText size={'m'}>
+                  <FormattedMessage
+                    id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.knowledgeBaseSetupDescription"
+                    defaultMessage="Setup to get started with the Knowledge Base."
+                  />
+                </EuiText>
+
+                <EuiSpacer size="s" />
+                <EuiFlexGroup justifyContent="spaceAround">
+                  <EuiFlexItem grow={false}>
+                    <SetupKnowledgeBaseButton />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="l" />
+              </>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
       <EuiSpacer size="m" />
       <AlertsSettingsManagement
@@ -286,6 +354,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
           ) : (
             <IndexEntryEditor
               entry={selectedEntry as IndexEntry}
+              dataViews={dataViews}
               setEntry={
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
               }

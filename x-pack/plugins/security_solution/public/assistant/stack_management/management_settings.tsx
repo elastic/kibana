@@ -37,6 +37,7 @@ export const ManagementSettings = React.memo(() => {
         securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
       },
     },
+    data: { dataViews },
     security,
   } = useKibana().services;
 
@@ -46,8 +47,8 @@ export const ManagementSettings = React.memo(() => {
       security?.userProfiles.getCurrent<{ avatar: UserAvatar }>({
         dataPath: 'avatar',
       }),
-    select: (data) => {
-      return data.data.avatar;
+    select: (d) => {
+      return d.data.avatar;
     },
     keepPreviousData: true,
     refetchOnWindowFocus: false,
@@ -79,7 +80,12 @@ export const ManagementSettings = React.memo(() => {
   }
 
   if (conversations) {
-    return <AssistantSettingsManagement selectedConversation={currentConversation} />;
+    return (
+      <AssistantSettingsManagement
+        selectedConversation={currentConversation}
+        dataViews={dataViews}
+      />
+    );
   }
 
   return <></>;

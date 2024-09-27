@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiBadge, EuiBasicTableColumn, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiBasicTableColumn, EuiIcon, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
@@ -55,9 +55,7 @@ export const useKnowledgeBaseTable = () => {
         },
         {
           name: i18n.COLUMN_NAME,
-          render: ({ id, name }: KnowledgeBaseEntryResponse) => (
-            <EuiLink onClick={() => onEntryNameClicked({ id })}>{name}</EuiLink>
-          ),
+          render: ({ name }: KnowledgeBaseEntryResponse) => name,
           sortable: ({ name }: KnowledgeBaseEntryResponse) => name,
           width: '30%',
         },

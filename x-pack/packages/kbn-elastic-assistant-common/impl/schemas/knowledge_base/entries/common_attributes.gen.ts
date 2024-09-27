@@ -106,7 +106,11 @@ export type BaseCreateProps = z.infer<typeof BaseCreateProps>;
 export const BaseCreateProps = BaseRequiredFields.merge(BaseDefaultableFields);
 
 export type BaseUpdateProps = z.infer<typeof BaseUpdateProps>;
-export const BaseUpdateProps = BaseCreateProps.partial();
+export const BaseUpdateProps = BaseCreateProps.partial().merge(
+  z.object({
+    id: NonEmptyString,
+  })
+);
 
 export type BaseResponseProps = z.infer<typeof BaseResponseProps>;
 export const BaseResponseProps = BaseRequiredFields.merge(BaseDefaultableFields.required());
