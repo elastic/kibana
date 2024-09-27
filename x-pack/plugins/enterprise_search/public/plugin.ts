@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -19,7 +19,6 @@ import {
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
   AppDeepLink,
-  AppUpdater,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -176,7 +175,7 @@ const applicationsLinks: AppDeepLink[] = [
   },
 ];
 
-const appSearchLinks = [
+const appSearchLinks: AppDeepLink[] = [
   {
     id: 'engines',
     path: `/${ENGINES_PATH}`,
@@ -187,7 +186,6 @@ const appSearchLinks = [
 ];
 
 export class EnterpriseSearchPlugin implements Plugin {
-  private appUpdaters$: Record<string, Subject<AppUpdater>> = {};
   private config: ClientConfigType;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -520,8 +518,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerLocators(share!);
 
     if (config.canDeployEntSearch) {
-      this.appUpdaters$[APP_SEARCH_PLUGIN.ID] = new Subject<AppUpdater>();
-
       core.application.register({
         appRoute: APP_SEARCH_PLUGIN.URL,
         category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
