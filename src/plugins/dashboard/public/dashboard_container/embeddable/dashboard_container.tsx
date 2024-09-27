@@ -171,6 +171,9 @@ export class DashboardContainer
   public setLastSavedInput: (lastSavedInput: DashboardContainerInput) => void;
   public lastSavedInput$: PublishingSubject<DashboardContainerInput>;
   public setSavedObjectId: (id: string | undefined) => void;
+  public expandPanel: (panelId: string) => void;
+  public scrollToPanel: (panelRef: HTMLDivElement) => Promise<void>;
+  public scrollToTop: () => void;
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
@@ -340,6 +343,9 @@ export class DashboardContainer
     this.lastSavedInput$ = dashboardApi.lastSavedInput$;
     this.savedObjectId = dashboardApi.savedObjectId;
     this.setSavedObjectId = dashboardApi.setSavedObjectId;
+    this.expandPanel = dashboardApi.expandPanel;
+    this.scrollToPanel = dashboardApi.scrollToPanel;
+    this.scrollToTop = dashboardApi.scrollToTop;
 
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
