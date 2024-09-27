@@ -29,12 +29,13 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
   FieldStatsFlyoutProvider,
-} from '../../../../../components/field_stats_flyout';
-import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+  type FieldForStats,
+} from '@kbn/ml-field-stats-flyout';
+
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useDataSource } from '../../../../../contexts/ml';
 

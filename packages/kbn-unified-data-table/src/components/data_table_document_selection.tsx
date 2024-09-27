@@ -38,12 +38,16 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
   const { record, rowIndex } = useControlColumn(props);
   const { euiTheme } = useEuiTheme();
   const { selectedDocsState } = useContext(UnifiedDataTableContext);
-  const { isDocSelected, toggleDocSelection } = selectedDocsState;
+  const { isDocSelected, toggleDocSelection, toggleMultipleDocsSelection } = selectedDocsState;
 
   const toggleDocumentSelectionLabel = i18n.translate('unifiedDataTable.grid.selectDoc', {
     defaultMessage: `Select document ''{rowNumber}''`,
     values: { rowNumber: rowIndex + 1 },
   });
+
+  if (!record) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup
@@ -62,8 +66,12 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
           aria-label={toggleDocumentSelectionLabel}
           checked={isDocSelected(record.id)}
           data-test-subj={`dscGridSelectDoc-${record.id}`}
-          onChange={() => {
-            toggleDocSelection(record.id);
+          onChange={(event) => {
+            if ((event.nativeEvent as MouseEvent)?.shiftKey) {
+              toggleMultipleDocsSelection(record.id);
+            } else {
+              toggleDocSelection(record.id);
+            }
           }}
         />
       </EuiFlexItem>
@@ -71,13 +79,13 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
   );
 };
 
-export const SelectAllButton = () => {
-  const { selectedDocsState, pageIndex, pageSize, rows } = useContext(UnifiedDataTableContext);
+export const getSelectAllButton = (rows: DataTableRecord[]) => () => {
+  const { selectedDocsState, pageIndex, pageSize } = useContext(UnifiedDataTableContext);
   const { getCountOfFilteredSelectedDocs, deselectSomeDocs, selectMoreDocs } = selectedDocsState;
 
   const docIdsFromCurrentPage = useMemo(() => {
     return getDocIdsForCurrentPage(rows, pageIndex, pageSize);
-  }, [rows, pageIndex, pageSize]);
+  }, [pageIndex, pageSize]);
 
   const countOfSelectedDocs = useMemo(() => {
     return docIdsFromCurrentPage?.length
@@ -200,6 +208,7 @@ export function DataTableDocumentToolbarBtn({
       // Copy results to clipboard as text
       <DataTableCopyRowsAsText
         key="copyRowsAsText"
+        rows={rows}
         toastNotifications={toastNotifications}
         columns={columns}
         onCompleted={closePopover}
@@ -207,6 +216,7 @@ export function DataTableDocumentToolbarBtn({
       // Copy results to clipboard as JSON
       <DataTableCopyRowsAsJson
         key="copyRowsAsJson"
+        rows={rows}
         toastNotifications={toastNotifications}
         onCompleted={closePopover}
       />,
@@ -272,17 +282,18 @@ export function DataTableDocumentToolbarBtn({
       </EuiContextMenuItem>,
     ];
   }, [
-    isFilterActive,
-    isPlainRecord,
-    setIsFilterActive,
-    clearAllSelectedDocs,
+    enableComparisonMode,
     selectedDocsCount,
     docIdsInSelectionOrder,
-    enableComparisonMode,
     setIsCompareActive,
     toastNotifications,
     columns,
     closePopover,
+    rows,
+    isFilterActive,
+    isPlainRecord,
+    setIsFilterActive,
+    clearAllSelectedDocs,
   ]);
 
   const toggleSelectionToolbar = useCallback(

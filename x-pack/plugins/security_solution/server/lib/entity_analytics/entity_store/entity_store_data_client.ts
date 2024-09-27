@@ -10,10 +10,9 @@ import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_c
 
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-import { createQueryFilterClauses } from '../../../utils/build_query';
 import type {
-  InitEntityStoreRequestBody,
-  InitEntityStoreResponse,
+  InitEntityEngineRequestBody,
+  InitEntityEngineResponse,
 } from '../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 
 import type {
@@ -53,8 +52,8 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    { indexPattern = '', filter = '' }: InitEntityStoreRequestBody
-  ): Promise<InitEntityStoreResponse> {
+    { indexPattern = '', filter = '' }: InitEntityEngineRequestBody
+  ): Promise<InitEntityEngineResponse> {
     const definition = getEntityDefinition(entityType, this.options.namespace);
 
     this.options.logger.info(`Initializing entity store for ${entityType}`);
@@ -137,13 +136,7 @@ export class EntityStoreDataClient {
     const index = entityTypes.map((type) => getEntitiesIndexName(type, this.options.namespace));
     const from = (page - 1) * perPage;
     const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
-
-    const filter = [...createQueryFilterClauses(filterQuery)];
-    const query = {
-      bool: {
-        filter,
-      },
-    };
+    const query = filterQuery ? JSON.parse(filterQuery) : undefined;
 
     const response = await this.options.esClient.search<Entity>({
       index,
