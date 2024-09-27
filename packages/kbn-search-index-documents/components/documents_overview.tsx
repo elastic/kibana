@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent } from 'react';
+import { css } from '@emotion/react';
 
 interface DocumentsProps {
   accessControlSwitch?: React.ReactNode;
@@ -23,13 +24,19 @@ export const DocumentsOverview: React.FC<DocumentsProps> = ({
   documentComponent,
   searchQueryCallback,
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
             {accessControlSwitch && (
-              <EuiFlexItem style={{ minWidth: 260 }} grow={false}>
+              <EuiFlexItem
+                css={css`ç
+                  min-width: ${Number(euiTheme.size.xs) * 65}px;
+                `}
+                grow={false}
+              >
                 {accessControlSwitch}
               </EuiFlexItem>
             )}
