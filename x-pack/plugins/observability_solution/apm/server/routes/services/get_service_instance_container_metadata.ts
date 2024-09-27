@@ -22,6 +22,7 @@ import {
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
 import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
+import { normalizeFields } from '../../utils/normalize_fields';
 
 export type ServiceInstanceContainerMetadataDetails =
   | {
@@ -54,6 +55,7 @@ export const getServiceInstanceContainerMetadata = async ({
   const response = await infraMetricsClient.search({
     size: 1,
     track_total_hits: false,
+    fields: ['*'],
     query: {
       bool: {
         filter: [
@@ -69,7 +71,9 @@ export const getServiceInstanceContainerMetadata = async ({
     },
   });
 
-  const sample = maybe(response.hits.hits[0])?._source as ServiceInstanceContainerMetadataDetails;
+  const sample = maybe(
+    normalizeFields(response.hits.hits[0]?.fields)
+  ) as ServiceInstanceContainerMetadataDetails;
 
   return {
     kubernetes: {

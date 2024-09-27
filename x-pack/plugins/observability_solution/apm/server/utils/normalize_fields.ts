@@ -11,6 +11,9 @@ export const normalizeFields = (
   fields: Partial<Record<string, unknown[]>>
 ): Record<string, unknown> => {
   const normalizedFields: Record<string, unknown> = {};
+  if (!fields) {
+    return {};
+  }
 
   for (const [key, value] of Object.entries(fields)) {
     const normalizedValue = Array.isArray(value) && value.length > 0 ? value[0] : value;
