@@ -192,7 +192,7 @@ export async function getExpressionRendererParams(
       handleEvent,
       onData$: onData,
       searchContext,
-      interactive: disableTriggers,
+      interactive: !disableTriggers,
       executionContext: getExecutionContext?.(),
       lensInspector: {
         getInspectorAdapters: api.getInspectorAdapters,
