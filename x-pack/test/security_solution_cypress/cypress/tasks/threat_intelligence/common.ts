@@ -109,6 +109,7 @@ export const openBarchartPopoverMenu = () => {
 export const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   recurse(
     () => {
+      cy.get(propertySelector).eq(rowIndex).click(); // Triggers scrollIntoView
       cy.get(propertySelector).eq(rowIndex).realHover();
       return cy.get(actionSelector).first();
     },
