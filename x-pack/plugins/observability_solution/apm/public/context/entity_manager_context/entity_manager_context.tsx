@@ -62,9 +62,6 @@ export function EntityManagerEnablementContextProvider({
     true
   );
 
-  const isEntityCentricExperienceViewEnabled =
-    isEntityManagerEnabled && isEntityCentricExperienceSettingEnabled;
-
   function handleServiceInventoryViewChange(nextView: ServiceInventoryView) {
     setServiceInventoryViewLocalStorageSetting(nextView);
     // Updates the telemetry context variable every time the user switches views
@@ -86,7 +83,7 @@ export function EntityManagerEnablementContextProvider({
         refetch,
         serviceInventoryViewLocalStorageSetting,
         setServiceInventoryViewLocalStorageSetting: handleServiceInventoryViewChange,
-        isEntityCentricExperienceViewEnabled,
+        isEntityCentricExperienceViewEnabled: isEntityCentricExperienceSettingEnabled,
         tourState,
         updateTourState: handleTourStateUpdate,
       }}
