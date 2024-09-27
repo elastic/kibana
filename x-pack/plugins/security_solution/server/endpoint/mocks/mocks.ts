@@ -9,6 +9,7 @@
 
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
+  analyticsServiceMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
@@ -136,6 +137,7 @@ export const createMockEndpointAppContextService = (
     getExceptionListsClient: jest.fn(),
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
     getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
+    getTelemetryService: jest.fn(),
     getInternalResponseActionsClient: jest.fn(() => {
       return responseActionsClientMock.create();
     }),
@@ -151,6 +153,7 @@ export const createMockEndpointAppContextServiceSetupContract =
       securitySolutionRequestContextFactory: requestContextFactoryMock.create(),
       cloud: cloudMock.createSetup(),
       loggerFactory: loggingSystemMock.create(),
+      telemetry: analyticsServiceMock.createAnalyticsServiceSetup(),
       httpServiceSetup: coreMock.createSetup().http,
     };
   };

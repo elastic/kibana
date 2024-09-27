@@ -236,6 +236,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       securitySolutionRequestContextFactory: requestContextFactory,
       cloud: plugins.cloud,
       loggerFactory: this.pluginContext.logger,
+      telemetry: core.analytics,
       httpServiceSetup: core.http,
     });
 
