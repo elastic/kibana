@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { RuleToImport } from '../../../../../../common/api/detection_engine';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import { getReferencedExceptionLists } from './gather_referenced_exceptions';
-import type { RuleFromImportStream } from './utils';
 import { isRuleConflictError, isRuleImportError } from './errors';
 
 /**
@@ -38,7 +38,7 @@ export const importRules = async ({
   allowMissingConnectorSecrets,
   savedObjectsClient,
 }: {
-  ruleChunks: RuleFromImportStream[][];
+  ruleChunks: RuleToImport[][];
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
@@ -63,18 +63,6 @@ export const importRules = async ({
       batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
         const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve, reject) => {
           try {
-            if (parsedRule instanceof Error) {
-              // If the JSON object had a validation or parse error then we return
-              // early with the error and an (unknown) for the ruleId
-              resolve(
-                createBulkErrorObject({
-                  statusCode: 400,
-                  message: parsedRule.message,
-                })
-              );
-              return null;
-            }
-
             if (parsedRule.immutable) {
               resolve(
                 createBulkErrorObject({

@@ -38,26 +38,6 @@ describe('importRules', () => {
     expect(result).toEqual([]);
   });
 
-  it('returns 400 error if "ruleChunks" includes Error', async () => {
-    const result = await importRules({
-      ruleChunks: [[new Error('error importing')]],
-      rulesResponseAcc: [],
-      overwriteRules: false,
-      detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-      savedObjectsClient,
-    });
-
-    expect(result).toEqual([
-      {
-        error: {
-          message: 'error importing',
-          status_code: 400,
-        },
-        rule_id: '(unknown id)',
-      },
-    ]);
-  });
-
   it('returns 409 error if DetectionRulesClient throws with 409 - existing rule', async () => {
     clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
       throw createRuleImportErrorObject({

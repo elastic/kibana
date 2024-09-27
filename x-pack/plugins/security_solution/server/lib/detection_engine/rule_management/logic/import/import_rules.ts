@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { partition } from 'lodash';
-
+import type { RuleToImport } from '../../../../../../common/api/detection_engine';
 import { type ImportRuleResponse, createBulkErrorObject } from '../../../routes/utils';
 import type { IRuleSourceImporter } from '../../../prebuilt_rules/logic/rule_source_importer';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import { isRuleConflictError, isRuleImportError } from './errors';
-import { isRuleToImport, type RuleFromImportStream } from './utils';
 
 /**
  * Takes a stream of rules to be imported and either creates or updates rules
@@ -35,7 +33,7 @@ export const importRules = async ({
   ruleSourceImporter,
   allowMissingConnectorSecrets,
 }: {
-  ruleChunks: RuleFromImportStream[][];
+  ruleChunks: RuleToImport[][];
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
@@ -51,8 +49,7 @@ export const importRules = async ({
   }
 
   while (ruleChunks.length) {
-    const ruleChunk = ruleChunks.shift() ?? [];
-    const [rules, errors] = partition(ruleChunk, isRuleToImport);
+    const rules = ruleChunks.shift() ?? [];
 
     const importedRulesResponse = await detectionRulesClient.importRules({
       allowMissingConnectorSecrets,
@@ -60,13 +57,6 @@ export const importRules = async ({
       ruleSourceImporter,
       rules,
     });
-
-    const genericErrors = errors.map((error) =>
-      createBulkErrorObject({
-        statusCode: 400,
-        message: error.message,
-      })
-    );
 
     const importResponses = importedRulesResponse.map((rule) => {
       if (isRuleImportError(rule)) {
@@ -83,7 +73,7 @@ export const importRules = async ({
       };
     });
 
-    response = [...response, ...genericErrors, ...importResponses];
+    response = [...response, ...importResponses];
   }
 
   return response;

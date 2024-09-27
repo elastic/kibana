@@ -41,35 +41,6 @@ describe('importRules', () => {
     expect(result).toEqual([]);
   });
 
-  it('returns 400 errors if import was attempted on errored rules', async () => {
-    const rules = [new Error('error parsing'), new Error('error parsing')];
-
-    const result = await importRules({
-      ruleChunks: [rules],
-      rulesResponseAcc: [],
-      overwriteRules: false,
-      detectionRulesClient,
-      ruleSourceImporter: mockRuleSourceImporter,
-    });
-
-    expect(result).toEqual([
-      {
-        error: {
-          message: 'error parsing',
-          status_code: 400,
-        },
-        rule_id: '(unknown id)',
-      },
-      {
-        error: {
-          message: 'error parsing',
-          status_code: 400,
-        },
-        rule_id: '(unknown id)',
-      },
-    ]);
-  });
-
   it('returns 400 errors if client import returns generic errors', async () => {
     detectionRulesClient.importRules.mockResolvedValueOnce([
       createRuleImportErrorObject({

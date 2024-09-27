@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { chunk } from 'lodash/fp';
+import { chunk, partition } from 'lodash/fp';
 import { extname } from 'path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
@@ -18,8 +18,13 @@ import {
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
-import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
-import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
+import type { ImportRuleResponse } from '../../../../routes/utils';
+import {
+  buildSiemResponse,
+  createBulkErrorObject,
+  isBulkError,
+  isImportRegular,
+} from '../../../../routes/utils';
 import { createRuleSourceImporter } from '../../../../prebuilt_rules/logic/rule_source_importer';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
@@ -27,6 +32,7 @@ import { importRules } from '../../../logic/import/import_rules';
 import { importRules as legacyImportRules } from '../../../logic/import/import_rules_utils';
 import { createPromiseFromRuleImportStream } from '../../../logic/import/create_promise_from_rule_import_stream';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
+import { isRuleToImport } from '../../../logic/import/utils';
 import {
   getTupleDuplicateErrorsAndUniqueRules,
   migrateLegacyActionsIds,
@@ -139,7 +145,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           // rulesWithMigratedActions: Is returned only in case connectors were exported from different namespace and the
           // original rules actions' ids were replaced with new destinationIds
-          const parsedRules = actionConnectorErrors.length
+          const parsedRuleStream = actionConnectorErrors.length
             ? []
             : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
 
@@ -149,13 +155,14 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
           });
 
-          const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
+          const [parsedRules, parsedRuleErrors] = partition(isRuleToImport, parsedRuleStream);
+          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
 
           let importRuleResponse: ImportRuleResponse[] = [];
 
           if (prebuiltRulesCustomizationEnabled) {
             importRuleResponse = await importRules({
-              ruleChunks: chunkParseObjects,
+              ruleChunks,
               rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
               overwriteRules: request.query.overwrite,
               allowMissingConnectorSecrets: !!actionConnectors.length,
@@ -164,7 +171,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             });
           } else {
             importRuleResponse = await legacyImportRules({
-              ruleChunks: chunkParseObjects,
+              ruleChunks,
               rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
               overwriteRules: request.query.overwrite,
               allowMissingConnectorSecrets: !!actionConnectors.length,
@@ -173,7 +180,15 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             });
           }
 
-          const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
+          const parseErrors = parsedRuleErrors.map((error) =>
+            createBulkErrorObject({
+              statusCode: 400,
+              message: error.message,
+            })
+          );
+          const importErrors = importRuleResponse.filter(isBulkError);
+          const errors = [...parseErrors, ...importErrors];
+
           const successes = importRuleResponse.filter((resp) => {
             if (isImportRegular(resp)) {
               return resp.status_code === 200;
@@ -181,11 +196,12 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
               return false;
             }
           });
+
           const importedRules: ImportRulesResponse = {
-            success: errorsResp.length === 0,
+            success: errors.length === 0,
             success_count: successes.length,
             rules_count: rules.length,
-            errors: errorsResp,
+            errors,
             exceptions_errors: exceptionsErrors,
             exceptions_success: exceptionsSuccess,
             exceptions_success_count: exceptionsSuccessCount,
