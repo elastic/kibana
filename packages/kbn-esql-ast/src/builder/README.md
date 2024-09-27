@@ -20,5 +20,20 @@ Construct a `source` expression node:
 ```typescript
 import { Builder } from '@kbn/esql-ast';
 
-const node = Builder.expression.source({ name: 'kibana_ecommerce', sourceType: 'index' });
+const node = Builder.expression.literal.numeric({ value: 42, literalType: 'integer' });
+```
+
+Returns:
+
+```js
+{
+  type: 'literal',
+  literalType: 'integer',
+  value: 42,
+  name: '42'
+
+  location: { min: 0, max: 0 },
+  text: '',
+  incomplete: false,
+}
 ```
