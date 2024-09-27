@@ -44,7 +44,7 @@ describe('Handlers', () => {
           kuery: 'kuery',
           policyIds: item.requested,
         },
-      } as any;
+      };
       const response = httpServerMock.createResponseFactory();
 
       await getAgentStatusForAgentPolicyHandler(
@@ -52,7 +52,7 @@ describe('Handlers', () => {
           core: coreMock.createRequestHandlerContext(),
           fleet: { internalSoClient: {} },
         } as any,
-        request,
+        request as any,
         response
       );
 
