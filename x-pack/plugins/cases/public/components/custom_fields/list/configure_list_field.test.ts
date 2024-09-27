@@ -22,6 +22,7 @@ describe('configureListCustomFieldFactory ', () => {
       build: expect.any(Function),
       convertNullToEmpty: expect.any(Function),
       getFilterOptions: expect.any(Function),
+      convertValueToDisplayText: expect.any(Function),
     });
   });
 });
