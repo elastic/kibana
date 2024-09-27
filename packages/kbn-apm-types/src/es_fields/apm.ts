@@ -46,26 +46,9 @@ export const SERVICE_TARGET_NAME = 'service.target.name';
 export const SERVICE_OVERFLOW_COUNT = 'service_transaction.aggregation.overflow_count';
 
 export const URL_FULL = 'url.full';
-export const URL_PATH = 'url.path';
-export const URL_ORIGINAL = 'url.original';
-export const URL_SCHEME = 'url.scheme';
-export const URL_PORT = 'url.port';
-export const URL_DOMAIN = 'url.domain';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
 export const HTTP_RESPONSE_STATUS_CODE = 'http.response.status_code';
-export const HTTP_RESPONSE_HEADERS_TRANSFER_ENCODING = 'http.response.headers.Transfer-Encoding';
-export const HTTP_RESPONSE_HEADERS_CONNECTION = 'http.response.headers.Connection';
-export const HTTP_RESPONSE_HEADERS_DATE = 'http.response.headers.Date';
-export const HTTP_RESPONSE_HEADERS_X_POWERED_BY = 'http.response.headers.X-Powered-By';
-export const HTTP_VERSION = 'http.version';
-export const HTTP_REQUEST_HEADERS_ACCEPT = 'http.request.headers.Accept';
-export const HTTP_REQUEST_HEADERS_CONNECTION = 'http.request.headers.Connection';
-export const HTTP_REQUEST_HEADERS_USER_AGENT = 'http.request.headers.User-Agent';
-export const HTTP_REQUEST_HEADERS_HOST = 'http.request.headers.Host';
-export const HTTP_REQUEST_HEADERS_ELASTIC_APM_TRACEPARENT =
-  'http.request.headers.Elastic-Apm-Traceparent';
-export const HTTP_REQUEST_HEADERS_TRACESTATE = 'http.request.headers.Tracestate';
-export const HTTP_REQUEST_HEADERS_TRACEPARENT = 'http.request.headers.Traceparent';
+
 export const USER_ID = 'user.id';
 export const USER_AGENT_ORIGINAL = 'user_agent.original';
 export const USER_AGENT_NAME = 'user_agent.name';
@@ -82,10 +65,7 @@ export const PROCESOR_NAME = 'processor.name';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
-export const TRANSACTION_DURATION_HISTOGRAM_VALUES = 'transaction.duration.histogram.values';
 export const TRANSACTION_DURATION_SUMMARY = 'transaction.duration.summary';
-export const TRANSACTION_DURATION_SUMMARY_SUM = 'transaction.duration.summary.sum';
-export const TRANSACTION_DURATION_SUMMARY_VALUE_COUNT = 'transaction.duration.summary.count';
 export const TRANSACTION_TYPE = 'transaction.type';
 export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';
@@ -152,11 +132,6 @@ export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
 export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
 export const METRIC_SYSTEM_CPU_PERCENT = 'system.cpu.total.norm.pct';
 export const METRIC_PROCESS_CPU_PERCENT = 'system.process.cpu.total.norm.pct';
-export const METRIC_PROCESS_CPU_SYSTEM_NORM_PCT = 'system.process.cpu.system.norm.pct';
-export const METRIC_PROCESS_CPU_TOTAL_NORM_PCT = 'system.process.cpu.total.norm.pct';
-export const METRIC_PROCESS_CPU_TOTAL_USER_PCT = 'system.process.cpu.user.norm.pct';
-export const METRIC_PROCESS_MEMORY_RSS_BYTES = 'system.process.memory.rss.bytes';
-export const METRIC_PROCESS_MEMORY_SIZE = 'system.process.memory.size';
 export const METRIC_CGROUP_MEMORY_LIMIT_BYTES = 'system.process.cgroup.memory.mem.limit.bytes';
 export const METRIC_CGROUP_MEMORY_USAGE_BYTES = 'system.process.cgroup.memory.mem.usage.bytes';
 
@@ -179,8 +154,6 @@ export const LABEL_TYPE = 'labels.type';
 export const LABEL_TELEMETRY_AUTO_VERSION = 'labels.telemetry_auto_version';
 export const LABEL_LIFECYCLE_STATE = 'labels.lifecycle_state';
 export const LABEL_SOME_RESOURCE_ATTRIBUTE = 'labels.some_resource_attribute';
-export const LABEL_ENV = 'labels.env';
-export const LABEL_HOSTNAME = 'labels.hostname';
 
 export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
@@ -247,20 +220,3 @@ export const CLIENT_IP = 'client.ip';
 export const CHILD_ID = 'child.id';
 
 export const LOG_LEVEL = 'log.level';
-
-export const NODEJS_EVENTLOOP_DELAY_AVG_MS = 'nodejs.eventloop.delay.avg.ms';
-export const NODEJS_HANDLES_ACTIVE = 'nodejs.handles.active';
-export const NODEJS_MEMORY_ARRAYBUFFERS_BYTES = 'nodejs.memory.arrayBuffers.bytes';
-export const NODEJS_MEMORY_EXTERNAL_BYTES = 'nodejs.memory.external.bytes';
-export const NODEJS_MEMORY_HEAP_ALLOCATED_BYTES = 'nodejs.memory.heap.allocated.bytes';
-export const NODEJS_MEMORY_HEAP_USED_BYTES = 'nodejs.memory.heap.used.bytes';
-export const NODEJS_REQUESTS_ACTIVE = 'nodejs.requests.active';
-
-export const PROCESS_ARGS = 'process.args';
-export const PROCESS_PARENT_PID = 'process.parent.pid';
-export const PROCESS_PID = 'process.pid';
-export const PROCESS_TITLE = 'process.title';
-
-export const SOURCE_IP = 'source.ip';
-
-export const DOC_COUNT = '_doc_count';
