@@ -174,7 +174,8 @@ function getErrorItem(
   const errorItem: IWaterfallError = {
     docType: 'error',
     doc: error,
-    id: error.error.id,
+    // To be fixed after https://github.com/elastic/opentelemetry-lib/issues/86
+    id: error?.error?.id ?? '',
     parent,
     parentId: parent?.id,
     offset: error.timestamp.us - entryTimestamp,
