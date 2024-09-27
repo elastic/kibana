@@ -450,7 +450,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         // open the flyout once initially to ensure table is the default tab
         await dataGrid.clickRowToggle();
-        await PageObjects.discover.isShowingDocViewer();
+        await discover.isShowingDocViewer();
         await dataGrid.closeFlyout();
       });
 
@@ -461,7 +461,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('keyboard navigation', () => {
         it('should navigate between documents with arrow keys', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
@@ -475,7 +475,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should not navigate between documents with arrow keys when the search input is focused', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
@@ -489,7 +489,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should not navigate between documents with arrow keys when the data grid is focused', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
@@ -503,28 +503,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should close the flyout with the escape key', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          expect(await PageObjects.discover.isShowingDocViewer()).to.be(true);
+          expect(await discover.isShowingDocViewer()).to.be(true);
           await browser.pressKeys(browser.keys.ESCAPE);
-          expect(await PageObjects.discover.isShowingDocViewer()).to.be(false);
+          expect(await discover.isShowingDocViewer()).to.be(false);
         });
 
         it('should close the flyout with the escape key when the search input is focused', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          expect(await PageObjects.discover.isShowingDocViewer()).to.be(true);
+          expect(await discover.isShowingDocViewer()).to.be(true);
           await testSubjects.click('unifiedDocViewerFieldsSearchInput');
           await browser.pressKeys(browser.keys.ESCAPE);
-          expect(await PageObjects.discover.isShowingDocViewer()).to.be(false);
+          expect(await discover.isShowingDocViewer()).to.be(false);
         });
 
         it('should not close the flyout with the escape key when the data grid is focused', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          expect(await PageObjects.discover.isShowingDocViewer()).to.be(true);
+          expect(await discover.isShowingDocViewer()).to.be(true);
           await testSubjects.click('dataGridHeaderCell-name');
           await browser.pressKeys(browser.keys.ESCAPE);
-          expect(await PageObjects.discover.isShowingDocViewer()).to.be(true);
+          expect(await discover.isShowingDocViewer()).to.be(true);
           await browser.pressKeys(browser.keys.TAB);
           await browser.pressKeys(browser.keys.ESCAPE);
-          expect(await PageObjects.discover.isShowingDocViewer()).to.be(false);
+          expect(await discover.isShowingDocViewer()).to.be(false);
         });
       });
 
@@ -532,7 +532,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should focus the flyout on open, and retain focus when resizing between push and overlay flyouts', async () => {
           // push -> overlay -> push
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           let activeElement = await find.activeElement();
           expect(await activeElement.getAttribute('data-test-subj')).to.be('docViewerFlyout');
           await reduceScreenWidth();
@@ -545,7 +545,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await browser.pressKeys(browser.keys.ESCAPE);
           await reduceScreenWidth();
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           activeElement = await find.activeElement();
           expect(await activeElement.getAttribute('data-test-subj')).to.be('docViewerFlyout');
           await restoreScreenWidth();
@@ -559,7 +559,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should return focus to the trigger element when the flyout is closed', async () => {
           // push
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           await browser.pressKeys(browser.keys.ESCAPE);
           let activeElement = await find.activeElement();
           expect(await activeElement.getAttribute('data-test-subj')).to.be(
@@ -567,7 +567,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           // push -> overlay
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           await reduceScreenWidth();
           await browser.pressKeys(browser.keys.ESCAPE);
           activeElement = await find.activeElement();
@@ -576,7 +576,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           // overlay
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           await browser.pressKeys(browser.keys.ESCAPE);
           activeElement = await find.activeElement();
           expect(await activeElement.getAttribute('data-test-subj')).to.be(
@@ -584,7 +584,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           // overlay -> push
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           await restoreScreenWidth();
           await browser.pressKeys(browser.keys.ESCAPE);
           activeElement = await find.activeElement();
@@ -595,7 +595,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should show custom screen reader description push flyout is active', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           await testSubjects.existOrFail('unifiedDocViewerScreenReaderDescription', {
             allowHidden: true,
           });
@@ -603,7 +603,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should not show custom screen reader description when overlay flyout active', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           await reduceScreenWidth();
           expect(
             await testSubjects.exists('unifiedDocViewerScreenReaderDescription', {
@@ -615,7 +615,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should use expected a11y attributes', async () => {
           // push flyout
           await dataGrid.clickRowToggle({ defaultTabId: false });
-          await PageObjects.discover.isShowingDocViewer();
+          await discover.isShowingDocViewer();
           let role = await testSubjects.getAttribute('docViewerFlyout', 'role');
           let tabindex = await testSubjects.getAttribute('docViewerFlyout', 'tabindex');
           let describedBy = await testSubjects.getAttribute('docViewerFlyout', 'aria-describedby');
