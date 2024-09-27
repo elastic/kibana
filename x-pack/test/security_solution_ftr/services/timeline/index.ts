@@ -12,8 +12,8 @@ import {
   DeleteTimelinesResponse,
   GetDraftTimelinesResponse,
   PatchTimelineResponse,
+  SavedTimeline,
 } from '@kbn/security-solution-plugin/common/api/timeline';
-import { TimelineInput } from '@kbn/security-solution-plugin/common/search_strategy';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { FtrService } from '../../../functional/ftr_provider_context';
@@ -75,7 +75,7 @@ export class TimelineTestService extends FtrService {
 
     const { savedObjectId: timelineId, version } = createdTimeline;
 
-    const timelineUpdate: TimelineInput = {
+    const timelineUpdate: SavedTimeline = {
       title,
       // Set date range to the last 1 year
       dateRange: {
@@ -83,7 +83,7 @@ export class TimelineTestService extends FtrService {
         end: moment().toISOString(),
         // Not sure why `start`/`end` are defined as numbers in the type, but looking at the
         // UI's use of it, I can see they are being set to strings, so I'm forcing a cast here
-      } as unknown as TimelineInput['dateRange'],
+      } as unknown as SavedTimeline['dateRange'],
 
       // Not sure why, but the following fields are not in the created timeline, which causes
       // the timeline to not be able to pull in the event for display
@@ -111,7 +111,7 @@ export class TimelineTestService extends FtrService {
 
   async updateTimeline(
     timelineId: string,
-    updates: TimelineInput,
+    updates: SavedTimeline,
     version: string
   ): Promise<PatchTimelineResponse> {
     return await this.supertest

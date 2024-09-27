@@ -37,8 +37,8 @@ import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/tim
 import type {
   TimelineErrorResponse,
   PersistTimelineResponse,
+  SavedTimeline,
 } from '../../../../common/api/timeline';
-import type { TimelineInput } from '../../../../common/search_strategy';
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { refreshTimelines } from './helpers';
@@ -156,7 +156,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
     return ret;
   };
 
-const timelineInput: TimelineInput = {
+const timelineInput: SavedTimeline = {
   columns: null,
   dataProviders: null,
   dataViewId: null,
@@ -182,8 +182,8 @@ const timelineInput: TimelineInput = {
 export const convertTimelineAsInput = (
   timeline: TimelineModel,
   timelineTimeRange: inputsModel.TimeRange
-): TimelineInput =>
-  Object.keys(timelineInput).reduce<TimelineInput>((acc, key) => {
+): SavedTimeline =>
+  Object.keys(timelineInput).reduce<SavedTimeline>((acc, key) => {
     if (has(key, timeline)) {
       if (key === 'kqlQuery') {
         return set(`${key}.filterQuery`, get(`${key}.filterQuery`, timeline), acc);

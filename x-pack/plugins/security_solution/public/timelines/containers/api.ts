@@ -17,6 +17,7 @@ import type {
   CopyTimelineResponse,
   GetDraftTimelinesResponse,
   GetTimelinesRequestQuery,
+  SavedTimeline,
 } from '../../../common/api/timeline';
 import {
   ImportTimelineResult,
@@ -49,10 +50,9 @@ import type {
   ImportDataProps,
   ImportDataResponse,
 } from '../../detection_engine/rule_management/logic';
-import type { TimelineInput } from '../../../common/search_strategy';
 
 interface RequestPostTimeline {
-  timeline: TimelineInput;
+  timeline: SavedTimeline;
   signal?: AbortSignal;
 }
 

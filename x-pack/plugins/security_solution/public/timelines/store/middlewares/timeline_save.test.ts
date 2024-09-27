@@ -175,7 +175,7 @@ describe('Timeline save middleware', () => {
   });
 
   describe('#convertTimelineAsInput ', () => {
-    test('should return a TimelineInput instead of TimelineModel ', () => {
+    test('should return a SavedTimeline instead of TimelineModel ', () => {
       const columns: TimelineModel['columns'] = [
         {
           columnHeaderType: 'not-filtered',
