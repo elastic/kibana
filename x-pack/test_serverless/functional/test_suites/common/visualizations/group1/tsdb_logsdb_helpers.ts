@@ -288,11 +288,7 @@ export const getDocsGenerator =
             delete doc[field];
           }
         }
-        if (removeLogsDBFields) {
-          for (const field of logsDBSpecialFields) {
-            delete doc[field];
-          }
-        }
+        // do not remove the fields for logsdb - ignore the flag
         return doc;
       });
 
