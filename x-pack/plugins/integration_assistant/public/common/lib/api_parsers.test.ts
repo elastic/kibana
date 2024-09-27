@@ -27,6 +27,14 @@ describe('getIntegrationNameFromResponse', () => {
     const response = { items: [] } as unknown as EpmPackageResponse;
     expect(getIntegrationNameFromResponse(response)).toEqual('');
   });
+  it('should return an empty string if the response is undefined', () => {
+    const response = {} as EpmPackageResponse;
+    expect(getIntegrationNameFromResponse(response)).toEqual('');
+  });
+  it('should return an empty string if the response is null', () => {
+    const response = { items: null } as unknown as EpmPackageResponse;
+    expect(getIntegrationNameFromResponse(response)).toEqual('');
+  });
   it('should return the integration name from the ingest pipeline name', () => {
     const response = {
       items: [
