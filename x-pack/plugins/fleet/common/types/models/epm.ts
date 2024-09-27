@@ -675,10 +675,14 @@ export interface EsAssetReference {
   deferred?: boolean;
 }
 
-export interface MiscAssetReference {
+export interface KnowledgeBaseMiscAssetReference {
   id: string;
-  type: KibanaMiscAssetTypes;
+  type: KibanaMiscAssetTypes.knowledgeBaseEntry;
+  system?: boolean;
 }
+
+// polymorphic type, even if only one subtype for now
+export type MiscAssetReference = KnowledgeBaseMiscAssetReference;
 
 export interface PackageAssetReference {
   id: string;

@@ -51,7 +51,12 @@ export async function cleanUpKnowledgeBaseAssetsStep(context: InstallContext) {
     logger.debug('Retry transition - clean up knowledge base assets first');
 
     await withPackageSpan('Retry transition - clean up knowledge base assets first', async () => {
-      await removeKnowledgeBaseEntries({ installedObjects, savedObjectsClient, esClient });
+      await removeKnowledgeBaseEntries({
+        installedObjects,
+        savedObjectsClient,
+        esClient,
+        packageName: installedPkg.attributes.name,
+      });
     });
   }
 }

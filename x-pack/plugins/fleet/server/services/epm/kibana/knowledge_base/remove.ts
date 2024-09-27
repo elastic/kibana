@@ -6,20 +6,60 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { KibanaMiscAssetTypes, type MiscAssetReference } from '../../../../types';
+import type { MiscAssetReference } from '../../../../types';
+import { auditLoggingService } from '../../../audit_logging';
+import { getSavedObjectId, getIndexName, isKnowledgeBaseEntryReference } from './utils';
+import { knowledgeBaseEntrySavedObjectType } from './consts';
 
 export const removeKnowledgeBaseEntries = async ({
   installedObjects,
   savedObjectsClient,
   esClient,
+  packageName,
 }: {
   installedObjects: MiscAssetReference[];
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
+  packageName: string;
 }) => {
-  const knowledgeBaseEntryAssets = installedObjects.filter(
-    (asset) => asset.type === KibanaMiscAssetTypes.knowledgeBaseEntry
+  const knowledgeBaseEntryAssets = installedObjects.filter(isKnowledgeBaseEntryReference);
+
+  const indicesToDelete = knowledgeBaseEntryAssets.map((entry) => {
+    return getIndexName({
+      system: entry.system ?? true,
+      entryName: entry.id,
+      packageName,
+    });
+  });
+
+  const savedObjectsToDelete = knowledgeBaseEntryAssets.map((entry) => {
+    return {
+      id: getSavedObjectId({
+        entryName: entry.id,
+        packageName,
+      }),
+      type: knowledgeBaseEntrySavedObjectType,
+    };
+  });
+
+  await Promise.all(
+    indicesToDelete.map((index) => {
+      return esClient.indices.delete(
+        {
+          index,
+        },
+        { ignore: [404] }
+      );
+    })
   );
 
-  // TODO
+  savedObjectsToDelete.forEach((asset) => {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'delete',
+      id: asset.id,
+      savedObjectType: asset.type,
+    });
+  });
+
+  await savedObjectsClient.bulkDelete(savedObjectsToDelete, { force: true });
 };

@@ -51,6 +51,7 @@ export type {
   EsAssetReference,
   KibanaAssetReference,
   MiscAssetReference,
+  KnowledgeBaseMiscAssetReference,
   RegistryPackage,
   BundledPackage,
   InstallablePackage,

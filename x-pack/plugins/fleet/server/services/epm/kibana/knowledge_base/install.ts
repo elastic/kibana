@@ -5,41 +5,23 @@
  * 2.0.
  */
 
-import { setTimeout } from 'timers/promises';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ElasticsearchClient,
   SavedObject,
-  SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
-  ISavedObjectsImporter,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
-import { createListStream } from '@kbn/utils';
-import { partition, chunk } from 'lodash';
-
-import { load } from 'js-yaml';
-import { getAssetFromAssetsMap, getPathParts } from '../../archive';
-import { KibanaAssetType, KibanaSavedObjectType, KibanaMiscAssetTypes } from '../../../../types';
-import type { AssetReference, Installation, PackageSpecTags } from '../../../../types';
+import { getAssetFromAssetsMap } from '../../archive';
+import { KibanaMiscAssetTypes } from '../../../../types';
+import type { Installation, KnowledgeBaseMiscAssetReference } from '../../../../types';
 import type { MiscAssetReference, PackageInstallContext } from '../../../../../common/types';
-import {
-  indexPatternTypes,
-  getIndexPatternSavedObjects,
-  makeManagedIndexPatternsGlobal,
-} from '../index_pattern/install';
-import { kibanaAssetsToAssetsRef, saveKibanaAssetsRefs } from '../../packages/install';
-import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
-import { FleetError, KibanaSOReferenceError } from '../../../../errors';
-import { withPackageSpan } from '../../packages/utils';
-import { loadKnowledgeBaseEntryFieldsFromYaml, processFields, Fields } from '../../fields/field';
-import { tagKibanaAssets } from './tag_assets';
-import { getSpaceAwareSaveobjectsClients } from './saved_objects';
 import { updateMiscAssetReferences } from '../../packages/misc_assets_reference';
 import { parseKnowledgeBaseEntries, type KnowledgeBaseEntryInfo } from './parse_entries';
 import { generateMappings } from '../../elasticsearch/template/template';
+import { getSavedObjectId, getIndexName } from './utils';
+import { knowledgeBaseEntrySavedObjectType } from './consts';
+import { removeKnowledgeBaseEntries } from './remove';
 
 interface InstallKibanaKnowledgeBaseEntriesOptions {
   packageInstallContext: PackageInstallContext;
@@ -52,19 +34,45 @@ interface InstallKibanaKnowledgeBaseEntriesOptions {
 export async function installKibanaKnowledgeBaseEntries(
   options: InstallKibanaKnowledgeBaseEntriesOptions
 ): Promise<MiscAssetReference[]> {
-  const { packageInstallContext } = options;
+  const { packageInstallContext, installedPkg, savedObjectsClient, esClient } = options;
+
+  if (installedPkg?.attributes.installed_misc?.length) {
+    await removeKnowledgeBaseEntries({
+      installedObjects: installedPkg.attributes.installed_misc,
+      packageName: packageInstallContext.packageInfo.name,
+      savedObjectsClient,
+      esClient,
+    });
+  }
 
   const entries = parseKnowledgeBaseEntries(packageInstallContext);
+  if (entries.length === 0) {
+    return [];
+  }
 
-  // TODO: store on installation before install
-  // AssetReference
-  // updateMiscAssetReferences
+  const references: KnowledgeBaseMiscAssetReference[] = entries.map((entry) => {
+    return {
+      id: entry.name,
+      type: KibanaMiscAssetTypes.knowledgeBaseEntry,
+      system: entry.manifest.index?.system ?? true,
+    };
+  });
+
+  await updateMiscAssetReferences(
+    savedObjectsClient,
+    packageInstallContext.packageInfo.name,
+    installedPkg?.attributes.installed_misc ?? [],
+    {
+      assetsToAdd: references,
+    }
+  );
 
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
     await installKibanaKnowledgeBaseEntry(entry, options);
   }
-  // TODO: return values
+
+  return references;
 }
 
 async function installKibanaKnowledgeBaseEntry(
@@ -103,8 +111,9 @@ async function installKibanaKnowledgeBaseEntry(
     packageName: packageInstallContext.packageInfo.name,
   });
   await savedObjectsClient.create(
-    'knowledge_base_entry',
+    knowledgeBaseEntrySavedObjectType,
     {
+      // TODO: update the mappings / props once the KB PR has been merged
       name: entry.manifest.name,
       type: 'index',
       description: entry.manifest.description,
@@ -137,27 +146,4 @@ const indexContentFile = async ({
     refresh: false,
     operations,
   });
-};
-
-const getIndexName = ({
-  entryName,
-  packageName,
-  system,
-}: {
-  packageName: string;
-  system: boolean;
-  entryName: string;
-}): string => {
-  const prefix = system ? '.kibana-' : '';
-  return `${prefix}${packageName}_${entryName}`;
-};
-
-const getSavedObjectId = ({
-  entryName,
-  packageName,
-}: {
-  packageName: string;
-  entryName: string;
-}): string => {
-  return `entry_${packageName}_${entryName}`;
 };

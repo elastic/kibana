@@ -18,4 +18,4 @@ export * from './step_save_archive_entries';
 export * from './step_save_system_object';
 export * from './step_resolve_kibana_promise';
 export * from './update_latest_executed_state';
-export * from './step_install_knowledge_base_entries';
+export * from './step_install_knowledge_base_assets';
