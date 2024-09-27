@@ -76,7 +76,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
     label: customFieldConfiguration.label,
   });
   const populatedWithDefault =
-    value?.[0] === customFieldConfiguration?.defaultValue && isEmpty(initialValue);
+    value === customFieldConfiguration?.defaultValue && isEmpty(initialValue);
 
   useEffect(() => {
     onChange({
@@ -103,7 +103,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
             fullWidth: true,
             disabled: isLoading,
             isLoading,
-            'data-test-subj': `case-text-custom-field-form-field-${customFieldConfiguration.key}`,
+            'data-test-subj': `case-list-custom-field-form-field-${customFieldConfiguration.key}`,
             options: selectOptions,
           },
         }}
@@ -155,9 +155,9 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
   };
 
   const title = customFieldConfiguration.label;
-  const isTextFieldValid =
+  const isListFieldValid =
     formState.isValid ||
-    (formState.value?.[0] === customFieldConfiguration.defaultValue && !initialValue);
+    (formState.value === customFieldConfiguration.defaultValue && !initialValue);
   const isCustomFieldValueDefined = !isEmpty(customField?.value);
 
   return (
@@ -223,7 +223,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
                     iconType="save"
                     onClick={onSubmitCustomField}
                     size="s"
-                    disabled={!isTextFieldValid || isLoading}
+                    disabled={!isListFieldValid || isLoading}
                   >
                     {SAVE}
                   </EuiButton>

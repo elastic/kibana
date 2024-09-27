@@ -1158,6 +1158,8 @@ export const customFieldsMock: CaseUICustomField[] = [
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
   { type: CustomFieldTypes.TEXT, key: 'test_key_3', value: null },
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', value: null },
+  { type: CustomFieldTypes.LIST, key: 'test_key_5', value: 'option_1' },
+  { type: CustomFieldTypes.LIST, key: 'test_key_6', value: null },
 ];
 
 export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = [
