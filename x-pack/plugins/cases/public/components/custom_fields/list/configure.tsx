@@ -42,9 +42,7 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldList>['Configure'] = ()
         component={OptionsField}
         componentProps={{
           label: 'Values',
-          euiFieldProps: {
-            'data-test-subj': 'list-custom-field-values',
-          },
+          'data-test-subj': 'list-custom-field-values',
         }}
         onChange={useCallback((options: ListCustomFieldOption[]) => {
           setCurrentOptions(options);

@@ -31,7 +31,6 @@ import * as i18n from '../../translations';
 
 interface Props {
   field: FieldHook<ListCustomFieldOption[]>;
-  euiFieldProps?: Record<string, unknown>;
   idAria?: string;
   [key: string]: unknown;
 }
@@ -48,7 +47,7 @@ export const INITIAL_OPTIONS = [
   },
 ];
 
-const OptionsFieldComponent = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
+const OptionsFieldComponent = ({ field, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   // Add a state to track if an option has just been created. This is used to auto-focus the input, and to prevent
@@ -155,6 +154,7 @@ const OptionsFieldComponent = ({ field, euiFieldProps = {}, idAria, ...rest }: P
                             onChangeOptionLabel({ key: option.key, label: e.target.value })
                           }
                           onBlur={() => onBlurOption(option)}
+                          data-test-subj={`options-field-option-label-${index}`}
                         />
                       </EuiFlexItem>
                       {currentOptions.length > 1 && (
@@ -163,6 +163,7 @@ const OptionsFieldComponent = ({ field, euiFieldProps = {}, idAria, ...rest }: P
                             iconType={'minusInCircle'}
                             color={'danger'}
                             onClick={() => onRemoveOption(option.key)}
+                            data-test-subj={`options-field-remove-option-${index}`}
                           />
                         </EuiFlexItem>
                       )}
@@ -175,7 +176,11 @@ const OptionsFieldComponent = ({ field, euiFieldProps = {}, idAria, ...rest }: P
         </EuiDragDropContext>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiButtonEmpty iconType={'plusInCircle'} onClick={onAddOption}>
+            <EuiButtonEmpty
+              iconType={'plusInCircle'}
+              onClick={onAddOption}
+              data-test-subj="options-field-add-option"
+            >
               {i18n.ADD_LIST_OPTION}
             </EuiButtonEmpty>
           </EuiFlexItem>
