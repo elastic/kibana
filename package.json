@@ -456,7 +456,7 @@
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
     "nock": "10.0.6",
-    "node-sass": "^4.9.4",
+    "node-sass": "^6.0.1",
     "normalize-path": "^3.0.0",
     "nyc": "^14.1.1",
     "pixelmatch": "4.0.2",
@@ -483,6 +483,6 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "10.15.2"
+    "node": "16.20.2"
   }
 }
