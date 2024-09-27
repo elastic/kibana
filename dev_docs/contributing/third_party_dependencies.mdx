@@ -7,7 +7,26 @@ date: 2024-10-01
 tags: ['contributor', 'dev', 'kibana', 'npm', 'dependencies', 'third-party', 'dependency']
 ---
 
-## Adding dependencies
+## Third-party dependencies
+
+Third-party dependencies allow us to leverage the broader web development community to effeciently bring ideas to life, without having to re-invent the wheel.
+This is an attractive proposition, but using someone else's code does not absolve us of responsibility.
+
+The Kibana project is not just the code we commit to the repo but rather the combined total of all of the source code from our own repo and all of the external dependencies we rely on. When a user encounters a deficiency in Kibana, it matters not whether the root cause is in code we've written or external code we depend on. Additionally, relying on a dependency is a considerable expense in terms of cognitive burden, maintenance overhead, and risk.
+
+Except for highly specialized functionality, dependencies often do more harm in the long term than their short term benefits justify. Always be critical of new external dependencies being added to the project, and frequently re-evaluate the use of existing dependencies.
+
+When the use of an external dependency is necessary, ensure there is sufficient integration testing in Kibana to ensure it continues to operate the way we'd expect when we change the consuming code in Kibana or upgrade the dependency code.
+
+Except in specific cases where widespread consensus was gained and clear ownership is established, third party dependencies should not be exposed directly as features of Kibana, whether it be through the UI, HTTP API, or programmatic interfaces.
+
+
+<DocCallOut>
+Treat third-party code as if it was your own. We share the responsibility for the efficacy, performance, and security of both the code we integrate and the code we develop.
+</DocCallOut>
+
+
+## Adding new dependencies
 
 Looking for a dependency that isn't already available in Kibana? There are a few things to keep in mind before adding a new dependency.
 
@@ -29,11 +48,10 @@ especially if they are included in the initial page bundle and not loaded asynch
 to roll your own rather than include a bloated depedency, especially if you are only using a single piece of functionality.
 4. **Does this dependency have a license that's compatible with Kibana's?** Most common open source licenses such as BSD, MIT,
 and Apache 2.0/1.1 are okay to use with Kibana. Others may not be, or may require special attribution.
-5. **Will this dependency need to be prebuilt?** Due to our build process, native module dependencies should include at least a prebuild
-step so at install time it simply downloads instead of building from source. This allows us to optimize bootstrap times.
+5. **Will this dependency need to be prebuilt?** Due to our build process, native module dependencies are only supported for development (`devDependencies`), and are not supported for production (`dependencies`).
 6. **Am I committed to maintaining this dependency?** Once you add a dependency to the `package.json`, someone else isn't going to
 keep it updated for you. That means you will be responsible for updating it regularly, keeping an eye out for security vulnerabilities,
-and dealing with any breaking changes that may arise during an upgrade. We recommend relying on the renovate bot to help keep the
+and dealing with any breaking changes that may arise during an upgrade. We recommend (and will soon require) relying on the renovate bot to help keep the
 dependency updated; be sure to mark your ownership of the package in the
 [`renovate.json`](https://github.com/elastic/kibana/blob/main/renovate.json`) file.
 
@@ -49,3 +67,8 @@ on Github:
   If you are unsure of which licenses are okay to use, refer to the
   [Permitted Open Source Licenses list](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md#permitted-licenses-list).
 </DocCallOut>
+
+## Using existing dependencies
+
+Using an existing dependency is typically preferred over adding a new one.
+Please consult with the owning team before using an existing dependency, as they may have specific guidelines or concerns about its use.
