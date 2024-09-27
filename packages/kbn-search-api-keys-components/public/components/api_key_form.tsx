@@ -34,7 +34,10 @@ export const ApiKeyForm = () => {
       <EuiFlexItem grow={0}>
         <EuiTitle size="xxxs" css={{ whiteSpace: 'nowrap' }}>
           <h6>
-            <FormattedMessage id="searchApiKeysComponents.apiKeyForm.title" defaultMessage="API Key" />
+            <FormattedMessage
+              id="searchApiKeysComponents.apiKeyForm.title"
+              defaultMessage="API Key"
+            />
           </h6>
         </EuiTitle>
       </EuiFlexItem>
@@ -83,9 +86,12 @@ export const ApiKeyForm = () => {
                     onClick={copy}
                     iconType="copy"
                     color="success"
-                    aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.copyMessageLabel', {
-                      defaultMessage: 'Copy Elasticsearch URL to clipboard',
-                    })}
+                    aria-label={i18n.translate(
+                      'searchApiKeysComponents.apiKeyForm.copyMessageLabel',
+                      {
+                        defaultMessage: 'Copy Elasticsearch URL to clipboard',
+                      }
+                    )}
                   />
                 )}
               </EuiCopy>
