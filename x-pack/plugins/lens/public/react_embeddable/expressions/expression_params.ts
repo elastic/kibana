@@ -154,9 +154,6 @@ export async function getExpressionRendererParams(
   activeDatasourceState?: unknown;
 }> {
   const { expressionRenderer, documentToExpression, data, injectFilterReferences } = services;
-  if (abortController) {
-    abortController.abort();
-  }
 
   const searchContext = getMergedSearchContext(state, unifiedSearch, {
     data,
