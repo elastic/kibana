@@ -23,7 +23,7 @@ import {
   type FieldHook,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEqual } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { v4 as uuidv4 } from 'uuid';
 import type { ListCustomFieldOption } from '../../../../../common/types/domain';
@@ -35,6 +35,8 @@ interface Props {
   idAria?: string;
   [key: string]: unknown;
 }
+
+type OptionsFieldOption = ListCustomFieldOption & { isFresh?: boolean };
 
 export const INITIAL_OPTIONS = [
   {
@@ -49,10 +51,15 @@ export const INITIAL_OPTIONS = [
 const OptionsFieldComponent = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-  const currentOptions: ListCustomFieldOption[] = useMemo(() => {
+  // Add a state to track if an option has just been created. This is used to auto-focus the input, and to prevent
+  // any validation errors from appearing until after the user has entered a value or blurred the input
+  const [freshOption, setFreshOption] = useState<OptionsFieldOption | null>(null);
+
+  const currentOptions: OptionsFieldOption[] = useMemo(() => {
     const parsedValue = field.value ?? INITIAL_OPTIONS;
+    if (freshOption) parsedValue.push(freshOption);
     return Array.isArray(parsedValue) ? parsedValue : INITIAL_OPTIONS;
-  }, [field.value]);
+  }, [field.value, freshOption]);
 
   useEffectOnce(() => {
     if (!isEqual(currentOptions, INITIAL_OPTIONS)) {
@@ -62,8 +69,9 @@ const OptionsFieldComponent = ({ field, euiFieldProps = {}, idAria, ...rest }: P
 
   const onChangeOptionLabel = useCallback(
     ({ key, label }) => {
+      setFreshOption(null);
       const newOptions = currentOptions.map((option) =>
-        key === option.key ? { ...option, label } : option
+        key === option.key ? { key, label } : option
       );
       field.setValue(newOptions);
     },
@@ -71,9 +79,9 @@ const OptionsFieldComponent = ({ field, euiFieldProps = {}, idAria, ...rest }: P
   );
 
   const onAddOption = useCallback(() => {
-    const newOptions = [...currentOptions, { key: uuidv4(), label: '' }];
-    field.setValue(newOptions);
-  }, [currentOptions, field]);
+    const newOption = { key: uuidv4(), label: '', isFresh: true };
+    setFreshOption(newOption);
+  }, []);
 
   const onRemoveOption = useCallback(
     (key) => {
@@ -81,6 +89,15 @@ const OptionsFieldComponent = ({ field, euiFieldProps = {}, idAria, ...rest }: P
       field.setValue(newOptions);
     },
     [currentOptions, field]
+  );
+
+  const onBlurOption = useCallback(
+    (option: OptionsFieldOption) => {
+      if (option.isFresh) {
+        onChangeOptionLabel(option);
+      }
+    },
+    [onChangeOptionLabel]
   );
 
   const onDragEnd = useCallback(
@@ -130,12 +147,14 @@ const OptionsFieldComponent = ({ field, euiFieldProps = {}, idAria, ...rest }: P
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiFieldText
+                          autoFocus={option.isFresh}
                           fullWidth
                           value={option.label as string}
                           placeholder={i18n.LIST_OPTION_PLACEHOLDER_TEXT}
                           onChange={(e) =>
                             onChangeOptionLabel({ key: option.key, label: e.target.value })
                           }
+                          onBlur={() => onBlurOption(option)}
                         />
                       </EuiFlexItem>
                       {currentOptions.length > 1 && (

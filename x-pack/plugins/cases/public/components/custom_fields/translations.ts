@@ -84,6 +84,14 @@ export const REQUIRED_FIELD = (fieldName: string): string =>
     defaultMessage: '{fieldName} is required.',
   });
 
+export const REQUIRED_OPTIONS = i18n.translate('xpack.cases.customFields.requiredOptions', {
+  defaultMessage: 'At least one option is required.',
+});
+
+export const EMPTY_OPTIONS = i18n.translate('xpack.cases.customFields.emptyOptions', {
+  defaultMessage: 'All options must have a value.',
+});
+
 export const EDIT_CUSTOM_FIELDS_ARIA_LABEL = (customFieldLabel: string) =>
   i18n.translate('xpack.cases.caseView.editCustomFieldsAriaLabel', {
     values: { customFieldLabel },
