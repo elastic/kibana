@@ -222,7 +222,7 @@
           "id": "ktCustomServerlessImage"
         },
         {
-          "id": "kibDevTutorialsServerlessProjectNavigation"
+          "id": "kibDevTutorialsSolutionNavigation"
         }
       ]
     },
@@ -240,8 +240,8 @@
       "pageId": "kibDevDocsSharedUxOverview",
       "items": [
         {
-          "label": "Serverless Project Navigation",
-          "id": "kibDevTutorialsServerlessProjectNavigation"
+          "label": "Solution Navigation (stateful solution nav and serverless navigation",
+          "id": "kibDevTutorialsSolutionNavigation"
         },
         {
           "id": "kibDevTutorialFileService",
