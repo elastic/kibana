@@ -28,7 +28,6 @@ import {
   DataViewSpec,
   DataViewAttributes,
   FieldAttrs,
-  FieldAttrSet,
   FieldAttrsAsObject,
   FieldSpec,
   DataViewFieldMap,
