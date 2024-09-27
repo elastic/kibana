@@ -411,7 +411,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       dots
         .attr('cx', (d) => lineChartXScale(d.date))
         // Fallback with domain's min value if value is null
-        // To ensure event markers are rendered properly on the bottom of the chart
+        // To ensure event markers are rendered properly at the bottom of the chart
         .attr('cy', (d) => lineChartYScale(d.value ? d.value : lineChartYScale.domain()[0]))
         .attr('class', (d) => {
           let markerClass = 'metric-value';
@@ -479,7 +479,7 @@ export class ExplorerChartSingleMetric extends React.Component {
           'y',
           (d) =>
             // Fallback with domain's min value if value is null
-            // To ensure event markers are rendered properly on the bottom of the chart
+            // To ensure event markers are rendered properly at the bottom of the chart
             lineChartYScale(d.value ? d.value : lineChartYScale.domain()[0]) -
             SCHEDULED_EVENT_SYMBOL_HEIGHT / 2
         );
