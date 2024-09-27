@@ -323,7 +323,7 @@ export interface HttpFetchOptions extends HttpRequestInit {
   context?: KibanaExecutionContext;
 
   /**
-   * When defined, the API version string to used to populate the ELASTIC_HTTP_VERSION_HEADER.
+   * When defined, the API version string used to populate the ELASTIC_HTTP_VERSION_HEADER.
    * Defaults to undefined.
    */
   version?: ApiVersion;
