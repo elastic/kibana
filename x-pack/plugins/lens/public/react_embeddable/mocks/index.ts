@@ -5,14 +5,27 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import faker from 'faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import { PhaseEvent } from '@kbn/presentation-publishing';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
+import { coreMock } from '@kbn/core/public/mocks';
+import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { DOC_TYPE } from '../../../common/constants';
-import { LensApi, LensRendererProps, LensSerializedState } from '../types';
+import {
+  LensApi,
+  LensEmbeddableStartServices,
+  LensRendererProps,
+  LensRuntimeState,
+  LensSerializedState,
+} from '../types';
+import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
+import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
 
 const LensApiMock: LensApi = {
   // Static props
@@ -98,7 +111,17 @@ export function getLensApiMock(overrides: Partial<LensApi> = {}) {
 
 export function getLensSerializedStateMock(overrides: Partial<LensSerializedState> = {}) {
   return {
+    savedObjectId: faker.random.uuid(),
     ...LensSerializedStateMock,
+    ...overrides,
+  };
+}
+
+export function getLensRuntimeStateMock(
+  overrides: Partial<LensRuntimeState> = {}
+): LensRuntimeState {
+  return {
+    ...(LensSerializedStateMock as LensRuntimeState),
     ...overrides,
   };
 }
@@ -110,3 +133,78 @@ export function getLensComponentProps(overrides: Partial<LensRendererProps> = {}
     ...overrides,
   };
 }
+
+export function makeEmbeddableServices(
+  sessionIdSubject = new Subject<string>(),
+  sessionId: string | undefined = undefined,
+  {
+    visOverrides,
+    dataOverrides,
+  }: {
+    visOverrides?: { id: string } & Partial<Visualization>;
+    dataOverrides?: { id: string } & Partial<Datasource>;
+  } = {}
+): jest.Mocked<LensEmbeddableStartServices> {
+  const services = makeDefaultServices(sessionIdSubject, sessionId);
+  return {
+    ...services,
+    expressions: expressionsPluginMock.createStartContract(),
+    visualizations: visualizationsPluginMock.createStartContract(),
+    embeddable: embeddablePluginMock.createStartContract(),
+    eventAnnotation: {} as LensEmbeddableStartServices['eventAnnotation'],
+    timefilter: services.data.query.timefilter.timefilter,
+    coreHttp: services.http,
+    coreStart: coreMock.createStart(),
+    capabilities: services.application.capabilities,
+    expressionRenderer: jest.fn().mockReturnValue(null),
+    documentToExpression: jest.fn(),
+    injectFilterReferences: services.data.query.filterManager.inject as jest.Mock,
+    visualizationMap: mockVisualizationMap(visOverrides?.id, visOverrides),
+    datasourceMap: mockDatasourceMap(dataOverrides?.id, dataOverrides),
+    charts: chartPluginMock.createStartContract(),
+    inspector: {
+      ...services.inspector,
+      isAvailable: jest.fn().mockReturnValue(true),
+      open: jest.fn(),
+    },
+    uiActions: {
+      ...services.uiActions,
+      getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
+    },
+  };
+}
+
+export const mockVisualizationMap = (
+  type: string | undefined = undefined,
+  overrides: Partial<Visualization> = {}
+): VisualizationMap => {
+  if (type == null) {
+    return {};
+  }
+  return {
+    [type]: { ...createMockVisualization(type), ...overrides },
+  };
+};
+
+export const mockDatasourceMap = (
+  type: string | undefined = undefined,
+  overrides: Partial<Datasource> = {}
+): DatasourceMap => {
+  const baseMap = {
+    // define the existing ones
+    formBased: createMockDatasource('formBased'),
+    textBased: createMockDatasource('textBased'),
+  };
+  if (type == null) {
+    return baseMap;
+  }
+  return {
+    // define the existing ones
+    ...baseMap,
+    // override at will
+    [type]: {
+      ...createMockDatasource(type),
+      ...overrides,
+    },
+  };
+};

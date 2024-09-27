@@ -146,5 +146,6 @@ export function mockDataPlugin(
     fieldFormats: {
       deserialize: jest.fn(),
     },
+    datatableUtilities: { getDateHistogramMeta: jest.fn(() => true) },
   } as unknown as DataPublicPluginStart;
 }
