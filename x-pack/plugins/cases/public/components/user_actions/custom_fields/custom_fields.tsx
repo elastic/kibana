@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { builderMap as customFieldsBuilder } from '../../custom_fields/builder';
 import type { CasesConfigurationUICustomField, CaseUICustomField } from '../../../../common/ui';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CustomFieldsUserAction } from '../../../../common/types/domain';
@@ -28,7 +29,12 @@ const getLabelTitle = (
 
   const value = Array.isArray(customFieldValue) ? customFieldValue[0] : customFieldValue;
 
-  return `${i18n.CHANGED_FIELD.toLowerCase()} ${label} ${i18n.TO} "${value}"`;
+  const { convertValueToLabel } = customFieldsBuilder[customField.type]();
+  const valueLabel = customFieldConfiguration
+    ? convertValueToLabel?.(value, customFieldConfiguration) ?? value
+    : value;
+
+  return `${i18n.CHANGED_FIELD.toLowerCase()} ${label} ${i18n.TO} "${valueLabel}"`;
 };
 
 export const createCustomFieldsUserActionBuilder: UserActionBuilder = ({

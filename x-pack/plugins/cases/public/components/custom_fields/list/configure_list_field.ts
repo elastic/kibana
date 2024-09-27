@@ -33,4 +33,9 @@ export const configureListCustomFieldFactory: CustomFieldFactory<
   }),
   convertNullToEmpty: (value: string | boolean | null) => (value == null ? '' : String(value)),
   getFilterOptions: ({ options }) => options.map((option) => ({ ...option, value: option.key })),
+  convertValueToLabel: (value: string | null, configuration: ListCustomFieldConfiguration) => {
+    if (!value) return '';
+    const option = configuration.options.find((opt) => opt.key === value);
+    return option?.label ?? '';
+  },
 });

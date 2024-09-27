@@ -176,3 +176,4 @@ export type Configuration = rt.TypeOf<typeof ConfigurationRt>;
 export type Configurations = rt.TypeOf<typeof ConfigurationsRt>;
 export type ListCustomFieldOption = rt.TypeOf<typeof ListCustomFieldOptionRt>;
 export type ListCustomFieldConfiguration = rt.TypeOf<typeof ListCustomFieldConfigurationRt>;
+export type ToggleCustomFieldConfiguration = rt.TypeOf<typeof ToggleCustomFieldConfigurationRt>;
