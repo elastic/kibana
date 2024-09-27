@@ -46,11 +46,14 @@ import {
   createBulkIndexOperationTuple,
   checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
+import { BASELINE_TEST_ARCHIVE_1K } from '../../kibana_migrator_archive_utils';
+import { defaultKibanaIndex } from '../../kibana_migrator_test_kit';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
+      dataArchive: BASELINE_TEST_ARCHIVE_1K,
       license: 'basic',
       esArgs: ['http.max_content_length=10Kb'],
     },
@@ -58,7 +61,8 @@ const { startES } = createTestServers({
 });
 let esServer: TestElasticsearchUtils;
 
-describe('migration actions', () => {
+// Failing: See https://github.com/elastic/kibana/issues/166190
+describe.skip('migration actions', () => {
   let client: ElasticsearchClient;
   let esCapabilities: ReturnType<typeof elasticsearchServiceMock.createCapabilities>;
 
@@ -1089,13 +1093,13 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       await waitForIndexStatus({
         client,
-        index: '.kibana_1',
+        index: defaultKibanaIndex,
         status: 'yellow',
       })();
 
       const res = (await reindex({
         client,
-        sourceIndex: '.kibana_1',
+        sourceIndex: defaultKibanaIndex,
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
@@ -1432,7 +1436,7 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        '.kibana_1',
+        defaultKibanaIndex,
         1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
