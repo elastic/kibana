@@ -111,12 +111,12 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
       paddingSize="l"
       style={{ maxWidth: MAX_WIDTH, margin: '0 auto' }}
     >
-      <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="logoElasticsearch" size="xl" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel paddingSize="none" color="transparent">
+      <EuiPanel color='transparent' paddingSize='m'>
+        <EuiFlexGroup alignItems="center" gutterSize='m'>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="logoElasticsearch" size="xl" />
+          </EuiFlexItem>
+          <EuiFlexItem>
             <EuiTitle size="xs">
               <h1>
                 {i18n.translate('xpack.searchIndices.startPage.pageTitle', {
@@ -124,21 +124,21 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
                 })}
               </h1>
             </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiTitle size="l">
-              <h2>
-                {i18n.translate('xpack.searchIndices.startPage.pageDescription', {
-                  defaultMessage: 'Vectorize, search, and visualize your data',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size='m' />
+        <EuiTitle size="l">
+          <h2>
+            {i18n.translate('xpack.searchIndices.startPage.pageDescription', {
+              defaultMessage: 'Vectorize, search, and visualize your data',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiPanel>
       <EuiSpacer />
       <EuiPanel>
         <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems='center'>
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h4>

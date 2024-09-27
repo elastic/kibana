@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -150,7 +151,7 @@ export const CreateIndexForm = ({
           <EuiFlexItem>
             {userPrivileges?.privileges?.canCreateApiKeys && (
               <EuiFlexGroup gutterSize="s">
-                <EuiIcon size="l" type="key" color="subdued" />
+                <EuiIcon size="m" type="key" color="subdued" />
                 <EuiText size="s" data-test-subj="apiKeyLabel">
                   <p>
                     {i18n.translate(
@@ -166,35 +167,37 @@ export const CreateIndexForm = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>
-      <EuiHorizontalRule margin="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="documents" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText color="subdued" size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.searchIndices.startPage.createIndex.fileUpload.text"
-                defaultMessage="Already have some data? {link}"
-                values={{
-                  link: (
-                    <EuiLink
-                      data-telemetry-id="searchIndices-start-uploadFile"
-                      data-test-subj="uploadFileLink"
-                      onClick={onFileUpload}
-                    >
-                      {i18n.translate('xpack.searchIndices.startPage.createIndex.fileUpload.link', {
-                        defaultMessage: 'Upload a file',
-                      })}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiHorizontalRule margin="none" />
+      <EuiPanel color='transparent' paddingSize='s'>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="documents" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText color="subdued" size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.searchIndices.startPage.createIndex.fileUpload.text"
+                  defaultMessage="Already have some data? {link}"
+                  values={{
+                    link: (
+                      <EuiLink
+                        data-telemetry-id="searchIndices-start-uploadFile"
+                        data-test-subj="uploadFileLink"
+                        onClick={onFileUpload}
+                      >
+                        {i18n.translate('xpack.searchIndices.startPage.createIndex.fileUpload.link', {
+                          defaultMessage: 'Upload a file',
+                        })}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </>
   );
 };
