@@ -561,7 +561,7 @@ export class DashboardContainer
     duplicateDashboardPanel.bind(this)(id);
   }
 
-  public canRemovePanels = () => this.expandedPanelId.value !== undefined;
+  public canRemovePanels = () => this.expandedPanelId.value === undefined;
 
   public getTypeDisplayName = () => dashboardTypeDisplayName;
   public getTypeDisplayNameLowerCase = () => dashboardTypeDisplayLowercase;
