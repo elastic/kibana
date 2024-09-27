@@ -9,10 +9,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-export function initializeExpandAndScrollPanels(
-  untilEmbeddableLoaded: (id: string) => Promise<unknown>
-) {
+export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Promise<unknown>) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
+  const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
+  const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   let scrollPosition: number | undefined;
 
@@ -35,6 +35,22 @@ export function initializeExpandAndScrollPanels(
       if (window.scrollY > 0) {
         scrollPosition = window.scrollY;
       }
+    },
+    focusedPanelId$,
+    highlightPanelId$,
+    highlightPanel: (panelRef: HTMLDivElement) => {
+      const id = highlightPanelId$.value;
+
+      if (id && panelRef) {
+        untilEmbeddableLoaded(id).then(() => {
+          panelRef.classList.add('dshDashboardGrid__item--highlighted');
+          // Removes the class after the highlight animation finishes
+          setTimeout(() => {
+            panelRef.classList.remove('dshDashboardGrid__item--highlighted');
+          }, 5000);
+        });
+      }
+      highlightPanelId$.next(undefined);
     },
     scrollToPanelId$,
     scrollToPanel: async (panelRef: HTMLDivElement) => {
@@ -61,6 +77,11 @@ export function initializeExpandAndScrollPanels(
       window.scroll(0, 0);
     },
     setExpandedPanelId: (id: string | undefined) => expandedPanelId$.next(id),
+    setFocusedPanelId: (id: string | undefined) => {
+      focusedPanelId$.next(id);
+      setScrollToPanelId(id);
+    },
+    setHighlightPanelId: (id: string | undefined) => highlightPanelId$.next(id),
     setScrollToPanelId,
   };
 }

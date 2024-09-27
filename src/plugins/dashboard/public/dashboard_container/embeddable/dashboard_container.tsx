@@ -104,11 +104,7 @@ import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_plac
 import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
-import {
-  DashboardReduxState,
-  DashboardStateFromSettingsFlyout,
-  UnsavedPanelState,
-} from '../types';
+import { DashboardReduxState, DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../types';
 import { addFromLibrary, addOrUpdateEmbeddable, runInteractiveSave, runQuickSave } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
 import {
@@ -121,9 +117,12 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
-import { InitialComponentState, initializeComponentStateManager } from '../../dashboard_api/component_state_manager';
-import { initializeExpandAndScrollPanels } from '../../dashboard_api/expand_and_scroll_panels';
-import { initializeTracksOverlays } from '../../dashboard_api/tracks_overlays';
+import {
+  InitialComponentState,
+  initializeComponentStateManager,
+} from '../../dashboard_api/component_state_manager';
+import { initializeTrackPanel } from '../../dashboard_api/track_panel';
+import { initializeTrackOverlay } from '../../dashboard_api/track_overlay';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -170,9 +169,11 @@ export class DashboardContainer
   public setHasUnsavedChanges: (hasUnsavedChanges: boolean) => void;
   public openOverlay: (ref: OverlayRef, options?: { focusedPanelId?: string }) => void;
   public clearOverlays: () => void;
+  public highlightPanel: (panelRef: HTMLDivElement) => void;
   public setScrollToPanelId: (id: string | undefined) => void;
   public setFullScreenMode: (fullScreenMode: boolean) => void;
   public setExpandedPanelId: (newId?: string) => void;
+  public setHighlightPanelId: (highlightPanelId: string | undefined) => void;
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
@@ -323,24 +324,26 @@ export class DashboardContainer
     this.setHasUnsavedChanges = componentStateManager.setHasUnsavedChanges;
     this.setManaged = componentStateManager.setManaged;
 
-    const expandAndScroll = initializeExpandAndScrollPanels(this.untilEmbeddableLoaded);
-    this.expandedPanelId = expandAndScroll.expandedPanelId;
-    this.setExpandedPanelId = expandAndScroll.setExpandedPanelId;
-    this.scrollToPanelId$ = expandAndScroll.scrollToPanelId$;
-    this.setScrollToPanelId = expandAndScroll.setScrollToPanelId;
+    const trackPanel = initializeTrackPanel(this.untilEmbeddableLoaded);
+    this.expandedPanelId = trackPanel.expandedPanelId;
+    this.focusedPanelId$ = trackPanel.focusedPanelId$;
+    this.highlightPanelId$ = trackPanel.highlightPanelId$;
+    this.highlightPanel = trackPanel.highlightPanel;
+    this.setExpandedPanelId = trackPanel.setExpandedPanelId;
+    this.setHighlightPanelId = trackPanel.setHighlightPanelId;
+    this.scrollToPanelId$ = trackPanel.scrollToPanelId$;
+    this.setScrollToPanelId = trackPanel.setScrollToPanelId;
 
-    const tracksOverlay = initializeTracksOverlays(expandAndScroll.setScrollToPanelId);
-    this.clearOverlays = tracksOverlay.clearOverlays;
-    this.focusedPanelId$ = tracksOverlay.focusedPanelId$;
-    this.hasOverlays$ = tracksOverlay.hasOverlayers$;
-    this.openOverlay = tracksOverlay.openOverlay;
+    const trackOverlay = initializeTrackOverlay(trackPanel.setFocusedPanelId);
+    this.clearOverlays = trackOverlay.clearOverlays;
+    this.hasOverlays$ = trackOverlay.hasOverlayers$;
+    this.openOverlay = trackOverlay.openOverlay;
 
     this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
     this.hasRunMigrations$ = new BehaviorSubject(
       this.getState().componentState.hasRunClientsideMigrations
     );
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
-    this.highlightPanelId$ = new BehaviorSubject(this.getState().componentState.highlightPanelId);
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
     this.publishingSubscription.add(
       this.onStateChange(() => {
@@ -350,9 +353,6 @@ export class DashboardContainer
         }
         if (this.useMargins$.value !== state.explicitInput.useMargins) {
           this.useMargins$.next(state.explicitInput.useMargins);
-        }
-        if (this.highlightPanelId$.value !== state.componentState.highlightPanelId) {
-          this.highlightPanelId$.next(state.componentState.highlightPanelId);
         }
         if (this.panels$.value !== state.explicitInput.panels) {
           this.panels$.next(state.explicitInput.panels);
@@ -864,25 +864,6 @@ export class DashboardContainer
     }
     return titles;
   }
-
-  public setHighlightPanelId = (id: string | undefined) => {
-    this.dispatch.setHighlightPanelId(id);
-  };
-
-  public highlightPanel = (panelRef: HTMLDivElement) => {
-    const id = this.getState().componentState.highlightPanelId;
-
-    if (id && panelRef) {
-      this.untilEmbeddableLoaded(id).then(() => {
-        panelRef.classList.add('dshDashboardGrid__item--highlighted');
-        // Removes the class after the highlight animation finishes
-        setTimeout(() => {
-          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
-        }, 5000);
-      });
-    }
-    this.setHighlightPanelId(undefined);
-  };
 
   public setPanels = (panels: DashboardPanelMap) => {
     this.dispatch.setPanels(panels);

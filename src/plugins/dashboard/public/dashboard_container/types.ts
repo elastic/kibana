@@ -43,7 +43,6 @@ export interface DashboardPublicState {
   hasRunClientsideMigrations?: boolean;
   savedQueryId?: string;
   lastSavedId?: string;
-  highlightPanelId?: string;
 }
 
 export type DashboardLoadType =

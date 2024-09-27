@@ -10,29 +10,25 @@
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { BehaviorSubject } from 'rxjs';
 
-export function initializeTracksOverlays(setScrollToPanels: (id: string | undefined) => void) {
+export function initializeTrackOverlay(setFocusedPanelId: (id: string | undefined) => void) {
   let overlayRef: OverlayRef;
-  const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const hasOverlayers$ = new BehaviorSubject(false);
 
   function clearOverlays() {
     hasOverlayers$.next(false);
-    focusedPanelId$.next(undefined);
-    setScrollToPanels(undefined);
+    setFocusedPanelId(undefined);
     overlayRef?.close();
   }
 
   return {
     clearOverlays,
-    focusedPanelId$,
     hasOverlayers$,
     openOverlay: (ref: OverlayRef, options?: { focusedPanelId?: string }) => {
       clearOverlays();
       hasOverlayers$.next(true);
       overlayRef = ref;
       if (options?.focusedPanelId) {
-        focusedPanelId$.next(options.focusedPanelId);
-        setScrollToPanels(options.focusedPanelId);
+        setFocusedPanelId(options.focusedPanelId);
       }
     },
   };
