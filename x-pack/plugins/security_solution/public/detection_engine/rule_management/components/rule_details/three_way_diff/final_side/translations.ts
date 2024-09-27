@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export * from './field_diff';
-export * from './header_bar';
-export * from './rule_diff_section';
+import { i18n } from '@kbn/i18n';
+
+export const UPGRADED_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradedVersion',
+  {
+    defaultMessage: 'Upgraded version',
+  }
+);

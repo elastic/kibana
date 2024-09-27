@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './field_diff';
-export * from './header_bar';
-export * from './rule_diff_section';
+export * from './split_accordion';
