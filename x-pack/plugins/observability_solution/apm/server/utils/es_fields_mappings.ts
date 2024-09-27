@@ -95,6 +95,7 @@ import {
   CLOUD_ACCOUNT_ID,
   CLOUD_ACCOUNT_NAME,
   CLOUD_IMAGE_ID,
+  CLOUD_SERVICE_NAME,
 } from '@kbn/apm-types';
 import {
   KUBERNETES_CONTAINER_NAME,
@@ -554,6 +555,7 @@ export const serviceMetadataDetailsMapping = (
   const kubernetesNamespace = normalizeValue<string>(fields[KUBERNETES_NAMESPACE]);
   const containerId = normalizeValue<string>(fields[CONTAINER_ID]);
   const cloudServiceName = normalizeValue<string>(fields[CLOUD_PROVIDER]);
+  const serviceRuntimeName = normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]);
   return {
     service: {
       name: normalizeValue<string>(fields[SERVICE_NAME]),
@@ -566,10 +568,14 @@ export const serviceMetadataDetailsMapping = (
       node: {
         name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
       },
-      runtime: {
-        name: normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]),
-        version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
-      },
+      ...(serviceRuntimeName
+        ? {
+            runtime: {
+              name: serviceRuntimeName,
+              version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
+            },
+          }
+        : undefined),
       language: {
         name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
         version: normalizeValue<string>(fields[SERVICE_LANGUAGE_VERSION]),
@@ -642,7 +648,7 @@ export const serviceMetadataDetailsMapping = (
               id: normalizeValue<string>(fields[CLOUD_IMAGE_ID]),
             },
             service: {
-              name: normalizeValue<string>(fields[CLOUD_PROVIDER]),
+              name: normalizeValue<string>(fields[CLOUD_SERVICE_NAME]),
             },
           },
         }
@@ -654,20 +660,40 @@ export const serviceMetadataIconsMapping = (
   fields: Partial<Record<string, unknown[]>>
 ): ServiceMetadataIconsRaw | undefined => {
   if (!fields) return undefined;
-  const kubernetesNamespace = normalizeValue<string>(fields[KUBERNETES_NAMESPACE]);
+  const kubernetesPodName = normalizeValue<string>(fields[KUBERNETES_POD_NAME]);
   const containerId = normalizeValue<string>(fields[CONTAINER_ID]);
-  const cloudServiceName = normalizeValue<string>(fields[CLOUD_PROVIDER]);
+  const cloudProvider = normalizeValue<string>(fields[CLOUD_PROVIDER]);
   return {
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
       version: '',
     },
-    ...(cloudServiceName
+    ...(cloudProvider
       ? {
           cloud: {
-            provider: normalizeValue<string>(fields[CLOUD_PROVIDER]),
+            availability_zone: normalizeValue<string>(fields[CLOUD_AVAILABILITY_ZONE]),
+            instance: {
+              name: normalizeValue<string>(fields[CLOUD_INSTANCE_NAME]),
+              id: normalizeValue<string>(fields[CLOUD_INSTANCE_ID]),
+            },
+            machine: {
+              type: normalizeValue<string>(fields[CLOUD_MACHINE_TYPE]),
+            },
+            project: {
+              id: normalizeValue<string>(fields[CLOUD_PROJECT_ID]),
+              name: normalizeValue<string>(fields[CLOUD_PROJECT_NAME]),
+            },
+            provider: cloudProvider,
+            region: normalizeValue<string>(fields[CLOUD_REGION]),
+            account: {
+              id: normalizeValue<string>(fields[CLOUD_ACCOUNT_ID]),
+              name: normalizeValue<string>(fields[CLOUD_ACCOUNT_NAME]),
+            },
+            image: {
+              id: normalizeValue<string>(fields[CLOUD_IMAGE_ID]),
+            },
             service: {
-              name: normalizeValue<string>(fields[CLOUD_PROVIDER]),
+              name: normalizeValue<string>(fields[CLOUD_SERVICE_NAME]),
             },
           },
         }
@@ -680,14 +706,14 @@ export const serviceMetadataIconsMapping = (
           },
         }
       : undefined),
-    ...(kubernetesNamespace
+    ...(kubernetesPodName
       ? {
           kubernetes: {
             pod: {
               name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
               uid: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
             },
-            namespace: kubernetesNamespace,
+            namespace: normalizeValue<string>(fields[KUBERNETES_NAMESPACE]),
             replicaset: {
               name: normalizeValue<string>(fields[KUBERNETES_REPLICASET_NAME]),
             },
