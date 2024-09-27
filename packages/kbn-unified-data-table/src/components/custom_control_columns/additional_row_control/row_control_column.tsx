@@ -26,7 +26,7 @@ export const RowControlCell = ({
 }: EuiDataGridCellValueElementProps & {
   renderControl: RowControlColumn['renderControl'];
 }) => {
-  const rowProps = useControlColumn(props);
+  const { record, rowIndex } = useControlColumn(props);
 
   const Control: React.FC<RowControlProps> = useMemo(
     () =>
@@ -50,17 +50,19 @@ export const RowControlCell = ({
                 color={color ?? 'text'}
                 aria-label={label}
                 onClick={() => {
-                  onClick?.(rowProps);
+                  if (record) {
+                    onClick?.({ record, rowIndex });
+                  }
                 }}
               />
             </EuiToolTip>
           </DataTableRowControl>
         );
       },
-    [props.columnId, rowProps]
+    [props.columnId, record, rowIndex]
   );
 
-  return renderControl(Control, rowProps);
+  return record ? renderControl(Control, { record, rowIndex }) : null;
 };
 
 export const getRowControlColumn = (

@@ -8,36 +8,33 @@
  */
 
 import React from 'react';
-import { getFieldCellActions, getFieldValueCellActions, TableRow } from './table_cell_actions';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import { getFieldCellActions, getFieldValueCellActions } from './table_cell_actions';
+import { FieldRow } from './field_row';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 describe('TableActions', () => {
-  const rows: TableRow[] = [
-    {
-      action: {
-        onFilter: jest.fn(),
-        flattenedField: 'flattenedField',
-        onToggleColumn: jest.fn(),
-      },
-      field: {
-        pinned: true,
-        onTogglePinned: jest.fn(),
-        field: 'message',
-        fieldMapping: new DataViewField({
-          type: 'keyword',
-          name: 'message',
-          searchable: true,
-          aggregatable: true,
-        }),
-        fieldType: 'keyword',
-        displayName: 'message',
-        scripted: false,
-      },
-      value: {
-        ignored: undefined,
-        formattedValue: 'test',
-      },
-    },
+  const rows: FieldRow[] = [
+    new FieldRow({
+      name: 'message',
+      flattenedValue: 'flattenedField',
+      hit: buildDataTableRecord(
+        {
+          _ignored: [],
+          _index: 'test',
+          _id: '1',
+          _source: {
+            message: 'test',
+          },
+        },
+        dataView
+      ),
+      dataView,
+      fieldFormats: {} as FieldFormatsStart,
+      isPinned: false,
+      columnsMeta: undefined,
+    }),
   ];
 
   const Component = () => <div>Component</div>;
@@ -52,13 +49,13 @@ describe('TableActions', () => {
   describe('getFieldCellActions', () => {
     it('should render correctly for undefined functions', () => {
       expect(
-        getFieldCellActions({ rows, filter: undefined, onToggleColumn: jest.fn() }).map((item) =>
+        getFieldCellActions({ rows, onFilter: undefined, onToggleColumn: jest.fn() }).map((item) =>
           item(EuiCellParams)
         )
       ).toMatchSnapshot();
 
       expect(
-        getFieldCellActions({ rows, filter: undefined, onToggleColumn: undefined }).map((item) =>
+        getFieldCellActions({ rows, onFilter: undefined, onToggleColumn: undefined }).map((item) =>
           item(EuiCellParams)
         )
       ).toMatchSnapshot();
@@ -66,7 +63,7 @@ describe('TableActions', () => {
 
     it('should render the panels correctly for defined onFilter function', () => {
       expect(
-        getFieldCellActions({ rows, filter: jest.fn(), onToggleColumn: jest.fn() }).map((item) =>
+        getFieldCellActions({ rows, onFilter: jest.fn(), onToggleColumn: jest.fn() }).map((item) =>
           item(EuiCellParams)
         )
       ).toMatchSnapshot();
@@ -76,13 +73,13 @@ describe('TableActions', () => {
   describe('getFieldValueCellActions', () => {
     it('should render correctly for undefined functions', () => {
       expect(
-        getFieldValueCellActions({ rows, filter: undefined }).map((item) => item(EuiCellParams))
+        getFieldValueCellActions({ rows, onFilter: undefined }).map((item) => item(EuiCellParams))
       ).toMatchSnapshot();
     });
 
     it('should render the panels correctly for defined onFilter function', () => {
       expect(
-        getFieldValueCellActions({ rows, filter: jest.fn() }).map((item) => item(EuiCellParams))
+        getFieldValueCellActions({ rows, onFilter: jest.fn() }).map((item) => item(EuiCellParams))
       ).toMatchSnapshot();
     });
   });

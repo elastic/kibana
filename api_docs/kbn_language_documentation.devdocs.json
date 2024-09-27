@@ -59,7 +59,7 @@
         "label": "LanguageDocumentationInline",
         "description": [],
         "signature": [
-          "React.NamedExoticComponent<DocumentationInlineProps> & { readonly type: ({ searchInDescription }: DocumentationInlineProps) => JSX.Element; }"
+          "React.NamedExoticComponent<DocumentationInlineProps> & { readonly type: ({ searchInDescription, height }: DocumentationInlineProps) => JSX.Element; }"
         ],
         "path": "packages/kbn-language-documentation/src/components/as_inline/index.tsx",
         "deprecated": false,
