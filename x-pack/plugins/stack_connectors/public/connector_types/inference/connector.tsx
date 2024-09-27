@@ -53,7 +53,7 @@ import { Config, Secrets, ServiceProviderKeys } from './types';
 import {
   generateInferenceEndpointId,
   getTaskTypeOptions,
-  getValidator,
+  getNonEmptyValidator,
   TaskTypeOption,
 } from './helpers';
 import { InferenceProvider } from './providers/get_providers';
@@ -191,11 +191,23 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         ...newTaskType?.configuration[k],
       })) as ConfigEntryView[];
 
+      config.taskTypeConfig = Object.keys(newTaskType?.configuration ?? {}).reduce(
+        (res: Record<string, unknown>, k) => {
+          if (newTaskType?.configuration[k] && !!newTaskType?.configuration[k].default_value) {
+            res[k] = newTaskType.configuration[k].default_value;
+          } else {
+            res[k] = null;
+          }
+          return res;
+        },
+        {}
+      );
+
       updateFieldValues({
         config: {
           taskType,
           taskTypeSchema: newTaskTypeSchema,
-          taskTypeConfig: {},
+          taskTypeConfig: config.taskTypeConfig,
         },
       });
     },
@@ -266,14 +278,29 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         ...newProvider?.configuration[k],
       })) as ConfigEntryView[];
 
+      const defaultProviderConfig: Record<string, unknown> = {};
+      const defaultProviderSecrets: Record<string, unknown> = {};
+
+      Object.keys(newProvider?.configuration ?? {}).forEach((k) => {
+        if (!newProvider?.configuration[k].sensitive) {
+          if (newProvider?.configuration[k] && !!newProvider?.configuration[k].default_value) {
+            defaultProviderConfig[k] = newProvider.configuration[k].default_value;
+          } else {
+            defaultProviderConfig[k] = null;
+          }
+        } else {
+          defaultProviderSecrets[k] = null;
+        }
+      });
+
       updateFieldValues({
         config: {
           provider: newProvider?.provider,
           providerSchema: config.providerSchema,
-          providerConfig: {},
+          providerConfig: defaultProviderConfig,
         },
         secrets: {
-          providerSecrets: {},
+          providerSecrets: defaultProviderSecrets,
         },
       });
     },
@@ -590,7 +617,12 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       config={{
         validations: [
           {
-            validator: getValidator('config.providerSchema', setRequiredProviderFormFields, true),
+            validator: getNonEmptyValidator(
+              'config.providerSchema',
+              setRequiredProviderFormFields,
+              isSubmitting,
+              true
+            ),
             isBlocking: true,
           },
         ],
@@ -604,7 +636,11 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       config={{
         validations: [
           {
-            validator: getValidator('config.providerSchema', setRequiredProviderFormFields),
+            validator: getNonEmptyValidator(
+              'config.providerSchema',
+              setRequiredProviderFormFields,
+              isSubmitting
+            ),
             isBlocking: true,
           },
         ],
@@ -624,7 +660,17 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       config={{
         validations: [
           {
-            validator: getValidator('config.taskTypeSchema', setTaskTypeFormFields),
+            validator: getNonEmptyValidator(
+              'config.taskTypeSchema',
+              (requiredFormFields) => {
+                const formFields = [
+                  ...requiredFormFields,
+                  ...(config?.taskTypeSchema ?? []).filter((f) => !f.required),
+                ];
+                setTaskTypeFormFields(formFields.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
+              },
+              isSubmitting
+            ),
             isBlocking: true,
           },
         ],

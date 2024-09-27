@@ -43,9 +43,10 @@ export const generateInferenceEndpointId = (
   setFieldValue('config.inferenceId', inferenceEndpointId);
 };
 
-export const getValidator = (
+export const getNonEmptyValidator = (
   schemaPath: string,
-  setFormFields: React.Dispatch<React.SetStateAction<ConfigEntryView[]>>,
+  validationEventHandler: (fieldsWithErrors: ConfigEntryView[]) => void,
+  isSubmitting: boolean = false,
   isSecrets: boolean = false
 ) => {
   return (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
@@ -55,29 +56,31 @@ export const getValidator = (
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
     if (formData[schemaPath]) {
-      formData[schemaPath].forEach((field: ConfigEntryView) => {
-        if (field.required && (isSecrets ? field.sensitive : !field.sensitive)) {
-          if (
-            !configData[field.key] ||
-            typeof configData[field.key] === 'string' ||
-            typeof configData[field.key] === 'number' ||
-            typeof configData[field.key] === 'boolean'
-          ) {
-            if (!configData[field.key] || isEmpty(configData[field.key])) {
-              field.validationErrors = [i18n.getRequiredMessage(field.label)];
-              field.isValid = false;
-              hasErrors = true;
-            } else {
-              field.validationErrors = [];
-              field.isValid = true;
+      formData[schemaPath]
+        .filter((f: ConfigEntryView) => f.required)
+        .forEach((field: ConfigEntryView) => {
+          // validate if submitting or on field edit - value is not default to null
+          if (configData[field.key] !== null || isSubmitting) {
+            // validate secrets fields separately from regular
+            if (isSecrets ? field.sensitive : !field.sensitive) {
+              if (
+                !configData[field.key] ||
+                (typeof configData[field.key] === 'string' && isEmpty(configData[field.key]))
+              ) {
+                field.validationErrors = [i18n.getRequiredMessage(field.label)];
+                field.isValid = false;
+                hasErrors = true;
+              } else {
+                field.validationErrors = [];
+                field.isValid = true;
+              }
             }
           }
-        }
-        newSchema.push(field);
-      });
+          newSchema.push(field);
+        });
 
+      validationEventHandler(newSchema.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
       if (hasErrors) {
-        setFormFields(newSchema);
         return {
           code: 'ERR_FIELD_MISSING',
           path,

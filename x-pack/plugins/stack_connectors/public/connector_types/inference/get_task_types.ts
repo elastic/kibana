@@ -457,7 +457,7 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             display: DisplayType.NUMERIC,
             label: 'Max tokens',
             order: 1,
-            required: false,
+            required: true,
             sensitive: false,
             tooltip: 'The maximum number of tokens to generate before stopping.',
             type: FieldType.INTEGER,

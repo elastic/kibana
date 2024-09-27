@@ -69,7 +69,6 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getOpenAIConnectorType());
   connectorTypeRegistry.register(getBedrockConnectorType());
   connectorTypeRegistry.register(getGeminiConnectorType());
-  connectorTypeRegistry.register(getInferenceConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
   connectorTypeRegistry.register(getTorqConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
@@ -81,5 +80,8 @@ export function registerConnectorTypes({
   }
   if (ExperimentalFeaturesService.get().crowdstrikeConnectorOn) {
     connectorTypeRegistry.register(getCrowdStrikeConnectorType());
+  }
+  if (ExperimentalFeaturesService.get().inferenceConnectorOn) {
+    connectorTypeRegistry.register(getInferenceConnectorType());
   }
 }

@@ -24,6 +24,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { isEmpty } from 'lodash/fp';
 import {
   ensureBooleanType,
   ensureCorrectTyping,
@@ -125,8 +126,9 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
       value={innerValue as number}
       isInvalid={!isValid}
       onChange={(event) => {
-        setInnerValue(event.target.value);
-        validateAndSetConfigValue(event.target.value);
+        const newValue = isEmpty(event.target.value) ? '0' : event.target.value;
+        setInnerValue(newValue);
+        validateAndSetConfigValue(newValue);
       }}
       placeholder={placeholder}
     />
@@ -206,8 +208,9 @@ export const ConfigSelectField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
 }) => {
-  const { isValid, options, value } = configEntry;
-  const [innerValue, setInnerValue] = useState(value);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { isValid, options, value, default_value } = configEntry;
+  const [innerValue, setInnerValue] = useState(value ?? default_value);
   const optionsRes = options?.map((o) => ({
     value: o.value,
     inputDisplay: (

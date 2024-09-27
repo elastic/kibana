@@ -109,7 +109,6 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getOpenAIConnectorType());
   actions.registerSubActionConnectorType(getBedrockConnectorType());
   actions.registerSubActionConnectorType(getGeminiConnectorType());
-  actions.registerSubActionConnectorType(getInferenceConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
@@ -119,5 +118,8 @@ export function registerConnectorTypes({
   }
   if (experimentalFeatures.crowdstrikeConnectorOn) {
     actions.registerSubActionConnectorType(getCrowdstrikeConnectorType());
+  }
+  if (experimentalFeatures.inferenceConnectorOn) {
+    actions.registerSubActionConnectorType(getInferenceConnectorType());
   }
 }
