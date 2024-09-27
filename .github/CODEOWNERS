@@ -476,7 +476,7 @@ src/plugins/files_management @elastic/appex-sharedux
 src/plugins/files @elastic/appex-sharedux
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 x-pack/plugins/fleet @elastic/fleet
-packages/kbn-flot-charts @elastic/kibana-operations
+packages/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 packages/kbn-formatters @elastic/obs-ux-logs-team
 src/plugins/ftr_apis @elastic/kibana-core
@@ -610,6 +610,7 @@ x-pack/packages/ml/data_view_utils @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
 x-pack/packages/ml/date_utils @elastic/ml-ui
 x-pack/packages/ml/error_utils @elastic/ml-ui
+x-pack/packages/ml/field_stats_flyout @elastic/ml-ui
 x-pack/packages/ml/in_memory_table @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
@@ -617,6 +618,7 @@ x-pack/packages/ml/kibana_theme @elastic/ml-ui
 x-pack/packages/ml/local_storage @elastic/ml-ui
 x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/packages/ml/number_utils @elastic/ml-ui
+x-pack/packages/ml/parse_interval @elastic/ml-ui
 x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/random_sampler_utils @elastic/ml-ui
@@ -628,6 +630,7 @@ x-pack/packages/ml/time_buckets @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/ui_actions @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
+x-pack/packages/ml/validators @elastic/ml-ui
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
@@ -1687,6 +1690,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
+/x-pack/test/functional/es_archives/asset_criticality @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine

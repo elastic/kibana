@@ -12,8 +12,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { CreateTransformButton } from './create_transform_button';
 
-jest.mock('../../../../../shared_imports');
-
 const queryClient = new QueryClient();
 
 describe('Transform: Transform List <CreateTransformButton />', () => {
