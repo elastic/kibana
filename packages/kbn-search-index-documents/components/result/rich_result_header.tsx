@@ -88,7 +88,13 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
           defaultMessage: 'Document metadata',
         })}
       </EuiPopoverTitle>
-      <EuiFlexGroup gutterSize="s" direction="column" style={{ width: '20rem' }}>
+      <EuiFlexGroup
+        gutterSize="s"
+        direction="column"
+        css={css`
+          width: 20rem;
+        `}
+      >
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
             <Term label="ID" />
@@ -201,7 +207,7 @@ export const RichResultHeader: React.FC<Props> = ({
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
               <EuiText>
-                <EuiFlexGroup alignItems="center" gutterSize="l">
+                <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
                   <EuiFlexItem>
                     {onTitleClick ? (
                       <EuiLink onClick={onTitleClick} color="text">
