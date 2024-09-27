@@ -6,7 +6,7 @@
  */
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -23,18 +23,14 @@ import {
   validateActions,
   addGeneratedActionValues,
 } from '../../../../rules_client/lib';
-import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
+import { apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../../rules_client/types';
-import { RuleDomain, RuleParams } from '../../types';
+import { RuleParams } from '../../types';
 import { SanitizedRule } from '../../../../types';
-import {
-  transformRuleAttributesToRuleDomain,
-  transformRuleDomainToRuleAttributes,
-  transformRuleDomainToRule,
-} from '../../transforms';
-import { ruleDomainSchema } from '../../schemas';
-import { RuleAttributes } from '../../../../data/rule/types';
+import { transformRuleDomainToRuleAttributes } from '../../transforms';
+// import { ruleDomainSchema } from '../../schemas';
+// import { RuleAttributes } from '../../../../data/rule/types';
 import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
@@ -125,25 +121,25 @@ export async function createRule<Params extends RuleParams = never>(
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   const username = await context.getUserName();
 
-  let createdAPIKey = null;
-  let isAuthTypeApiKey = false;
-  try {
-    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
-    const name = generateAPIKeyName(ruleType.id, data.name);
-    createdAPIKey = data.enabled
-      ? isAuthTypeApiKey
-        ? context.getAuthenticationAPIKey(`${name}-user-created`)
-        : await withSpan(
-            {
-              name: 'createAPIKey',
-              type: 'rules',
-            },
-            () => context.createAPIKey(name)
-          )
-      : null;
-  } catch (error) {
-    throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
-  }
+  const createdAPIKey = null;
+  const isAuthTypeApiKey = false;
+  // try {
+  //   isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
+  //   const name = generateAPIKeyName(ruleType.id, data.name);
+  //   createdAPIKey = data.enabled
+  //     ? isAuthTypeApiKey
+  //       ? context.getAuthenticationAPIKey(`${name}-user-created`)
+  //       : await withSpan(
+  //           {
+  //             name: 'createAPIKey',
+  //             type: 'rules',
+  //           },
+  //           () => context.createAPIKey(name)
+  //         )
+  //     : null;
+  // } catch (error) {
+  //   throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
+  // }
 
   await withSpan({ name: 'validateActions', type: 'rules' }, () =>
     validateActions(context, ruleType, data, allowMissingConnectorSecrets)
@@ -217,42 +213,40 @@ export async function createRule<Params extends RuleParams = never>(
     },
   });
 
-  const createdRuleSavedObject: SavedObject<RuleAttributes> = await withSpan(
-    { name: 'createRuleSavedObject', type: 'rules' },
-    () =>
-      createRuleSavedObject(context, {
-        intervalInMs,
-        rawRule: ruleAttributes,
-        references,
-        ruleId: id,
-        options,
-        returnRuleAttributes: true,
-      })
+  await withSpan({ name: 'createRuleSavedObject', type: 'rules' }, () =>
+    createRuleSavedObject(context, {
+      intervalInMs,
+      rawRule: ruleAttributes,
+      references,
+      ruleId: id,
+      options,
+      returnRuleAttributes: true,
+    })
   );
 
   // Convert ES RuleAttributes back to domain rule object
-  const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
-    createdRuleSavedObject.attributes,
-    {
-      id: createdRuleSavedObject.id,
-      logger: context.logger,
-      ruleType: context.ruleTypeRegistry.get(createdRuleSavedObject.attributes.alertTypeId),
-      references: createdRuleSavedObject.references,
-    },
-    (connectorId: string) => actionsClient.isSystemAction(connectorId)
-  );
+  // const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
+  //   createdRuleSavedObject.attributes,
+  //   {
+  //     id: createdRuleSavedObject.id,
+  //     logger: context.logger,
+  //     ruleType: context.ruleTypeRegistry.get(createdRuleSavedObject.attributes.alertTypeId),
+  //     references: createdRuleSavedObject.references,
+  //   },
+  //   (connectorId: string) => actionsClient.isSystemAction(connectorId)
+  // );
 
-  // Try to validate created rule, but don't throw.
-  try {
-    ruleDomainSchema.validate(ruleDomain);
-  } catch (e) {
-    context.logger.warn(`Error validating created rule domain object for id: ${id}, ${e}`);
-  }
+  // // Try to validate created rule, but don't throw.
+  // try {
+  //   ruleDomainSchema.validate(ruleDomain);
+  // } catch (e) {
+  //   context.logger.warn(`Error validating created rule domain object for id: ${id}, ${e}`);
+  // }
 
-  // Convert domain rule to rule (Remove certain properties)
-  const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true });
+  // // Convert domain rule to rule (Remove certain properties)
+  // const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true });
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types
-  return rule as SanitizedRule<Params>;
+  return {} as SanitizedRule<Params>;
 }

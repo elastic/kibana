@@ -9,7 +9,6 @@ import { RouteOptions } from '../../..';
 import type {
   CreateRuleRequestBodyV1,
   CreateRuleRequestParamsV1,
-  CreateRuleResponseV1,
 } from '../../../../../common/routes/rule/apis/create';
 import {
   createBodySchemaV1,
@@ -24,7 +23,7 @@ import {
   handleDisabledApiKeysError,
   verifyAccessAndContext,
 } from '../../../lib';
-import { transformRuleToRuleResponseV1 } from '../../transforms';
+// import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformCreateBodyV1 } from './transforms';
 
@@ -92,7 +91,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
 
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
-            const createdRule: Rule<RuleParamsV1> = (await rulesClient.create<RuleParamsV1>({
+            (await rulesClient.create<RuleParamsV1>({
               data: transformCreateBodyV1<RuleParamsV1>({
                 createBody: createRuleData,
                 actions,
@@ -102,11 +101,11 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
             })) as Rule<RuleParamsV1>;
 
             // Assert versioned response type
-            const response: CreateRuleResponseV1<RuleParamsV1> = {
-              body: transformRuleToRuleResponseV1<RuleParamsV1>(createdRule),
-            };
+            // const response: CreateRuleResponseV1<RuleParamsV1> = {
+            //   body: transformRuleToRuleResponseV1<RuleParamsV1>(createdRule),
+            // };
 
-            return res.ok(response);
+            return res.ok();
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {
               return e.sendResponse(res);
