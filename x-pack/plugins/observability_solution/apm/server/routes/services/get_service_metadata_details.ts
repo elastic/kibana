@@ -113,7 +113,19 @@ export async function getServiceMetadataDetails({
     body: {
       track_total_hits: 1,
       size: 1,
-      query: { bool: { filter, should } },
+      fields: [
+        `${SERVICE}*`,
+        `${AGENT}*`,
+        `telemetry*`,
+        HOST,
+        CONTAINER,
+        KUBERNETES,
+        CLOUD,
+        LABEL_TELEMETRY_AUTO_VERSION,
+      ],
+      query: {
+        bool: { filter, should },
+      },
       aggs: {
         serviceVersions: {
           terms: {
@@ -166,7 +178,6 @@ export async function getServiceMetadataDetails({
         },
         totalNumberInstances: { cardinality: { field: SERVICE_NODE_NAME } },
       },
-      fields: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD, LABEL_TELEMETRY_AUTO_VERSION],
     },
   };
 
