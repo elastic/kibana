@@ -205,8 +205,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public start(core: CoreStart, plugins: StartPlugins): PluginStart {
     this.services.start(core, plugins);
     this.registerFleetExtensions(core, plugins);
-    // Not awaiting to prevent blocking start execution
-    this.registerPluginUpdates(core, plugins);
+    this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
     return this.contract.getStartContract(core);
   }
 
@@ -214,6 +213,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.stop();
   }
 
+  /**
+   * SubPlugins are the individual building blocks of the Security Solution plugin.
+   * They are lazily instantiated to improve startup time.
+   * TODO: Move these functions to ./lazy_sub_plugins.ts
+   */
   private async createSubPlugins(): Promise<SubPlugins> {
     if (!this._subPlugins) {
       const { subPluginClasses } = await this.lazySubPlugins();
@@ -241,9 +245,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return this._subPlugins;
   }
 
-  /**
-   * All started subPlugins.
-   */
   private async startSubPlugins(
     storage: Storage,
     core: CoreStart,
@@ -313,7 +314,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
-   * Registers the alerts tables configurations.
+   * Registers the alerts tables configurations to the triggersActionsUi plugin.
    */
   private async registerAlertsTableConfiguration(
     triggersActionsUi: TriggersAndActionsUIPublicPluginSetup
