@@ -11,7 +11,6 @@ import { PayloadAction } from '@reduxjs/toolkit';
 
 import {
   DashboardReduxState,
-  DashboardPublicState,
   DashboardStateFromSaveModal,
   DashboardStateFromSettingsFlyout,
 } from '../types';
@@ -97,21 +96,6 @@ export const dashboardContainerReducers = {
     state.explicitInput.title = action.payload;
   },
 
-  // ------------------------------------------------------------------------------
-  // Unsaved Changes Reducers
-  // ------------------------------------------------------------------------------
-
-  setLastSavedInput: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardPublicState['lastSavedInput']>
-  ) => {
-    state.componentState.lastSavedInput = action.payload;
-
-    // if we set the last saved input, it means we have saved this Dashboard - therefore clientside migrations have
-    // been serialized into the SO.
-    state.componentState.hasRunClientsideMigrations = false;
-  },
-
   /**
    * Resets the dashboard to the last saved input, excluding:
    * 1) The time range, unless `timeRestore` is `true` - if we include the time range on reset even when
@@ -119,9 +103,9 @@ export const dashboardContainerReducers = {
    * 2) The view mode, since resetting should never impact this - sometimes the Dashboard saved objects
    *    have this saved in and we don't want resetting to cause unexpected view mode changes.
    */
-  resetToLastSavedInput: (state: DashboardReduxState) => {
+  resetToLastSavedInput: (state: DashboardReduxState, action: PayloadAction<DashboardContainerInput>) => {
     state.explicitInput = {
-      ...state.componentState.lastSavedInput,
+      ...action.payload,
       ...(!state.explicitInput.timeRestore && { timeRange: state.explicitInput.timeRange }),
       viewMode: state.explicitInput.viewMode,
     };
@@ -156,13 +140,6 @@ export const dashboardContainerReducers = {
     state.explicitInput.query = action.payload;
   },
 
-  setSavedQueryId: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardPublicState['savedQueryId']>
-  ) => {
-    state.componentState.savedQueryId = action.payload;
-  },
-
   setTimeRestore: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardContainerInput['timeRestore']>
@@ -189,13 +166,5 @@ export const dashboardContainerReducers = {
     action: PayloadAction<DashboardContainerInput['timeslice']>
   ) => {
     state.explicitInput.timeslice = action.payload;
-  },
-
-  // ------------------------------------------------------------------------------
-  // Component state reducers
-  // ------------------------------------------------------------------------------
-
-  setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
-    state.componentState.highlightPanelId = action.payload;
-  },
+  }
 };

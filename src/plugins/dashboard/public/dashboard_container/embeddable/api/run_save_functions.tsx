@@ -82,10 +82,10 @@ const serializeAllPanelState = async (
 export async function runQuickSave(this: DashboardContainer) {
   const {
     explicitInput: currentState,
-    componentState: { lastSavedId, managed },
+    componentState: { lastSavedId },
   } = this.getState();
 
-  if (managed) return;
+  if (this.managed$.value) return;
 
   const { panels: nextPanels, references } = await serializeAllPanelState(this);
   const dashboardStateToSave: DashboardContainerInput = { ...currentState, panels: nextPanels };
@@ -108,7 +108,7 @@ export async function runQuickSave(this: DashboardContainer) {
   });
 
   this.savedObjectReferences = saveResult.references ?? [];
-  this.dispatch.setLastSavedInput(dashboardStateToSave);
+  this.setLastSavedInput(dashboardStateToSave);
   this.saveNotification$.next();
 
   return saveResult;
@@ -121,9 +121,10 @@ export async function runQuickSave(this: DashboardContainer) {
 export async function runInteractiveSave(this: DashboardContainer, interactionMode: ViewMode) {
   const {
     explicitInput: currentState,
-    componentState: { lastSavedId, managed },
+    componentState: { lastSavedId },
   } = this.getState();
   const dashboardContentManagementService = getDashboardContentManagementService();
+  const managed = this.managed$.value;
 
   return new Promise<SaveDashboardReturn | undefined>((resolve, reject) => {
     if (interactionMode === ViewMode.EDIT && managed) {
@@ -247,7 +248,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
         if (saveResult.id) {
           batch(() => {
             this.dispatch.setStateFromSaveModal(stateFromSaveModal);
-            this.dispatch.setLastSavedInput(dashboardStateToSave);
+            this.setLastSavedInput(dashboardStateToSave);
           });
         }
 

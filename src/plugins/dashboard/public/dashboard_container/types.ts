@@ -39,9 +39,6 @@ export type DashboardStateFromSaveModal = Pick<
 export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & DashboardOptions;
 
 export interface DashboardPublicState {
-  lastSavedInput: DashboardContainerInput;
-  hasRunClientsideMigrations?: boolean;
-  savedQueryId?: string;
   lastSavedId?: string;
 }
 

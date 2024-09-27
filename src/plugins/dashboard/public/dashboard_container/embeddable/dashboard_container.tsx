@@ -119,8 +119,8 @@ import {
 } from './dashboard_container_factory';
 import {
   InitialComponentState,
-  initializeComponentStateManager,
-} from '../../dashboard_api/component_state_manager';
+  getDashboardApi,
+} from '../../dashboard_api/get_dashboard_api';
 import { initializeTrackPanel } from '../../dashboard_api/track_panel';
 import { initializeTrackOverlay } from '../../dashboard_api/track_overlay';
 
@@ -174,6 +174,8 @@ export class DashboardContainer
   public setFullScreenMode: (fullScreenMode: boolean) => void;
   public setExpandedPanelId: (newId?: string) => void;
   public setHighlightPanelId: (highlightPanelId: string | undefined) => void;
+  public setLastSavedInput: (lastSavedInput: DashboardContainerInput) => void;
+  public lastSavedInput$: PublishingSubject<DashboardContainerInput>;
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
@@ -306,43 +308,43 @@ export class DashboardContainer
       'id'
     ) as BehaviorSubject<string>;
 
-    const componentStateManager = initializeComponentStateManager(
+    const dashboardApi = getDashboardApi(
       initialComponentState
         ? initialComponentState
         : {
+            anyMigrationRun: false,
             isEmbeddedExternally: false,
+            lastSavedInput: initialInput,
+            lastSavedId: undefined,
             managed: false,
-          }
+          },
+      this.untilEmbeddableLoaded
     );
-    this.animatePanelTransforms$ = componentStateManager.animatePanelTransforms$;
-    this.fullScreenMode$ = componentStateManager.fullScreenMode$;
-    this.hasUnsavedChanges$ = componentStateManager.hasUnsavedChanges$;
-    this.isEmbeddedExternally = componentStateManager.isEmbeddedExternally;
-    this.managed$ = componentStateManager.managed$;
-    this.setAnimatePanelTransforms = componentStateManager.setAnimatePanelTransforms;
-    this.setFullScreenMode = componentStateManager.setFullScreenMode;
-    this.setHasUnsavedChanges = componentStateManager.setHasUnsavedChanges;
-    this.setManaged = componentStateManager.setManaged;
-
-    const trackPanel = initializeTrackPanel(this.untilEmbeddableLoaded);
-    this.expandedPanelId = trackPanel.expandedPanelId;
-    this.focusedPanelId$ = trackPanel.focusedPanelId$;
-    this.highlightPanelId$ = trackPanel.highlightPanelId$;
-    this.highlightPanel = trackPanel.highlightPanel;
-    this.setExpandedPanelId = trackPanel.setExpandedPanelId;
-    this.setHighlightPanelId = trackPanel.setHighlightPanelId;
-    this.scrollToPanelId$ = trackPanel.scrollToPanelId$;
-    this.setScrollToPanelId = trackPanel.setScrollToPanelId;
-
-    const trackOverlay = initializeTrackOverlay(trackPanel.setFocusedPanelId);
-    this.clearOverlays = trackOverlay.clearOverlays;
-    this.hasOverlays$ = trackOverlay.hasOverlayers$;
-    this.openOverlay = trackOverlay.openOverlay;
+    this.animatePanelTransforms$ = dashboardApi.animatePanelTransforms$;
+    this.fullScreenMode$ = dashboardApi.fullScreenMode$;
+    this.hasUnsavedChanges$ = dashboardApi.hasUnsavedChanges$;
+    this.isEmbeddedExternally = dashboardApi.isEmbeddedExternally;
+    this.managed$ = dashboardApi.managed$;
+    this.setAnimatePanelTransforms = dashboardApi.setAnimatePanelTransforms;
+    this.setFullScreenMode = dashboardApi.setFullScreenMode;
+    this.setHasUnsavedChanges = dashboardApi.setHasUnsavedChanges;
+    this.setManaged = dashboardApi.setManaged;
+    this.expandedPanelId = dashboardApi.expandedPanelId;
+    this.focusedPanelId$ = dashboardApi.focusedPanelId$;
+    this.highlightPanelId$ = dashboardApi.highlightPanelId$;
+    this.highlightPanel = dashboardApi.highlightPanel;
+    this.setExpandedPanelId = dashboardApi.setExpandedPanelId;
+    this.setHighlightPanelId = dashboardApi.setHighlightPanelId;
+    this.scrollToPanelId$ = dashboardApi.scrollToPanelId$;
+    this.setScrollToPanelId = dashboardApi.setScrollToPanelId;
+    this.clearOverlays = dashboardApi.clearOverlays;
+    this.hasOverlays$ = dashboardApi.hasOverlayers$;
+    this.openOverlay = dashboardApi.openOverlay;
+    this.hasRunMigrations$ = dashboardApi.hasRunMigrations$;
+    this.setLastSavedInput = dashboardApi.setLastSavedInput;
+    this.lastSavedInput$ = dashboardApi.lastSavedInput$;
 
     this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
-    this.hasRunMigrations$ = new BehaviorSubject(
-      this.getState().componentState.hasRunClientsideMigrations
-    );
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
     this.publishingSubscription.add(
@@ -574,7 +576,7 @@ export class DashboardContainer
   public focusedPanelId$: BehaviorSubject<string | undefined>;
   public managed$: BehaviorSubject<boolean>;
   public fullScreenMode$: BehaviorSubject<boolean>;
-  public hasRunMigrations$: BehaviorSubject<boolean | undefined>;
+  public hasRunMigrations$: BehaviorSubject<boolean>;
   public hasUnsavedChanges$: BehaviorSubject<boolean>;
   public hasOverlays$: BehaviorSubject<boolean>;
   public useMargins$: BehaviorSubject<boolean>;
@@ -725,13 +727,12 @@ export class DashboardContainer
   }
 
   public async asyncResetToLastSavedState() {
-    this.dispatch.resetToLastSavedInput({});
+    this.dispatch.resetToLastSavedInput(this.lastSavedInput$.value);
     const {
       explicitInput: { timeRange, refreshInterval },
-      componentState: {
-        lastSavedInput: { timeRestore: lastSavedTimeRestore },
-      },
     } = this.getState();
+
+    const { timeRestore: lastSavedTimeRestore } = this.lastSavedInput$.value;
 
     if (this.controlGroupApi$.value) {
       await this.controlGroupApi$.value.asyncResetUnsavedChanges();
@@ -784,10 +785,8 @@ export class DashboardContainer
     this.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
     this.setManaged(loadDashboardReturn?.managed ?? false);
     this.setExpandedPanelId(undefined);
+    this.setLastSavedInput(omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput'));
     batch(() => {
-      this.dispatch.setLastSavedInput(
-        omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
-      );
       this.dispatch.setLastSavedId(newSavedObjectId);
     });
     this.firstLoad = true;

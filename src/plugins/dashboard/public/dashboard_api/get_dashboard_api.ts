@@ -8,30 +8,39 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { DashboardContainerInput } from '../../common';
+import { initializeTrackPanel } from './track_panel';
+import { initializeTrackOverlay } from './track_overlay';
+import { initializeUnsavedChanges } from './unsaved_changes';
 
 export interface InitialComponentState {
+  anyMigrationRun: boolean;
   isEmbeddedExternally: boolean;
+  lastSavedInput: DashboardContainerInput;
+  lastSavedId: string | undefined;
   managed: boolean;
 }
 
-/**
- * Non-persisted runtime state
- */
-export function initializeComponentStateManager(initialComponentState: InitialComponentState) {
+export function getDashboardApi(
+  initialComponentState: InitialComponentState,
+  untilEmbeddableLoaded: (id: string) => Promise<unknown>
+) {
   const animatePanelTransforms$ = new BehaviorSubject(false); // set panel transforms to false initially to avoid panels animating on initial render.
   const fullScreenMode$ = new BehaviorSubject(false);
-  const hasUnsavedChanges$ = new BehaviorSubject(false);
   const managed$ = new BehaviorSubject(initialComponentState.managed);
+
+  const trackPanel = initializeTrackPanel(untilEmbeddableLoaded);
+  
   return {
+    ...trackPanel,
+    ...initializeTrackOverlay(trackPanel.setFocusedPanelId),
+    ...initializeUnsavedChanges(initialComponentState.anyMigrationRun, initialComponentState.lastSavedInput),
     animatePanelTransforms$,
     fullScreenMode$,
-    hasUnsavedChanges$,
     isEmbeddedExternally: initialComponentState.isEmbeddedExternally,
     managed$,
     setAnimatePanelTransforms: (animate: boolean) => animatePanelTransforms$.next(animate),
     setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
-    setHasUnsavedChanges: (hasUnsavedChanges: boolean) =>
-      hasUnsavedChanges$.next(hasUnsavedChanges),
     setManaged: (managed: boolean) => managed$.next(managed),
   };
 }
