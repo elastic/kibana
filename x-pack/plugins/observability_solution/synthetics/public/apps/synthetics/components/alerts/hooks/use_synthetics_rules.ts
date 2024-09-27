@@ -98,9 +98,14 @@ export const useSyntheticsRules = (isOpen: boolean) => {
       ruleTypeId: alertFlyoutVisible,
       onClose: () => dispatch(setAlertFlyoutVisible(null)),
       initialValues: {
-        name: i18n.translate('xpack.synthetics.alerting.defaultRuleName', {
-          defaultMessage: 'Synthetics monitor status rule',
-        }),
+        name:
+          alertFlyoutVisible === SYNTHETICS_TLS_RULE
+            ? i18n.translate('xpack.synthetics.alerting.defaultRuleName.tls', {
+                defaultMessage: 'Synthetics monitor TLS rule',
+              })
+            : i18n.translate('xpack.synthetics.alerting.defaultRuleName', {
+                defaultMessage: 'Synthetics monitor status rule',
+              }),
       },
     });
   }, [isNewRule, triggersActionsUi, dispatch, alertFlyoutVisible]);

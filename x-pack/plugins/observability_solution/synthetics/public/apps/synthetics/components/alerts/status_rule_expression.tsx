@@ -29,21 +29,14 @@ interface Props {
 }
 
 export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParams }) => {
-  const condition = ruleParams.condition;
-  const downThreshold =
-    condition && 'downThreshold' in condition ? condition.downThreshold ?? 5 : 5;
-  const locationsThreshold =
-    condition && 'locationsThreshold' in condition ? condition?.locationsThreshold ?? 1 : 1;
+  const condition = ruleParams.condition ?? DEFAULT_CONDITION;
+  const downThreshold = condition?.downThreshold ?? DEFAULT_CONDITION.downThreshold;
+
+  const locationsThreshold = condition?.locationsThreshold ?? DEFAULT_CONDITION.locationsThreshold;
 
   const onThresholdChange = useCallback(
     (value: number) => {
-      const prevCondition = ruleParams.condition ?? {
-        downThreshold: 5,
-        locationsThreshold: 1,
-        window: {
-          numberOfChecks: 5,
-        },
-      };
+      const prevCondition = ruleParams.condition ?? DEFAULT_CONDITION;
       setRuleParams('condition', {
         ...prevCondition,
         downThreshold: value,

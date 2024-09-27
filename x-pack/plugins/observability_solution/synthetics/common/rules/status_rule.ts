@@ -36,7 +36,7 @@ export const StatusRuleConditionSchema = schema.object({
   ),
   downThreshold: schema.maybe(
     schema.number({
-      defaultValue: 1,
+      defaultValue: 3,
     })
   ),
   locationsThreshold: schema.maybe(
@@ -82,12 +82,12 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
       isDefaultRule: true,
     };
   }
-  const conWindow = condition.window;
-  const useTimeWindow = conWindow && 'time' in condition.window;
-  const useLatestChecks = conWindow && 'numberOfChecks' in condition.window;
+  const useTimeWindow = condition.window && 'time' in condition.window;
+  const useLatestChecks = condition.window && 'numberOfChecks' in condition.window;
 
   if (useLatestChecks) {
-    numberOfChecks = condition && 'numberOfChecks' in conWindow ? conWindow.numberOfChecks : 1;
+    numberOfChecks =
+      condition && 'numberOfChecks' in condition.window ? condition.window.numberOfChecks : 1;
   }
 
   if (useTimeWindow) {

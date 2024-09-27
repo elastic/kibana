@@ -59,10 +59,10 @@ const OPTIONS: Option[] = [
   },
 ];
 
-export const DEFAULT_CONDITION: StatusRuleCondition = {
+export const DEFAULT_CONDITION = {
   window: { numberOfChecks: 5 },
   groupBy: 'locationId',
-  downThreshold: 5,
+  downThreshold: 3,
   locationsThreshold: 1,
 };
 const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {

@@ -9,10 +9,10 @@ import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
 import {
-  IRuleTypeAlerts,
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
+  IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
@@ -23,7 +23,7 @@ import {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { TimeWindow } from '../../common/rules/status_rule';
+import { StatusRuleParams, TimeWindow } from '../../common/rules/status_rule';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 import {
@@ -38,12 +38,11 @@ import {
   AlertOverviewStatus,
   SyntheticsCommonState,
   SyntheticsCommonStateCodec,
+  SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
-import type { MonitorSummaryStatusRule, MonitorStatusAlertDocument } from './status_rule/types';
-import { StatusRuleParams } from '../../common/rules/status_rule';
-import { SyntheticsMonitorStatusAlertState } from '../../common/runtime_types/alert_rules/common';
+import type { MonitorStatusAlertDocument, MonitorSummaryStatusRule } from './status_rule/types';
 
 export const updateState = (
   state: SyntheticsCommonState,
@@ -128,13 +127,11 @@ export const getRelativeViewInAppUrl = ({
   stateId: string;
   locationId: string;
 }) => {
-  const relativeViewInAppUrl = getSyntheticsErrorRouteFromMonitorId({
+  return getSyntheticsErrorRouteFromMonitorId({
     configId,
     stateId,
     locationId,
   });
-
-  return relativeViewInAppUrl;
 };
 
 export const setRecoveredAlertsContext = ({
@@ -205,8 +202,8 @@ export const setRecoveredAlertsContext = ({
     let lastErrorMessage = alertHit?.['error.message'];
 
     if (!groupByLocation && monitorSummary) {
-      const formattedLocationNames = locationName.join(' | ');
-      const formattedLocationIds = locationIds.join(' | ');
+      const formattedLocationNames = locationName.join(` ${AND_LABEL} `);
+      const formattedLocationIds = locationIds.join(` ${AND_LABEL} `);
       monitorSummary.locationNames = formattedLocationNames;
       monitorSummary.locationName = formattedLocationNames;
       monitorSummary.locationId = formattedLocationIds;
@@ -582,3 +579,7 @@ export function getTimeUnitLabel(timeWindow: TimeWindow) {
       });
   }
 }
+
+const AND_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.andLabel', {
+  defaultMessage: 'and',
+});
