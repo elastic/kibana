@@ -81,11 +81,13 @@ const resultsGroupedOnId = 'aiopsLogRateAnalysisGroupingOn';
 
 export interface LogRateAnalysisOptionsProps {
   foundGroups: boolean;
+  growFirstItem?: boolean;
   onFieldsFilterChange: (skippedFieldsUpdate: string[]) => void;
 }
 
 export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
   foundGroups,
+  growFirstItem = false,
   onFieldsFilterChange,
 }) => {
   const dispatch = useAppDispatch();
@@ -142,7 +144,7 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
 
   return (
     <>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={growFirstItem}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiText size="xs">{groupResultsMessage}</EuiText>

@@ -8,10 +8,10 @@
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { apiIsOfType, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
-import type { ChangePointEmbeddableApi } from '../embeddables/change_point_chart/types';
+import type { LogRateAnalysisEmbeddableApi } from '../embeddables/log_rate_analysis/types';
 
 export interface LogRateAnalysisActionContext extends EmbeddableApiContext {
-  embeddable: ChangePointEmbeddableApi;
+  embeddable: LogRateAnalysisEmbeddableApi;
 }
 
 export function isLogRateAnalysisEmbeddableContext(
