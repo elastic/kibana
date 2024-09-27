@@ -205,8 +205,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public start(core: CoreStart, plugins: StartPlugins): PluginStart {
     this.services.start(core, plugins);
     this.registerFleetExtensions(core, plugins);
-    this.updatePluginStatus(core);
-    this.registerAppLinks(core, plugins); // Not awaiting to prevent blocking start execution
+    // Not awaiting to prevent blocking start execution
+    this.registerPluginUpdates(core, plugins);
     return this.contract.getStartContract(core);
   }
 
@@ -330,24 +330,36 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
-   * Registers deepLinks and appUpdater for appLinks using license.
+   * Registers the plugin updates including status, visibleIn, and deepLinks via the plugin updater$.
    */
-  private async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
+  private async registerPluginUpdates(core: CoreStart, plugins: StartPlugins) {
+    const { license$ } = plugins.licensing;
+    const { capabilities } = core.application;
+    const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
+
+    // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
+    if (!capabilities.siem?.show && !capabilities.securitySolutionCases?.read_cases) {
+      this.appUpdater$.next(() => ({
+        status: AppStatus.inaccessible,
+        visibleIn: [],
+      }));
+      // no need to register the links updater when the plugin is inaccessible
+      return;
+    }
+
+    // Configuration of AppLinks updater registration based on license and capabilities
     const {
       appLinks: initialAppLinks,
       getFilteredLinks,
       solutionAppLinksSwitcher,
     } = await this.lazyApplicationLinks();
-    const { license$ } = plugins.licensing;
-    const { capabilities } = core.application;
-    const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
 
     registerDeepLinksUpdater(this.appUpdater$, isSolutionNavigationEnabled$);
 
-    const appLinks$ = new Subject<AppLinkItems>();
-    appLinks$.next(initialAppLinks);
+    const appLinksToUpdate$ = new Subject<AppLinkItems>();
+    appLinksToUpdate$.next(initialAppLinks);
 
-    appLinks$
+    appLinksToUpdate$
       .pipe(combineLatestWith(license$, isSolutionNavigationEnabled$))
       .subscribe(([appLinks, license, isSolutionNavigationEnabled]) => {
         const links = isSolutionNavigationEnabled ? solutionAppLinksSwitcher(appLinks) : appLinks;
@@ -362,22 +374,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
 
     const filteredLinks = await getFilteredLinks(core, plugins);
-    appLinks$.next(filteredLinks);
-  }
-
-  /**
-   * Checks if the plugin should be accessible based on the user's capabilities, and updates the plugin using appUpdater$ accordingly.
-   */
-  private updatePluginStatus(core: CoreStart) {
-    const { capabilities } = core.application;
-
-    // The plugin should only be inaccessible when both SIEM (main Security) and Security Cases features are "none".
-    if (!capabilities.siem?.show && !capabilities.securitySolutionCases?.read_cases) {
-      this.appUpdater$.next(() => ({
-        status: AppStatus.inaccessible,
-        visibleIn: [],
-      }));
-    }
+    appLinksToUpdate$.next(filteredLinks);
   }
 
   private registerFleetExtensions(core: CoreStart, plugins: StartPlugins) {
