@@ -28,6 +28,19 @@ function Listing({ definition }: ListingProps) {
   } = useKibana().services;
   const entityDetailUrl = basePath.prepend(paths.entitieDetail(definition.id));
 
+  const checkpointDuration = definition.resources.transforms.reduce(
+    (acc, transformState) => {
+      if (transformState.stats.stats.exponential_avg_checkpoint_duration_ms > acc.duration) {
+        return {
+          duration: transformState.stats.stats.exponential_avg_checkpoint_duration_ms,
+          id: transformState.id,
+        };
+      }
+      return acc;
+    },
+    { duration: 0, id: '' }
+  );
+
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup alignItems="center">
@@ -55,16 +68,12 @@ function Listing({ definition }: ListingProps) {
         <EuiFlexItem grow={0}>
           <EuiStat
             titleSize="s"
-            title={`${
-              numeral(definition.state.avgCheckpointDuration.history).format('0,0') + 'ms' || 'N/A'
-            } | ${
-              numeral(definition.state.avgCheckpointDuration.latest).format('0,0') + 'ms' || 'N/A'
-            }`}
+            title={`${numeral(checkpointDuration.duration).format('0,0') + 'ms' || 'N/A'}`}
             textAlign="right"
             description={i18n.translate(
               'xpack.entityManager.listing.historyCheckpointDuration.label',
               {
-                defaultMessage: 'Avg. Checkpoint Duration',
+                defaultMessage: 'Checkpoint Duration',
               }
             )}
           />

@@ -7,7 +7,7 @@
 
 import { EntityDefinition, FindEntitiesQuery } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { installEntityDefinition } from './entities/install_entity_definition';
 import { startTransforms } from './entities/start_transforms';
@@ -21,7 +21,7 @@ import { findEntities } from './entities/find_entities';
 export class EntityClient {
   constructor(
     private options: {
-      esClient: ElasticsearchClient;
+      scopedClusterClient: IScopedClusterClient;
       soClient: SavedObjectsClientContract;
       logger: Logger;
     }
@@ -37,12 +37,16 @@ export class EntityClient {
     const installedDefinition = await installEntityDefinition({
       definition,
       soClient: this.options.soClient,
-      esClient: this.options.esClient,
+      esClient: this.options.scopedClusterClient.asSecondaryAuthUser,
       logger: this.options.logger,
     });
 
     if (!installOnly) {
-      await startTransforms(this.options.esClient, definition, this.options.logger);
+      await startTransforms(
+        this.options.scopedClusterClient.asSecondaryAuthUser,
+        definition,
+        this.options.logger
+      );
     }
 
     return installedDefinition;
@@ -53,7 +57,7 @@ export class EntityClient {
       id,
       perPage: 1,
       soClient: this.options.soClient,
-      esClient: this.options.esClient,
+      esClient: this.options.scopedClusterClient.asSecondaryAuthUser,
     });
 
     if (!definition) {
@@ -66,7 +70,7 @@ export class EntityClient {
       definition,
       deleteData,
       soClient: this.options.soClient,
-      esClient: this.options.esClient,
+      esClient: this.options.scopedClusterClient.asSecondaryAuthUser,
       logger: this.options.logger,
     });
   }
@@ -83,7 +87,7 @@ export class EntityClient {
     includeState?: boolean;
   }) {
     const definitions = await findEntityDefinitions({
-      esClient: this.options.esClient,
+      esClient: this.options.scopedClusterClient.asCurrentUser,
       soClient: this.options.soClient,
       page,
       perPage,
@@ -96,9 +100,10 @@ export class EntityClient {
 
   async getEntityDefinition({ id }: { id: string }) {
     const definitions = await findEntityDefinitions({
-      esClient: this.options.esClient,
+      esClient: this.options.scopedClusterClient.asCurrentUser,
       soClient: this.options.soClient,
       id,
+      includeState: true,
     });
 
     return definitions[0] || null;
@@ -111,17 +116,31 @@ export class EntityClient {
     sortField = '@timestamp',
     sortDirection = 'asc',
   }: FindEntitiesQuery) {
-    return await findEntities(this.options.esClient, perPage, query, searchAfter, {
-      field: sortField,
-      direction: sortDirection,
-    });
+    return await findEntities(
+      this.options.scopedClusterClient.asCurrentUser,
+      perPage,
+      query,
+      searchAfter,
+      {
+        field: sortField,
+        direction: sortDirection,
+      }
+    );
   }
 
   async startEntityDefinition(definition: EntityDefinition) {
-    return startTransforms(this.options.esClient, definition, this.options.logger);
+    return startTransforms(
+      this.options.scopedClusterClient.asSecondaryAuthUser,
+      definition,
+      this.options.logger
+    );
   }
 
   async stopEntityDefinition(definition: EntityDefinition) {
-    return stopTransforms(this.options.esClient, definition, this.options.logger);
+    return stopTransforms(
+      this.options.scopedClusterClient.asSecondaryAuthUser,
+      definition,
+      this.options.logger
+    );
   }
 }

@@ -20,8 +20,9 @@ import {
   generateLatestIndexTemplateId,
 } from './helpers/generate_component_id';
 import { BUILT_IN_ID_PREFIX } from './built_in';
-import { EntityDefinitionState, EntityDefinitionWithState } from './types';
+import { EntityDefinitionWithState } from './types';
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
+import { getEntityDefinitionStats } from './get_entity_definition_stats';
 
 export async function findEntityDefinitions({
   soClient,
@@ -59,8 +60,14 @@ export async function findEntityDefinitions({
 
   return Promise.all(
     response.saved_objects.map(async ({ attributes }) => {
-      const state = await getEntityDefinitionState(esClient, attributes);
-      return { ...attributes, state };
+      const { state, resources } = await getEntityDefinitionState(esClient, attributes);
+      const stats = await getEntityDefinitionStats(esClient, attributes);
+      return {
+        ...attributes,
+        state,
+        resources,
+        stats,
+      };
     })
   );
 }
@@ -90,7 +97,7 @@ export async function findEntityDefinitionById({
 async function getEntityDefinitionState(
   esClient: ElasticsearchClient,
   definition: EntityDefinition
-): Promise<EntityDefinitionState> {
+) {
   const [ingestPipelines, transforms, indexTemplates] = await Promise.all([
     getIngestPipelineState({ definition, esClient }),
     getTransformState({ definition, esClient }),
@@ -104,9 +111,8 @@ async function getEntityDefinitionState(
   const running = transforms.every((transform) => transform.running);
 
   return {
-    installed,
-    running,
-    components: { transforms, ingestPipelines, indexTemplates },
+    state: { installed, running },
+    resources: { transforms, ingestPipelines, indexTemplates },
   };
 }
 
@@ -127,9 +133,15 @@ async function getTransformState({
     transformIds.map((id) => esClient.transform.getTransformStats({ transform_id: id }))
   ).then((results) => results.map(({ transforms }) => transforms).flat());
 
+  const transformSummaries = await Promise.all(
+    transformIds.map((id) => esClient.transform.getTransform({ transform_id: id }))
+  ).then((results) => results.map(({ transforms }) => transforms).flat());
+
   return transformIds.map((id) => {
+    const summary = transformSummaries.find((transform) => transform.id === id);
     const stats = transformStats.find((transform) => transform.id === id);
-    if (!stats) {
+
+    if (!stats || !summary) {
       return { id, installed: false, running: false };
     }
 
@@ -137,6 +149,7 @@ async function getTransformState({
       id,
       installed: true,
       running: stats.state === 'started' || stats.state === 'indexing',
+      summary,
       stats,
     };
   });
@@ -209,7 +222,7 @@ async function getIndexTemplatesState({
     return {
       id,
       installed: true,
-      stats: template.index_template,
+      template: template.index_template,
     };
   });
 }

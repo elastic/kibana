@@ -7,19 +7,19 @@
 
 import { createEntityDefinitionRoute } from './definition/create';
 import { deleteEntityDefinitionRoute } from './definition/delete';
-import { findEntityDefinitionRoute } from './definition/find';
 import { resetEntityDefinitionRoute } from './definition/reset';
 import { updateEntityDefinitionRoute } from './definition/update';
 import { getEntityDefinitionRoute } from './definition/get';
+import { findEntityDefinitionsRoute } from './definition/find';
 
 import { findEntitiesRoute } from './find';
 
 export const entitiesRoutes = {
   ...createEntityDefinitionRoute,
   ...deleteEntityDefinitionRoute,
-  ...findEntityDefinitionRoute,
   ...resetEntityDefinitionRoute,
   ...updateEntityDefinitionRoute,
   ...getEntityDefinitionRoute,
+  ...findEntityDefinitionsRoute,
   ...findEntitiesRoute,
 };

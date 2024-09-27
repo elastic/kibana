@@ -10,18 +10,26 @@ import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { EuiStat } from '@elastic/eui';
 import { DefinitionStatProps } from './types';
+import { generateHistoryTransformId } from '../../../common/helpers/generate_component_id';
 
 export function HistoryCheckpointDurationStat({
   definition,
   textAlign,
   titleSize,
 }: DefinitionStatProps) {
+  const transformState = definition.resources.transforms.find(
+    (doc) => doc.id === generateHistoryTransformId(definition)
+  );
+  const value =
+    transformState != null
+      ? numeral(transformState.stats.stats.exponential_avg_checkpoint_duration_ms).format('0,0') +
+        'ms'
+      : 'N/A';
+
   return (
     <EuiStat
       titleSize={titleSize}
-      title={`${
-        numeral(definition.state.avgCheckpointDuration.history).format('0,0') + 'ms' || 'N/A'
-      }`}
+      title={value}
       textAlign={textAlign}
       description={i18n.translate(
         'xpack.entityManager.definitionStat.historyCheckpointDuration.label',

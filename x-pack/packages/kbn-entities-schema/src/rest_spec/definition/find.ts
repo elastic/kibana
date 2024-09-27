@@ -7,15 +7,17 @@
 
 import { z } from '@kbn/zod';
 import {
-  IngestGetPipelineResponse,
+  IndicesGetIndexTemplateIndexTemplateItem,
   TransformGetTransformStatsTransformStats,
   TransformGetTransformTransformSummary,
 } from '@elastic/elasticsearch/lib/api/types';
+import { BooleanFromString } from '@kbn/zod-helpers';
 import { entityDefinitionSchema } from '../../schema/entity_definition';
 
 export const findEntityDefinitionQuerySchema = z.object({
   page: z.optional(z.coerce.number()),
   perPage: z.optional(z.coerce.number()),
+  includeState: z.optional(BooleanFromString).default(false),
 });
 
 export type FindEntityDefinitionQuery = z.infer<typeof findEntityDefinitionQuerySchema>;
@@ -24,10 +26,6 @@ export const entitiyDefinitionWithStateSchema = entityDefinitionSchema.extend({
   state: z.object({
     installed: z.boolean(),
     running: z.boolean(),
-    avgCheckpointDuration: z.object({
-      history: z.number().or(z.null()),
-      latest: z.number().or(z.null()),
-    }),
   }),
   stats: z.object({
     entityCount: z.number(),
@@ -36,17 +34,34 @@ export const entitiyDefinitionWithStateSchema = entityDefinitionSchema.extend({
   }),
 });
 
+interface IngestPipelineState {
+  id: string;
+  installed: boolean;
+  stats: {
+    count: number;
+    failed: number;
+  };
+}
+
+interface IndexTemplateState {
+  id: string;
+  installed: boolean;
+  template: IndicesGetIndexTemplateIndexTemplateItem;
+}
+
+interface TransformState {
+  id: string;
+  installed: boolean;
+  running: boolean;
+  summary: TransformGetTransformTransformSummary;
+  stats: TransformGetTransformStatsTransformStats;
+}
+
 export type EntityDefinitionWithState = z.infer<typeof entitiyDefinitionWithStateSchema> & {
   resources: {
-    ingestPipelines: IngestGetPipelineResponse;
-    transforms: {
-      history?: TransformGetTransformTransformSummary;
-      latest?: TransformGetTransformTransformSummary;
-      stats: {
-        history?: TransformGetTransformStatsTransformStats;
-        latest?: TransformGetTransformStatsTransformStats;
-      };
-    };
+    ingestPipelines: IngestPipelineState[];
+    indexTemplates: IndexTemplateState[];
+    transforms: TransformState[];
   };
 };
 

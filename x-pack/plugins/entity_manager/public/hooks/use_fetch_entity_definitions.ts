@@ -19,6 +19,9 @@ export function useFetchEntityDefinitions() {
       try {
         const response = await http.get<EntityDefintionResponse>('/internal/entities/definition', {
           signal,
+          query: {
+            includeState: true,
+          },
         });
         return response.definitions;
       } catch (e) {

@@ -13,6 +13,10 @@ import numeral from '@elastic/numeral';
 import { TransformHealthBadge } from './transform_health_badge';
 import { TransformStatusBadge } from './transform_status_badge';
 import { TransformContent } from './transform_content';
+import {
+  generateHistoryTransformId,
+  generateLatestTransformId,
+} from '../../../../common/helpers/generate_component_id';
 
 interface TransformProps {
   type: 'history' | 'latest';
@@ -28,9 +32,16 @@ const HISTORY_TITLE = i18n.translate('xpack.entityManager.transfrom.historyTitle
 });
 
 export function Transform({ definition, type }: TransformProps) {
-  const title = type === 'history' ? HISTORY_TITLE : LATEST_TITLE;
-  const transform = definition.resources.transforms[type];
-  const stats = definition.resources.transforms.stats[type];
+  const isHistory = type === 'history';
+  const title = isHistory ? HISTORY_TITLE : LATEST_TITLE;
+
+  const id = isHistory
+    ? generateHistoryTransformId(definition)
+    : generateLatestTransformId(definition);
+
+  const transformState = definition.resources.transforms.find((doc) => doc.id === id);
+  const transform = transformState?.summary;
+  const stats = transformState?.stats;
 
   if (!transform || !stats) return null;
 
