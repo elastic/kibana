@@ -76,6 +76,9 @@ import {
   isRefreshingSelector,
   defaultIndexSelector,
   fieldsSelector,
+  indexPatternSelector,
+  timestampSelector,
+  dataViewNameSelector,
 } from '../../management_app/data_view_mgmt_selectors';
 
 export const EditIndexPattern = withRouter(
@@ -99,6 +102,9 @@ export const EditIndexPattern = withRouter(
     const isRefreshing = useStateSelector(dataViewMgmtService.state$, isRefreshingSelector);
     const defaultIndex = useStateSelector(dataViewMgmtService.state$, defaultIndexSelector);
     const fields = useStateSelector(dataViewMgmtService.state$, fieldsSelector);
+    const indexPatternString = useStateSelector(dataViewMgmtService.state$, indexPatternSelector);
+    const timestamp = useStateSelector(dataViewMgmtService.state$, timestampSelector);
+    const dataViewName = useStateSelector(dataViewMgmtService.state$, dataViewNameSelector);
     const fieldConflictCount = useStateSelector(
       dataViewMgmtService.state$,
       (state) => state.fieldConflictCount
@@ -142,8 +148,9 @@ export const EditIndexPattern = withRouter(
       dataViews.getRollupsEnabled();
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
-        onSave={() => {
-          dataViewMgmtService.refreshFields();
+        onSave={async (dv) => {
+          const dvLegacy = await dataViews.get(dv.id!);
+          dataViewMgmtService.setDataView(dvLegacy);
           setShowEditDialog(false);
         }}
         onCancel={() => setShowEditDialog(false)}
@@ -220,26 +227,27 @@ export const EditIndexPattern = withRouter(
             }
             defaultIndex={defaultIndex}
             canSave={userEditPermission}
+            dataViewName={dataViewName}
           >
             <EuiHorizontalRule margin="none" />
             <EuiSpacer size="l" />
             <EuiFlexGroup wrap gutterSize="l" alignItems="center">
-              {Boolean(indexPattern.title) && (
+              {Boolean(indexPatternString) && (
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="none" alignItems="center">
                     <EuiText size="s">{indexPatternHeading}</EuiText>
                     <EuiCode data-test-subj="currentIndexPatternTitle" style={codeStyle}>
-                      {indexPattern.title}
+                      {indexPatternString}
                     </EuiCode>
                   </EuiFlexGroup>
                 </EuiFlexItem>
               )}
-              {Boolean(indexPattern.timeFieldName) && (
+              {Boolean(timestamp) && (
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="none" alignItems="center">
                     <EuiText size="s">{timeFilterHeading}</EuiText>
                     <EuiCode data-test-subj="currentIndexPatternTimeField" style={codeStyle}>
-                      {indexPattern.timeFieldName}
+                      {timestamp}
                     </EuiCode>
                   </EuiFlexGroup>
                 </EuiFlexItem>

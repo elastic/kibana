@@ -15,6 +15,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 interface IndexHeaderProps {
   indexPattern: DataView;
   defaultIndex?: string;
+  dataViewName?: string;
   setDefault?: () => void;
   editIndexPatternClick?: () => void;
   deleteIndexPatternClick?: () => void;
@@ -50,6 +51,7 @@ const removeTooltip = i18n.translate('indexPatternManagement.editDataView.remove
 export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
   defaultIndex,
   indexPattern,
+  dataViewName,
   setDefault,
   editIndexPatternClick,
   deleteIndexPatternClick,
@@ -58,7 +60,7 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
 }) => {
   return (
     <EuiPageHeader
-      pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.getName()}</span>}
+      pageTitle={<span data-test-subj="indexPatternTitle">{dataViewName}</span>}
       rightSideItems={[
         canSave && (
           <EuiButton
