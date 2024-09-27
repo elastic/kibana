@@ -221,6 +221,12 @@ describe('install_entity_definition', () => {
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       const soClient = savedObjectsClientMock.create();
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10 });
+      soClient.update.mockResolvedValue({
+        id: mockEntityDefinition.id,
+        type: 'entity-definition',
+        references: [],
+        attributes: {},
+      });
 
       await installEntityDefinition({
         esClient,
@@ -257,6 +263,12 @@ describe('install_entity_definition', () => {
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       const soClient = savedObjectsClientMock.create();
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10 });
+      soClient.update.mockResolvedValue({
+        id: mockEntityDefinition.id,
+        type: 'entity-definition',
+        references: [],
+        attributes: {},
+      });
 
       await installBuiltInEntityDefinitions({
         esClient,
@@ -293,6 +305,12 @@ describe('install_entity_definition', () => {
         total: 1,
         page: 1,
         per_page: 10,
+      });
+      soClient.update.mockResolvedValue({
+        id: mockEntityDefinition.id,
+        type: 'entity-definition',
+        references: [],
+        attributes: {},
       });
 
       await installBuiltInEntityDefinitions({
@@ -332,6 +350,12 @@ describe('install_entity_definition', () => {
         total: 1,
         page: 1,
         per_page: 10,
+      });
+      soClient.update.mockResolvedValue({
+        id: mockEntityDefinition.id,
+        type: 'entity-definition',
+        references: [],
+        attributes: {},
       });
 
       await installBuiltInEntityDefinitions({
@@ -374,6 +398,12 @@ describe('install_entity_definition', () => {
         page: 1,
         per_page: 10,
       });
+      soClient.update.mockResolvedValue({
+        id: mockEntityDefinition.id,
+        type: 'entity-definition',
+        references: [],
+        attributes: {},
+      });
 
       await installBuiltInEntityDefinitions({
         esClient,
@@ -409,6 +439,12 @@ describe('install_entity_definition', () => {
         total: 1,
         page: 1,
         per_page: 10,
+      });
+      soClient.update.mockResolvedValue({
+        id: mockEntityDefinition.id,
+        type: 'entity-definition',
+        references: [],
+        attributes: {},
       });
 
       await installBuiltInEntityDefinitions({
