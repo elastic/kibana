@@ -27,36 +27,38 @@ export const toTime = 'Jun 16, 2023 @ 00:00:00.000';
 
 export type TestDoc = Record<string, string | string[] | number | null | Record<string, unknown>>;
 
-export const testDocTemplate: TestDoc = {
-  agent: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
-  bytes: 6219,
-  clientip: '223.87.60.27',
-  extension: 'deb',
-  geo: {
-    srcdest: 'US:US',
-    src: 'US',
-    dest: 'US',
-    coordinates: { lat: 39.41042861, lon: -88.8454325 },
-  },
-  host: { name: 'artifacts.elastic.co' },
-  index: 'kibana_sample_data_logs',
-  ip: '223.87.60.27',
-  machine: { ram: 8589934592, os: 'win 8' },
-  memory: null,
-  message:
-    '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /elasticsearch/elasticsearch-6.3.2.deb_1 HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-  phpmemory: null,
-  referer: 'http://twitter.com/success/wendy-lawrence',
-  request: '/elasticsearch/elasticsearch-6.3.2.deb',
-  response: 200,
-  tags: ['success', 'info'],
-  '@timestamp': '2018-07-22T00:39:02.912Z',
-  url: 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.2.deb_1',
-  utc_time: '2018-07-22T00:39:02.912Z',
-  event: { dataset: 'sample_web_logs' },
-  bytes_gauge: 0,
-  bytes_counter: 0,
-};
+export function testDocTemplate(mode: 'tsdb' | 'logsdb'): TestDoc {
+  return {
+    agent: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
+    bytes: 6219,
+    clientip: '223.87.60.27',
+    extension: 'deb',
+    geo: {
+      srcdest: 'US:US',
+      src: 'US',
+      dest: 'US',
+      coordinates: { lat: 39.41042861, lon: -88.8454325 },
+    },
+    host: mode === 'tsdb' ? 'artifacts.elastic.co' : { name: 'artifacts.elastic.co' },
+    index: 'kibana_sample_data_logs',
+    ip: '223.87.60.27',
+    machine: { ram: 8589934592, os: 'win 8' },
+    memory: null,
+    message:
+      '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /elasticsearch/elasticsearch-6.3.2.deb_1 HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
+    phpmemory: null,
+    referer: 'http://twitter.com/success/wendy-lawrence',
+    request: '/elasticsearch/elasticsearch-6.3.2.deb',
+    response: 200,
+    tags: ['success', 'info'],
+    '@timestamp': '2018-07-22T00:39:02.912Z',
+    url: 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.2.deb_1',
+    utc_time: '2018-07-22T00:39:02.912Z',
+    event: { dataset: 'sample_web_logs' },
+    bytes_gauge: 0,
+    bytes_counter: 0,
+  };
+}
 
 export function getDataMapping(
   {
@@ -124,13 +126,23 @@ export function getDataMapping(
         },
       },
     },
-    host: {
-      properties: {
-        name: {
-          type: 'keyword',
+    host: tsdb
+      ? {
+          fields: {
+            keyword: {
+              ignore_above: 256,
+              type: 'keyword',
+            },
+          },
+          type: 'text',
+        }
+      : {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+          },
         },
-      },
-    },
     index: {
       fields: {
         keyword: {
@@ -251,7 +263,7 @@ export function sumFirstNValues(n: number, bars: Array<{ y: number }> | undefine
 }
 
 export const getDocsGenerator =
-  (log: ToolingLog, es: Client) =>
+  (log: ToolingLog, es: Client, mode: 'tsdb' | 'logsdb') =>
   async (
     esIndex: string,
     {
@@ -270,7 +282,7 @@ export const getDocsGenerator =
         .format(TIME_PICKER_FORMAT)}`
     );
     const docs = Array<TestDoc>(TEST_DOC_COUNT)
-      .fill(testDocTemplate)
+      .fill(testDocTemplate(mode))
       .map((templateDoc, i) => {
         const timestamp = moment
           .utc(startTime, TIME_PICKER_FORMAT)
@@ -345,6 +357,7 @@ export function setupScenarioRunner(
 
   function runTestsForEachScenario(
     initialIndex: string,
+    mode: 'tsdb' | 'logsdb',
     testingFn: (indexes: ScenarioIndexes[]) => void
   ): void {
     const { common, lens } = getPageObjects(['common', 'lens', 'dashboard']);
@@ -353,7 +366,7 @@ export function setupScenarioRunner(
     const dataStreams = getService('dataStreams');
     const elasticChart = getService('elasticChart');
     const indexPatterns = getService('indexPatterns');
-    const createDocs = getDocsGenerator(log, es);
+    const createDocs = getDocsGenerator(log, es, mode);
 
     for (const { name, indexes } of getScenario(initialIndex)) {
       describe(name, () => {

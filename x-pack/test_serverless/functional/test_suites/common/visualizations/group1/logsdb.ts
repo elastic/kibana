@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const retry = getService('retry');
 
-  const createDocs = getDocsGenerator(log, es);
+  const createDocs = getDocsGenerator(log, es, 'logsdb');
 
   describe('lens logsdb', function () {
     const logsdbIndex = 'kibana_sample_data_logslogsdb';
@@ -216,7 +216,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await dataStreams.deleteDataStream(streamIndex);
           });
 
-          runTestsForEachScenario(streamConvertedToLogsDBIndex, (indexes) => {
+          runTestsForEachScenario(streamConvertedToLogsDBIndex, 'logsdb', (indexes) => {
             it(`should visualize a date histogram chart`, async () => {
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -404,7 +404,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await dataStreams.deleteDataStream(logsdbConvertedToStream);
           });
 
-          runTestsForEachScenario(logsdbConvertedToStream, (indexes) => {
+          runTestsForEachScenario(logsdbConvertedToStream, 'logsdb', (indexes) => {
             it(`should visualize a date histogram chart`, async () => {
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

@@ -31,12 +31,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const comboBox = getService('comboBox');
 
-  const createDocs = getDocsGenerator(log, es);
+  const createDocs = getDocsGenerator(log, es, 'tsdb');
 
   describe('lens tsdb', function () {
-    const tsdbIndex = 'kibana_sample_data_logslogsdb';
+    const tsdbIndex = 'kibana_sample_data_logstsdb';
     const tsdbDataView = tsdbIndex;
-    const tsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb';
+    const tsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb';
     const fromTime = 'Apr 16, 2023 @ 00:00:00.000';
     const toTime = 'Jun 16, 2023 @ 00:00:00.000';
 
@@ -387,7 +387,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataStreams.deleteDataStream(streamIndex);
         });
 
-        runTestsForEachScenario(streamConvertedToTsdbIndex, (indexes) => {
+        runTestsForEachScenario(streamConvertedToTsdbIndex, 'tsdb', (indexes) => {
           it('should detect the data stream has now been upgraded to TSDB', async () => {
             await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -489,7 +489,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataStreams.deleteDataStream(tsdbConvertedToStream);
         });
 
-        runTestsForEachScenario(tsdbConvertedToStream, (indexes) => {
+        runTestsForEachScenario(tsdbConvertedToStream, 'tsdb', (indexes) => {
           it('should keep TSDB restrictions only if a tsdb stream is in the dataView mix', async () => {
             await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

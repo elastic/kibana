@@ -176,7 +176,7 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
   }
 
   /**
-   * "Upgrade" a given data stream into a a TSDB or LogsDB data series
+   * "Upgrade" a given data stream into a TSDB or LogsDB data series
    * @param stream the data stream name
    * @param newMapping the new mapping already with time series metrics/dimensions configured
    */

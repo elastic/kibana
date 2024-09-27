@@ -21,10 +21,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('visual builder tsdb check', function describeIndexTests() {
     before(async () => {
       log.info(`loading sample TSDB index...`);
-      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb');
+      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb');
       log.info(`creating the TSDB data view...`);
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_logsdb'
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb'
       );
       log.info(`setting the TSDB dataView as default...`);
       await kibanaServer.uiSettings.replace({
@@ -34,12 +34,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       log.info(`removing the TSDB index...`);
-      await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb'
-      );
+      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb');
       log.info(`removing the TSDB dataView...`);
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_logsdb'
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb'
       );
       log.info(`unsetting the TSDB dataView default...`);
       await kibanaServer.uiSettings.unset('defaultIndex');
