@@ -30,7 +30,7 @@ Returns:
   type: 'literal',
   literalType: 'integer',
   value: 42,
-  name: '42'
+  name: '42',
 
   location: { min: 0, max: 0 },
   text: '',
