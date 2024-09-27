@@ -83,7 +83,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       agentIds = [],
     }): Promise<void> => {
       if (!soClient) {
-        soClient = this.savedObjects.createInternalScopedSoClient(spaceId);
+        soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
       }
 
       const handlePromiseErrors = (err: Error): never => {

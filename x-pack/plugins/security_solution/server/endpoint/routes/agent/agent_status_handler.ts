@@ -85,11 +85,13 @@ export const getAgentStatusRouteHandler = (
         context.actions,
       ]);
       const esClient = corePlugin.elasticsearch.client.asInternalUser;
-      const soClient = endpointContext.service.savedObjects.createInternalScopedSoClient(
-        endpointContext.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-          ? securitySolutionPlugin.getSpaceId()
-          : undefined
-      );
+      const spaceId = endpointContext.service.experimentalFeatures
+        .endpointManagementSpaceAwarenessEnabled
+        ? securitySolutionPlugin.getSpaceId()
+        : undefined;
+      const soClient = endpointContext.service.savedObjects.createInternalScopedSoClient({
+        spaceId,
+      });
       const connectorActionsClient = actionsPlugin.getActionsClient();
       const agentStatusClient = getAgentStatusClient(agentType, {
         esClient,
