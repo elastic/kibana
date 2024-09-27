@@ -182,6 +182,16 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     align-items: baseline;
   }
 
+  .euiDataGrid__customRenderBody {
+    .euiDataGridHeader {
+      position: relative;
+    }
+
+    .euiDataGridRowCell[data-gridcell-visible-row-index='0'] .euiDataGridRowCell__actions {
+      bottom: -18px;
+    }
+  }
+
   ${leadingActionsColumnStyles}
 `;
 
