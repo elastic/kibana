@@ -46,7 +46,7 @@ function getFieldAgg(
   const sortByField =
     fieldConfig?.sort?.by === 'name' || isModelPlotSearch ? '_key' : 'maxRecordScore';
 
-  const filterValues = Object.entries(fieldsConfig ?? {})
+  const splitFieldFilterValues = Object.entries(fieldsConfig ?? {})
     .filter(([key, field]) => key !== fieldType && field.value)
     .map(([key, field]) => ({
       fieldValueKey: `${key}_value`,
@@ -85,9 +85,9 @@ function getFieldAgg(
                   },
                 ]
               : []),
-            ...filterValues.map((filter) => ({
+            ...splitFieldFilterValues.map((filterValue) => ({
               term: {
-                [filter.fieldValueKey]: filter.fieldValue,
+                [filterValue.fieldValueKey]: filterValue.fieldValue,
               },
             })),
           ],

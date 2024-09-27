@@ -142,7 +142,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
 
   // Merge the default config with the one from the local storage
   const resultFieldsConfig = useMemo(() => {
-    const defaultFieldConfig = getDefaultFieldConfig(
+    const resultFieldConfig = getDefaultFieldConfig(
       entityControls,
       !storageFieldsConfig
         ? true
@@ -153,17 +153,17 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
     );
 
     // Early return to prevent unnecessary looping through the default config
-    if (!storageFieldsConfig) return defaultFieldConfig;
+    if (!storageFieldsConfig) return resultFieldConfig;
 
     // Override only the fields properties stored in the local storage
-    for (const key of Object.keys(defaultFieldConfig) as MlEntityFieldType[]) {
-      defaultFieldConfig[key] = {
-        ...defaultFieldConfig[key],
+    for (const key of Object.keys(resultFieldConfig) as MlEntityFieldType[]) {
+      resultFieldConfig[key] = {
+        ...resultFieldConfig[key],
         ...storageFieldsConfig[key],
       } as UiPartitionFieldConfig;
     }
 
-    return defaultFieldConfig;
+    return resultFieldConfig;
   }, [entityControls, storageFieldsConfig]);
 
   /**
