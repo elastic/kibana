@@ -70,7 +70,7 @@ export const scheduleAssetCriticalityEcsCompliancyMigration = async ({
   }
 };
 
-const createMigrationTask =
+export const createMigrationTask =
   ({
     getStartServices,
     logger,
@@ -111,7 +111,7 @@ const createMigrationTask =
 // [X] Asset criticality APIs should be usable because the mapping is done on startup
 // [x] Entity engine init should check if the migration has completed before allowing init to be called (throw an error if it hasn't finished)
 // [x] make logger append asset-criticality-ecs-migration to the logger context
-// [ ] write unit tests
-// [ ] bundle size might get very big because of the client import
+// [x] bundle size might get very big because of the client import
+// [wip] write unit tests
 // [ ] update document generator to reproduce the issue
 // [ ] test with lots of data
