@@ -75,6 +75,12 @@ export {
   TimelineTypeEnum,
 };
 
+/**
+ * This type represents a timeline type stored in a saved object that does not include any fields that reference
+ * other saved objects.
+ */
+export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
+
 export type BarePinnedEventWithoutExternalRefs = Omit<BarePinnedEvent, 'timelineId'>;
 
 /**
