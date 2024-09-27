@@ -58,7 +58,10 @@ import {
 } from './table_actions';
 import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
 import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
-import { getFieldTypeFromDatatable } from '../../../../common/expressions/datatable/utils';
+import {
+  getFieldMetaFromDatatable,
+  isNumericField,
+} from '../../../../common/expressions/datatable/utils';
 import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getColumnAlignment } from '../utils';
 
@@ -230,10 +233,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       columnConfig.columns
         .filter((_col, index) => {
           const col = firstTableRef.current.columns[index];
-          return (
-            col?.meta?.sourceParams?.type &&
-            getType(col.meta.sourceParams.type as string)?.type === 'buckets'
-          );
+          return getType(col?.meta)?.type === 'buckets';
         })
         .map((col) => col.columnId),
     [firstTableRef, columnConfig, getType]
@@ -241,7 +241,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const isEmpty =
     firstLocalTable.rows.length === 0 ||
-    (bucketedColumns.length &&
+    (bucketedColumns.length > 0 &&
       props.data.rows.every((row) => bucketedColumns.every((col) => row[col] == null)));
 
   const visibleColumns = useMemo(
@@ -272,20 +272,17 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       firstLocalTable.columns.reduce<Record<string, boolean>>(
         (map, column) => ({
           ...map,
-          [column.id]: column.meta.type === 'number' && column.meta.params?.id !== 'range',
+          [column.id]: isNumericField(column.meta),
         }),
         {}
       ),
-    [firstLocalTable]
+    [firstLocalTable.columns]
   );
 
   const alignments: Record<string, 'left' | 'right' | 'center'> = useMemo(() => {
     const alignmentMap: Record<string, 'left' | 'right' | 'center'> = {};
     columnConfig.columns.forEach((column) => {
-      alignmentMap[column.columnId] = getColumnAlignment(
-        column.alignment,
-        isNumericMap[column.columnId]
-      );
+      alignmentMap[column.columnId] = getColumnAlignment(column, isNumericMap[column.columnId]);
     });
     return alignmentMap;
   }, [columnConfig.columns, isNumericMap]);
@@ -402,7 +399,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         return cellColorFnMap.get(originalId)!;
       }
 
-      const dataType = getFieldTypeFromDatatable(firstLocalTable, originalId);
+      const dataType = getFieldMetaFromDatatable(firstLocalTable, originalId)?.type;
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(dataType, isBucketed);
 

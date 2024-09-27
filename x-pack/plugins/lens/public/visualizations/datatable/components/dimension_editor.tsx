@@ -27,6 +27,10 @@ import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 import { getColumnAlignment } from '../utils';
+import {
+  getFieldMetaFromDatatable,
+  isNumericField,
+} from '../../../../common/expressions/datatable/utils';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -46,12 +50,13 @@ function updateColumn(
   });
 }
 
-export function TableDimensionEditor(
-  props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
+export type TableDimensionEditorProps =
+  VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
     isDarkMode: boolean;
-  }
-) {
+  };
+
+export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const { frame, accessor, isInlineEditing, isDarkMode } = props;
   const column = props.state.columns.find(({ columnId }) => accessor === columnId);
   const { inputValue: localState, handleInputChange: setLocalState } =
@@ -75,12 +80,13 @@ export function TableDimensionEditor(
 
   const currentData = frame.activeData?.[localState.layerId];
   const datasource = frame.datasourceLayers?.[localState.layerId];
-  const { dataType, isBucketed } = datasource?.getOperationForColumnId(accessor) ?? {};
-  const showColorByTerms = shouldColorByTerms(dataType, isBucketed);
-  const currentAlignment = getColumnAlignment(column?.alignment, dataType === 'number');
+  const { isBucketed } = datasource?.getOperationForColumnId(accessor) ?? {};
+  const meta = getFieldMetaFromDatatable(currentData, accessor);
+  const showColorByTerms = shouldColorByTerms(meta?.type, isBucketed);
+  const currentAlignment = getColumnAlignment(column, isNumericField(meta));
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
-  const showDynamicColoringFeature = dataType !== 'date';
+  const showDynamicColoringFeature = meta?.type !== 'date';
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
   const hasTransposedColumn = localState.columns.some(({ isTransposed }) => isTransposed);

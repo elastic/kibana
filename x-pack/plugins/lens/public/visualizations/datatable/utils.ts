@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { ColumnState } from '../../../common/expressions';
-
-export function getColumnAlignment(
-  alignment: ColumnState['alignment'],
+export function getColumnAlignment<C extends { alignment?: 'left' | 'right' | 'center' }>(
+  { alignment }: C,
   isNumeric = false
 ): 'left' | 'right' | 'center' {
   if (alignment) return alignment;
-  return (isNumeric ? 'right' : 'left') ?? 'right';
+  return isNumeric ? 'right' : 'left';
 }
