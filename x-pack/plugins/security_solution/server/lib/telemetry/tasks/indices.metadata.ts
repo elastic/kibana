@@ -39,9 +39,9 @@ export function createTelemetryIndicesMetadataTaskConfig() {
       const log = newTelemetryLogger(logger.get('indices-metadata'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      // config
-      const pageSize = 500;
-      const dataStreamsLimit = 500;
+      // TODO: Taken from taskExecutionPeriod, just for testing purposes
+      const pageSize = Number(taskExecutionPeriod.last ?? '500');
+      const dataStreamsLimit = Number(taskExecutionPeriod.current ?? '500');
 
       try {
         // 1. Get all data streams

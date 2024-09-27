@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
 import type { Logger, IRouter } from '@kbn/core/server';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ITelemetryEventsSender } from '../sender';
@@ -20,12 +21,24 @@ export const getTriggerIndicesMetadataTaskRoute = (
   router.get(
     {
       path: '/internal/trigger-indices-metadata-task',
-      validate: false,
+      validate: {
+        query: schema.object({
+          pageSize: schema.maybe(schema.number()),
+          dataStreamsLimit: schema.maybe(schema.number()),
+        }),
+      },
     },
-    async (_context, _request, response) => {
+    async (_context, request, response) => {
       const taskMetricsService = new TaskMetricsService(logger, sender);
       const task = createTelemetryIndicesMetadataTaskConfig();
       const timeStart = performance.now();
+
+      const { pageSize, dataStreamsLimit } = request.query;
+
+      logger.info(
+        `Triggering indices metadata task with pageSize: ${pageSize} and dataStreamsLimit: ${dataStreamsLimit}`
+      );
+
       let msgSuffix = '';
       if (global.gc) {
         global.gc();
@@ -34,8 +47,8 @@ export const getTriggerIndicesMetadataTaskRoute = (
       }
       const initialMemory = process.memoryUsage().heapUsed;
       const result = await task.runTask('id', logger, receiver, sender, taskMetricsService, {
-        last: 'last',
-        current: 'current',
+        last: `${pageSize || 500}`,
+        current: `${dataStreamsLimit || 500}`,
       });
       const memoryUsed = process.memoryUsage().heapUsed - initialMemory;
       const elapsedTime = performance.now() - timeStart;
