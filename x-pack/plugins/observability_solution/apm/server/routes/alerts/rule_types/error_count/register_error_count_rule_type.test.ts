@@ -142,7 +142,7 @@ describe('Error count alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -167,7 +167,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo-2',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -192,7 +192,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -283,7 +283,7 @@ describe('Error count alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -310,7 +310,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo-2',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -337,7 +337,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -433,7 +433,7 @@ describe('Error count alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         errorGroupingKey: 'error-key-foo',
         interval: '5 mins',
@@ -458,7 +458,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo-2',
         errorGroupingKey: 'error-key-foo-2',
         interval: '5 mins',
@@ -483,7 +483,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         errorGroupingKey: 'error-key-bar',
         interval: '5 mins',
@@ -573,7 +573,7 @@ describe('Error count alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -598,7 +598,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo-2',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -623,7 +623,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -714,7 +714,7 @@ describe('Error count alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'Not defined',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -740,7 +740,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'Not defined',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -766,7 +766,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         errorGroupingKey: undefined,
         interval: '5 mins',
@@ -860,7 +860,7 @@ describe('Error count alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         errorGroupingKey: 'error-key-foo',
         errorGroupingName: 'error-name-foo',
@@ -887,7 +887,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo-2',
         errorGroupingKey: 'error-key-foo-2',
         errorGroupingName: 'error-name-foo2',
@@ -914,7 +914,7 @@ describe('Error count alert', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         errorGroupingKey: 'error-key-bar',
         errorGroupingName: 'error-name-bar',
@@ -1001,7 +1001,7 @@ describe('Error count alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         errorGroupingKey: undefined,
         interval: '5 mins',
