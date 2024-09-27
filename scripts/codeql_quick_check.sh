@@ -15,13 +15,13 @@ blue=$(tput setaf 4)
 yellow=$(tput setaf 3)
 
 # Prompt for FILE_TO_ANALYZE if not set
-if [ -z "$FILE_TO_ANALYZE" ]; then
-    read -rp "${blue}${bold}Enter the path to the file you want to analyze: ${reset}" FILE_TO_ANALYZE
-fi
-
-# Check if FILE_TO_ANALYZE is provided
-if [ -z "$FILE_TO_ANALYZE" ]; then
-    echo "${red}${bold}Error: FILE_TO_ANALYZE is required.${reset}"
+# Check if the input is a file or a directory
+if [ -f "$FILE_TO_ANALYZE" ]; then
+    SOURCE_ROOT="$(dirname "$FILE_TO_ANALYZE")"
+elif [ -d "$FILE_TO_ANALYZE" ]; then
+    SOURCE_ROOT="$FILE_TO_ANALYZE"
+else
+    echo "${red}${bold}Error: The path $FILE_TO_ANALYZE is neither a file nor a directory.${reset}"
     exit 1
 fi
 
@@ -60,7 +60,7 @@ fi
 # 3. Create a CodeQL database for the single file
 echo "${blue}${bold}Creating CodeQL database for $FILE_TO_ANALYZE...${reset}"
 mkdir -p "$DATABASE_PATH"
-codeql database create "$DATABASE_PATH" --language="$LANGUAGE" --source-root="$(dirname "$FILE_TO_ANALYZE")" --overwrite
+codeql database create "$DATABASE_PATH" --language="$LANGUAGE" --source-root="$SOURCE_ROOT" --overwrite
 
 # 4. Determine whether to run a single query or a suite
 if [ -n "$SINGLE_QUERY" ]; then
