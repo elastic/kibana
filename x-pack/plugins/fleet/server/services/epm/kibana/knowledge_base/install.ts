@@ -113,7 +113,7 @@ async function installKibanaKnowledgeBaseEntry(
   await savedObjectsClient.create(
     knowledgeBaseEntrySavedObjectType,
     {
-      // TODO: update the mappings / props once the KB PR has been merged
+      // TODO: update the props to the full set once the KB PR has been merged
       name: entry.manifest.name,
       type: 'index',
       description: entry.manifest.description,
@@ -133,9 +133,13 @@ const indexContentFile = async ({
 }) => {
   const fileContent = contentBuffer.toString('utf-8');
   const lines = fileContent.split('\n');
-  const documents = lines.map((line) => {
-    return JSON.parse(line.trim());
-  });
+
+  const documents = lines
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map((line) => {
+      return JSON.parse(line);
+    });
 
   const operations = documents.reduce((ops, document) => {
     ops!.push(...[{ index: { _index: indexName } }, document]);

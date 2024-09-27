@@ -75,7 +75,7 @@ const entryPathsFromManifestPath = (manifestPath: string) => {
   const splits = manifestPath.split('/');
   const rootFolderPath = splits.slice(0, splits.length - 1).join('/');
   const entryName = splits[splits.length - 2];
-  const contentFolderPath = [...rootFolderPath, 'content'].join('/');
+  const contentFolderPath = [rootFolderPath, 'content'].join('/');
 
   return {
     entryName,
