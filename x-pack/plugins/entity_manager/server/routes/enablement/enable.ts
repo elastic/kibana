@@ -80,8 +80,10 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const canEnable = await canEnableEntityDiscovery(esClient);
+      const core = await context.core;
+
+      const esClientAsCurrentUser = core.elasticsearch.client.asCurrentUser;
+      const canEnable = await canEnableEntityDiscovery(esClientAsCurrentUser);
       if (!canEnable) {
         return response.forbidden({
           body: {
@@ -91,7 +93,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
-      const soClient = (await context.core).savedObjects.getClient({
+      const soClient = core.savedObjects.getClient({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
       const existingApiKey = await readEntityDiscoveryAPIKey(server);
@@ -117,6 +119,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
 
       await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
+      const esClient = core.elasticsearch.client.asSecondaryAuthUser;
       const installedDefinitions = await installBuiltInEntityDefinitions({
         esClient,
         soClient,

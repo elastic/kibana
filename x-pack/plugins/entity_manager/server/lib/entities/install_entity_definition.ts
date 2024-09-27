@@ -168,11 +168,11 @@ async function install({
   logger.debug(`Installing transforms for definition ${definition.id}`);
   const transforms = await createAndInstallTransforms(esClient, definition, logger);
 
-  await updateEntityDefinition(soClient, definition.id, {
+  const updatedProps = await updateEntityDefinition(soClient, definition.id, {
     installStatus: 'installed',
     installedComponents: [...templates, ...pipelines, ...transforms],
   });
-  return { ...definition, installStatus: 'installed' };
+  return { ...definition, ...updatedProps.attributes };
 }
 
 // stop and delete the current transforms and reinstall all the components
