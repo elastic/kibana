@@ -11,11 +11,11 @@ import type { FieldRetentionDefinition } from './types';
 const DEFAULT_FIELD_RETENTION_COUNT = 10;
 
 const getBaseFields = (entityType: EntityType): FieldRetentionDefinition['fields'] => [
-  // {
-  //   field: 'entity.source',
-  //   operation: 'collect_values',
-  //   maxLength: DEFAULT_FIELD_RETENTION_COUNT,
-  // },
+  {
+    field: 'entityFields.source',
+    operation: 'collect_values',
+    maxLength: DEFAULT_FIELD_RETENTION_COUNT,
+  },
   {
     field: 'asset.criticality',
     operation: 'prefer_newest_value',
