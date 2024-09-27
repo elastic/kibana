@@ -29,7 +29,8 @@ import { createRuleSourceImporter } from '../../../../prebuilt_rules/logic/rule_
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { importRules } from '../../../logic/import/import_rules';
-import { importRules as legacyImportRules } from '../../../logic/import/import_rules_utils';
+// eslint-disable-next-line no-restricted-imports
+import { importRulesLegacy } from '../../../logic/import/import_rules_legacy';
 import { createPromiseFromRuleImportStream } from '../../../logic/import/create_promise_from_rule_import_stream';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
 import { isRuleToImport } from '../../../logic/import/utils';
@@ -169,7 +170,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
               detectionRulesClient,
             });
           } else {
-            importRuleResponse = await legacyImportRules({
+            importRuleResponse = await importRulesLegacy({
               ruleChunks,
               overwriteRules: request.query.overwrite,
               allowMissingConnectorSecrets: !!actionConnectors.length,

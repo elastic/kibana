@@ -18,14 +18,16 @@ import { isRuleConflictError, isRuleImportError } from './errors';
 
 /**
  * Takes rules to be imported and either creates or updates rules
- * based on user overwrite preferences
+ * based on user overwrite preferences.
+ *
+ * @deprecated Use {@link importRules} instead.
  * @param ruleChunks {@link RuleToImport} - rules being imported
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
  * @param detectionRulesClient {object}
  * @returns {Promise} an array of error and success messages from import
  */
-export const importRules = async ({
+export const importRulesLegacy = async ({
   ruleChunks,
   overwriteRules,
   detectionRulesClient,

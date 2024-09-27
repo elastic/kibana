@@ -11,10 +11,12 @@ import { getImportRulesSchemaMock } from '../../../../../../common/api/detection
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { requestContextMock } from '../../../routes/__mocks__';
 
-import { importRules } from './import_rules_utils';
 import { createRuleImportErrorObject } from './errors';
 
-describe('importRules', () => {
+// eslint-disable-next-line no-restricted-imports
+import { importRulesLegacy } from './import_rules_legacy';
+
+describe('importRulesLegacy', () => {
   const { clients, context } = requestContextMock.createTools();
   const ruleToImport = getImportRulesSchemaMock();
 
@@ -27,7 +29,7 @@ describe('importRules', () => {
   });
 
   it('returns an empty rules response if no rules to import', async () => {
-    const result = await importRules({
+    const result = await importRulesLegacy({
       ruleChunks: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
@@ -47,7 +49,7 @@ describe('importRules', () => {
     });
 
     const ruleChunk = [ruleToImport];
-    const result = await importRules({
+    const result = await importRulesLegacy({
       ruleChunks: [ruleChunk],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
@@ -72,7 +74,7 @@ describe('importRules', () => {
     });
 
     const ruleChunk = [ruleToImport];
-    const result = await importRules({
+    const result = await importRulesLegacy({
       ruleChunks: [ruleChunk],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
@@ -88,7 +90,7 @@ describe('importRules', () => {
       immutable: true,
       version: 1,
     };
-    const result = await importRules({
+    const result = await importRulesLegacy({
       ruleChunks: [[prebuiltRuleToImport]],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
