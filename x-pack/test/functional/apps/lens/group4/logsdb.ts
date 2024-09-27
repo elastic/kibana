@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           {
             name: 'LogsDB stream with no additional stream/index and no host.name field',
-            indexes: [{ index: `${initialIndex}_no_host`, removeLogsDBFields: true, create: true }],
+            indexes: [{ index: `${initialIndex}_no_host`, removeLogsDBFields: true, create: true, logsdb: true }],
           },
           {
             name: 'LogsDB stream with an additional regular index',

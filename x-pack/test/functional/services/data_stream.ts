@@ -130,6 +130,26 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
         },
       },
     });
+    // Uncomment only when needed
+    // log.debug(`
+    //   PUT _component_template/${stream}_mappings
+    //   ${JSON.stringify({
+    //     name: `${stream}_mapping`,
+    //     template: {
+    //       settings: !mode
+    //         ? { mode: undefined }
+    //         : mode === 'logsdb'
+    //         ? { mode: 'logsdb' }
+    //         : {
+    //             mode: 'time_series',
+    //             routing_path: 'request',
+    //           },
+    //       mappings: {
+    //         properties: mapping,
+    //       },
+    //     },
+    //   }, null, 2)}
+    // `);
     log.info(`Updating ${stream} index template${mode ? ` for ${mode.toUpperCase()}` : ''}...`);
     await es.indices.putIndexTemplate({
       name: `${stream}_index_template`,
@@ -140,6 +160,19 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
         description: `Template for ${stream} testing index`,
       },
     });
+    // Uncomment only when needed
+    // log.verbose(`
+    //   PUT _index_template/${stream}-index-template
+    //   ${JSON.stringify({
+    //     name: `${stream}_index_template`,
+    //     index_patterns: [stream],
+    //     data_stream: {},
+    //     composed_of: [`${stream}_mapping`],
+    //     _meta: {
+    //       description: `Template for ${stream} testing index`,
+    //     },
+    //   }, null, 2)}
+    // `);
   }
 
   /**
@@ -157,10 +190,12 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
     log.info(`Updating ${stream} data stream component template with ${mode} stuff...`);
     await updateDataStreamTemplate(stream, newMapping, mode);
 
-    log.info('Rolling over the backing index for ${mode}');
+    log.info(`Rolling over the backing index for ${mode}`);
     await es.indices.rollover({
       alias: stream,
     });
+    // Uncomment only when needed
+    // log.verbose(`POST ${stream}/_rollover`); 
   }
 
   /**
@@ -192,6 +227,8 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
     await es.indices.rollover({
       alias: stream,
     });
+    // Uncomment only when needed
+    // log.debug(`POST ${stream}/_rollover`); 
   }
 
   /**
@@ -213,6 +250,8 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
     await es.indices.createDataStream({
       name: streamIndex,
     });
+    // Uncomment only when needed
+    // log.debug(`PUT _data_stream/${streamIndex}`); 
   }
 
   /**
@@ -222,14 +261,20 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
   async function deleteDataStream(streamIndex: string) {
     log.info(`Delete ${streamIndex} data stream index...`);
     await es.indices.deleteDataStream({ name: streamIndex });
+    // Uncomment only when needed
+    // log.debug(`DELETE _data_stream/${streamIndex}`); 
     log.info(`Delete ${streamIndex} index template...`);
     await es.indices.deleteIndexTemplate({
       name: `${streamIndex}_index_template`,
     });
+    // Uncomment only when needed
+    // log.debug(`DELETE _index_template/${streamIndex}-index-template`);
     log.info(`Delete ${streamIndex} data stream component template...`);
     await es.cluster.deleteComponentTemplate({
       name: `${streamIndex}_mapping`,
     });
+    // Uncomment only when needed
+    // log.debug(`DELETE _component_template/${streamIndex}_mappings`);
   }
 
   return {
