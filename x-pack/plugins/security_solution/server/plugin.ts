@@ -238,6 +238,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       securitySolutionRequestContextFactory: requestContextFactory,
       cloud: plugins.cloud,
       loggerFactory: this.pluginContext.logger,
+      telemetry: core.analytics,
     });
 
     initUsageCollectors({
@@ -554,14 +555,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       APP_UI_ID,
       getAssistantTools(config.experimentalFeatures.assistantNaturalLanguageESQLTool)
     );
-    plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
+    const features = {
       assistantBedrockChat: config.experimentalFeatures.assistantBedrockChat,
       assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-    });
-    plugins.elasticAssistant.registerFeatures('management', {
-      assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-    });
+    };
+    plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
+    plugins.elasticAssistant.registerFeatures('management', features);
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
