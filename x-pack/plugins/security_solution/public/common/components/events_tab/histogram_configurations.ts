@@ -13,7 +13,7 @@ import * as i18n from './translations';
 
 export const NO_BREAKDOWN_STACK_BY_VALUE = 'no_breakdown';
 
-const DEFAULT_EVENTS_STACK_BY_VALUE = NO_BREAKDOWN_STACK_BY_VALUE;
+export const DEFAULT_EVENTS_STACK_BY_VALUE = NO_BREAKDOWN_STACK_BY_VALUE;
 
 export const getSubtitleFunction =
   (defaultNumberFormat: string, isAlert: boolean) => (totalCount: number) =>
