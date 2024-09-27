@@ -101,9 +101,6 @@ image::images/dashboard-add-time-slider-control-8.15.0.png[Controls button in th
 Several settings that apply to all controls of the same dashboard are available.
 
 . In *Edit* mode, select *Controls* > *Settings*.
-+
-[role="screenshot"]
-image::images/dashboard-control-settings-8.15.0.png[Controls button in the toolbar with the Settings option selected, width=60%]
 
 . On the *Control settings* flyout, configure the following settings:
 
