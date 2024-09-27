@@ -359,7 +359,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       solutionAppLinksSwitcher,
     } = await this.lazyApplicationLinks();
 
-    registerDeepLinksUpdater(this.appUpdater$, isSolutionNavigationEnabled$);
+    registerDeepLinksUpdater(this.appUpdater$, isSolutionNavigationEnabled$, core);
 
     const appLinksToUpdate$ = new Subject<AppLinkItems>();
     appLinksToUpdate$.next(initialAppLinks);
