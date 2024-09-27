@@ -139,11 +139,11 @@ const getEndpointPolicyWithIntegrationConfig = (
 };
 
 /**
- * Retrieve policy for cloud based on the on the cloud integration config
+ * Retrieve policy for cloud based on the cloud integration config
  */
 const getCloudPolicyConfig = (policy: PolicyConfig): PolicyConfig => {
   // Disabling all protections, since it's not yet supported on Cloud integrations
-  const policyWithDisabledProtections = disableProtections(policy);
+  const policyWithDisabledProtections = disableProtections(policy, { isDefaultCloudPolicy: true });
 
   return {
     ...policyWithDisabledProtections,

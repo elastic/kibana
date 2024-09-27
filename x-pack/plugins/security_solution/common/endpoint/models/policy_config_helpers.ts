@@ -65,9 +65,13 @@ export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => 
  * Returns a copy of the passed `PolicyConfig` with all protections set to disabled.
  *
  * @param policy
+ * @param options
  * @returns
  */
-export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
+export const disableProtections = (
+  policy: PolicyConfig,
+  options: { isDefaultCloudPolicy?: boolean } = { isDefaultCloudPolicy: false }
+): PolicyConfig => {
   const result = disableCommonProtections(policy);
 
   return {
@@ -75,6 +79,16 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
     windows: {
       ...result.windows,
       ...getDisabledWindowsSpecificProtections(result),
+      // Keep antivirus registration in sync mode for cloud policies, disabled by default since malware protection is off
+      ...(options.isDefaultCloudPolicy
+        ? {
+            antivirus_registration: {
+              ...policy.windows.antivirus_registration,
+              mode: AntivirusRegistrationModes.sync,
+              enabled: false,
+            },
+          }
+        : {}),
       popup: {
         ...result.windows.popup,
         ...getDisabledWindowsSpecificPopups(result),

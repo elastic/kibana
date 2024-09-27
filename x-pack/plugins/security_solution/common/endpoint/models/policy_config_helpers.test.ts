@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createDefaultPolicy } from '../../../server/fleet_integration/handlers/create_default_policy';
 import type { PolicyConfig } from '../types';
 import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 import { policyFactory } from './policy_config';
@@ -16,6 +17,10 @@ import {
   getPolicyProtectionsReference,
 } from './policy_config_helpers';
 import { set } from 'lodash';
+import type { LicenseService } from '../../license';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ProductFeaturesService } from '../../../server/lib/product_features_service';
 
 describe('Policy Config helpers', () => {
   describe('disableProtections', () => {
@@ -125,6 +130,47 @@ describe('Policy Config helpers', () => {
       };
 
       expect(disableProtections(inputPolicy)).toEqual<PolicyConfig>(expectedPolicy);
+    });
+
+    it('returns default policy for cloud configuration with antivirus registration mode set to sync', () => {
+      const licenseService = {
+        getLicenseType: jest.fn().mockReturnValue('platinum'),
+        getLicenseUID: jest.fn().mockReturnValue('license-uid'),
+        isPlatinumPlus: jest.fn().mockReturnValue(true),
+      } as unknown as jest.Mocked<LicenseService>;
+
+      const cloud = { isCloudEnabled: true, isServerlessEnabled: false } as unknown as CloudSetup;
+      const esClientInfo = {
+        cluster_uuid: 'cluster-uuid',
+        cluster_name: 'cluster-name',
+      } as unknown as InfoResponse;
+      const productFeatures = {
+        isEnabled: jest.fn().mockReturnValue(true),
+      } as unknown as ProductFeaturesService;
+
+      const result = createDefaultPolicy(
+        licenseService,
+        { type: 'cloud' },
+        cloud,
+        esClientInfo,
+        productFeatures
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          linux: expect.objectContaining({
+            events: expect.objectContaining({
+              session_data: true,
+            }),
+          }),
+          windows: expect.objectContaining({
+            antivirus_registration: expect.objectContaining({
+              mode: AntivirusRegistrationModes.sync,
+              enabled: false,
+            }),
+          }),
+        })
+      );
     });
   });
 
