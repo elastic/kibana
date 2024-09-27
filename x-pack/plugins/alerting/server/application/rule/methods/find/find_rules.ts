@@ -142,7 +142,7 @@ export async function findRules<Params extends RuleParams = never>(
       context.auditLogger?.log(
         ruleAuditEvent({
           action: RuleAuditAction.FIND,
-          savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+          savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
           error,
         })
       );
@@ -168,11 +168,11 @@ export async function findRules<Params extends RuleParams = never>(
     return rule;
   });
 
-  authorizedData.forEach(({ id }) =>
+  authorizedData.forEach(({ id, name }) =>
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.FIND,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name },
       })
     )
   );
