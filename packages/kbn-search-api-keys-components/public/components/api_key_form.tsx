@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiCode,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -27,10 +28,6 @@ export const ApiKeyForm = () => {
   const { euiTheme } = useEuiTheme();
   const [showFlyout, setShowFlyout] = useState(false);
   const { apiKey, status, handleSaveKey, showAPIKey, displayedApiKey } = useSearchApiKey();
-  const handleAddToClipboard = useCallback(
-    () => apiKey && navigator.clipboard.writeText(apiKey),
-    [apiKey]
-  );
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexStart" responsive={false}>
@@ -73,17 +70,27 @@ export const ApiKeyForm = () => {
               })}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={0}>
-            <EuiButtonIcon
-              iconType="copy"
-              color="success"
-              onClick={handleAddToClipboard}
-              data-test-subj="apiKeyFormAPIKeyCopyButton"
-              aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.copyButton', {
-                defaultMessage: 'Copy button',
-              })}
-            />
-          </EuiFlexItem>
+          {apiKey && (
+            <EuiFlexItem grow={0}>
+              <EuiCopy
+                textToCopy={apiKey}
+                afterMessage={i18n.translate('xpack.searchApiKeys.apiKeyForm.copyMessage', {
+                  defaultMessage: 'Copied',
+                })}
+              >
+                {(copy) => (
+                  <EuiButtonIcon
+                    onClick={copy}
+                    iconType="copy"
+                    color="success"
+                    aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.copyMessageLabel', {
+                      defaultMessage: 'Copy Elasticsearch URL to clipboard',
+                    })}
+                  />
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
+          )}
         </>
       )}
       {status === Status.showCreateButton && (
@@ -102,7 +109,7 @@ export const ApiKeyForm = () => {
             />
           </EuiButton>
           {showFlyout && (
-            <ApiKeyFlyoutWrapper onClose={() => setShowFlyout(false)} onSuccess={handleSaveKey} />
+            <ApiKeyFlyoutWrapper onCancel={() => setShowFlyout(false)} onSuccess={handleSaveKey} />
           )}
         </EuiFlexItem>
       )}

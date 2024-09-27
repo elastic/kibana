@@ -4,9 +4,8 @@
     "outDir": "target/types",
   },
   "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
+    "public/components/**/*",
+    "public/hooks/**/*"
   ],
   "kbn_references": [
     "@kbn/config-schema",

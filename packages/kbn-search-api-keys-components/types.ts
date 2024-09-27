@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const API_KEY_NAME = 'Unrestricted API Key';
+export enum APIRoutes {
+  API_KEYS = '/internal/search_api_keys',
+  API_KEY_VALIDITY = '/internal/search_api_keys/validity',
+}

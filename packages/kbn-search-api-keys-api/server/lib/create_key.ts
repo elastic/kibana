@@ -9,21 +9,22 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { GetApiKeyResponse } from '../../common/types';
+import type { APIKeyCreationResponse } from '../../types';
 
-export async function getAPIKeyById(
-  id: string,
+export async function createAPIKey(
+  name: string,
   client: ElasticsearchClient,
   logger: Logger
-): Promise<GetApiKeyResponse> {
+): Promise<APIKeyCreationResponse> {
   try {
-    const apiKey = await client.security.getApiKey({
-      id,
+    const apiKey = await client.security.createApiKey({
+      name,
+      role_descriptors: {},
     });
 
-    return apiKey.api_keys?.[0];
+    return apiKey;
   } catch (e) {
-    logger.error(`Search API Keys: Error on getting API Key`);
+    logger.error(`Search API Keys: Error during creating API Key`);
     logger.error(e);
     throw e;
   }

@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
-import { registerSearchApiKeysRoutes } from '@kbn/search-api-keys/server/routes/routes';
+import { registerSearchApiKeysRoutes } from '@kbn/search-api-keys-api/server/routes/routes';
 import { registerIndicesRoutes } from './indices';
 import { registerStatusRoutes } from './status';
 
