@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -20,6 +21,7 @@ import {
   persistTimeline,
 } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
+import type { CleanDraftTimelinesResponse } from '../../../../../../common/api/timeline';
 import {
   CleanDraftTimelinesRequestBody,
   TimelineTypeEnum,
@@ -41,7 +43,7 @@ export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) =
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<CleanDraftTimelinesResponse>> => {
         const frameworkRequest = await buildFrameworkRequest(context, request);
         const siemResponse = buildSiemResponse(response);
 
