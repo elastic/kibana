@@ -46,7 +46,6 @@ describe('Card utils', () => {
         version: '1.0.0',
         isUpdateAvailable: true,
         extraLabelsBadges: undefined,
-        installStatus: null,
       });
     });
 
@@ -67,7 +66,6 @@ describe('Card utils', () => {
         release: 'preview',
         version: '1.0.0-preview-1',
         isUpdateAvailable: true,
-        installStatus: null,
       });
     });
 
@@ -85,7 +83,6 @@ describe('Card utils', () => {
         release: 'preview',
         version: '2.0.0-preview-1',
         isUpdateAvailable: false,
-        installStatus: null,
       });
     });
 
@@ -112,7 +109,7 @@ describe('Card utils', () => {
       });
     });
 
-    it('should return null installStatus if the item is not an integration', () => {
+    it('should not return installStatus if the item is not an integration', () => {
       const cardItem = mapToCard({
         item: {
           id: 'test',
@@ -131,7 +128,6 @@ describe('Card utils', () => {
         release: 'ga',
         version: '1.0.0',
         isUpdateAvailable: true,
-        installStatus: null,
       });
     });
   });

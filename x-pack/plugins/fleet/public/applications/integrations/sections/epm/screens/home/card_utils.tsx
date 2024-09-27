@@ -47,7 +47,7 @@ export interface IntegrationCardItem {
   fromIntegrations?: string;
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   id: string;
-  installStatus: EpmPackageInstallStatus | null | undefined;
+  installStatus?: EpmPackageInstallStatus;
   integration: string;
   isCollectionCard?: boolean;
   isQuickstart?: boolean;
@@ -116,7 +116,7 @@ export const mapToCard = ({
     extraLabelsBadges = getIntegrationLabels(item);
   }
 
-  return {
+  const cardResult: IntegrationCardItem = {
     id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}:${item.id}`,
     description: item.description,
     icons: !item.icons || !item.icons.length ? [] : item.icons,
@@ -132,8 +132,13 @@ export const mapToCard = ({
     isUnverified,
     isUpdateAvailable,
     extraLabelsBadges,
-    installStatus: item.type === 'integration' ? item.installationInfo?.install_status : null,
   };
+
+  if (item.type === 'integration') {
+    cardResult.installStatus = item.installationInfo?.install_status;
+  }
+
+  return cardResult;
 };
 
 export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
