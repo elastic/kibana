@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless delete_rules_bulk', () => {
+  describe('@ess @serverless @skipInServerlessMKI delete_rules_bulk', () => {
     describe('deleting rules bulk using DELETE', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
