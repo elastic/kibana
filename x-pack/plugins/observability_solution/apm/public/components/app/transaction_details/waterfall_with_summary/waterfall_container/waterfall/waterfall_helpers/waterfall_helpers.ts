@@ -174,8 +174,7 @@ function getErrorItem(
   const errorItem: IWaterfallError = {
     docType: 'error',
     doc: error,
-    // TODO FIX ME
-    id: error?.error?.id ?? '',
+    id: error.error.id,
     parent,
     parentId: parent?.id,
     offset: error.timestamp.us - entryTimestamp,

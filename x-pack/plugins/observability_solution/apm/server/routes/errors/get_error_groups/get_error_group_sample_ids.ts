@@ -66,7 +66,7 @@ export async function getErrorGroupSampleIds({
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }], // prefer error samples with related transactions
         },
       },
-      fields: [ERROR_ID, 'transaction'],
+      fields: [ERROR_ID, 'transaction*'],
       sort: asMutableArray([
         { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
