@@ -29,9 +29,7 @@ export const Page: FC = () => {
   const modelId = globalState?.ml?.modelId;
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(
-    !jobId && !modelId
-  );
+  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(false);
   const [jobsExist, setJobsExist] = useState(true);
   const [isLoadingJobsExist, setIsLoadingJobsExist] = useState(false);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
@@ -60,7 +58,9 @@ export const Page: FC = () => {
     setIsLoadingJobsExist(true);
     try {
       const { count } = await getDataFrameAnalytics(undefined, undefined, 0);
-      setJobsExist(count > 0);
+      const hasAnalyticsJobs = count > 0;
+      setJobsExist(hasAnalyticsJobs);
+      setIsIdSelectorFlyoutVisible(hasAnalyticsJobs);
     } catch (e) {
       // Swallow the error and just show the empty table in the analytics id selector
       console.error('Error checking analytics jobs exist', e); // eslint-disable-line no-console
