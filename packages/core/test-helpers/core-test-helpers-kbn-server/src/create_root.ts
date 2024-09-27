@@ -37,6 +37,7 @@ const DEFAULTS_SETTINGS = {
     // port and aren't affected by the timing issues in test environment.
     port: 0,
     xsrf: { disableProtection: true },
+    restrictInternalApis: true,
   },
   logging: {
     root: {
