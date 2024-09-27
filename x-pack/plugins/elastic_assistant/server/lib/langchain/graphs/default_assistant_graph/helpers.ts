@@ -42,7 +42,6 @@ interface StreamGraphParams {
  * @param request
  * @param traceOptions
  */
-/* eslint complexity: ["error", 210]*/
 export const streamGraph = async ({
   apmTracer,
   assistantGraph,
