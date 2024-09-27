@@ -7,7 +7,7 @@
 
 import type { Subject, Subscription } from 'rxjs';
 import { combineLatestWith } from 'rxjs';
-import type { AppDeepLink, AppUpdater, AppDeepLinkLocations, CoreStart } from '@kbn/core/public';
+import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/public';
 import { appLinks$ } from './links';
 import type { AppLinkItems } from './types';
 
@@ -68,16 +68,12 @@ const solutionFormatter: DeepLinksFormatter = (appLinks) =>
  */
 export const registerDeepLinksUpdater = (
   appUpdater$: Subject<AppUpdater>,
-  isSolutionNavigationEnabled$: Subject<boolean>,
-  core: CoreStart
+  isSolutionNavigationEnabled$: Subject<boolean>
 ): Subscription => {
   return appLinks$
     .pipe(combineLatestWith(isSolutionNavigationEnabled$))
     .subscribe(([appLinks, isSolutionNavigationEnabled]) => {
       appUpdater$.next(() => ({
-        visibleIn: core.application.capabilities.siem?.show
-          ? ['globalSearch', 'home', 'kibanaOverview']
-          : [],
         deepLinks: isSolutionNavigationEnabled
           ? solutionFormatter(appLinks)
           : classicFormatter(appLinks),
