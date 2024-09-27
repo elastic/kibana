@@ -22,6 +22,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { LogRecord } from '@kbn/logging';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
+import { delay } from '../test_utils';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const targetIndex = `.kibana_${kibanaVersion}_001`;
@@ -89,6 +90,7 @@ describe('migration v2', () => {
     }
     if (esServer) {
       await esServer.stop();
+      await delay(10);
     }
   });
 
