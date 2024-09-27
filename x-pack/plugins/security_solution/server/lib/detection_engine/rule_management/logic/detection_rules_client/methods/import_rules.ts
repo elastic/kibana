@@ -10,7 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { RuleResponse, RuleToImport } from '../../../../../../../common/api/detection_engine';
 import { ruleToImportHasVersion } from '../../../../../../../common/api/detection_engine/rule_management';
-import type { IRuleSourceImporter } from '../../../../prebuilt_rules/logic/rule_source_importer';
+import type { IRuleSourceImporter } from '../../import/rule_source_importer';
 import {
   type RuleImportErrorObject,
   createRuleImportErrorObject,

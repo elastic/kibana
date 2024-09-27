@@ -25,9 +25,9 @@ import {
   isBulkError,
   isImportRegular,
 } from '../../../../routes/utils';
-import { createRuleSourceImporter } from '../../../../prebuilt_rules/logic/rule_source_importer';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
+import { createRuleSourceImporter } from '../../../logic/import/rule_source_importer';
 import { importRules } from '../../../logic/import/import_rules';
 // eslint-disable-next-line no-restricted-imports
 import { importRulesLegacy } from '../../../logic/import/import_rules_legacy';

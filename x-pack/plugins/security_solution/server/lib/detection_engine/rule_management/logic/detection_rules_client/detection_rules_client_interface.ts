@@ -14,7 +14,7 @@ import type {
   RuleToImport,
   RuleSource,
 } from '../../../../../../common/api/detection_engine';
-import type { IRuleSourceImporter } from '../../../prebuilt_rules/logic/rule_source_importer';
+import type { IRuleSourceImporter } from '../import/rule_source_importer';
 import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 

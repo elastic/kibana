@@ -8,8 +8,8 @@
 import type {
   RuleSource,
   ValidatedRuleToImport,
-} from '../../../../../../common/api/detection_engine';
-import type { RuleFromImportStream } from '../../../rule_management/logic/import/utils';
+} from '../../../../../../../common/api/detection_engine';
+import type { RuleFromImportStream } from '../utils';
 
 export interface RuleSpecifier {
   rule_id: string;

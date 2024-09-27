@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ValidatedRuleToImport } from '../../../../../../common/api/detection_engine';
-import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../rule_assets/__mocks__/prebuilt_rule_assets_client';
-import type { RuleFromImportStream } from '../../../rule_management/logic/import/utils';
-import { configMock, createMockConfig, requestContextMock } from '../../../routes/__mocks__';
+import type { ValidatedRuleToImport } from '../../../../../../../common/api/detection_engine';
+import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
+import type { RuleFromImportStream } from '../utils';
+import { configMock, createMockConfig, requestContextMock } from '../../../../routes/__mocks__';
+import { getPrebuiltRuleMock } from '../../../../prebuilt_rules/mocks';
 import { createRuleSourceImporter } from './rule_source_importer';
-import * as calculateRuleSourceModule from '../../../rule_management/logic/import/calculate_rule_source_for_import';
-import { getPrebuiltRuleMock } from '../../mocks';
+import * as calculateRuleSourceModule from '../calculate_rule_source_for_import';
 
 describe('ruleSourceImporter', () => {
   let ruleAssetsClientMock: ReturnType<typeof createPrebuiltRuleAssetsClientMock>;

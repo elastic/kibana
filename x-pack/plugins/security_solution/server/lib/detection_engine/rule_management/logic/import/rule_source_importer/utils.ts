@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import type { IPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
+import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
+import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleSpecifier } from './types';
 
 /**

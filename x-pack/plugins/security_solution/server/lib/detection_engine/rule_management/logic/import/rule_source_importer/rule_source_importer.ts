@@ -12,20 +12,17 @@
  * 2.0.
  */
 
-import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
-import type { ConfigType } from '../../../../../config';
+import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../../types';
+import type { ConfigType } from '../../../../../../config';
 import type {
   RuleToImport,
   ValidatedRuleToImport,
-} from '../../../../../../common/api/detection_engine';
-import { calculateRuleSourceForImport } from '../../../rule_management/logic/import/calculate_rule_source_for_import';
-import {
-  isRuleToImport,
-  type RuleFromImportStream,
-} from '../../../rule_management/logic/import/utils';
-import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import type { IPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
-import { ensureLatestRulesPackageInstalled } from '../ensure_latest_rules_package_installed';
+} from '../../../../../../../common/api/detection_engine';
+import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
+import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { ensureLatestRulesPackageInstalled } from '../../../../prebuilt_rules/logic/ensure_latest_rules_package_installed';
+import { calculateRuleSourceForImport } from '../calculate_rule_source_for_import';
+import { isRuleToImport, type RuleFromImportStream } from '../utils';
 import type { CalculatedRuleSource, IRuleSourceImporter, RuleSpecifier } from './types';
 import { fetchAvailableRuleAssetIds, fetchMatchingAssets } from './utils';
 
