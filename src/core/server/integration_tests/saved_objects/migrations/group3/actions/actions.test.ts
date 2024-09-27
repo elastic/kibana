@@ -61,8 +61,7 @@ const { startES } = createTestServers({
 });
 let esServer: TestElasticsearchUtils;
 
-// Failing: See https://github.com/elastic/kibana/issues/166190
-describe.skip('migration actions', () => {
+describe('migration actions', () => {
   let client: ElasticsearchClient;
   let esCapabilities: ReturnType<typeof elasticsearchServiceMock.createCapabilities>;
 
