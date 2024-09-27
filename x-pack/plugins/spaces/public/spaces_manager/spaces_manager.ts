@@ -13,7 +13,12 @@ import type { SavedObjectsCollectMultiNamespaceReferencesResponse } from '@kbn/c
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { Role } from '@kbn/security-plugin-types-common';
 
-import type { GetAllSpacesOptions, GetSpaceResult, Space } from '../../common';
+import {
+  API_VERSIONS,
+  type GetAllSpacesOptions,
+  type GetSpaceResult,
+  type Space,
+} from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 import type { SpaceContentTypeSummaryItem } from '../types';
 
@@ -23,7 +28,7 @@ interface SavedObjectTarget {
 }
 
 const TAG_TYPE = 'tag';
-const version = '2023-10-31';
+const version = API_VERSIONS.public.v1;
 
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
