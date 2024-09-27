@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useEffect, useState } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
@@ -25,34 +25,6 @@ export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
   toggleSideNav,
 }) => {
   const isCollapsed = useObservable(isSideNavCollapsed$, false);
-  const [collapsibleNavOffset, setCollapsibleNavOffset] = useState(0);
-  const clipPathWidth = collapsibleNavOffset + PANEL_WIDTH;
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout | undefined;
-    const observer = new MutationObserver(() => {
-      clearTimeout(timeoutId);
-
-      // Debounce the CSS variable change to avoid unnecessary re-renders
-      timeoutId = setTimeout(() => {
-        const offSet = getComputedStyle(document.documentElement).getPropertyValue(
-          '--euiCollapsibleNavOffset'
-        );
-        setCollapsibleNavOffset(parseFloat(offSet));
-      }, 50);
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['style'],
-      subtree: true,
-      childList: true,
-    });
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
 
   return (
     <EuiCollapsibleNavBeta
@@ -61,7 +33,7 @@ export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
       onCollapseToggle={toggleSideNav}
       css={{
         overflow: 'visible',
-        clipPath: `polygon(0 0, ${clipPathWidth}px 0, ${clipPathWidth}px 100%, 0 100%)`,
+        clipPath: `polygon(0 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 100%, 0 100%)`,
       }}
     >
       {children}
