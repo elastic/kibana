@@ -69,7 +69,7 @@ const RELATED_ALERTS_TAB_ID = 'related_alerts';
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 type TabId = typeof OVERVIEW_TAB_ID | typeof METADATA_TAB_ID | typeof RELATED_ALERTS_TAB_ID;
 
-const getPageTitle = (ruleCategory: string) => {
+export const getPageTitle = (ruleCategory: string) => {
   return i18n.translate('xpack.observability.pages.alertDetails.pageTitle.title', {
     defaultMessage:
       '{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}',
