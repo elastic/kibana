@@ -105,6 +105,8 @@ const normalizeValue = <T>(field: unknown[] | unknown): T => {
 };
 
 export const metadataForDependencyMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  if (!fields) return undefined;
+
   return {
     span: {
       type: normalizeValue<string>(fields[SPAN_TYPE]),
@@ -116,6 +118,8 @@ export const metadataForDependencyMapping = (fields: Partial<Record<string, unkn
 export const transactionsForDependencySpansMapping = (
   fields: Partial<Record<string, unknown[]>>
 ) => {
+  if (!fields) return undefined;
+
   return {
     transaction: {
       id: normalizeValue<string>(fields[TRANSACTION_ID]),
@@ -126,6 +130,8 @@ export const transactionsForDependencySpansMapping = (
 };
 
 export const topDependencySpansMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  if (!fields) return undefined;
+
   return {
     transaction: {
       id: normalizeValue<string>(fields[TRANSACTION_ID]),
@@ -155,6 +161,8 @@ export const topDependencySpansMapping = (fields: Partial<Record<string, unknown
 };
 
 export const spanMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  if (!fields) return undefined;
+
   return {
     parent: {
       id: normalizeValue<string>(fields[PARENT_ID]),
@@ -227,6 +235,8 @@ export const spanMapping = (fields: Partial<Record<string, unknown[]>>) => {
 };
 
 export const spanLinksDetailsMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  if (!fields) return undefined;
+
   return {
     trace: {
       id: normalizeValue<string>(fields[TRACE_ID]),
@@ -262,6 +272,8 @@ export const spanLinksDetailsMapping = (fields: Partial<Record<string, unknown[]
 
 // todo: pending #192337
 export const linkedParentsOfSpanMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  if (!fields) return undefined;
+
   return {
     span: {
       links: [
@@ -279,6 +291,8 @@ export const linkedParentsOfSpanMapping = (fields: Partial<Record<string, unknow
 };
 
 export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  if (!fields) return undefined;
+
   return {
     transaction: {
       representative_count: normalizeValue<number>(fields[TRANSACTION_REPRESENTATIVE_COUNT]),
@@ -342,7 +356,9 @@ export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) =
 
 export const traceDocMapping = (
   fields: Partial<Record<string, unknown[]>>
-): WaterfallTransaction | WaterfallSpan => {
+): WaterfallTransaction | WaterfallSpan | undefined => {
+  if (!fields) return undefined;
+
   return {
     timestamp: {
       us: normalizeValue<number>(fields[TIMESTAMP]),
@@ -403,7 +419,11 @@ export const traceDocMapping = (
   };
 };
 
-export const errorDocsMapping = (fields: Partial<Record<string, unknown[]>>): WaterfallError => {
+export const errorDocsMapping = (
+  fields: Partial<Record<string, unknown[]>>
+): WaterfallError | undefined => {
+  if (!fields) return undefined;
+
   return {
     timestamp: {
       us: normalizeValue<number>(fields[TIMESTAMP]),
@@ -432,6 +452,8 @@ export const errorDocsMapping = (fields: Partial<Record<string, unknown[]>>): Wa
 };
 
 export const errorGroupMainStatisticsMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  if (!fields) return undefined;
+
   return {
     trace: {
       id: normalizeValue<string>(fields[TRACE_ID]),
@@ -455,7 +477,11 @@ export const errorGroupMainStatisticsMapping = (fields: Partial<Record<string, u
   };
 };
 
-export const errorSampleDetailsMapping = (fields: Partial<Record<string, unknown[]>>): APMError => {
+export const errorSampleDetailsMapping = (
+  fields: Partial<Record<string, unknown[]>>
+): APMError | undefined => {
+  if (!fields) return undefined;
+
   return {
     observer: {
       type: normalizeValue<string>(fields[OBSERVER_TYPE]),
@@ -507,7 +533,9 @@ export const errorSampleDetailsMapping = (fields: Partial<Record<string, unknown
 
 export const serviceMetadataIconsMapping = (
   fields: Partial<Record<string, unknown[]>>
-): ServiceMetadataIconsRaw => {
+): ServiceMetadataIconsRaw | undefined => {
+  if (!fields) return undefined;
+
   return {
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
@@ -527,7 +555,9 @@ export const serviceMetadataIconsMapping = (
 // todo(milosz): test it
 export const serviceVersionMapping = (
   fields: Partial<Record<string, unknown[]>>
-): Pick<Transaction | Span | APMError, 'observer'> => {
+): Pick<Transaction | Span | APMError, 'observer'> | undefined => {
+  if (!fields) return undefined;
+
   return {
     observer: {
       version: normalizeValue<string>(fields[OBSERVER_VERSION]),
@@ -537,6 +567,8 @@ export const serviceVersionMapping = (
 };
 
 export const metadataAppMetricMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  if (!fields) return undefined;
+
   return {
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
     agent: {
@@ -586,6 +618,8 @@ export const metadataAppMetricMapping = (fields: Partial<Record<string, unknown[
 };
 
 export const metadataAppTransactionEventMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  if (!fields) return undefined;
+
   return {
     kubernetes: {
       namespace: normalizeValue<string>(fields[KUBERNETES_NAMESPACE]),
@@ -635,6 +669,8 @@ export const metadataAppTransactionEventMapping = (fields: Partial<Record<string
 };
 
 export const metaDataAppTransactionMetricMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  if (!fields) return undefined;
+
   return {
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
     agent: {
@@ -670,7 +706,10 @@ export const metaDataAppTransactionMetricMapping = (fields: Partial<Record<strin
   };
 };
 
+// todo: missing cloud and service properties
 export const serviceAgentNameMapping = (fields: Partial<Record<string, unknown[]>>) => {
+  if (!fields) return undefined;
+
   return {
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
