@@ -86,7 +86,7 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     async expectO11yTrialLink() {
       await testSubjects.existOrFail('startO11yTrialBtn');
       expect(await testSubjects.getAttribute('startO11yTrialBtn', 'href')).equal(
-        'https://cloud.elastic.co/projects/create/observability/start'
+        'https://fake-cloud.elastic.co/projects/create/observability/start'
       );
       expect(await testSubjects.getAttribute('startO11yTrialBtn', 'target')).equal('_blank');
     },

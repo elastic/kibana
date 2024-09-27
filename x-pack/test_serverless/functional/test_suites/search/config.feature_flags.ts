@@ -21,7 +21,7 @@ export default createTestConfig({
   kbnServerArgs: [
     `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
     `--xpack.cloud.serverless.project_id=fakeprojectid`,
-    `--xpack.cloud.base_url=https://cloud.elastic.co`,
+    `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
     `--xpack.cloud.projects_url=/projects/`,
     `--xpack.cloud.organization_url=/account/members`,
     `--xpack.security.roleManagementEnabled=true`,
