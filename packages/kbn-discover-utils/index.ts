@@ -56,6 +56,9 @@ export {
   getFieldValue,
   getVisibleColumns,
   canPrependTimeFieldColumn,
+  DiscoverFlyouts,
+  dismissAllFlyoutsExceptFor,
+  dismissFlyouts,
 } from './src';
 
 export type { LogsContextService } from './src';
