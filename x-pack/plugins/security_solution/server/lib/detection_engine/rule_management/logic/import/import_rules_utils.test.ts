@@ -29,7 +29,6 @@ describe('importRules', () => {
   it('returns an empty rules response if no rules to import', async () => {
     const result = await importRules({
       ruleChunks: [],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
       savedObjectsClient,
@@ -50,7 +49,6 @@ describe('importRules', () => {
     const ruleChunk = [ruleToImport];
     const result = await importRules({
       ruleChunks: [ruleChunk],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
       savedObjectsClient,
@@ -76,7 +74,6 @@ describe('importRules', () => {
     const ruleChunk = [ruleToImport];
     const result = await importRules({
       ruleChunks: [ruleChunk],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
       savedObjectsClient,
@@ -93,7 +90,6 @@ describe('importRules', () => {
     };
     const result = await importRules({
       ruleChunks: [[prebuiltRuleToImport]],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
       savedObjectsClient,

@@ -14,33 +14,26 @@ import { isRuleConflictError, isRuleImportError } from './errors';
 /**
  * Takes a stream of rules to be imported and either creates or updates rules
  * based on user overwrite preferences
- * @param ruleChunks {array} - rules being imported
- * @param rulesResponseAcc {array} - the accumulation of success and
- * error messages gathered through the rules import logic
- * @param mlAuthz {object}
+ * @param ruleChunks {@link RuleToImport} - rules being imported
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
  * @param detectionRulesClient {object}
- * @param existingLists {object} - all exception lists referenced by
- * rules that were found to exist
  * @returns {Promise} an array of error and success messages from import
  */
 export const importRules = async ({
   ruleChunks,
-  rulesResponseAcc,
   overwriteRules,
   detectionRulesClient,
   ruleSourceImporter,
   allowMissingConnectorSecrets,
 }: {
   ruleChunks: RuleToImport[][];
-  rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
   ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
 }) => {
-  let response: ImportRuleResponse[] = [...rulesResponseAcc];
+  const response: ImportRuleResponse[] = [];
 
   // If we had 100% errors and no successful rule could be imported we still have to output an error.
   // otherwise we would output we are success importing 0 rules.
@@ -73,7 +66,7 @@ export const importRules = async ({
       };
     });
 
-    response = [...response, ...importResponses];
+    response.push(...importResponses);
   }
 
   return response;

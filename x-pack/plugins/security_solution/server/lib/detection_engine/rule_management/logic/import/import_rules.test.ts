@@ -32,7 +32,6 @@ describe('importRules', () => {
   it('returns an empty rules response if no rules to import', async () => {
     const result = await importRules({
       ruleChunks: [],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -55,7 +54,6 @@ describe('importRules', () => {
 
     const result = await importRules({
       ruleChunks: [[ruleToImport]],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -95,7 +93,6 @@ describe('importRules', () => {
 
     const result = await importRules({
       ruleChunks: [[ruleToImport]],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -137,7 +134,6 @@ describe('importRules', () => {
 
     const result = await importRules({
       ruleChunks: [[ruleToImport]],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -172,7 +168,6 @@ describe('importRules', () => {
 
     const result = await importRules({
       ruleChunks: [[ruleToImport]],
-      rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,

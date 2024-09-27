@@ -163,7 +163,6 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           if (prebuiltRulesCustomizationEnabled) {
             importRuleResponse = await importRules({
               ruleChunks,
-              rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
               overwriteRules: request.query.overwrite,
               allowMissingConnectorSecrets: !!actionConnectors.length,
               ruleSourceImporter,
@@ -172,7 +171,6 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           } else {
             importRuleResponse = await legacyImportRules({
               ruleChunks,
-              rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
               overwriteRules: request.query.overwrite,
               allowMissingConnectorSecrets: !!actionConnectors.length,
               detectionRulesClient,
@@ -187,7 +185,12 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             })
           );
           const importErrors = importRuleResponse.filter(isBulkError);
-          const errors = [...parseErrors, ...importErrors];
+          const errors = [
+            ...parseErrors,
+            ...actionConnectorErrors,
+            ...duplicateIdErrors,
+            ...importErrors,
+          ];
 
           const successes = importRuleResponse.filter((resp) => {
             if (isImportRegular(resp)) {
