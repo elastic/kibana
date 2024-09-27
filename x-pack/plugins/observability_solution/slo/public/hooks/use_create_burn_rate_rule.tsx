@@ -27,9 +27,10 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
   } = useKibana().services;
 
   return useMutation<
-    CreateRuleResponse<Params> & { loadingToastId?: string },
+    CreateRuleResponse<Params>,
     Error,
-    { rule: CreateRuleRequestBody<Params> }
+    { rule: CreateRuleRequestBody<Params> },
+    { loadingToastId?: string }
   >(
     ['createRule'],
     ({ rule }) => {
@@ -44,7 +45,7 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
       }
     },
     {
-      onMutate: async ({ rule }) => {
+      onMutate: async () => {
         const loadingToast = toasts.addInfo({
           title: toMountPoint(
             <EuiFlexGroup justifyContent="center" alignItems="center">
@@ -77,9 +78,9 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
           })
         );
       },
-      onSettled: (data) => {
-        if (data?.loadingToastId) {
-          toasts.remove(data?.loadingToastId);
+      onSettled: (_d, _err, _res, ctx) => {
+        if (ctx?.loadingToastId) {
+          toasts.remove(ctx?.loadingToastId);
         }
       },
     }
