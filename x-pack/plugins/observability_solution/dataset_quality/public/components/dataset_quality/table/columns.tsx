@@ -188,7 +188,11 @@ export const getDatasetQualityTableColumns = ({
         const { integration, name, rawName } = dataStreamStat;
 
         return (
-          <DatasetQualityDetailsLink urlService={urlService} dataStream={rawName}>
+          <DatasetQualityDetailsLink
+            urlService={urlService}
+            dataStream={rawName}
+            timeRange={timeRange}
+          >
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <IntegrationIcon integration={integration} />
