@@ -179,7 +179,7 @@ describe('install_entity_definition', () => {
         installEntityDefinition({
           esClient,
           soClient,
-          definition: { id: 'a'.repeat(40) } as EntityDefinition,
+          definition: { id: 'a'.repeat(50) } as EntityDefinition,
           logger: loggerMock.create(),
         })
       ).rejects.toThrow(EntityDefinitionIdInvalid);
