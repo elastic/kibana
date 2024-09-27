@@ -606,7 +606,6 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       eventLogger: this.eventLogger!,
       executionContext: core.executionContext,
-      getRulesClientWithRequest,
       kibanaBaseUrl: this.kibanaBaseUrl,
       logger,
       maintenanceWindowsService: new MaintenanceWindowsService({
