@@ -613,7 +613,7 @@ class AgentPolicyService {
               showInactive: true,
               perPage: 0,
               page: 1,
-              kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+              kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}"`,
             }).then(({ total }) => (agentPolicy.agents = total));
           } else {
             agentPolicy.agents = 0;
@@ -1146,7 +1146,7 @@ class AgentPolicyService {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${id}"`,
     });
 
     if (total > 0) {
