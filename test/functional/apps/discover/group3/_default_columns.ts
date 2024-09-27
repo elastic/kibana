@@ -32,13 +32,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb');
+      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb');
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/kibana_sample_data_flights'
       );
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb'
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_logsdb'
       );
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
@@ -48,7 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb');
+      await esArchiver.unload(
+        'test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb'
+      );
       await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
