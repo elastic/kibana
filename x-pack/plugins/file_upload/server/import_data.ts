@@ -24,7 +24,6 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     ingestPipeline: IngestPipelineWrapper | undefined,
     data: InputData
   ): Promise<ImportResponse> {
-    let createdIndex;
     const docCount = data.length;
     const pipelineId = ingestPipeline?.id;
     const pipeline = ingestPipeline?.pipeline;
@@ -35,7 +34,6 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
         id = generateId();
 
         await createIndex(index, settings, mappings);
-        createdIndex = index;
 
         // create the pipeline if one has been supplied
         if (pipelineId !== undefined) {
@@ -44,8 +42,6 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
             throw resp;
           }
         }
-      } else {
-        createdIndex = index;
       }
 
       let failures: ImportFailure[] = [];
@@ -66,7 +62,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
       return {
         success: true,
         id,
-        index: createdIndex,
+        index,
         pipelineId,
         docCount,
         failures,
@@ -75,7 +71,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
       return {
         success: false,
         id: id!,
-        index: createdIndex,
+        index,
         pipelineId,
         error: error.body !== undefined ? error.body : error,
         docCount,
