@@ -23,6 +23,7 @@ interface Props {
   defaultValue?: string;
   labelAppend?: ReactNode;
 }
+
 export function IndexFieldSelector({
   indexFields,
   name,
