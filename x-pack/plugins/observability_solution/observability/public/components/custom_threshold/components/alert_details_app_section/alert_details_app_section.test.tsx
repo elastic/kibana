@@ -77,6 +77,7 @@ jest.mock('../../../../utils/kibana_react', () => ({
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
   const mockedSetAlertSummaryFields = jest.fn();
+  const mockedSetRelatedAlertsKuery = jest.fn();
 
   const renderComponent = (
     alert: Partial<CustomThresholdAlert> = {},
@@ -89,6 +90,7 @@ describe('AlertDetailsAppSection', () => {
             alert={buildCustomThresholdAlert(alert, alertFields)}
             rule={buildCustomThresholdRule()}
             setAlertSummaryFields={mockedSetAlertSummaryFields}
+            setRelatedAlertsKuery={mockedSetRelatedAlertsKuery}
           />
         </QueryClientProvider>
       </IntlProvider>
@@ -116,6 +118,15 @@ describe('AlertDetailsAppSection', () => {
 
     expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(6);
     expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it('should set relatedAlertsKuery', async () => {
+    renderComponent();
+
+    expect(mockedSetAlertSummaryFields).toBeCalledTimes(2);
+    expect(mockedSetRelatedAlertsKuery).toHaveBeenLastCalledWith(
+      '(tags: "tag 1" or tags: "tag 2") or (host.name: "host-1" or kibana.alert.group.value: "host-1")'
+    );
   });
 
   it('should render title on condition charts', async () => {
