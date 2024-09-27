@@ -8,6 +8,7 @@
  */
 
 import { isObject } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { RuleFormData } from '../types';
 import { parseDuration, formatDuration } from '../utils';
 import {
@@ -20,10 +21,31 @@ import {
 } from '../translations';
 import {
   MinimumScheduleInterval,
+  RuleFormActionsErrors,
   RuleFormBaseErrors,
   RuleFormParamsErrors,
   RuleTypeModel,
+  RuleUiAction,
 } from '../../common';
+
+export const validateAction = ({ action }: { action: RuleUiAction }): RuleFormActionsErrors => {
+  const errors = {
+    filterQuery: new Array<string>(),
+  };
+
+  if ('alertsFilter' in action) {
+    const query = action?.alertsFilter?.query;
+    if (query && !query.kql) {
+      errors.filterQuery.push(
+        i18n.translate('alertsUIShared.ruleForm.actionsForm.requiredFilterQuery', {
+          defaultMessage: 'A custom query is required.',
+        })
+      );
+    }
+  }
+
+  return errors;
+};
 
 export function validateRuleBase({
   formData,
@@ -93,7 +115,13 @@ const hasRuleBaseErrors = (errors: RuleFormBaseErrors) => {
   return Object.values(errors).some((error: string[]) => error.length > 0);
 };
 
-const hasRuleParamsErrors = (errors: RuleFormParamsErrors): boolean => {
+const hasActionsError = (actionsErrors: Record<string, RuleFormActionsErrors>) => {
+  return Object.values(actionsErrors).some((errors: RuleFormActionsErrors) => {
+    return Object.values(errors).some((error: string[]) => error.length > 0);
+  });
+};
+
+const hasParamsErrors = (errors: RuleFormParamsErrors): boolean => {
   const values = Object.values(errors);
   let hasError = false;
   for (const value of values) {
@@ -104,18 +132,33 @@ const hasRuleParamsErrors = (errors: RuleFormParamsErrors): boolean => {
       return true;
     }
     if (isObject(value)) {
-      hasError = hasRuleParamsErrors(value as RuleFormParamsErrors);
+      hasError = hasParamsErrors(value as RuleFormParamsErrors);
     }
   }
   return hasError;
 };
 
+const hasActionsParamsErrors = (actionsParamsErrors: Record<string, RuleFormParamsErrors>) => {
+  return Object.values(actionsParamsErrors).some((errors: RuleFormParamsErrors) => {
+    return hasParamsErrors(errors);
+  });
+};
+
 export const hasRuleErrors = ({
   baseErrors,
   paramsErrors,
+  actionsErrors,
+  actionsParamsErrors,
 }: {
   baseErrors: RuleFormBaseErrors;
   paramsErrors: RuleFormParamsErrors;
+  actionsErrors: Record<string, RuleFormActionsErrors>;
+  actionsParamsErrors: Record<string, RuleFormParamsErrors>;
 }): boolean => {
-  return hasRuleBaseErrors(baseErrors) || hasRuleParamsErrors(paramsErrors);
+  return (
+    hasRuleBaseErrors(baseErrors) ||
+    hasParamsErrors(paramsErrors) ||
+    hasActionsError(actionsErrors) ||
+    hasActionsParamsErrors(actionsParamsErrors)
+  );
 };
