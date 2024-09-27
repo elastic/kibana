@@ -17,6 +17,7 @@ import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
 import {
   createSecuritySolutionStorageMock,
   mockTimelineData,
+  mockTimelineModel,
   TestProviders,
 } from '../../../../common/mock';
 import { createMockStore } from '../../../../common/mock/create_store';
@@ -29,6 +30,7 @@ import { timelineActions } from '../../../store';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { getColumnHeaders } from '../body/column_headers/helpers';
@@ -40,6 +42,8 @@ jest.mock('../../../containers', () => ({
 }));
 
 jest.mock('../../../containers/details');
+
+jest.mock('../../../../common/hooks/use_selector');
 
 jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
@@ -205,6 +209,13 @@ describe('unified timeline', () => {
     (useKibana as jest.Mock).mockImplementation(() => {
       return {
         services: kibanaServiceMock,
+      };
+    });
+
+    (useDeepEqualSelector as jest.Mock).mockImplementation(() => {
+      return {
+        ...mockTimelineModel,
+        show: true,
       };
     });
 
@@ -513,6 +524,38 @@ describe('unified timeline', () => {
   });
 
   describe('unified field list', () => {
+    it(
+      'should not load when timeline is not open',
+      async () => {
+        (useDeepEqualSelector as jest.Mock).mockImplementation(() => {
+          return {
+            ...mockTimelineModel,
+            show: false,
+          };
+        });
+        renderTestComponents();
+        expect(await screen.queryByTestId('timeline-sidebar')).not.toBeInTheDocument();
+        (useDeepEqualSelector as jest.Mock).mockClear();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should load when timeline is open',
+      async () => {
+        (useDeepEqualSelector as jest.Mock).mockImplementation(() => {
+          return {
+            ...mockTimelineModel,
+            show: true,
+          };
+        });
+        renderTestComponents();
+        expect(await screen.queryByTestId('timeline-sidebar')).toBeInTheDocument();
+        (useDeepEqualSelector as jest.Mock).mockClear();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
     it(
       'should be able to add filters',
       async () => {
