@@ -80,10 +80,9 @@ const serializeAllPanelState = async (
  * Save the current state of this dashboard to a saved object without showing any save modal.
  */
 export async function runQuickSave(this: DashboardContainer) {
-  const {
-    explicitInput: currentState,
-    componentState: { lastSavedId },
-  } = this.getState();
+  const { explicitInput: currentState } = this.getState();
+
+  const lastSavedId = this.savedObjectId.value;
 
   if (this.managed$.value) return;
 
@@ -119,11 +118,9 @@ export async function runQuickSave(this: DashboardContainer) {
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */
 export async function runInteractiveSave(this: DashboardContainer, interactionMode: ViewMode) {
-  const {
-    explicitInput: currentState,
-    componentState: { lastSavedId },
-  } = this.getState();
+  const { explicitInput: currentState } = this.getState();
   const dashboardContentManagementService = getDashboardContentManagementService();
+  const lastSavedId = this.savedObjectId.value;
   const managed = this.managed$.value;
 
   return new Promise<SaveDashboardReturn | undefined>((resolve, reject) => {

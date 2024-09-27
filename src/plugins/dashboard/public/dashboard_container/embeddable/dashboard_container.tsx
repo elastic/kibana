@@ -11,7 +11,6 @@ import deepEqual from 'fast-deep-equal';
 import { omit } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { batch } from 'react-redux';
 import {
   BehaviorSubject,
   Subject,
@@ -117,12 +116,7 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
-import {
-  InitialComponentState,
-  getDashboardApi,
-} from '../../dashboard_api/get_dashboard_api';
-import { initializeTrackPanel } from '../../dashboard_api/track_panel';
-import { initializeTrackOverlay } from '../../dashboard_api/track_overlay';
+import { InitialComponentState, getDashboardApi } from '../../dashboard_api/get_dashboard_api';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -176,6 +170,7 @@ export class DashboardContainer
   public setHighlightPanelId: (highlightPanelId: string | undefined) => void;
   public setLastSavedInput: (lastSavedInput: DashboardContainerInput) => void;
   public lastSavedInput$: PublishingSubject<DashboardContainerInput>;
+  public setSavedObjectId: (id: string | undefined) => void;
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
@@ -343,16 +338,14 @@ export class DashboardContainer
     this.hasRunMigrations$ = dashboardApi.hasRunMigrations$;
     this.setLastSavedInput = dashboardApi.setLastSavedInput;
     this.lastSavedInput$ = dashboardApi.lastSavedInput$;
+    this.savedObjectId = dashboardApi.savedObjectId;
+    this.setSavedObjectId = dashboardApi.setSavedObjectId;
 
-    this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
     this.publishingSubscription.add(
       this.onStateChange(() => {
         const state = this.getState();
-        if (this.savedObjectId.value !== this.getDashboardSavedObjectId()) {
-          this.savedObjectId.next(this.getDashboardSavedObjectId());
-        }
         if (this.useMargins$.value !== state.explicitInput.useMargins) {
           this.useMargins$.next(state.explicitInput.useMargins);
         }
@@ -434,16 +427,12 @@ export class DashboardContainer
 
   public getAppContext() {
     const embeddableAppContext = this.creationOptions?.getEmbeddableAppContext?.(
-      this.getDashboardSavedObjectId()
+      this.savedObjectId.value
     );
     return {
       ...embeddableAppContext,
       currentAppId: embeddableAppContext?.currentAppId ?? DASHBOARD_APP_ID,
     };
-  }
-
-  public getDashboardSavedObjectId() {
-    return this.getState().componentState.lastSavedId;
   }
 
   protected createNewPanelState<
@@ -786,9 +775,7 @@ export class DashboardContainer
     this.setManaged(loadDashboardReturn?.managed ?? false);
     this.setExpandedPanelId(undefined);
     this.setLastSavedInput(omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput'));
-    batch(() => {
-      this.dispatch.setLastSavedId(newSavedObjectId);
-    });
+    this.setSavedObjectId(newSavedObjectId);
     this.firstLoad = true;
     this.updateInput(newInput);
     dashboardContainerReady$.next(this);
@@ -811,7 +798,6 @@ export class DashboardContainer
     return {
       description: state.explicitInput.description,
       hidePanelTitles: state.explicitInput.hidePanelTitles,
-      lastSavedId: state.componentState.lastSavedId,
       syncColors: state.explicitInput.syncColors,
       syncCursor: state.explicitInput.syncCursor,
       syncTooltips: state.explicitInput.syncTooltips,

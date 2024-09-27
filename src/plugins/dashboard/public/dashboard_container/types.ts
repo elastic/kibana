@@ -21,8 +21,7 @@ export interface UnsavedPanelState {
 
 export type DashboardReduxState = ReduxEmbeddableState<
   DashboardContainerInput,
-  DashboardContainerOutput,
-  DashboardPublicState
+  DashboardContainerOutput
 >;
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
@@ -33,14 +32,9 @@ export type RedirectToProps =
 export type DashboardStateFromSaveModal = Pick<
   DashboardContainerInput,
   'title' | 'description' | 'tags' | 'timeRestore' | 'timeRange' | 'refreshInterval'
-> &
-  Pick<DashboardPublicState, 'lastSavedId'>;
+>;
 
 export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & DashboardOptions;
-
-export interface DashboardPublicState {
-  lastSavedId?: string;
-}
 
 export type DashboardLoadType =
   | 'sessionFirstLoad'

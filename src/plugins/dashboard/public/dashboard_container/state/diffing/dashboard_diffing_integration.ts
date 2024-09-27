@@ -26,10 +26,7 @@ import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_dif
  * and the last saved input, so we can safely ignore any output reducers, and most componentState reducers.
  * This is only for performance reasons, because the diffing function itself can be quite heavy.
  */
-export const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
-  'setTimeslice',
-  'setExpandedPanelId',
-];
+export const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = ['setTimeslice'];
 
 /**
  * Some keys will often have deviated from their last saved state, but should not persist over reloads
@@ -92,12 +89,9 @@ export function startDiffingDashboardState(
     debounceTime(CHANGE_CHECK_DEBOUNCE),
     switchMap(() => {
       return (async () => {
-        const {
-          explicitInput: currentInput,
-          componentState: { lastSavedInput },
-        } = this.getState();
+        const { explicitInput: currentInput } = this.getState();
         const unsavedChanges = await getDashboardUnsavedChanges.bind(this)(
-          lastSavedInput,
+          this.lastSavedInput$.value,
           currentInput
         );
         return unsavedChanges;
@@ -191,7 +185,7 @@ function backupUnsavedChanges(
   const dashboardStateToBackup = omit(dashboardChanges, keysToOmitFromSessionStorage);
 
   getDashboardBackupService().setState(
-    this.getDashboardSavedObjectId(),
+    this.savedObjectId.value,
     {
       ...dashboardStateToBackup,
       panels: dashboardChanges.panels,

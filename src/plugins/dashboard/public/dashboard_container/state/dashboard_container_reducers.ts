@@ -34,8 +34,6 @@ export const dashboardContainerReducers = {
     state: DashboardReduxState,
     action: PayloadAction<DashboardStateFromSaveModal>
   ) => {
-    state.componentState.lastSavedId = action.payload.lastSavedId;
-
     state.explicitInput.tags = action.payload.tags;
     state.explicitInput.title = action.payload.title;
     state.explicitInput.description = action.payload.description;
@@ -49,16 +47,10 @@ export const dashboardContainerReducers = {
     }
   },
 
-  setLastSavedId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
-    state.componentState.lastSavedId = action.payload;
-  },
-
   setStateFromSettingsFlyout: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardStateFromSettingsFlyout>
   ) => {
-    state.componentState.lastSavedId = action.payload.lastSavedId;
-
     state.explicitInput.tags = action.payload.tags;
     state.explicitInput.title = action.payload.title;
     state.explicitInput.description = action.payload.description;
@@ -103,7 +95,10 @@ export const dashboardContainerReducers = {
    * 2) The view mode, since resetting should never impact this - sometimes the Dashboard saved objects
    *    have this saved in and we don't want resetting to cause unexpected view mode changes.
    */
-  resetToLastSavedInput: (state: DashboardReduxState, action: PayloadAction<DashboardContainerInput>) => {
+  resetToLastSavedInput: (
+    state: DashboardReduxState,
+    action: PayloadAction<DashboardContainerInput>
+  ) => {
     state.explicitInput = {
       ...action.payload,
       ...(!state.explicitInput.timeRestore && { timeRange: state.explicitInput.timeRange }),
@@ -166,5 +161,5 @@ export const dashboardContainerReducers = {
     action: PayloadAction<DashboardContainerInput['timeslice']>
   ) => {
     state.explicitInput.timeslice = action.payload;
-  }
+  },
 };

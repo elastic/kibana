@@ -10,7 +10,10 @@
 import { BehaviorSubject } from 'rxjs';
 import type { DashboardContainerInput } from '../../common';
 
-export function initializeUnsavedChanges(anyMigrationRun: boolean, lastSavedInput: DashboardContainerInput) {
+export function initializeUnsavedChanges(
+  anyMigrationRun: boolean,
+  lastSavedInput: DashboardContainerInput
+) {
   const hasRunMigrations$ = new BehaviorSubject(anyMigrationRun);
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedInput$ = new BehaviorSubject<DashboardContainerInput>(lastSavedInput);
@@ -21,9 +24,9 @@ export function initializeUnsavedChanges(anyMigrationRun: boolean, lastSavedInpu
     lastSavedInput$,
     setHasUnsavedChanges: (hasUnsavedChanges: boolean) =>
       hasUnsavedChanges$.next(hasUnsavedChanges),
-    setLastSavedInput: (lastSavedInput: DashboardContainerInput) => {
-      lastSavedInput$.next(lastSavedInput)
-  
+    setLastSavedInput: (input: DashboardContainerInput) => {
+      lastSavedInput$.next(input);
+
       // if we set the last saved input, it means we have saved this Dashboard - therefore clientside migrations have
       // been serialized into the SO.
       hasRunMigrations$.next(false);
