@@ -648,11 +648,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/services/analytics/types.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
+                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
               },
               {
                 "plugin": "integrationAssistant",
@@ -996,6 +992,14 @@
               },
               {
                 "plugin": "observabilityOnboarding",
+                "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/quickstart_flows/shared/empty_prompt.tsx"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/quickstart_flows/shared/get_started_panel.tsx"
+              },
+              {
+                "plugin": "observabilityOnboarding",
                 "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/quickstart_flows/shared/feedback_buttons.tsx"
               },
               {
@@ -1009,6 +1013,18 @@
               {
                 "plugin": "observabilityOnboarding",
                 "path": "x-pack/plugins/observability_solution/observability_onboarding/public/hooks/use_flow_progress_telemetry.ts"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/quickstart_flows/kubernetes/use_kubernetes_flow.ts"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/quickstart_flows/shared/use_window_blur_data_monitoring_trigger.ts"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/quickstart_flows/firehose/use_firehose_flow.ts"
               },
               {
                 "plugin": "observabilityOnboarding",
@@ -1073,10 +1089,6 @@
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
                 "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/services/analytics/analytics.stub.ts"
               },
               {
                 "plugin": "@kbn/core-root-browser-internal",
@@ -1709,6 +1721,10 @@
                 "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
               },
               {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/services/discover_ebt_context_manager.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/plugin.ts"
               },
@@ -1775,6 +1791,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/services/discover_ebt_context_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core-application-browser-internal",
