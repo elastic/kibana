@@ -3,7 +3,7 @@ info:
   contact:
     name: Kibana Team
   description: >
-    **Technical preview**  
+    **Technical preview**
 
     This functionality is in technical preview and may be changed or removed in
     a future release.
@@ -171,7 +171,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -270,7 +270,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -362,7 +362,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -448,7 +448,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -570,7 +570,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -666,7 +666,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -758,7 +758,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -846,7 +846,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -14921,6 +14921,10 @@ paths:
           name: documentIds
           schema:
             $ref: '#/components/schemas/Security_Timeline_API_DocumentIds'
+        - in: query
+          name: savedObjectIds
+          schema:
+            $ref: '#/components/schemas/Security_Timeline_API_SavedObjectIds'
         - in: query
           name: page
           schema:
@@ -31685,6 +31689,12 @@ components:
         - aliasMatch
         - conflict
       type: string
+    Security_Timeline_API_SavedObjectIds:
+      oneOf:
+        - items:
+            type: string
+          type: array
+        - type: string
     Security_Timeline_API_SavedTimeline:
       type: object
       properties:
