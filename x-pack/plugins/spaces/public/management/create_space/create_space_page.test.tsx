@@ -14,6 +14,7 @@ import { act } from 'react-dom/test-utils';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
@@ -48,6 +49,15 @@ featuresStart.getFeatures.mockResolvedValue([
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+  }),
+  new KibanaFeature({
+    id: 'feature-2',
+    name: 'feature 2',
+    app: [],
+    category: DEFAULT_APP_CATEGORIES.kibana,
+    privileges: null,
+    scope: [KibanaFeatureScope.Security],
   }),
 ]);
 
@@ -640,6 +650,54 @@ describe('ManageSpacePage', () => {
     expect(warningDialog).toHaveLength(0);
 
     expect(spacesManager.updateSpace).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows only features with space scope', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.getSpace = jest.fn().mockResolvedValue({
+      id: 'my-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+    });
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const wrapper = mountWithIntl(
+      <CreateSpacePage
+        spaceId={'my-space'}
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        eventTracker={eventTracker}
+        allowFeatureVisibility
+        allowSolutionVisibility
+      />
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    });
+
+    expect(wrapper.state('features')).toEqual([
+      new KibanaFeature({
+        id: 'feature-1',
+        name: 'feature 1',
+        app: [],
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        privileges: null,
+        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      }),
+    ]);
   });
 });
 
