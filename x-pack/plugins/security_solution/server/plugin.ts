@@ -78,7 +78,7 @@ import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitor
 import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import type {
-  CreateQueryRuleAdditionalOptions,
+  CreateRuleAdditionalOptions,
   CreateRuleOptions,
 } from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
@@ -238,6 +238,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       securitySolutionRequestContextFactory: requestContextFactory,
       cloud: plugins.cloud,
       loggerFactory: this.pluginContext.logger,
+      telemetry: core.analytics,
     });
 
     initUsageCollectors({
@@ -311,7 +312,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       analytics: core.analytics,
     };
 
-    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+    const ruleAdditionalOptions: CreateRuleAdditionalOptions = {
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery.createActionService,
@@ -320,15 +321,19 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
-    plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(createEqlAlertType({ ...ruleOptions, ...ruleAdditionalOptions }))
+    );
     if (!experimentalFeatures.esqlRulesDisabled) {
-      plugins.alerting.registerType(securityRuleTypeWrapper(createEsqlAlertType(ruleOptions)));
+      plugins.alerting.registerType(
+        securityRuleTypeWrapper(createEsqlAlertType({ ...ruleOptions, ...ruleAdditionalOptions }))
+      );
     }
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
         createQueryAlertType({
           ...ruleOptions,
-          ...queryRuleAdditionalOptions,
+          ...ruleAdditionalOptions,
           id: SAVED_QUERY_RULE_TYPE_ID,
           name: 'Saved Query Rule',
         })
@@ -342,14 +347,16 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeWrapper(
         createQueryAlertType({
           ...ruleOptions,
-          ...queryRuleAdditionalOptions,
+          ...ruleAdditionalOptions,
           id: QUERY_RULE_TYPE_ID,
           name: 'Custom Query Rule',
         })
       )
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
-    plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(createNewTermsAlertType({ ...ruleOptions, ...ruleAdditionalOptions }))
+    );
 
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
@@ -544,15 +551,17 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.licensing$ = plugins.licensing.license$;
 
     // Assistant Tool and Feature Registration
-    plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
-    plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
+    plugins.elasticAssistant.registerTools(
+      APP_UI_ID,
+      getAssistantTools(config.experimentalFeatures.assistantNaturalLanguageESQLTool)
+    );
+    const features = {
       assistantBedrockChat: config.experimentalFeatures.assistantBedrockChat,
       assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-    });
-    plugins.elasticAssistant.registerFeatures('management', {
-      assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-    });
+    };
+    plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
+    plugins.elasticAssistant.registerFeatures('management', features);
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start

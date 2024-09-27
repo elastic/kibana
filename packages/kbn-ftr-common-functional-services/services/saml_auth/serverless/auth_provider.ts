@@ -51,7 +51,7 @@ export class ServerlessAuthProvider implements AuthProvider {
   }
 
   getSupportedRoleDescriptors(): Record<string, unknown> {
-    return readRolesDescriptorsFromResource(this.rolesDefinitionPath);
+    return readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>;
   }
   getDefaultRole(): string {
     return getDefaultServerlessRole(this.projectType);

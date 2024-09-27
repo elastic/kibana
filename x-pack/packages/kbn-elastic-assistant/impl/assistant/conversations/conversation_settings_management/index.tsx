@@ -260,6 +260,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const columns = useMemo(
     () =>
       getColumns({
+        isDeleteEnabled: (rowItem: ConversationTableItem) => rowItem.isDefault !== true,
+        isEditEnabled: () => true,
         onDeleteActionClicked,
         onEditActionClicked,
       }),

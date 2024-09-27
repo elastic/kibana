@@ -12,10 +12,11 @@ import { OutputAPI, OutputEvent, OutputEventType } from '.';
 import { ensureMultiTurn } from '../ensure_multi_turn';
 
 export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
-  return (id, { connectorId, input, schema, system, previousMessages }) => {
+  return (id, { connectorId, input, schema, system, previousMessages, functionCalling }) => {
     return chatCompleteApi({
       connectorId,
       system,
+      functionCalling,
       messages: ensureMultiTurn([
         ...(previousMessages || []),
         {
@@ -26,12 +27,12 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
       ...(schema
         ? {
             tools: {
-              output: {
+              structuredOutput: {
                 description: `Use the following schema to respond to the user's request in structured data, so it can be parsed and handled.`,
                 schema,
               },
             },
-            toolChoice: { function: 'output' as const },
+            toolChoice: { function: 'structuredOutput' as const },
           }
         : {}),
     }).pipe(

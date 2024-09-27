@@ -13,4 +13,7 @@ export enum AnalyticsEvents {
   startCreateIndexLanguageSelect = 'start_code_lang_select',
   startCreateIndexCodeCopyInstall = 'start_code_copy_install',
   startCreateIndexCodeCopy = 'start_code_copy',
+  indexDetailsInstallCodeCopy = 'index_details_code_copy_install',
+  indexDetailsAddMappingsCodeCopy = 'index_details_add_mappings_code_copy',
+  indexDetailsIngestDocumentsCodeCopy = 'index_details_ingest_documents_code_copy',
 }
