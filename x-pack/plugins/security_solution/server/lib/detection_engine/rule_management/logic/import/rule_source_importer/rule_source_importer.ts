@@ -39,7 +39,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private latestPackagesInstalled: boolean = false;
   private matchingAssets: PrebuiltRuleAsset[] = [];
   private knownRules: RuleSpecifier[] = [];
-  private availableRuleAssetIds: string[] = [];
+  private availableRuleAssetIds: Set<string> = new Set();
 
   constructor({
     config,
@@ -68,13 +68,13 @@ export class RuleSourceImporter implements IRuleSourceImporter {
 
     this.knownRules = rules.map((rule) => ({ rule_id: rule.rule_id, version: rule.version }));
     this.matchingAssets = await this.fetchMatchingAssets();
-    this.availableRuleAssetIds = await this.fetchAvailableRuleAssetIds();
+    this.availableRuleAssetIds = new Set(await this.fetchAvailableRuleAssetIds());
   }
 
   public isPrebuiltRule(rule: RuleToImport): boolean {
     this.validateRuleInput(rule);
 
-    return this.availableRuleAssetIds.includes(rule.rule_id);
+    return this.availableRuleAssetIds.has(rule.rule_id);
   }
 
   public calculateRuleSource(rule: ValidatedRuleToImport): CalculatedRuleSource {
@@ -83,7 +83,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
     return calculateRuleSourceForImport({
       rule,
       prebuiltRuleAssets: this.matchingAssets,
-      installedRuleIds: this.availableRuleAssetIds,
+      ruleIdExists: this.availableRuleAssetIds.has(rule.rule_id),
     });
   }
 

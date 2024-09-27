@@ -106,6 +106,7 @@ describe('ruleSourceImporter', () => {
 
   describe('#calculateRuleSource()', () => {
     let rule: ValidatedRuleToImport;
+    let calculatorSpy: jest.SpyInstance;
 
     beforeEach(() => {
       rule = { rule_id: 'validated-rule', version: 1 } as ValidatedRuleToImport;
@@ -115,14 +116,14 @@ describe('ruleSourceImporter', () => {
       ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([
         getPrebuiltRuleMock({ rule_id: 'rule-1' }),
         getPrebuiltRuleMock({ rule_id: 'rule-2' }),
+        getPrebuiltRuleMock({ rule_id: 'validated-rule' }),
       ]);
+      calculatorSpy = jest
+        .spyOn(calculateRuleSourceModule, 'calculateRuleSourceForImport')
+        .mockReturnValue({ ruleSource: { type: 'internal' }, immutable: false });
     });
 
     it('invokes calculateRuleSourceForImport with the correct arguments', async () => {
-      const calculatorSpy = jest
-        .spyOn(calculateRuleSourceModule, 'calculateRuleSourceForImport')
-        .mockReturnValue({ ruleSource: { type: 'internal' }, immutable: false });
-
       await subject.setup({ rules: [rule] });
       await subject.calculateRuleSource(rule);
 
@@ -130,7 +131,7 @@ describe('ruleSourceImporter', () => {
       expect(calculatorSpy).toHaveBeenCalledWith({
         rule,
         prebuiltRuleAssets: [expect.objectContaining({ rule_id: 'rule-1' })],
-        installedRuleIds: ['rule-1', 'rule-2'],
+        ruleIdExists: true,
       });
     });
 
@@ -151,10 +152,6 @@ describe('ruleSourceImporter', () => {
 
     describe('for rules set up without a version', () => {
       it('invokes the calculator with the correct arguments', async () => {
-        const calculatorSpy = jest
-          .spyOn(calculateRuleSourceModule, 'calculateRuleSourceForImport')
-          .mockReturnValue({ ruleSource: { type: 'internal' }, immutable: false });
-
         await subject.setup({ rules: [{ ...rule, version: undefined }] });
         await subject.calculateRuleSource(rule);
 
@@ -162,7 +159,7 @@ describe('ruleSourceImporter', () => {
         expect(calculatorSpy).toHaveBeenCalledWith({
           rule,
           prebuiltRuleAssets: [expect.objectContaining({ rule_id: 'rule-1' })],
-          installedRuleIds: ['rule-1', 'rule-2'],
+          ruleIdExists: true,
         });
       });
     });
