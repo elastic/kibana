@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
 
   // Failing: See https://github.com/elastic/kibana/issues/193400
-  describe.skip('extension getAdditionalCellActions', () => {
+  describe('extension getAdditionalCellActions', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin();
     });
@@ -146,19 +146,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not render incompatible cell action for message column', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
-        await dataViews.switchTo('my-example-logs');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 2);
-        expect(await dataGrid.cellExpandPopoverActionExists('example-data-source-action')).to.be(
-          true
-        );
-        expect(
-          await dataGrid.cellExpandPopoverActionExists('another-example-data-source-action')
-        ).to.be(false);
+        while (true) {
+          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await dataViews.switchTo('my-example-logs');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 2);
+          expect(await dataGrid.cellExpandPopoverActionExists('example-data-source-action')).to.be(
+            true
+          );
+          expect(
+            await dataGrid.cellExpandPopoverActionExists('another-example-data-source-action')
+          ).to.be(false);
+        }
       });
 
       it('should not render cell actions for incompatible data source', async () => {

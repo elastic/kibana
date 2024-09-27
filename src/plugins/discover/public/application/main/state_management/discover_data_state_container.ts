@@ -276,7 +276,12 @@ export function getDataStateContainer({
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
 
+              console.error('Checking if has data view', dataView?.id);
               if (dataView) {
+                console.error(
+                  'Getting default profile state',
+                  JSON.stringify(resetDefaultProfileState, null, 2)
+                );
                 const stateUpdate = getDefaultProfileState({
                   profilesManager,
                   resetDefaultProfileState,
@@ -286,10 +291,17 @@ export function getDataStateContainer({
                 });
 
                 if (stateUpdate) {
+                  console.error(
+                    'Default profile state found',
+                    JSON.stringify(stateUpdate, null, 2)
+                  );
                   await appStateContainer.replaceUrlState(stateUpdate);
+                } else {
+                  console.error('No default profile state found');
                 }
               }
 
+              console.error('Clear reset profile state after fetch');
               internalStateContainer.transitions.setResetDefaultProfileState({
                 columns: false,
                 rowHeight: false,

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs';
+import { delay, filter, map } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
@@ -67,6 +67,7 @@ export const fetchDocuments = (
     })
     .pipe(
       filter((res) => !isRunningResponse(res)),
+      delay(5000),
       map((res) => {
         return buildDataTableRecordList({
           records: res.rawResponse.hits.hits,

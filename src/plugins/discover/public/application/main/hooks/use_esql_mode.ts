@@ -111,11 +111,13 @@ export function useEsqlMode({
           const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
           if (indexPatternChanged) {
+            console.error('Reset profile state from indexPatternChanged');
             stateContainer.internalState.transitions.setResetDefaultProfileState({
               columns: true,
               rowHeight: true,
             });
           } else if (allColumnsChanged) {
+            console.error('Reset profile state from allColumnsChanged');
             stateContainer.internalState.transitions.setResetDefaultProfileState({
               columns: true,
               rowHeight: false,
