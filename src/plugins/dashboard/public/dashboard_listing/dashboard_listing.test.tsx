@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ComponentType, ReactWrapper, mount } from 'enzyme';
 import React, { PropsWithChildren } from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper, ComponentType } from 'enzyme';
+
 import { I18nProvider } from '@kbn/i18n-react';
-
-import { pluginServices } from '../services/plugin_services';
-import { DashboardListing } from './dashboard_listing';
-
 /**
  * Mock Table List view. This dashboard component is a wrapper around the shared UX table List view. We
  * need to ensure we're passing down the correct props, but the table list view itself doesn't need to be rendered
  * in our tests because it is covered in its package.
  */
 import { TableListView } from '@kbn/content-management-table-list-view';
+
+import { DashboardListing } from './dashboard_listing';
 import { DashboardListingProps } from './types';
-// import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view';
+import { coreServices } from '../services/kibana_services';
+
 jest.mock('@kbn/content-management-table-list-view-table', () => {
   const originalModule = jest.requireActual('@kbn/content-management-table-list-view-table');
   return {
@@ -65,7 +65,7 @@ function mountWith({ props: incomingProps }: { props?: Partial<DashboardListingP
 }
 
 test('initial filter is passed through', async () => {
-  pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+  (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
 
   let component: ReactWrapper;
 
@@ -80,7 +80,7 @@ test('initial filter is passed through', async () => {
 });
 
 test('when showWriteControls is true, table list view is passed editing functions', async () => {
-  pluginServices.getServices().dashboardCapabilities.showWriteControls = true;
+  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
 
   let component: ReactWrapper;
 
@@ -99,7 +99,7 @@ test('when showWriteControls is true, table list view is passed editing function
 });
 
 test('when showWriteControls is false, table list view is not passed editing functions', async () => {
-  pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+  (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
 
   let component: ReactWrapper;
 
