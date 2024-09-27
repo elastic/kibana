@@ -254,9 +254,9 @@ export interface ITelemetryReceiver {
 
   // ---------- TODO: POC ----------  //
   getDataStreams(): Promise<DataStream[]>;
-  getIndicesStats(indices: string[]): Promise<IndexStats[]>;
-  getIlmsStats(indices: string[]): Promise<IlmStats[]>;
-  getIlmsPolicies(ilms: string[]): Promise<IlmPolicy[]>;
+  getIndicesStats(indices: string[], pageSize: number): AsyncGenerator<IndexStats, void, unknown>;
+  getIlmsStats(indices: string[], pageSize: number): AsyncGenerator<IlmStats, void, unknown>;
+  getIlmsPolicies(ilms: string[], pageSize: number): AsyncGenerator<IlmPolicy, void, unknown>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -1344,100 +1344,127 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async getDataStreams(): Promise<DataStream[]> {
     const es = this.esClient();
 
+    this.logger.debug('Fetching datstreams');
+
     const request: IndicesGetDataStreamRequest = {
       name: '*',
       expand_wildcards: ['open', 'hidden'],
       filter_path: ['data_streams.name', 'data_streams.indices'],
     };
 
-    return es.indices.getDataStream(request).then((response) =>
-      response.data_streams.map((ds) => {
-        return {
-          datastream_name: ds.name,
-          indices:
-            ds.indices?.map((index) => {
-              return {
-                index_name: index.index_name,
-                ilm_policy: index.ilm_policy,
-              } as Index;
-            }) ?? [],
-        } as DataStream;
-      })
-    );
+    return es.indices
+      .getDataStream(request)
+      .then((response) =>
+        response.data_streams.map((ds) => {
+          return {
+            datastream_name: ds.name,
+            indices:
+              ds.indices?.map((index) => {
+                return {
+                  index_name: index.index_name,
+                  ilm_policy: index.ilm_policy,
+                } as Index;
+              }) ?? [],
+          } as DataStream;
+        })
+      )
+      .catch((error) => {
+        this.logger.warn('Error fetching datastreams', { error_message: error } as LogMeta);
+        throw error;
+      });
   }
 
-  public async getIndicesStats(indices: string[]): Promise<IndexStats[]> {
+  public async *getIndicesStats(indices: string[], pageSize: number) {
     const es = this.esClient();
 
-    this.logger.debug('Fetching indices stats', { indices } as LogMeta);
+    this.logger.debug(`Fetching indices stats for ${indices.length} indices`, {
+      indices,
+    } as LogMeta);
 
-    const request: IndicesStatsRequest = {
-      index: indices,
-      level: 'indices',
-      metric: ['docs', 'search', 'store'],
-      expand_wildcards: ['open', 'hidden'],
-      filter_path: [
-        'indices.*.total.search.query_total',
-        'indices.*.total.search.query_time_in_millis',
-        'indices.*.total.docs.count',
-        'indices.*.total.docs.deleted',
-        'indices.*.total.store.size_in_bytes',
-      ],
-    };
+    const chunked = this._chunk(indices, pageSize)
+      .map((ilms) => this._getCommonPrefixes(ilms))
+      .flat();
 
-    return es.indices.stats(request).then((response) =>
-      Object.entries(response.indices ?? {}).map(([indexName, stats]) => {
-        return {
-          index_name: indexName,
-          query_total: stats.total?.search?.query_total,
-          query_time_in_millis: stats.total?.search?.query_time_in_millis,
-          docs_count: stats.total?.docs?.count,
-          docs_deleted: stats.total?.docs?.deleted,
-          docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
-        } as IndexStats;
-      })
-    );
+    this.logger.debug(`Splitted indices into ${chunked.length} chunks`, {
+      chunks: chunked.length,
+    } as LogMeta);
+
+    for (const name of chunked) {
+      this.logger.debug(`Fetching indices stats for ${name}`, { name } as LogMeta);
+      const request: IndicesStatsRequest = {
+        index: `${name}*`,
+        level: 'indices',
+        metric: ['docs', 'search', 'store'],
+        expand_wildcards: ['open', 'hidden'],
+        filter_path: [
+          'indices.*.total.search.query_total',
+          'indices.*.total.search.query_time_in_millis',
+          'indices.*.total.docs.count',
+          'indices.*.total.docs.deleted',
+          'indices.*.total.store.size_in_bytes',
+        ],
+      };
+
+      try {
+        const response = await es.indices.stats(request);
+        for (const [indexName, stats] of Object.entries(response.indices ?? {})) {
+          yield {
+            index_name: indexName,
+            query_total: stats.total?.search?.query_total,
+            query_time_in_millis: stats.total?.search?.query_time_in_millis,
+            docs_count: stats.total?.docs?.count,
+            docs_deleted: stats.total?.docs?.deleted,
+            docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
+          } as IndexStats;
+        }
+      } catch (error) {
+        this.logger.warn('Error fetching indices stats', { error_message: error } as LogMeta);
+        throw error;
+      }
+    }
   }
 
-  public async getIlmsStats(indices: string[]): Promise<IlmStats[]> {
+  public async *getIlmsStats(indices: string[], pageSize: number) {
     const es = this.esClient();
 
-    this.logger.debug('Fetching ilms stats', { indices } as LogMeta);
+    this.logger.debug(`Fetching ilm stats for ${indices.length} indices`, { indices } as LogMeta);
 
-    const request: IlmExplainLifecycleRequest = {
-      index: indices.join(','),
-      only_managed: false,
-      filter_path: ['indices.*.phase', 'indices.*.age', 'indices.*.policy'],
-    };
+    const chunked = this._chunk(indices, pageSize)
+      .map((ilms) => this._getCommonPrefixes(ilms))
+      .flat();
 
-    return es.ilm.explainLifecycle(request).then((response) =>
-      Object.entries(response.indices ?? {}).map(([indexName, stats]) => {
-        return {
-          index_name: indexName,
-          phase: ('phase' in stats && stats.phase) || undefined,
-          age: ('age' in stats && stats.age) || undefined,
-          policy_name: ('policy' in stats && stats.policy) || undefined,
-        } as IlmStats;
-      })
-    );
+    for (const name of chunked) {
+      this.logger.debug(`Fetching ilm stats for ${name}`, { name } as LogMeta);
+      const request: IlmExplainLifecycleRequest = {
+        index: `${name}*`,
+        only_managed: false,
+        filter_path: ['indices.*.phase', 'indices.*.age', 'indices.*.policy'],
+      };
+
+      const data = await es.ilm.explainLifecycle(request);
+
+      try {
+        for (const [indexName, stats] of Object.entries(data.indices ?? {})) {
+          const entry = {
+            index_name: indexName,
+            phase: ('phase' in stats && stats.phase) || undefined,
+            age: ('age' in stats && stats.age) || undefined,
+            policy_name: ('policy' in stats && stats.policy) || undefined,
+          } as IlmStats;
+
+          yield entry;
+        }
+      } catch (error) {
+        this.logger.warn('Error fetching ilm stats', { error_message: error } as LogMeta);
+        throw error;
+      }
+    }
   }
 
-  public async getIlmsPolicies(ilms: string[]): Promise<IlmPolicy[]> {
+  public async *getIlmsPolicies(ilms: string[], pageSize: number) {
     const es = this.esClient();
 
-    this.logger.debug('Fetching ilms policies', { ilms } as LogMeta);
-
-    const request: IlmGetLifecycleRequest = {
-      name: ilms.join(','),
-      filter_path: [
-        '*.policy.phases.cold.min_age',
-        '*.policy.phases.delete.min_age',
-        '*.policy.phases.frozen.min_age',
-        '*.policy.phases.hot.min_age',
-        '*.policy.phases.warm.min_age',
-        '*.modified_date',
-      ],
-    };
+    this.logger.debug(`Fetching ilms policies for ${ilms.length} ilms`, { ilms } as LogMeta);
 
     const phase = (obj: unknown): Nullable<IlmPhase> => {
       let value: Nullable<IlmPhase>;
@@ -1449,20 +1476,95 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       return value;
     };
 
-    return es.ilm.getLifecycle(request).then((response) => {
-      return Object.entries(response ?? {}).map(([policyName, stats]) => {
-        return {
-          policy_name: policyName,
-          modified_date: stats.modified_date,
-          phases: {
-            cold: phase(stats.policy.phases.cold),
-            delete: phase(stats.policy.phases.delete),
-            frozen: phase(stats.policy.phases.frozen),
-            hot: phase(stats.policy.phases.hot),
-            warm: phase(stats.policy.phases.warm),
-          } as IlmPhases,
-        } as IlmPolicy;
-      });
-    });
+    const chunked = this._chunk(ilms, pageSize).map(this._getCommonPrefixes).flat();
+
+    this.logger.debug(`Splitted ilms into ${chunked.length} chunks`, {
+      chunks: chunked.length,
+    } as LogMeta);
+
+    for (const name of chunked) {
+      this.logger.debug(`Fetching ilm policies for ${name}`, { name } as LogMeta);
+      const request: IlmGetLifecycleRequest = {
+        name: `${name}*`,
+        filter_path: [
+          '*.policy.phases.cold.min_age',
+          '*.policy.phases.delete.min_age',
+          '*.policy.phases.frozen.min_age',
+          '*.policy.phases.hot.min_age',
+          '*.policy.phases.warm.min_age',
+          '*.modified_date',
+        ],
+      };
+
+      const response = await es.ilm.getLifecycle(request);
+      try {
+        for (const [policyName, stats] of Object.entries(response ?? {})) {
+          yield {
+            policy_name: policyName,
+            modified_date: stats.modified_date,
+            phases: {
+              cold: phase(stats.policy.phases.cold),
+              delete: phase(stats.policy.phases.delete),
+              frozen: phase(stats.policy.phases.frozen),
+              hot: phase(stats.policy.phases.hot),
+              warm: phase(stats.policy.phases.warm),
+            } as IlmPhases,
+          } as IlmPolicy;
+        }
+      } catch (error) {
+        this.logger.warn('Error fetching ilm policies', { error_message: error } as LogMeta);
+        throw error;
+      }
+    }
+  }
+
+  // very basic implementation of a common prefix finder
+  // TODO: add tests to cover edge cases and check performance
+  private _getCommonPrefixes(names: string[], minLength: number = 10): string[] {
+    if (names.length === 0) return [];
+
+    names.sort();
+    const result: string[] = [];
+
+    let currentPrefix = names[0];
+
+    for (let i = 1; i < names.length; i++) {
+      const name = names[i];
+      let commonPrefix = '';
+
+      // Find the common prefix between currentPrefix and the current name
+      for (let j = 0; j < Math.min(currentPrefix.length, name.length); j++) {
+        if (currentPrefix[j] === name[j]) {
+          commonPrefix += currentPrefix[j];
+        } else {
+          break;
+        }
+      }
+
+      // Check if the common prefix is long enough
+      if (commonPrefix.length >= minLength) {
+        currentPrefix = commonPrefix;
+      } else {
+        if (currentPrefix.length >= minLength) {
+          result.push(currentPrefix); // Save the last valid prefix
+        }
+        currentPrefix = name; // Start a new prefix
+      }
+    }
+
+    // Add the final prefix if it has at least N characters
+    if (currentPrefix.length >= minLength) {
+      result.push(currentPrefix);
+    }
+
+    return result;
+  }
+
+  private _chunk(arr: string[], size: number): string[][] {
+    return arr.reduce(
+      (result: string[][], _, index) =>
+        index % size === 0 ? [...result, arr.slice(index, index + size)] : result,
+      []
+    );
   }
 }

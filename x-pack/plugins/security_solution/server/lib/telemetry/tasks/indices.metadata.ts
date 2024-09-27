@@ -39,11 +39,13 @@ export function createTelemetryIndicesMetadataTaskConfig() {
       const log = newTelemetryLogger(logger.get('indices-metadata'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l('Running indices metadata task');
+      // config
+      const pageSize = 500;
+      const dataStreamsLimit = 500;
 
       try {
         // 1. Get all data streams
-        const dataStreams = await receiver.getDataStreams();
+        const dataStreams = (await receiver.getDataStreams()).slice(0, dataStreamsLimit + 1);
 
         // and calculate index and ilm names
         const dsNames = dataStreams.map((stream) => stream.datastream_name);
@@ -62,42 +64,46 @@ export function createTelemetryIndicesMetadataTaskConfig() {
           indices: indexNames.length,
         } as LogMeta);
 
-        // 2. Get stats
-        const [indicesStats, ilmsStats, policies] = await Promise.all([
-          receiver.getIndicesStats(dsNames),
-          receiver.getIlmsStats(indexNames),
-          receiver.getIlmsPolicies(ilmsNames),
-        ]);
+        let policyCount = 0;
+        let indicesCount = 0;
+        let ilmsCount = 0;
+        let dsCount = 0;
 
-        // TODO: remove this log
-        log.debug(`Got stats`, {
-          dataStreams,
-          indicesStats,
-          ilmsStats,
-          policiesStats: policies,
+        for await (const stat of receiver.getIndicesStats(dsNames, pageSize)) {
+          sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT.eventType, stat);
+          indicesCount++;
+        }
+        log.info(`Sent ${indicesCount} indices stats`, { indicesCount } as LogMeta);
+
+        for await (const stat of receiver.getIlmsStats(indexNames, pageSize)) {
+          sender.reportEBT(TELEMETRY_ILM_STATS_EVENT.eventType, stat);
+          ilmsCount++;
+        }
+        log.info(`Sent ${ilmsCount} ILM stats`, { ilmsCount } as LogMeta);
+
+        for (const ds of dataStreams) {
+          sender.reportEBT(TELEMETRY_DATA_STREAM_EVENT.eventType, ds);
+          dsCount++;
+        }
+        log.info(`Sent ${dsCount} data streams`, { dsCount } as LogMeta);
+
+        for await (const policy of receiver.getIlmsPolicies(ilmsNames, pageSize)) {
+          sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT.eventType, policy);
+          policyCount++;
+        }
+        log.info(`Sent ${policyCount} ILM policies`, { policyCount } as LogMeta);
+
+        log.info(`Sent EBT events`, {
+          datastreams: dsCount,
+          ilms: ilmsCount,
+          indices: indicesCount,
+          policies: policyCount,
         } as LogMeta);
 
-        // 3. Send events
-        policies.forEach((p) => {
-          sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT.eventType, p);
-        });
-
-        ilmsStats.forEach((i) => {
-          sender.reportEBT(TELEMETRY_ILM_STATS_EVENT.eventType, i);
-        });
-
-        dataStreams.forEach((ds) => {
-          sender.reportEBT(TELEMETRY_DATA_STREAM_EVENT.eventType, ds);
-        });
-
-        indicesStats.forEach((is) => {
-          sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT.eventType, is);
-        });
-
-        return dataStreams.length;
+        return policyCount + indicesCount + ilmsCount + dsCount;
       } catch (err) {
         log.warn(`Error running indices metadata task`, {
-          error: JSON.stringify(err),
+          error: err.message,
         } as LogMeta);
         await taskMetricsService.end(trace, err);
         return 0;
