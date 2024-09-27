@@ -29,12 +29,12 @@ const getLabelTitle = (
 
   const value = Array.isArray(customFieldValue) ? customFieldValue[0] : customFieldValue;
 
-  const { convertValueToLabel } = customFieldsBuilder[customField.type]();
-  const valueLabel = customFieldConfiguration
-    ? convertValueToLabel?.(value, customFieldConfiguration) ?? value
+  const { convertValueToDisplayText } = customFieldsBuilder[customField.type]();
+  const displayValue = customFieldConfiguration
+    ? convertValueToDisplayText?.(value, customFieldConfiguration) ?? value
     : value;
 
-  return `${i18n.CHANGED_FIELD.toLowerCase()} ${label} ${i18n.TO} "${valueLabel}"`;
+  return `${i18n.CHANGED_FIELD.toLowerCase()} ${label} ${i18n.TO} "${displayValue}"`;
 };
 
 export const createCustomFieldsUserActionBuilder: UserActionBuilder = ({

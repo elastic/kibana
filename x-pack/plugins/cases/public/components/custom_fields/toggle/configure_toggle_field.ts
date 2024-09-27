@@ -37,6 +37,6 @@ export const configureToggleCustomFieldFactory: CustomFieldFactory<
     { key: 'off', label: i18n.TOGGLE_FIELD_OFF_LABEL, value: false },
   ],
   getDefaultValue: () => false,
-  convertValueToLabel: (value) =>
+  convertValueToDisplayText: (value) =>
     value ? i18n.TOGGLE_FIELD_ON_LABEL : i18n.TOGGLE_FIELD_OFF_LABEL,
 });
