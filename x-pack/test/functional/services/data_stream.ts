@@ -195,7 +195,7 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
       alias: stream,
     });
     // Uncomment only when needed
-    // log.verbose(`POST ${stream}/_rollover`); 
+    // log.verbose(`POST ${stream}/_rollover`);
   }
 
   /**
@@ -228,7 +228,7 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
       alias: stream,
     });
     // Uncomment only when needed
-    // log.debug(`POST ${stream}/_rollover`); 
+    // log.debug(`POST ${stream}/_rollover`);
   }
 
   /**
@@ -251,7 +251,7 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
       name: streamIndex,
     });
     // Uncomment only when needed
-    // log.debug(`PUT _data_stream/${streamIndex}`); 
+    // log.debug(`PUT _data_stream/${streamIndex}`);
   }
 
   /**
@@ -262,7 +262,7 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
     log.info(`Delete ${streamIndex} data stream index...`);
     await es.indices.deleteDataStream({ name: streamIndex });
     // Uncomment only when needed
-    // log.debug(`DELETE _data_stream/${streamIndex}`); 
+    // log.debug(`DELETE _data_stream/${streamIndex}`);
     log.info(`Delete ${streamIndex} index template...`);
     await es.indices.deleteIndexTemplate({
       name: `${streamIndex}_index_template`,
