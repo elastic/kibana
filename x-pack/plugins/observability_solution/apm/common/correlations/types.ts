@@ -26,9 +26,13 @@ export interface ResponseHitSource {
   [s: string]: unknown;
 }
 
+export interface ResponseHitFields {
+  [s: string]: unknown;
+}
+
 export interface ResponseHit {
-  _source: ResponseHitSource;
-  fields: ResponseHitSource;
+  _source?: ResponseHitSource;
+  fields: ResponseHitFields;
 }
 
 export interface CommonCorrelationsQueryParams {
